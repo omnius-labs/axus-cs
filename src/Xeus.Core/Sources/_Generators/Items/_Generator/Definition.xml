@@ -1,0 +1,49 @@
+<Config>
+
+    <Class Modifier="internal" Name="ProtectedCacheInfo">
+        <Properties>
+            <Item Type="DateTime" Name="CreationTime" />
+            <Array Type="Hash" Name="Hashes" />
+        </Properties>
+    </Class>
+
+    <Class Modifier="internal" Name="ClusterInfo">
+        <Properties>
+            <Item Type="long[]" Name="Indexes" />
+            <Item Type="int" Name="Length" />
+            <Item Type="DateTime" Name="UpdateTime" IsMutable="true" />
+        </Properties>
+    </Class>
+
+    <Class Modifier="internal" Name="DownloadItemInfo">
+        <Properties>
+            <Item Type="Metadata" Name="Metadata" />
+            <Item Type="string" Name="Path" />
+            <Item Type="long" Name="MaxLength" IsMutable="true" />
+            <Item Type="int" Name="Depth" IsMutable="true" />
+            <Item Type="Index" Name="Index" IsMutable="true" />
+            <Item Type="DownloadState" Name="State" IsMutable="true" />
+            <Array Type="Hash" Name="ResultHashes" IsMutable="true" />
+        </Properties>
+    </Class>
+
+    <Class Modifier="internal" Name="ContentInfo">
+        <Properties>
+            <Item Type="DateTime" Name="CreationTime" />
+            <Item Type="TimeSpan" Name="LifeSpan" />
+            <Item Type="Metadata" Name="Metadata" />
+            <Array Type="Hash" Name="LockedHashes" />
+            <Item Type="ShareInfo" Name="ShareInfo" />
+        </Properties>
+    </Class>
+
+    <Class Modifier="internal" Name="ShareInfo">
+        <Properties>
+            <Item Type="string" Name="Path" />
+            <Item Type="long" Name="FileLength" />
+            <Item Type="int" Name="BlockLength" />
+            <Array Type="Hash" Name="Hashes" />
+        </Properties>
+    </Class>
+
+</Config>

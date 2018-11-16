@@ -1,0 +1,171 @@
+﻿<controls:MetroWindow
+    x:Class="Xeus.Gui.Wpf.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:chrome="http://schemes.grabacr.net/winfx/2014/chrome"
+    xmlns:controls="http://schemes.grabacr.net/winfx/2014/controls"
+    xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+    xmlns:local="clr-namespace:Xeus.Gui.Wpf"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+    Width="800"
+    Height="500"
+    SnapsToDevicePixels="True"
+    Style="{StaticResource CustomMaterialDesignMetroWindow}"
+    TextOptions.TextFormattingMode="Display"
+    UseLayoutRounding="True">
+    <md:DialogHost
+        HorizontalContentAlignment="Stretch"
+        VerticalContentAlignment="Stretch"
+        IsOpen="{Binding Path=IsProgressDialogOpen.Value}">
+        <md:DialogHost.DialogContent>
+            <ProgressBar
+                Margin="16"
+                HorizontalAlignment="Center"
+                IsIndeterminate="True"
+                Style="{DynamicResource MaterialDesignCircularProgressBar}"
+                Value="0" />
+        </md:DialogHost.DialogContent>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="180" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!--  MenuBar  -->
+            <Grid>
+                <Grid Background="{DynamicResource MaterialDesignCardBackground}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Height="48">
+                        <TextBlock
+                            Padding="2,0,0,0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontSize="28"
+                            Text="Xeus" />
+                    </Grid>
+
+                    <Grid Grid.Row="1">
+                        <md:TransitioningContent x:Name="TransitioningContentSlide" OpeningEffect="{md:TransitionEffect Kind=SlideInFromLeft, Duration=0:0:0.2}">
+                            <Grid
+                                x:Name="GridCursor"
+                                Width="10"
+                                Height="48"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
+                                Background="{DynamicResource SecondaryAccentBrush}" />
+                        </md:TransitioningContent>
+
+                        <ListView
+                            x:Name="ListViewMenu"
+                            SelectedIndex="{Binding Path=DynamicOptions.TabListBox_SelectedIndex, FallbackValue=0}"
+                            SelectionChanged="ListViewMenu_SelectionChanged"
+                            SelectionMode="Single">
+                            <ListViewItem Name="OverviewListViewItem">
+                                <StackPanel Margin="8,0,0,0" Orientation="Horizontal">
+                                    <md:PackIcon
+                                        Width="32"
+                                        Height="32"
+                                        Kind="HomeOutline" />
+                                    <TextBlock
+                                        Padding="8,0,0,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="16"
+                                        Text="Overview" />
+                                </StackPanel>
+                            </ListViewItem>
+                            <ListViewItem Name="ChatListViewItem">
+                                <StackPanel Margin="8,0,0,0" Orientation="Horizontal">
+                                    <md:PackIcon
+                                        Width="32"
+                                        Height="32"
+                                        Kind="CommentOutline" />
+                                    <TextBlock
+                                        Padding="8,0,0,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="16"
+                                        Text="Chat" />
+                                </StackPanel>
+                            </ListViewItem>
+                            <ListViewItem Name="DocsListViewItem">
+                                <StackPanel Margin="8,0,0,0" Orientation="Horizontal">
+                                    <md:PackIcon
+                                        Width="32"
+                                        Height="32"
+                                        Kind="FileOutline" />
+                                    <TextBlock
+                                        Padding="8,0,0,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="16"
+                                        Text="Docs" />
+                                </StackPanel>
+                            </ListViewItem>
+                            <ListViewItem Name="SearchListViewItem">
+                                <StackPanel Margin="8,0,0,0" Orientation="Horizontal">
+                                    <md:PackIcon
+                                        Width="32"
+                                        Height="32"
+                                        Kind="Magnify" />
+                                    <TextBlock
+                                        Padding="8,0,0,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="16"
+                                        Text="Search" />
+                                </StackPanel>
+                            </ListViewItem>
+                            <ListViewItem Name="DownloadListViewItem">
+                                <StackPanel Margin="8,0,0,0" Orientation="Horizontal">
+                                    <md:PackIcon
+                                        Width="32"
+                                        Height="32"
+                                        Kind="ArrowDown"/>
+                                    <TextBlock
+                                        Padding="8,0,0,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="16"
+                                        Text="Download" />
+                                </StackPanel>
+                            </ListViewItem>
+                            <ListViewItem Name="UploadListViewItem">
+                                <StackPanel Margin="8,0,0,0" Orientation="Horizontal">
+                                    <md:PackIcon
+                                        Width="32"
+                                        Height="32"
+                                        Kind="ArrowUp" />
+                                    <TextBlock
+                                        Padding="8,0,0,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="16"
+                                        Text="Upload" />
+                                </StackPanel>
+                            </ListViewItem>
+                        </ListView>
+                    </Grid>
+                </Grid>
+            </Grid>
+
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!--  TitleBar  -->
+                <Border Grid.Row="0" controls:MetroWindow.IsCaptionBar="True">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <controls:SystemButtons Grid.Column="2" VerticalAlignment="Stretch" />
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </md:DialogHost>
+</controls:MetroWindow>

@@ -1,0 +1,17 @@
+@startuml
+
+title Service
+
+ContentExchangeEngine *--> BlockExchangeEngine
+ContentExchangeEngine *--> MetadataExchangeEngine
+
+BlockExchangeEngine *--> BlockDatabase
+MetadataExchangeEngine *--> MetadataDatabase
+BlockExchangeEngine *---> ConnectionPool
+MetadataExchangeEngine *---> ConnectionPool
+
+ConnectionPool *--> TcpConnectionGenerator
+ConnectionPool *--> TorConnectionGenerator
+ConnectionPool *--> I2pConnectionGenerator
+
+@enduml

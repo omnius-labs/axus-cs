@@ -1,0 +1,30 @@
+<#@ template debug="true" hostspecific="true" language="C#" #>
+<#@ output encoding="UTF-8" extension=".generated.cs" #>
+<#@ assembly name="System" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Xml" #>
+<#@ assembly name="System.Xml.Linq" #>
+<#@ assembly name="Microsoft.CSharp" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Xml" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#@ import namespace="System.Dynamic" #>
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using Amoeba.Messages;
+using Newtonsoft.Json;
+using Omnius.Base;
+using Omnius.Serialization;
+using Omnius.Utils;
+
+namespace Amoeba.Service
+{
+<#= Generator.GetString(this.Host.ResolvePath("Definition.xml")) #>
+}
+<#@ include file="$(ProjectDir)\..\Omnius\Generators\ItemGenerator.ttinclude" #>

@@ -1,0 +1,131 @@
+﻿<Config>
+
+    <Struct Name="Hash">
+        <Properties>
+            <Varint Name="Algorithm" Id="0" Type="HashAlgorithm" />
+            <Bytes Name="Value" Id="1" Limit="32" />
+        </Properties>
+    </Struct>
+
+    <Class Name="Location">
+        <Properties>
+            <Array Name="Uris" Id="0" Limit="32">
+                <Element>
+                    <String Limit="256" />
+                </Element>
+            </Array>
+        </Properties>
+    </Class>
+
+    <Class Name="Metadata">
+        <Properties>
+            <Varint Name="Depth" Id="0" Type="int" />
+            <Message Name="Hash" Id="1" Type="Hash" />
+        </Properties>
+    </Class>
+
+    <Class Name="Tag">
+        <Properties>
+            <String Name="Name" Id="0" Limit="256" />
+            <Bytes Name="Id" Id="1" Limit="32" />
+        </Properties>
+    </Class>
+
+    <Class Name="ProfileContent">
+        <Properties>
+            <Message Name="AgreementPublicKey" Id="0" Type="AgreementPublicKey" />
+            <Array Name="TrustSignatures" Id="1" Limit="1024">
+                <Element>
+                    <Message Type="Signature" />
+                </Element>
+            </Array>
+            <Array Name="UntrustSignatures" Id="2" Limit="1024">
+                <Element>
+                    <Message Type="Signature" />
+                </Element>
+            </Array>
+            <Array Name="SubscriptionTags" Id="3" Limit="1024">
+                <Element>
+                    <Message Type="Tag" />
+                </Element>
+            </Array>
+            <String Name="Comment" Id="4" Limit="8192" IsNullable="true" />
+        </Properties>
+    </Class>
+
+    <Class Name="StoreContent">
+        <Properties>
+            <Array Name="Boxes" Id="0" Limit="1024 * 8">
+                <Element>
+                    <Message Type="Box" />
+                </Element>
+            </Array>
+        </Properties>
+    </Class>
+
+    <Class Name="Box">
+        <Properties>
+            <String Name="Name" Id="0" Limit="256" />
+            <Array Name="Seeds" Id="1" Limit="1024 * 64">
+                <Element>
+                    <Message Type="Seed" />
+                </Element>
+            </Array>
+            <Array Name="Boxes" Id="2" Limit="1024 * 8">
+                <Element>
+                    <Message Type="Box" />
+                </Element>
+            </Array>
+        </Properties>
+    </Class>
+
+    <Class Name="Seed">
+        <Properties>
+            <String Name="Name" Id="0" Limit="256" />
+            <Varint Name="Length" Id="1" Type="long" />
+            <Message Name="Metadata" Id="2" Type="Metadata" />
+        </Properties>
+    </Class>
+
+    <Class Name="CommentContent">
+        <Properties>
+            <String Name="Comment" Id="0" Limit="8192" />
+        </Properties>
+    </Class>
+
+    <Class Name="BroadcastProfileMessage">
+        <Properties>
+            <Message Name="AuthorSignature" Id="0" Type="Signature" />
+            <DateTime Name="CreationTime" Id="1" Type="DateTime" />
+            <Message Name="Value" Id="2" Type="ProfileContent" />
+        </Properties>
+    </Class>
+
+    <Class Name="BroadcastStoreMessage">
+        <Properties>
+            <Message Name="AuthorSignature" Id="0" Type="Signature" />
+            <DateTime Name="CreationTime" Id="1" Type="DateTime" />
+            <Message Name="Value" Id="2" Type="StoreContent" />
+        </Properties>
+    </Class>
+
+    <Class Name="MulticastCommentMessage">
+        <Properties>
+            <Message Name="Tag" Id="0" Type="Tag" />
+            <Message Name="AuthorSignature" Id="1" Type="Signature" />
+            <DateTime Name="CreationTime" Id="2" Type="DateTime" />
+            <Message Name="Cost" Id="3" Type="Cost" />
+            <Message Name="Value" Id="4" Type="CommentContent" />
+        </Properties>
+    </Class>
+
+    <Class Name="UnicastCommentMessage">
+        <Properties>
+            <Message Name="TargetSignature" Id="0" Type="Signature" />
+            <Message Name="AuthorSignature" Id="1" Type="Signature" />
+            <DateTime Name="CreationTime" Id="2" Type="DateTime" />
+            <Message Name="Value" Id="3" Type="CommentContent" />
+        </Properties>
+    </Class>
+
+</Config>

@@ -1,0 +1,28 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="http://schemes.grabacr.net/winfx/2014/controls"
+    xmlns:system="clr-namespace:System;assembly=mscorlib">
+
+    <Style x:Key="CustomMaterialDesignMetroWindow" TargetType="{x:Type controls:MetroWindow}">
+        <Setter Property="WindowChrome.WindowChrome">
+            <Setter.Value>
+                <WindowChrome
+                    CaptionHeight="0"
+                    CornerRadius="3"
+                    GlassFrameThickness="1"
+                    ResizeBorderThickness="8"
+                    UseAeroCaptionButtons="False" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource MaterialDesignBody}" />
+        <Setter Property="TextElement.FontWeight" Value="Regular" />
+        <Setter Property="TextElement.FontSize" Value="13" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" />
+        <Setter Property="TextOptions.TextRenderingMode" Value="Auto" />
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}" />
+        <Setter Property="FontFamily" Value="{DynamicResource MaterialDesignFont}" />
+    </Style>
+
+    <Style BasedOn="{StaticResource CustomMaterialDesignMetroWindow}" TargetType="{x:Type controls:MetroWindow}" />
+</ResourceDictionary>
