@@ -1,0 +1,118 @@
+syntax = v1;
+
+using "../refs/Omnix/formats/Omnix.Cryptography.rpf";
+using "../refs/Omnix/formats/Omnix.Network.rpf";
+using "Xeus.Messages.rpf";
+using "Xeus.Messages.Options.rpf";
+using "Xeus.Messages.Reports.rpf";
+
+option csharp_namespace = "Xeus.Core.Exchange.Internal";
+option csharp_access_level = "internal";
+
+message BroadcastClue {
+    Type: string(256) = 0,
+    CreationTime: timestamp = 1,
+    Clue: Clue = 2,
+    Certificate: OmniCertificate = 3,
+}
+
+message UnicastClue {
+    Type: string(256) = 0,
+    Signature: OmniSignature = 1,
+    CreationTime: timestamp = 2,
+    Clue: Clue = 3,
+    Certificate: OmniCertificate = 4,
+}
+
+message MulticastClue {
+    Type: string(256) = 0,
+    Channel: Channel = 1,
+    CreationTime: timestamp = 2,
+    Clue: Clue = 3,
+    Hashcash: OmniHashcash = 4,
+    Certificate: OmniCertificate = 5,
+}
+
+enum ProtocolVersion : uint8 {
+    Version1 = 1,
+}
+
+message HelloMessage {
+    ProtocolVersions: vector<ProtocolVersion>(32) = 0,
+}
+
+message ProfileMessage {
+    Id: memory(32) = 0,
+    Address: OmniAddress = 1,
+}
+
+message NodeAddressesMessage {
+    Addresses: vector<OmniAddress>(256) = 0,
+}
+
+message RelayOptions {
+    HopLimit: uint8 = 0,
+    Priority: uint8 = 1,
+}
+
+message WantBroadcastCluesMessage {
+    HopLimit: uint8 = 0,
+    Signatures: OmniSignature = 1,
+}
+
+message WantUnicastCluesMessage {
+    HopLimit: uint8 = 0,
+    Signatures: OmniSignature = 1,
+}
+
+message WantMulticastCluesMessage {
+    HopLimit: uint8 = 0,
+    Channel: Channel = 1,
+}
+
+message BroadcastCluesMessage {
+    BroadcastClue
+}
+
+message CluesResponsePacket {
+    BroadcastMetadatas: vector<BroadcastMetadata>(8192) = 0,
+    UnicastMetadatas: vector<UnicastMetadata>(8192) = 1,
+    MulticastMetadatas: vector<MulticastMetadata>(8192) = 2,
+}
+
+message DiffuseBlockMessage {
+    HopLimit: uint8 = 0,
+    Priority: uint8 = 1,
+    Hash: OmniHash = 2,
+    [Recyclable]
+    Value: memory(4194304) = 3,
+}
+
+message PublishBlocksMessage {
+    HopLimit: uint8 = 0,
+    Priority: uint8 = 1,
+    Hash: OmniHash = 2,
+}
+
+message WantBlocksMessage {
+    HopLimit: uint8 = 0,
+    Priority: uint8 = 1,
+    Hash: OmniHash = 2,
+}
+
+message BlockMessage {
+    Hash: OmniHash = 0,
+    [Recyclable]
+    Value: memory(4194304) = 1,
+}
+
+message DiffuseBlockInfo {
+    CreationTime: timestamp = 0,
+    HopLimit: uint8 = 1,
+    Priority: uint8 = 2,
+    Hash: OmniHash = 3,
+}
+
+message ExchangeManagerConfig {
+    Version: uint32 = 0,
+}

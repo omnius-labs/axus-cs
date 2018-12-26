@@ -1,0 +1,41 @@
+﻿syntax = v1;
+
+using "../refs/Omnix/formats/Omnix.Cryptography.rpf";
+using "../refs/Omnix/formats/Omnix.Network.rpf";
+using "Xeus.Messages.rpf";
+using "Xeus.Messages.Options.rpf";
+using "Xeus.Messages.Reports.rpf";
+
+option csharp_namespace = "Xeus.Core.Contents.Internal";
+option csharp_access_level = "internal";
+
+message ClusterInfo {
+    Sectors: vector<uint64>(256) = 0,
+    Length: uint32 = 1,
+    LastAccessTime: timestamp = 2,
+}
+
+message ContentInfo {
+    Clue: Clue = 0,
+    CreationTime: timestamp = 1,
+    LockedHashes: vector<OmniHash>(1073741824) = 2,
+    SharedBlocksInfo: SharedBlocksInfo = 3, 
+}
+
+message SharedBlocksInfo {
+    Path: string(1024) = 0,
+    Length: uint64 = 1,
+    BlockLength: uint32 = 2,
+    Hashes: vector<OmniHash>(1073741824) = 3,
+}
+
+message BlocksStorageConfig {
+    Version: uint32 = 0,
+    ClusterInfoMap: map<OmniHash, ClusterInfo>(1073741824) = 1,
+    Size: uint64 = 2,
+}
+
+message ContentsManagerConfig {
+    Version: uint32 = 0,
+    ContentInfos: vector<ContentInfo>(1073741824) = 1,
+}

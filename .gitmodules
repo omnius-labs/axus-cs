@@ -1,3 +1,3 @@
 [submodule "refs/Omnix"]
 	path = refs/Omnix
-	url = git@github.com:OmniusLabs/Omnix.git
+	url = https://github.com/OmniusLabs/Omnix.git

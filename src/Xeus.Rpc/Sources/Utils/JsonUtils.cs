@@ -8,8 +8,8 @@ using System.Runtime.Serialization;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using Omnius.Base;
-using Omnius.Io;
+using Omnix.Base;
+using Omnix.Io;
 
 namespace Amoeba.Rpc
 {

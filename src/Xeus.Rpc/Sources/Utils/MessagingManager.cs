@@ -3,9 +3,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading;
-using Omnius.Base;
-using Omnius.Io;
-using Omnius.Serialization;
+using Omnix.Base;
+using Omnix.Io;
+using Omnix.Serialization;
 
 namespace Amoeba.Rpc
 {

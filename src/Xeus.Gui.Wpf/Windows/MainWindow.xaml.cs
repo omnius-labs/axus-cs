@@ -12,9 +12,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Xeus.Gui.Wpf.Extensions;
+using Lxna.Gui.Wpf.Extensions;
 
-namespace Xeus.Gui.Wpf
+namespace Lxna.Gui.Wpf.Windows
 {
     /// <summary>
     /// MainWindow.xaml の相互作用ロジック

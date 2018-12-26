@@ -1,0 +1,10 @@
+﻿syntax = v1;
+
+using "../refs/Omnix/formats/Omnix.Cryptography.rpf";
+using "../refs/Omnix/formats/Omnix.Network.rpf";
+using "Xeus.Messages.rpf";
+using "Xeus.Messages.Options.rpf";
+using "Xeus.Messages.Reports.rpf";
+
+option csharp_namespace = "Xeus.Core.Connections.Internal";
+option csharp_access_level = "internal";
