@@ -1,8 +1,9 @@
 ﻿<Application
-    x:Class="Xeus.Gui.Wpf.App"
+    x:Class="Lxna.Gui.Wpf.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="clr-namespace:Xeus.Gui.Wpf"
+    xmlns:local="clr-namespace:Lxna.Gui.Wpf"
+    xmlns:internal="clr-namespace:Lxna.Gui.Wpf.Internal"
     StartupUri="Windows/MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
@@ -19,6 +20,8 @@
 
                 <ResourceDictionary Source="Themes/Defaults.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <ObjectDataProvider x:Key="Languages" ObjectInstance="{x:Static internal:LanguagesManager.Instance}" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -1,0 +1,64 @@
+﻿syntax = v1;
+
+using "../refs/Omnix/formats/Omnix.Cryptography.rpf";
+
+option csharp_namespace = "Xeus.Messages";
+
+message Clue {
+    Hash: OmniHash = 0,
+    Depth: uint8 = 1,
+}
+
+message ArchiveMetadata {
+    Clue: Clue = 0,
+    Name: string(1024) = 1,
+    Length: uint64 = 2,
+    CreationTime: timestamp = 3,
+    Tags: vector<string(32)>(6) = 4,
+}
+
+message ProfileContent {
+    AgreementPublicKey: OmniAgreementPublicKey = 0,
+    TrustedSignatures: vector<OmniSignature>(256) = 1,
+    InvalidSignatures: vector<OmniSignature>(256) = 2,
+}
+
+message StoreContent {
+    ArchiveMetadatas: vector<ArchiveMetadata>(32768) = 0,
+}
+
+message CommentContent {
+    Comment: string(8192) = 0,
+}
+
+message BroadcastProfileMessage {
+    AuthorSignature: OmniSignature = 0,
+    CreationTime: timestamp = 1,
+    Value: ProfileContent = 2,
+}
+
+message BroadcastStoreMessage {
+    AuthorSignature: OmniSignature = 0,
+    CreationTime: timestamp = 1,
+    Value: StoreContent = 2,
+}
+
+message Channel {
+    Id: memory(32) = 0,
+    Name: string(256) = 1,
+}
+
+message MulticastCommentMessage {
+    Channel: Channel = 0,
+    AuthorSignature: OmniSignature = 1,
+    CreationTime: timestamp = 2,
+    Cost: uint32 = 3,
+    Value: CommentContent = 4,
+}
+
+message UnicastCommentMessage {
+    TargetSignature: OmniSignature = 0,
+    AuthorSignature: OmniSignature = 1,
+    CreationTime: timestamp = 2,
+    Value: CommentContent = 3,
+}

@@ -1,0 +1,326 @@
+<Config>
+
+  <Property Name="Global_DateTime_StringFormat" Value="yyyy/MM/dd HH:mm:ss" />
+
+  <Property Name="Languages_English" Value="English" />
+  <Property Name="Languages_Japanese" Value="Japanese" />
+  <Property Name="Languages_Chinese" Value="Chinese" />
+
+  <Property Name="MainWindow_Explorer" Value="Explorer" />
+  <Property Name="MainWindow_Search" Value="Search" />
+  
+  <Property Name="ValidationRule_ErrorMessage" Value="Error." />
+
+  <Property Name="SessionType_Connect" Value="Connect" />
+  <Property Name="SessionType_Accept" Value="Accept" />
+
+  <Property Name="ManagerState_Start" Value="Start" />
+  <Property Name="ManagerState_Stop" Value="Stop" />
+
+  <Property Name="ConnectionType_None" Value="None" />
+  <Property Name="ConnectionType_Tcp" Value="Tcp" />
+  <Property Name="ConnectionType_Socks5Proxy" Value="Socks5 proxy" />
+  <Property Name="ConnectionType_HttpProxy" Value="Http proxy" />
+
+  <Property Name="Tag_Name" Value="Name" />
+  <Property Name="Tag_Id" Value="ID" />
+
+  <Property Name="Seed_Name" Value="Name" />
+  <Property Name="Seed_Signature" Value="Signature" />
+  <Property Name="Seed_Length" Value="Length" />
+  <Property Name="Seed_CreationTime" Value="Creation time" />
+
+  <Property Name="Box_Name" Value="Name" />
+  <Property Name="Box_Signature" Value="Signature" />
+  <Property Name="Box_CreationTime" Value="Creation time" />
+
+  <Property Name="SearchState_Store" Value="Store" />
+  <Property Name="SearchState_Cache" Value="Cache" />
+  <Property Name="SearchState_Downloading" Value="Downloading" />
+  <Property Name="SearchState_Downloaded" Value="Downloaded" />
+
+  <Property Name="SearchState_Flag_Store" Value="S" />
+  <Property Name="SearchState_Flag_Cache" Value="C" />
+  <Property Name="SearchState_Flag_Downloading" Value="D" />
+  <Property Name="SearchState_Flag_Downloaded" Value="DH" />
+
+  <Property Name="DownloadState_Downloading" Value="Downloading" />
+  <Property Name="DownloadState_ParityDecoding" Value="Parity decoding" />
+  <Property Name="DownloadState_Decoding" Value="Decoding" />
+  <Property Name="DownloadState_Completed" Value="Completed" />
+  <Property Name="DownloadState_Error" Value="Error" />
+
+  <Property Name="ConfirmWindow_Title" Value="Confirm" />
+  <Property Name="ConfirmWindow_DeleteMessage" Value="Are you sure you want to delete?" />
+  <Property Name="ConfirmWindow_CheckExistMessage" Value="Are you sure you want to check file existence?" />
+
+  <Property Name="NameEditWindow_Title" Value="Name edit" />
+  <Property Name="NameEditWindow_Name" Value="Name" />
+  <Property Name="NameEditWindow_Ok" Value="OK" />
+  <Property Name="NameEditWindow_Cancel" Value="Cancel" />
+
+  <Property Name="QuickSearchControl_Search" Value="Search" />
+
+  <Property Name="RelationWindow_Title" Value="Relation" />
+  <Property Name="RelationWindow_Ranking" Value="Ranking" />
+  <Property Name="RelationWindow_Signature" Value="Signature" />
+  <Property Name="RelationWindow_Search" Value="Search" />
+  <Property Name="RelationWindow_Profile" Value="Profile" />
+  <Property Name="RelationWindow_Trust" Value="Trust" />
+  <Property Name="RelationWindow_TrustSignature" Value="Trust signature" />
+  <Property Name="RelationWindow_Untrust" Value="Untrust" />
+  <Property Name="RelationWindow_UntrustSignature" Value="Untrust signature" />
+  <Property Name="RelationWindow_Tags" Value="Tags" />
+  <Property Name="RelationWindow_Tag" Value="Tag" />
+  <Property Name="RelationWindow_Name" Value="Name" />
+  <Property Name="RelationWindow_Id" Value="ID" />
+  <Property Name="RelationWindow_Comment" Value="Comment" />
+  <Property Name="RelationWindow_Dependencies" Value="Dependencies" />
+  <Property Name="RelationWindow_Copy" Value="Copy" />
+  <Property Name="RelationWindow_Close" Value="Close" />
+
+  <Property Name="OptionsWindow_Title" Value="Options" />
+  <Property Name="OptionsWindow_Account" Value="Account" />
+  <Property Name="OptionsWindow_Signature" Value="Signature" />
+  <Property Name="OptionsWindow_TrustSignatures" Value="Trust signatures" />
+  <Property Name="OptionsWindow_UntrustSignatures" Value="Untrust signatures" />
+  <Property Name="OptionsWindow_Tags" Value="Tags" />
+  <Property Name="OptionsWindow_Comment" Value="Comment" />
+  <Property Name="OptionsWindow_Connection" Value="Connection" />
+  <Property Name="OptionsWindow_Tcp" Value="TCP" />
+  <Property Name="OptionsWindow_I2p" Value="I2P" />
+  <Property Name="OptionsWindow_Custom" Value="Custom" />
+  <Property Name="OptionsWindow_LocationUris" Value="Location uris" />
+  <Property Name="OptionsWindow_ConnectionFilters" Value="Connection filters" />
+  <Property Name="OptionsWindow_ListenUris" Value="Listen uris" />
+  <Property Name="OptionsWindow_Bandwidth" Value="Bandwidth" />
+  <Property Name="OptionsWindow_Data" Value="Data" />
+  <Property Name="OptionsWindow_Cache" Value="Cache" />
+  <Property Name="OptionsWindow_Download" Value="Download" />
+  <Property Name="OptionsWindow_View" Value="View" />
+  <Property Name="OptionsWindow_Subscribe" Value="Subscribe" />
+  <Property Name="OptionsWindow_Update" Value="Update" />
+  <Property Name="OptionsWindow_Ok" Value="OK" />
+  <Property Name="OptionsWindow_Cancel" Value="Cancel" />
+
+  <Property Name="AccountOptionsControl_SignatureSettings" Value="Signature settings" />
+  <Property Name="AccountOptionsControl_YourSignature" Value="Your signature" />
+  <Property Name="AccountOptionsControl_TrustSignaturesSettings" Value="Trust signatures settings" />
+  <Property Name="AccountOptionsControl_TrustSignature" Value="Trust signature" />
+  <Property Name="AccountOptionsControl_UntrustSignaturesSettings" Value="Untrust signatures settings" />
+  <Property Name="AccountOptionsControl_UntrustSignature" Value="Untrust signature" />
+  <Property Name="AccountOptionsControl_TagsSettings" Value="Tags settings" />
+  <Property Name="AccountOptionsControl_Name" Value="Name" />
+  <Property Name="AccountOptionsControl_Id" Value="ID" />
+  <Property Name="AccountOptionsControl_CommentSettings" Value="Comment settings" />
+  <Property Name="AccountOptionsControl_New" Value="New" />
+  <Property Name="AccountOptionsControl_Import" Value="Import" />
+  <Property Name="AccountOptionsControl_Export" Value="Export" />
+  <Property Name="AccountOptionsControl_Delete" Value="Delete" />
+  <Property Name="AccountOptionsControl_Copy" Value="Copy" />
+  <Property Name="AccountOptionsControl_Paste" Value="Paste" />
+
+  <Property Name="ConnectionOptionsControl_TcpSettings" Value="TCP settings" />
+  <Property Name="ConnectionOptionsControl_Ipv4IsEnabled" Value="IPv4 is enabled" />
+  <Property Name="ConnectionOptionsControl_Ipv4Port" Value="IPv4 port" />
+  <Property Name="ConnectionOptionsControl_Ipv6IsEnabled" Value="IPv6 is enabled" />
+  <Property Name="ConnectionOptionsControl_Ipv6Port" Value="IPv6 port" />
+  <Property Name="ConnectionOptionsControl_ProxyUri" Value="Proxy uri" />
+  <Property Name="ConnectionOptionsControl_I2pSettings" Value="I2P settings" />
+  <Property Name="ConnectionOptionsControl_I2pIsEnabled" Value="I2P is enabled" />
+  <Property Name="ConnectionOptionsControl_SamBridgeUri" Value="Sam bridge uri" />
+  <Property Name="ConnectionOptionsControl_LocationUrisSettings" Value="Location uris settings" />
+  <Property Name="ConnectionOptionsControl_Uri" Value="Uri" />
+  <Property Name="ConnectionOptionsControl_ConnectionFiltersSettings" Value="Connection filters settings" />
+  <Property Name="ConnectionOptionsControl_Scheme" Value="Scheme" />
+  <Property Name="ConnectionOptionsControl_Type" Value="Type" />
+  <Property Name="ConnectionOptionsControl_ListenUrisSettings" Value="Listen uris settings" />
+  <Property Name="ConnectionOptionsControl_BandwidthSettings" Value="Bandwidth settings" />
+  <Property Name="ConnectionOptionsControl_ConnectionCountLimit" Value="Connection count limit" />
+  <Property Name="ConnectionOptionsControl_BandwidthLimit" Value="Bandwidth limit (*/s) [0 Byte: unlimited]" />
+  <Property Name="ConnectionOptionsControl_Up" Value="Up" />
+  <Property Name="ConnectionOptionsControl_Down" Value="Down" />
+  <Property Name="ConnectionOptionsControl_Add" Value="Add" />
+  <Property Name="ConnectionOptionsControl_Edit" Value="Edit" />
+  <Property Name="ConnectionOptionsControl_Delete" Value="Delete" />
+
+  <Property Name="DataOptionsControl_CacheSettings" Value="Cache settings" />
+  <Property Name="DataOptionsControl_CacheSize" Value="Cache size" />
+  <Property Name="DataOptionsControl_DownloadSettings" Value="Download settings" />
+  <Property Name="DataOptionsControl_DownloadDirectoryPath" Value="Directory path" />
+  <Property Name="DataOptionsControl_ProtectedCachePercentage" Value="Percentage of protected cache" />
+  <Property Name="DataOptionsControl_CacheResize_Message" Value="Resizing of cache will delete important block. Would that be all right?" />
+  <Property Name="DataOptionsControl_Import" Value="Import" />
+
+  <Property Name="ViewOptionsControl_SubscribeSettings" Value="Subscribe settings" />
+  <Property Name="ViewOptionsControl_SubscribeSignature" Value="Subscribe signature" />
+  <Property Name="ViewOptionsControl_Delete" Value="Delete" />
+  <Property Name="ViewOptionsControl_Copy" Value="Copy" />
+  <Property Name="ViewOptionsControl_Paste" Value="Paste" />
+
+  <Property Name="UpdateOptionsControl_UpdateSettings" Value="Update settings" />
+  <Property Name="UpdateOptionsControl_UpdateIsEnabled" Value="Update is enabled" />
+
+  <Property Name="VersionWindow_Title" Value="Version" />
+  <Property Name="VersionWindow_Close" Value="Close" />
+
+  <Property Name="CheckBlocksWindow_Title" Value="Check blocks" />
+  <Property Name="CheckBlocksWindow_BadCount" Value="Bad count" />
+  <Property Name="CheckBlocksWindow_CheckedCount" Value="Checked count" />
+  <Property Name="CheckBlocksWindow_BlockCount" Value="Block count" />
+  <Property Name="CheckBlocksWindow_Close" Value="Close" />
+
+  <Property Name="CloudControl_Connection" Value="Connection" />
+  <Property Name="CloudControl_State" Value="State" />
+  <Property Name="CloudControl_Log" Value="Log" />
+  <Property Name="CloudControl_Location" Value="Location" />
+  <Property Name="CloudControl_Uri" Value="Uri" />
+  <Property Name="CloudControl_States" Value="States" />
+  <Property Name="CloudControl_Copy" Value="Copy" />
+  <Property Name="CloudControl_Paste" Value="Paste" />
+  <Property Name="CloudControl_Type" Value="Type" />
+  <Property Name="CloudControl_Priority" Value="Priority" />
+  <Property Name="CloudControl_ReceivedByteCount" Value="Received byte count" />
+  <Property Name="CloudControl_SentByteCount" Value="Sent byte count" />
+  <Property Name="CloudControl_Name" Value="Name" />
+  <Property Name="CloudControl_Value" Value="Value" />
+
+  <Property Name="ChatControl_NewCategory" Value="New category" />
+  <Property Name="ChatControl_NewChat" Value="New chat" />
+  <Property Name="ChatControl_Edit" Value="Edit" />
+  <Property Name="ChatControl_Delete" Value="Delete" />
+  <Property Name="ChatControl_Cut" Value="Cut" />
+  <Property Name="ChatControl_Copy" Value="Copy" />
+  <Property Name="ChatControl_Paste" Value="Paste" />
+  <Property Name="ChatControl_TagList" Value="Tag list" />
+  <Property Name="ChatControl_Response" Value="Response" />
+  <Property Name="ChatControl_Trust" Value="Trust" />
+  <Property Name="ChatControl_New" Value="New" />
+  <Property Name="ChatControl_Limit" Value="Limit:" />
+  <Property Name="ChatControl_NewMessage" Value="New message" />
+
+  <Property Name="ChatMessageEditWindow_Title" Value="Chat message edit" />
+  <Property Name="ChatMessageEditWindow_Ok" Value="OK" />
+  <Property Name="ChatMessageEditWindow_Cancel" Value="Cancel" />
+
+  <Property Name="ChatTagListWindow_Title" Value="Chat tag list" />
+  <Property Name="ChatTagListWindow_Name" Value="Name" />
+  <Property Name="ChatTagListWindow_Id" Value="ID" />
+  <Property Name="ChatTagListWindow_Copy" Value="Copy" />
+  <Property Name="ChatTagListWindow_Join" Value="Join" />
+  <Property Name="ChatTagListWindow_Close" Value="Close" />
+
+  <Property Name="StoreControl_NewCategory" Value="New category" />
+  <Property Name="StoreControl_Edit" Value="Edit" />
+  <Property Name="StoreControl_Delete" Value="Delete" />
+  <Property Name="StoreControl_Cut" Value="Cut" />
+  <Property Name="StoreControl_Copy" Value="Copy" />
+  <Property Name="StoreControl_Paste" Value="Paste" />
+  <Property Name="StoreControl_Download" Value="Download" />
+  <Property Name="StoreControl_Advanced" Value="Advanced" />
+  <Property Name="StoreControl_CopyName" Value="Copy name" />
+  <Property Name="StoreControl_Name" Value="Name" />
+  <Property Name="StoreControl_Length" Value="Length" />
+  <Property Name="StoreControl_CreationTime" Value="CreationTime" />
+  <Property Name="StoreControl_State" Value="State" />
+  <Property Name="StoreControl_Up" Value="Up" />
+
+  <Property Name="SearchControl_SearchHint" Value="Search" />
+  <Property Name="SearchControl_Download" Value="Download" />
+  <Property Name="SearchControl_NewSearch" Value="New search" />
+  <Property Name="SearchControl_Edit" Value="Edit" />
+  <Property Name="SearchControl_Delete" Value="Delete" />
+  <Property Name="SearchControl_Cut" Value="Cut" />
+  <Property Name="SearchControl_Copy" Value="Copy" />
+  <Property Name="SearchControl_Paste" Value="Paste" />
+  <Property Name="SearchControl_Advanced" Value="Advanced" />
+  <Property Name="SearchControl_CopyName" Value="Copy name" />
+  <Property Name="SearchControl_CopySignature" Value="Copy signature" />
+  <Property Name="SearchControl_RemoveCacheItem" Value="Remove cache item" />
+  <Property Name="SearchControl_RemoveDownloadingItem" Value="Remove downloading item" />
+  <Property Name="SearchControl_RemoveDownloadedItem" Value="Remove downloaded item" />
+  <Property Name="SearchControl_Name" Value="Name" />
+  <Property Name="SearchControl_Signature" Value="Signature" />
+  <Property Name="SearchControl_Length" Value="Length" />
+  <Property Name="SearchControl_CreationTime" Value="CreationTime" />
+  <Property Name="SearchControl_State" Value="State" />
+
+  <Property Name="SearchInfoEditWindow_Title" Value="Search edit" />
+  <Property Name="SearchInfoEditWindow_SearchName" Value="Search name" />
+  <Property Name="SearchInfoEditWindow_Name" Value="Name" />
+  <Property Name="SearchInfoEditWindow_NameConditions" Value="Name conditions" />
+  <Property Name="SearchInfoEditWindow_Regex" Value="Regex" />
+  <Property Name="SearchInfoEditWindow_RegexConditions" Value="Regex conditions" />
+  <Property Name="SearchInfoEditWindow_Signature" Value="Signature" />
+  <Property Name="SearchInfoEditWindow_SignatureConditions" Value="Signature conditions" />
+  <Property Name="SearchInfoEditWindow_CreationTime" Value="Creation time" />
+  <Property Name="SearchInfoEditWindow_CreationTimeConditions" Value="Creation time conditions" />
+  <Property Name="SearchInfoEditWindow_Length" Value="Length" />
+  <Property Name="SearchInfoEditWindow_LengthConditions" Value="Length conditions" />
+  <Property Name="SearchInfoEditWindow_State" Value="State" />
+  <Property Name="SearchInfoEditWindow_StateConditions" Value="State conditions" />
+  <Property Name="SearchInfoEditWindow_Ok" Value="OK" />
+  <Property Name="SearchInfoEditWindow_Cancel" Value="Cancel" />
+
+  <Property Name="SearchConditionsControl_Add" Value="Add" />
+  <Property Name="SearchConditionsControl_Edit" Value="Edit" />
+  <Property Name="SearchConditionsControl_Delete" Value="Delete" />
+  <Property Name="SearchConditionsControl_Copy" Value="Copy" />
+  <Property Name="SearchConditionsControl_Paste" Value="Paste" />
+  <Property Name="SearchConditionsControl_NotContains" Value="Not contains" />
+  <Property Name="SearchConditionsControl_Contains" Value="Contains" />
+  <Property Name="SearchConditionsControl_IgnoreCase" Value="Ignore case" />
+  <Property Name="SearchConditionsControl_Min" Value="Min" />
+  <Property Name="SearchConditionsControl_Max" Value="Max" />
+  <Property Name="SearchConditionsControl_Value" Value="Value" />
+
+  <Property Name="DownloadControl_Name" Value="Name" />
+  <Property Name="DownloadControl_Length" Value="Length" />
+  <Property Name="DownloadControl_CreationTime" Value="CreationTime" />
+  <Property Name="DownloadControl_Rate" Value="Rate" />
+  <Property Name="DownloadControl_State" Value="State" />
+  <Property Name="DownloadControl_Path" Value="Path" />
+  <Property Name="DownloadControl_Delete" Value="Delete" />
+  <Property Name="DownloadControl_Copy" Value="Copy" />
+  <Property Name="DownloadControl_Paste" Value="Paste" />
+  <Property Name="DownloadControl_Reset" Value="Reset" />
+  <Property Name="DownloadControl_RemoveCompletedItem" Value="Remove completed item" />
+
+  <Property Name="UploadControl_NewCategory" Value="New category" />
+  <Property Name="UploadControl_AddDirectory" Value="Add directory" />
+  <Property Name="UploadControl_Edit" Value="Edit" />
+  <Property Name="UploadControl_Delete" Value="Delete" />
+  <Property Name="UploadControl_Cut" Value="Cut" />
+  <Property Name="UploadControl_Copy" Value="Copy" />
+  <Property Name="UploadControl_Paste" Value="Paste" />
+  <Property Name="UploadControl_Reupload" Value="Reupload" />
+  <Property Name="UploadControl_Advanced" Value="Advanced" />
+  <Property Name="UploadControl_CopyName" Value="Copy name" />
+  <Property Name="UploadControl_Name" Value="Name" />
+  <Property Name="UploadControl_Length" Value="Length" />
+  <Property Name="UploadControl_CreationTime" Value="CreationTime" />
+  <Property Name="UploadControl_State" Value="State" />
+  <Property Name="UploadControl_Path" Value="Path" />
+  <Property Name="UploadControl_Up" Value="Up" />
+  <Property Name="UploadControl_Upload" Value="Upload" />
+  <Property Name="UploadControl_Sync" Value="Sync" />
+  <Property Name="UploadControl_Syncing" Value="Syncing" />
+  <Property Name="UploadControl_Cancel" Value="CANCEL" />
+
+  <Property Name="UploadDirectoryInfoEditWindow_Title" Value="Upload directory edit" />
+  <Property Name="UploadDirectoryInfoEditWindow_Name" Value="Name" />
+  <Property Name="UploadDirectoryInfoEditWindow_Path" Value="Path" />
+  <Property Name="UploadDirectoryInfoEditWindow_Ok" Value="Ok" />
+  <Property Name="UploadDirectoryInfoEditWindow_Cancel" Value="Cancel" />
+
+  <Property Name="UploadItemsPreviewWindow_Title" Value="Upload items preview" />
+  <Property Name="UploadItemsPreviewWindow_Add" Value="Add" />
+  <Property Name="UploadItemsPreviewWindow_Remove" Value="Remove" />
+  <Property Name="UploadItemsPreviewWindow_Name" Value="Name" />
+  <Property Name="UploadItemsPreviewWindow_Length" Value="Length" />
+  <Property Name="UploadItemsPreviewWindow_Path" Value="Path" />
+  <Property Name="UploadItemsPreviewWindow_Copy" Value="Copy" />
+  <Property Name="UploadItemsPreviewWindow_Ok" Value="Ok" />
+  <Property Name="UploadItemsPreviewWindow_Cancel" Value="Cancel" />
+
+</Config>

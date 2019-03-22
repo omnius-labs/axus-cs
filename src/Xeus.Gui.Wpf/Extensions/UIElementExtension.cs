@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Media;
 
-namespace Xeus.Gui.Wpf.Extensions
+namespace Lxna.Gui.Wpf.Extensions
 {
     public static class UIElementExtension
     {

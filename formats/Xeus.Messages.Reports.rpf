@@ -1,0 +1,256 @@
+﻿syntax = v1;
+
+using "Xeus.Messages.rpf";
+
+option csharp_namespace = "Xeus.Messages.Reports";
+
+enum ErrorReportType : uint8 {
+    SpaceNotFound = 0,
+}
+
+message ErrorReport {
+    Type: ErrorReportType = 0,
+    CreationTime: timestamp = 1,
+}
+
+message CheckBlocksProgressReport {
+    BadBlockCount: uint32 = 0,
+    CheckedBlockCount: uint32 = 1,
+    TotalBlockCount: uint32 = 2,
+}
+
+message ContentReport {
+    Clue: Clue = 0,
+    Length: uint64 = 1,
+    CreationTime: timestamp = 2,
+    Path: string(1024) = 3,
+}
+
+message ContentsReport {
+    BlockCount: uint32 = 0,
+    UsingAreaSize: uint64 = 1,
+    ProtectionAreaSize: uint64 = 2,
+}
+
+enum DownloadStateType : uint8 
+{
+    Downloading = 0,
+    ParityDecoding = 1,
+    Decoding = 2,
+    Completed = 3,
+    Error = 4,
+}
+
+message DownloadContentReport {
+    Clue: Clue = 0,
+    Path: string(1024) = 1,
+    DownloadStateType: DownloadStateType = 2,
+    DownloadingDepth: uint8 = 3,
+    TotalBlockCount: uint64 = 4,
+    DownloadedBlockCount: uint64 = 5,
+    ParityBlockCount: uint64 = 6,
+}
+
+message DownloadReport {
+
+}
+
+enum SessionType : uint8 {
+    In = 0,
+    Out = 1,
+}
+
+message NetworkReport {
+    
+}
+
+message ConnectionsReport {
+    
+}
+
+/*
+message NetworkReport {
+
+}
+message CoreReport {
+    Cache: CacheReport,
+    Network: NetworkReport,
+}
+
+    <Class Name="RelayExchangeReport">
+        <Properties>
+            <Item Type="Location" Name="MyLocation" />
+
+            <Item Type="long" Name="ConnectCount" />
+            <Item Type="long" Name="AcceptCount" />
+
+            <Item Type="int" Name="CloudNodeCount" />
+            <Item Type="int" Name="MessageCount" />
+
+            <Item Type="int" Name="UploadBlockCount" />
+            <Item Type="int" Name="DiffusionBlockCount" />
+
+            <Item Type="long" Name="TotalReceivedByteCount" />
+            <Item Type="long" Name="TotalSentByteCount" />
+
+            <Item Type="long" Name="PushLocationCount" />
+            <Item Type="long" Name="PushBlockLinkCount" />
+            <Item Type="long" Name="PushBlockRequestCount" />
+            <Item Type="long" Name="PushBlockResultCount" />
+            <Item Type="long" Name="PushMessageRequestCount" />
+            <Item Type="long" Name="PushMessageResultCount" />
+
+            <Item Type="long" Name="PullLocationCount" />
+            <Item Type="long" Name="PullBlockLinkCount" />
+            <Item Type="long" Name="PullBlockRequestCount" />
+            <Item Type="long" Name="PullBlockResultCount" />
+            <Item Type="long" Name="PullMessageRequestCount" />
+            <Item Type="long" Name="PullMessageResultCount" />
+        </Properties>
+    </Class>
+
+    <Class Name="ConnectionReport">
+        <Properties>
+            <Item Type="TcpConnectionReport" Name="Tcp" />
+            <Item Type="CustomConnectionReport" Name="Custom" />
+        </Properties>
+    </Class>
+
+    <Class Name="TcpConnectionReport">
+        <Properties>
+            <Item Type="long" Name="CatharsisBlockCount" />
+        </Properties>
+    </Class>
+
+}    <Class Name="CustomConnectionReport">
+        <Properties>
+ /           <Item Type="long" Name="CatharsisBlockCount" />
+        </Properties>
+    </Class>
+
+    <Class Name="DirectExchangeConnectionReport">
+        <Properties>
+            <Item Type="byte[]" Name="Id" />
+            <Item Type="SecureConnectionType" Name="Type" />
+            <Item Type="string" Name="Uri" />
+            <Item Type="Location" Name="Location" />
+            <Item Type="long" Name="Priority" />
+            <Item Type="long" Name="ReceivedByteCount" />
+            <Item Type="long" Name="SentByteCount" />
+        </Properties>
+    </Class>
+
+    <Class Name="RelayExchangeConnectionReport">
+        <Properties>
+            <Item Type="byte[]" Name="Id" />
+            <Item Type="SecureConnectionType" Name="Type" />
+            <Item Type="string" Name="Uri" />
+            <Item Type="Location" Name="Location" />
+            <Item Type="long" Name="Priority" />
+            <Item Type="long" Name="ReceivedByteCount" />
+            <Item Type="long" Name="SentByteCount" />
+        </Properties>
+    </Class>
+
+
+
+    <Class Name="ServiceConfig">
+        <Properties>
+            <Item Type="CoreConfig" Name="Core" />
+            <Item Type="ConnectionConfig" Name="Connection" />
+            <Item Type="MessageConfig" Name="Message" />
+        </Properties>
+    </Class>
+
+    <Class Name="CoreConfig">
+        <Properties>
+            <Item Type="NetworkConfig" Name="Network" />
+            <Item Type="DownloadConfig" Name="Download" />
+        </Properties>
+    </Class>
+
+    <Class Name="NetworkConfig">
+        <Properties>
+            <Item Type="DirectExchangeConfig" Name="DirectExchange" />
+            <Item Type="RelayExchangeConfig" Name="RelayExchange" />
+        </Properties>
+    </Class>
+
+    <Class Name="DirectExchangeConfig">
+        <Properties>
+            <Item Type="bool" Name="IsEnabled" />
+            <Item Type="Location" Name="MyLocation" />
+            <Item Type="int" Name="ConnectionCountUpperLimit" />
+            <Item Type="int" Name="BandwidthUpperLimit" />
+        </Properties>
+    </Class>
+
+    <Class Name="RelayExchangeConfig">
+        <Properties>
+            <Item Type="Location" Name="MyLocation" />
+            <Item Type="int" Name="ConnectionCountUpperLimit" />
+            <Item Type="int" Name="BandwidthUpperLimit" />
+        </Properties>
+    </Class>
+
+    <Class Name="CacheConfig">
+        <Properties>
+            <Item Type="int" Name="UploadedMessageProtectionAreaUpperLimitPercentage" />
+        </Properties>
+    </Class>
+
+
+    <Class Name="ConnectionConfig">
+        <Properties>
+            <Item Type="TcpConnectionConfig" Name="Tcp" />
+            <Item Type="I2pConnectionConfig" Name="I2p" />
+            <Item Type="CustomConnectionConfig" Name="Custom" />
+            <Item Type="CatharsisConfig" Name="Catharsis" />
+        </Properties>
+    </Class>
+
+    <Class Name="CatharsisConfig">
+        <Properties>
+            <Item Type="CatharsisIpv4Config" Name="Ipv4Config" />
+        </Properties>
+    </Class>
+
+    <Class Name="CatharsisIpv4Config">
+        <Properties>
+            <Array Type="string" Name="Urls" />
+            <Array Type="string" Name="Paths" />
+        </Properties>
+    </Class>
+
+    <Class Name="TcpConnectionConfig">
+        <Properties>
+            <Item Type="TcpConnectionType" Name="Type" />
+            <Item Type="ushort" Name="Ipv4Port" />
+            <Item Type="ushort" Name="Ipv6Port" />
+            <Item Type="string" Name="ProxyUri" />
+        </Properties>
+    </Class>
+
+    <Class Name="I2pConnectionConfig">
+        <Properties>
+            <Item Type="bool" Name="IsEnabled" />
+            <Item Type="string" Name="SamBridgeUri" />
+        </Properties>
+    </Class>
+
+    <Class Name="CustomConnectionConfig">
+        <Properties>
+            <Array Type="string" Name="LocationUris" />
+            <Array Type="ConnectionFilter" Name="ConnectionFilters" />
+            <Array Type="string" Name="ListenUris" />
+        </Properties>
+    </Class>
+
+    <Class Name="MessageConfig">
+        <Properties>
+            <Array Type="Signature" Name="SearchSignatures" />
+        </Properties>
+    </Class>
+
+</Config>
+*/

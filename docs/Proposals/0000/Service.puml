@@ -2,16 +2,23 @@
 
 title Service
 
-ContentExchangeEngine *--> BlockExchangeEngine
-ContentExchangeEngine *--> MetadataExchangeEngine
+XeusServiceManager *--> ExchangeEngine
+XeusServiceManager *--> ContentsDatabase
 
-BlockExchangeEngine *--> BlockDatabase
-MetadataExchangeEngine *--> MetadataDatabase
-BlockExchangeEngine *---> ConnectionPool
-MetadataExchangeEngine *---> ConnectionPool
+ContentsDatabase *--> BlocksStorage
+ContentsDatabase *--> ContentsInfosManager
 
-ConnectionPool *--> TcpConnectionGenerator
-ConnectionPool *--> TorConnectionGenerator
-ConnectionPool *--> I2pConnectionGenerator
+BlocksStorage *--> BitmapManager
+BlocksStorage *--> ProtectionStatusManager
+BlocksStorage *--> UsingSectorsManager
+
+ExchangeEngine *--> ConnectionCreator
+ExchangeEngine *--> DownloadManager
+ExchangeEngine *--> NetworkManager
+
+ConnectionCreator *--> CatharsisManager
+ConnectionCreator *--> TcpConnectionCreator
+ConnectionCreator *--> I2pConnectionCreator
+ConnectionCreator *--> CustomConnectionManager
 
 @enduml

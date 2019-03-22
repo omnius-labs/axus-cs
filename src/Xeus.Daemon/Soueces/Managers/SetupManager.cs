@@ -13,7 +13,7 @@ using Amoeba.Rpc;
 using Amoeba.Service;
 using CommandLine;
 using Nett;
-using Omnius.Base;
+using Omnix.Base;
 
 namespace Amoeba.Daemon
 {

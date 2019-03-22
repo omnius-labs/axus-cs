@@ -1,27 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        <AssemblyVersion>2018.4.17.228</AssemblyVersion>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-      <LangVersion>latest</LangVersion>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-      <LangVersion>latest</LangVersion>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\Amoeba.Messages\Amoeba.Messages.csproj" />
-        <ProjectReference Include="..\Omnius\Omnius.Base\Omnius.Base.csproj" />
-        <ProjectReference Include="..\Omnius\Omnius.Collections\Omnius.Collections.csproj" />
-        <ProjectReference Include="..\Omnius\Omnius.Configuration\Omnius.Configuration.csproj" />
-        <ProjectReference Include="..\Omnius\Omnius.Io\Omnius.Io.csproj" />
-        <ProjectReference Include="..\Omnius\Omnius.Net.Proxy\Omnius.Net.Proxy.csproj" />
-        <ProjectReference Include="..\Omnius\Omnius.Net.Upnp\Omnius.Net.Upnp.csproj" />
-        <ProjectReference Include="..\Omnius\Omnius.Security\Omnius.Security.csproj" />
-        <ProjectReference Include="..\Omnius\Omnius.Serialization\Omnius.Serialization.csproj" />
-    </ItemGroup>
 </Project>

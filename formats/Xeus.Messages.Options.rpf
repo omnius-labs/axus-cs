@@ -1,0 +1,31 @@
+﻿syntax = v1;
+
+using "Xeus.Messages.rpf";
+
+option csharp_namespace = "Xeus.Messages.Options";
+
+enum ConnectionType : uint8
+{
+    None = 0,
+    Tcp = 1,
+    Socks5Proxy = 2,
+    HttpProxy = 3,
+}
+
+message ConnectionFilter {
+    Scheme: string(256) = 0,
+    ConnectionType: ConnectionType = 1,
+    ProxyUri string(1024) = 2,
+}
+
+message ContentsOptions {
+    
+}
+
+message DownloadOptions {
+    BasePath: string(1024) = 0,
+}
+
+message ExchangeOptions {
+    ConnectionCountUpperLimit = 0,
+}

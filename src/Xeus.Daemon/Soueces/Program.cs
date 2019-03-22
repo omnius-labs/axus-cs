@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading;
 using Amoeba.Rpc;
 using Amoeba.Service;
-using Omnius.Base;
+using Omnix.Base;
 
 namespace Amoeba.Daemon
 {

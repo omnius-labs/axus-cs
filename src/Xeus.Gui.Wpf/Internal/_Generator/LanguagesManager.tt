@@ -1,0 +1,43 @@
+<#@ template debug="true" hostspecific="true" language="C#" #>
+<#@ output encoding="UTF-8" extension=".generated.cs" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Xml" #>
+<#@ assembly name="System.Xml.Linq" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Xml" #>
+<#@ import namespace="System.Xml.Linq" #>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Lxna.Gui.Wpf.Internal
+{
+    partial class LanguagesManager
+    {
+<#
+var projectPath = this.Host.ResolveAssemblyReference("$(ProjectDir)");
+
+using (var stream = new FileStream(Path.Combine(projectPath, "Resources/Languages/English.xml"), FileMode.Open))
+using (var reader = new XmlTextReader(stream))
+{
+    while (reader.Read())
+    {
+        if (reader.NodeType == XmlNodeType.Element)
+        {
+            if (reader.LocalName == "Property")
+            {
+#>
+        public string <#= reader.GetAttribute("Name") #> => this.Translate("<#= reader.GetAttribute("Name") #>");
+<#
+            }
+        }
+    }
+}
+#>
+    }
+}

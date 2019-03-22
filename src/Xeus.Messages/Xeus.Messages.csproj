@@ -1,60 +1,23 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        <AssemblyVersion>2018.5.1.260</AssemblyVersion>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <LangVersion>latest</LangVersion>
-    </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\refs\Omnix\src\Omnix.Base\Omnix.Base.csproj" />
+    <ProjectReference Include="..\..\refs\Omnix\src\Omnix.Serialization.RocketPack\Omnix.Serialization.RocketPack.csproj" />
+    <ProjectReference Include="..\..\refs\Omnix\src\Omnix.Serialization\Omnix.Serialization.csproj" />
+    <ProjectReference Include="..\..\refs\Omnix\src\Omnix.Cryptography\Omnix.Cryptography.csproj" />
+  </ItemGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-        <LangVersion>latest</LangVersion>
-    </PropertyGroup>
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <Compile Remove="Sources\Core\**" />
-        <EmbeddedResource Remove="Sources\Core\**" />
-        <None Remove="Sources\Core\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\Omnius\Omnius.Base\Omnius.Base.csproj" />
-        <ProjectReference Include="..\Omnius\Omnius.Collections\Omnius.Collections.csproj" />
-        <ProjectReference Include="..\Omnius\Omnius.Configuration\Omnius.Configuration.csproj" />
-        <ProjectReference Include="..\Omnius\Omnius.Io\Omnius.Io.csproj" />
-        <ProjectReference Include="..\Omnius\Omnius.Security\Omnius.Security.csproj" />
-        <ProjectReference Include="..\Omnius\Omnius.Serialization\Omnius.Serialization.csproj" />
-        <ProjectReference Include="..\Omnius\Omnius.Utils\Omnius.Utils.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Compile Update="Sources\_Generators\Messages\_Generator\Models.generated.cs">
-            <DependentUpon>Models.tt</DependentUpon>
-            <DesignTime>True</DesignTime>
-            <AutoGen>True</AutoGen>
-        </Compile>
-        <Compile Update="Sources\_Generators\Items\_Generator\Models.generated.cs">
-            <DesignTime>True</DesignTime>
-            <AutoGen>True</AutoGen>
-            <DependentUpon>Models.tt</DependentUpon>
-        </Compile>
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Update="Sources\_Generators\Messages\_Generator\Models.tt">
-            <LastGenOutput>Models.generated.cs</LastGenOutput>
-            <Generator>TextTemplatingFileGenerator</Generator>
-        </None>
-        <None Update="Sources\_Generators\Items\_Generator\Models.tt">
-            <Generator>TextTemplatingFileGenerator</Generator>
-            <LastGenOutput>Models.generated.cs</LastGenOutput>
-        </None>
-    </ItemGroup>
+  <ItemGroup>
+    <Folder Include="_RocketPack\" />
+  </ItemGroup>
 
 </Project>

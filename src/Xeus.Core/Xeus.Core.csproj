@@ -1,54 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>0.0.0</Version>
-    <Authors>Lyrise</Authors>
-    <Company>Alliance-Network</Company>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <UpgradeBackupLocation>
-    </UpgradeBackupLocation>
-    <OldToolsVersion>2.0</OldToolsVersion>
-    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <LangVersion>latest</LangVersion>
-    <AssemblyVersion>2018.5.1.361</AssemblyVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.Threading.Thread" Version="4.3.0" />
+    <PackageReference Include="NLog" Version="4.5.11" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Amoeba.Messages\Amoeba.Messages.csproj" />
-    <ProjectReference Include="..\Omnius\Omnius.Base\Omnius.Base.csproj" />
-    <ProjectReference Include="..\Omnius\Omnius.Collections\Omnius.Collections.csproj" />
-    <ProjectReference Include="..\Omnius\Omnius.Configuration\Omnius.Configuration.csproj" />
-    <ProjectReference Include="..\Omnius\Omnius.Io\Omnius.Io.csproj" />
-    <ProjectReference Include="..\Omnius\Omnius.Net.Proxy\Omnius.Net.Proxy.csproj" />
-    <ProjectReference Include="..\Omnius\Omnius.Net.Upnp\Omnius.Net.Upnp.csproj" />
-    <ProjectReference Include="..\Omnius\Omnius.Security\Omnius.Security.csproj" />
-    <ProjectReference Include="..\Omnius\Omnius.Serialization\Omnius.Serialization.csproj" />
-    <ProjectReference Include="..\Omnius\Omnius.Utils\Omnius.Utils.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="Sources\_Generators\Items\_Generator\Models.generated.cs">
-      <DependentUpon>Models.tt</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
-    <Compile Update="Sources\_Generators\Messages\_Generator\Models.generated.cs">
-      <DependentUpon>Models.tt</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="Sources\_Generators\Items\_Generator\Models.tt">
-      <LastGenOutput>Models.generated.cs</LastGenOutput>
-      <Generator>TextTemplatingFileGenerator</Generator>
-    </None>
-    <None Update="Sources\_Generators\Messages\_Generator\Models.tt">
-      <LastGenOutput>Models.generated.cs</LastGenOutput>
-      <Generator>TextTemplatingFileGenerator</Generator>
-    </None>
+    <ProjectReference Include="..\..\refs\Omnix\src\Omnix.Base\Omnix.Base.csproj" />
+    <ProjectReference Include="..\..\refs\Omnix\src\Omnix.Collections\Omnix.Collections.csproj" />
+    <ProjectReference Include="..\..\refs\Omnix\src\Omnix.Configuration\Omnix.Configuration.csproj" />
+    <ProjectReference Include="..\..\refs\Omnix\src\Omnix.Correction\Omnix.Correction.csproj" />
+    <ProjectReference Include="..\..\refs\Omnix\src\Omnix.Io\Omnix.Io.csproj" />
+    <ProjectReference Include="..\..\refs\Omnix\src\Omnix.Network.Connection\Omnix.Network.Connection.csproj" />
+    <ProjectReference Include="..\..\refs\Omnix\src\Omnix.Network\Omnix.Network.csproj" />
+    <ProjectReference Include="..\..\refs\Omnix\src\Omnix.Serialization.RocketPack\Omnix.Serialization.RocketPack.csproj" />
+    <ProjectReference Include="..\..\refs\Omnix\src\Omnix.Serialization\Omnix.Serialization.csproj" />
+    <ProjectReference Include="..\Xeus.Messages\Xeus.Messages.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
