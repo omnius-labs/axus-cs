@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Omnius.Base;
+using Omnix.Base;
 
 namespace Amoeba.Daemon
 {

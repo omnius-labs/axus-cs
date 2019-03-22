@@ -1,0 +1,33 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Xeus.Gui.Desktop"
+        Height="300"
+        Width="500">
+  <Grid RowDefinitions="*,*" ColumnDefinitions="Auto,*">
+    <ListBox Grid.RowSpan="2" Width="150" ScrollViewer.HorizontalScrollBarVisibility="Hidden">
+      <ListBox.Styles>
+        <Style Selector="ListBoxItem">
+          <Setter Property="ListBoxItem.Foreground" Value="White"/>
+          <Setter Property="ListBoxItem.HorizontalContentAlignment" Value="Center"/>
+          <Setter Property="ListBoxItem.VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="ListBoxItem StackPanel">
+          <Setter Property="StackPanel.Orientation" Value="Horizontal" />
+        </Style>
+        <Style Selector="ListBoxItem StackPanel Image">
+          <Setter Property="Image.Height" Value="30" />
+          <Setter Property="Image.Width" Value="30" />
+        </Style>
+        <Style Selector="ListBoxItem StackPanel TextBlock">
+          <Setter Property="TextBlock.VerticalAlignment" Value="Center" />
+        </Style>
+      </ListBox.Styles>
+      <ListBoxItem>
+        <StackPanel Orientation="Horizontal">
+          <Image></Image>
+          <TextBlock>AAAAAAAA</TextBlock>
+        </StackPanel>
+      </ListBoxItem>
+    </ListBox>
+  </Grid>
+</Window>

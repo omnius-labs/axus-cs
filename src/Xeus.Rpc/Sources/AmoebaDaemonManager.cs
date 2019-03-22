@@ -4,11 +4,11 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Amoeba.Messages;
-using Omnius.Base;
-using Omnius.Collections;
-using Omnius.Io;
-using Omnius.Security;
-using Omnius.Serialization;
+using Omnix.Base;
+using Omnix.Collections;
+using Omnix.Io;
+using Omnix.Security;
+using Omnix.Serialization;
 
 namespace Amoeba.Rpc
 {

@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Xeus.Gui.Wpf
+namespace Lxna.Gui.Wpf
 {
     class Program
     {

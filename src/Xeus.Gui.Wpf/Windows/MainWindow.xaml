@@ -1,12 +1,12 @@
 ﻿<controls:MetroWindow
-    x:Class="Xeus.Gui.Wpf.MainWindow"
+    x:Class="Lxna.Gui.Wpf.Windows.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:chrome="http://schemes.grabacr.net/winfx/2014/chrome"
     xmlns:controls="http://schemes.grabacr.net/winfx/2014/controls"
     xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
     xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-    xmlns:local="clr-namespace:Xeus.Gui.Wpf"
+    xmlns:local="clr-namespace:Lxna.Gui.Wpf"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
     Width="800"
@@ -15,6 +15,7 @@
     Style="{StaticResource CustomMaterialDesignMetroWindow}"
     TextOptions.TextFormattingMode="Display"
     UseLayoutRounding="True">
+    
     <md:DialogHost
         HorizontalContentAlignment="Stretch"
         VerticalContentAlignment="Stretch"
@@ -47,7 +48,7 @@
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             FontSize="28"
-                            Text="Xeus" />
+                            Text="Lxna" />
                     </Grid>
 
                     <Grid Grid.Row="1">
@@ -76,33 +77,7 @@
                                         Padding="8,0,0,0"
                                         VerticalAlignment="Center"
                                         FontSize="16"
-                                        Text="Overview" />
-                                </StackPanel>
-                            </ListViewItem>
-                            <ListViewItem Name="ChatListViewItem">
-                                <StackPanel Margin="8,0,0,0" Orientation="Horizontal">
-                                    <md:PackIcon
-                                        Width="32"
-                                        Height="32"
-                                        Kind="CommentOutline" />
-                                    <TextBlock
-                                        Padding="8,0,0,0"
-                                        VerticalAlignment="Center"
-                                        FontSize="16"
-                                        Text="Chat" />
-                                </StackPanel>
-                            </ListViewItem>
-                            <ListViewItem Name="DocsListViewItem">
-                                <StackPanel Margin="8,0,0,0" Orientation="Horizontal">
-                                    <md:PackIcon
-                                        Width="32"
-                                        Height="32"
-                                        Kind="FileOutline" />
-                                    <TextBlock
-                                        Padding="8,0,0,0"
-                                        VerticalAlignment="Center"
-                                        FontSize="16"
-                                        Text="Docs" />
+                                        Text="{Binding Path=MainWindow_Explorer, Source={StaticResource Languages}}" />
                                 </StackPanel>
                             </ListViewItem>
                             <ListViewItem Name="SearchListViewItem">
@@ -115,33 +90,7 @@
                                         Padding="8,0,0,0"
                                         VerticalAlignment="Center"
                                         FontSize="16"
-                                        Text="Search" />
-                                </StackPanel>
-                            </ListViewItem>
-                            <ListViewItem Name="DownloadListViewItem">
-                                <StackPanel Margin="8,0,0,0" Orientation="Horizontal">
-                                    <md:PackIcon
-                                        Width="32"
-                                        Height="32"
-                                        Kind="ArrowDown"/>
-                                    <TextBlock
-                                        Padding="8,0,0,0"
-                                        VerticalAlignment="Center"
-                                        FontSize="16"
-                                        Text="Download" />
-                                </StackPanel>
-                            </ListViewItem>
-                            <ListViewItem Name="UploadListViewItem">
-                                <StackPanel Margin="8,0,0,0" Orientation="Horizontal">
-                                    <md:PackIcon
-                                        Width="32"
-                                        Height="32"
-                                        Kind="ArrowUp" />
-                                    <TextBlock
-                                        Padding="8,0,0,0"
-                                        VerticalAlignment="Center"
-                                        FontSize="16"
-                                        Text="Upload" />
+                                        Text="{Binding Path=MainWindow_Search, Source={StaticResource Languages}}" />
                                 </StackPanel>
                             </ListViewItem>
                         </ListView>
