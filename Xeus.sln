@@ -20,33 +20,33 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01.Omnix", "01.Omnix", "{E9
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02.Xeus", "02.Xeus", "{99AB5966-31CD-4D1A-82A5-365BA112ABF4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Base", "refs\Omnix\src\Omnix.Base\Omnix.Base.csproj", "{5B65A42F-1747-4AF3-82DD-113D8267CE59}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Base", "refs\omnix\src\Omnix.Base\Omnix.Base.csproj", "{5B65A42F-1747-4AF3-82DD-113D8267CE59}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Collections", "refs\Omnix\src\Omnix.Collections\Omnix.Collections.csproj", "{A6E27264-B3DC-4047-96BB-14A277694557}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Collections", "refs\omnix\src\Omnix.Collections\Omnix.Collections.csproj", "{A6E27264-B3DC-4047-96BB-14A277694557}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Configuration", "refs\Omnix\src\Omnix.Configuration\Omnix.Configuration.csproj", "{D6FD6DE2-5DAB-4180-876C-97479EE4B8A6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Configuration", "refs\omnix\src\Omnix.Configuration\Omnix.Configuration.csproj", "{D6FD6DE2-5DAB-4180-876C-97479EE4B8A6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Correction", "refs\Omnix\src\Omnix.Correction\Omnix.Correction.csproj", "{29D0A194-7DFD-4FCB-9BDD-51B93D54AC40}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Correction", "refs\omnix\src\Omnix.Correction\Omnix.Correction.csproj", "{29D0A194-7DFD-4FCB-9BDD-51B93D54AC40}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Cryptography", "refs\Omnix\src\Omnix.Cryptography\Omnix.Cryptography.csproj", "{308788F4-FB8F-409C-A501-C2F380AFC632}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Cryptography", "refs\omnix\src\Omnix.Cryptography\Omnix.Cryptography.csproj", "{308788F4-FB8F-409C-A501-C2F380AFC632}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Io", "refs\Omnix\src\Omnix.Io\Omnix.Io.csproj", "{9E5013F3-D58F-4810-933A-9198A56C0569}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Io", "refs\omnix\src\Omnix.Io\Omnix.Io.csproj", "{9E5013F3-D58F-4810-933A-9198A56C0569}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Network", "refs\Omnix\src\Omnix.Network\Omnix.Network.csproj", "{3AFBC905-D12A-4DD3-8577-EF86DC6FC045}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Network", "refs\omnix\src\Omnix.Network\Omnix.Network.csproj", "{3AFBC905-D12A-4DD3-8577-EF86DC6FC045}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Network.Connection", "refs\Omnix\src\Omnix.Network.Connection\Omnix.Network.Connection.csproj", "{58002495-CAFA-43AE-A7CC-A41E3B3FC72F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Network.Connection", "refs\omnix\src\Omnix.Network.Connection\Omnix.Network.Connection.csproj", "{58002495-CAFA-43AE-A7CC-A41E3B3FC72F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Network.I2p", "refs\Omnix\src\Omnix.Network.I2p\Omnix.Network.I2p.csproj", "{C739D521-2E5B-4A38-8BAD-34D18BE8AF87}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Network.I2p", "refs\omnix\src\Omnix.Network.I2p\Omnix.Network.I2p.csproj", "{C739D521-2E5B-4A38-8BAD-34D18BE8AF87}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Network.Tor", "refs\Omnix\src\Omnix.Network.Tor\Omnix.Network.Tor.csproj", "{52E429FC-BC55-454D-A894-60C2641477D4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Network.Tor", "refs\omnix\src\Omnix.Network.Tor\Omnix.Network.Tor.csproj", "{52E429FC-BC55-454D-A894-60C2641477D4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Network.Upnp", "refs\Omnix\src\Omnix.Network.Upnp\Omnix.Network.Upnp.csproj", "{F2117095-6C04-4057-87B1-1CDFDFDD56B9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Network.Upnp", "refs\omnix\src\Omnix.Network.Upnp\Omnix.Network.Upnp.csproj", "{F2117095-6C04-4057-87B1-1CDFDFDD56B9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Serialization", "refs\Omnix\src\Omnix.Serialization\Omnix.Serialization.csproj", "{EE0F9A1A-CAB1-458B-82FD-1AB0B7576E47}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Serialization", "refs\omnix\src\Omnix.Serialization\Omnix.Serialization.csproj", "{EE0F9A1A-CAB1-458B-82FD-1AB0B7576E47}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Serialization.RocketPack", "refs\Omnix\src\Omnix.Serialization.RocketPack\Omnix.Serialization.RocketPack.csproj", "{1CDE55E3-FF71-4EF0-84B5-5CC7E8409177}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Serialization.RocketPack", "refs\omnix\src\Omnix.Serialization.RocketPack\Omnix.Serialization.RocketPack.csproj", "{1CDE55E3-FF71-4EF0-84B5-5CC7E8409177}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Serialization.RocketPack.CodeGenerator", "refs\Omnix\src\Omnix.Serialization.RocketPack.CodeGenerator\Omnix.Serialization.RocketPack.CodeGenerator.csproj", "{6C4618A4-B23A-4B63-9C80-833FA93B613A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Serialization.RocketPack.CodeGenerator", "refs\omnix\src\Omnix.Serialization.RocketPack.CodeGenerator\Omnix.Serialization.RocketPack.CodeGenerator.csproj", "{6C4618A4-B23A-4B63-9C80-833FA93B613A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Updater", "Updater", "{77DB4744-1E29-4A11-9C9E-C66AF519C9EB}"
 EndProject
@@ -68,7 +68,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sources", "Sources", "{E245
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{4D0DF5A7-4EBE-44E7-B7D9-F8B699535AE1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Avalonia", "refs\Omnix\src\Omnix.Avalonia\Omnix.Avalonia.csproj", "{D1B4E1A2-6688-464A-B505-B746743070A5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Avalonia", "refs\omnix\src\Omnix.Avalonia\Omnix.Avalonia.csproj", "{D1B4E1A2-6688-464A-B505-B746743070A5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xeus.Gui.Desktop", "src\Xeus.Gui.Desktop\Xeus.Gui.Desktop.csproj", "{662F449F-B141-435E-91DB-11113A6E75BC}"
 EndProject

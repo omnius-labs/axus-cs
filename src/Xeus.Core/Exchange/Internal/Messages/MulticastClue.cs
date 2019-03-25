@@ -11,11 +11,11 @@ using Xeus.Messages;
 
 namespace Xeus.Core.Exchange.Internal
 {
-    sealed partial class MulticastMetadata
+    sealed partial class MulticastClue
     {
         private static readonly Lazy<UTF8Encoding> _utf8Encoding = new Lazy<UTF8Encoding>(() => new UTF8Encoding(false));
 
-        public static async ValueTask<MulticastMetadata> Create(string type, Channel channel, Timestamp creationTime, Clue clue, OmniDigitalSignature digitalSignature, int miningLimit, TimeSpan miningTimeout, CancellationToken token)
+        public static async ValueTask<MulticastClue> Create(string type, Channel channel, Timestamp creationTime, Clue clue, OmniDigitalSignature digitalSignature, int miningLimit, TimeSpan miningTimeout, CancellationToken token)
         {
             OmniHashcash hashcash = null;
             {
@@ -23,7 +23,7 @@ namespace Xeus.Core.Exchange.Internal
 
                 try
                 {
-                    var target = new MulticastMetadata(type, channel, creationTime, clue, null, null);
+                    var target = new MulticastClue(type, channel, creationTime, clue, null, null);
                     target.Export(hub.Writer, BufferPool.Shared);
                     hub.Writer.Complete();
 
@@ -41,14 +41,14 @@ namespace Xeus.Core.Exchange.Internal
 
                 try
                 {
-                    var target = new MulticastMetadata(type, channel, creationTime, clue, hashcash, null);
+                    var target = new MulticastClue(type, channel, creationTime, clue, hashcash, null);
                     target.Export(hub.Writer, BufferPool.Shared);
                     hub.Writer.Complete();
 
                     var certificate = OmniCertificate.Create(digitalSignature, hub.Reader.GetSequence());
                     hub.Reader.Complete();
 
-                    return new MulticastMetadata(type, channel, creationTime, clue, hashcash, certificate);
+                    return new MulticastClue(type, channel, creationTime, clue, hashcash, certificate);
                 }
                 finally
                 {
@@ -63,7 +63,7 @@ namespace Xeus.Core.Exchange.Internal
 
             try
             {
-                var target = new MulticastMetadata(this.Type, this.Channel, this.CreationTime, this.Clue, this.Hashcash, null);
+                var target = new MulticastClue(this.Type, this.Channel, this.CreationTime, this.Clue, this.Hashcash, null);
                 target.Export(hub.Writer, BufferPool.Shared);
                 hub.Writer.Complete();
 
@@ -96,7 +96,7 @@ namespace Xeus.Core.Exchange.Internal
 
                         try
                         {
-                            var target = new MulticastMetadata(this.Type, this.Channel, this.CreationTime, this.Clue, null, null);
+                            var target = new MulticastClue(this.Type, this.Channel, this.CreationTime, this.Clue, null, null);
                             target.Export(hub.Writer, BufferPool.Shared);
                             hub.Writer.Complete();
 
