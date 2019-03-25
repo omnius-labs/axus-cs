@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Amoeba.Messages;
 using Omnix.Base;
 using Omnix.Configuration;
 using Omnix.Cryptography;
@@ -12,9 +11,9 @@ using Omnix.Network;
 
 namespace Xeus.Core
 {
-    public delegate IEnumerable<OmniSignature> GetSignaturesEventHandler(object sender);
-    public delegate Cap ConnectCapEventHandler(object sender, OmniAddress address);
-    public delegate Cap AcceptCapEventHandler(object sender, out OmniAddress address);
+    public delegate IEnumerable<OmniSignature> GetSignaturesEventHandler();
+    public delegate Cap ConnectCapEventHandler(OmniAddress address);
+    public delegate Cap AcceptCapEventHandler(out OmniAddress address);
 
     public sealed class ServiceManager : StateManagerBase, IService, ISettings, ISynchronized
     {

@@ -57,23 +57,23 @@ namespace Xeus.Core
         {
             if (signature == null) throw new ArgumentNullException(nameof(signature));
 
-            var broadcastMetadata = _coreManager.GetBroadcastMetadata(signature, "Profile");
-            if (broadcastMetadata == null) return Task.FromResult<BroadcastProfileMessage>(null);
-            if (creationTimeLowerLimit != null && broadcastMetadata.CreationTime <= creationTimeLowerLimit) return Task.FromResult<BroadcastProfileMessage>(null);
+            var BroadcastClue = _coreManager.GetBroadcastClue(signature, "Profile");
+            if (BroadcastClue == null) return Task.FromResult<BroadcastProfileMessage>(null);
+            if (creationTimeLowerLimit != null && BroadcastClue.CreationTime <= creationTimeLowerLimit) return Task.FromResult<BroadcastProfileMessage>(null);
 
             return Task.Run(() =>
             {
                 try
                 {
-                    var stream = _coreManager.VolatileGetStream(broadcastMetadata.Metadata, 1024 * 1024 * 32);
+                    var stream = _coreManager.VolatileGetStream(BroadcastClue.Metadata, 1024 * 1024 * 32);
                     if (stream == null) return null;
 
                     var content = ContentConverter.FromStream<ProfileContent>(stream, 0);
                     if (content == null) return null;
 
                     var result = new BroadcastProfileMessage(
-                        broadcastMetadata.Certificate.GetSignature(),
-                        broadcastMetadata.CreationTime,
+                        BroadcastClue.Certificate.GetSignature(),
+                        BroadcastClue.CreationTime,
                         content);
 
                     return result;
@@ -91,23 +91,23 @@ namespace Xeus.Core
         {
             if (signature == null) throw new ArgumentNullException(nameof(signature));
 
-            var broadcastMetadata = _coreManager.GetBroadcastMetadata(signature, "Store");
-            if (broadcastMetadata == null) return Task.FromResult<BroadcastStoreMessage>(null);
-            if (creationTimeLowerLimit != null && broadcastMetadata.CreationTime <= creationTimeLowerLimit) return Task.FromResult<BroadcastStoreMessage>(null);
+            var BroadcastClue = _coreManager.GetBroadcastClue(signature, "Store");
+            if (BroadcastClue == null) return Task.FromResult<BroadcastStoreMessage>(null);
+            if (creationTimeLowerLimit != null && BroadcastClue.CreationTime <= creationTimeLowerLimit) return Task.FromResult<BroadcastStoreMessage>(null);
 
             return Task.Run(() =>
             {
                 try
                 {
-                    var stream = _coreManager.VolatileGetStream(broadcastMetadata.Metadata, 1024 * 1024 * 32);
+                    var stream = _coreManager.VolatileGetStream(BroadcastClue.Metadata, 1024 * 1024 * 32);
                     if (stream == null) return null;
 
                     var content = ContentConverter.FromStream<StoreContent>(stream, 0);
                     if (content == null) return null;
 
                     var result = new BroadcastStoreMessage(
-                        broadcastMetadata.Certificate.GetSignature(),
-                        broadcastMetadata.CreationTime,
+                        BroadcastClue.Certificate.GetSignature(),
+                        BroadcastClue.CreationTime,
                         content);
 
                     return result;
@@ -139,13 +139,13 @@ namespace Xeus.Core
                         }
                     }
 
-                    var trustedMetadatas = new List<UnicastMetadata>();
+                    var trustedMetadatas = new List<UnicastClue>();
                     {
-                        foreach (var unicastMetadata in _coreManager.GetUnicastMetadatas(signature, "MailMessage"))
+                        foreach (var UnicastClue in _coreManager.GetUnicastClues(signature, "MailMessage"))
                         {
-                            if (!_searchSignatures.Contains(unicastMetadata.Certificate.GetSignature())) continue;
+                            if (!_searchSignatures.Contains(UnicastClue.Certificate.GetSignature())) continue;
 
-                            trustedMetadatas.Add(unicastMetadata);
+                            trustedMetadatas.Add(UnicastClue);
                         }
 
                         trustedMetadatas.Sort((x, y) => y.CreationTime.CompareTo(x.CreationTime));
@@ -153,17 +153,17 @@ namespace Xeus.Core
 
                     var results = new List<UnicastCommentMessage>();
 
-                    foreach (var unicastMetadata in trustedMetadatas.Take(messageCountUpperLimit))
+                    foreach (var UnicastClue in trustedMetadatas.Take(messageCountUpperLimit))
                     {
-                        if (filter.TryGetValue(unicastMetadata.Certificate.GetSignature(), out var hashSet) && hashSet.Contains(unicastMetadata.CreationTime)) continue;
+                        if (filter.TryGetValue(UnicastClue.Certificate.GetSignature(), out var hashSet) && hashSet.Contains(UnicastClue.CreationTime)) continue;
 
-                        var stream = _coreManager.VolatileGetStream(unicastMetadata.Metadata, 1024 * 1024 * 1);
+                        var stream = _coreManager.VolatileGetStream(UnicastClue.Metadata, 1024 * 1024 * 1);
                         if (stream == null) continue;
 
                         var result = new UnicastCommentMessage(
-                            unicastMetadata.Signature,
-                            unicastMetadata.Certificate.GetSignature(),
-                            unicastMetadata.CreationTime,
+                            UnicastClue.Signature,
+                            UnicastClue.Certificate.GetSignature(),
+                            UnicastClue.CreationTime,
                             ContentConverter.FromCryptoStream<CommentContent>(stream, agreementPrivateKey, 0));
 
                         if (result.Value == null) continue;
@@ -201,18 +201,18 @@ namespace Xeus.Core
                         }
                     }
 
-                    var trustedMetadatas = new List<MulticastMetadata>();
-                    var untrustedMetadatas = new List<MulticastMetadata>();
+                    var trustedMetadatas = new List<MulticastClue>();
+                    var untrustedMetadatas = new List<MulticastClue>();
                     {
-                        foreach (var multicastMetadata in _coreManager.GetMulticastMetadatas(tag, "ChatMessage"))
+                        foreach (var MulticastClue in _coreManager.GetMulticastClues(tag, "ChatMessage"))
                         {
-                            if (_searchSignatures.Contains(multicastMetadata.Certificate.GetSignature()))
+                            if (_searchSignatures.Contains(MulticastClue.Certificate.GetSignature()))
                             {
-                                trustedMetadatas.Add(multicastMetadata);
+                                trustedMetadatas.Add(MulticastClue);
                             }
                             else
                             {
-                                untrustedMetadatas.Add(multicastMetadata);
+                                untrustedMetadatas.Add(MulticastClue);
                             }
                         }
 
@@ -229,21 +229,21 @@ namespace Xeus.Core
 
                     var results = new List<MulticastCommentMessage>();
 
-                    foreach (var multicastMetadata in CollectionUtils.Unite(trustedMetadatas.Take(trustMessageCountUpperLimit), untrustedMetadatas.Take(untrustMessageCountUpperLimit)))
+                    foreach (var MulticastClue in CollectionUtils.Unite(trustedMetadatas.Take(trustMessageCountUpperLimit), untrustedMetadatas.Take(untrustMessageCountUpperLimit)))
                     {
-                        if (filter.TryGetValue(multicastMetadata.Certificate.GetSignature(), out var hashSet) && hashSet.Contains(multicastMetadata.CreationTime)) continue;
+                        if (filter.TryGetValue(MulticastClue.Certificate.GetSignature(), out var hashSet) && hashSet.Contains(MulticastClue.CreationTime)) continue;
 
-                        var stream = _coreManager.VolatileGetStream(multicastMetadata.Metadata, 1024 * 1024 * 1);
+                        var stream = _coreManager.VolatileGetStream(MulticastClue.Metadata, 1024 * 1024 * 1);
                         if (stream == null) continue;
 
                         var content = ContentConverter.FromStream<CommentContent>(stream, 0);
                         if (content == null) continue;
 
                         var result = new MulticastCommentMessage(
-                            multicastMetadata.Tag,
-                            multicastMetadata.Certificate.GetSignature(),
-                            multicastMetadata.CreationTime,
-                            multicastMetadata.Cost,
+                            MulticastClue.Tag,
+                            MulticastClue.Certificate.GetSignature(),
+                            MulticastClue.CreationTime,
+                            MulticastClue.Cost,
                             content);
 
                         results.Add(result);
@@ -268,7 +268,7 @@ namespace Xeus.Core
             return _coreManager.VolatileSetStream(ContentConverter.ToStream(profile, 0), TimeSpan.FromDays(360), token)
                 .ContinueWith(task =>
                 {
-                    _coreManager.UploadMetadata(new BroadcastMetadata("Profile", DateTime.UtcNow, task.Result, digitalSignature));
+                    _coreManager.UploadMetadata(new BroadcastClue("Profile", DateTime.UtcNow, task.Result, digitalSignature));
                 });
         }
 
@@ -280,7 +280,7 @@ namespace Xeus.Core
             return _coreManager.VolatileSetStream(ContentConverter.ToStream(store, 0), TimeSpan.FromDays(360), token)
                 .ContinueWith(task =>
                 {
-                    _coreManager.UploadMetadata(new BroadcastMetadata("Store", DateTime.UtcNow, task.Result, digitalSignature));
+                    _coreManager.UploadMetadata(new BroadcastClue("Store", DateTime.UtcNow, task.Result, digitalSignature));
                 });
         }
 
@@ -293,7 +293,7 @@ namespace Xeus.Core
             return _coreManager.VolatileSetStream(ContentConverter.ToCryptoStream(comment, 1024 * 256, agreementPublicKey, 0), TimeSpan.FromDays(360), token)
                 .ContinueWith(task =>
                 {
-                    _coreManager.UploadMetadata(new UnicastMetadata("MailMessage", targetSignature, DateTime.UtcNow, task.Result, digitalSignature));
+                    _coreManager.UploadMetadata(new UnicastClue("MailMessage", targetSignature, DateTime.UtcNow, task.Result, digitalSignature));
                 });
         }
 
@@ -306,19 +306,19 @@ namespace Xeus.Core
             return _coreManager.VolatileSetStream(ContentConverter.ToStream(comment, 0), TimeSpan.FromDays(360), token)
                 .ContinueWith(task =>
                 {
-                    MulticastMetadata multicastMetadata;
+                    MulticastClue MulticastClue;
 
                     try
                     {
                         var miner = new Miner(CashAlgorithm.Version1, -1, miningTime);
-                        multicastMetadata = new MulticastMetadata("ChatMessage", tag, DateTime.UtcNow, task.Result, digitalSignature, miner, token);
+                        MulticastClue = new MulticastClue("ChatMessage", tag, DateTime.UtcNow, task.Result, digitalSignature, miner, token);
                     }
                     catch (MinerException)
                     {
                         return;
                     }
 
-                    _coreManager.UploadMetadata(multicastMetadata);
+                    _coreManager.UploadMetadata(MulticastClue);
                 });
         }
 

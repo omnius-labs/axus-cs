@@ -1,16 +1,10 @@
-﻿using Omnix.Base;
-using Omnix.Base.Helpers;
-using Omnix.Cryptography;
+﻿using Omnix.Cryptography;
 using Omnix.Network;
-using Omnix.Serialization;
-using Omnix.Serialization.RocketPack;
-using System;
-using System.Buffers;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using Xeus.Messages;
 using Xeus.Messages.Options;
 using Xeus.Messages.Reports;
+
+#nullable enable
 
 namespace Xeus.Core.Internal
 {
@@ -19,87 +13,93 @@ namespace Xeus.Core.Internal
         ReedSolomon8 = 0,
     }
 
-    internal sealed partial class MerkleTreeSection : RocketPackMessageBase<MerkleTreeSection>
+    internal sealed partial class MerkleTreeSection : Omnix.Serialization.RocketPack.RocketPackMessageBase<MerkleTreeSection>
     {
         static MerkleTreeSection()
         {
             MerkleTreeSection.Formatter = new CustomFormatter();
+            MerkleTreeSection.Empty = new MerkleTreeSection((CorrectionAlgorithmType)0, 0, System.Array.Empty<OmniHash>());
         }
+
+        private readonly int __hashCode;
 
         public static readonly int MaxHashesCount = 1048576;
 
-        public MerkleTreeSection(CorrectionAlgorithmType correctionAlgorithmType, ulong length, IList<OmniHash> hashes)
+        public MerkleTreeSection(CorrectionAlgorithmType correctionAlgorithmType, ulong length, OmniHash[] hashes)
         {
-            if (hashes is null) throw new ArgumentNullException("hashes");
-            if (hashes.Count > 1048576) throw new ArgumentOutOfRangeException("hashes");
+            if (hashes is null) throw new System.ArgumentNullException("hashes");
+            if (hashes.Length > 1048576) throw new System.ArgumentOutOfRangeException("hashes");
 
             this.CorrectionAlgorithmType = correctionAlgorithmType;
             this.Length = length;
-            this.Hashes = new ReadOnlyCollection<OmniHash>(hashes);
+            this.Hashes = new Omnix.Collections.ReadOnlyListSlim<OmniHash>(hashes);
 
             {
-                var hashCode = new HashCode();
-                if (this.CorrectionAlgorithmType != default) hashCode.Add(this.CorrectionAlgorithmType.GetHashCode());
-                if (this.Length != default) hashCode.Add(this.Length.GetHashCode());
+                var __h = new System.HashCode();
+                if (this.CorrectionAlgorithmType != default) __h.Add(this.CorrectionAlgorithmType.GetHashCode());
+                if (this.Length != default) __h.Add(this.Length.GetHashCode());
                 foreach (var n in this.Hashes)
                 {
-                    if (n != default) hashCode.Add(n.GetHashCode());
+                    if (n != default) __h.Add(n.GetHashCode());
                 }
-                _hashCode = hashCode.ToHashCode();
+                __hashCode = __h.ToHashCode();
             }
         }
 
         public CorrectionAlgorithmType CorrectionAlgorithmType { get; }
         public ulong Length { get; }
-        public IReadOnlyList<OmniHash> Hashes { get; }
+        public Omnix.Collections.ReadOnlyListSlim<OmniHash> Hashes { get; }
 
-        public override bool Equals(MerkleTreeSection target)
+        public override bool Equals(MerkleTreeSection? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
             if (this.CorrectionAlgorithmType != target.CorrectionAlgorithmType) return false;
             if (this.Length != target.Length) return false;
-            if ((this.Hashes is null) != (target.Hashes is null)) return false;
-            if (!(this.Hashes is null) && !(target.Hashes is null) && !CollectionHelper.Equals(this.Hashes, target.Hashes)) return false;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.Hashes, target.Hashes)) return false;
 
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<MerkleTreeSection>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<MerkleTreeSection>
         {
-            public void Serialize(RocketPackWriter w, MerkleTreeSection value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, MerkleTreeSection value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    if (value.CorrectionAlgorithmType != default) propertyCount++;
-                    if (value.Length != default) propertyCount++;
-                    if (value.Hashes.Count != 0) propertyCount++;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    if (value.CorrectionAlgorithmType != (CorrectionAlgorithmType)0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Length != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Hashes.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
                 }
 
-                // CorrectionAlgorithmType
-                if (value.CorrectionAlgorithmType != default)
+                if (value.CorrectionAlgorithmType != (CorrectionAlgorithmType)0)
                 {
-                    w.Write((ulong)0);
+                    w.Write((uint)0);
                     w.Write((ulong)value.CorrectionAlgorithmType);
                 }
-                // Length
-                if (value.Length != default)
+                if (value.Length != 0)
                 {
-                    w.Write((ulong)1);
-                    w.Write((ulong)value.Length);
+                    w.Write((uint)1);
+                    w.Write(value.Length);
                 }
-                // Hashes
                 if (value.Hashes.Count != 0)
                 {
-                    w.Write((ulong)2);
-                    w.Write((ulong)value.Hashes.Count);
+                    w.Write((uint)2);
+                    w.Write((uint)value.Hashes.Count);
                     foreach (var n in value.Hashes)
                     {
                         OmniHash.Formatter.Serialize(w, n, rank + 1);
@@ -107,20 +107,20 @@ namespace Xeus.Core.Internal
                 }
             }
 
-            public MerkleTreeSection Deserialize(RocketPackReader r, int rank)
+            public MerkleTreeSection Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
-                CorrectionAlgorithmType p_correctionAlgorithmType = default;
-                ulong p_length = default;
-                IList<OmniHash> p_hashes = default;
+                CorrectionAlgorithmType p_correctionAlgorithmType = (CorrectionAlgorithmType)0;
+                ulong p_length = 0;
+                OmniHash[] p_hashes = System.Array.Empty<OmniHash>();
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                         case 0: // CorrectionAlgorithmType
@@ -130,14 +130,14 @@ namespace Xeus.Core.Internal
                             }
                         case 1: // Length
                             {
-                                p_length = (ulong)r.GetUInt64();
+                                p_length = r.GetUInt64();
                                 break;
                             }
                         case 2: // Hashes
                             {
-                                var length = (int)r.GetUInt64();
+                                var length = r.GetUInt32();
                                 p_hashes = new OmniHash[length];
-                                for (int i = 0; i < p_hashes.Count; i++)
+                                for (int i = 0; i < p_hashes.Length; i++)
                                 {
                                     p_hashes[i] = OmniHash.Formatter.Deserialize(r, rank + 1);
                                 }
@@ -151,69 +151,71 @@ namespace Xeus.Core.Internal
         }
     }
 
-    internal sealed partial class MerkleTreeNode : RocketPackMessageBase<MerkleTreeNode>
+    internal sealed partial class MerkleTreeNode : Omnix.Serialization.RocketPack.RocketPackMessageBase<MerkleTreeNode>
     {
         static MerkleTreeNode()
         {
             MerkleTreeNode.Formatter = new CustomFormatter();
+            MerkleTreeNode.Empty = new MerkleTreeNode(System.Array.Empty<MerkleTreeSection>());
         }
+
+        private readonly int __hashCode;
 
         public static readonly int MaxSectionsCount = 1048576;
 
-        public MerkleTreeNode(IList<MerkleTreeSection> sections)
+        public MerkleTreeNode(MerkleTreeSection[] sections)
         {
-            if (sections is null) throw new ArgumentNullException("sections");
-            if (sections.Count > 1048576) throw new ArgumentOutOfRangeException("sections");
+            if (sections is null) throw new System.ArgumentNullException("sections");
+            if (sections.Length > 1048576) throw new System.ArgumentOutOfRangeException("sections");
             foreach (var n in sections)
             {
-                if (n is null) throw new ArgumentNullException("n");
+                if (n is null) throw new System.ArgumentNullException("n");
             }
 
-            this.Sections = new ReadOnlyCollection<MerkleTreeSection>(sections);
+            this.Sections = new Omnix.Collections.ReadOnlyListSlim<MerkleTreeSection>(sections);
 
             {
-                var hashCode = new HashCode();
+                var __h = new System.HashCode();
                 foreach (var n in this.Sections)
                 {
-                    if (n != default) hashCode.Add(n.GetHashCode());
+                    if (n != default) __h.Add(n.GetHashCode());
                 }
-                _hashCode = hashCode.ToHashCode();
+                __hashCode = __h.ToHashCode();
             }
         }
 
-        public IReadOnlyList<MerkleTreeSection> Sections { get; }
+        public Omnix.Collections.ReadOnlyListSlim<MerkleTreeSection> Sections { get; }
 
-        public override bool Equals(MerkleTreeNode target)
+        public override bool Equals(MerkleTreeNode? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
-            if ((this.Sections is null) != (target.Sections is null)) return false;
-            if (!(this.Sections is null) && !(target.Sections is null) && !CollectionHelper.Equals(this.Sections, target.Sections)) return false;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.Sections, target.Sections)) return false;
 
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<MerkleTreeNode>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<MerkleTreeNode>
         {
-            public void Serialize(RocketPackWriter w, MerkleTreeNode value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, MerkleTreeNode value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    if (value.Sections.Count != 0) propertyCount++;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    if (value.Sections.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
                 }
 
-                // Sections
                 if (value.Sections.Count != 0)
                 {
-                    w.Write((ulong)0);
-                    w.Write((ulong)value.Sections.Count);
+                    w.Write((uint)0);
+                    w.Write((uint)value.Sections.Count);
                     foreach (var n in value.Sections)
                     {
                         MerkleTreeSection.Formatter.Serialize(w, n, rank + 1);
@@ -221,25 +223,25 @@ namespace Xeus.Core.Internal
                 }
             }
 
-            public MerkleTreeNode Deserialize(RocketPackReader r, int rank)
+            public MerkleTreeNode Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
-                IList<MerkleTreeSection> p_sections = default;
+                MerkleTreeSection[] p_sections = System.Array.Empty<MerkleTreeSection>();
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                         case 0: // Sections
                             {
-                                var length = (int)r.GetUInt64();
+                                var length = r.GetUInt32();
                                 p_sections = new MerkleTreeSection[length];
-                                for (int i = 0; i < p_sections.Count; i++)
+                                for (int i = 0; i < p_sections.Length; i++)
                                 {
                                     p_sections[i] = MerkleTreeSection.Formatter.Deserialize(r, rank + 1);
                                 }

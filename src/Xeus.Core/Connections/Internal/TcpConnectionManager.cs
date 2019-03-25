@@ -42,7 +42,7 @@ namespace Xeus.Core
 
             public TcpConnectionManager(string configPath, CatharsisManager catharsisManager, BufferPool bufferPool)
             {
-                _bufferPool = bufferPool;C:\Local\Projects\OmniusLabs\Xeus\src\Xeus.Core\Exchange\Classes\UnicastMetadata.cs
+                _bufferPool = bufferPool;C:\Local\Projects\OmniusLabs\Xeus\src\Xeus.Core\Exchange\Classes\UnicastClue.cs
                 _catharsisManager = catharsisManager;
 
                 _settings = new Settings(configPath);

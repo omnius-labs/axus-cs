@@ -1,16 +1,10 @@
-﻿using Omnix.Base;
-using Omnix.Base.Helpers;
-using Omnix.Cryptography;
+﻿using Omnix.Cryptography;
 using Omnix.Network;
-using Omnix.Serialization;
-using Omnix.Serialization.RocketPack;
-using System;
-using System.Buffers;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using Xeus.Messages;
 using Xeus.Messages.Options;
 using Xeus.Messages.Reports;
+
+#nullable enable
 
 namespace Xeus.Core.Exchange.Internal
 {
@@ -19,21 +13,24 @@ namespace Xeus.Core.Exchange.Internal
         Version1 = 1,
     }
 
-    internal sealed partial class BroadcastMetadata : RocketPackMessageBase<BroadcastMetadata>
+    internal sealed partial class BroadcastClue : Omnix.Serialization.RocketPack.RocketPackMessageBase<BroadcastClue>
     {
-        static BroadcastMetadata()
+        static BroadcastClue()
         {
-            BroadcastMetadata.Formatter = new CustomFormatter();
+            BroadcastClue.Formatter = new CustomFormatter();
+            BroadcastClue.Empty = new BroadcastClue(string.Empty, Omnix.Serialization.RocketPack.Timestamp.Zero, Clue.Empty, OmniCertificate.Empty);
         }
+
+        private readonly int __hashCode;
 
         public static readonly int MaxTypeLength = 256;
 
-        public BroadcastMetadata(string type, Timestamp creationTime, Clue clue, OmniCertificate certificate)
+        public BroadcastClue(string type, Omnix.Serialization.RocketPack.Timestamp creationTime, Clue clue, OmniCertificate certificate)
         {
-            if (type is null) throw new ArgumentNullException("type");
-            if (type.Length > 256) throw new ArgumentOutOfRangeException("type");
-            if (clue is null) throw new ArgumentNullException("clue");
-            if (certificate is null) throw new ArgumentNullException("certificate");
+            if (type is null) throw new System.ArgumentNullException("type");
+            if (type.Length > 256) throw new System.ArgumentOutOfRangeException("type");
+            if (clue is null) throw new System.ArgumentNullException("clue");
+            if (certificate is null) throw new System.ArgumentNullException("certificate");
 
             this.Type = type;
             this.CreationTime = creationTime;
@@ -41,24 +38,24 @@ namespace Xeus.Core.Exchange.Internal
             this.Certificate = certificate;
 
             {
-                var hashCode = new HashCode();
-                if (this.Type != default) hashCode.Add(this.Type.GetHashCode());
-                if (this.CreationTime != default) hashCode.Add(this.CreationTime.GetHashCode());
-                if (this.Clue != default) hashCode.Add(this.Clue.GetHashCode());
-                if (this.Certificate != default) hashCode.Add(this.Certificate.GetHashCode());
-                _hashCode = hashCode.ToHashCode();
+                var __h = new System.HashCode();
+                if (this.Type != default) __h.Add(this.Type.GetHashCode());
+                if (this.CreationTime != default) __h.Add(this.CreationTime.GetHashCode());
+                if (this.Clue != default) __h.Add(this.Clue.GetHashCode());
+                if (this.Certificate != default) __h.Add(this.Certificate.GetHashCode());
+                __hashCode = __h.ToHashCode();
             }
         }
 
         public string Type { get; }
-        public Timestamp CreationTime { get; }
+        public Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
         public Clue Clue { get; }
         public OmniCertificate Certificate { get; }
 
-        public override bool Equals(BroadcastMetadata target)
+        public override bool Equals(BroadcastClue? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
             if (this.Type != target.Type) return false;
             if (this.CreationTime != target.CreationTime) return false;
             if (this.Clue != target.Clue) return false;
@@ -67,66 +64,72 @@ namespace Xeus.Core.Exchange.Internal
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<BroadcastMetadata>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<BroadcastClue>
         {
-            public void Serialize(RocketPackWriter w, BroadcastMetadata value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, BroadcastClue value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    if (value.Type != default) propertyCount++;
-                    if (value.CreationTime != default) propertyCount++;
-                    if (value.Clue != default) propertyCount++;
-                    if (value.Certificate != default) propertyCount++;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    if (value.Type != string.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.CreationTime != Omnix.Serialization.RocketPack.Timestamp.Zero)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Clue != Clue.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Certificate != OmniCertificate.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
                 }
 
-                // Type
-                if (value.Type != default)
+                if (value.Type != string.Empty)
                 {
-                    w.Write((ulong)0);
+                    w.Write((uint)0);
                     w.Write(value.Type);
                 }
-                // CreationTime
-                if (value.CreationTime != default)
+                if (value.CreationTime != Omnix.Serialization.RocketPack.Timestamp.Zero)
                 {
-                    w.Write((ulong)1);
+                    w.Write((uint)1);
                     w.Write(value.CreationTime);
                 }
-                // Clue
-                if (value.Clue != default)
+                if (value.Clue != Clue.Empty)
                 {
-                    w.Write((ulong)2);
+                    w.Write((uint)2);
                     Clue.Formatter.Serialize(w, value.Clue, rank + 1);
                 }
-                // Certificate
-                if (value.Certificate != default)
+                if (value.Certificate != OmniCertificate.Empty)
                 {
-                    w.Write((ulong)3);
+                    w.Write((uint)3);
                     OmniCertificate.Formatter.Serialize(w, value.Certificate, rank + 1);
                 }
             }
 
-            public BroadcastMetadata Deserialize(RocketPackReader r, int rank)
+            public BroadcastClue Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
-                string p_type = default;
-                Timestamp p_creationTime = default;
-                Clue p_clue = default;
-                OmniCertificate p_certificate = default;
+                string p_type = string.Empty;
+                Omnix.Serialization.RocketPack.Timestamp p_creationTime = Omnix.Serialization.RocketPack.Timestamp.Zero;
+                Clue p_clue = Clue.Empty;
+                OmniCertificate p_certificate = OmniCertificate.Empty;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                         case 0: // Type
@@ -152,27 +155,30 @@ namespace Xeus.Core.Exchange.Internal
                     }
                 }
 
-                return new BroadcastMetadata(p_type, p_creationTime, p_clue, p_certificate);
+                return new BroadcastClue(p_type, p_creationTime, p_clue, p_certificate);
             }
         }
     }
 
-    internal sealed partial class UnicastMetadata : RocketPackMessageBase<UnicastMetadata>
+    internal sealed partial class UnicastClue : Omnix.Serialization.RocketPack.RocketPackMessageBase<UnicastClue>
     {
-        static UnicastMetadata()
+        static UnicastClue()
         {
-            UnicastMetadata.Formatter = new CustomFormatter();
+            UnicastClue.Formatter = new CustomFormatter();
+            UnicastClue.Empty = new UnicastClue(string.Empty, OmniSignature.Empty, Omnix.Serialization.RocketPack.Timestamp.Zero, Clue.Empty, OmniCertificate.Empty);
         }
+
+        private readonly int __hashCode;
 
         public static readonly int MaxTypeLength = 256;
 
-        public UnicastMetadata(string type, OmniSignature signature, Timestamp creationTime, Clue clue, OmniCertificate certificate)
+        public UnicastClue(string type, OmniSignature signature, Omnix.Serialization.RocketPack.Timestamp creationTime, Clue clue, OmniCertificate certificate)
         {
-            if (type is null) throw new ArgumentNullException("type");
-            if (type.Length > 256) throw new ArgumentOutOfRangeException("type");
-            if (signature is null) throw new ArgumentNullException("signature");
-            if (clue is null) throw new ArgumentNullException("clue");
-            if (certificate is null) throw new ArgumentNullException("certificate");
+            if (type is null) throw new System.ArgumentNullException("type");
+            if (type.Length > 256) throw new System.ArgumentOutOfRangeException("type");
+            if (signature is null) throw new System.ArgumentNullException("signature");
+            if (clue is null) throw new System.ArgumentNullException("clue");
+            if (certificate is null) throw new System.ArgumentNullException("certificate");
 
             this.Type = type;
             this.Signature = signature;
@@ -181,26 +187,26 @@ namespace Xeus.Core.Exchange.Internal
             this.Certificate = certificate;
 
             {
-                var hashCode = new HashCode();
-                if (this.Type != default) hashCode.Add(this.Type.GetHashCode());
-                if (this.Signature != default) hashCode.Add(this.Signature.GetHashCode());
-                if (this.CreationTime != default) hashCode.Add(this.CreationTime.GetHashCode());
-                if (this.Clue != default) hashCode.Add(this.Clue.GetHashCode());
-                if (this.Certificate != default) hashCode.Add(this.Certificate.GetHashCode());
-                _hashCode = hashCode.ToHashCode();
+                var __h = new System.HashCode();
+                if (this.Type != default) __h.Add(this.Type.GetHashCode());
+                if (this.Signature != default) __h.Add(this.Signature.GetHashCode());
+                if (this.CreationTime != default) __h.Add(this.CreationTime.GetHashCode());
+                if (this.Clue != default) __h.Add(this.Clue.GetHashCode());
+                if (this.Certificate != default) __h.Add(this.Certificate.GetHashCode());
+                __hashCode = __h.ToHashCode();
             }
         }
 
         public string Type { get; }
         public OmniSignature Signature { get; }
-        public Timestamp CreationTime { get; }
+        public Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
         public Clue Clue { get; }
         public OmniCertificate Certificate { get; }
 
-        public override bool Equals(UnicastMetadata target)
+        public override bool Equals(UnicastClue? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
             if (this.Type != target.Type) return false;
             if (this.Signature != target.Signature) return false;
             if (this.CreationTime != target.CreationTime) return false;
@@ -210,74 +216,82 @@ namespace Xeus.Core.Exchange.Internal
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<UnicastMetadata>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<UnicastClue>
         {
-            public void Serialize(RocketPackWriter w, UnicastMetadata value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, UnicastClue value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    if (value.Type != default) propertyCount++;
-                    if (value.Signature != default) propertyCount++;
-                    if (value.CreationTime != default) propertyCount++;
-                    if (value.Clue != default) propertyCount++;
-                    if (value.Certificate != default) propertyCount++;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    if (value.Type != string.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Signature != OmniSignature.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.CreationTime != Omnix.Serialization.RocketPack.Timestamp.Zero)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Clue != Clue.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Certificate != OmniCertificate.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
                 }
 
-                // Type
-                if (value.Type != default)
+                if (value.Type != string.Empty)
                 {
-                    w.Write((ulong)0);
+                    w.Write((uint)0);
                     w.Write(value.Type);
                 }
-                // Signature
-                if (value.Signature != default)
+                if (value.Signature != OmniSignature.Empty)
                 {
-                    w.Write((ulong)1);
+                    w.Write((uint)1);
                     OmniSignature.Formatter.Serialize(w, value.Signature, rank + 1);
                 }
-                // CreationTime
-                if (value.CreationTime != default)
+                if (value.CreationTime != Omnix.Serialization.RocketPack.Timestamp.Zero)
                 {
-                    w.Write((ulong)2);
+                    w.Write((uint)2);
                     w.Write(value.CreationTime);
                 }
-                // Clue
-                if (value.Clue != default)
+                if (value.Clue != Clue.Empty)
                 {
-                    w.Write((ulong)3);
+                    w.Write((uint)3);
                     Clue.Formatter.Serialize(w, value.Clue, rank + 1);
                 }
-                // Certificate
-                if (value.Certificate != default)
+                if (value.Certificate != OmniCertificate.Empty)
                 {
-                    w.Write((ulong)4);
+                    w.Write((uint)4);
                     OmniCertificate.Formatter.Serialize(w, value.Certificate, rank + 1);
                 }
             }
 
-            public UnicastMetadata Deserialize(RocketPackReader r, int rank)
+            public UnicastClue Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
-                string p_type = default;
-                OmniSignature p_signature = default;
-                Timestamp p_creationTime = default;
-                Clue p_clue = default;
-                OmniCertificate p_certificate = default;
+                string p_type = string.Empty;
+                OmniSignature p_signature = OmniSignature.Empty;
+                Omnix.Serialization.RocketPack.Timestamp p_creationTime = Omnix.Serialization.RocketPack.Timestamp.Zero;
+                Clue p_clue = Clue.Empty;
+                OmniCertificate p_certificate = OmniCertificate.Empty;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                         case 0: // Type
@@ -308,28 +322,31 @@ namespace Xeus.Core.Exchange.Internal
                     }
                 }
 
-                return new UnicastMetadata(p_type, p_signature, p_creationTime, p_clue, p_certificate);
+                return new UnicastClue(p_type, p_signature, p_creationTime, p_clue, p_certificate);
             }
         }
     }
 
-    internal sealed partial class MulticastMetadata : RocketPackMessageBase<MulticastMetadata>
+    internal sealed partial class MulticastClue : Omnix.Serialization.RocketPack.RocketPackMessageBase<MulticastClue>
     {
-        static MulticastMetadata()
+        static MulticastClue()
         {
-            MulticastMetadata.Formatter = new CustomFormatter();
+            MulticastClue.Formatter = new CustomFormatter();
+            MulticastClue.Empty = new MulticastClue(string.Empty, Channel.Empty, Omnix.Serialization.RocketPack.Timestamp.Zero, Clue.Empty, OmniHashcash.Empty, OmniCertificate.Empty);
         }
+
+        private readonly int __hashCode;
 
         public static readonly int MaxTypeLength = 256;
 
-        public MulticastMetadata(string type, Channel channel, Timestamp creationTime, Clue clue, OmniHashcash hashcash, OmniCertificate certificate)
+        public MulticastClue(string type, Channel channel, Omnix.Serialization.RocketPack.Timestamp creationTime, Clue clue, OmniHashcash hashcash, OmniCertificate certificate)
         {
-            if (type is null) throw new ArgumentNullException("type");
-            if (type.Length > 256) throw new ArgumentOutOfRangeException("type");
-            if (channel is null) throw new ArgumentNullException("channel");
-            if (clue is null) throw new ArgumentNullException("clue");
-            if (hashcash is null) throw new ArgumentNullException("hashcash");
-            if (certificate is null) throw new ArgumentNullException("certificate");
+            if (type is null) throw new System.ArgumentNullException("type");
+            if (type.Length > 256) throw new System.ArgumentOutOfRangeException("type");
+            if (channel is null) throw new System.ArgumentNullException("channel");
+            if (clue is null) throw new System.ArgumentNullException("clue");
+            if (hashcash is null) throw new System.ArgumentNullException("hashcash");
+            if (certificate is null) throw new System.ArgumentNullException("certificate");
 
             this.Type = type;
             this.Channel = channel;
@@ -339,28 +356,28 @@ namespace Xeus.Core.Exchange.Internal
             this.Certificate = certificate;
 
             {
-                var hashCode = new HashCode();
-                if (this.Type != default) hashCode.Add(this.Type.GetHashCode());
-                if (this.Channel != default) hashCode.Add(this.Channel.GetHashCode());
-                if (this.CreationTime != default) hashCode.Add(this.CreationTime.GetHashCode());
-                if (this.Clue != default) hashCode.Add(this.Clue.GetHashCode());
-                if (this.Hashcash != default) hashCode.Add(this.Hashcash.GetHashCode());
-                if (this.Certificate != default) hashCode.Add(this.Certificate.GetHashCode());
-                _hashCode = hashCode.ToHashCode();
+                var __h = new System.HashCode();
+                if (this.Type != default) __h.Add(this.Type.GetHashCode());
+                if (this.Channel != default) __h.Add(this.Channel.GetHashCode());
+                if (this.CreationTime != default) __h.Add(this.CreationTime.GetHashCode());
+                if (this.Clue != default) __h.Add(this.Clue.GetHashCode());
+                if (this.Hashcash != default) __h.Add(this.Hashcash.GetHashCode());
+                if (this.Certificate != default) __h.Add(this.Certificate.GetHashCode());
+                __hashCode = __h.ToHashCode();
             }
         }
 
         public string Type { get; }
         public Channel Channel { get; }
-        public Timestamp CreationTime { get; }
+        public Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
         public Clue Clue { get; }
         public OmniHashcash Hashcash { get; }
         public OmniCertificate Certificate { get; }
 
-        public override bool Equals(MulticastMetadata target)
+        public override bool Equals(MulticastClue? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
             if (this.Type != target.Type) return false;
             if (this.Channel != target.Channel) return false;
             if (this.CreationTime != target.CreationTime) return false;
@@ -371,82 +388,92 @@ namespace Xeus.Core.Exchange.Internal
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<MulticastMetadata>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<MulticastClue>
         {
-            public void Serialize(RocketPackWriter w, MulticastMetadata value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, MulticastClue value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    if (value.Type != default) propertyCount++;
-                    if (value.Channel != default) propertyCount++;
-                    if (value.CreationTime != default) propertyCount++;
-                    if (value.Clue != default) propertyCount++;
-                    if (value.Hashcash != default) propertyCount++;
-                    if (value.Certificate != default) propertyCount++;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    if (value.Type != string.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Channel != Channel.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.CreationTime != Omnix.Serialization.RocketPack.Timestamp.Zero)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Clue != Clue.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Hashcash != OmniHashcash.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Certificate != OmniCertificate.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
                 }
 
-                // Type
-                if (value.Type != default)
+                if (value.Type != string.Empty)
                 {
-                    w.Write((ulong)0);
+                    w.Write((uint)0);
                     w.Write(value.Type);
                 }
-                // Channel
-                if (value.Channel != default)
+                if (value.Channel != Channel.Empty)
                 {
-                    w.Write((ulong)1);
+                    w.Write((uint)1);
                     Channel.Formatter.Serialize(w, value.Channel, rank + 1);
                 }
-                // CreationTime
-                if (value.CreationTime != default)
+                if (value.CreationTime != Omnix.Serialization.RocketPack.Timestamp.Zero)
                 {
-                    w.Write((ulong)2);
+                    w.Write((uint)2);
                     w.Write(value.CreationTime);
                 }
-                // Clue
-                if (value.Clue != default)
+                if (value.Clue != Clue.Empty)
                 {
-                    w.Write((ulong)3);
+                    w.Write((uint)3);
                     Clue.Formatter.Serialize(w, value.Clue, rank + 1);
                 }
-                // Hashcash
-                if (value.Hashcash != default)
+                if (value.Hashcash != OmniHashcash.Empty)
                 {
-                    w.Write((ulong)4);
+                    w.Write((uint)4);
                     OmniHashcash.Formatter.Serialize(w, value.Hashcash, rank + 1);
                 }
-                // Certificate
-                if (value.Certificate != default)
+                if (value.Certificate != OmniCertificate.Empty)
                 {
-                    w.Write((ulong)5);
+                    w.Write((uint)5);
                     OmniCertificate.Formatter.Serialize(w, value.Certificate, rank + 1);
                 }
             }
 
-            public MulticastMetadata Deserialize(RocketPackReader r, int rank)
+            public MulticastClue Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
-                string p_type = default;
-                Channel p_channel = default;
-                Timestamp p_creationTime = default;
-                Clue p_clue = default;
-                OmniHashcash p_hashcash = default;
-                OmniCertificate p_certificate = default;
+                string p_type = string.Empty;
+                Channel p_channel = Channel.Empty;
+                Omnix.Serialization.RocketPack.Timestamp p_creationTime = Omnix.Serialization.RocketPack.Timestamp.Zero;
+                Clue p_clue = Clue.Empty;
+                OmniHashcash p_hashcash = OmniHashcash.Empty;
+                OmniCertificate p_certificate = OmniCertificate.Empty;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                         case 0: // Type
@@ -482,70 +509,72 @@ namespace Xeus.Core.Exchange.Internal
                     }
                 }
 
-                return new MulticastMetadata(p_type, p_channel, p_creationTime, p_clue, p_hashcash, p_certificate);
+                return new MulticastClue(p_type, p_channel, p_creationTime, p_clue, p_hashcash, p_certificate);
             }
         }
     }
 
-    internal sealed partial class HelloPacket : RocketPackMessageBase<HelloPacket>
+    internal sealed partial class HelloMessage : Omnix.Serialization.RocketPack.RocketPackMessageBase<HelloMessage>
     {
-        static HelloPacket()
+        static HelloMessage()
         {
-            HelloPacket.Formatter = new CustomFormatter();
+            HelloMessage.Formatter = new CustomFormatter();
+            HelloMessage.Empty = new HelloMessage(System.Array.Empty<ProtocolVersion>());
         }
+
+        private readonly int __hashCode;
 
         public static readonly int MaxProtocolVersionsCount = 32;
 
-        public HelloPacket(IList<ProtocolVersion> protocolVersions)
+        public HelloMessage(ProtocolVersion[] protocolVersions)
         {
-            if (protocolVersions is null) throw new ArgumentNullException("protocolVersions");
-            if (protocolVersions.Count > 32) throw new ArgumentOutOfRangeException("protocolVersions");
+            if (protocolVersions is null) throw new System.ArgumentNullException("protocolVersions");
+            if (protocolVersions.Length > 32) throw new System.ArgumentOutOfRangeException("protocolVersions");
 
-            this.ProtocolVersions = new ReadOnlyCollection<ProtocolVersion>(protocolVersions);
+            this.ProtocolVersions = new Omnix.Collections.ReadOnlyListSlim<ProtocolVersion>(protocolVersions);
 
             {
-                var hashCode = new HashCode();
+                var __h = new System.HashCode();
                 foreach (var n in this.ProtocolVersions)
                 {
-                    if (n != default) hashCode.Add(n.GetHashCode());
+                    if (n != default) __h.Add(n.GetHashCode());
                 }
-                _hashCode = hashCode.ToHashCode();
+                __hashCode = __h.ToHashCode();
             }
         }
 
-        public IReadOnlyList<ProtocolVersion> ProtocolVersions { get; }
+        public Omnix.Collections.ReadOnlyListSlim<ProtocolVersion> ProtocolVersions { get; }
 
-        public override bool Equals(HelloPacket target)
+        public override bool Equals(HelloMessage? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
-            if ((this.ProtocolVersions is null) != (target.ProtocolVersions is null)) return false;
-            if (!(this.ProtocolVersions is null) && !(target.ProtocolVersions is null) && !CollectionHelper.Equals(this.ProtocolVersions, target.ProtocolVersions)) return false;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.ProtocolVersions, target.ProtocolVersions)) return false;
 
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<HelloPacket>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<HelloMessage>
         {
-            public void Serialize(RocketPackWriter w, HelloPacket value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, HelloMessage value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    if (value.ProtocolVersions.Count != 0) propertyCount++;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    if (value.ProtocolVersions.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
                 }
 
-                // ProtocolVersions
                 if (value.ProtocolVersions.Count != 0)
                 {
-                    w.Write((ulong)0);
-                    w.Write((ulong)value.ProtocolVersions.Count);
+                    w.Write((uint)0);
+                    w.Write((uint)value.ProtocolVersions.Count);
                     foreach (var n in value.ProtocolVersions)
                     {
                         w.Write((ulong)n);
@@ -553,25 +582,25 @@ namespace Xeus.Core.Exchange.Internal
                 }
             }
 
-            public HelloPacket Deserialize(RocketPackReader r, int rank)
+            public HelloMessage Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
-                IList<ProtocolVersion> p_protocolVersions = default;
+                ProtocolVersion[] p_protocolVersions = System.Array.Empty<ProtocolVersion>();
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                         case 0: // ProtocolVersions
                             {
-                                var length = (int)r.GetUInt64();
+                                var length = r.GetUInt32();
                                 p_protocolVersions = new ProtocolVersion[length];
-                                for (int i = 0; i < p_protocolVersions.Count; i++)
+                                for (int i = 0; i < p_protocolVersions.Length; i++)
                                 {
                                     p_protocolVersions[i] = (ProtocolVersion)r.GetUInt64();
                                 }
@@ -580,93 +609,98 @@ namespace Xeus.Core.Exchange.Internal
                     }
                 }
 
-                return new HelloPacket(p_protocolVersions);
+                return new HelloMessage(p_protocolVersions);
             }
         }
     }
 
-    internal sealed partial class ProfilePacket : RocketPackMessageBase<ProfilePacket>
+    internal sealed partial class ProfileMessage : Omnix.Serialization.RocketPack.RocketPackMessageBase<ProfileMessage>
     {
-        static ProfilePacket()
+        static ProfileMessage()
         {
-            ProfilePacket.Formatter = new CustomFormatter();
+            ProfileMessage.Formatter = new CustomFormatter();
+            ProfileMessage.Empty = new ProfileMessage(System.ReadOnlyMemory<byte>.Empty, OmniAddress.Empty);
         }
+
+        private readonly int __hashCode;
 
         public static readonly int MaxIdLength = 32;
 
-        public ProfilePacket(ReadOnlyMemory<byte> id, OmniAddress address)
+        public ProfileMessage(System.ReadOnlyMemory<byte> id, OmniAddress address)
         {
-            if (id.Length > 32) throw new ArgumentOutOfRangeException("id");
-            if (address is null) throw new ArgumentNullException("address");
+            if (id.Length > 32) throw new System.ArgumentOutOfRangeException("id");
+            if (address is null) throw new System.ArgumentNullException("address");
 
             this.Id = id;
             this.Address = address;
 
             {
-                var hashCode = new HashCode();
-                if (!this.Id.IsEmpty) hashCode.Add(ObjectHelper.GetHashCode(this.Id.Span));
-                if (this.Address != default) hashCode.Add(this.Address.GetHashCode());
-                _hashCode = hashCode.ToHashCode();
+                var __h = new System.HashCode();
+                if (!this.Id.IsEmpty) __h.Add(Omnix.Base.Helpers.ObjectHelper.GetHashCode(this.Id.Span));
+                if (this.Address != default) __h.Add(this.Address.GetHashCode());
+                __hashCode = __h.ToHashCode();
             }
         }
 
-        public ReadOnlyMemory<byte> Id { get; }
+        public System.ReadOnlyMemory<byte> Id { get; }
         public OmniAddress Address { get; }
 
-        public override bool Equals(ProfilePacket target)
+        public override bool Equals(ProfileMessage? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
-            if (!BytesOperations.SequenceEqual(this.Id.Span, target.Id.Span)) return false;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (!Omnix.Base.BytesOperations.SequenceEqual(this.Id.Span, target.Id.Span)) return false;
             if (this.Address != target.Address) return false;
 
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<ProfilePacket>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<ProfileMessage>
         {
-            public void Serialize(RocketPackWriter w, ProfilePacket value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, ProfileMessage value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    if (!value.Id.IsEmpty) propertyCount++;
-                    if (value.Address != default) propertyCount++;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    if (!value.Id.IsEmpty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Address != OmniAddress.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
                 }
 
-                // Id
                 if (!value.Id.IsEmpty)
                 {
-                    w.Write((ulong)0);
+                    w.Write((uint)0);
                     w.Write(value.Id.Span);
                 }
-                // Address
-                if (value.Address != default)
+                if (value.Address != OmniAddress.Empty)
                 {
-                    w.Write((ulong)1);
+                    w.Write((uint)1);
                     OmniAddress.Formatter.Serialize(w, value.Address, rank + 1);
                 }
             }
 
-            public ProfilePacket Deserialize(RocketPackReader r, int rank)
+            public ProfileMessage Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
-                ReadOnlyMemory<byte> p_id = default;
-                OmniAddress p_address = default;
+                System.ReadOnlyMemory<byte> p_id = System.ReadOnlyMemory<byte>.Empty;
+                OmniAddress p_address = OmniAddress.Empty;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                         case 0: // Id
@@ -682,74 +716,76 @@ namespace Xeus.Core.Exchange.Internal
                     }
                 }
 
-                return new ProfilePacket(p_id, p_address);
+                return new ProfileMessage(p_id, p_address);
             }
         }
     }
 
-    internal sealed partial class AddressesPublishPacket : RocketPackMessageBase<AddressesPublishPacket>
+    internal sealed partial class NodeAddressesMessage : Omnix.Serialization.RocketPack.RocketPackMessageBase<NodeAddressesMessage>
     {
-        static AddressesPublishPacket()
+        static NodeAddressesMessage()
         {
-            AddressesPublishPacket.Formatter = new CustomFormatter();
+            NodeAddressesMessage.Formatter = new CustomFormatter();
+            NodeAddressesMessage.Empty = new NodeAddressesMessage(System.Array.Empty<OmniAddress>());
         }
+
+        private readonly int __hashCode;
 
         public static readonly int MaxAddressesCount = 256;
 
-        public AddressesPublishPacket(IList<OmniAddress> addresses)
+        public NodeAddressesMessage(OmniAddress[] addresses)
         {
-            if (addresses is null) throw new ArgumentNullException("addresses");
-            if (addresses.Count > 256) throw new ArgumentOutOfRangeException("addresses");
+            if (addresses is null) throw new System.ArgumentNullException("addresses");
+            if (addresses.Length > 256) throw new System.ArgumentOutOfRangeException("addresses");
             foreach (var n in addresses)
             {
-                if (n is null) throw new ArgumentNullException("n");
+                if (n is null) throw new System.ArgumentNullException("n");
             }
 
-            this.Addresses = new ReadOnlyCollection<OmniAddress>(addresses);
+            this.Addresses = new Omnix.Collections.ReadOnlyListSlim<OmniAddress>(addresses);
 
             {
-                var hashCode = new HashCode();
+                var __h = new System.HashCode();
                 foreach (var n in this.Addresses)
                 {
-                    if (n != default) hashCode.Add(n.GetHashCode());
+                    if (n != default) __h.Add(n.GetHashCode());
                 }
-                _hashCode = hashCode.ToHashCode();
+                __hashCode = __h.ToHashCode();
             }
         }
 
-        public IReadOnlyList<OmniAddress> Addresses { get; }
+        public Omnix.Collections.ReadOnlyListSlim<OmniAddress> Addresses { get; }
 
-        public override bool Equals(AddressesPublishPacket target)
+        public override bool Equals(NodeAddressesMessage? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
-            if ((this.Addresses is null) != (target.Addresses is null)) return false;
-            if (!(this.Addresses is null) && !(target.Addresses is null) && !CollectionHelper.Equals(this.Addresses, target.Addresses)) return false;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.Addresses, target.Addresses)) return false;
 
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<AddressesPublishPacket>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<NodeAddressesMessage>
         {
-            public void Serialize(RocketPackWriter w, AddressesPublishPacket value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, NodeAddressesMessage value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    if (value.Addresses.Count != 0) propertyCount++;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    if (value.Addresses.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
                 }
 
-                // Addresses
                 if (value.Addresses.Count != 0)
                 {
-                    w.Write((ulong)0);
-                    w.Write((ulong)value.Addresses.Count);
+                    w.Write((uint)0);
+                    w.Write((uint)value.Addresses.Count);
                     foreach (var n in value.Addresses)
                     {
                         OmniAddress.Formatter.Serialize(w, n, rank + 1);
@@ -757,25 +793,25 @@ namespace Xeus.Core.Exchange.Internal
                 }
             }
 
-            public AddressesPublishPacket Deserialize(RocketPackReader r, int rank)
+            public NodeAddressesMessage Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
-                IList<OmniAddress> p_addresses = default;
+                OmniAddress[] p_addresses = System.Array.Empty<OmniAddress>();
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                         case 0: // Addresses
                             {
-                                var length = (int)r.GetUInt64();
+                                var length = r.GetUInt32();
                                 p_addresses = new OmniAddress[length];
-                                for (int i = 0; i < p_addresses.Count; i++)
+                                for (int i = 0; i < p_addresses.Length; i++)
                                 {
                                     p_addresses[i] = OmniAddress.Formatter.Deserialize(r, rank + 1);
                                 }
@@ -784,837 +820,1099 @@ namespace Xeus.Core.Exchange.Internal
                     }
                 }
 
-                return new AddressesPublishPacket(p_addresses);
+                return new NodeAddressesMessage(p_addresses);
             }
         }
     }
 
-    internal sealed partial class AddressesRequestPacket : RocketPackMessageBase<AddressesRequestPacket>
+    internal sealed partial class RelayOption : Omnix.Serialization.RocketPack.RocketPackMessageBase<RelayOption>
     {
-        static AddressesRequestPacket()
+        static RelayOption()
         {
-            AddressesRequestPacket.Formatter = new CustomFormatter();
+            RelayOption.Formatter = new CustomFormatter();
+            RelayOption.Empty = new RelayOption(0, 0);
         }
 
-        public static readonly int MaxIdsCount = 256;
+        private readonly int __hashCode;
 
-        public AddressesRequestPacket(IList<ReadOnlyMemory<byte>> ids)
+        public RelayOption(byte hopLimit, byte priority)
         {
-            if (ids is null) throw new ArgumentNullException("ids");
-            if (ids.Count > 256) throw new ArgumentOutOfRangeException("ids");
-            foreach (var n in ids)
-            {
-                if (n.Length > 32) throw new ArgumentOutOfRangeException("n");
-            }
-
-            this.Ids = new ReadOnlyCollection<ReadOnlyMemory<byte>>(ids);
-
-            {
-                var hashCode = new HashCode();
-                foreach (var n in this.Ids)
-                {
-                    if (!n.IsEmpty) hashCode.Add(ObjectHelper.GetHashCode(n.Span));
-                }
-                _hashCode = hashCode.ToHashCode();
-            }
-        }
-
-        public IReadOnlyList<ReadOnlyMemory<byte>> Ids { get; }
-
-        public override bool Equals(AddressesRequestPacket target)
-        {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
-            if ((this.Ids is null) != (target.Ids is null)) return false;
-            if (!(this.Ids is null) && !(target.Ids is null) && !CollectionHelper.Equals(this.Ids, target.Ids)) return false;
-
-            return true;
-        }
-
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
-
-        private sealed class CustomFormatter : IRocketPackFormatter<AddressesRequestPacket>
-        {
-            public void Serialize(RocketPackWriter w, AddressesRequestPacket value, int rank)
-            {
-                if (rank > 256) throw new FormatException();
-
-                // Write property count
-                {
-                    int propertyCount = 0;
-                    if (value.Ids.Count != 0) propertyCount++;
-                    w.Write((ulong)propertyCount);
-                }
-
-                // Ids
-                if (value.Ids.Count != 0)
-                {
-                    w.Write((ulong)0);
-                    w.Write((ulong)value.Ids.Count);
-                    foreach (var n in value.Ids)
-                    {
-                        w.Write(n.Span);
-                    }
-                }
-            }
-
-            public AddressesRequestPacket Deserialize(RocketPackReader r, int rank)
-            {
-                if (rank > 256) throw new FormatException();
-
-                // Read property count
-                int propertyCount = (int)r.GetUInt64();
-
-                IList<ReadOnlyMemory<byte>> p_ids = default;
-
-                for (; propertyCount > 0; propertyCount--)
-                {
-                    int id = (int)r.GetUInt64();
-                    switch (id)
-                    {
-                        case 0: // Ids
-                            {
-                                var length = (int)r.GetUInt64();
-                                p_ids = new ReadOnlyMemory<byte>[length];
-                                for (int i = 0; i < p_ids.Count; i++)
-                                {
-                                    p_ids[i] = r.GetMemory(32);
-                                }
-                                break;
-                            }
-                    }
-                }
-
-                return new AddressesRequestPacket(p_ids);
-            }
-        }
-    }
-
-    internal sealed partial class AddressesResultPacket : RocketPackMessageBase<AddressesResultPacket>
-    {
-        static AddressesResultPacket()
-        {
-            AddressesResultPacket.Formatter = new CustomFormatter();
-        }
-
-        public static readonly int MaxIdLength = 32;
-        public static readonly int MaxAddressesCount = 256;
-
-        public AddressesResultPacket(ReadOnlyMemory<byte> id, IList<OmniAddress> addresses)
-        {
-            if (id.Length > 32) throw new ArgumentOutOfRangeException("id");
-            if (addresses is null) throw new ArgumentNullException("addresses");
-            if (addresses.Count > 256) throw new ArgumentOutOfRangeException("addresses");
-            foreach (var n in addresses)
-            {
-                if (n is null) throw new ArgumentNullException("n");
-            }
-
-            this.Id = id;
-            this.Addresses = new ReadOnlyCollection<OmniAddress>(addresses);
-
-            {
-                var hashCode = new HashCode();
-                if (!this.Id.IsEmpty) hashCode.Add(ObjectHelper.GetHashCode(this.Id.Span));
-                foreach (var n in this.Addresses)
-                {
-                    if (n != default) hashCode.Add(n.GetHashCode());
-                }
-                _hashCode = hashCode.ToHashCode();
-            }
-        }
-
-        public ReadOnlyMemory<byte> Id { get; }
-        public IReadOnlyList<OmniAddress> Addresses { get; }
-
-        public override bool Equals(AddressesResultPacket target)
-        {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
-            if (!BytesOperations.SequenceEqual(this.Id.Span, target.Id.Span)) return false;
-            if ((this.Addresses is null) != (target.Addresses is null)) return false;
-            if (!(this.Addresses is null) && !(target.Addresses is null) && !CollectionHelper.Equals(this.Addresses, target.Addresses)) return false;
-
-            return true;
-        }
-
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
-
-        private sealed class CustomFormatter : IRocketPackFormatter<AddressesResultPacket>
-        {
-            public void Serialize(RocketPackWriter w, AddressesResultPacket value, int rank)
-            {
-                if (rank > 256) throw new FormatException();
-
-                // Write property count
-                {
-                    int propertyCount = 0;
-                    if (!value.Id.IsEmpty) propertyCount++;
-                    if (value.Addresses.Count != 0) propertyCount++;
-                    w.Write((ulong)propertyCount);
-                }
-
-                // Id
-                if (!value.Id.IsEmpty)
-                {
-                    w.Write((ulong)0);
-                    w.Write(value.Id.Span);
-                }
-                // Addresses
-                if (value.Addresses.Count != 0)
-                {
-                    w.Write((ulong)1);
-                    w.Write((ulong)value.Addresses.Count);
-                    foreach (var n in value.Addresses)
-                    {
-                        OmniAddress.Formatter.Serialize(w, n, rank + 1);
-                    }
-                }
-            }
-
-            public AddressesResultPacket Deserialize(RocketPackReader r, int rank)
-            {
-                if (rank > 256) throw new FormatException();
-
-                // Read property count
-                int propertyCount = (int)r.GetUInt64();
-
-                ReadOnlyMemory<byte> p_id = default;
-                IList<OmniAddress> p_addresses = default;
-
-                for (; propertyCount > 0; propertyCount--)
-                {
-                    int id = (int)r.GetUInt64();
-                    switch (id)
-                    {
-                        case 0: // Id
-                            {
-                                p_id = r.GetMemory(32);
-                                break;
-                            }
-                        case 1: // Addresses
-                            {
-                                var length = (int)r.GetUInt64();
-                                p_addresses = new OmniAddress[length];
-                                for (int i = 0; i < p_addresses.Count; i++)
-                                {
-                                    p_addresses[i] = OmniAddress.Formatter.Deserialize(r, rank + 1);
-                                }
-                                break;
-                            }
-                    }
-                }
-
-                return new AddressesResultPacket(p_id, p_addresses);
-            }
-        }
-    }
-
-    internal sealed partial class BroadcastMetadataRequestPacket : RocketPackMessageBase<BroadcastMetadataRequestPacket>
-    {
-        static BroadcastMetadataRequestPacket()
-        {
-            BroadcastMetadataRequestPacket.Formatter = new CustomFormatter();
-        }
-
-        public BroadcastMetadataRequestPacket(byte hopLimit, OmniSignature signatures)
-        {
-            if (signatures is null) throw new ArgumentNullException("signatures");
-
-            this.HopLimit = hopLimit;
-            this.Signatures = signatures;
-
-            {
-                var hashCode = new HashCode();
-                if (this.HopLimit != default) hashCode.Add(this.HopLimit.GetHashCode());
-                if (this.Signatures != default) hashCode.Add(this.Signatures.GetHashCode());
-                _hashCode = hashCode.ToHashCode();
-            }
-        }
-
-        public byte HopLimit { get; }
-        public OmniSignature Signatures { get; }
-
-        public override bool Equals(BroadcastMetadataRequestPacket target)
-        {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
-            if (this.HopLimit != target.HopLimit) return false;
-            if (this.Signatures != target.Signatures) return false;
-
-            return true;
-        }
-
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
-
-        private sealed class CustomFormatter : IRocketPackFormatter<BroadcastMetadataRequestPacket>
-        {
-            public void Serialize(RocketPackWriter w, BroadcastMetadataRequestPacket value, int rank)
-            {
-                if (rank > 256) throw new FormatException();
-
-                // Write property count
-                {
-                    int propertyCount = 0;
-                    if (value.HopLimit != default) propertyCount++;
-                    if (value.Signatures != default) propertyCount++;
-                    w.Write((ulong)propertyCount);
-                }
-
-                // HopLimit
-                if (value.HopLimit != default)
-                {
-                    w.Write((ulong)0);
-                    w.Write((ulong)value.HopLimit);
-                }
-                // Signatures
-                if (value.Signatures != default)
-                {
-                    w.Write((ulong)1);
-                    OmniSignature.Formatter.Serialize(w, value.Signatures, rank + 1);
-                }
-            }
-
-            public BroadcastMetadataRequestPacket Deserialize(RocketPackReader r, int rank)
-            {
-                if (rank > 256) throw new FormatException();
-
-                // Read property count
-                int propertyCount = (int)r.GetUInt64();
-
-                byte p_hopLimit = default;
-                OmniSignature p_signatures = default;
-
-                for (; propertyCount > 0; propertyCount--)
-                {
-                    int id = (int)r.GetUInt64();
-                    switch (id)
-                    {
-                        case 0: // HopLimit
-                            {
-                                p_hopLimit = (byte)r.GetUInt64();
-                                break;
-                            }
-                        case 1: // Signatures
-                            {
-                                p_signatures = OmniSignature.Formatter.Deserialize(r, rank + 1);
-                                break;
-                            }
-                    }
-                }
-
-                return new BroadcastMetadataRequestPacket(p_hopLimit, p_signatures);
-            }
-        }
-    }
-
-    internal sealed partial class UnicastMetadataRequestPacket : RocketPackMessageBase<UnicastMetadataRequestPacket>
-    {
-        static UnicastMetadataRequestPacket()
-        {
-            UnicastMetadataRequestPacket.Formatter = new CustomFormatter();
-        }
-
-        public UnicastMetadataRequestPacket(byte hopLimit, OmniSignature signatures)
-        {
-            if (signatures is null) throw new ArgumentNullException("signatures");
-
-            this.HopLimit = hopLimit;
-            this.Signatures = signatures;
-
-            {
-                var hashCode = new HashCode();
-                if (this.HopLimit != default) hashCode.Add(this.HopLimit.GetHashCode());
-                if (this.Signatures != default) hashCode.Add(this.Signatures.GetHashCode());
-                _hashCode = hashCode.ToHashCode();
-            }
-        }
-
-        public byte HopLimit { get; }
-        public OmniSignature Signatures { get; }
-
-        public override bool Equals(UnicastMetadataRequestPacket target)
-        {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
-            if (this.HopLimit != target.HopLimit) return false;
-            if (this.Signatures != target.Signatures) return false;
-
-            return true;
-        }
-
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
-
-        private sealed class CustomFormatter : IRocketPackFormatter<UnicastMetadataRequestPacket>
-        {
-            public void Serialize(RocketPackWriter w, UnicastMetadataRequestPacket value, int rank)
-            {
-                if (rank > 256) throw new FormatException();
-
-                // Write property count
-                {
-                    int propertyCount = 0;
-                    if (value.HopLimit != default) propertyCount++;
-                    if (value.Signatures != default) propertyCount++;
-                    w.Write((ulong)propertyCount);
-                }
-
-                // HopLimit
-                if (value.HopLimit != default)
-                {
-                    w.Write((ulong)0);
-                    w.Write((ulong)value.HopLimit);
-                }
-                // Signatures
-                if (value.Signatures != default)
-                {
-                    w.Write((ulong)1);
-                    OmniSignature.Formatter.Serialize(w, value.Signatures, rank + 1);
-                }
-            }
-
-            public UnicastMetadataRequestPacket Deserialize(RocketPackReader r, int rank)
-            {
-                if (rank > 256) throw new FormatException();
-
-                // Read property count
-                int propertyCount = (int)r.GetUInt64();
-
-                byte p_hopLimit = default;
-                OmniSignature p_signatures = default;
-
-                for (; propertyCount > 0; propertyCount--)
-                {
-                    int id = (int)r.GetUInt64();
-                    switch (id)
-                    {
-                        case 0: // HopLimit
-                            {
-                                p_hopLimit = (byte)r.GetUInt64();
-                                break;
-                            }
-                        case 1: // Signatures
-                            {
-                                p_signatures = OmniSignature.Formatter.Deserialize(r, rank + 1);
-                                break;
-                            }
-                    }
-                }
-
-                return new UnicastMetadataRequestPacket(p_hopLimit, p_signatures);
-            }
-        }
-    }
-
-    internal sealed partial class MulticastMetadataRequestPacket : RocketPackMessageBase<MulticastMetadataRequestPacket>
-    {
-        static MulticastMetadataRequestPacket()
-        {
-            MulticastMetadataRequestPacket.Formatter = new CustomFormatter();
-        }
-
-        public MulticastMetadataRequestPacket(byte hopLimit, Channel channel)
-        {
-            if (channel is null) throw new ArgumentNullException("channel");
-
-            this.HopLimit = hopLimit;
-            this.Channel = channel;
-
-            {
-                var hashCode = new HashCode();
-                if (this.HopLimit != default) hashCode.Add(this.HopLimit.GetHashCode());
-                if (this.Channel != default) hashCode.Add(this.Channel.GetHashCode());
-                _hashCode = hashCode.ToHashCode();
-            }
-        }
-
-        public byte HopLimit { get; }
-        public Channel Channel { get; }
-
-        public override bool Equals(MulticastMetadataRequestPacket target)
-        {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
-            if (this.HopLimit != target.HopLimit) return false;
-            if (this.Channel != target.Channel) return false;
-
-            return true;
-        }
-
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
-
-        private sealed class CustomFormatter : IRocketPackFormatter<MulticastMetadataRequestPacket>
-        {
-            public void Serialize(RocketPackWriter w, MulticastMetadataRequestPacket value, int rank)
-            {
-                if (rank > 256) throw new FormatException();
-
-                // Write property count
-                {
-                    int propertyCount = 0;
-                    if (value.HopLimit != default) propertyCount++;
-                    if (value.Channel != default) propertyCount++;
-                    w.Write((ulong)propertyCount);
-                }
-
-                // HopLimit
-                if (value.HopLimit != default)
-                {
-                    w.Write((ulong)0);
-                    w.Write((ulong)value.HopLimit);
-                }
-                // Channel
-                if (value.Channel != default)
-                {
-                    w.Write((ulong)1);
-                    Channel.Formatter.Serialize(w, value.Channel, rank + 1);
-                }
-            }
-
-            public MulticastMetadataRequestPacket Deserialize(RocketPackReader r, int rank)
-            {
-                if (rank > 256) throw new FormatException();
-
-                // Read property count
-                int propertyCount = (int)r.GetUInt64();
-
-                byte p_hopLimit = default;
-                Channel p_channel = default;
-
-                for (; propertyCount > 0; propertyCount--)
-                {
-                    int id = (int)r.GetUInt64();
-                    switch (id)
-                    {
-                        case 0: // HopLimit
-                            {
-                                p_hopLimit = (byte)r.GetUInt64();
-                                break;
-                            }
-                        case 1: // Channel
-                            {
-                                p_channel = Channel.Formatter.Deserialize(r, rank + 1);
-                                break;
-                            }
-                    }
-                }
-
-                return new MulticastMetadataRequestPacket(p_hopLimit, p_channel);
-            }
-        }
-    }
-
-    internal sealed partial class MetadatasResultPacket : RocketPackMessageBase<MetadatasResultPacket>
-    {
-        static MetadatasResultPacket()
-        {
-            MetadatasResultPacket.Formatter = new CustomFormatter();
-        }
-
-        public static readonly int MaxBroadcastMetadatasCount = 8192;
-        public static readonly int MaxUnicastMetadatasCount = 8192;
-        public static readonly int MaxMulticastMetadatasCount = 8192;
-
-        public MetadatasResultPacket(IList<BroadcastMetadata> broadcastMetadatas, IList<UnicastMetadata> unicastMetadatas, IList<MulticastMetadata> multicastMetadatas)
-        {
-            if (broadcastMetadatas is null) throw new ArgumentNullException("broadcastMetadatas");
-            if (broadcastMetadatas.Count > 8192) throw new ArgumentOutOfRangeException("broadcastMetadatas");
-            foreach (var n in broadcastMetadatas)
-            {
-                if (n is null) throw new ArgumentNullException("n");
-            }
-            if (unicastMetadatas is null) throw new ArgumentNullException("unicastMetadatas");
-            if (unicastMetadatas.Count > 8192) throw new ArgumentOutOfRangeException("unicastMetadatas");
-            foreach (var n in unicastMetadatas)
-            {
-                if (n is null) throw new ArgumentNullException("n");
-            }
-            if (multicastMetadatas is null) throw new ArgumentNullException("multicastMetadatas");
-            if (multicastMetadatas.Count > 8192) throw new ArgumentOutOfRangeException("multicastMetadatas");
-            foreach (var n in multicastMetadatas)
-            {
-                if (n is null) throw new ArgumentNullException("n");
-            }
-
-            this.BroadcastMetadatas = new ReadOnlyCollection<BroadcastMetadata>(broadcastMetadatas);
-            this.UnicastMetadatas = new ReadOnlyCollection<UnicastMetadata>(unicastMetadatas);
-            this.MulticastMetadatas = new ReadOnlyCollection<MulticastMetadata>(multicastMetadatas);
-
-            {
-                var hashCode = new HashCode();
-                foreach (var n in this.BroadcastMetadatas)
-                {
-                    if (n != default) hashCode.Add(n.GetHashCode());
-                }
-                foreach (var n in this.UnicastMetadatas)
-                {
-                    if (n != default) hashCode.Add(n.GetHashCode());
-                }
-                foreach (var n in this.MulticastMetadatas)
-                {
-                    if (n != default) hashCode.Add(n.GetHashCode());
-                }
-                _hashCode = hashCode.ToHashCode();
-            }
-        }
-
-        public IReadOnlyList<BroadcastMetadata> BroadcastMetadatas { get; }
-        public IReadOnlyList<UnicastMetadata> UnicastMetadatas { get; }
-        public IReadOnlyList<MulticastMetadata> MulticastMetadatas { get; }
-
-        public override bool Equals(MetadatasResultPacket target)
-        {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
-            if ((this.BroadcastMetadatas is null) != (target.BroadcastMetadatas is null)) return false;
-            if (!(this.BroadcastMetadatas is null) && !(target.BroadcastMetadatas is null) && !CollectionHelper.Equals(this.BroadcastMetadatas, target.BroadcastMetadatas)) return false;
-            if ((this.UnicastMetadatas is null) != (target.UnicastMetadatas is null)) return false;
-            if (!(this.UnicastMetadatas is null) && !(target.UnicastMetadatas is null) && !CollectionHelper.Equals(this.UnicastMetadatas, target.UnicastMetadatas)) return false;
-            if ((this.MulticastMetadatas is null) != (target.MulticastMetadatas is null)) return false;
-            if (!(this.MulticastMetadatas is null) && !(target.MulticastMetadatas is null) && !CollectionHelper.Equals(this.MulticastMetadatas, target.MulticastMetadatas)) return false;
-
-            return true;
-        }
-
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
-
-        private sealed class CustomFormatter : IRocketPackFormatter<MetadatasResultPacket>
-        {
-            public void Serialize(RocketPackWriter w, MetadatasResultPacket value, int rank)
-            {
-                if (rank > 256) throw new FormatException();
-
-                // Write property count
-                {
-                    int propertyCount = 0;
-                    if (value.BroadcastMetadatas.Count != 0) propertyCount++;
-                    if (value.UnicastMetadatas.Count != 0) propertyCount++;
-                    if (value.MulticastMetadatas.Count != 0) propertyCount++;
-                    w.Write((ulong)propertyCount);
-                }
-
-                // BroadcastMetadatas
-                if (value.BroadcastMetadatas.Count != 0)
-                {
-                    w.Write((ulong)0);
-                    w.Write((ulong)value.BroadcastMetadatas.Count);
-                    foreach (var n in value.BroadcastMetadatas)
-                    {
-                        BroadcastMetadata.Formatter.Serialize(w, n, rank + 1);
-                    }
-                }
-                // UnicastMetadatas
-                if (value.UnicastMetadatas.Count != 0)
-                {
-                    w.Write((ulong)1);
-                    w.Write((ulong)value.UnicastMetadatas.Count);
-                    foreach (var n in value.UnicastMetadatas)
-                    {
-                        UnicastMetadata.Formatter.Serialize(w, n, rank + 1);
-                    }
-                }
-                // MulticastMetadatas
-                if (value.MulticastMetadatas.Count != 0)
-                {
-                    w.Write((ulong)2);
-                    w.Write((ulong)value.MulticastMetadatas.Count);
-                    foreach (var n in value.MulticastMetadatas)
-                    {
-                        MulticastMetadata.Formatter.Serialize(w, n, rank + 1);
-                    }
-                }
-            }
-
-            public MetadatasResultPacket Deserialize(RocketPackReader r, int rank)
-            {
-                if (rank > 256) throw new FormatException();
-
-                // Read property count
-                int propertyCount = (int)r.GetUInt64();
-
-                IList<BroadcastMetadata> p_broadcastMetadatas = default;
-                IList<UnicastMetadata> p_unicastMetadatas = default;
-                IList<MulticastMetadata> p_multicastMetadatas = default;
-
-                for (; propertyCount > 0; propertyCount--)
-                {
-                    int id = (int)r.GetUInt64();
-                    switch (id)
-                    {
-                        case 0: // BroadcastMetadatas
-                            {
-                                var length = (int)r.GetUInt64();
-                                p_broadcastMetadatas = new BroadcastMetadata[length];
-                                for (int i = 0; i < p_broadcastMetadatas.Count; i++)
-                                {
-                                    p_broadcastMetadatas[i] = BroadcastMetadata.Formatter.Deserialize(r, rank + 1);
-                                }
-                                break;
-                            }
-                        case 1: // UnicastMetadatas
-                            {
-                                var length = (int)r.GetUInt64();
-                                p_unicastMetadatas = new UnicastMetadata[length];
-                                for (int i = 0; i < p_unicastMetadatas.Count; i++)
-                                {
-                                    p_unicastMetadatas[i] = UnicastMetadata.Formatter.Deserialize(r, rank + 1);
-                                }
-                                break;
-                            }
-                        case 2: // MulticastMetadatas
-                            {
-                                var length = (int)r.GetUInt64();
-                                p_multicastMetadatas = new MulticastMetadata[length];
-                                for (int i = 0; i < p_multicastMetadatas.Count; i++)
-                                {
-                                    p_multicastMetadatas[i] = MulticastMetadata.Formatter.Deserialize(r, rank + 1);
-                                }
-                                break;
-                            }
-                    }
-                }
-
-                return new MetadatasResultPacket(p_broadcastMetadatas, p_unicastMetadatas, p_multicastMetadatas);
-            }
-        }
-    }
-
-    internal sealed partial class BlockPublishPacket : RocketPackMessageBase<BlockPublishPacket>, IDisposable
-    {
-        static BlockPublishPacket()
-        {
-            BlockPublishPacket.Formatter = new CustomFormatter();
-        }
-
-        public static readonly int MaxValueLength = 4194304;
-
-        public BlockPublishPacket(byte hopLimit, byte priority, OmniHash hash, IMemoryOwner<byte> value)
-        {
-            if (value is null) throw new ArgumentNullException("value");
-            if (value.Memory.Length > 4194304) throw new ArgumentOutOfRangeException("value");
-
             this.HopLimit = hopLimit;
             this.Priority = priority;
-            this.Hash = hash;
-            _value = value;
 
             {
-                var hashCode = new HashCode();
-                if (this.HopLimit != default) hashCode.Add(this.HopLimit.GetHashCode());
-                if (this.Priority != default) hashCode.Add(this.Priority.GetHashCode());
-                if (this.Hash != default) hashCode.Add(this.Hash.GetHashCode());
-                if (!this.Value.IsEmpty) hashCode.Add(ObjectHelper.GetHashCode(this.Value.Span));
-                _hashCode = hashCode.ToHashCode();
+                var __h = new System.HashCode();
+                if (this.HopLimit != default) __h.Add(this.HopLimit.GetHashCode());
+                if (this.Priority != default) __h.Add(this.Priority.GetHashCode());
+                __hashCode = __h.ToHashCode();
             }
         }
 
         public byte HopLimit { get; }
         public byte Priority { get; }
-        public OmniHash Hash { get; }
-        private readonly IMemoryOwner<byte> _value;
-        public ReadOnlyMemory<byte> Value => _value.Memory;
 
-        public override bool Equals(BlockPublishPacket target)
+        public override bool Equals(RelayOption? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
             if (this.HopLimit != target.HopLimit) return false;
             if (this.Priority != target.Priority) return false;
-            if (this.Hash != target.Hash) return false;
-            if (!BytesOperations.SequenceEqual(this.Value.Span, target.Value.Span)) return false;
 
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
+
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<RelayOption>
+        {
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, RelayOption value, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                {
+                    uint propertyCount = 0;
+                    if (value.HopLimit != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Priority != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
+                }
+
+                if (value.HopLimit != 0)
+                {
+                    w.Write((uint)0);
+                    w.Write(value.HopLimit);
+                }
+                if (value.Priority != 0)
+                {
+                    w.Write((uint)1);
+                    w.Write(value.Priority);
+                }
+            }
+
+            public RelayOption Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                // Read property count
+                uint propertyCount = r.GetUInt32();
+
+                byte p_hopLimit = 0;
+                byte p_priority = 0;
+
+                for (; propertyCount > 0; propertyCount--)
+                {
+                    uint id = r.GetUInt32();
+                    switch (id)
+                    {
+                        case 0: // HopLimit
+                            {
+                                p_hopLimit = r.GetUInt8();
+                                break;
+                            }
+                        case 1: // Priority
+                            {
+                                p_priority = r.GetUInt8();
+                                break;
+                            }
+                    }
+                }
+
+                return new RelayOption(p_hopLimit, p_priority);
+            }
+        }
+    }
+
+    internal sealed partial class WantBroadcastCluesMessage : Omnix.Serialization.RocketPack.RocketPackMessageBase<WantBroadcastCluesMessage>
+    {
+        static WantBroadcastCluesMessage()
+        {
+            WantBroadcastCluesMessage.Formatter = new CustomFormatter();
+            WantBroadcastCluesMessage.Empty = new WantBroadcastCluesMessage(new System.Collections.Generic.Dictionary<OmniSignature, RelayOption>());
+        }
+
+        private readonly int __hashCode;
+
+        public static readonly int MaxParametersCount = 8192;
+
+        public WantBroadcastCluesMessage(System.Collections.Generic.Dictionary<OmniSignature, RelayOption> parameters)
+        {
+            if (parameters is null) throw new System.ArgumentNullException("parameters");
+            if (parameters.Count > 8192) throw new System.ArgumentOutOfRangeException("parameters");
+            foreach (var n in parameters)
+            {
+                if (n.Key is null) throw new System.ArgumentNullException("n.Key");
+                if (n.Value is null) throw new System.ArgumentNullException("n.Value");
+            }
+
+            this.Parameters = new Omnix.Collections.ReadOnlyDictionarySlim<OmniSignature, RelayOption>(parameters);
+
+            {
+                var __h = new System.HashCode();
+                foreach (var n in this.Parameters)
+                {
+                    if (n.Key != default) __h.Add(n.Key.GetHashCode());
+                    if (n.Value != default) __h.Add(n.Value.GetHashCode());
+                }
+                __hashCode = __h.ToHashCode();
+            }
+        }
+
+        public Omnix.Collections.ReadOnlyDictionarySlim<OmniSignature, RelayOption> Parameters { get; }
+
+        public override bool Equals(WantBroadcastCluesMessage? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.Parameters, target.Parameters)) return false;
+
+            return true;
+        }
+
+        public override int GetHashCode() => __hashCode;
+
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<WantBroadcastCluesMessage>
+        {
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, WantBroadcastCluesMessage value, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                {
+                    uint propertyCount = 0;
+                    if (value.Parameters.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
+                }
+
+                if (value.Parameters.Count != 0)
+                {
+                    w.Write((uint)0);
+                    w.Write((uint)value.Parameters.Count);
+                    foreach (var n in value.Parameters)
+                    {
+                        OmniSignature.Formatter.Serialize(w, n.Key, rank + 1);
+                        RelayOption.Formatter.Serialize(w, n.Value, rank + 1);
+                    }
+                }
+            }
+
+            public WantBroadcastCluesMessage Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                // Read property count
+                uint propertyCount = r.GetUInt32();
+
+                System.Collections.Generic.Dictionary<OmniSignature, RelayOption> p_parameters = new System.Collections.Generic.Dictionary<OmniSignature, RelayOption>();
+
+                for (; propertyCount > 0; propertyCount--)
+                {
+                    uint id = r.GetUInt32();
+                    switch (id)
+                    {
+                        case 0: // Parameters
+                            {
+                                var length = r.GetUInt32();
+                                p_parameters = new System.Collections.Generic.Dictionary<OmniSignature, RelayOption>();
+                                OmniSignature t_key = OmniSignature.Empty;
+                                RelayOption t_value = RelayOption.Empty;
+                                for (int i = 0; i < length; i++)
+                                {
+                                    t_key = OmniSignature.Formatter.Deserialize(r, rank + 1);
+                                    t_value = RelayOption.Formatter.Deserialize(r, rank + 1);
+                                    p_parameters[t_key] = t_value;
+                                }
+                                break;
+                            }
+                    }
+                }
+
+                return new WantBroadcastCluesMessage(p_parameters);
+            }
+        }
+    }
+
+    internal sealed partial class WantUnicastCluesMessage : Omnix.Serialization.RocketPack.RocketPackMessageBase<WantUnicastCluesMessage>
+    {
+        static WantUnicastCluesMessage()
+        {
+            WantUnicastCluesMessage.Formatter = new CustomFormatter();
+            WantUnicastCluesMessage.Empty = new WantUnicastCluesMessage(new System.Collections.Generic.Dictionary<OmniSignature, RelayOption>());
+        }
+
+        private readonly int __hashCode;
+
+        public static readonly int MaxParametersCount = 8192;
+
+        public WantUnicastCluesMessage(System.Collections.Generic.Dictionary<OmniSignature, RelayOption> parameters)
+        {
+            if (parameters is null) throw new System.ArgumentNullException("parameters");
+            if (parameters.Count > 8192) throw new System.ArgumentOutOfRangeException("parameters");
+            foreach (var n in parameters)
+            {
+                if (n.Key is null) throw new System.ArgumentNullException("n.Key");
+                if (n.Value is null) throw new System.ArgumentNullException("n.Value");
+            }
+
+            this.Parameters = new Omnix.Collections.ReadOnlyDictionarySlim<OmniSignature, RelayOption>(parameters);
+
+            {
+                var __h = new System.HashCode();
+                foreach (var n in this.Parameters)
+                {
+                    if (n.Key != default) __h.Add(n.Key.GetHashCode());
+                    if (n.Value != default) __h.Add(n.Value.GetHashCode());
+                }
+                __hashCode = __h.ToHashCode();
+            }
+        }
+
+        public Omnix.Collections.ReadOnlyDictionarySlim<OmniSignature, RelayOption> Parameters { get; }
+
+        public override bool Equals(WantUnicastCluesMessage? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.Parameters, target.Parameters)) return false;
+
+            return true;
+        }
+
+        public override int GetHashCode() => __hashCode;
+
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<WantUnicastCluesMessage>
+        {
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, WantUnicastCluesMessage value, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                {
+                    uint propertyCount = 0;
+                    if (value.Parameters.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
+                }
+
+                if (value.Parameters.Count != 0)
+                {
+                    w.Write((uint)0);
+                    w.Write((uint)value.Parameters.Count);
+                    foreach (var n in value.Parameters)
+                    {
+                        OmniSignature.Formatter.Serialize(w, n.Key, rank + 1);
+                        RelayOption.Formatter.Serialize(w, n.Value, rank + 1);
+                    }
+                }
+            }
+
+            public WantUnicastCluesMessage Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                // Read property count
+                uint propertyCount = r.GetUInt32();
+
+                System.Collections.Generic.Dictionary<OmniSignature, RelayOption> p_parameters = new System.Collections.Generic.Dictionary<OmniSignature, RelayOption>();
+
+                for (; propertyCount > 0; propertyCount--)
+                {
+                    uint id = r.GetUInt32();
+                    switch (id)
+                    {
+                        case 0: // Parameters
+                            {
+                                var length = r.GetUInt32();
+                                p_parameters = new System.Collections.Generic.Dictionary<OmniSignature, RelayOption>();
+                                OmniSignature t_key = OmniSignature.Empty;
+                                RelayOption t_value = RelayOption.Empty;
+                                for (int i = 0; i < length; i++)
+                                {
+                                    t_key = OmniSignature.Formatter.Deserialize(r, rank + 1);
+                                    t_value = RelayOption.Formatter.Deserialize(r, rank + 1);
+                                    p_parameters[t_key] = t_value;
+                                }
+                                break;
+                            }
+                    }
+                }
+
+                return new WantUnicastCluesMessage(p_parameters);
+            }
+        }
+    }
+
+    internal sealed partial class WantMulticastCluesMessage : Omnix.Serialization.RocketPack.RocketPackMessageBase<WantMulticastCluesMessage>
+    {
+        static WantMulticastCluesMessage()
+        {
+            WantMulticastCluesMessage.Formatter = new CustomFormatter();
+            WantMulticastCluesMessage.Empty = new WantMulticastCluesMessage(new System.Collections.Generic.Dictionary<Channel, RelayOption>());
+        }
+
+        private readonly int __hashCode;
+
+        public static readonly int MaxParametersCount = 8192;
+
+        public WantMulticastCluesMessage(System.Collections.Generic.Dictionary<Channel, RelayOption> parameters)
+        {
+            if (parameters is null) throw new System.ArgumentNullException("parameters");
+            if (parameters.Count > 8192) throw new System.ArgumentOutOfRangeException("parameters");
+            foreach (var n in parameters)
+            {
+                if (n.Key is null) throw new System.ArgumentNullException("n.Key");
+                if (n.Value is null) throw new System.ArgumentNullException("n.Value");
+            }
+
+            this.Parameters = new Omnix.Collections.ReadOnlyDictionarySlim<Channel, RelayOption>(parameters);
+
+            {
+                var __h = new System.HashCode();
+                foreach (var n in this.Parameters)
+                {
+                    if (n.Key != default) __h.Add(n.Key.GetHashCode());
+                    if (n.Value != default) __h.Add(n.Value.GetHashCode());
+                }
+                __hashCode = __h.ToHashCode();
+            }
+        }
+
+        public Omnix.Collections.ReadOnlyDictionarySlim<Channel, RelayOption> Parameters { get; }
+
+        public override bool Equals(WantMulticastCluesMessage? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.Parameters, target.Parameters)) return false;
+
+            return true;
+        }
+
+        public override int GetHashCode() => __hashCode;
+
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<WantMulticastCluesMessage>
+        {
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, WantMulticastCluesMessage value, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                {
+                    uint propertyCount = 0;
+                    if (value.Parameters.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
+                }
+
+                if (value.Parameters.Count != 0)
+                {
+                    w.Write((uint)0);
+                    w.Write((uint)value.Parameters.Count);
+                    foreach (var n in value.Parameters)
+                    {
+                        Channel.Formatter.Serialize(w, n.Key, rank + 1);
+                        RelayOption.Formatter.Serialize(w, n.Value, rank + 1);
+                    }
+                }
+            }
+
+            public WantMulticastCluesMessage Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                // Read property count
+                uint propertyCount = r.GetUInt32();
+
+                System.Collections.Generic.Dictionary<Channel, RelayOption> p_parameters = new System.Collections.Generic.Dictionary<Channel, RelayOption>();
+
+                for (; propertyCount > 0; propertyCount--)
+                {
+                    uint id = r.GetUInt32();
+                    switch (id)
+                    {
+                        case 0: // Parameters
+                            {
+                                var length = r.GetUInt32();
+                                p_parameters = new System.Collections.Generic.Dictionary<Channel, RelayOption>();
+                                Channel t_key = Channel.Empty;
+                                RelayOption t_value = RelayOption.Empty;
+                                for (int i = 0; i < length; i++)
+                                {
+                                    t_key = Channel.Formatter.Deserialize(r, rank + 1);
+                                    t_value = RelayOption.Formatter.Deserialize(r, rank + 1);
+                                    p_parameters[t_key] = t_value;
+                                }
+                                break;
+                            }
+                    }
+                }
+
+                return new WantMulticastCluesMessage(p_parameters);
+            }
+        }
+    }
+
+    internal sealed partial class BroadcastCluesMessage : Omnix.Serialization.RocketPack.RocketPackMessageBase<BroadcastCluesMessage>
+    {
+        static BroadcastCluesMessage()
+        {
+            BroadcastCluesMessage.Formatter = new CustomFormatter();
+            BroadcastCluesMessage.Empty = new BroadcastCluesMessage(System.Array.Empty<BroadcastClue>());
+        }
+
+        private readonly int __hashCode;
+
+        public static readonly int MaxResultsCount = 8192;
+
+        public BroadcastCluesMessage(BroadcastClue[] results)
+        {
+            if (results is null) throw new System.ArgumentNullException("results");
+            if (results.Length > 8192) throw new System.ArgumentOutOfRangeException("results");
+            foreach (var n in results)
+            {
+                if (n is null) throw new System.ArgumentNullException("n");
+            }
+
+            this.Results = new Omnix.Collections.ReadOnlyListSlim<BroadcastClue>(results);
+
+            {
+                var __h = new System.HashCode();
+                foreach (var n in this.Results)
+                {
+                    if (n != default) __h.Add(n.GetHashCode());
+                }
+                __hashCode = __h.ToHashCode();
+            }
+        }
+
+        public Omnix.Collections.ReadOnlyListSlim<BroadcastClue> Results { get; }
+
+        public override bool Equals(BroadcastCluesMessage? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.Results, target.Results)) return false;
+
+            return true;
+        }
+
+        public override int GetHashCode() => __hashCode;
+
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<BroadcastCluesMessage>
+        {
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, BroadcastCluesMessage value, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                {
+                    uint propertyCount = 0;
+                    if (value.Results.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
+                }
+
+                if (value.Results.Count != 0)
+                {
+                    w.Write((uint)0);
+                    w.Write((uint)value.Results.Count);
+                    foreach (var n in value.Results)
+                    {
+                        BroadcastClue.Formatter.Serialize(w, n, rank + 1);
+                    }
+                }
+            }
+
+            public BroadcastCluesMessage Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                // Read property count
+                uint propertyCount = r.GetUInt32();
+
+                BroadcastClue[] p_results = System.Array.Empty<BroadcastClue>();
+
+                for (; propertyCount > 0; propertyCount--)
+                {
+                    uint id = r.GetUInt32();
+                    switch (id)
+                    {
+                        case 0: // Results
+                            {
+                                var length = r.GetUInt32();
+                                p_results = new BroadcastClue[length];
+                                for (int i = 0; i < p_results.Length; i++)
+                                {
+                                    p_results[i] = BroadcastClue.Formatter.Deserialize(r, rank + 1);
+                                }
+                                break;
+                            }
+                    }
+                }
+
+                return new BroadcastCluesMessage(p_results);
+            }
+        }
+    }
+
+    internal sealed partial class UnicastCluesMessage : Omnix.Serialization.RocketPack.RocketPackMessageBase<UnicastCluesMessage>
+    {
+        static UnicastCluesMessage()
+        {
+            UnicastCluesMessage.Formatter = new CustomFormatter();
+            UnicastCluesMessage.Empty = new UnicastCluesMessage(System.Array.Empty<UnicastClue>());
+        }
+
+        private readonly int __hashCode;
+
+        public static readonly int MaxResultsCount = 8192;
+
+        public UnicastCluesMessage(UnicastClue[] results)
+        {
+            if (results is null) throw new System.ArgumentNullException("results");
+            if (results.Length > 8192) throw new System.ArgumentOutOfRangeException("results");
+            foreach (var n in results)
+            {
+                if (n is null) throw new System.ArgumentNullException("n");
+            }
+
+            this.Results = new Omnix.Collections.ReadOnlyListSlim<UnicastClue>(results);
+
+            {
+                var __h = new System.HashCode();
+                foreach (var n in this.Results)
+                {
+                    if (n != default) __h.Add(n.GetHashCode());
+                }
+                __hashCode = __h.ToHashCode();
+            }
+        }
+
+        public Omnix.Collections.ReadOnlyListSlim<UnicastClue> Results { get; }
+
+        public override bool Equals(UnicastCluesMessage? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.Results, target.Results)) return false;
+
+            return true;
+        }
+
+        public override int GetHashCode() => __hashCode;
+
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<UnicastCluesMessage>
+        {
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, UnicastCluesMessage value, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                {
+                    uint propertyCount = 0;
+                    if (value.Results.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
+                }
+
+                if (value.Results.Count != 0)
+                {
+                    w.Write((uint)0);
+                    w.Write((uint)value.Results.Count);
+                    foreach (var n in value.Results)
+                    {
+                        UnicastClue.Formatter.Serialize(w, n, rank + 1);
+                    }
+                }
+            }
+
+            public UnicastCluesMessage Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                // Read property count
+                uint propertyCount = r.GetUInt32();
+
+                UnicastClue[] p_results = System.Array.Empty<UnicastClue>();
+
+                for (; propertyCount > 0; propertyCount--)
+                {
+                    uint id = r.GetUInt32();
+                    switch (id)
+                    {
+                        case 0: // Results
+                            {
+                                var length = r.GetUInt32();
+                                p_results = new UnicastClue[length];
+                                for (int i = 0; i < p_results.Length; i++)
+                                {
+                                    p_results[i] = UnicastClue.Formatter.Deserialize(r, rank + 1);
+                                }
+                                break;
+                            }
+                    }
+                }
+
+                return new UnicastCluesMessage(p_results);
+            }
+        }
+    }
+
+    internal sealed partial class MulticastCluesMessage : Omnix.Serialization.RocketPack.RocketPackMessageBase<MulticastCluesMessage>
+    {
+        static MulticastCluesMessage()
+        {
+            MulticastCluesMessage.Formatter = new CustomFormatter();
+            MulticastCluesMessage.Empty = new MulticastCluesMessage(System.Array.Empty<MulticastClue>());
+        }
+
+        private readonly int __hashCode;
+
+        public static readonly int MaxResultsCount = 8192;
+
+        public MulticastCluesMessage(MulticastClue[] results)
+        {
+            if (results is null) throw new System.ArgumentNullException("results");
+            if (results.Length > 8192) throw new System.ArgumentOutOfRangeException("results");
+            foreach (var n in results)
+            {
+                if (n is null) throw new System.ArgumentNullException("n");
+            }
+
+            this.Results = new Omnix.Collections.ReadOnlyListSlim<MulticastClue>(results);
+
+            {
+                var __h = new System.HashCode();
+                foreach (var n in this.Results)
+                {
+                    if (n != default) __h.Add(n.GetHashCode());
+                }
+                __hashCode = __h.ToHashCode();
+            }
+        }
+
+        public Omnix.Collections.ReadOnlyListSlim<MulticastClue> Results { get; }
+
+        public override bool Equals(MulticastCluesMessage? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.Results, target.Results)) return false;
+
+            return true;
+        }
+
+        public override int GetHashCode() => __hashCode;
+
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<MulticastCluesMessage>
+        {
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, MulticastCluesMessage value, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                {
+                    uint propertyCount = 0;
+                    if (value.Results.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
+                }
+
+                if (value.Results.Count != 0)
+                {
+                    w.Write((uint)0);
+                    w.Write((uint)value.Results.Count);
+                    foreach (var n in value.Results)
+                    {
+                        MulticastClue.Formatter.Serialize(w, n, rank + 1);
+                    }
+                }
+            }
+
+            public MulticastCluesMessage Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                // Read property count
+                uint propertyCount = r.GetUInt32();
+
+                MulticastClue[] p_results = System.Array.Empty<MulticastClue>();
+
+                for (; propertyCount > 0; propertyCount--)
+                {
+                    uint id = r.GetUInt32();
+                    switch (id)
+                    {
+                        case 0: // Results
+                            {
+                                var length = r.GetUInt32();
+                                p_results = new MulticastClue[length];
+                                for (int i = 0; i < p_results.Length; i++)
+                                {
+                                    p_results[i] = MulticastClue.Formatter.Deserialize(r, rank + 1);
+                                }
+                                break;
+                            }
+                    }
+                }
+
+                return new MulticastCluesMessage(p_results);
+            }
+        }
+    }
+
+    internal sealed partial class PublishBlocksMessage : Omnix.Serialization.RocketPack.RocketPackMessageBase<PublishBlocksMessage>
+    {
+        static PublishBlocksMessage()
+        {
+            PublishBlocksMessage.Formatter = new CustomFormatter();
+            PublishBlocksMessage.Empty = new PublishBlocksMessage(new System.Collections.Generic.Dictionary<OmniHash, RelayOption>());
+        }
+
+        private readonly int __hashCode;
+
+        public static readonly int MaxParametersCount = 8192;
+
+        public PublishBlocksMessage(System.Collections.Generic.Dictionary<OmniHash, RelayOption> parameters)
+        {
+            if (parameters is null) throw new System.ArgumentNullException("parameters");
+            if (parameters.Count > 8192) throw new System.ArgumentOutOfRangeException("parameters");
+            foreach (var n in parameters)
+            {
+                if (n.Value is null) throw new System.ArgumentNullException("n.Value");
+            }
+
+            this.Parameters = new Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, RelayOption>(parameters);
+
+            {
+                var __h = new System.HashCode();
+                foreach (var n in this.Parameters)
+                {
+                    if (n.Key != default) __h.Add(n.Key.GetHashCode());
+                    if (n.Value != default) __h.Add(n.Value.GetHashCode());
+                }
+                __hashCode = __h.ToHashCode();
+            }
+        }
+
+        public Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, RelayOption> Parameters { get; }
+
+        public override bool Equals(PublishBlocksMessage? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.Parameters, target.Parameters)) return false;
+
+            return true;
+        }
+
+        public override int GetHashCode() => __hashCode;
+
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<PublishBlocksMessage>
+        {
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, PublishBlocksMessage value, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                {
+                    uint propertyCount = 0;
+                    if (value.Parameters.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
+                }
+
+                if (value.Parameters.Count != 0)
+                {
+                    w.Write((uint)0);
+                    w.Write((uint)value.Parameters.Count);
+                    foreach (var n in value.Parameters)
+                    {
+                        OmniHash.Formatter.Serialize(w, n.Key, rank + 1);
+                        RelayOption.Formatter.Serialize(w, n.Value, rank + 1);
+                    }
+                }
+            }
+
+            public PublishBlocksMessage Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                // Read property count
+                uint propertyCount = r.GetUInt32();
+
+                System.Collections.Generic.Dictionary<OmniHash, RelayOption> p_parameters = new System.Collections.Generic.Dictionary<OmniHash, RelayOption>();
+
+                for (; propertyCount > 0; propertyCount--)
+                {
+                    uint id = r.GetUInt32();
+                    switch (id)
+                    {
+                        case 0: // Parameters
+                            {
+                                var length = r.GetUInt32();
+                                p_parameters = new System.Collections.Generic.Dictionary<OmniHash, RelayOption>();
+                                OmniHash t_key = OmniHash.Empty;
+                                RelayOption t_value = RelayOption.Empty;
+                                for (int i = 0; i < length; i++)
+                                {
+                                    t_key = OmniHash.Formatter.Deserialize(r, rank + 1);
+                                    t_value = RelayOption.Formatter.Deserialize(r, rank + 1);
+                                    p_parameters[t_key] = t_value;
+                                }
+                                break;
+                            }
+                    }
+                }
+
+                return new PublishBlocksMessage(p_parameters);
+            }
+        }
+    }
+
+    internal sealed partial class WantBlocksMessage : Omnix.Serialization.RocketPack.RocketPackMessageBase<WantBlocksMessage>
+    {
+        static WantBlocksMessage()
+        {
+            WantBlocksMessage.Formatter = new CustomFormatter();
+            WantBlocksMessage.Empty = new WantBlocksMessage(new System.Collections.Generic.Dictionary<OmniHash, RelayOption>());
+        }
+
+        private readonly int __hashCode;
+
+        public static readonly int MaxParametersCount = 8192;
+
+        public WantBlocksMessage(System.Collections.Generic.Dictionary<OmniHash, RelayOption> parameters)
+        {
+            if (parameters is null) throw new System.ArgumentNullException("parameters");
+            if (parameters.Count > 8192) throw new System.ArgumentOutOfRangeException("parameters");
+            foreach (var n in parameters)
+            {
+                if (n.Value is null) throw new System.ArgumentNullException("n.Value");
+            }
+
+            this.Parameters = new Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, RelayOption>(parameters);
+
+            {
+                var __h = new System.HashCode();
+                foreach (var n in this.Parameters)
+                {
+                    if (n.Key != default) __h.Add(n.Key.GetHashCode());
+                    if (n.Value != default) __h.Add(n.Value.GetHashCode());
+                }
+                __hashCode = __h.ToHashCode();
+            }
+        }
+
+        public Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, RelayOption> Parameters { get; }
+
+        public override bool Equals(WantBlocksMessage? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.Parameters, target.Parameters)) return false;
+
+            return true;
+        }
+
+        public override int GetHashCode() => __hashCode;
+
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<WantBlocksMessage>
+        {
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, WantBlocksMessage value, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                {
+                    uint propertyCount = 0;
+                    if (value.Parameters.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
+                }
+
+                if (value.Parameters.Count != 0)
+                {
+                    w.Write((uint)0);
+                    w.Write((uint)value.Parameters.Count);
+                    foreach (var n in value.Parameters)
+                    {
+                        OmniHash.Formatter.Serialize(w, n.Key, rank + 1);
+                        RelayOption.Formatter.Serialize(w, n.Value, rank + 1);
+                    }
+                }
+            }
+
+            public WantBlocksMessage Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                // Read property count
+                uint propertyCount = r.GetUInt32();
+
+                System.Collections.Generic.Dictionary<OmniHash, RelayOption> p_parameters = new System.Collections.Generic.Dictionary<OmniHash, RelayOption>();
+
+                for (; propertyCount > 0; propertyCount--)
+                {
+                    uint id = r.GetUInt32();
+                    switch (id)
+                    {
+                        case 0: // Parameters
+                            {
+                                var length = r.GetUInt32();
+                                p_parameters = new System.Collections.Generic.Dictionary<OmniHash, RelayOption>();
+                                OmniHash t_key = OmniHash.Empty;
+                                RelayOption t_value = RelayOption.Empty;
+                                for (int i = 0; i < length; i++)
+                                {
+                                    t_key = OmniHash.Formatter.Deserialize(r, rank + 1);
+                                    t_value = RelayOption.Formatter.Deserialize(r, rank + 1);
+                                    p_parameters[t_key] = t_value;
+                                }
+                                break;
+                            }
+                    }
+                }
+
+                return new WantBlocksMessage(p_parameters);
+            }
+        }
+    }
+
+    internal sealed partial class DiffuseBlockMessage : Omnix.Serialization.RocketPack.RocketPackMessageBase<DiffuseBlockMessage>, System.IDisposable
+    {
+        static DiffuseBlockMessage()
+        {
+            DiffuseBlockMessage.Formatter = new CustomFormatter();
+            DiffuseBlockMessage.Empty = new DiffuseBlockMessage(OmniHash.Empty, RelayOption.Empty, Omnix.Base.SimpleMemoryOwner<byte>.Empty);
+        }
+
+        private readonly int __hashCode;
+
+        public static readonly int MaxValueLength = 4194304;
+
+        public DiffuseBlockMessage(OmniHash hash, RelayOption relayOption, System.Buffers.IMemoryOwner<byte> value)
+        {
+            if (relayOption is null) throw new System.ArgumentNullException("relayOption");
+            if (value is null) throw new System.ArgumentNullException("value");
+            if (value.Memory.Length > 4194304) throw new System.ArgumentOutOfRangeException("value");
+
+            this.Hash = hash;
+            this.RelayOption = relayOption;
+            _value = value;
+
+            {
+                var __h = new System.HashCode();
+                if (this.Hash != default) __h.Add(this.Hash.GetHashCode());
+                if (this.RelayOption != default) __h.Add(this.RelayOption.GetHashCode());
+                if (!this.Value.IsEmpty) __h.Add(Omnix.Base.Helpers.ObjectHelper.GetHashCode(this.Value.Span));
+                __hashCode = __h.ToHashCode();
+            }
+        }
+
+        public OmniHash Hash { get; }
+        public RelayOption RelayOption { get; }
+        private readonly System.Buffers.IMemoryOwner<byte> _value;
+        public System.ReadOnlyMemory<byte> Value => _value.Memory;
+
+        public override bool Equals(DiffuseBlockMessage? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (this.Hash != target.Hash) return false;
+            if (this.RelayOption != target.RelayOption) return false;
+            if (!Omnix.Base.BytesOperations.SequenceEqual(this.Value.Span, target.Value.Span)) return false;
+
+            return true;
+        }
+
+        public override int GetHashCode() => __hashCode;
 
         public void Dispose()
         {
             _value?.Dispose();
         }
 
-        private sealed class CustomFormatter : IRocketPackFormatter<BlockPublishPacket>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<DiffuseBlockMessage>
         {
-            public void Serialize(RocketPackWriter w, BlockPublishPacket value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, DiffuseBlockMessage value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    if (value.HopLimit != default) propertyCount++;
-                    if (value.Priority != default) propertyCount++;
-                    if (value.Hash != default) propertyCount++;
-                    if (!value.Value.IsEmpty) propertyCount++;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    if (value.Hash != OmniHash.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.RelayOption != RelayOption.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (!value.Value.IsEmpty)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
                 }
 
-                // HopLimit
-                if (value.HopLimit != default)
+                if (value.Hash != OmniHash.Empty)
                 {
-                    w.Write((ulong)0);
-                    w.Write((ulong)value.HopLimit);
-                }
-                // Priority
-                if (value.Priority != default)
-                {
-                    w.Write((ulong)1);
-                    w.Write((ulong)value.Priority);
-                }
-                // Hash
-                if (value.Hash != default)
-                {
-                    w.Write((ulong)2);
+                    w.Write((uint)0);
                     OmniHash.Formatter.Serialize(w, value.Hash, rank + 1);
                 }
-                // Value
+                if (value.RelayOption != RelayOption.Empty)
+                {
+                    w.Write((uint)1);
+                    RelayOption.Formatter.Serialize(w, value.RelayOption, rank + 1);
+                }
                 if (!value.Value.IsEmpty)
                 {
-                    w.Write((ulong)3);
+                    w.Write((uint)2);
                     w.Write(value.Value.Span);
                 }
             }
 
-            public BlockPublishPacket Deserialize(RocketPackReader r, int rank)
+            public DiffuseBlockMessage Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
-                byte p_hopLimit = default;
-                byte p_priority = default;
-                OmniHash p_hash = default;
-                IMemoryOwner<byte> p_value = default;
+                OmniHash p_hash = OmniHash.Empty;
+                RelayOption p_relayOption = RelayOption.Empty;
+                System.Buffers.IMemoryOwner<byte> p_value = Omnix.Base.SimpleMemoryOwner<byte>.Empty;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // HopLimit
-                            {
-                                p_hopLimit = (byte)r.GetUInt64();
-                                break;
-                            }
-                        case 1: // Priority
-                            {
-                                p_priority = (byte)r.GetUInt64();
-                                break;
-                            }
-                        case 2: // Hash
+                        case 0: // Hash
                             {
                                 p_hash = OmniHash.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
-                        case 3: // Value
+                        case 1: // RelayOption
+                            {
+                                p_relayOption = RelayOption.Formatter.Deserialize(r, rank + 1);
+                                break;
+                            }
+                        case 2: // Value
                             {
                                 p_value = r.GetRecyclableMemory(4194304);
                                 break;
@@ -1622,327 +1920,104 @@ namespace Xeus.Core.Exchange.Internal
                     }
                 }
 
-                return new BlockPublishPacket(p_hopLimit, p_priority, p_hash, p_value);
+                return new DiffuseBlockMessage(p_hash, p_relayOption, p_value);
             }
         }
     }
 
-    internal sealed partial class BlockRequestPacket : RocketPackMessageBase<BlockRequestPacket>
+    internal sealed partial class BlockMessage : Omnix.Serialization.RocketPack.RocketPackMessageBase<BlockMessage>, System.IDisposable
     {
-        static BlockRequestPacket()
+        static BlockMessage()
         {
-            BlockRequestPacket.Formatter = new CustomFormatter();
+            BlockMessage.Formatter = new CustomFormatter();
+            BlockMessage.Empty = new BlockMessage(OmniHash.Empty, Omnix.Base.SimpleMemoryOwner<byte>.Empty);
         }
 
-        public BlockRequestPacket(byte hopLimit, byte priority, OmniHash hash)
-        {
-            this.HopLimit = hopLimit;
-            this.Priority = priority;
-            this.Hash = hash;
-
-            {
-                var hashCode = new HashCode();
-                if (this.HopLimit != default) hashCode.Add(this.HopLimit.GetHashCode());
-                if (this.Priority != default) hashCode.Add(this.Priority.GetHashCode());
-                if (this.Hash != default) hashCode.Add(this.Hash.GetHashCode());
-                _hashCode = hashCode.ToHashCode();
-            }
-        }
-
-        public byte HopLimit { get; }
-        public byte Priority { get; }
-        public OmniHash Hash { get; }
-
-        public override bool Equals(BlockRequestPacket target)
-        {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
-            if (this.HopLimit != target.HopLimit) return false;
-            if (this.Priority != target.Priority) return false;
-            if (this.Hash != target.Hash) return false;
-
-            return true;
-        }
-
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
-
-        private sealed class CustomFormatter : IRocketPackFormatter<BlockRequestPacket>
-        {
-            public void Serialize(RocketPackWriter w, BlockRequestPacket value, int rank)
-            {
-                if (rank > 256) throw new FormatException();
-
-                // Write property count
-                {
-                    int propertyCount = 0;
-                    if (value.HopLimit != default) propertyCount++;
-                    if (value.Priority != default) propertyCount++;
-                    if (value.Hash != default) propertyCount++;
-                    w.Write((ulong)propertyCount);
-                }
-
-                // HopLimit
-                if (value.HopLimit != default)
-                {
-                    w.Write((ulong)0);
-                    w.Write((ulong)value.HopLimit);
-                }
-                // Priority
-                if (value.Priority != default)
-                {
-                    w.Write((ulong)1);
-                    w.Write((ulong)value.Priority);
-                }
-                // Hash
-                if (value.Hash != default)
-                {
-                    w.Write((ulong)2);
-                    OmniHash.Formatter.Serialize(w, value.Hash, rank + 1);
-                }
-            }
-
-            public BlockRequestPacket Deserialize(RocketPackReader r, int rank)
-            {
-                if (rank > 256) throw new FormatException();
-
-                // Read property count
-                int propertyCount = (int)r.GetUInt64();
-
-                byte p_hopLimit = default;
-                byte p_priority = default;
-                OmniHash p_hash = default;
-
-                for (; propertyCount > 0; propertyCount--)
-                {
-                    int id = (int)r.GetUInt64();
-                    switch (id)
-                    {
-                        case 0: // HopLimit
-                            {
-                                p_hopLimit = (byte)r.GetUInt64();
-                                break;
-                            }
-                        case 1: // Priority
-                            {
-                                p_priority = (byte)r.GetUInt64();
-                                break;
-                            }
-                        case 2: // Hash
-                            {
-                                p_hash = OmniHash.Formatter.Deserialize(r, rank + 1);
-                                break;
-                            }
-                    }
-                }
-
-                return new BlockRequestPacket(p_hopLimit, p_priority, p_hash);
-            }
-        }
-    }
-
-    internal sealed partial class BlockLinkPacket : RocketPackMessageBase<BlockLinkPacket>
-    {
-        static BlockLinkPacket()
-        {
-            BlockLinkPacket.Formatter = new CustomFormatter();
-        }
-
-        public BlockLinkPacket(byte hopLimit, byte priority, OmniHash hash)
-        {
-            this.HopLimit = hopLimit;
-            this.Priority = priority;
-            this.Hash = hash;
-
-            {
-                var hashCode = new HashCode();
-                if (this.HopLimit != default) hashCode.Add(this.HopLimit.GetHashCode());
-                if (this.Priority != default) hashCode.Add(this.Priority.GetHashCode());
-                if (this.Hash != default) hashCode.Add(this.Hash.GetHashCode());
-                _hashCode = hashCode.ToHashCode();
-            }
-        }
-
-        public byte HopLimit { get; }
-        public byte Priority { get; }
-        public OmniHash Hash { get; }
-
-        public override bool Equals(BlockLinkPacket target)
-        {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
-            if (this.HopLimit != target.HopLimit) return false;
-            if (this.Priority != target.Priority) return false;
-            if (this.Hash != target.Hash) return false;
-
-            return true;
-        }
-
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
-
-        private sealed class CustomFormatter : IRocketPackFormatter<BlockLinkPacket>
-        {
-            public void Serialize(RocketPackWriter w, BlockLinkPacket value, int rank)
-            {
-                if (rank > 256) throw new FormatException();
-
-                // Write property count
-                {
-                    int propertyCount = 0;
-                    if (value.HopLimit != default) propertyCount++;
-                    if (value.Priority != default) propertyCount++;
-                    if (value.Hash != default) propertyCount++;
-                    w.Write((ulong)propertyCount);
-                }
-
-                // HopLimit
-                if (value.HopLimit != default)
-                {
-                    w.Write((ulong)0);
-                    w.Write((ulong)value.HopLimit);
-                }
-                // Priority
-                if (value.Priority != default)
-                {
-                    w.Write((ulong)1);
-                    w.Write((ulong)value.Priority);
-                }
-                // Hash
-                if (value.Hash != default)
-                {
-                    w.Write((ulong)2);
-                    OmniHash.Formatter.Serialize(w, value.Hash, rank + 1);
-                }
-            }
-
-            public BlockLinkPacket Deserialize(RocketPackReader r, int rank)
-            {
-                if (rank > 256) throw new FormatException();
-
-                // Read property count
-                int propertyCount = (int)r.GetUInt64();
-
-                byte p_hopLimit = default;
-                byte p_priority = default;
-                OmniHash p_hash = default;
-
-                for (; propertyCount > 0; propertyCount--)
-                {
-                    int id = (int)r.GetUInt64();
-                    switch (id)
-                    {
-                        case 0: // HopLimit
-                            {
-                                p_hopLimit = (byte)r.GetUInt64();
-                                break;
-                            }
-                        case 1: // Priority
-                            {
-                                p_priority = (byte)r.GetUInt64();
-                                break;
-                            }
-                        case 2: // Hash
-                            {
-                                p_hash = OmniHash.Formatter.Deserialize(r, rank + 1);
-                                break;
-                            }
-                    }
-                }
-
-                return new BlockLinkPacket(p_hopLimit, p_priority, p_hash);
-            }
-        }
-    }
-
-    internal sealed partial class BlockResultPacket : RocketPackMessageBase<BlockResultPacket>, IDisposable
-    {
-        static BlockResultPacket()
-        {
-            BlockResultPacket.Formatter = new CustomFormatter();
-        }
+        private readonly int __hashCode;
 
         public static readonly int MaxValueLength = 4194304;
 
-        public BlockResultPacket(OmniHash hash, IMemoryOwner<byte> value)
+        public BlockMessage(OmniHash hash, System.Buffers.IMemoryOwner<byte> value)
         {
-            if (value is null) throw new ArgumentNullException("value");
-            if (value.Memory.Length > 4194304) throw new ArgumentOutOfRangeException("value");
+            if (value is null) throw new System.ArgumentNullException("value");
+            if (value.Memory.Length > 4194304) throw new System.ArgumentOutOfRangeException("value");
 
             this.Hash = hash;
             _value = value;
 
             {
-                var hashCode = new HashCode();
-                if (this.Hash != default) hashCode.Add(this.Hash.GetHashCode());
-                if (!this.Value.IsEmpty) hashCode.Add(ObjectHelper.GetHashCode(this.Value.Span));
-                _hashCode = hashCode.ToHashCode();
+                var __h = new System.HashCode();
+                if (this.Hash != default) __h.Add(this.Hash.GetHashCode());
+                if (!this.Value.IsEmpty) __h.Add(Omnix.Base.Helpers.ObjectHelper.GetHashCode(this.Value.Span));
+                __hashCode = __h.ToHashCode();
             }
         }
 
         public OmniHash Hash { get; }
-        private readonly IMemoryOwner<byte> _value;
-        public ReadOnlyMemory<byte> Value => _value.Memory;
+        private readonly System.Buffers.IMemoryOwner<byte> _value;
+        public System.ReadOnlyMemory<byte> Value => _value.Memory;
 
-        public override bool Equals(BlockResultPacket target)
+        public override bool Equals(BlockMessage? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
             if (this.Hash != target.Hash) return false;
-            if (!BytesOperations.SequenceEqual(this.Value.Span, target.Value.Span)) return false;
+            if (!Omnix.Base.BytesOperations.SequenceEqual(this.Value.Span, target.Value.Span)) return false;
 
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
         public void Dispose()
         {
             _value?.Dispose();
         }
 
-        private sealed class CustomFormatter : IRocketPackFormatter<BlockResultPacket>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<BlockMessage>
         {
-            public void Serialize(RocketPackWriter w, BlockResultPacket value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, BlockMessage value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    if (value.Hash != default) propertyCount++;
-                    if (!value.Value.IsEmpty) propertyCount++;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    if (value.Hash != OmniHash.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (!value.Value.IsEmpty)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
                 }
 
-                // Hash
-                if (value.Hash != default)
+                if (value.Hash != OmniHash.Empty)
                 {
-                    w.Write((ulong)0);
+                    w.Write((uint)0);
                     OmniHash.Formatter.Serialize(w, value.Hash, rank + 1);
                 }
-                // Value
                 if (!value.Value.IsEmpty)
                 {
-                    w.Write((ulong)1);
+                    w.Write((uint)1);
                     w.Write(value.Value.Span);
                 }
             }
 
-            public BlockResultPacket Deserialize(RocketPackReader r, int rank)
+            public BlockMessage Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
-                OmniHash p_hash = default;
-                IMemoryOwner<byte> p_value = default;
+                OmniHash p_hash = OmniHash.Empty;
+                System.Buffers.IMemoryOwner<byte> p_value = Omnix.Base.SimpleMemoryOwner<byte>.Empty;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                         case 0: // Hash
@@ -1958,112 +2033,109 @@ namespace Xeus.Core.Exchange.Internal
                     }
                 }
 
-                return new BlockResultPacket(p_hash, p_value);
+                return new BlockMessage(p_hash, p_value);
             }
         }
     }
 
-    internal sealed partial class UploadBlockInfo : RocketPackMessageBase<UploadBlockInfo>
+    internal sealed partial class DiffuseBlockInfo : Omnix.Serialization.RocketPack.RocketPackMessageBase<DiffuseBlockInfo>
     {
-        static UploadBlockInfo()
+        static DiffuseBlockInfo()
         {
-            UploadBlockInfo.Formatter = new CustomFormatter();
+            DiffuseBlockInfo.Formatter = new CustomFormatter();
+            DiffuseBlockInfo.Empty = new DiffuseBlockInfo(Omnix.Serialization.RocketPack.Timestamp.Zero, OmniHash.Empty, RelayOption.Empty);
         }
 
-        public UploadBlockInfo(Timestamp creationTime, uint hopLimit, byte priority, OmniHash hash)
+        private readonly int __hashCode;
+
+        public DiffuseBlockInfo(Omnix.Serialization.RocketPack.Timestamp creationTime, OmniHash hash, RelayOption relayOption)
         {
+            if (relayOption is null) throw new System.ArgumentNullException("relayOption");
+
             this.CreationTime = creationTime;
-            this.HopLimit = hopLimit;
-            this.Priority = priority;
             this.Hash = hash;
+            this.RelayOption = relayOption;
 
             {
-                var hashCode = new HashCode();
-                if (this.CreationTime != default) hashCode.Add(this.CreationTime.GetHashCode());
-                if (this.HopLimit != default) hashCode.Add(this.HopLimit.GetHashCode());
-                if (this.Priority != default) hashCode.Add(this.Priority.GetHashCode());
-                if (this.Hash != default) hashCode.Add(this.Hash.GetHashCode());
-                _hashCode = hashCode.ToHashCode();
+                var __h = new System.HashCode();
+                if (this.CreationTime != default) __h.Add(this.CreationTime.GetHashCode());
+                if (this.Hash != default) __h.Add(this.Hash.GetHashCode());
+                if (this.RelayOption != default) __h.Add(this.RelayOption.GetHashCode());
+                __hashCode = __h.ToHashCode();
             }
         }
 
-        public Timestamp CreationTime { get; }
-        public uint HopLimit { get; }
-        public byte Priority { get; }
+        public Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
         public OmniHash Hash { get; }
+        public RelayOption RelayOption { get; }
 
-        public override bool Equals(UploadBlockInfo target)
+        public override bool Equals(DiffuseBlockInfo? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
             if (this.CreationTime != target.CreationTime) return false;
-            if (this.HopLimit != target.HopLimit) return false;
-            if (this.Priority != target.Priority) return false;
             if (this.Hash != target.Hash) return false;
+            if (this.RelayOption != target.RelayOption) return false;
 
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<UploadBlockInfo>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<DiffuseBlockInfo>
         {
-            public void Serialize(RocketPackWriter w, UploadBlockInfo value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, DiffuseBlockInfo value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    if (value.CreationTime != default) propertyCount++;
-                    if (value.HopLimit != default) propertyCount++;
-                    if (value.Priority != default) propertyCount++;
-                    if (value.Hash != default) propertyCount++;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    if (value.CreationTime != Omnix.Serialization.RocketPack.Timestamp.Zero)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Hash != OmniHash.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.RelayOption != RelayOption.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
                 }
 
-                // CreationTime
-                if (value.CreationTime != default)
+                if (value.CreationTime != Omnix.Serialization.RocketPack.Timestamp.Zero)
                 {
-                    w.Write((ulong)0);
+                    w.Write((uint)0);
                     w.Write(value.CreationTime);
                 }
-                // HopLimit
-                if (value.HopLimit != default)
+                if (value.Hash != OmniHash.Empty)
                 {
-                    w.Write((ulong)1);
-                    w.Write((ulong)value.HopLimit);
-                }
-                // Priority
-                if (value.Priority != default)
-                {
-                    w.Write((ulong)2);
-                    w.Write((ulong)value.Priority);
-                }
-                // Hash
-                if (value.Hash != default)
-                {
-                    w.Write((ulong)3);
+                    w.Write((uint)1);
                     OmniHash.Formatter.Serialize(w, value.Hash, rank + 1);
+                }
+                if (value.RelayOption != RelayOption.Empty)
+                {
+                    w.Write((uint)2);
+                    RelayOption.Formatter.Serialize(w, value.RelayOption, rank + 1);
                 }
             }
 
-            public UploadBlockInfo Deserialize(RocketPackReader r, int rank)
+            public DiffuseBlockInfo Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
-                Timestamp p_creationTime = default;
-                uint p_hopLimit = default;
-                byte p_priority = default;
-                OmniHash p_hash = default;
+                Omnix.Serialization.RocketPack.Timestamp p_creationTime = Omnix.Serialization.RocketPack.Timestamp.Zero;
+                OmniHash p_hash = OmniHash.Empty;
+                RelayOption p_relayOption = RelayOption.Empty;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                         case 0: // CreationTime
@@ -2071,99 +2143,97 @@ namespace Xeus.Core.Exchange.Internal
                                 p_creationTime = r.GetTimestamp();
                                 break;
                             }
-                        case 1: // HopLimit
-                            {
-                                p_hopLimit = (uint)r.GetUInt64();
-                                break;
-                            }
-                        case 2: // Priority
-                            {
-                                p_priority = (byte)r.GetUInt64();
-                                break;
-                            }
-                        case 3: // Hash
+                        case 1: // Hash
                             {
                                 p_hash = OmniHash.Formatter.Deserialize(r, rank + 1);
+                                break;
+                            }
+                        case 2: // RelayOption
+                            {
+                                p_relayOption = RelayOption.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
                     }
                 }
 
-                return new UploadBlockInfo(p_creationTime, p_hopLimit, p_priority, p_hash);
+                return new DiffuseBlockInfo(p_creationTime, p_hash, p_relayOption);
             }
         }
     }
 
-    internal sealed partial class ExchangeManagerConfig : RocketPackMessageBase<ExchangeManagerConfig>
+    internal sealed partial class ExchangeManagerConfig : Omnix.Serialization.RocketPack.RocketPackMessageBase<ExchangeManagerConfig>
     {
         static ExchangeManagerConfig()
         {
             ExchangeManagerConfig.Formatter = new CustomFormatter();
+            ExchangeManagerConfig.Empty = new ExchangeManagerConfig(0);
         }
+
+        private readonly int __hashCode;
 
         public ExchangeManagerConfig(uint version)
         {
             this.Version = version;
 
             {
-                var hashCode = new HashCode();
-                if (this.Version != default) hashCode.Add(this.Version.GetHashCode());
-                _hashCode = hashCode.ToHashCode();
+                var __h = new System.HashCode();
+                if (this.Version != default) __h.Add(this.Version.GetHashCode());
+                __hashCode = __h.ToHashCode();
             }
         }
 
         public uint Version { get; }
 
-        public override bool Equals(ExchangeManagerConfig target)
+        public override bool Equals(ExchangeManagerConfig? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
             if (this.Version != target.Version) return false;
 
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<ExchangeManagerConfig>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<ExchangeManagerConfig>
         {
-            public void Serialize(RocketPackWriter w, ExchangeManagerConfig value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, ExchangeManagerConfig value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    if (value.Version != default) propertyCount++;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    if (value.Version != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
                 }
 
-                // Version
-                if (value.Version != default)
+                if (value.Version != 0)
                 {
-                    w.Write((ulong)0);
-                    w.Write((ulong)value.Version);
+                    w.Write((uint)0);
+                    w.Write(value.Version);
                 }
             }
 
-            public ExchangeManagerConfig Deserialize(RocketPackReader r, int rank)
+            public ExchangeManagerConfig Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
-                uint p_version = default;
+                uint p_version = 0;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                         case 0: // Version
                             {
-                                p_version = (uint)r.GetUInt64();
+                                p_version = r.GetUInt32();
                                 break;
                             }
                     }

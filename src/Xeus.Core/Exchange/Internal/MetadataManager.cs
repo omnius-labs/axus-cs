@@ -13,11 +13,11 @@ namespace Xeus.Core.Exchange.Internal
     internal sealed class MetadataManager
     {
         // Type, AuthorSignature
-        private Dictionary<string, Dictionary<OmniSignature, BroadcastMetadata>> _broadcastMetadatas = new Dictionary<string, Dictionary<OmniSignature, BroadcastMetadata>>();
+        private Dictionary<string, Dictionary<OmniSignature, BroadcastClue>> _BroadcastClues = new Dictionary<string, Dictionary<OmniSignature, BroadcastClue>>();
         // Type, Signature, AuthorSignature
-        private Dictionary<string, Dictionary<OmniSignature, Dictionary<OmniSignature, HashSet<UnicastMetadata>>>> _unicastMetadatas = new Dictionary<string, Dictionary<OmniSignature, Dictionary<OmniSignature, HashSet<UnicastMetadata>>>>();
+        private Dictionary<string, Dictionary<OmniSignature, Dictionary<OmniSignature, HashSet<UnicastClue>>>> _UnicastClues = new Dictionary<string, Dictionary<OmniSignature, Dictionary<OmniSignature, HashSet<UnicastClue>>>>();
         // Type, Channel, AuthorSignature
-        private Dictionary<string, Dictionary<Channel, Dictionary<OmniSignature, HashSet<MulticastMetadata>>>> _multicastMetadatas = new Dictionary<string, Dictionary<Channel, Dictionary<OmniSignature, HashSet<MulticastMetadata>>>>();
+        private Dictionary<string, Dictionary<Channel, Dictionary<OmniSignature, HashSet<MulticastClue>>>> _MulticastClues = new Dictionary<string, Dictionary<Channel, Dictionary<OmniSignature, HashSet<MulticastClue>>>>();
 
         // UpdateTime
         private Dictionary<string, DateTime> _broadcastTypes = new Dictionary<string, DateTime>();
@@ -60,14 +60,14 @@ namespace Xeus.Core.Exchange.Internal
                             _broadcastTypes.Remove(type);
                         }
 
-                        foreach (string type in _broadcastMetadatas.Keys.ToArray())
+                        foreach (string type in _BroadcastClues.Keys.ToArray())
                         {
                             if (!removeTypes.Contains(type)) continue;
-                            _broadcastMetadatas.Remove(type);
+                            _BroadcastClues.Remove(type);
                         }
                     }
 
-                    foreach (var dic in _broadcastMetadatas.Values)
+                    foreach (var dic in _BroadcastClues.Values)
                     {
                         var keys = dic.Keys.Where(n => !lockedSignatures.Contains(n)).ToList();
 
@@ -88,14 +88,14 @@ namespace Xeus.Core.Exchange.Internal
                             _unicastTypes.Remove(type);
                         }
 
-                        foreach (string type in _unicastMetadatas.Keys.ToArray())
+                        foreach (string type in _UnicastClues.Keys.ToArray())
                         {
                             if (!removeTypes.Contains(type)) continue;
-                            _unicastMetadatas.Remove(type);
+                            _UnicastClues.Remove(type);
                         }
                     }
 
-                    foreach (var dic in _unicastMetadatas.Values)
+                    foreach (var dic in _UnicastClues.Values)
                     {
                         var keys = dic.Keys.Where(n => !lockedSignatures.Contains(n)).ToList();
 
@@ -105,7 +105,7 @@ namespace Xeus.Core.Exchange.Internal
                         }
                     }
 
-                    foreach (var dic in _unicastMetadatas.Values.SelectMany(n => n.Values))
+                    foreach (var dic in _UnicastClues.Values.SelectMany(n => n.Values))
                     {
                         var keys = dic.Keys.Where(n => !lockedSignatures.Contains(n)).ToList();
 
@@ -115,7 +115,7 @@ namespace Xeus.Core.Exchange.Internal
                         }
                     }
 
-                    foreach (var hashset in _unicastMetadatas.Values.SelectMany(n => n.Values.SelectMany(m => m.Values)).ToArray())
+                    foreach (var hashset in _UnicastClues.Values.SelectMany(n => n.Values.SelectMany(m => m.Values)).ToArray())
                     {
                         if (hashset.Count <= 32) continue;
 
@@ -139,14 +139,14 @@ namespace Xeus.Core.Exchange.Internal
                             _multicastTypes.Remove(type);
                         }
 
-                        foreach (string type in _multicastMetadatas.Keys.ToArray())
+                        foreach (string type in _MulticastClues.Keys.ToArray())
                         {
                             if (!removeTypes.Contains(type)) continue;
-                            _multicastMetadatas.Remove(type);
+                            _MulticastClues.Remove(type);
                         }
                     }
 
-                    foreach (var dic in _multicastMetadatas.Values)
+                    foreach (var dic in _MulticastClues.Values)
                     {
                         var keys = dic.Keys.Where(n => !lockedChannels.Contains(n)).ToList();
 
@@ -156,7 +156,7 @@ namespace Xeus.Core.Exchange.Internal
                         }
                     }
 
-                    foreach (var dic in _multicastMetadatas.Values.SelectMany(n => n.Values))
+                    foreach (var dic in _MulticastClues.Values.SelectMany(n => n.Values))
                     {
                         var keys = dic.Keys.Where(n => !lockedSignatures.Contains(n)).ToList();
 
@@ -166,7 +166,7 @@ namespace Xeus.Core.Exchange.Internal
                         }
                     }
 
-                    foreach (var hashset in _multicastMetadatas.Values.SelectMany(n => n.Values.SelectMany(m => m.Values)).ToArray())
+                    foreach (var hashset in _MulticastClues.Values.SelectMany(n => n.Values.SelectMany(m => m.Values)).ToArray())
                     {
                         if (hashset.Count <= 32) continue;
 
@@ -190,9 +190,9 @@ namespace Xeus.Core.Exchange.Internal
                 {
                     int count = 0;
 
-                    count += _broadcastMetadatas.Values.Sum(n => n.Count);
-                    count += _unicastMetadatas.Values.Sum(n => n.Values.Sum(m => m.Values.Sum(o => o.Count)));
-                    count += _multicastMetadatas.Values.Sum(n => n.Values.Sum(m => m.Values.Sum(o => o.Count)));
+                    count += _BroadcastClues.Values.Sum(n => n.Count);
+                    count += _UnicastClues.Values.Sum(n => n.Values.Sum(m => m.Values.Sum(o => o.Count)));
+                    count += _MulticastClues.Values.Sum(n => n.Values.Sum(m => m.Values.Sum(o => o.Count)));
 
                     return count;
                 }
@@ -205,7 +205,7 @@ namespace Xeus.Core.Exchange.Internal
             {
                 var hashset = new HashSet<OmniSignature>();
 
-                hashset.UnionWith(_broadcastMetadatas.Values.SelectMany(n => n.Keys));
+                hashset.UnionWith(_BroadcastClues.Values.SelectMany(n => n.Keys));
 
                 return hashset;
             }
@@ -217,7 +217,7 @@ namespace Xeus.Core.Exchange.Internal
             {
                 var hashset = new HashSet<OmniSignature>();
 
-                hashset.UnionWith(_unicastMetadatas.Values.SelectMany(n => n.Keys));
+                hashset.UnionWith(_UnicastClues.Values.SelectMany(n => n.Keys));
 
                 return hashset;
             }
@@ -229,31 +229,31 @@ namespace Xeus.Core.Exchange.Internal
             {
                 var hashset = new HashSet<Channel>();
 
-                hashset.UnionWith(_multicastMetadatas.Values.SelectMany(n => n.Keys));
+                hashset.UnionWith(_MulticastClues.Values.SelectMany(n => n.Keys));
 
                 return hashset;
             }
         }
 
-        public IEnumerable<BroadcastMetadata> GetBroadcastMetadatas()
+        public IEnumerable<BroadcastClue> GetBroadcastClues()
         {
             lock (_lockObject)
             {
-                return _broadcastMetadatas.Values.SelectMany(n => n.Values).ToArray();
+                return _BroadcastClues.Values.SelectMany(n => n.Values).ToArray();
             }
         }
 
-        public IEnumerable<BroadcastMetadata> GetBroadcastMetadatas(OmniSignature signature)
+        public IEnumerable<BroadcastClue> GetBroadcastClues(OmniSignature signature)
         {
             lock (_lockObject)
             {
-                var list = new List<BroadcastMetadata>();
+                var list = new List<BroadcastClue>();
 
-                foreach (var dic in _broadcastMetadatas.Values)
+                foreach (var dic in _BroadcastClues.Values)
                 {
-                    if (dic.TryGetValue(signature, out var broadcastMetadata))
+                    if (dic.TryGetValue(signature, out var BroadcastClue))
                     {
-                        list.Add(broadcastMetadata);
+                        list.Add(BroadcastClue);
                     }
                 }
 
@@ -261,17 +261,17 @@ namespace Xeus.Core.Exchange.Internal
             }
         }
 
-        public BroadcastMetadata GetBroadcastMetadata(OmniSignature signature, string type)
+        public BroadcastClue GetBroadcastClue(OmniSignature signature, string type)
         {
             lock (_lockObject)
             {
                 _broadcastTypes[type] = DateTime.UtcNow;
 
-                if (_broadcastMetadatas.TryGetValue(type, out var dic))
+                if (_BroadcastClues.TryGetValue(type, out var dic))
                 {
-                    if (dic.TryGetValue(signature, out var broadcastMetadata))
+                    if (dic.TryGetValue(signature, out var BroadcastClue))
                     {
-                        return broadcastMetadata;
+                        return BroadcastClue;
                     }
                 }
 
@@ -279,21 +279,21 @@ namespace Xeus.Core.Exchange.Internal
             }
         }
 
-        public IEnumerable<UnicastMetadata> GetUnicastMetadatas()
+        public IEnumerable<UnicastClue> GetUnicastClues()
         {
             lock (_lockObject)
             {
-                return _unicastMetadatas.Values.SelectMany(n => n.Values.SelectMany(m => m.Values.SelectMany(o => o))).ToArray();
+                return _UnicastClues.Values.SelectMany(n => n.Values.SelectMany(m => m.Values.SelectMany(o => o))).ToArray();
             }
         }
 
-        public IEnumerable<UnicastMetadata> GetUnicastMetadatas(OmniSignature signature)
+        public IEnumerable<UnicastClue> GetUnicastClues(OmniSignature signature)
         {
             lock (_lockObject)
             {
-                var list = new List<UnicastMetadata>();
+                var list = new List<UnicastClue>();
 
-                foreach (var dic in _unicastMetadatas.Values)
+                foreach (var dic in _UnicastClues.Values)
                 {
                     if (dic.TryGetValue(signature, out var dic2))
                     {
@@ -305,15 +305,15 @@ namespace Xeus.Core.Exchange.Internal
             }
         }
 
-        public IEnumerable<UnicastMetadata> GetUnicastMetadatas(OmniSignature signature, string type)
+        public IEnumerable<UnicastClue> GetUnicastClues(OmniSignature signature, string type)
         {
             lock (_lockObject)
             {
                 _unicastTypes[type] = DateTime.UtcNow;
 
-                var list = new List<UnicastMetadata>();
+                var list = new List<UnicastClue>();
 
-                if (_unicastMetadatas.TryGetValue(type, out var dic))
+                if (_UnicastClues.TryGetValue(type, out var dic))
                 {
                     if (dic.TryGetValue(signature, out var dic2))
                     {
@@ -325,21 +325,21 @@ namespace Xeus.Core.Exchange.Internal
             }
         }
 
-        public IEnumerable<MulticastMetadata> GetMulticastMetadatas()
+        public IEnumerable<MulticastClue> GetMulticastClues()
         {
             lock (_lockObject)
             {
-                return _multicastMetadatas.Values.SelectMany(n => n.Values.SelectMany(m => m.Values.SelectMany(o => o))).ToArray();
+                return _MulticastClues.Values.SelectMany(n => n.Values.SelectMany(m => m.Values.SelectMany(o => o))).ToArray();
             }
         }
 
-        public IEnumerable<MulticastMetadata> GetMulticastMetadatas(Channel channel)
+        public IEnumerable<MulticastClue> GetMulticastClues(Channel channel)
         {
             lock (_lockObject)
             {
-                var list = new List<MulticastMetadata>();
+                var list = new List<MulticastClue>();
 
-                foreach (var dic in _multicastMetadatas.Values)
+                foreach (var dic in _MulticastClues.Values)
                 {
                     if (dic.TryGetValue(channel, out var dic2))
                     {
@@ -351,16 +351,16 @@ namespace Xeus.Core.Exchange.Internal
             }
         }
 
-        public IEnumerable<MulticastMetadata> GetMulticastMetadatas(Channel channel, string type)
+        public IEnumerable<MulticastClue> GetMulticastClues(Channel channel, string type)
         {
             lock (_lockObject)
             {
                 _aliveChannels.Add(channel);
                 _multicastTypes[type] = DateTime.UtcNow;
 
-                var list = new List<MulticastMetadata>();
+                var list = new List<MulticastClue>();
 
-                if (_multicastMetadatas.TryGetValue(type, out var dic))
+                if (_MulticastClues.TryGetValue(type, out var dic))
                 {
                     if (dic.TryGetValue(channel, out var dic2))
                     {
@@ -372,121 +372,121 @@ namespace Xeus.Core.Exchange.Internal
             }
         }
 
-        public bool SetMetadata(BroadcastMetadata broadcastMetadata)
+        public bool SetMetadata(BroadcastClue BroadcastClue)
         {
             lock (_lockObject)
             {
                 var now = DateTime.UtcNow;
 
-                if (broadcastMetadata == null
-                    || broadcastMetadata.Type == null
-                    || (broadcastMetadata.CreationTime.ToDateTime() - now).TotalMinutes > 30
-                    || broadcastMetadata.Certificate == null) return false;
+                if (BroadcastClue == null
+                    || BroadcastClue.Type == null
+                    || (BroadcastClue.CreationTime.ToDateTime() - now).TotalMinutes > 30
+                    || BroadcastClue.Certificate == null) return false;
 
-                if (!_broadcastMetadatas.TryGetValue(broadcastMetadata.Type, out var dic))
+                if (!_BroadcastClues.TryGetValue(BroadcastClue.Type, out var dic))
                 {
-                    dic = new Dictionary<OmniSignature, BroadcastMetadata>();
-                    _broadcastMetadatas[broadcastMetadata.Type] = dic;
+                    dic = new Dictionary<OmniSignature, BroadcastClue>();
+                    _BroadcastClues[BroadcastClue.Type] = dic;
                 }
 
-                var signature = broadcastMetadata.Certificate.GetOmniSignature();
+                var signature = BroadcastClue.Certificate.GetOmniSignature();
 
                 if (!dic.TryGetValue(signature, out var tempMetadata)
-                    || broadcastMetadata.CreationTime.ToDateTime() > tempMetadata.CreationTime.ToDateTime())
+                    || BroadcastClue.CreationTime.ToDateTime() > tempMetadata.CreationTime.ToDateTime())
                 {
-                    if (!broadcastMetadata.VerifyCertificate()) return false;
+                    if (!BroadcastClue.VerifyCertificate()) return false;
 
-                    dic[signature] = broadcastMetadata;
+                    dic[signature] = BroadcastClue;
                 }
 
                 return true;
             }
         }
 
-        public bool SetMetadata(UnicastMetadata unicastMetadata)
+        public bool SetMetadata(UnicastClue UnicastClue)
         {
             lock (_lockObject)
             {
                 var now = DateTime.UtcNow;
 
-                if (unicastMetadata == null
-                    || unicastMetadata.Type == null
-                    || unicastMetadata.Signature == null
-                        || unicastMetadata.Signature.Hash.Value.Length == 0
-                        || string.IsNullOrWhiteSpace(unicastMetadata.Signature.Name)
-                    || (unicastMetadata.CreationTime.ToDateTime() - now).TotalMinutes > 30
-                    || unicastMetadata.Certificate == null) return false;
+                if (UnicastClue == null
+                    || UnicastClue.Type == null
+                    || UnicastClue.Signature == null
+                        || UnicastClue.Signature.Hash.Value.Length == 0
+                        || string.IsNullOrWhiteSpace(UnicastClue.Signature.Name)
+                    || (UnicastClue.CreationTime.ToDateTime() - now).TotalMinutes > 30
+                    || UnicastClue.Certificate == null) return false;
 
-                if (!_unicastMetadatas.TryGetValue(unicastMetadata.Type, out var dic))
+                if (!_UnicastClues.TryGetValue(UnicastClue.Type, out var dic))
                 {
-                    dic = new Dictionary<OmniSignature, Dictionary<OmniSignature, HashSet<UnicastMetadata>>>();
-                    _unicastMetadatas[unicastMetadata.Type] = dic;
+                    dic = new Dictionary<OmniSignature, Dictionary<OmniSignature, HashSet<UnicastClue>>>();
+                    _UnicastClues[UnicastClue.Type] = dic;
                 }
 
-                if (!dic.TryGetValue(unicastMetadata.Signature, out var dic2))
+                if (!dic.TryGetValue(UnicastClue.Signature, out var dic2))
                 {
-                    dic2 = new Dictionary<OmniSignature, HashSet<UnicastMetadata>>();
-                    dic[unicastMetadata.Signature] = dic2;
+                    dic2 = new Dictionary<OmniSignature, HashSet<UnicastClue>>();
+                    dic[UnicastClue.Signature] = dic2;
                 }
 
-                var signature = unicastMetadata.Certificate.GetOmniSignature();
+                var signature = UnicastClue.Certificate.GetOmniSignature();
 
                 if (!dic2.TryGetValue(signature, out var hashset))
                 {
-                    hashset = new HashSet<UnicastMetadata>();
+                    hashset = new HashSet<UnicastClue>();
                     dic2[signature] = hashset;
                 }
 
-                if (!hashset.Contains(unicastMetadata))
+                if (!hashset.Contains(UnicastClue))
                 {
-                    if (!unicastMetadata.VerifyCertificate()) return false;
+                    if (!UnicastClue.VerifyCertificate()) return false;
 
-                    hashset.Add(unicastMetadata);
+                    hashset.Add(UnicastClue);
                 }
 
                 return true;
             }
         }
 
-        public bool SetMetadata(MulticastMetadata multicastMetadata)
+        public bool SetMetadata(MulticastClue MulticastClue)
         {
             lock (_lockObject)
             {
                 var now = DateTime.UtcNow;
 
-                if (multicastMetadata == null
-                    || multicastMetadata.Type == null
-                    || multicastMetadata.Channel == null
-                        || multicastMetadata.Channel.Id.Length == 0
-                        || string.IsNullOrWhiteSpace(multicastMetadata.Channel.Name)
-                    || (multicastMetadata.CreationTime.ToDateTime() - now).TotalMinutes > 30
-                    || multicastMetadata.Certificate == null) return false;
+                if (MulticastClue == null
+                    || MulticastClue.Type == null
+                    || MulticastClue.Channel == null
+                        || MulticastClue.Channel.Id.Length == 0
+                        || string.IsNullOrWhiteSpace(MulticastClue.Channel.Name)
+                    || (MulticastClue.CreationTime.ToDateTime() - now).TotalMinutes > 30
+                    || MulticastClue.Certificate == null) return false;
 
-                if (!_multicastMetadatas.TryGetValue(multicastMetadata.Type, out var dic))
+                if (!_MulticastClues.TryGetValue(MulticastClue.Type, out var dic))
                 {
-                    dic = new Dictionary<Channel, Dictionary<OmniSignature, HashSet<MulticastMetadata>>>();
-                    _multicastMetadatas[multicastMetadata.Type] = dic;
+                    dic = new Dictionary<Channel, Dictionary<OmniSignature, HashSet<MulticastClue>>>();
+                    _MulticastClues[MulticastClue.Type] = dic;
                 }
 
-                if (!dic.TryGetValue(multicastMetadata.Channel, out var dic2))
+                if (!dic.TryGetValue(MulticastClue.Channel, out var dic2))
                 {
-                    dic2 = new Dictionary<OmniSignature, HashSet<MulticastMetadata>>();
-                    dic[multicastMetadata.Channel] = dic2;
+                    dic2 = new Dictionary<OmniSignature, HashSet<MulticastClue>>();
+                    dic[MulticastClue.Channel] = dic2;
                 }
 
-                var signature = multicastMetadata.Certificate.GetOmniSignature();
+                var signature = MulticastClue.Certificate.GetOmniSignature();
 
                 if (!dic2.TryGetValue(signature, out var hashset))
                 {
-                    hashset = new HashSet<MulticastMetadata>();
+                    hashset = new HashSet<MulticastClue>();
                     dic2[signature] = hashset;
                 }
 
-                if (!hashset.Contains(multicastMetadata))
+                if (!hashset.Contains(MulticastClue))
                 {
-                    if (!multicastMetadata.VerifyCertificate()) return false;
+                    if (!MulticastClue.VerifyCertificate()) return false;
 
-                    hashset.Add(multicastMetadata);
+                    hashset.Add(MulticastClue);
                 }
 
                 return true;

@@ -1,135 +1,135 @@
-﻿using Omnix.Base;
-using Omnix.Base.Helpers;
-using Omnix.Cryptography;
+﻿using Omnix.Cryptography;
 using Omnix.Network;
-using Omnix.Serialization;
-using Omnix.Serialization.RocketPack;
-using System;
-using System.Buffers;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using Xeus.Messages;
 using Xeus.Messages.Options;
 using Xeus.Messages.Reports;
 
+#nullable enable
+
 namespace Xeus.Core.Contents.Internal
 {
-    internal sealed partial class ClusterInfo : RocketPackMessageBase<ClusterInfo>
+    internal sealed partial class ClusterInfo : Omnix.Serialization.RocketPack.RocketPackMessageBase<ClusterInfo>
     {
         static ClusterInfo()
         {
             ClusterInfo.Formatter = new CustomFormatter();
+            ClusterInfo.Empty = new ClusterInfo(System.Array.Empty<ulong>(), 0, Omnix.Serialization.RocketPack.Timestamp.Zero);
         }
+
+        private readonly int __hashCode;
 
         public static readonly int MaxSectorsCount = 256;
 
-        public ClusterInfo(IList<ulong> sectors, uint length, Timestamp lastAccessTime)
+        public ClusterInfo(ulong[] sectors, uint length, Omnix.Serialization.RocketPack.Timestamp lastAccessTime)
         {
-            if (sectors is null) throw new ArgumentNullException("sectors");
-            if (sectors.Count > 256) throw new ArgumentOutOfRangeException("sectors");
-            this.Sectors = new ReadOnlyCollection<ulong>(sectors);
+            if (sectors is null) throw new System.ArgumentNullException("sectors");
+            if (sectors.Length > 256) throw new System.ArgumentOutOfRangeException("sectors");
+            this.Sectors = new Omnix.Collections.ReadOnlyListSlim<ulong>(sectors);
             this.Length = length;
             this.LastAccessTime = lastAccessTime;
 
             {
-                var hashCode = new HashCode();
+                var __h = new System.HashCode();
                 foreach (var n in this.Sectors)
                 {
-                    if (n != default) hashCode.Add(n.GetHashCode());
+                    if (n != default) __h.Add(n.GetHashCode());
                 }
-                if (this.Length != default) hashCode.Add(this.Length.GetHashCode());
-                if (this.LastAccessTime != default) hashCode.Add(this.LastAccessTime.GetHashCode());
-                _hashCode = hashCode.ToHashCode();
+                if (this.Length != default) __h.Add(this.Length.GetHashCode());
+                if (this.LastAccessTime != default) __h.Add(this.LastAccessTime.GetHashCode());
+                __hashCode = __h.ToHashCode();
             }
         }
 
-        public IReadOnlyList<ulong> Sectors { get; }
+        public Omnix.Collections.ReadOnlyListSlim<ulong> Sectors { get; }
         public uint Length { get; }
-        public Timestamp LastAccessTime { get; }
+        public Omnix.Serialization.RocketPack.Timestamp LastAccessTime { get; }
 
-        public override bool Equals(ClusterInfo target)
+        public override bool Equals(ClusterInfo? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
-            if ((this.Sectors is null) != (target.Sectors is null)) return false;
-            if (!(this.Sectors is null) && !(target.Sectors is null) && !CollectionHelper.Equals(this.Sectors, target.Sectors)) return false;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.Sectors, target.Sectors)) return false;
             if (this.Length != target.Length) return false;
             if (this.LastAccessTime != target.LastAccessTime) return false;
 
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<ClusterInfo>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<ClusterInfo>
         {
-            public void Serialize(RocketPackWriter w, ClusterInfo value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, ClusterInfo value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    if (value.Sectors.Count != 0) propertyCount++;
-                    if (value.Length != default) propertyCount++;
-                    if (value.LastAccessTime != default) propertyCount++;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    if (value.Sectors.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Length != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.LastAccessTime != Omnix.Serialization.RocketPack.Timestamp.Zero)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
                 }
 
-                // Sectors
                 if (value.Sectors.Count != 0)
                 {
-                    w.Write((ulong)0);
-                    w.Write((ulong)value.Sectors.Count);
+                    w.Write((uint)0);
+                    w.Write((uint)value.Sectors.Count);
                     foreach (var n in value.Sectors)
                     {
-                        w.Write((ulong)n);
+                        w.Write(n);
                     }
                 }
-                // Length
-                if (value.Length != default)
+                if (value.Length != 0)
                 {
-                    w.Write((ulong)1);
-                    w.Write((ulong)value.Length);
+                    w.Write((uint)1);
+                    w.Write(value.Length);
                 }
-                // LastAccessTime
-                if (value.LastAccessTime != default)
+                if (value.LastAccessTime != Omnix.Serialization.RocketPack.Timestamp.Zero)
                 {
-                    w.Write((ulong)2);
+                    w.Write((uint)2);
                     w.Write(value.LastAccessTime);
                 }
             }
 
-            public ClusterInfo Deserialize(RocketPackReader r, int rank)
+            public ClusterInfo Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
-                IList<ulong> p_sectors = default;
-                uint p_length = default;
-                Timestamp p_lastAccessTime = default;
+                ulong[] p_sectors = System.Array.Empty<ulong>();
+                uint p_length = 0;
+                Omnix.Serialization.RocketPack.Timestamp p_lastAccessTime = Omnix.Serialization.RocketPack.Timestamp.Zero;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                         case 0: // Sectors
                             {
-                                var length = (int)r.GetUInt64();
+                                var length = r.GetUInt32();
                                 p_sectors = new ulong[length];
-                                for (int i = 0; i < p_sectors.Count; i++)
+                                for (int i = 0; i < p_sectors.Length; i++)
                                 {
-                                    p_sectors[i] = (ulong)r.GetUInt64();
+                                    p_sectors[i] = r.GetUInt64();
                                 }
                                 break;
                             }
                         case 1: // Length
                             {
-                                p_length = (uint)r.GetUInt64();
+                                p_length = r.GetUInt32();
                                 break;
                             }
                         case 2: // LastAccessTime
@@ -145,122 +145,130 @@ namespace Xeus.Core.Contents.Internal
         }
     }
 
-    internal sealed partial class ContentInfo : RocketPackMessageBase<ContentInfo>
+    internal sealed partial class ContentInfo : Omnix.Serialization.RocketPack.RocketPackMessageBase<ContentInfo>
     {
         static ContentInfo()
         {
             ContentInfo.Formatter = new CustomFormatter();
+            ContentInfo.Empty = new ContentInfo(Clue.Empty, Omnix.Serialization.RocketPack.Timestamp.Zero, System.Array.Empty<OmniHash>(), SharedBlocksInfo.Empty);
         }
+
+        private readonly int __hashCode;
 
         public static readonly int MaxLockedHashesCount = 1073741824;
 
-        public ContentInfo(Clue clue, Timestamp creationTime, IList<OmniHash> lockedHashes, SharedBlocksInfo sharedBlocksInfo)
+        public ContentInfo(Clue clue, Omnix.Serialization.RocketPack.Timestamp creationTime, OmniHash[] lockedHashes, SharedBlocksInfo sharedBlocksInfo)
         {
-            if (clue is null) throw new ArgumentNullException("clue");
-            if (lockedHashes is null) throw new ArgumentNullException("lockedHashes");
-            if (lockedHashes.Count > 1073741824) throw new ArgumentOutOfRangeException("lockedHashes");
-            if (sharedBlocksInfo is null) throw new ArgumentNullException("sharedBlocksInfo");
+            if (clue is null) throw new System.ArgumentNullException("clue");
+            if (lockedHashes is null) throw new System.ArgumentNullException("lockedHashes");
+            if (lockedHashes.Length > 1073741824) throw new System.ArgumentOutOfRangeException("lockedHashes");
+            if (sharedBlocksInfo is null) throw new System.ArgumentNullException("sharedBlocksInfo");
 
             this.Clue = clue;
             this.CreationTime = creationTime;
-            this.LockedHashes = new ReadOnlyCollection<OmniHash>(lockedHashes);
+            this.LockedHashes = new Omnix.Collections.ReadOnlyListSlim<OmniHash>(lockedHashes);
             this.SharedBlocksInfo = sharedBlocksInfo;
 
             {
-                var hashCode = new HashCode();
-                if (this.Clue != default) hashCode.Add(this.Clue.GetHashCode());
-                if (this.CreationTime != default) hashCode.Add(this.CreationTime.GetHashCode());
+                var __h = new System.HashCode();
+                if (this.Clue != default) __h.Add(this.Clue.GetHashCode());
+                if (this.CreationTime != default) __h.Add(this.CreationTime.GetHashCode());
                 foreach (var n in this.LockedHashes)
                 {
-                    if (n != default) hashCode.Add(n.GetHashCode());
+                    if (n != default) __h.Add(n.GetHashCode());
                 }
-                if (this.SharedBlocksInfo != default) hashCode.Add(this.SharedBlocksInfo.GetHashCode());
-                _hashCode = hashCode.ToHashCode();
+                if (this.SharedBlocksInfo != default) __h.Add(this.SharedBlocksInfo.GetHashCode());
+                __hashCode = __h.ToHashCode();
             }
         }
 
         public Clue Clue { get; }
-        public Timestamp CreationTime { get; }
-        public IReadOnlyList<OmniHash> LockedHashes { get; }
+        public Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
+        public Omnix.Collections.ReadOnlyListSlim<OmniHash> LockedHashes { get; }
         public SharedBlocksInfo SharedBlocksInfo { get; }
 
-        public override bool Equals(ContentInfo target)
+        public override bool Equals(ContentInfo? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
             if (this.Clue != target.Clue) return false;
             if (this.CreationTime != target.CreationTime) return false;
-            if ((this.LockedHashes is null) != (target.LockedHashes is null)) return false;
-            if (!(this.LockedHashes is null) && !(target.LockedHashes is null) && !CollectionHelper.Equals(this.LockedHashes, target.LockedHashes)) return false;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.LockedHashes, target.LockedHashes)) return false;
             if (this.SharedBlocksInfo != target.SharedBlocksInfo) return false;
 
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<ContentInfo>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<ContentInfo>
         {
-            public void Serialize(RocketPackWriter w, ContentInfo value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, ContentInfo value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    if (value.Clue != default) propertyCount++;
-                    if (value.CreationTime != default) propertyCount++;
-                    if (value.LockedHashes.Count != 0) propertyCount++;
-                    if (value.SharedBlocksInfo != default) propertyCount++;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    if (value.Clue != Clue.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.CreationTime != Omnix.Serialization.RocketPack.Timestamp.Zero)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.LockedHashes.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.SharedBlocksInfo != SharedBlocksInfo.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
                 }
 
-                // Clue
-                if (value.Clue != default)
+                if (value.Clue != Clue.Empty)
                 {
-                    w.Write((ulong)0);
+                    w.Write((uint)0);
                     Clue.Formatter.Serialize(w, value.Clue, rank + 1);
                 }
-                // CreationTime
-                if (value.CreationTime != default)
+                if (value.CreationTime != Omnix.Serialization.RocketPack.Timestamp.Zero)
                 {
-                    w.Write((ulong)1);
+                    w.Write((uint)1);
                     w.Write(value.CreationTime);
                 }
-                // LockedHashes
                 if (value.LockedHashes.Count != 0)
                 {
-                    w.Write((ulong)2);
-                    w.Write((ulong)value.LockedHashes.Count);
+                    w.Write((uint)2);
+                    w.Write((uint)value.LockedHashes.Count);
                     foreach (var n in value.LockedHashes)
                     {
                         OmniHash.Formatter.Serialize(w, n, rank + 1);
                     }
                 }
-                // SharedBlocksInfo
-                if (value.SharedBlocksInfo != default)
+                if (value.SharedBlocksInfo != SharedBlocksInfo.Empty)
                 {
-                    w.Write((ulong)3);
+                    w.Write((uint)3);
                     SharedBlocksInfo.Formatter.Serialize(w, value.SharedBlocksInfo, rank + 1);
                 }
             }
 
-            public ContentInfo Deserialize(RocketPackReader r, int rank)
+            public ContentInfo Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
-                Clue p_clue = default;
-                Timestamp p_creationTime = default;
-                IList<OmniHash> p_lockedHashes = default;
-                SharedBlocksInfo p_sharedBlocksInfo = default;
+                Clue p_clue = Clue.Empty;
+                Omnix.Serialization.RocketPack.Timestamp p_creationTime = Omnix.Serialization.RocketPack.Timestamp.Zero;
+                OmniHash[] p_lockedHashes = System.Array.Empty<OmniHash>();
+                SharedBlocksInfo p_sharedBlocksInfo = SharedBlocksInfo.Empty;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                         case 0: // Clue
@@ -275,9 +283,9 @@ namespace Xeus.Core.Contents.Internal
                             }
                         case 2: // LockedHashes
                             {
-                                var length = (int)r.GetUInt64();
+                                var length = r.GetUInt32();
                                 p_lockedHashes = new OmniHash[length];
-                                for (int i = 0; i < p_lockedHashes.Count; i++)
+                                for (int i = 0; i < p_lockedHashes.Length; i++)
                                 {
                                     p_lockedHashes[i] = OmniHash.Formatter.Deserialize(r, rank + 1);
                                 }
@@ -296,101 +304,109 @@ namespace Xeus.Core.Contents.Internal
         }
     }
 
-    internal sealed partial class SharedBlocksInfo : RocketPackMessageBase<SharedBlocksInfo>
+    internal sealed partial class SharedBlocksInfo : Omnix.Serialization.RocketPack.RocketPackMessageBase<SharedBlocksInfo>
     {
         static SharedBlocksInfo()
         {
             SharedBlocksInfo.Formatter = new CustomFormatter();
+            SharedBlocksInfo.Empty = new SharedBlocksInfo(string.Empty, 0, 0, System.Array.Empty<OmniHash>());
         }
+
+        private readonly int __hashCode;
 
         public static readonly int MaxPathLength = 1024;
         public static readonly int MaxHashesCount = 1073741824;
 
-        public SharedBlocksInfo(string path, ulong length, uint blockLength, IList<OmniHash> hashes)
+        public SharedBlocksInfo(string path, ulong length, uint blockLength, OmniHash[] hashes)
         {
-            if (path is null) throw new ArgumentNullException("path");
-            if (path.Length > 1024) throw new ArgumentOutOfRangeException("path");
-            if (hashes is null) throw new ArgumentNullException("hashes");
-            if (hashes.Count > 1073741824) throw new ArgumentOutOfRangeException("hashes");
+            if (path is null) throw new System.ArgumentNullException("path");
+            if (path.Length > 1024) throw new System.ArgumentOutOfRangeException("path");
+            if (hashes is null) throw new System.ArgumentNullException("hashes");
+            if (hashes.Length > 1073741824) throw new System.ArgumentOutOfRangeException("hashes");
 
             this.Path = path;
             this.Length = length;
             this.BlockLength = blockLength;
-            this.Hashes = new ReadOnlyCollection<OmniHash>(hashes);
+            this.Hashes = new Omnix.Collections.ReadOnlyListSlim<OmniHash>(hashes);
 
             {
-                var hashCode = new HashCode();
-                if (this.Path != default) hashCode.Add(this.Path.GetHashCode());
-                if (this.Length != default) hashCode.Add(this.Length.GetHashCode());
-                if (this.BlockLength != default) hashCode.Add(this.BlockLength.GetHashCode());
+                var __h = new System.HashCode();
+                if (this.Path != default) __h.Add(this.Path.GetHashCode());
+                if (this.Length != default) __h.Add(this.Length.GetHashCode());
+                if (this.BlockLength != default) __h.Add(this.BlockLength.GetHashCode());
                 foreach (var n in this.Hashes)
                 {
-                    if (n != default) hashCode.Add(n.GetHashCode());
+                    if (n != default) __h.Add(n.GetHashCode());
                 }
-                _hashCode = hashCode.ToHashCode();
+                __hashCode = __h.ToHashCode();
             }
         }
 
         public string Path { get; }
         public ulong Length { get; }
         public uint BlockLength { get; }
-        public IReadOnlyList<OmniHash> Hashes { get; }
+        public Omnix.Collections.ReadOnlyListSlim<OmniHash> Hashes { get; }
 
-        public override bool Equals(SharedBlocksInfo target)
+        public override bool Equals(SharedBlocksInfo? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
             if (this.Path != target.Path) return false;
             if (this.Length != target.Length) return false;
             if (this.BlockLength != target.BlockLength) return false;
-            if ((this.Hashes is null) != (target.Hashes is null)) return false;
-            if (!(this.Hashes is null) && !(target.Hashes is null) && !CollectionHelper.Equals(this.Hashes, target.Hashes)) return false;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.Hashes, target.Hashes)) return false;
 
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<SharedBlocksInfo>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<SharedBlocksInfo>
         {
-            public void Serialize(RocketPackWriter w, SharedBlocksInfo value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, SharedBlocksInfo value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    if (value.Path != default) propertyCount++;
-                    if (value.Length != default) propertyCount++;
-                    if (value.BlockLength != default) propertyCount++;
-                    if (value.Hashes.Count != 0) propertyCount++;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    if (value.Path != string.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Length != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.BlockLength != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Hashes.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
                 }
 
-                // Path
-                if (value.Path != default)
+                if (value.Path != string.Empty)
                 {
-                    w.Write((ulong)0);
+                    w.Write((uint)0);
                     w.Write(value.Path);
                 }
-                // Length
-                if (value.Length != default)
+                if (value.Length != 0)
                 {
-                    w.Write((ulong)1);
-                    w.Write((ulong)value.Length);
+                    w.Write((uint)1);
+                    w.Write(value.Length);
                 }
-                // BlockLength
-                if (value.BlockLength != default)
+                if (value.BlockLength != 0)
                 {
-                    w.Write((ulong)2);
-                    w.Write((ulong)value.BlockLength);
+                    w.Write((uint)2);
+                    w.Write(value.BlockLength);
                 }
-                // Hashes
                 if (value.Hashes.Count != 0)
                 {
-                    w.Write((ulong)3);
-                    w.Write((ulong)value.Hashes.Count);
+                    w.Write((uint)3);
+                    w.Write((uint)value.Hashes.Count);
                     foreach (var n in value.Hashes)
                     {
                         OmniHash.Formatter.Serialize(w, n, rank + 1);
@@ -398,21 +414,21 @@ namespace Xeus.Core.Contents.Internal
                 }
             }
 
-            public SharedBlocksInfo Deserialize(RocketPackReader r, int rank)
+            public SharedBlocksInfo Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
-                string p_path = default;
-                ulong p_length = default;
-                uint p_blockLength = default;
-                IList<OmniHash> p_hashes = default;
+                string p_path = string.Empty;
+                ulong p_length = 0;
+                uint p_blockLength = 0;
+                OmniHash[] p_hashes = System.Array.Empty<OmniHash>();
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                         case 0: // Path
@@ -422,19 +438,19 @@ namespace Xeus.Core.Contents.Internal
                             }
                         case 1: // Length
                             {
-                                p_length = (ulong)r.GetUInt64();
+                                p_length = r.GetUInt64();
                                 break;
                             }
                         case 2: // BlockLength
                             {
-                                p_blockLength = (uint)r.GetUInt64();
+                                p_blockLength = r.GetUInt32();
                                 break;
                             }
                         case 3: // Hashes
                             {
-                                var length = (int)r.GetUInt64();
+                                var length = r.GetUInt32();
                                 p_hashes = new OmniHash[length];
-                                for (int i = 0; i < p_hashes.Count; i++)
+                                for (int i = 0; i < p_hashes.Length; i++)
                                 {
                                     p_hashes[i] = OmniHash.Formatter.Deserialize(r, rank + 1);
                                 }
@@ -448,126 +464,132 @@ namespace Xeus.Core.Contents.Internal
         }
     }
 
-    internal sealed partial class BlocksStorageConfig : RocketPackMessageBase<BlocksStorageConfig>
+    internal sealed partial class BlocksStorageConfig : Omnix.Serialization.RocketPack.RocketPackMessageBase<BlocksStorageConfig>
     {
         static BlocksStorageConfig()
         {
             BlocksStorageConfig.Formatter = new CustomFormatter();
+            BlocksStorageConfig.Empty = new BlocksStorageConfig(0, new System.Collections.Generic.Dictionary<OmniHash, ClusterInfo>(), 0);
         }
+
+        private readonly int __hashCode;
 
         public static readonly int MaxClusterInfoMapCount = 1073741824;
 
-        public BlocksStorageConfig(uint version, IDictionary<OmniHash, ClusterInfo> clusterInfoMap, ulong size)
+        public BlocksStorageConfig(uint version, System.Collections.Generic.Dictionary<OmniHash, ClusterInfo> clusterInfoMap, ulong size)
         {
-            if (clusterInfoMap is null) throw new ArgumentNullException("clusterInfoMap");
-            if (clusterInfoMap.Count > 1073741824) throw new ArgumentOutOfRangeException("clusterInfoMap");
+            if (clusterInfoMap is null) throw new System.ArgumentNullException("clusterInfoMap");
+            if (clusterInfoMap.Count > 1073741824) throw new System.ArgumentOutOfRangeException("clusterInfoMap");
             foreach (var n in clusterInfoMap)
             {
-                if (n.Value is null) throw new ArgumentNullException("n.Value");
+                if (n.Value is null) throw new System.ArgumentNullException("n.Value");
             }
             this.Version = version;
-            this.ClusterInfoMap = new ReadOnlyDictionary<OmniHash, ClusterInfo>(clusterInfoMap);
+            this.ClusterInfoMap = new Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, ClusterInfo>(clusterInfoMap);
             this.Size = size;
 
             {
-                var hashCode = new HashCode();
-                if (this.Version != default) hashCode.Add(this.Version.GetHashCode());
+                var __h = new System.HashCode();
+                if (this.Version != default) __h.Add(this.Version.GetHashCode());
                 foreach (var n in this.ClusterInfoMap)
                 {
-                    if (n.Key != default) hashCode.Add(n.Key.GetHashCode());
-                    if (n.Value != default) hashCode.Add(n.Value.GetHashCode());
+                    if (n.Key != default) __h.Add(n.Key.GetHashCode());
+                    if (n.Value != default) __h.Add(n.Value.GetHashCode());
                 }
-                if (this.Size != default) hashCode.Add(this.Size.GetHashCode());
-                _hashCode = hashCode.ToHashCode();
+                if (this.Size != default) __h.Add(this.Size.GetHashCode());
+                __hashCode = __h.ToHashCode();
             }
         }
 
         public uint Version { get; }
-        public IReadOnlyDictionary<OmniHash, ClusterInfo> ClusterInfoMap { get; }
+        public Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, ClusterInfo> ClusterInfoMap { get; }
         public ulong Size { get; }
 
-        public override bool Equals(BlocksStorageConfig target)
+        public override bool Equals(BlocksStorageConfig? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
             if (this.Version != target.Version) return false;
-            if ((this.ClusterInfoMap is null) != (target.ClusterInfoMap is null)) return false;
-            if (!(this.ClusterInfoMap is null) && !(target.ClusterInfoMap is null) && !CollectionHelper.Equals(this.ClusterInfoMap, target.ClusterInfoMap)) return false;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.ClusterInfoMap, target.ClusterInfoMap)) return false;
             if (this.Size != target.Size) return false;
 
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<BlocksStorageConfig>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<BlocksStorageConfig>
         {
-            public void Serialize(RocketPackWriter w, BlocksStorageConfig value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, BlocksStorageConfig value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    if (value.Version != default) propertyCount++;
-                    if (value.ClusterInfoMap.Count != 0) propertyCount++;
-                    if (value.Size != default) propertyCount++;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    if (value.Version != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.ClusterInfoMap.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Size != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
                 }
 
-                // Version
-                if (value.Version != default)
+                if (value.Version != 0)
                 {
-                    w.Write((ulong)0);
-                    w.Write((ulong)value.Version);
+                    w.Write((uint)0);
+                    w.Write(value.Version);
                 }
-                // ClusterInfoMap
                 if (value.ClusterInfoMap.Count != 0)
                 {
-                    w.Write((ulong)1);
-                    w.Write((ulong)value.ClusterInfoMap.Count);
+                    w.Write((uint)1);
+                    w.Write((uint)value.ClusterInfoMap.Count);
                     foreach (var n in value.ClusterInfoMap)
                     {
                         OmniHash.Formatter.Serialize(w, n.Key, rank + 1);
                         ClusterInfo.Formatter.Serialize(w, n.Value, rank + 1);
                     }
                 }
-                // Size
-                if (value.Size != default)
+                if (value.Size != 0)
                 {
-                    w.Write((ulong)2);
-                    w.Write((ulong)value.Size);
+                    w.Write((uint)2);
+                    w.Write(value.Size);
                 }
             }
 
-            public BlocksStorageConfig Deserialize(RocketPackReader r, int rank)
+            public BlocksStorageConfig Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
-                uint p_version = default;
-                IDictionary<OmniHash, ClusterInfo> p_clusterInfoMap = default;
-                ulong p_size = default;
+                uint p_version = 0;
+                System.Collections.Generic.Dictionary<OmniHash, ClusterInfo> p_clusterInfoMap = new System.Collections.Generic.Dictionary<OmniHash, ClusterInfo>();
+                ulong p_size = 0;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                         case 0: // Version
                             {
-                                p_version = (uint)r.GetUInt64();
+                                p_version = r.GetUInt32();
                                 break;
                             }
                         case 1: // ClusterInfoMap
                             {
-                                var length = (int)r.GetUInt64();
-                                p_clusterInfoMap = new Dictionary<OmniHash, ClusterInfo>();
-                                OmniHash t_key = default;
-                                ClusterInfo t_value = default;
+                                var length = r.GetUInt32();
+                                p_clusterInfoMap = new System.Collections.Generic.Dictionary<OmniHash, ClusterInfo>();
+                                OmniHash t_key = OmniHash.Empty;
+                                ClusterInfo t_value = ClusterInfo.Empty;
                                 for (int i = 0; i < length; i++)
                                 {
                                     t_key = OmniHash.Formatter.Deserialize(r, rank + 1);
@@ -578,7 +600,7 @@ namespace Xeus.Core.Contents.Internal
                             }
                         case 2: // Size
                             {
-                                p_size = (ulong)r.GetUInt64();
+                                p_size = r.GetUInt64();
                                 break;
                             }
                     }
@@ -589,80 +611,84 @@ namespace Xeus.Core.Contents.Internal
         }
     }
 
-    internal sealed partial class ContentsManagerConfig : RocketPackMessageBase<ContentsManagerConfig>
+    internal sealed partial class ContentsManagerConfig : Omnix.Serialization.RocketPack.RocketPackMessageBase<ContentsManagerConfig>
     {
         static ContentsManagerConfig()
         {
             ContentsManagerConfig.Formatter = new CustomFormatter();
+            ContentsManagerConfig.Empty = new ContentsManagerConfig(0, System.Array.Empty<ContentInfo>());
         }
+
+        private readonly int __hashCode;
 
         public static readonly int MaxContentInfosCount = 1073741824;
 
-        public ContentsManagerConfig(uint version, IList<ContentInfo> contentInfos)
+        public ContentsManagerConfig(uint version, ContentInfo[] contentInfos)
         {
-            if (contentInfos is null) throw new ArgumentNullException("contentInfos");
-            if (contentInfos.Count > 1073741824) throw new ArgumentOutOfRangeException("contentInfos");
+            if (contentInfos is null) throw new System.ArgumentNullException("contentInfos");
+            if (contentInfos.Length > 1073741824) throw new System.ArgumentOutOfRangeException("contentInfos");
             foreach (var n in contentInfos)
             {
-                if (n is null) throw new ArgumentNullException("n");
+                if (n is null) throw new System.ArgumentNullException("n");
             }
 
             this.Version = version;
-            this.ContentInfos = new ReadOnlyCollection<ContentInfo>(contentInfos);
+            this.ContentInfos = new Omnix.Collections.ReadOnlyListSlim<ContentInfo>(contentInfos);
 
             {
-                var hashCode = new HashCode();
-                if (this.Version != default) hashCode.Add(this.Version.GetHashCode());
+                var __h = new System.HashCode();
+                if (this.Version != default) __h.Add(this.Version.GetHashCode());
                 foreach (var n in this.ContentInfos)
                 {
-                    if (n != default) hashCode.Add(n.GetHashCode());
+                    if (n != default) __h.Add(n.GetHashCode());
                 }
-                _hashCode = hashCode.ToHashCode();
+                __hashCode = __h.ToHashCode();
             }
         }
 
         public uint Version { get; }
-        public IReadOnlyList<ContentInfo> ContentInfos { get; }
+        public Omnix.Collections.ReadOnlyListSlim<ContentInfo> ContentInfos { get; }
 
-        public override bool Equals(ContentsManagerConfig target)
+        public override bool Equals(ContentsManagerConfig? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
             if (this.Version != target.Version) return false;
-            if ((this.ContentInfos is null) != (target.ContentInfos is null)) return false;
-            if (!(this.ContentInfos is null) && !(target.ContentInfos is null) && !CollectionHelper.Equals(this.ContentInfos, target.ContentInfos)) return false;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.ContentInfos, target.ContentInfos)) return false;
 
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<ContentsManagerConfig>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<ContentsManagerConfig>
         {
-            public void Serialize(RocketPackWriter w, ContentsManagerConfig value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, ContentsManagerConfig value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    if (value.Version != default) propertyCount++;
-                    if (value.ContentInfos.Count != 0) propertyCount++;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    if (value.Version != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.ContentInfos.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
                 }
 
-                // Version
-                if (value.Version != default)
+                if (value.Version != 0)
                 {
-                    w.Write((ulong)0);
-                    w.Write((ulong)value.Version);
+                    w.Write((uint)0);
+                    w.Write(value.Version);
                 }
-                // ContentInfos
                 if (value.ContentInfos.Count != 0)
                 {
-                    w.Write((ulong)1);
-                    w.Write((ulong)value.ContentInfos.Count);
+                    w.Write((uint)1);
+                    w.Write((uint)value.ContentInfos.Count);
                     foreach (var n in value.ContentInfos)
                     {
                         ContentInfo.Formatter.Serialize(w, n, rank + 1);
@@ -670,31 +696,31 @@ namespace Xeus.Core.Contents.Internal
                 }
             }
 
-            public ContentsManagerConfig Deserialize(RocketPackReader r, int rank)
+            public ContentsManagerConfig Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
-                uint p_version = default;
-                IList<ContentInfo> p_contentInfos = default;
+                uint p_version = 0;
+                ContentInfo[] p_contentInfos = System.Array.Empty<ContentInfo>();
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                         case 0: // Version
                             {
-                                p_version = (uint)r.GetUInt64();
+                                p_version = r.GetUInt32();
                                 break;
                             }
                         case 1: // ContentInfos
                             {
-                                var length = (int)r.GetUInt64();
+                                var length = r.GetUInt32();
                                 p_contentInfos = new ContentInfo[length];
-                                for (int i = 0; i < p_contentInfos.Count; i++)
+                                for (int i = 0; i < p_contentInfos.Length; i++)
                                 {
                                     p_contentInfos[i] = ContentInfo.Formatter.Deserialize(r, rank + 1);
                                 }

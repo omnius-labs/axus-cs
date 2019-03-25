@@ -304,7 +304,7 @@ namespace Xeus.Core
             }
         }
 
-        public void UploadMetadata(BroadcastMetadata metadata)
+        public void UploadMetadata(BroadcastClue metadata)
         {
             this.Check();
 
@@ -314,7 +314,7 @@ namespace Xeus.Core
             }
         }
 
-        public void UploadMetadata(UnicastMetadata metadata)
+        public void UploadMetadata(UnicastClue metadata)
         {
             this.Check();
 
@@ -324,7 +324,7 @@ namespace Xeus.Core
             }
         }
 
-        public void UploadMetadata(MulticastMetadata metadata)
+        public void UploadMetadata(MulticastClue metadata)
         {
             this.Check();
 
@@ -334,33 +334,33 @@ namespace Xeus.Core
             }
         }
 
-        public BroadcastMetadata GetBroadcastMetadata(Signature signature, string type)
+        public BroadcastClue GetBroadcastClue(Signature signature, string type)
         {
             this.Check();
 
             lock (_lockObject)
             {
-                return _networkManager.GetBroadcastMetadata(signature, type);
+                return _networkManager.GetBroadcastClue(signature, type);
             }
         }
 
-        public IEnumerable<UnicastMetadata> GetUnicastMetadatas(Signature signature, string type)
+        public IEnumerable<UnicastClue> GetUnicastClues(Signature signature, string type)
         {
             this.Check();
 
             lock (_lockObject)
             {
-                return _networkManager.GetUnicastMetadatas(signature, type);
+                return _networkManager.GetUnicastClues(signature, type);
             }
         }
 
-        public IEnumerable<MulticastMetadata> GetMulticastMetadatas(Tag tag, string type)
+        public IEnumerable<MulticastClue> GetMulticastClues(Tag tag, string type)
         {
             this.Check();
 
             lock (_lockObject)
             {
-                return _networkManager.GetMulticastMetadatas(tag, type);
+                return _networkManager.GetMulticastClues(tag, type);
             }
         }
 
