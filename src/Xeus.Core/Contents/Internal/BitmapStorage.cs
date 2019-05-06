@@ -7,18 +7,18 @@ using Xeus.Core.Internal;
 
 namespace Xeus.Core.Contents.Internal
 {
-    internal sealed class BitmapManager : DisposableBase
+    internal sealed class BitmapStorage : DisposableBase
     {
-        private BufferPool _bufferPool;
+        private readonly BufferPool _bufferPool;
 
-        private byte[][] _bufferList;
+        private byte[][]? _bufferList;
         private ulong _length;
 
         private volatile bool _disposed;
 
-        public static readonly uint SectorSize = 32 * 1024;
+        public static readonly uint SectorSize = 32 * 1024; // 32 KB
 
-        public BitmapManager(BufferPool bufferPool)
+        public BitmapStorage(BufferPool bufferPool)
         {
             _bufferPool = bufferPool;
         }
@@ -47,6 +47,11 @@ namespace Xeus.Core.Contents.Internal
         {
             if (point >= _length) throw new ArgumentOutOfRangeException(nameof(point));
 
+            if (_bufferList is null)
+            {
+                return false;
+            }
+
             ulong sectorOffset = (point / 8) / SectorSize;
             int bufferOffset = (int)((point / 8) % SectorSize);
             byte bitOffset = (byte)(point % 8);
@@ -58,6 +63,11 @@ namespace Xeus.Core.Contents.Internal
         public void Set(ulong point, bool state)
         {
             if (point >= _length) throw new ArgumentOutOfRangeException(nameof(point));
+
+            if (_bufferList is null)
+            {
+                return;
+            }
 
             ulong sectorOffset = (point / 8) / SectorSize;
             int bufferOffset = (int)((point / 8) % SectorSize);
@@ -82,12 +92,15 @@ namespace Xeus.Core.Contents.Internal
 
             if (disposing)
             {
-                for (int i = 0; i < _bufferList.Length; i++)
+                if (_bufferList != null)
                 {
-                    _bufferPool.GetArrayPool().Return(_bufferList[i]);
-                }
+                    for (int i = 0; i < _bufferList.Length; i++)
+                    {
+                        _bufferPool.GetArrayPool().Return(_bufferList[i]);
+                    }
 
-                _bufferList.Clone();
+                    _bufferList = null;
+                }
             }
         }
     }
