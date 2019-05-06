@@ -1,31 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>netcoreapp2.0</TargetFramework>
-        <AssemblyVersion>2018.4.17.270</AssemblyVersion>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <LangVersion>latest</LangVersion>
+        <TargetFramework>netcoreapp2.2</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="CommandLineParser" Version="2.2.1" />
         <PackageReference Include="Nett" Version="0.8.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\Amoeba.Messages\Amoeba.Messages.csproj" />
-        <ProjectReference Include="..\Amoeba.Rpc\Amoeba.Rpc.csproj" />
-        <ProjectReference Include="..\Amoeba.Service\Amoeba.Service.csproj" />
-        <ProjectReference Include="..\Omnius\Omnius.Base\Omnius.Base.csproj" />
-        <ProjectReference Include="..\Omnius\Omnius.Collections\Omnius.Collections.csproj" />
-        <ProjectReference Include="..\Omnius\Omnius.Configuration\Omnius.Configuration.csproj" />
-        <ProjectReference Include="..\Omnius\Omnius.Io\Omnius.Io.csproj" />
-        <ProjectReference Include="..\Omnius\Omnius.Net.Proxy\Omnius.Net.Proxy.csproj" />
-        <ProjectReference Include="..\Omnius\Omnius.Net.Upnp\Omnius.Net.Upnp.csproj" />
-        <ProjectReference Include="..\Omnius\Omnius.Security\Omnius.Security.csproj" />
-        <ProjectReference Include="..\Omnius\Omnius.Serialization\Omnius.Serialization.csproj" />
     </ItemGroup>
 </Project>

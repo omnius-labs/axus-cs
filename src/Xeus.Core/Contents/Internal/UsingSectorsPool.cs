@@ -8,10 +8,10 @@ using Xeus.Core.Internal;
 
 namespace Xeus.Core.Contents.Internal
 {
-    internal sealed class UsingSectorsManager : DisposableBase
+    internal sealed class UsingSectorsPool : DisposableBase
     {
-        private BitmapManager _bitmapManager;
-        private BufferPool _bufferPool;
+        private readonly BitmapStorage _bitmapStorage;
+        private readonly BufferPool _bufferPool;
 
         private HashSet<ulong> _freeSectors = new HashSet<ulong>();
         private ulong _size;
@@ -23,9 +23,9 @@ namespace Xeus.Core.Contents.Internal
 
         public static readonly uint SectorSize = 1024 * 256;
 
-        public UsingSectorsManager(BufferPool bufferPool)
+        public UsingSectorsPool(BufferPool bufferPool)
         {
-            _bitmapManager = new BitmapManager(bufferPool);
+            _bitmapStorage = new BitmapStorage(bufferPool);
             _bufferPool = bufferPool;
         }
 
@@ -49,9 +49,9 @@ namespace Xeus.Core.Contents.Internal
         {
             foreach (var sector in sectors)
             {
-                if (!_bitmapManager.Get(sector))
+                if (!_bitmapStorage.Get(sector))
                 {
-                    _bitmapManager.Set(sector, true);
+                    _bitmapStorage.Set(sector, true);
 
                     _usingSectorCount++;
                 }
@@ -64,9 +64,9 @@ namespace Xeus.Core.Contents.Internal
         {
             foreach (var sector in sectors)
             {
-                if (_bitmapManager.Get(sector))
+                if (_bitmapStorage.Get(sector))
                 {
-                    _bitmapManager.Set(sector, false);
+                    _bitmapStorage.Set(sector, false);
                     if (_freeSectors.Count < 1024 * 4) _freeSectors.Add(sector);
 
                     _usingSectorCount--;
@@ -78,9 +78,9 @@ namespace Xeus.Core.Contents.Internal
         {
             if (_freeSectors.Count < count)
             {
-                for (ulong i = 0; i < _bitmapManager.Length; i++)
+                for (ulong i = 0; i < _bitmapStorage.Length; i++)
                 {
-                    if (!_bitmapManager.Get(i))
+                    if (!_bitmapStorage.Get(i))
                     {
                         _freeSectors.Add(i);
                         if (_freeSectors.Count >= Math.Max(count, 1024 * 4)) break;
@@ -92,7 +92,7 @@ namespace Xeus.Core.Contents.Internal
 
             foreach (var sector in result)
             {
-                _bitmapManager.Set(sector, true);
+                _bitmapStorage.Set(sector, true);
 
                 _usingSectorCount++;
             }
@@ -109,19 +109,7 @@ namespace Xeus.Core.Contents.Internal
 
             if (disposing)
             {
-                if (_bitmapManager != null)
-                {
-                    try
-                    {
-                        _bitmapManager.Dispose();
-                    }
-                    catch (Exception)
-                    {
-
-                    }
-
-                    _bitmapManager = null;
-                }
+                _bitmapStorage.Dispose();
             }
         }
     }

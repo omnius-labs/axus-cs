@@ -9,11 +9,11 @@ using Omnix.Cryptography;
 
 namespace Xeus.Core.Contents.Internal
 {
-    internal sealed class ProtectionStatusManager
+    internal sealed class ProtectionStatus
     {
         private Dictionary<OmniHash, int> _lockedHashMap = new Dictionary<OmniHash, int>();
 
-        public ProtectionStatusManager()
+        public ProtectionStatus()
         {
 
         }

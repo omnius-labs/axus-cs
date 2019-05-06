@@ -8,19 +8,19 @@ using Xeus.Messages.Reports;
 
 namespace Xeus.Core.Contents.Internal
 {
-    internal sealed partial class ClusterInfo : Omnix.Serialization.RocketPack.RocketPackMessageBase<ClusterInfo>
+    internal sealed partial class ClusterMetadata : Omnix.Serialization.RocketPack.RocketPackMessageBase<ClusterMetadata>
     {
-        static ClusterInfo()
+        static ClusterMetadata()
         {
-            ClusterInfo.Formatter = new CustomFormatter();
-            ClusterInfo.Empty = new ClusterInfo(System.Array.Empty<ulong>(), 0, Omnix.Serialization.RocketPack.Timestamp.Zero);
+            ClusterMetadata.Formatter = new CustomFormatter();
+            ClusterMetadata.Empty = new ClusterMetadata(System.Array.Empty<ulong>(), 0, Omnix.Serialization.RocketPack.Timestamp.Zero);
         }
 
         private readonly int __hashCode;
 
         public static readonly int MaxSectorsCount = 256;
 
-        public ClusterInfo(ulong[] sectors, uint length, Omnix.Serialization.RocketPack.Timestamp lastAccessTime)
+        public ClusterMetadata(ulong[] sectors, uint length, Omnix.Serialization.RocketPack.Timestamp lastAccessTime)
         {
             if (sectors is null) throw new System.ArgumentNullException("sectors");
             if (sectors.Length > 256) throw new System.ArgumentOutOfRangeException("sectors");
@@ -44,7 +44,7 @@ namespace Xeus.Core.Contents.Internal
         public uint Length { get; }
         public Omnix.Serialization.RocketPack.Timestamp LastAccessTime { get; }
 
-        public override bool Equals(ClusterInfo? target)
+        public override bool Equals(ClusterMetadata? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -57,9 +57,9 @@ namespace Xeus.Core.Contents.Internal
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<ClusterInfo>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<ClusterMetadata>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, ClusterInfo value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, ClusterMetadata value, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -101,7 +101,7 @@ namespace Xeus.Core.Contents.Internal
                 }
             }
 
-            public ClusterInfo Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public ClusterMetadata Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -140,34 +140,32 @@ namespace Xeus.Core.Contents.Internal
                     }
                 }
 
-                return new ClusterInfo(p_sectors, p_length, p_lastAccessTime);
+                return new ClusterMetadata(p_sectors, p_length, p_lastAccessTime);
             }
         }
     }
 
-    internal sealed partial class ContentInfo : Omnix.Serialization.RocketPack.RocketPackMessageBase<ContentInfo>
+    internal sealed partial class ContentMetadata : Omnix.Serialization.RocketPack.RocketPackMessageBase<ContentMetadata>
     {
-        static ContentInfo()
+        static ContentMetadata()
         {
-            ContentInfo.Formatter = new CustomFormatter();
-            ContentInfo.Empty = new ContentInfo(Clue.Empty, Omnix.Serialization.RocketPack.Timestamp.Zero, System.Array.Empty<OmniHash>(), SharedBlocksInfo.Empty);
+            ContentMetadata.Formatter = new CustomFormatter();
+            ContentMetadata.Empty = new ContentMetadata(Clue.Empty, Omnix.Serialization.RocketPack.Timestamp.Zero, System.Array.Empty<OmniHash>(), null);
         }
 
         private readonly int __hashCode;
 
         public static readonly int MaxLockedHashesCount = 1073741824;
 
-        public ContentInfo(Clue clue, Omnix.Serialization.RocketPack.Timestamp creationTime, OmniHash[] lockedHashes, SharedBlocksInfo sharedBlocksInfo)
+        public ContentMetadata(Clue clue, Omnix.Serialization.RocketPack.Timestamp creationTime, OmniHash[] lockedHashes, SharedBlocksMetadata? sharedBlocksMetadata)
         {
             if (clue is null) throw new System.ArgumentNullException("clue");
             if (lockedHashes is null) throw new System.ArgumentNullException("lockedHashes");
             if (lockedHashes.Length > 1073741824) throw new System.ArgumentOutOfRangeException("lockedHashes");
-            if (sharedBlocksInfo is null) throw new System.ArgumentNullException("sharedBlocksInfo");
-
             this.Clue = clue;
             this.CreationTime = creationTime;
             this.LockedHashes = new Omnix.Collections.ReadOnlyListSlim<OmniHash>(lockedHashes);
-            this.SharedBlocksInfo = sharedBlocksInfo;
+            this.SharedBlocksMetadata = sharedBlocksMetadata;
 
             {
                 var __h = new System.HashCode();
@@ -177,7 +175,7 @@ namespace Xeus.Core.Contents.Internal
                 {
                     if (n != default) __h.Add(n.GetHashCode());
                 }
-                if (this.SharedBlocksInfo != default) __h.Add(this.SharedBlocksInfo.GetHashCode());
+                if (this.SharedBlocksMetadata != default) __h.Add(this.SharedBlocksMetadata.GetHashCode());
                 __hashCode = __h.ToHashCode();
             }
         }
@@ -185,25 +183,26 @@ namespace Xeus.Core.Contents.Internal
         public Clue Clue { get; }
         public Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
         public Omnix.Collections.ReadOnlyListSlim<OmniHash> LockedHashes { get; }
-        public SharedBlocksInfo SharedBlocksInfo { get; }
+        public SharedBlocksMetadata? SharedBlocksMetadata { get; }
 
-        public override bool Equals(ContentInfo? target)
+        public override bool Equals(ContentMetadata? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.Clue != target.Clue) return false;
             if (this.CreationTime != target.CreationTime) return false;
             if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.LockedHashes, target.LockedHashes)) return false;
-            if (this.SharedBlocksInfo != target.SharedBlocksInfo) return false;
+            if ((this.SharedBlocksMetadata is null) != (target.SharedBlocksMetadata is null)) return false;
+            if (!(this.SharedBlocksMetadata is null) && !(target.SharedBlocksMetadata is null) && this.SharedBlocksMetadata != target.SharedBlocksMetadata) return false;
 
             return true;
         }
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<ContentInfo>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<ContentMetadata>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, ContentInfo value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, ContentMetadata value, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -221,7 +220,7 @@ namespace Xeus.Core.Contents.Internal
                     {
                         propertyCount++;
                     }
-                    if (value.SharedBlocksInfo != SharedBlocksInfo.Empty)
+                    if (value.SharedBlocksMetadata != null)
                     {
                         propertyCount++;
                     }
@@ -247,14 +246,14 @@ namespace Xeus.Core.Contents.Internal
                         OmniHash.Formatter.Serialize(w, n, rank + 1);
                     }
                 }
-                if (value.SharedBlocksInfo != SharedBlocksInfo.Empty)
+                if (value.SharedBlocksMetadata != null)
                 {
                     w.Write((uint)3);
-                    SharedBlocksInfo.Formatter.Serialize(w, value.SharedBlocksInfo, rank + 1);
+                    SharedBlocksMetadata.Formatter.Serialize(w, value.SharedBlocksMetadata, rank + 1);
                 }
             }
 
-            public ContentInfo Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public ContentMetadata Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -264,7 +263,7 @@ namespace Xeus.Core.Contents.Internal
                 Clue p_clue = Clue.Empty;
                 Omnix.Serialization.RocketPack.Timestamp p_creationTime = Omnix.Serialization.RocketPack.Timestamp.Zero;
                 OmniHash[] p_lockedHashes = System.Array.Empty<OmniHash>();
-                SharedBlocksInfo p_sharedBlocksInfo = SharedBlocksInfo.Empty;
+                SharedBlocksMetadata? p_sharedBlocksMetadata = null;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -291,25 +290,25 @@ namespace Xeus.Core.Contents.Internal
                                 }
                                 break;
                             }
-                        case 3: // SharedBlocksInfo
+                        case 3: // SharedBlocksMetadata
                             {
-                                p_sharedBlocksInfo = SharedBlocksInfo.Formatter.Deserialize(r, rank + 1);
+                                p_sharedBlocksMetadata = SharedBlocksMetadata.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
                     }
                 }
 
-                return new ContentInfo(p_clue, p_creationTime, p_lockedHashes, p_sharedBlocksInfo);
+                return new ContentMetadata(p_clue, p_creationTime, p_lockedHashes, p_sharedBlocksMetadata);
             }
         }
     }
 
-    internal sealed partial class SharedBlocksInfo : Omnix.Serialization.RocketPack.RocketPackMessageBase<SharedBlocksInfo>
+    internal sealed partial class SharedBlocksMetadata : Omnix.Serialization.RocketPack.RocketPackMessageBase<SharedBlocksMetadata>
     {
-        static SharedBlocksInfo()
+        static SharedBlocksMetadata()
         {
-            SharedBlocksInfo.Formatter = new CustomFormatter();
-            SharedBlocksInfo.Empty = new SharedBlocksInfo(string.Empty, 0, 0, System.Array.Empty<OmniHash>());
+            SharedBlocksMetadata.Formatter = new CustomFormatter();
+            SharedBlocksMetadata.Empty = new SharedBlocksMetadata(string.Empty, 0, 0, System.Array.Empty<OmniHash>());
         }
 
         private readonly int __hashCode;
@@ -317,7 +316,7 @@ namespace Xeus.Core.Contents.Internal
         public static readonly int MaxPathLength = 1024;
         public static readonly int MaxHashesCount = 1073741824;
 
-        public SharedBlocksInfo(string path, ulong length, uint blockLength, OmniHash[] hashes)
+        public SharedBlocksMetadata(string path, ulong length, uint blockLength, OmniHash[] hashes)
         {
             if (path is null) throw new System.ArgumentNullException("path");
             if (path.Length > 1024) throw new System.ArgumentOutOfRangeException("path");
@@ -347,7 +346,7 @@ namespace Xeus.Core.Contents.Internal
         public uint BlockLength { get; }
         public Omnix.Collections.ReadOnlyListSlim<OmniHash> Hashes { get; }
 
-        public override bool Equals(SharedBlocksInfo? target)
+        public override bool Equals(SharedBlocksMetadata? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -361,9 +360,9 @@ namespace Xeus.Core.Contents.Internal
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<SharedBlocksInfo>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<SharedBlocksMetadata>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, SharedBlocksInfo value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, SharedBlocksMetadata value, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -414,7 +413,7 @@ namespace Xeus.Core.Contents.Internal
                 }
             }
 
-            public SharedBlocksInfo Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public SharedBlocksMetadata Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -459,7 +458,7 @@ namespace Xeus.Core.Contents.Internal
                     }
                 }
 
-                return new SharedBlocksInfo(p_path, p_length, p_blockLength, p_hashes);
+                return new SharedBlocksMetadata(p_path, p_length, p_blockLength, p_hashes);
             }
         }
     }
@@ -469,29 +468,29 @@ namespace Xeus.Core.Contents.Internal
         static BlocksStorageConfig()
         {
             BlocksStorageConfig.Formatter = new CustomFormatter();
-            BlocksStorageConfig.Empty = new BlocksStorageConfig(0, new System.Collections.Generic.Dictionary<OmniHash, ClusterInfo>(), 0);
+            BlocksStorageConfig.Empty = new BlocksStorageConfig(0, new System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>(), 0);
         }
 
         private readonly int __hashCode;
 
-        public static readonly int MaxClusterInfoMapCount = 1073741824;
+        public static readonly int MaxClusterMetadataMapCount = 1073741824;
 
-        public BlocksStorageConfig(uint version, System.Collections.Generic.Dictionary<OmniHash, ClusterInfo> clusterInfoMap, ulong size)
+        public BlocksStorageConfig(uint version, System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata> clusterMetadataMap, ulong size)
         {
-            if (clusterInfoMap is null) throw new System.ArgumentNullException("clusterInfoMap");
-            if (clusterInfoMap.Count > 1073741824) throw new System.ArgumentOutOfRangeException("clusterInfoMap");
-            foreach (var n in clusterInfoMap)
+            if (clusterMetadataMap is null) throw new System.ArgumentNullException("clusterMetadataMap");
+            if (clusterMetadataMap.Count > 1073741824) throw new System.ArgumentOutOfRangeException("clusterMetadataMap");
+            foreach (var n in clusterMetadataMap)
             {
                 if (n.Value is null) throw new System.ArgumentNullException("n.Value");
             }
             this.Version = version;
-            this.ClusterInfoMap = new Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, ClusterInfo>(clusterInfoMap);
+            this.ClusterMetadataMap = new Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata>(clusterMetadataMap);
             this.Size = size;
 
             {
                 var __h = new System.HashCode();
                 if (this.Version != default) __h.Add(this.Version.GetHashCode());
-                foreach (var n in this.ClusterInfoMap)
+                foreach (var n in this.ClusterMetadataMap)
                 {
                     if (n.Key != default) __h.Add(n.Key.GetHashCode());
                     if (n.Value != default) __h.Add(n.Value.GetHashCode());
@@ -502,7 +501,7 @@ namespace Xeus.Core.Contents.Internal
         }
 
         public uint Version { get; }
-        public Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, ClusterInfo> ClusterInfoMap { get; }
+        public Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata> ClusterMetadataMap { get; }
         public ulong Size { get; }
 
         public override bool Equals(BlocksStorageConfig? target)
@@ -510,7 +509,7 @@ namespace Xeus.Core.Contents.Internal
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.Version != target.Version) return false;
-            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.ClusterInfoMap, target.ClusterInfoMap)) return false;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.ClusterMetadataMap, target.ClusterMetadataMap)) return false;
             if (this.Size != target.Size) return false;
 
             return true;
@@ -530,7 +529,7 @@ namespace Xeus.Core.Contents.Internal
                     {
                         propertyCount++;
                     }
-                    if (value.ClusterInfoMap.Count != 0)
+                    if (value.ClusterMetadataMap.Count != 0)
                     {
                         propertyCount++;
                     }
@@ -546,14 +545,14 @@ namespace Xeus.Core.Contents.Internal
                     w.Write((uint)0);
                     w.Write(value.Version);
                 }
-                if (value.ClusterInfoMap.Count != 0)
+                if (value.ClusterMetadataMap.Count != 0)
                 {
                     w.Write((uint)1);
-                    w.Write((uint)value.ClusterInfoMap.Count);
-                    foreach (var n in value.ClusterInfoMap)
+                    w.Write((uint)value.ClusterMetadataMap.Count);
+                    foreach (var n in value.ClusterMetadataMap)
                     {
                         OmniHash.Formatter.Serialize(w, n.Key, rank + 1);
-                        ClusterInfo.Formatter.Serialize(w, n.Value, rank + 1);
+                        ClusterMetadata.Formatter.Serialize(w, n.Value, rank + 1);
                     }
                 }
                 if (value.Size != 0)
@@ -571,7 +570,7 @@ namespace Xeus.Core.Contents.Internal
                 uint propertyCount = r.GetUInt32();
 
                 uint p_version = 0;
-                System.Collections.Generic.Dictionary<OmniHash, ClusterInfo> p_clusterInfoMap = new System.Collections.Generic.Dictionary<OmniHash, ClusterInfo>();
+                System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata> p_clusterMetadataMap = new System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>();
                 ulong p_size = 0;
 
                 for (; propertyCount > 0; propertyCount--)
@@ -584,17 +583,17 @@ namespace Xeus.Core.Contents.Internal
                                 p_version = r.GetUInt32();
                                 break;
                             }
-                        case 1: // ClusterInfoMap
+                        case 1: // ClusterMetadataMap
                             {
                                 var length = r.GetUInt32();
-                                p_clusterInfoMap = new System.Collections.Generic.Dictionary<OmniHash, ClusterInfo>();
+                                p_clusterMetadataMap = new System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>();
                                 OmniHash t_key = OmniHash.Empty;
-                                ClusterInfo t_value = ClusterInfo.Empty;
+                                ClusterMetadata t_value = ClusterMetadata.Empty;
                                 for (int i = 0; i < length; i++)
                                 {
                                     t_key = OmniHash.Formatter.Deserialize(r, rank + 1);
-                                    t_value = ClusterInfo.Formatter.Deserialize(r, rank + 1);
-                                    p_clusterInfoMap[t_key] = t_value;
+                                    t_value = ClusterMetadata.Formatter.Deserialize(r, rank + 1);
+                                    p_clusterMetadataMap[t_key] = t_value;
                                 }
                                 break;
                             }
@@ -606,7 +605,7 @@ namespace Xeus.Core.Contents.Internal
                     }
                 }
 
-                return new BlocksStorageConfig(p_version, p_clusterInfoMap, p_size);
+                return new BlocksStorageConfig(p_version, p_clusterMetadataMap, p_size);
             }
         }
     }
@@ -616,29 +615,29 @@ namespace Xeus.Core.Contents.Internal
         static ContentsManagerConfig()
         {
             ContentsManagerConfig.Formatter = new CustomFormatter();
-            ContentsManagerConfig.Empty = new ContentsManagerConfig(0, System.Array.Empty<ContentInfo>());
+            ContentsManagerConfig.Empty = new ContentsManagerConfig(0, System.Array.Empty<ContentMetadata>());
         }
 
         private readonly int __hashCode;
 
-        public static readonly int MaxContentInfosCount = 1073741824;
+        public static readonly int MaxContentMetadatasCount = 1073741824;
 
-        public ContentsManagerConfig(uint version, ContentInfo[] contentInfos)
+        public ContentsManagerConfig(uint version, ContentMetadata[] contentMetadatas)
         {
-            if (contentInfos is null) throw new System.ArgumentNullException("contentInfos");
-            if (contentInfos.Length > 1073741824) throw new System.ArgumentOutOfRangeException("contentInfos");
-            foreach (var n in contentInfos)
+            if (contentMetadatas is null) throw new System.ArgumentNullException("contentMetadatas");
+            if (contentMetadatas.Length > 1073741824) throw new System.ArgumentOutOfRangeException("contentMetadatas");
+            foreach (var n in contentMetadatas)
             {
                 if (n is null) throw new System.ArgumentNullException("n");
             }
 
             this.Version = version;
-            this.ContentInfos = new Omnix.Collections.ReadOnlyListSlim<ContentInfo>(contentInfos);
+            this.ContentMetadatas = new Omnix.Collections.ReadOnlyListSlim<ContentMetadata>(contentMetadatas);
 
             {
                 var __h = new System.HashCode();
                 if (this.Version != default) __h.Add(this.Version.GetHashCode());
-                foreach (var n in this.ContentInfos)
+                foreach (var n in this.ContentMetadatas)
                 {
                     if (n != default) __h.Add(n.GetHashCode());
                 }
@@ -647,14 +646,14 @@ namespace Xeus.Core.Contents.Internal
         }
 
         public uint Version { get; }
-        public Omnix.Collections.ReadOnlyListSlim<ContentInfo> ContentInfos { get; }
+        public Omnix.Collections.ReadOnlyListSlim<ContentMetadata> ContentMetadatas { get; }
 
         public override bool Equals(ContentsManagerConfig? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.Version != target.Version) return false;
-            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.ContentInfos, target.ContentInfos)) return false;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.ContentMetadatas, target.ContentMetadatas)) return false;
 
             return true;
         }
@@ -673,7 +672,7 @@ namespace Xeus.Core.Contents.Internal
                     {
                         propertyCount++;
                     }
-                    if (value.ContentInfos.Count != 0)
+                    if (value.ContentMetadatas.Count != 0)
                     {
                         propertyCount++;
                     }
@@ -685,13 +684,13 @@ namespace Xeus.Core.Contents.Internal
                     w.Write((uint)0);
                     w.Write(value.Version);
                 }
-                if (value.ContentInfos.Count != 0)
+                if (value.ContentMetadatas.Count != 0)
                 {
                     w.Write((uint)1);
-                    w.Write((uint)value.ContentInfos.Count);
-                    foreach (var n in value.ContentInfos)
+                    w.Write((uint)value.ContentMetadatas.Count);
+                    foreach (var n in value.ContentMetadatas)
                     {
-                        ContentInfo.Formatter.Serialize(w, n, rank + 1);
+                        ContentMetadata.Formatter.Serialize(w, n, rank + 1);
                     }
                 }
             }
@@ -704,7 +703,7 @@ namespace Xeus.Core.Contents.Internal
                 uint propertyCount = r.GetUInt32();
 
                 uint p_version = 0;
-                ContentInfo[] p_contentInfos = System.Array.Empty<ContentInfo>();
+                ContentMetadata[] p_contentMetadatas = System.Array.Empty<ContentMetadata>();
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -716,20 +715,20 @@ namespace Xeus.Core.Contents.Internal
                                 p_version = r.GetUInt32();
                                 break;
                             }
-                        case 1: // ContentInfos
+                        case 1: // ContentMetadatas
                             {
                                 var length = r.GetUInt32();
-                                p_contentInfos = new ContentInfo[length];
-                                for (int i = 0; i < p_contentInfos.Length; i++)
+                                p_contentMetadatas = new ContentMetadata[length];
+                                for (int i = 0; i < p_contentMetadatas.Length; i++)
                                 {
-                                    p_contentInfos[i] = ContentInfo.Formatter.Deserialize(r, rank + 1);
+                                    p_contentMetadatas[i] = ContentMetadata.Formatter.Deserialize(r, rank + 1);
                                 }
                                 break;
                             }
                     }
                 }
 
-                return new ContentsManagerConfig(p_version, p_contentInfos);
+                return new ContentsManagerConfig(p_version, p_contentMetadatas);
             }
         }
     }

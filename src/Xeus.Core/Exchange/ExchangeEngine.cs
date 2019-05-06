@@ -23,7 +23,7 @@ namespace Xeus.Core.Exchange
 {
     sealed partial class ExchangeEngine : ServiceBase, ISettings
     {
-        private static NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
+        private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         private BufferPool _bufferPool;
         private ContentsStorage _contentsStorage;

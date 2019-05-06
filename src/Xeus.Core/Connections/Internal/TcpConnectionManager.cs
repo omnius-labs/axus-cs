@@ -6,10 +6,6 @@ using System.Net.Sockets;
 using Amoeba.Messages;
 using Omnix.Base;
 using Omnix.Configuration;
-using Omnix.Net;
-using Omnix.Net.Proxy;
-using Omnix.Net.Upnp;
-using Omnix.Utils;
 
 namespace Xeus.Core
 {
@@ -42,7 +38,7 @@ namespace Xeus.Core
 
             public TcpConnectionManager(string configPath, CatharsisManager catharsisManager, BufferPool bufferPool)
             {
-                _bufferPool = bufferPool;C:\Local\Projects\OmniusLabs\Xeus\src\Xeus.Core\Exchange\Classes\UnicastClue.cs
+                _bufferPool = bufferPool;
                 _catharsisManager = catharsisManager;
 
                 _settings = new Settings(configPath);

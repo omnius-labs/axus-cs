@@ -4,6 +4,94 @@
 
 namespace Xeus.Messages
 {
+    public sealed partial class XeusOptions : Omnix.Serialization.RocketPack.RocketPackMessageBase<XeusOptions>
+    {
+        static XeusOptions()
+        {
+            XeusOptions.Formatter = new CustomFormatter();
+            XeusOptions.Empty = new XeusOptions(string.Empty);
+        }
+
+        private readonly int __hashCode;
+
+        public static readonly int MaxConfigDirectoryPathLength = 1024;
+
+        public XeusOptions(string configDirectoryPath)
+        {
+            if (configDirectoryPath is null) throw new System.ArgumentNullException("configDirectoryPath");
+            if (configDirectoryPath.Length > 1024) throw new System.ArgumentOutOfRangeException("configDirectoryPath");
+
+            this.ConfigDirectoryPath = configDirectoryPath;
+
+            {
+                var __h = new System.HashCode();
+                if (this.ConfigDirectoryPath != default) __h.Add(this.ConfigDirectoryPath.GetHashCode());
+                __hashCode = __h.ToHashCode();
+            }
+        }
+
+        public string ConfigDirectoryPath { get; }
+
+        public override bool Equals(XeusOptions? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (this.ConfigDirectoryPath != target.ConfigDirectoryPath) return false;
+
+            return true;
+        }
+
+        public override int GetHashCode() => __hashCode;
+
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<XeusOptions>
+        {
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, XeusOptions value, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                {
+                    uint propertyCount = 0;
+                    if (value.ConfigDirectoryPath != string.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
+                }
+
+                if (value.ConfigDirectoryPath != string.Empty)
+                {
+                    w.Write((uint)0);
+                    w.Write(value.ConfigDirectoryPath);
+                }
+            }
+
+            public XeusOptions Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                // Read property count
+                uint propertyCount = r.GetUInt32();
+
+                string p_configDirectoryPath = string.Empty;
+
+                for (; propertyCount > 0; propertyCount--)
+                {
+                    uint id = r.GetUInt32();
+                    switch (id)
+                    {
+                        case 0: // ConfigDirectoryPath
+                            {
+                                p_configDirectoryPath = r.GetString(1024);
+                                break;
+                            }
+                    }
+                }
+
+                return new XeusOptions(p_configDirectoryPath);
+            }
+        }
+    }
+
     public sealed partial class Clue : Omnix.Serialization.RocketPack.RocketPackMessageBase<Clue>
     {
         static Clue()

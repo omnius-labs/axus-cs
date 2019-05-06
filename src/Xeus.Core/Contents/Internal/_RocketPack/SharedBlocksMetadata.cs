@@ -5,7 +5,7 @@ using Omnix.Cryptography;
 
 namespace Xeus.Core.Contents.Internal
 {
-    partial class SharedBlocksInfo
+    partial class SharedBlocksMetadata
     {
         #region OmniHash to Index
 
