@@ -17,4 +17,7 @@
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Serialization\Omnix.Serialization.csproj" />
     <ProjectReference Include="..\Xeus.Messages\Xeus.Messages.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="excluded_folder\**\*" />
+  </ItemGroup>
 </Project>

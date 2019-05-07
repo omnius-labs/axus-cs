@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Amoeba.Messages;
 
 namespace Xeus.Core.Contents.Primitives
 {
