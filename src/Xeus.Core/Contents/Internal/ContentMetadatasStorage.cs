@@ -6,6 +6,7 @@ using Omnix.Base.Extensions;
 using Omnix.Base.Helpers;
 using Omnix.Collections;
 using Omnix.Cryptography;
+using Xeus.Core.Contents.Primitives;
 using Xeus.Messages;
 
 namespace Xeus.Core.Contents.Internal
