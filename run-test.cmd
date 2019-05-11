@@ -1,6 +1,4 @@
 setlocal
+cd %~dp0
 
-set BAT_DIR=%~dp0
-cd %BAT_DIR%
-
-powershell -File ./run-test.ps1
+powershell -File ./eng/run-test.ps1

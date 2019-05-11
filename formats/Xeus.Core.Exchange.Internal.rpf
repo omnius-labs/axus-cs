@@ -50,54 +50,48 @@ message NodeAddressesMessage {
     Addresses: vector<OmniAddress>(256) = 0,
 }
 
-message RelayOptions {
+message RelayOption {
     HopLimit: uint8 = 0,
     Priority: uint8 = 1,
 }
 
 message WantBroadcastCluesMessage {
-    HopLimit: uint8 = 0,
-    Signatures: OmniSignature = 1,
+    Parameters: map<OmniSignature, RelayOption>(8192) = 0,
 }
 
 message WantUnicastCluesMessage {
-    HopLimit: uint8 = 0,
-    Signatures: OmniSignature = 1,
+    Parameters: map<OmniSignature, RelayOption>(8192) = 0,
 }
 
 message WantMulticastCluesMessage {
-    HopLimit: uint8 = 0,
-    Channel: Channel = 1,
+    Parameters: map<Channel, RelayOption>(8192) = 0,
 }
 
 message BroadcastCluesMessage {
-    BroadcastClue
+    Results: vector<BroadcastClue>(8192) = 0,
 }
 
-message CluesResponsePacket {
-    BroadcastMetadatas: vector<BroadcastMetadata>(8192) = 0,
-    UnicastMetadatas: vector<UnicastMetadata>(8192) = 1,
-    MulticastMetadatas: vector<MulticastMetadata>(8192) = 2,
+message UnicastCluesMessage {
+    Results: vector<UnicastClue>(8192) = 0,
 }
 
-message DiffuseBlockMessage {
-    HopLimit: uint8 = 0,
-    Priority: uint8 = 1,
-    Hash: OmniHash = 2,
-    [Recyclable]
-    Value: memory(4194304) = 3,
+message MulticastCluesMessage {
+    Results: vector<MulticastClue>(8192) = 0,
 }
 
 message PublishBlocksMessage {
-    HopLimit: uint8 = 0,
-    Priority: uint8 = 1,
-    Hash: OmniHash = 2,
+    Parameters: map<OmniHash, RelayOption>(8192) = 0,
 }
 
 message WantBlocksMessage {
-    HopLimit: uint8 = 0,
-    Priority: uint8 = 1,
-    Hash: OmniHash = 2,
+    Parameters: map<OmniHash, RelayOption>(8192) = 0,
+}
+
+message DiffuseBlockMessage {
+    Hash: OmniHash = 0,
+    RelayOption: RelayOption = 1,
+    [Recyclable]
+    Value: memory(4194304) = 2,
 }
 
 message BlockMessage {
@@ -108,9 +102,8 @@ message BlockMessage {
 
 message DiffuseBlockInfo {
     CreationTime: timestamp = 0,
-    HopLimit: uint8 = 1,
-    Priority: uint8 = 2,
-    Hash: OmniHash = 3,
+    Hash: OmniHash = 1,
+    RelayOption: RelayOption = 2,
 }
 
 message ExchangeManagerConfig {

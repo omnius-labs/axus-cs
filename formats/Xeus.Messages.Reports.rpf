@@ -4,13 +4,15 @@ using "Xeus.Messages.rpf";
 
 option csharp_namespace = "Xeus.Messages.Reports";
 
-enum ErrorReportType : uint8 {
+enum ErrorReportType : uint8
+{
     SpaceNotFound = 0,
 }
 
-message ErrorReport {
-    Type: ErrorReportType = 0,
-    CreationTime: timestamp = 1,
+message ErrorReport
+{
+    CreationTime: timestamp = 0,
+    Type: ErrorReportType = 1,
 }
 
 message CheckBlocksProgressReport {
@@ -19,17 +21,18 @@ message CheckBlocksProgressReport {
     TotalBlockCount: uint32 = 2,
 }
 
-message ContentReport {
+message CacheContentReport {
     Clue: Clue = 0,
     Length: uint64 = 1,
     CreationTime: timestamp = 2,
     Path: string(1024) = 3,
 }
 
-message ContentsReport {
+message CacheReport {
     BlockCount: uint32 = 0,
-    UsingAreaSize: uint64 = 1,
-    ProtectionAreaSize: uint64 = 2,
+    UsingArea: uint64 = 1,
+    ProtectionArea: uint64 = 2,
+    FreeArea: uint64 = 3,
 }
 
 enum DownloadStateType : uint8 

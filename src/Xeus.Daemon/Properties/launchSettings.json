@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "Amoeba.Daemon": {
-      "commandName": "Project",
-      "commandLineArgs": "E:\\Works\\Test"
-    }
-  }
-}
