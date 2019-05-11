@@ -14,6 +14,7 @@ using Omnix.Cryptography;
 using Omnix.Io;
 using Omnix.Serialization;
 using Omnix.Serialization.RocketPack;
+using Omnix.Serialization.RocketPack.Helpers;
 using Xeus.Core.Contents.Internal;
 using Xeus.Core.Contents.Primitives;
 using Xeus.Core.Internal;
@@ -484,7 +485,10 @@ namespace Xeus.Core.Contents
                             depth++;
 
                             stream.Dispose();
-                            stream = RocketPackHelper.MessageToStream(new MerkleTreeNode(merkleTreeSectionList.ToArray()));
+
+                            stream = new RecyclableMemoryStream(_bufferPool);
+                            RocketPackHelper.MessageToStream(new MerkleTreeNode(merkleTreeSectionList.ToArray()), stream);
+                            stream.Seek(0, SeekOrigin.Begin);
                         }
                     }
                 }
@@ -630,8 +634,11 @@ namespace Xeus.Core.Contents
                     while (merkleTreeSectionList.Count > 0)
                     {
                         // Index
-                        using (var stream = RocketPackHelper.MessageToStream(new MerkleTreeNode(merkleTreeSectionList.ToArray())))
+                        using (var stream = new RecyclableMemoryStream(_bufferPool))
                         {
+                            RocketPackHelper.MessageToStream(new MerkleTreeNode(merkleTreeSectionList.ToArray()), stream);
+                            stream.Seek(0, SeekOrigin.Begin);
+
                             merkleTreeSectionList.Clear();
 
                             if (stream.Length <= blockLength)
@@ -949,7 +956,7 @@ namespace Xeus.Core.Contents
             lock (_lockObject)
             {
                 var contentInfo = _contentMetadatasStorage.GetFileContentMetadata(path);
-                if (contentInfo == null) Enumerable.Empty<OmniHash>();
+                if (contentInfo == null) return Enumerable.Empty<OmniHash>();
 
                 return contentInfo.LockedHashes.ToArray();
             }
