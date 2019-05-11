@@ -57,7 +57,7 @@ namespace Xeus.Core.Contents.Internal
             return _messageContentMetadatas.Values.ToArray();
         }
 
-        public ContentMetadata GetMessageContentMetadata(Clue clue)
+        public ContentMetadata? GetMessageContentMetadata(Clue clue)
         {
             ContentMetadata contentInfo;
             if (!_messageContentMetadatas.TryGetValue(clue, out contentInfo)) return null;
@@ -75,7 +75,10 @@ namespace Xeus.Core.Contents.Internal
             {
                 _fileContentMetadatas.Remove(path);
 
-                _hashMap.Remove(contentInfo.SharedBlocksMetadata);
+                if (contentInfo.SharedBlocksMetadata != null)
+                {
+                    _hashMap.Remove(contentInfo.SharedBlocksMetadata);
+                }
             }
         }
 
@@ -89,7 +92,7 @@ namespace Xeus.Core.Contents.Internal
             return _fileContentMetadatas.Values.ToArray();
         }
 
-        public ContentMetadata GetFileContentMetadata(string path)
+        public ContentMetadata? GetFileContentMetadata(string path)
         {
             ContentMetadata contentInfo;
             if (!_fileContentMetadatas.TryGetValue(path, out contentInfo)) return null;
