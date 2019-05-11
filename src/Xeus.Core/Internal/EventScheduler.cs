@@ -10,7 +10,7 @@ namespace Xeus.Core.Internal
 {
     internal sealed class EventScheduler : DisposableBase
     {
-        private static NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
+        private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         private Action _callback;
         private readonly object _callbackLockObject = new object();

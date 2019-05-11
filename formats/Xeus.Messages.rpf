@@ -4,6 +4,10 @@ using "../refs/Omnix/formats/Omnix.Cryptography.rpf";
 
 option csharp_namespace = "Xeus.Messages";
 
+message XeusOptions {
+    ConfigDirectoryPath: string(1024) = 0,
+}
+
 message Clue {
     Hash: OmniHash = 0,
     Depth: uint8 = 1,

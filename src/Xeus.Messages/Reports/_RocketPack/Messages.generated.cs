@@ -1,13 +1,7 @@
-﻿using Omnix.Base;
-using Omnix.Base.Helpers;
-using Omnix.Cryptography;
-using Omnix.Serialization;
-using Omnix.Serialization.RocketPack;
-using System;
-using System.Buffers;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using Omnix.Cryptography;
 using Xeus.Messages;
+
+#nullable enable
 
 namespace Xeus.Messages.Reports
 {
@@ -31,109 +25,117 @@ namespace Xeus.Messages.Reports
         Out = 1,
     }
 
-    public sealed partial class ErrorReport : RocketPackMessageBase<ErrorReport>
+    public sealed partial class ErrorReport : Omnix.Serialization.RocketPack.RocketPackMessageBase<ErrorReport>
     {
         static ErrorReport()
         {
             ErrorReport.Formatter = new CustomFormatter();
+            ErrorReport.Empty = new ErrorReport(Omnix.Serialization.RocketPack.Timestamp.Zero, (ErrorReportType)0);
         }
 
-        public ErrorReport(ErrorReportType type, Timestamp creationTime)
+        private readonly int __hashCode;
+
+        public ErrorReport(Omnix.Serialization.RocketPack.Timestamp creationTime, ErrorReportType type)
         {
-            this.Type = type;
             this.CreationTime = creationTime;
+            this.Type = type;
 
             {
-                var hashCode = new HashCode();
-                if (this.Type != default) hashCode.Add(this.Type.GetHashCode());
-                if (this.CreationTime != default) hashCode.Add(this.CreationTime.GetHashCode());
-                _hashCode = hashCode.ToHashCode();
+                var __h = new System.HashCode();
+                if (this.CreationTime != default) __h.Add(this.CreationTime.GetHashCode());
+                if (this.Type != default) __h.Add(this.Type.GetHashCode());
+                __hashCode = __h.ToHashCode();
             }
         }
 
+        public Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
         public ErrorReportType Type { get; }
-        public Timestamp CreationTime { get; }
 
-        public override bool Equals(ErrorReport target)
+        public override bool Equals(ErrorReport? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
-            if (this.Type != target.Type) return false;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
             if (this.CreationTime != target.CreationTime) return false;
+            if (this.Type != target.Type) return false;
 
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<ErrorReport>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<ErrorReport>
         {
-            public void Serialize(RocketPackWriter w, ErrorReport value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, ErrorReport value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    if (value.Type != default) propertyCount++;
-                    if (value.CreationTime != default) propertyCount++;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    if (value.CreationTime != Omnix.Serialization.RocketPack.Timestamp.Zero)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Type != (ErrorReportType)0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
                 }
 
-                // Type
-                if (value.Type != default)
+                if (value.CreationTime != Omnix.Serialization.RocketPack.Timestamp.Zero)
                 {
-                    w.Write((ulong)0);
-                    w.Write((ulong)value.Type);
-                }
-                // CreationTime
-                if (value.CreationTime != default)
-                {
-                    w.Write((ulong)1);
+                    w.Write((uint)0);
                     w.Write(value.CreationTime);
+                }
+                if (value.Type != (ErrorReportType)0)
+                {
+                    w.Write((uint)1);
+                    w.Write((ulong)value.Type);
                 }
             }
 
-            public ErrorReport Deserialize(RocketPackReader r, int rank)
+            public ErrorReport Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
-                ErrorReportType p_type = default;
-                Timestamp p_creationTime = default;
+                Omnix.Serialization.RocketPack.Timestamp p_creationTime = Omnix.Serialization.RocketPack.Timestamp.Zero;
+                ErrorReportType p_type = (ErrorReportType)0;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Type
-                            {
-                                p_type = (ErrorReportType)r.GetUInt64();
-                                break;
-                            }
-                        case 1: // CreationTime
+                        case 0: // CreationTime
                             {
                                 p_creationTime = r.GetTimestamp();
+                                break;
+                            }
+                        case 1: // Type
+                            {
+                                p_type = (ErrorReportType)r.GetUInt64();
                                 break;
                             }
                     }
                 }
 
-                return new ErrorReport(p_type, p_creationTime);
+                return new ErrorReport(p_creationTime, p_type);
             }
         }
     }
 
-    public sealed partial class CheckBlocksProgressReport : RocketPackMessageBase<CheckBlocksProgressReport>
+    public sealed partial class CheckBlocksProgressReport : Omnix.Serialization.RocketPack.RocketPackMessageBase<CheckBlocksProgressReport>
     {
         static CheckBlocksProgressReport()
         {
             CheckBlocksProgressReport.Formatter = new CustomFormatter();
+            CheckBlocksProgressReport.Empty = new CheckBlocksProgressReport(0, 0, 0);
         }
+
+        private readonly int __hashCode;
 
         public CheckBlocksProgressReport(uint badBlockCount, uint checkedBlockCount, uint totalBlockCount)
         {
@@ -142,11 +144,11 @@ namespace Xeus.Messages.Reports
             this.TotalBlockCount = totalBlockCount;
 
             {
-                var hashCode = new HashCode();
-                if (this.BadBlockCount != default) hashCode.Add(this.BadBlockCount.GetHashCode());
-                if (this.CheckedBlockCount != default) hashCode.Add(this.CheckedBlockCount.GetHashCode());
-                if (this.TotalBlockCount != default) hashCode.Add(this.TotalBlockCount.GetHashCode());
-                _hashCode = hashCode.ToHashCode();
+                var __h = new System.HashCode();
+                if (this.BadBlockCount != default) __h.Add(this.BadBlockCount.GetHashCode());
+                if (this.CheckedBlockCount != default) __h.Add(this.CheckedBlockCount.GetHashCode());
+                if (this.TotalBlockCount != default) __h.Add(this.TotalBlockCount.GetHashCode());
+                __hashCode = __h.ToHashCode();
             }
         }
 
@@ -154,10 +156,10 @@ namespace Xeus.Messages.Reports
         public uint CheckedBlockCount { get; }
         public uint TotalBlockCount { get; }
 
-        public override bool Equals(CheckBlocksProgressReport target)
+        public override bool Equals(CheckBlocksProgressReport? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
             if (this.BadBlockCount != target.BadBlockCount) return false;
             if (this.CheckedBlockCount != target.CheckedBlockCount) return false;
             if (this.TotalBlockCount != target.TotalBlockCount) return false;
@@ -165,73 +167,77 @@ namespace Xeus.Messages.Reports
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<CheckBlocksProgressReport>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<CheckBlocksProgressReport>
         {
-            public void Serialize(RocketPackWriter w, CheckBlocksProgressReport value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, CheckBlocksProgressReport value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    if (value.BadBlockCount != default) propertyCount++;
-                    if (value.CheckedBlockCount != default) propertyCount++;
-                    if (value.TotalBlockCount != default) propertyCount++;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    if (value.BadBlockCount != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.CheckedBlockCount != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.TotalBlockCount != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
                 }
 
-                // BadBlockCount
-                if (value.BadBlockCount != default)
+                if (value.BadBlockCount != 0)
                 {
-                    w.Write((ulong)0);
-                    w.Write((ulong)value.BadBlockCount);
+                    w.Write((uint)0);
+                    w.Write(value.BadBlockCount);
                 }
-                // CheckedBlockCount
-                if (value.CheckedBlockCount != default)
+                if (value.CheckedBlockCount != 0)
                 {
-                    w.Write((ulong)1);
-                    w.Write((ulong)value.CheckedBlockCount);
+                    w.Write((uint)1);
+                    w.Write(value.CheckedBlockCount);
                 }
-                // TotalBlockCount
-                if (value.TotalBlockCount != default)
+                if (value.TotalBlockCount != 0)
                 {
-                    w.Write((ulong)2);
-                    w.Write((ulong)value.TotalBlockCount);
+                    w.Write((uint)2);
+                    w.Write(value.TotalBlockCount);
                 }
             }
 
-            public CheckBlocksProgressReport Deserialize(RocketPackReader r, int rank)
+            public CheckBlocksProgressReport Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
-                uint p_badBlockCount = default;
-                uint p_checkedBlockCount = default;
-                uint p_totalBlockCount = default;
+                uint p_badBlockCount = 0;
+                uint p_checkedBlockCount = 0;
+                uint p_totalBlockCount = 0;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                         case 0: // BadBlockCount
                             {
-                                p_badBlockCount = (uint)r.GetUInt64();
+                                p_badBlockCount = r.GetUInt32();
                                 break;
                             }
                         case 1: // CheckedBlockCount
                             {
-                                p_checkedBlockCount = (uint)r.GetUInt64();
+                                p_checkedBlockCount = r.GetUInt32();
                                 break;
                             }
                         case 2: // TotalBlockCount
                             {
-                                p_totalBlockCount = (uint)r.GetUInt64();
+                                p_totalBlockCount = r.GetUInt32();
                                 break;
                             }
                     }
@@ -242,20 +248,23 @@ namespace Xeus.Messages.Reports
         }
     }
 
-    public sealed partial class ContentReport : RocketPackMessageBase<ContentReport>
+    public sealed partial class CacheContentReport : Omnix.Serialization.RocketPack.RocketPackMessageBase<CacheContentReport>
     {
-        static ContentReport()
+        static CacheContentReport()
         {
-            ContentReport.Formatter = new CustomFormatter();
+            CacheContentReport.Formatter = new CustomFormatter();
+            CacheContentReport.Empty = new CacheContentReport(Clue.Empty, 0, Omnix.Serialization.RocketPack.Timestamp.Zero, string.Empty);
         }
+
+        private readonly int __hashCode;
 
         public static readonly int MaxPathLength = 1024;
 
-        public ContentReport(Clue clue, ulong length, Timestamp creationTime, string path)
+        public CacheContentReport(Clue clue, ulong length, Omnix.Serialization.RocketPack.Timestamp creationTime, string path)
         {
-            if (clue is null) throw new ArgumentNullException("clue");
-            if (path is null) throw new ArgumentNullException("path");
-            if (path.Length > 1024) throw new ArgumentOutOfRangeException("path");
+            if (clue is null) throw new System.ArgumentNullException("clue");
+            if (path is null) throw new System.ArgumentNullException("path");
+            if (path.Length > 1024) throw new System.ArgumentOutOfRangeException("path");
 
             this.Clue = clue;
             this.Length = length;
@@ -263,24 +272,24 @@ namespace Xeus.Messages.Reports
             this.Path = path;
 
             {
-                var hashCode = new HashCode();
-                if (this.Clue != default) hashCode.Add(this.Clue.GetHashCode());
-                if (this.Length != default) hashCode.Add(this.Length.GetHashCode());
-                if (this.CreationTime != default) hashCode.Add(this.CreationTime.GetHashCode());
-                if (this.Path != default) hashCode.Add(this.Path.GetHashCode());
-                _hashCode = hashCode.ToHashCode();
+                var __h = new System.HashCode();
+                if (this.Clue != default) __h.Add(this.Clue.GetHashCode());
+                if (this.Length != default) __h.Add(this.Length.GetHashCode());
+                if (this.CreationTime != default) __h.Add(this.CreationTime.GetHashCode());
+                if (this.Path != default) __h.Add(this.Path.GetHashCode());
+                __hashCode = __h.ToHashCode();
             }
         }
 
         public Clue Clue { get; }
         public ulong Length { get; }
-        public Timestamp CreationTime { get; }
+        public Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
         public string Path { get; }
 
-        public override bool Equals(ContentReport target)
+        public override bool Equals(CacheContentReport? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
             if (this.Clue != target.Clue) return false;
             if (this.Length != target.Length) return false;
             if (this.CreationTime != target.CreationTime) return false;
@@ -289,66 +298,72 @@ namespace Xeus.Messages.Reports
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<ContentReport>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<CacheContentReport>
         {
-            public void Serialize(RocketPackWriter w, ContentReport value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, CacheContentReport value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    if (value.Clue != default) propertyCount++;
-                    if (value.Length != default) propertyCount++;
-                    if (value.CreationTime != default) propertyCount++;
-                    if (value.Path != default) propertyCount++;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    if (value.Clue != Clue.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Length != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.CreationTime != Omnix.Serialization.RocketPack.Timestamp.Zero)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Path != string.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
                 }
 
-                // Clue
-                if (value.Clue != default)
+                if (value.Clue != Clue.Empty)
                 {
-                    w.Write((ulong)0);
+                    w.Write((uint)0);
                     Clue.Formatter.Serialize(w, value.Clue, rank + 1);
                 }
-                // Length
-                if (value.Length != default)
+                if (value.Length != 0)
                 {
-                    w.Write((ulong)1);
-                    w.Write((ulong)value.Length);
+                    w.Write((uint)1);
+                    w.Write(value.Length);
                 }
-                // CreationTime
-                if (value.CreationTime != default)
+                if (value.CreationTime != Omnix.Serialization.RocketPack.Timestamp.Zero)
                 {
-                    w.Write((ulong)2);
+                    w.Write((uint)2);
                     w.Write(value.CreationTime);
                 }
-                // Path
-                if (value.Path != default)
+                if (value.Path != string.Empty)
                 {
-                    w.Write((ulong)3);
+                    w.Write((uint)3);
                     w.Write(value.Path);
                 }
             }
 
-            public ContentReport Deserialize(RocketPackReader r, int rank)
+            public CacheContentReport Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
-                Clue p_clue = default;
-                ulong p_length = default;
-                Timestamp p_creationTime = default;
-                string p_path = default;
+                Clue p_clue = Clue.Empty;
+                ulong p_length = 0;
+                Omnix.Serialization.RocketPack.Timestamp p_creationTime = Omnix.Serialization.RocketPack.Timestamp.Zero;
+                string p_path = string.Empty;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                         case 0: // Clue
@@ -358,7 +373,7 @@ namespace Xeus.Messages.Reports
                             }
                         case 1: // Length
                             {
-                                p_length = (ulong)r.GetUInt64();
+                                p_length = r.GetUInt64();
                                 break;
                             }
                         case 2: // CreationTime
@@ -374,139 +389,168 @@ namespace Xeus.Messages.Reports
                     }
                 }
 
-                return new ContentReport(p_clue, p_length, p_creationTime, p_path);
+                return new CacheContentReport(p_clue, p_length, p_creationTime, p_path);
             }
         }
     }
 
-    public sealed partial class ContentsReport : RocketPackMessageBase<ContentsReport>
+    public sealed partial class CacheReport : Omnix.Serialization.RocketPack.RocketPackMessageBase<CacheReport>
     {
-        static ContentsReport()
+        static CacheReport()
         {
-            ContentsReport.Formatter = new CustomFormatter();
+            CacheReport.Formatter = new CustomFormatter();
+            CacheReport.Empty = new CacheReport(0, 0, 0, 0);
         }
 
-        public ContentsReport(uint blockCount, ulong usingAreaSize, ulong protectionAreaSize)
+        private readonly int __hashCode;
+
+        public CacheReport(uint blockCount, ulong usingArea, ulong protectionArea, ulong freeArea)
         {
             this.BlockCount = blockCount;
-            this.UsingAreaSize = usingAreaSize;
-            this.ProtectionAreaSize = protectionAreaSize;
+            this.UsingArea = usingArea;
+            this.ProtectionArea = protectionArea;
+            this.FreeArea = freeArea;
 
             {
-                var hashCode = new HashCode();
-                if (this.BlockCount != default) hashCode.Add(this.BlockCount.GetHashCode());
-                if (this.UsingAreaSize != default) hashCode.Add(this.UsingAreaSize.GetHashCode());
-                if (this.ProtectionAreaSize != default) hashCode.Add(this.ProtectionAreaSize.GetHashCode());
-                _hashCode = hashCode.ToHashCode();
+                var __h = new System.HashCode();
+                if (this.BlockCount != default) __h.Add(this.BlockCount.GetHashCode());
+                if (this.UsingArea != default) __h.Add(this.UsingArea.GetHashCode());
+                if (this.ProtectionArea != default) __h.Add(this.ProtectionArea.GetHashCode());
+                if (this.FreeArea != default) __h.Add(this.FreeArea.GetHashCode());
+                __hashCode = __h.ToHashCode();
             }
         }
 
         public uint BlockCount { get; }
-        public ulong UsingAreaSize { get; }
-        public ulong ProtectionAreaSize { get; }
+        public ulong UsingArea { get; }
+        public ulong ProtectionArea { get; }
+        public ulong FreeArea { get; }
 
-        public override bool Equals(ContentsReport target)
+        public override bool Equals(CacheReport? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
             if (this.BlockCount != target.BlockCount) return false;
-            if (this.UsingAreaSize != target.UsingAreaSize) return false;
-            if (this.ProtectionAreaSize != target.ProtectionAreaSize) return false;
+            if (this.UsingArea != target.UsingArea) return false;
+            if (this.ProtectionArea != target.ProtectionArea) return false;
+            if (this.FreeArea != target.FreeArea) return false;
 
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<ContentsReport>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<CacheReport>
         {
-            public void Serialize(RocketPackWriter w, ContentsReport value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, CacheReport value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    if (value.BlockCount != default) propertyCount++;
-                    if (value.UsingAreaSize != default) propertyCount++;
-                    if (value.ProtectionAreaSize != default) propertyCount++;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    if (value.BlockCount != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.UsingArea != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.ProtectionArea != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.FreeArea != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
                 }
 
-                // BlockCount
-                if (value.BlockCount != default)
+                if (value.BlockCount != 0)
                 {
-                    w.Write((ulong)0);
-                    w.Write((ulong)value.BlockCount);
+                    w.Write((uint)0);
+                    w.Write(value.BlockCount);
                 }
-                // UsingAreaSize
-                if (value.UsingAreaSize != default)
+                if (value.UsingArea != 0)
                 {
-                    w.Write((ulong)1);
-                    w.Write((ulong)value.UsingAreaSize);
+                    w.Write((uint)1);
+                    w.Write(value.UsingArea);
                 }
-                // ProtectionAreaSize
-                if (value.ProtectionAreaSize != default)
+                if (value.ProtectionArea != 0)
                 {
-                    w.Write((ulong)2);
-                    w.Write((ulong)value.ProtectionAreaSize);
+                    w.Write((uint)2);
+                    w.Write(value.ProtectionArea);
+                }
+                if (value.FreeArea != 0)
+                {
+                    w.Write((uint)3);
+                    w.Write(value.FreeArea);
                 }
             }
 
-            public ContentsReport Deserialize(RocketPackReader r, int rank)
+            public CacheReport Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
-                uint p_blockCount = default;
-                ulong p_usingAreaSize = default;
-                ulong p_protectionAreaSize = default;
+                uint p_blockCount = 0;
+                ulong p_usingArea = 0;
+                ulong p_protectionArea = 0;
+                ulong p_freeArea = 0;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                         case 0: // BlockCount
                             {
-                                p_blockCount = (uint)r.GetUInt64();
+                                p_blockCount = r.GetUInt32();
                                 break;
                             }
-                        case 1: // UsingAreaSize
+                        case 1: // UsingArea
                             {
-                                p_usingAreaSize = (ulong)r.GetUInt64();
+                                p_usingArea = r.GetUInt64();
                                 break;
                             }
-                        case 2: // ProtectionAreaSize
+                        case 2: // ProtectionArea
                             {
-                                p_protectionAreaSize = (ulong)r.GetUInt64();
+                                p_protectionArea = r.GetUInt64();
+                                break;
+                            }
+                        case 3: // FreeArea
+                            {
+                                p_freeArea = r.GetUInt64();
                                 break;
                             }
                     }
                 }
 
-                return new ContentsReport(p_blockCount, p_usingAreaSize, p_protectionAreaSize);
+                return new CacheReport(p_blockCount, p_usingArea, p_protectionArea, p_freeArea);
             }
         }
     }
 
-    public sealed partial class DownloadContentReport : RocketPackMessageBase<DownloadContentReport>
+    public sealed partial class DownloadContentReport : Omnix.Serialization.RocketPack.RocketPackMessageBase<DownloadContentReport>
     {
         static DownloadContentReport()
         {
             DownloadContentReport.Formatter = new CustomFormatter();
+            DownloadContentReport.Empty = new DownloadContentReport(Clue.Empty, string.Empty, (DownloadStateType)0, 0, 0, 0, 0);
         }
+
+        private readonly int __hashCode;
 
         public static readonly int MaxPathLength = 1024;
 
         public DownloadContentReport(Clue clue, string path, DownloadStateType downloadStateType, byte downloadingDepth, ulong totalBlockCount, ulong downloadedBlockCount, ulong parityBlockCount)
         {
-            if (clue is null) throw new ArgumentNullException("clue");
-            if (path is null) throw new ArgumentNullException("path");
-            if (path.Length > 1024) throw new ArgumentOutOfRangeException("path");
+            if (clue is null) throw new System.ArgumentNullException("clue");
+            if (path is null) throw new System.ArgumentNullException("path");
+            if (path.Length > 1024) throw new System.ArgumentOutOfRangeException("path");
             this.Clue = clue;
             this.Path = path;
             this.DownloadStateType = downloadStateType;
@@ -516,15 +560,15 @@ namespace Xeus.Messages.Reports
             this.ParityBlockCount = parityBlockCount;
 
             {
-                var hashCode = new HashCode();
-                if (this.Clue != default) hashCode.Add(this.Clue.GetHashCode());
-                if (this.Path != default) hashCode.Add(this.Path.GetHashCode());
-                if (this.DownloadStateType != default) hashCode.Add(this.DownloadStateType.GetHashCode());
-                if (this.DownloadingDepth != default) hashCode.Add(this.DownloadingDepth.GetHashCode());
-                if (this.TotalBlockCount != default) hashCode.Add(this.TotalBlockCount.GetHashCode());
-                if (this.DownloadedBlockCount != default) hashCode.Add(this.DownloadedBlockCount.GetHashCode());
-                if (this.ParityBlockCount != default) hashCode.Add(this.ParityBlockCount.GetHashCode());
-                _hashCode = hashCode.ToHashCode();
+                var __h = new System.HashCode();
+                if (this.Clue != default) __h.Add(this.Clue.GetHashCode());
+                if (this.Path != default) __h.Add(this.Path.GetHashCode());
+                if (this.DownloadStateType != default) __h.Add(this.DownloadStateType.GetHashCode());
+                if (this.DownloadingDepth != default) __h.Add(this.DownloadingDepth.GetHashCode());
+                if (this.TotalBlockCount != default) __h.Add(this.TotalBlockCount.GetHashCode());
+                if (this.DownloadedBlockCount != default) __h.Add(this.DownloadedBlockCount.GetHashCode());
+                if (this.ParityBlockCount != default) __h.Add(this.ParityBlockCount.GetHashCode());
+                __hashCode = __h.ToHashCode();
             }
         }
 
@@ -536,10 +580,10 @@ namespace Xeus.Messages.Reports
         public ulong DownloadedBlockCount { get; }
         public ulong ParityBlockCount { get; }
 
-        public override bool Equals(DownloadContentReport target)
+        public override bool Equals(DownloadContentReport? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
             if (this.Clue != target.Clue) return false;
             if (this.Path != target.Path) return false;
             if (this.DownloadStateType != target.DownloadStateType) return false;
@@ -551,90 +595,102 @@ namespace Xeus.Messages.Reports
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<DownloadContentReport>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<DownloadContentReport>
         {
-            public void Serialize(RocketPackWriter w, DownloadContentReport value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, DownloadContentReport value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    if (value.Clue != default) propertyCount++;
-                    if (value.Path != default) propertyCount++;
-                    if (value.DownloadStateType != default) propertyCount++;
-                    if (value.DownloadingDepth != default) propertyCount++;
-                    if (value.TotalBlockCount != default) propertyCount++;
-                    if (value.DownloadedBlockCount != default) propertyCount++;
-                    if (value.ParityBlockCount != default) propertyCount++;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    if (value.Clue != Clue.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Path != string.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.DownloadStateType != (DownloadStateType)0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.DownloadingDepth != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.TotalBlockCount != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.DownloadedBlockCount != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.ParityBlockCount != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
                 }
 
-                // Clue
-                if (value.Clue != default)
+                if (value.Clue != Clue.Empty)
                 {
-                    w.Write((ulong)0);
+                    w.Write((uint)0);
                     Clue.Formatter.Serialize(w, value.Clue, rank + 1);
                 }
-                // Path
-                if (value.Path != default)
+                if (value.Path != string.Empty)
                 {
-                    w.Write((ulong)1);
+                    w.Write((uint)1);
                     w.Write(value.Path);
                 }
-                // DownloadStateType
-                if (value.DownloadStateType != default)
+                if (value.DownloadStateType != (DownloadStateType)0)
                 {
-                    w.Write((ulong)2);
+                    w.Write((uint)2);
                     w.Write((ulong)value.DownloadStateType);
                 }
-                // DownloadingDepth
-                if (value.DownloadingDepth != default)
+                if (value.DownloadingDepth != 0)
                 {
-                    w.Write((ulong)3);
-                    w.Write((ulong)value.DownloadingDepth);
+                    w.Write((uint)3);
+                    w.Write(value.DownloadingDepth);
                 }
-                // TotalBlockCount
-                if (value.TotalBlockCount != default)
+                if (value.TotalBlockCount != 0)
                 {
-                    w.Write((ulong)4);
-                    w.Write((ulong)value.TotalBlockCount);
+                    w.Write((uint)4);
+                    w.Write(value.TotalBlockCount);
                 }
-                // DownloadedBlockCount
-                if (value.DownloadedBlockCount != default)
+                if (value.DownloadedBlockCount != 0)
                 {
-                    w.Write((ulong)5);
-                    w.Write((ulong)value.DownloadedBlockCount);
+                    w.Write((uint)5);
+                    w.Write(value.DownloadedBlockCount);
                 }
-                // ParityBlockCount
-                if (value.ParityBlockCount != default)
+                if (value.ParityBlockCount != 0)
                 {
-                    w.Write((ulong)6);
-                    w.Write((ulong)value.ParityBlockCount);
+                    w.Write((uint)6);
+                    w.Write(value.ParityBlockCount);
                 }
             }
 
-            public DownloadContentReport Deserialize(RocketPackReader r, int rank)
+            public DownloadContentReport Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
-                Clue p_clue = default;
-                string p_path = default;
-                DownloadStateType p_downloadStateType = default;
-                byte p_downloadingDepth = default;
-                ulong p_totalBlockCount = default;
-                ulong p_downloadedBlockCount = default;
-                ulong p_parityBlockCount = default;
+                Clue p_clue = Clue.Empty;
+                string p_path = string.Empty;
+                DownloadStateType p_downloadStateType = (DownloadStateType)0;
+                byte p_downloadingDepth = 0;
+                ulong p_totalBlockCount = 0;
+                ulong p_downloadedBlockCount = 0;
+                ulong p_parityBlockCount = 0;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                         case 0: // Clue
@@ -654,22 +710,22 @@ namespace Xeus.Messages.Reports
                             }
                         case 3: // DownloadingDepth
                             {
-                                p_downloadingDepth = (byte)r.GetUInt64();
+                                p_downloadingDepth = r.GetUInt8();
                                 break;
                             }
                         case 4: // TotalBlockCount
                             {
-                                p_totalBlockCount = (ulong)r.GetUInt64();
+                                p_totalBlockCount = r.GetUInt64();
                                 break;
                             }
                         case 5: // DownloadedBlockCount
                             {
-                                p_downloadedBlockCount = (ulong)r.GetUInt64();
+                                p_downloadedBlockCount = r.GetUInt64();
                                 break;
                             }
                         case 6: // ParityBlockCount
                             {
-                                p_parityBlockCount = (ulong)r.GetUInt64();
+                                p_parityBlockCount = r.GetUInt64();
                                 break;
                             }
                     }
@@ -680,59 +736,60 @@ namespace Xeus.Messages.Reports
         }
     }
 
-    public sealed partial class DownloadReport : RocketPackMessageBase<DownloadReport>
+    public sealed partial class DownloadReport : Omnix.Serialization.RocketPack.RocketPackMessageBase<DownloadReport>
     {
         static DownloadReport()
         {
             DownloadReport.Formatter = new CustomFormatter();
+            DownloadReport.Empty = new DownloadReport();
         }
+
+        private readonly int __hashCode;
 
         public DownloadReport()
         {
 
             {
-                var hashCode = new HashCode();
-                _hashCode = hashCode.ToHashCode();
+                var __h = new System.HashCode();
+                __hashCode = __h.ToHashCode();
             }
         }
 
 
-        public override bool Equals(DownloadReport target)
+        public override bool Equals(DownloadReport? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
 
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<DownloadReport>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<DownloadReport>
         {
-            public void Serialize(RocketPackWriter w, DownloadReport value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, DownloadReport value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    w.Write(propertyCount);
                 }
 
             }
 
-            public DownloadReport Deserialize(RocketPackReader r, int rank)
+            public DownloadReport Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                     }
@@ -743,59 +800,60 @@ namespace Xeus.Messages.Reports
         }
     }
 
-    public sealed partial class NetworkReport : RocketPackMessageBase<NetworkReport>
+    public sealed partial class NetworkReport : Omnix.Serialization.RocketPack.RocketPackMessageBase<NetworkReport>
     {
         static NetworkReport()
         {
             NetworkReport.Formatter = new CustomFormatter();
+            NetworkReport.Empty = new NetworkReport();
         }
+
+        private readonly int __hashCode;
 
         public NetworkReport()
         {
 
             {
-                var hashCode = new HashCode();
-                _hashCode = hashCode.ToHashCode();
+                var __h = new System.HashCode();
+                __hashCode = __h.ToHashCode();
             }
         }
 
 
-        public override bool Equals(NetworkReport target)
+        public override bool Equals(NetworkReport? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
 
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<NetworkReport>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<NetworkReport>
         {
-            public void Serialize(RocketPackWriter w, NetworkReport value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, NetworkReport value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    w.Write(propertyCount);
                 }
 
             }
 
-            public NetworkReport Deserialize(RocketPackReader r, int rank)
+            public NetworkReport Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                     }
@@ -806,59 +864,60 @@ namespace Xeus.Messages.Reports
         }
     }
 
-    public sealed partial class ConnectionsReport : RocketPackMessageBase<ConnectionsReport>
+    public sealed partial class ConnectionsReport : Omnix.Serialization.RocketPack.RocketPackMessageBase<ConnectionsReport>
     {
         static ConnectionsReport()
         {
             ConnectionsReport.Formatter = new CustomFormatter();
+            ConnectionsReport.Empty = new ConnectionsReport();
         }
+
+        private readonly int __hashCode;
 
         public ConnectionsReport()
         {
 
             {
-                var hashCode = new HashCode();
-                _hashCode = hashCode.ToHashCode();
+                var __h = new System.HashCode();
+                __hashCode = __h.ToHashCode();
             }
         }
 
 
-        public override bool Equals(ConnectionsReport target)
+        public override bool Equals(ConnectionsReport? target)
         {
-            if ((object)target == null) return false;
-            if (Object.ReferenceEquals(this, target)) return true;
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
 
             return true;
         }
 
-        private readonly int _hashCode;
-        public override int GetHashCode() => _hashCode;
+        public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<ConnectionsReport>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<ConnectionsReport>
         {
-            public void Serialize(RocketPackWriter w, ConnectionsReport value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, ConnectionsReport value, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
-                // Write property count
                 {
-                    int propertyCount = 0;
-                    w.Write((ulong)propertyCount);
+                    uint propertyCount = 0;
+                    w.Write(propertyCount);
                 }
 
             }
 
-            public ConnectionsReport Deserialize(RocketPackReader r, int rank)
+            public ConnectionsReport Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new FormatException();
+                if (rank > 256) throw new System.FormatException();
 
                 // Read property count
-                int propertyCount = (int)r.GetUInt64();
+                uint propertyCount = r.GetUInt32();
 
 
                 for (; propertyCount > 0; propertyCount--)
                 {
-                    int id = (int)r.GetUInt64();
+                    uint id = r.GetUInt32();
                     switch (id)
                     {
                     }

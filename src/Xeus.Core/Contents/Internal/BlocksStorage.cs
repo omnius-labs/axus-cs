@@ -12,29 +12,32 @@ using Omnix.Base.Helpers;
 using Omnix.Configuration;
 using Omnix.Cryptography;
 using Omnix.Serialization;
+using Omnix.Serialization.RocketPack;
 using Xeus.Core.Internal;
+using Xeus.Messages;
 using Xeus.Messages.Reports;
 
 namespace Xeus.Core.Contents.Internal
 {
     internal sealed partial class BlocksStorage : DisposableBase, IEnumerable<OmniHash>
     {
-        private static NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
+        private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private Stream _fileStream;
+        private readonly Stream _fileStream;
 
-        private BufferPool _bufferPool;
-        private UsingSectorsManager _usingSectorsManager;
-        private ProtectionStatusManager _protectionStatusManager;
+        private readonly XeusOptions _options;
+        private readonly BufferPool _bufferPool;
+        private readonly UsingSectorsPool _usingSectorsPool;
+        private readonly ProtectionStatus _protectionStatus;
 
-        private Settings _settings;
+        private readonly Settings _settings;
 
         private ulong _size;
-        private Dictionary<OmniHash, ClusterInfo> _clusterInfoMap;
+        private readonly Dictionary<OmniHash, ClusterMetadata> _clusterMetadataMap = new Dictionary<OmniHash, ClusterMetadata>();
 
-        private EventQueue<OmniHash> _addedBlockEventQueue = new EventQueue<OmniHash>(new TimeSpan(0, 0, 3));
-        private EventQueue<OmniHash> _removedBlockEventQueue = new EventQueue<OmniHash>(new TimeSpan(0, 0, 3));
-        private EventQueue<ErrorReport> _errorReportEventQueue = new EventQueue<ErrorReport>(new TimeSpan(0, 0, 3));
+        private readonly EventQueue<OmniHash> _addedBlockEventQueue = new EventQueue<OmniHash>(new TimeSpan(0, 0, 3));
+        private readonly EventQueue<OmniHash> _removedBlockEventQueue = new EventQueue<OmniHash>(new TimeSpan(0, 0, 3));
+        private readonly EventQueue<ErrorReport> _errorReportEventQueue = new EventQueue<ErrorReport>(new TimeSpan(0, 0, 3));
 
         private readonly object _lockObject = new object();
 
@@ -42,8 +45,15 @@ namespace Xeus.Core.Contents.Internal
 
         public static readonly uint SectorSize = 1024 * 256; // 256 KB
 
-        public BlocksStorage(string configPath, string blocksPath, BufferPool bufferPool)
+        public BlocksStorage(XeusOptions options, BufferPool bufferPool)
         {
+            _options = options;
+            _bufferPool = bufferPool;
+
+            string configPath = Path.Combine(options.ConfigDirectoryPath, nameof(BlocksStorage));
+            string blocksPath = Path.Combine(configPath, "blocks");
+            _settings = new Settings(Path.Combine(configPath, "settings"));
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 const FileOptions FileFlagNoBuffering = (FileOptions)0x20000000;
@@ -58,11 +68,8 @@ namespace Xeus.Core.Contents.Internal
                 throw new NotSupportedException();
             }
 
-            _bufferPool = bufferPool;
-            _usingSectorsManager = new UsingSectorsManager(_bufferPool);
-            _protectionStatusManager = new ProtectionStatusManager();
-
-            _settings = new Settings(configPath);
+            _usingSectorsPool = new UsingSectorsPool(_bufferPool);
+            _protectionStatus = new ProtectionStatus();
         }
 
         public ulong UsingAreaSize
@@ -84,9 +91,9 @@ namespace Xeus.Core.Contents.Internal
                 {
                     ulong protectionAreaSize = 0;
 
-                    foreach (var hash in _protectionStatusManager.GetProtectedHashes())
+                    foreach (var hash in _protectionStatus.GetProtectedHashes())
                     {
-                        if (_clusterInfoMap.TryGetValue(hash, out var clusterInfo))
+                        if (_clusterMetadataMap.TryGetValue(hash, out var clusterInfo))
                         {
                             protectionAreaSize += (ulong)(SectorSize * clusterInfo.Sectors.Count);
                         }
@@ -96,7 +103,7 @@ namespace Xeus.Core.Contents.Internal
                 }
             }
         }
-        
+
         public ulong Size
         {
             get
@@ -114,7 +121,7 @@ namespace Xeus.Core.Contents.Internal
             {
                 lock (_lockObject)
                 {
-                    return _clusterInfoMap.Count;
+                    return _clusterMetadataMap.Count;
                 }
             }
         }
@@ -157,18 +164,19 @@ namespace Xeus.Core.Contents.Internal
 
         private bool TryGetFreeSectors(int count, out ulong[] sectors)
         {
-            sectors = null;
+            sectors = Array.Empty<ulong>();
+
             lock (_lockObject)
             {
-                if (_usingSectorsManager.FreeSectorCount >= (uint)count)
+                if (_usingSectorsPool.FreeSectorCount >= (uint)count)
                 {
-                    sectors = _usingSectorsManager.TakeFreeSectors(count);
+                    sectors = _usingSectorsPool.TakeFreeSectors(count);
                     return true;
                 }
                 else
                 {
-                    var removePairs = _clusterInfoMap
-                        .Where(n => !_protectionStatusManager.Contains(n.Key))
+                    var removePairs = _clusterMetadataMap
+                        .Where(n => !_protectionStatus.Contains(n.Key))
                         .ToList();
 
                     removePairs.Sort((x, y) =>
@@ -180,15 +188,15 @@ namespace Xeus.Core.Contents.Internal
                     {
                         this.Remove(hash);
 
-                        if (_usingSectorsManager.FreeSectorCount >= 1024 * 4) break;
+                        if (_usingSectorsPool.FreeSectorCount >= 1024 * 4) break;
                     }
 
-                    if (_usingSectorsManager.FreeSectorCount < (uint)count)
+                    if (_usingSectorsPool.FreeSectorCount < (uint)count)
                     {
                         return false;
                     }
 
-                    sectors = _usingSectorsManager.TakeFreeSectors(count);
+                    sectors = _usingSectorsPool.TakeFreeSectors(count);
                     return true;
                 }
             }
@@ -198,7 +206,7 @@ namespace Xeus.Core.Contents.Internal
         {
             lock (_lockObject)
             {
-                _protectionStatusManager.Add(hash);
+                _protectionStatus.Add(hash);
             }
         }
 
@@ -206,7 +214,7 @@ namespace Xeus.Core.Contents.Internal
         {
             lock (_lockObject)
             {
-                _protectionStatusManager.Remove(hash);
+                _protectionStatus.Remove(hash);
             }
         }
 
@@ -214,7 +222,7 @@ namespace Xeus.Core.Contents.Internal
         {
             lock (_lockObject)
             {
-                return _clusterInfoMap.ContainsKey(hash);
+                return _clusterMetadataMap.ContainsKey(hash);
             }
         }
 
@@ -224,7 +232,7 @@ namespace Xeus.Core.Contents.Internal
             {
                 foreach (var hash in collection)
                 {
-                    if (_clusterInfoMap.ContainsKey(hash))
+                    if (_clusterMetadataMap.ContainsKey(hash))
                     {
                         yield return hash;
                     }
@@ -238,7 +246,7 @@ namespace Xeus.Core.Contents.Internal
             {
                 foreach (var hash in collection)
                 {
-                    if (!_clusterInfoMap.ContainsKey(hash))
+                    if (!_clusterMetadataMap.ContainsKey(hash))
                     {
                         yield return hash;
                     }
@@ -250,11 +258,11 @@ namespace Xeus.Core.Contents.Internal
         {
             lock (_lockObject)
             {
-                if (_clusterInfoMap.TryGetValue(hash, out var clusterInfo))
+                if (_clusterMetadataMap.TryGetValue(hash, out var clusterInfo))
                 {
-                    _clusterInfoMap.Remove(hash);
+                    _clusterMetadataMap.Remove(hash);
 
-                    _usingSectorsManager.SetFreeSectors(clusterInfo.Sectors);
+                    _usingSectorsPool.SetFreeSectors(clusterInfo.Sectors);
 
                     // Event
                     _removedBlockEventQueue.Enqueue(hash);
@@ -271,8 +279,8 @@ namespace Xeus.Core.Contents.Internal
                 uint unit = 1024 * 1024 * 256; // 256MB
                 size = MathHelper.Roundup(size, unit);
 
-                foreach (var key in _clusterInfoMap.Keys.ToArray()
-                    .Where(n => _clusterInfoMap[n].Sectors.Any(point => size < (point * SectorSize) + SectorSize))
+                foreach (var key in _clusterMetadataMap.Keys.ToArray()
+                    .Where(n => _clusterMetadataMap[n].Sectors.Any(point => size < (point * SectorSize) + SectorSize))
                     .ToArray())
                 {
                     this.Remove(key);
@@ -289,11 +297,11 @@ namespace Xeus.Core.Contents.Internal
         {
             lock (_lockObject)
             {
-                _usingSectorsManager.Reallocate(_size);
+                _usingSectorsPool.Reallocate(_size);
 
-                foreach (var indexes in _clusterInfoMap.Values.Select(n => n.Sectors))
+                foreach (var indexes in _clusterMetadataMap.Values.Select(n => n.Sectors))
                 {
-                    _usingSectorsManager.SetUsingSectors(indexes);
+                    _usingSectorsPool.SetUsingSectors(indexes);
                 }
             }
         }
@@ -305,13 +313,13 @@ namespace Xeus.Core.Contents.Internal
                 // 重複するセクタを確保したブロックを検出しRemoveする。
                 lock (_lockObject)
                 {
-                    using (var bitmapManager = new BitmapManager(_bufferPool))
+                    using (var bitmapManager = new BitmapStorage(_bufferPool))
                     {
                         bitmapManager.SetLength(this.Size / SectorSize);
 
                         var hashes = new List<OmniHash>();
 
-                        foreach (var (hash, clusterInfo) in _clusterInfoMap)
+                        foreach (var (hash, clusterInfo) in _clusterMetadataMap)
                         {
                             foreach (var sector in clusterInfo.Sectors)
                             {
@@ -362,7 +370,7 @@ namespace Xeus.Core.Contents.Internal
                                     badCount++;
                                 }
 
-                                memoryOwner.Dispose();
+                                memoryOwner?.Dispose();
                             }
                         }
 
@@ -381,7 +389,7 @@ namespace Xeus.Core.Contents.Internal
 
         private byte[] _sectorBuffer = new byte[SectorSize];
 
-        public bool TryGet(OmniHash hash, out IMemoryOwner<byte> memoryOwner)
+        public bool TryGet(OmniHash hash, out IMemoryOwner<byte>? memoryOwner)
         {
             if (!EnumHelper.IsValid(hash.AlgorithmType)) throw new ArgumentException($"Incorrect HashAlgorithmType: {hash.AlgorithmType}");
 
@@ -392,12 +400,12 @@ namespace Xeus.Core.Contents.Internal
             {
                 lock (_lockObject)
                 {
-                    ClusterInfo clusterInfo = null;
+                    ClusterMetadata? clusterInfo = null;
 
-                    if (_clusterInfoMap.TryGetValue(hash, out clusterInfo))
+                    if (_clusterMetadataMap.TryGetValue(hash, out clusterInfo))
                     {
-                        clusterInfo = new ClusterInfo(clusterInfo.Sectors.ToArray(), clusterInfo.Length, Timestamp.FromDateTime(DateTime.UtcNow));
-                        _clusterInfoMap[hash] = clusterInfo;
+                        clusterInfo = new ClusterMetadata(clusterInfo.Sectors.ToArray(), clusterInfo.Length, Timestamp.FromDateTime(DateTime.UtcNow));
+                        _clusterMetadataMap[hash] = clusterInfo;
                     }
 
                     if (clusterInfo == null) return false;
@@ -499,7 +507,7 @@ namespace Xeus.Core.Contents.Internal
 
                 if (!this.TryGetFreeSectors((int)((value.Length + (SectorSize - 1)) / SectorSize), out sectors))
                 {
-                    _errorReportEventQueue.Enqueue(new ErrorReport(ErrorReportType.SpaceNotFound, Timestamp.FromDateTime(DateTime.UtcNow)));
+                    _errorReportEventQueue.Enqueue(new ErrorReport(Timestamp.FromDateTime(DateTime.UtcNow), ErrorReportType.SpaceNotFound));
 
                     _logger.Debug("Space not found.");
 
@@ -544,7 +552,7 @@ namespace Xeus.Core.Contents.Internal
                     return false;
                 }
 
-                _clusterInfoMap[hash] = new ClusterInfo(sectors, (uint)value.Length, Timestamp.FromDateTime(DateTime.UtcNow));
+                _clusterMetadataMap[hash] = new ClusterMetadata(sectors, (uint)value.Length, Timestamp.FromDateTime(DateTime.UtcNow));
 
                 // Event
                 _addedBlockEventQueue.Enqueue(hash);
@@ -557,7 +565,7 @@ namespace Xeus.Core.Contents.Internal
         {
             lock (_lockObject)
             {
-                if (_clusterInfoMap.TryGetValue(hash, out var value))
+                if (_clusterMetadataMap.TryGetValue(hash, out var value))
                 {
                     return value.Length;
                 }
@@ -572,10 +580,16 @@ namespace Xeus.Core.Contents.Internal
         {
             lock (_lockObject)
             {
-                var config = _settings.Load<BlocksStorageConfig>("Config");
+                var config = _settings.Load<BlocksStorageConfig>("config");
 
                 _size = config.Size;
-                _clusterInfoMap = new Dictionary<OmniHash, ClusterInfo>(config.ClusterInfoMap);
+
+                _clusterMetadataMap.Clear();
+
+                foreach (var (key, value) in config.ClusterMetadataMap)
+                {
+                    _clusterMetadataMap.Add(key, value);
+                }
 
                 this.UpdateUsingSectors();
             }
@@ -585,8 +599,8 @@ namespace Xeus.Core.Contents.Internal
         {
             lock (_lockObject)
             {
-                var config = new BlocksStorageConfig(0, _clusterInfoMap, _size);
-                _settings.Save("Config", config);
+                var config = new BlocksStorageConfig(0, _clusterMetadataMap, _size);
+                _settings.Save("config", config);
             }
         }
 
@@ -596,7 +610,7 @@ namespace Xeus.Core.Contents.Internal
         {
             lock (_lockObject)
             {
-                return _clusterInfoMap.Keys.ToArray();
+                return _clusterMetadataMap.Keys.ToArray();
             }
         }
 
@@ -604,7 +618,7 @@ namespace Xeus.Core.Contents.Internal
         {
             lock (_lockObject)
             {
-                foreach (var hash in _clusterInfoMap.Keys)
+                foreach (var hash in _clusterMetadataMap.Keys)
                 {
                     yield return hash;
                 }
@@ -629,17 +643,8 @@ namespace Xeus.Core.Contents.Internal
                 _addedBlockEventQueue.Dispose();
                 _removedBlockEventQueue.Dispose();
 
-                if (_usingSectorsManager != null)
-                {
-                    _usingSectorsManager.Dispose();
-                    _usingSectorsManager = null;
-                }
-
-                if (_fileStream != null)
-                {
-                    _fileStream.Dispose();
-                    _fileStream = null;
-                }
+                _usingSectorsPool.Dispose();
+                _fileStream.Dispose();
             }
         }
     }
