@@ -16,7 +16,7 @@ message ClusterMetadata {
 }
 
 message ContentMetadata {
-    Clue: Clue = 0,
+    Clue: XeusClue = 0,
     CreationTime: timestamp = 1,
     LockedHashes: vector<OmniHash>(1073741824) = 2,
     SharedBlocksMetadata: SharedBlocksMetadata? = 3, 

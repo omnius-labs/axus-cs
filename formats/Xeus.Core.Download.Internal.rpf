@@ -11,7 +11,7 @@ option csharp_namespace = "Xeus.Core.Download.Internal";
 option csharp_access_level = "internal";
 
 message DownloadItemInfo {
-    Clue: Clue = 0,
+    Clue: XeusClue = 0,
     Path: string(1024) = 1,
     MaxLength: uint64 = 2,
     DownloadingDepth: uint32 = 3,
