@@ -12,7 +12,7 @@ option csharp_access_level = "internal";
 message BroadcastClue {
     Type: string(256) = 0,
     CreationTime: timestamp = 1,
-    Clue: Clue = 2,
+    Clue: XeusClue = 2,
     Certificate: OmniCertificate = 3,
 }
 
@@ -20,15 +20,15 @@ message UnicastClue {
     Type: string(256) = 0,
     Signature: OmniSignature = 1,
     CreationTime: timestamp = 2,
-    Clue: Clue = 3,
+    Clue: XeusClue = 3,
     Certificate: OmniCertificate = 4,
 }
 
 message MulticastClue {
     Type: string(256) = 0,
-    Channel: Channel = 1,
+    ChannelId: XeusChannelId = 1,
     CreationTime: timestamp = 2,
-    Clue: Clue = 3,
+    Clue: XeusClue = 3,
     Hashcash: OmniHashcash = 4,
     Certificate: OmniCertificate = 5,
 }
@@ -64,7 +64,7 @@ message WantUnicastCluesMessage {
 }
 
 message WantMulticastCluesMessage {
-    Parameters: map<Channel, RelayOption>(8192) = 0,
+    Parameters: map<XeusChannelId, RelayOption>(8192) = 0,
 }
 
 message BroadcastCluesMessage {

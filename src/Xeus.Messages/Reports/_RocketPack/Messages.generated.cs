@@ -253,14 +253,14 @@ namespace Xeus.Messages.Reports
         static CacheContentReport()
         {
             CacheContentReport.Formatter = new CustomFormatter();
-            CacheContentReport.Empty = new CacheContentReport(Clue.Empty, 0, Omnix.Serialization.RocketPack.Timestamp.Zero, string.Empty);
+            CacheContentReport.Empty = new CacheContentReport(XeusClue.Empty, 0, Omnix.Serialization.RocketPack.Timestamp.Zero, string.Empty);
         }
 
         private readonly int __hashCode;
 
         public static readonly int MaxPathLength = 1024;
 
-        public CacheContentReport(Clue clue, ulong length, Omnix.Serialization.RocketPack.Timestamp creationTime, string path)
+        public CacheContentReport(XeusClue clue, ulong length, Omnix.Serialization.RocketPack.Timestamp creationTime, string path)
         {
             if (clue is null) throw new System.ArgumentNullException("clue");
             if (path is null) throw new System.ArgumentNullException("path");
@@ -281,7 +281,7 @@ namespace Xeus.Messages.Reports
             }
         }
 
-        public Clue Clue { get; }
+        public XeusClue Clue { get; }
         public ulong Length { get; }
         public Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
         public string Path { get; }
@@ -308,7 +308,7 @@ namespace Xeus.Messages.Reports
 
                 {
                     uint propertyCount = 0;
-                    if (value.Clue != Clue.Empty)
+                    if (value.Clue != XeusClue.Empty)
                     {
                         propertyCount++;
                     }
@@ -327,10 +327,10 @@ namespace Xeus.Messages.Reports
                     w.Write(propertyCount);
                 }
 
-                if (value.Clue != Clue.Empty)
+                if (value.Clue != XeusClue.Empty)
                 {
                     w.Write((uint)0);
-                    Clue.Formatter.Serialize(w, value.Clue, rank + 1);
+                    XeusClue.Formatter.Serialize(w, value.Clue, rank + 1);
                 }
                 if (value.Length != 0)
                 {
@@ -356,7 +356,7 @@ namespace Xeus.Messages.Reports
                 // Read property count
                 uint propertyCount = r.GetUInt32();
 
-                Clue p_clue = Clue.Empty;
+                XeusClue p_clue = XeusClue.Empty;
                 ulong p_length = 0;
                 Omnix.Serialization.RocketPack.Timestamp p_creationTime = Omnix.Serialization.RocketPack.Timestamp.Zero;
                 string p_path = string.Empty;
@@ -368,7 +368,7 @@ namespace Xeus.Messages.Reports
                     {
                         case 0: // Clue
                             {
-                                p_clue = Clue.Formatter.Deserialize(r, rank + 1);
+                                p_clue = XeusClue.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
                         case 1: // Length
@@ -539,14 +539,14 @@ namespace Xeus.Messages.Reports
         static DownloadContentReport()
         {
             DownloadContentReport.Formatter = new CustomFormatter();
-            DownloadContentReport.Empty = new DownloadContentReport(Clue.Empty, string.Empty, (DownloadStateType)0, 0, 0, 0, 0);
+            DownloadContentReport.Empty = new DownloadContentReport(XeusClue.Empty, string.Empty, (DownloadStateType)0, 0, 0, 0, 0);
         }
 
         private readonly int __hashCode;
 
         public static readonly int MaxPathLength = 1024;
 
-        public DownloadContentReport(Clue clue, string path, DownloadStateType downloadStateType, byte downloadingDepth, ulong totalBlockCount, ulong downloadedBlockCount, ulong parityBlockCount)
+        public DownloadContentReport(XeusClue clue, string path, DownloadStateType downloadStateType, byte downloadingDepth, ulong totalBlockCount, ulong downloadedBlockCount, ulong parityBlockCount)
         {
             if (clue is null) throw new System.ArgumentNullException("clue");
             if (path is null) throw new System.ArgumentNullException("path");
@@ -572,7 +572,7 @@ namespace Xeus.Messages.Reports
             }
         }
 
-        public Clue Clue { get; }
+        public XeusClue Clue { get; }
         public string Path { get; }
         public DownloadStateType DownloadStateType { get; }
         public byte DownloadingDepth { get; }
@@ -605,7 +605,7 @@ namespace Xeus.Messages.Reports
 
                 {
                     uint propertyCount = 0;
-                    if (value.Clue != Clue.Empty)
+                    if (value.Clue != XeusClue.Empty)
                     {
                         propertyCount++;
                     }
@@ -636,10 +636,10 @@ namespace Xeus.Messages.Reports
                     w.Write(propertyCount);
                 }
 
-                if (value.Clue != Clue.Empty)
+                if (value.Clue != XeusClue.Empty)
                 {
                     w.Write((uint)0);
-                    Clue.Formatter.Serialize(w, value.Clue, rank + 1);
+                    XeusClue.Formatter.Serialize(w, value.Clue, rank + 1);
                 }
                 if (value.Path != string.Empty)
                 {
@@ -680,7 +680,7 @@ namespace Xeus.Messages.Reports
                 // Read property count
                 uint propertyCount = r.GetUInt32();
 
-                Clue p_clue = Clue.Empty;
+                XeusClue p_clue = XeusClue.Empty;
                 string p_path = string.Empty;
                 DownloadStateType p_downloadStateType = (DownloadStateType)0;
                 byte p_downloadingDepth = 0;
@@ -695,7 +695,7 @@ namespace Xeus.Messages.Reports
                     {
                         case 0: // Clue
                             {
-                                p_clue = Clue.Formatter.Deserialize(r, rank + 1);
+                                p_clue = XeusClue.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
                         case 1: // Path

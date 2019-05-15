@@ -361,13 +361,13 @@ namespace Xeus.Core.Contents
             });
         }
 
-        public async ValueTask<Clue> Import(Stream stream, CancellationToken token = default)
+        public async ValueTask<XeusClue> Import(Stream stream, CancellationToken token = default)
         {
             if (stream == null) throw new ArgumentNullException(nameof(stream));
 
             return await Task.Run(async () =>
             {
-                Clue? clue = null;
+                XeusClue? clue = null;
                 var lockedHashes = new HashSet<OmniHash>();
 
                 try
@@ -409,7 +409,7 @@ namespace Xeus.Core.Contents
 
                             stream.Dispose();
 
-                            clue = new Clue(hash, depth);
+                            clue = new XeusClue(hash, depth);
 
                             break;
                         }
@@ -516,7 +516,7 @@ namespace Xeus.Core.Contents
             }, token);
         }
 
-        public async ValueTask<Clue> Import(string path, DateTime creationTime, CancellationToken token = default)
+        public async ValueTask<XeusClue> Import(string path, DateTime creationTime, CancellationToken token = default)
         {
             if (path == null) throw new ArgumentNullException(nameof(path));
 
@@ -526,10 +526,10 @@ namespace Xeus.Core.Contents
                 lock (_lockObject)
                 {
                     var info = _contentMetadatasStorage.GetFileContentMetadata(path);
-                    if (info != null) return info.Clue;
+                    if (info != null) return info.XeusClue;
                 }
 
-                Clue? clue = null;
+                XeusClue? clue = null;
                 var lockedHashes = new HashSet<OmniHash>();
                 SharedBlocksMetadata? sharedBlocksInfo = null;
 
@@ -560,7 +560,7 @@ namespace Xeus.Core.Contents
                             }
 
                             sharedBlocksInfo = new SharedBlocksMetadata(path, (ulong)stream.Length, (uint)stream.Length, new OmniHash[] { hash });
-                            clue = new Clue(hash, depth);
+                            clue = new XeusClue(hash, depth);
                         }
                         else
                         {
@@ -666,7 +666,7 @@ namespace Xeus.Core.Contents
                                     lockedHashes.Add(hash);
                                 }
 
-                                clue = new Clue(hash, depth);
+                                clue = new XeusClue(hash, depth);
                             }
                             else
                             {
@@ -882,12 +882,12 @@ namespace Xeus.Core.Contents
                 {
                     if (contentInfo.LockedHashes.All(n => this.Contains(n))) continue;
 
-                    this.RemoveMessage(contentInfo.Clue);
+                    this.RemoveMessage(contentInfo.XeusClue);
                 }
             }
         }
 
-        public void RemoveMessage(Clue clue)
+        public void RemoveMessage(XeusClue clue)
         {
             lock (_lockObject)
             {

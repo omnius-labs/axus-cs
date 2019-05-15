@@ -150,26 +150,26 @@ namespace Xeus.Core.Contents.Internal
         static ContentMetadata()
         {
             ContentMetadata.Formatter = new CustomFormatter();
-            ContentMetadata.Empty = new ContentMetadata(Clue.Empty, Omnix.Serialization.RocketPack.Timestamp.Zero, System.Array.Empty<OmniHash>(), null);
+            ContentMetadata.Empty = new ContentMetadata(XeusClue.Empty, Omnix.Serialization.RocketPack.Timestamp.Zero, System.Array.Empty<OmniHash>(), null);
         }
 
         private readonly int __hashCode;
 
         public static readonly int MaxLockedHashesCount = 1073741824;
 
-        public ContentMetadata(Clue clue, Omnix.Serialization.RocketPack.Timestamp creationTime, OmniHash[] lockedHashes, SharedBlocksMetadata? sharedBlocksMetadata)
+        public ContentMetadata(XeusClue clue, Omnix.Serialization.RocketPack.Timestamp creationTime, OmniHash[] lockedHashes, SharedBlocksMetadata? sharedBlocksMetadata)
         {
             if (clue is null) throw new System.ArgumentNullException("clue");
             if (lockedHashes is null) throw new System.ArgumentNullException("lockedHashes");
             if (lockedHashes.Length > 1073741824) throw new System.ArgumentOutOfRangeException("lockedHashes");
-            this.Clue = clue;
+            this.XeusClue = clue;
             this.CreationTime = creationTime;
             this.LockedHashes = new Omnix.Collections.ReadOnlyListSlim<OmniHash>(lockedHashes);
             this.SharedBlocksMetadata = sharedBlocksMetadata;
 
             {
                 var __h = new System.HashCode();
-                if (this.Clue != default) __h.Add(this.Clue.GetHashCode());
+                if (this.XeusClue != default) __h.Add(this.XeusClue.GetHashCode());
                 if (this.CreationTime != default) __h.Add(this.CreationTime.GetHashCode());
                 foreach (var n in this.LockedHashes)
                 {
@@ -180,7 +180,7 @@ namespace Xeus.Core.Contents.Internal
             }
         }
 
-        public Clue Clue { get; }
+        public XeusClue XeusClue { get; }
         public Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
         public Omnix.Collections.ReadOnlyListSlim<OmniHash> LockedHashes { get; }
         public SharedBlocksMetadata? SharedBlocksMetadata { get; }
@@ -189,7 +189,7 @@ namespace Xeus.Core.Contents.Internal
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.Clue != target.Clue) return false;
+            if (this.XeusClue != target.XeusClue) return false;
             if (this.CreationTime != target.CreationTime) return false;
             if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.LockedHashes, target.LockedHashes)) return false;
             if ((this.SharedBlocksMetadata is null) != (target.SharedBlocksMetadata is null)) return false;
@@ -208,7 +208,7 @@ namespace Xeus.Core.Contents.Internal
 
                 {
                     uint propertyCount = 0;
-                    if (value.Clue != Clue.Empty)
+                    if (value.XeusClue != XeusClue.Empty)
                     {
                         propertyCount++;
                     }
@@ -227,10 +227,10 @@ namespace Xeus.Core.Contents.Internal
                     w.Write(propertyCount);
                 }
 
-                if (value.Clue != Clue.Empty)
+                if (value.XeusClue != XeusClue.Empty)
                 {
                     w.Write((uint)0);
-                    Clue.Formatter.Serialize(w, value.Clue, rank + 1);
+                    XeusClue.Formatter.Serialize(w, value.XeusClue, rank + 1);
                 }
                 if (value.CreationTime != Omnix.Serialization.RocketPack.Timestamp.Zero)
                 {
@@ -260,7 +260,7 @@ namespace Xeus.Core.Contents.Internal
                 // Read property count
                 uint propertyCount = r.GetUInt32();
 
-                Clue p_clue = Clue.Empty;
+                XeusClue p_clue = XeusClue.Empty;
                 Omnix.Serialization.RocketPack.Timestamp p_creationTime = Omnix.Serialization.RocketPack.Timestamp.Zero;
                 OmniHash[] p_lockedHashes = System.Array.Empty<OmniHash>();
                 SharedBlocksMetadata? p_sharedBlocksMetadata = null;
@@ -270,9 +270,9 @@ namespace Xeus.Core.Contents.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Clue
+                        case 0: // XeusClue
                             {
-                                p_clue = Clue.Formatter.Deserialize(r, rank + 1);
+                                p_clue = XeusClue.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
                         case 1: // CreationTime

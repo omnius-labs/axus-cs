@@ -13,14 +13,14 @@ namespace Xeus.Core.Contents.Internal
 {
     internal sealed class ContentMetadatasStorage : ISetOperators<OmniHash>, IEnumerable<ContentMetadata>
     {
-        private readonly Dictionary<Clue, ContentMetadata> _messageContentMetadatas;
+        private readonly Dictionary<XeusClue, ContentMetadata> _messageContentMetadatas;
         private readonly Dictionary<string, ContentMetadata> _fileContentMetadatas;
 
         private readonly HashMap _hashMap;
 
         public ContentMetadatasStorage()
         {
-            _messageContentMetadatas = new Dictionary<Clue, ContentMetadata>();
+            _messageContentMetadatas = new Dictionary<XeusClue, ContentMetadata>();
             _fileContentMetadatas = new Dictionary<string, ContentMetadata>();
 
             _hashMap = new HashMap();
@@ -30,7 +30,7 @@ namespace Xeus.Core.Contents.Internal
         {
             if (info.SharedBlocksMetadata == null)
             {
-                _messageContentMetadatas.Add(info.Clue, info);
+                _messageContentMetadatas.Add(info.XeusClue, info);
             }
             else
             {
@@ -42,12 +42,12 @@ namespace Xeus.Core.Contents.Internal
 
         #region Message
 
-        public void RemoveMessageContentMetadata(Clue clue)
+        public void RemoveMessageContentMetadata(XeusClue clue)
         {
             _messageContentMetadatas.Remove(clue);
         }
 
-        public bool ContainsMessageContentMetadata(Clue clue)
+        public bool ContainsMessageContentMetadata(XeusClue clue)
         {
             return _messageContentMetadatas.ContainsKey(clue);
         }
@@ -57,7 +57,7 @@ namespace Xeus.Core.Contents.Internal
             return _messageContentMetadatas.Values.ToArray();
         }
 
-        public ContentMetadata? GetMessageContentMetadata(Clue clue)
+        public ContentMetadata? GetMessageContentMetadata(XeusClue clue)
         {
             ContentMetadata contentInfo;
             if (!_messageContentMetadatas.TryGetValue(clue, out contentInfo)) return null;
