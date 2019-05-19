@@ -14,12 +14,13 @@ using Omnix.Cryptography;
 using Omnix.Serialization;
 using Omnix.Serialization.RocketPack;
 using Xeus.Core.Internal;
+using Xeus.Core.Primitives;
 using Xeus.Messages;
 using Xeus.Messages.Reports;
 
 namespace Xeus.Core.Contents.Internal
 {
-    internal sealed partial class BlocksStorage : DisposableBase, IEnumerable<OmniHash>
+    internal sealed partial class BlockStorage : DisposableBase, ISettings, IEnumerable<OmniHash>
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -27,10 +28,10 @@ namespace Xeus.Core.Contents.Internal
 
         private readonly XeusOptions _options;
         private readonly BufferPool _bufferPool;
-        private readonly UsingSectorsPool _usingSectorsPool;
+        private readonly UsingSectorPool _usingSectorPool;
         private readonly ProtectionStatus _protectionStatus;
 
-        private readonly Settings _settings;
+        private readonly SettingsDatabase _settings;
 
         private ulong _size;
         private readonly Dictionary<OmniHash, ClusterMetadata> _clusterMetadataMap = new Dictionary<OmniHash, ClusterMetadata>();
@@ -45,14 +46,20 @@ namespace Xeus.Core.Contents.Internal
 
         public static readonly uint SectorSize = 1024 * 256; // 256 KB
 
-        public BlocksStorage(XeusOptions options, BufferPool bufferPool)
+        public BlockStorage(XeusOptions options, BufferPool bufferPool)
         {
             _options = options;
             _bufferPool = bufferPool;
 
-            string configPath = Path.Combine(options.ConfigDirectoryPath, nameof(BlocksStorage));
+            string configPath = Path.Combine(options.ConfigDirectoryPath, nameof(BlockStorage));
+
+            if (!Directory.Exists(configPath))
+            {
+                Directory.CreateDirectory(configPath);
+            }
+
             string blocksPath = Path.Combine(configPath, "blocks");
-            _settings = new Settings(Path.Combine(configPath, "settings"));
+            _settings = new SettingsDatabase(Path.Combine(configPath, "settings"));
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -68,7 +75,7 @@ namespace Xeus.Core.Contents.Internal
                 throw new NotSupportedException();
             }
 
-            _usingSectorsPool = new UsingSectorsPool(_bufferPool);
+            _usingSectorPool = new UsingSectorPool(_bufferPool);
             _protectionStatus = new ProtectionStatus();
         }
 
@@ -168,9 +175,9 @@ namespace Xeus.Core.Contents.Internal
 
             lock (_lockObject)
             {
-                if (_usingSectorsPool.FreeSectorCount >= (uint)count)
+                if (_usingSectorPool.FreeSectorCount >= (uint)count)
                 {
-                    sectors = _usingSectorsPool.TakeFreeSectors(count);
+                    sectors = _usingSectorPool.TakeFreeSectors(count);
                     return true;
                 }
                 else
@@ -188,15 +195,15 @@ namespace Xeus.Core.Contents.Internal
                     {
                         this.Remove(hash);
 
-                        if (_usingSectorsPool.FreeSectorCount >= 1024 * 4) break;
+                        if (_usingSectorPool.FreeSectorCount >= 1024 * 4) break;
                     }
 
-                    if (_usingSectorsPool.FreeSectorCount < (uint)count)
+                    if (_usingSectorPool.FreeSectorCount < (uint)count)
                     {
                         return false;
                     }
 
-                    sectors = _usingSectorsPool.TakeFreeSectors(count);
+                    sectors = _usingSectorPool.TakeFreeSectors(count);
                     return true;
                 }
             }
@@ -262,7 +269,7 @@ namespace Xeus.Core.Contents.Internal
                 {
                     _clusterMetadataMap.Remove(hash);
 
-                    _usingSectorsPool.SetFreeSectors(clusterInfo.Sectors);
+                    _usingSectorPool.SetFreeSectors(clusterInfo.Sectors);
 
                     // Event
                     _removedBlockEventQueue.Enqueue(hash);
@@ -297,11 +304,11 @@ namespace Xeus.Core.Contents.Internal
         {
             lock (_lockObject)
             {
-                _usingSectorsPool.Reallocate(_size);
+                _usingSectorPool.Reallocate(_size);
 
                 foreach (var indexes in _clusterMetadataMap.Values.Select(n => n.Sectors))
                 {
-                    _usingSectorsPool.SetUsingSectors(indexes);
+                    _usingSectorPool.SetUsingSectors(indexes);
                 }
             }
         }
@@ -580,15 +587,17 @@ namespace Xeus.Core.Contents.Internal
         {
             lock (_lockObject)
             {
-                var config = _settings.Load<BlocksStorageConfig>("config");
-
-                _size = config.Size;
-
+                _size = 0;
                 _clusterMetadataMap.Clear();
 
-                foreach (var (key, value) in config.ClusterMetadataMap)
+                if (_settings.TryGetContent<BlocksStorageConfig>("config", out var config))
                 {
-                    _clusterMetadataMap.Add(key, value);
+                    _size = config.Size;
+
+                    foreach (var (key, value) in config.ClusterMetadataMap)
+                    {
+                        _clusterMetadataMap.Add(key, value);
+                    }
                 }
 
                 this.UpdateUsingSectors();
@@ -600,7 +609,8 @@ namespace Xeus.Core.Contents.Internal
             lock (_lockObject)
             {
                 var config = new BlocksStorageConfig(0, _clusterMetadataMap, _size);
-                _settings.Save("config", config);
+                _settings.SetContent("config", config);
+                _settings.Commit();
             }
         }
 
@@ -640,10 +650,12 @@ namespace Xeus.Core.Contents.Internal
 
             if (disposing)
             {
+                _settings.Dispose();
+
                 _addedBlockEventQueue.Dispose();
                 _removedBlockEventQueue.Dispose();
 
-                _usingSectorsPool.Dispose();
+                _usingSectorPool.Dispose();
                 _fileStream.Dispose();
             }
         }

@@ -34,14 +34,14 @@ namespace Xeus.Core.Exchange.Internal
 
             this.Type = type;
             this.CreationTime = creationTime;
-            this.XeusClue = clue;
+            this.Clue = clue;
             this.Certificate = certificate;
 
             {
                 var __h = new System.HashCode();
                 if (this.Type != default) __h.Add(this.Type.GetHashCode());
                 if (this.CreationTime != default) __h.Add(this.CreationTime.GetHashCode());
-                if (this.XeusClue != default) __h.Add(this.XeusClue.GetHashCode());
+                if (this.Clue != default) __h.Add(this.Clue.GetHashCode());
                 if (this.Certificate != default) __h.Add(this.Certificate.GetHashCode());
                 __hashCode = __h.ToHashCode();
             }
@@ -49,7 +49,7 @@ namespace Xeus.Core.Exchange.Internal
 
         public string Type { get; }
         public Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
-        public XeusClue XeusClue { get; }
+        public XeusClue Clue { get; }
         public OmniCertificate Certificate { get; }
 
         public override bool Equals(BroadcastClue? target)
@@ -58,7 +58,7 @@ namespace Xeus.Core.Exchange.Internal
             if (object.ReferenceEquals(this, target)) return true;
             if (this.Type != target.Type) return false;
             if (this.CreationTime != target.CreationTime) return false;
-            if (this.XeusClue != target.XeusClue) return false;
+            if (this.Clue != target.Clue) return false;
             if (this.Certificate != target.Certificate) return false;
 
             return true;
@@ -82,7 +82,7 @@ namespace Xeus.Core.Exchange.Internal
                     {
                         propertyCount++;
                     }
-                    if (value.XeusClue != XeusClue.Empty)
+                    if (value.Clue != XeusClue.Empty)
                     {
                         propertyCount++;
                     }
@@ -103,10 +103,10 @@ namespace Xeus.Core.Exchange.Internal
                     w.Write((uint)1);
                     w.Write(value.CreationTime);
                 }
-                if (value.XeusClue != XeusClue.Empty)
+                if (value.Clue != XeusClue.Empty)
                 {
                     w.Write((uint)2);
-                    XeusClue.Formatter.Serialize(w, value.XeusClue, rank + 1);
+                    XeusClue.Formatter.Serialize(w, value.Clue, rank + 1);
                 }
                 if (value.Certificate != OmniCertificate.Empty)
                 {
@@ -142,7 +142,7 @@ namespace Xeus.Core.Exchange.Internal
                                 p_creationTime = r.GetTimestamp();
                                 break;
                             }
-                        case 2: // XeusClue
+                        case 2: // Clue
                             {
                                 p_clue = XeusClue.Formatter.Deserialize(r, rank + 1);
                                 break;
@@ -183,7 +183,7 @@ namespace Xeus.Core.Exchange.Internal
             this.Type = type;
             this.Signature = signature;
             this.CreationTime = creationTime;
-            this.XeusClue = clue;
+            this.Clue = clue;
             this.Certificate = certificate;
 
             {
@@ -191,7 +191,7 @@ namespace Xeus.Core.Exchange.Internal
                 if (this.Type != default) __h.Add(this.Type.GetHashCode());
                 if (this.Signature != default) __h.Add(this.Signature.GetHashCode());
                 if (this.CreationTime != default) __h.Add(this.CreationTime.GetHashCode());
-                if (this.XeusClue != default) __h.Add(this.XeusClue.GetHashCode());
+                if (this.Clue != default) __h.Add(this.Clue.GetHashCode());
                 if (this.Certificate != default) __h.Add(this.Certificate.GetHashCode());
                 __hashCode = __h.ToHashCode();
             }
@@ -200,7 +200,7 @@ namespace Xeus.Core.Exchange.Internal
         public string Type { get; }
         public OmniSignature Signature { get; }
         public Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
-        public XeusClue XeusClue { get; }
+        public XeusClue Clue { get; }
         public OmniCertificate Certificate { get; }
 
         public override bool Equals(UnicastClue? target)
@@ -210,7 +210,7 @@ namespace Xeus.Core.Exchange.Internal
             if (this.Type != target.Type) return false;
             if (this.Signature != target.Signature) return false;
             if (this.CreationTime != target.CreationTime) return false;
-            if (this.XeusClue != target.XeusClue) return false;
+            if (this.Clue != target.Clue) return false;
             if (this.Certificate != target.Certificate) return false;
 
             return true;
@@ -238,7 +238,7 @@ namespace Xeus.Core.Exchange.Internal
                     {
                         propertyCount++;
                     }
-                    if (value.XeusClue != XeusClue.Empty)
+                    if (value.Clue != XeusClue.Empty)
                     {
                         propertyCount++;
                     }
@@ -264,10 +264,10 @@ namespace Xeus.Core.Exchange.Internal
                     w.Write((uint)2);
                     w.Write(value.CreationTime);
                 }
-                if (value.XeusClue != XeusClue.Empty)
+                if (value.Clue != XeusClue.Empty)
                 {
                     w.Write((uint)3);
-                    XeusClue.Formatter.Serialize(w, value.XeusClue, rank + 1);
+                    XeusClue.Formatter.Serialize(w, value.Clue, rank + 1);
                 }
                 if (value.Certificate != OmniCertificate.Empty)
                 {
@@ -309,7 +309,7 @@ namespace Xeus.Core.Exchange.Internal
                                 p_creationTime = r.GetTimestamp();
                                 break;
                             }
-                        case 3: // XeusClue
+                        case 3: // Clue
                             {
                                 p_clue = XeusClue.Formatter.Deserialize(r, rank + 1);
                                 break;
@@ -351,7 +351,7 @@ namespace Xeus.Core.Exchange.Internal
             this.Type = type;
             this.ChannelId = channelId;
             this.CreationTime = creationTime;
-            this.XeusClue = clue;
+            this.Clue = clue;
             this.Hashcash = hashcash;
             this.Certificate = certificate;
 
@@ -360,7 +360,7 @@ namespace Xeus.Core.Exchange.Internal
                 if (this.Type != default) __h.Add(this.Type.GetHashCode());
                 if (this.ChannelId != default) __h.Add(this.ChannelId.GetHashCode());
                 if (this.CreationTime != default) __h.Add(this.CreationTime.GetHashCode());
-                if (this.XeusClue != default) __h.Add(this.XeusClue.GetHashCode());
+                if (this.Clue != default) __h.Add(this.Clue.GetHashCode());
                 if (this.Hashcash != default) __h.Add(this.Hashcash.GetHashCode());
                 if (this.Certificate != default) __h.Add(this.Certificate.GetHashCode());
                 __hashCode = __h.ToHashCode();
@@ -370,7 +370,7 @@ namespace Xeus.Core.Exchange.Internal
         public string Type { get; }
         public XeusChannelId ChannelId { get; }
         public Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
-        public XeusClue XeusClue { get; }
+        public XeusClue Clue { get; }
         public OmniHashcash Hashcash { get; }
         public OmniCertificate Certificate { get; }
 
@@ -381,7 +381,7 @@ namespace Xeus.Core.Exchange.Internal
             if (this.Type != target.Type) return false;
             if (this.ChannelId != target.ChannelId) return false;
             if (this.CreationTime != target.CreationTime) return false;
-            if (this.XeusClue != target.XeusClue) return false;
+            if (this.Clue != target.Clue) return false;
             if (this.Hashcash != target.Hashcash) return false;
             if (this.Certificate != target.Certificate) return false;
 
@@ -410,7 +410,7 @@ namespace Xeus.Core.Exchange.Internal
                     {
                         propertyCount++;
                     }
-                    if (value.XeusClue != XeusClue.Empty)
+                    if (value.Clue != XeusClue.Empty)
                     {
                         propertyCount++;
                     }
@@ -440,10 +440,10 @@ namespace Xeus.Core.Exchange.Internal
                     w.Write((uint)2);
                     w.Write(value.CreationTime);
                 }
-                if (value.XeusClue != XeusClue.Empty)
+                if (value.Clue != XeusClue.Empty)
                 {
                     w.Write((uint)3);
-                    XeusClue.Formatter.Serialize(w, value.XeusClue, rank + 1);
+                    XeusClue.Formatter.Serialize(w, value.Clue, rank + 1);
                 }
                 if (value.Hashcash != OmniHashcash.Empty)
                 {
@@ -491,7 +491,7 @@ namespace Xeus.Core.Exchange.Internal
                                 p_creationTime = r.GetTimestamp();
                                 break;
                             }
-                        case 3: // XeusClue
+                        case 3: // Clue
                             {
                                 p_clue = XeusClue.Formatter.Deserialize(r, rank + 1);
                                 break;

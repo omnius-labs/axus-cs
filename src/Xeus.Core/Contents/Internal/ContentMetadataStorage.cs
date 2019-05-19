@@ -11,14 +11,14 @@ using Xeus.Messages;
 
 namespace Xeus.Core.Contents.Internal
 {
-    internal sealed class ContentMetadatasStorage : ISetOperators<OmniHash>, IEnumerable<ContentMetadata>
+    internal sealed class ContentMetadataStorage : ISetOperators<OmniHash>, IEnumerable<ContentMetadata>
     {
         private readonly Dictionary<XeusClue, ContentMetadata> _messageContentMetadatas;
         private readonly Dictionary<string, ContentMetadata> _fileContentMetadatas;
 
         private readonly HashMap _hashMap;
 
-        public ContentMetadatasStorage()
+        public ContentMetadataStorage()
         {
             _messageContentMetadatas = new Dictionary<XeusClue, ContentMetadata>();
             _fileContentMetadatas = new Dictionary<string, ContentMetadata>();
@@ -30,7 +30,7 @@ namespace Xeus.Core.Contents.Internal
         {
             if (info.SharedBlocksMetadata == null)
             {
-                _messageContentMetadatas.Add(info.XeusClue, info);
+                _messageContentMetadatas.Add(info.Clue, info);
             }
             else
             {
