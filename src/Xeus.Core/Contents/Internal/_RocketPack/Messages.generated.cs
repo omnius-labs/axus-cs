@@ -162,14 +162,14 @@ namespace Xeus.Core.Contents.Internal
             if (clue is null) throw new System.ArgumentNullException("clue");
             if (lockedHashes is null) throw new System.ArgumentNullException("lockedHashes");
             if (lockedHashes.Length > 1073741824) throw new System.ArgumentOutOfRangeException("lockedHashes");
-            this.XeusClue = clue;
+            this.Clue = clue;
             this.CreationTime = creationTime;
             this.LockedHashes = new Omnix.Collections.ReadOnlyListSlim<OmniHash>(lockedHashes);
             this.SharedBlocksMetadata = sharedBlocksMetadata;
 
             {
                 var __h = new System.HashCode();
-                if (this.XeusClue != default) __h.Add(this.XeusClue.GetHashCode());
+                if (this.Clue != default) __h.Add(this.Clue.GetHashCode());
                 if (this.CreationTime != default) __h.Add(this.CreationTime.GetHashCode());
                 foreach (var n in this.LockedHashes)
                 {
@@ -180,7 +180,7 @@ namespace Xeus.Core.Contents.Internal
             }
         }
 
-        public XeusClue XeusClue { get; }
+        public XeusClue Clue { get; }
         public Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
         public Omnix.Collections.ReadOnlyListSlim<OmniHash> LockedHashes { get; }
         public SharedBlocksMetadata? SharedBlocksMetadata { get; }
@@ -189,7 +189,7 @@ namespace Xeus.Core.Contents.Internal
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.XeusClue != target.XeusClue) return false;
+            if (this.Clue != target.Clue) return false;
             if (this.CreationTime != target.CreationTime) return false;
             if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.LockedHashes, target.LockedHashes)) return false;
             if ((this.SharedBlocksMetadata is null) != (target.SharedBlocksMetadata is null)) return false;
@@ -208,7 +208,7 @@ namespace Xeus.Core.Contents.Internal
 
                 {
                     uint propertyCount = 0;
-                    if (value.XeusClue != XeusClue.Empty)
+                    if (value.Clue != XeusClue.Empty)
                     {
                         propertyCount++;
                     }
@@ -227,10 +227,10 @@ namespace Xeus.Core.Contents.Internal
                     w.Write(propertyCount);
                 }
 
-                if (value.XeusClue != XeusClue.Empty)
+                if (value.Clue != XeusClue.Empty)
                 {
                     w.Write((uint)0);
-                    XeusClue.Formatter.Serialize(w, value.XeusClue, rank + 1);
+                    XeusClue.Formatter.Serialize(w, value.Clue, rank + 1);
                 }
                 if (value.CreationTime != Omnix.Serialization.RocketPack.Timestamp.Zero)
                 {
@@ -270,7 +270,7 @@ namespace Xeus.Core.Contents.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // XeusClue
+                        case 0: // Clue
                             {
                                 p_clue = XeusClue.Formatter.Deserialize(r, rank + 1);
                                 break;
