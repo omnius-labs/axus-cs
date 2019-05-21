@@ -22,7 +22,7 @@ message CheckBlocksProgressReport {
 }
 
 message CacheContentReport {
-    Clue: Clue = 0,
+    Clue: XeusClue = 0,
     Length: uint64 = 1,
     CreationTime: timestamp = 2,
     Path: string(1024) = 3,
@@ -45,7 +45,7 @@ enum DownloadStateType : uint8
 }
 
 message DownloadContentReport {
-    Clue: Clue = 0,
+    Clue: XeusClue = 0,
     Path: string(1024) = 1,
     DownloadStateType: DownloadStateType = 2,
     DownloadingDepth: uint8 = 3,

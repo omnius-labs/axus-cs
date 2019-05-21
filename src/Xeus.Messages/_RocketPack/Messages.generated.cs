@@ -92,17 +92,17 @@ namespace Xeus.Messages
         }
     }
 
-    public sealed partial class Clue : Omnix.Serialization.RocketPack.RocketPackMessageBase<Clue>
+    public sealed partial class XeusClue : Omnix.Serialization.RocketPack.RocketPackMessageBase<XeusClue>
     {
-        static Clue()
+        static XeusClue()
         {
-            Clue.Formatter = new CustomFormatter();
-            Clue.Empty = new Clue(OmniHash.Empty, 0);
+            XeusClue.Formatter = new CustomFormatter();
+            XeusClue.Empty = new XeusClue(OmniHash.Empty, 0);
         }
 
         private readonly int __hashCode;
 
-        public Clue(OmniHash hash, byte depth)
+        public XeusClue(OmniHash hash, byte depth)
         {
             this.Hash = hash;
             this.Depth = depth;
@@ -118,7 +118,7 @@ namespace Xeus.Messages
         public OmniHash Hash { get; }
         public byte Depth { get; }
 
-        public override bool Equals(Clue? target)
+        public override bool Equals(XeusClue? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -130,9 +130,9 @@ namespace Xeus.Messages
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<Clue>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<XeusClue>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, Clue value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, XeusClue value, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -161,7 +161,7 @@ namespace Xeus.Messages
                 }
             }
 
-            public Clue Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public XeusClue Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -189,17 +189,17 @@ namespace Xeus.Messages
                     }
                 }
 
-                return new Clue(p_hash, p_depth);
+                return new XeusClue(p_hash, p_depth);
             }
         }
     }
 
-    public sealed partial class ArchiveMetadata : Omnix.Serialization.RocketPack.RocketPackMessageBase<ArchiveMetadata>
+    public sealed partial class XeusFileMetadata : Omnix.Serialization.RocketPack.RocketPackMessageBase<XeusFileMetadata>
     {
-        static ArchiveMetadata()
+        static XeusFileMetadata()
         {
-            ArchiveMetadata.Formatter = new CustomFormatter();
-            ArchiveMetadata.Empty = new ArchiveMetadata(Clue.Empty, string.Empty, 0, Omnix.Serialization.RocketPack.Timestamp.Zero, System.Array.Empty<string>());
+            XeusFileMetadata.Formatter = new CustomFormatter();
+            XeusFileMetadata.Empty = new XeusFileMetadata(XeusClue.Empty, string.Empty, 0, Omnix.Serialization.RocketPack.Timestamp.Zero, System.Array.Empty<string>());
         }
 
         private readonly int __hashCode;
@@ -207,7 +207,7 @@ namespace Xeus.Messages
         public static readonly int MaxNameLength = 1024;
         public static readonly int MaxTagsCount = 6;
 
-        public ArchiveMetadata(Clue clue, string name, ulong length, Omnix.Serialization.RocketPack.Timestamp creationTime, string[] tags)
+        public XeusFileMetadata(XeusClue clue, string name, ulong length, Omnix.Serialization.RocketPack.Timestamp creationTime, string[] tags)
         {
             if (clue is null) throw new System.ArgumentNullException("clue");
             if (name is null) throw new System.ArgumentNullException("name");
@@ -240,13 +240,13 @@ namespace Xeus.Messages
             }
         }
 
-        public Clue Clue { get; }
+        public XeusClue Clue { get; }
         public string Name { get; }
         public ulong Length { get; }
         public Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
         public Omnix.Collections.ReadOnlyListSlim<string> Tags { get; }
 
-        public override bool Equals(ArchiveMetadata? target)
+        public override bool Equals(XeusFileMetadata? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -261,15 +261,15 @@ namespace Xeus.Messages
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<ArchiveMetadata>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<XeusFileMetadata>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, ArchiveMetadata value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, XeusFileMetadata value, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
                 {
                     uint propertyCount = 0;
-                    if (value.Clue != Clue.Empty)
+                    if (value.Clue != XeusClue.Empty)
                     {
                         propertyCount++;
                     }
@@ -292,10 +292,10 @@ namespace Xeus.Messages
                     w.Write(propertyCount);
                 }
 
-                if (value.Clue != Clue.Empty)
+                if (value.Clue != XeusClue.Empty)
                 {
                     w.Write((uint)0);
-                    Clue.Formatter.Serialize(w, value.Clue, rank + 1);
+                    XeusClue.Formatter.Serialize(w, value.Clue, rank + 1);
                 }
                 if (value.Name != string.Empty)
                 {
@@ -323,14 +323,14 @@ namespace Xeus.Messages
                 }
             }
 
-            public ArchiveMetadata Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public XeusFileMetadata Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
                 // Read property count
                 uint propertyCount = r.GetUInt32();
 
-                Clue p_clue = Clue.Empty;
+                XeusClue p_clue = XeusClue.Empty;
                 string p_name = string.Empty;
                 ulong p_length = 0;
                 Omnix.Serialization.RocketPack.Timestamp p_creationTime = Omnix.Serialization.RocketPack.Timestamp.Zero;
@@ -343,7 +343,7 @@ namespace Xeus.Messages
                     {
                         case 0: // Clue
                             {
-                                p_clue = Clue.Formatter.Deserialize(r, rank + 1);
+                                p_clue = XeusClue.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
                         case 1: // Name
@@ -374,17 +374,181 @@ namespace Xeus.Messages
                     }
                 }
 
-                return new ArchiveMetadata(p_clue, p_name, p_length, p_creationTime, p_tags);
+                return new XeusFileMetadata(p_clue, p_name, p_length, p_creationTime, p_tags);
             }
         }
     }
 
-    public sealed partial class ProfileContent : Omnix.Serialization.RocketPack.RocketPackMessageBase<ProfileContent>
+    public sealed partial class XeusDirectoryMetadata : Omnix.Serialization.RocketPack.RocketPackMessageBase<XeusDirectoryMetadata>
     {
-        static ProfileContent()
+        static XeusDirectoryMetadata()
         {
-            ProfileContent.Formatter = new CustomFormatter();
-            ProfileContent.Empty = new ProfileContent(OmniAgreementPublicKey.Empty, System.Array.Empty<OmniSignature>(), System.Array.Empty<OmniSignature>());
+            XeusDirectoryMetadata.Formatter = new CustomFormatter();
+            XeusDirectoryMetadata.Empty = new XeusDirectoryMetadata(string.Empty, System.Array.Empty<XeusFileMetadata>(), System.Array.Empty<XeusDirectoryMetadata>());
+        }
+
+        private readonly int __hashCode;
+
+        public static readonly int MaxNameLength = 1024;
+        public static readonly int MaxFilesCount = 32768;
+        public static readonly int MaxDirectoriesCount = 32768;
+
+        public XeusDirectoryMetadata(string name, XeusFileMetadata[] files, XeusDirectoryMetadata[] directories)
+        {
+            if (name is null) throw new System.ArgumentNullException("name");
+            if (name.Length > 1024) throw new System.ArgumentOutOfRangeException("name");
+            if (files is null) throw new System.ArgumentNullException("files");
+            if (files.Length > 32768) throw new System.ArgumentOutOfRangeException("files");
+            foreach (var n in files)
+            {
+                if (n is null) throw new System.ArgumentNullException("n");
+            }
+            if (directories is null) throw new System.ArgumentNullException("directories");
+            if (directories.Length > 32768) throw new System.ArgumentOutOfRangeException("directories");
+            foreach (var n in directories)
+            {
+                if (n is null) throw new System.ArgumentNullException("n");
+            }
+
+            this.Name = name;
+            this.Files = new Omnix.Collections.ReadOnlyListSlim<XeusFileMetadata>(files);
+            this.Directories = new Omnix.Collections.ReadOnlyListSlim<XeusDirectoryMetadata>(directories);
+
+            {
+                var __h = new System.HashCode();
+                if (this.Name != default) __h.Add(this.Name.GetHashCode());
+                foreach (var n in this.Files)
+                {
+                    if (n != default) __h.Add(n.GetHashCode());
+                }
+                foreach (var n in this.Directories)
+                {
+                    if (n != default) __h.Add(n.GetHashCode());
+                }
+                __hashCode = __h.ToHashCode();
+            }
+        }
+
+        public string Name { get; }
+        public Omnix.Collections.ReadOnlyListSlim<XeusFileMetadata> Files { get; }
+        public Omnix.Collections.ReadOnlyListSlim<XeusDirectoryMetadata> Directories { get; }
+
+        public override bool Equals(XeusDirectoryMetadata? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (this.Name != target.Name) return false;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.Files, target.Files)) return false;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.Directories, target.Directories)) return false;
+
+            return true;
+        }
+
+        public override int GetHashCode() => __hashCode;
+
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<XeusDirectoryMetadata>
+        {
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, XeusDirectoryMetadata value, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                {
+                    uint propertyCount = 0;
+                    if (value.Name != string.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Files.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Directories.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
+                }
+
+                if (value.Name != string.Empty)
+                {
+                    w.Write((uint)0);
+                    w.Write(value.Name);
+                }
+                if (value.Files.Count != 0)
+                {
+                    w.Write((uint)1);
+                    w.Write((uint)value.Files.Count);
+                    foreach (var n in value.Files)
+                    {
+                        XeusFileMetadata.Formatter.Serialize(w, n, rank + 1);
+                    }
+                }
+                if (value.Directories.Count != 0)
+                {
+                    w.Write((uint)2);
+                    w.Write((uint)value.Directories.Count);
+                    foreach (var n in value.Directories)
+                    {
+                        XeusDirectoryMetadata.Formatter.Serialize(w, n, rank + 1);
+                    }
+                }
+            }
+
+            public XeusDirectoryMetadata Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                // Read property count
+                uint propertyCount = r.GetUInt32();
+
+                string p_name = string.Empty;
+                XeusFileMetadata[] p_files = System.Array.Empty<XeusFileMetadata>();
+                XeusDirectoryMetadata[] p_directories = System.Array.Empty<XeusDirectoryMetadata>();
+
+                for (; propertyCount > 0; propertyCount--)
+                {
+                    uint id = r.GetUInt32();
+                    switch (id)
+                    {
+                        case 0: // Name
+                            {
+                                p_name = r.GetString(1024);
+                                break;
+                            }
+                        case 1: // Files
+                            {
+                                var length = r.GetUInt32();
+                                p_files = new XeusFileMetadata[length];
+                                for (int i = 0; i < p_files.Length; i++)
+                                {
+                                    p_files[i] = XeusFileMetadata.Formatter.Deserialize(r, rank + 1);
+                                }
+                                break;
+                            }
+                        case 2: // Directories
+                            {
+                                var length = r.GetUInt32();
+                                p_directories = new XeusDirectoryMetadata[length];
+                                for (int i = 0; i < p_directories.Length; i++)
+                                {
+                                    p_directories[i] = XeusDirectoryMetadata.Formatter.Deserialize(r, rank + 1);
+                                }
+                                break;
+                            }
+                    }
+                }
+
+                return new XeusDirectoryMetadata(p_name, p_files, p_directories);
+            }
+        }
+    }
+
+    public sealed partial class XeusProfileContent : Omnix.Serialization.RocketPack.RocketPackMessageBase<XeusProfileContent>
+    {
+        static XeusProfileContent()
+        {
+            XeusProfileContent.Formatter = new CustomFormatter();
+            XeusProfileContent.Empty = new XeusProfileContent(OmniAgreementPublicKey.Empty, System.Array.Empty<OmniSignature>(), System.Array.Empty<OmniSignature>());
         }
 
         private readonly int __hashCode;
@@ -392,7 +556,7 @@ namespace Xeus.Messages
         public static readonly int MaxTrustedSignaturesCount = 256;
         public static readonly int MaxInvalidSignaturesCount = 256;
 
-        public ProfileContent(OmniAgreementPublicKey agreementPublicKey, OmniSignature[] trustedSignatures, OmniSignature[] invalidSignatures)
+        public XeusProfileContent(OmniAgreementPublicKey agreementPublicKey, OmniSignature[] trustedSignatures, OmniSignature[] invalidSignatures)
         {
             if (agreementPublicKey is null) throw new System.ArgumentNullException("agreementPublicKey");
             if (trustedSignatures is null) throw new System.ArgumentNullException("trustedSignatures");
@@ -431,7 +595,7 @@ namespace Xeus.Messages
         public Omnix.Collections.ReadOnlyListSlim<OmniSignature> TrustedSignatures { get; }
         public Omnix.Collections.ReadOnlyListSlim<OmniSignature> InvalidSignatures { get; }
 
-        public override bool Equals(ProfileContent? target)
+        public override bool Equals(XeusProfileContent? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -444,9 +608,9 @@ namespace Xeus.Messages
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<ProfileContent>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<XeusProfileContent>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, ProfileContent value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, XeusProfileContent value, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -492,7 +656,7 @@ namespace Xeus.Messages
                 }
             }
 
-            public ProfileContent Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public XeusProfileContent Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -536,37 +700,37 @@ namespace Xeus.Messages
                     }
                 }
 
-                return new ProfileContent(p_agreementPublicKey, p_trustedSignatures, p_invalidSignatures);
+                return new XeusProfileContent(p_agreementPublicKey, p_trustedSignatures, p_invalidSignatures);
             }
         }
     }
 
-    public sealed partial class StoreContent : Omnix.Serialization.RocketPack.RocketPackMessageBase<StoreContent>
+    public sealed partial class XeusStorageContent : Omnix.Serialization.RocketPack.RocketPackMessageBase<XeusStorageContent>
     {
-        static StoreContent()
+        static XeusStorageContent()
         {
-            StoreContent.Formatter = new CustomFormatter();
-            StoreContent.Empty = new StoreContent(System.Array.Empty<ArchiveMetadata>());
+            XeusStorageContent.Formatter = new CustomFormatter();
+            XeusStorageContent.Empty = new XeusStorageContent(System.Array.Empty<XeusDirectoryMetadata>());
         }
 
         private readonly int __hashCode;
 
-        public static readonly int MaxArchiveMetadatasCount = 32768;
+        public static readonly int MaxDirectoriesCount = 32768;
 
-        public StoreContent(ArchiveMetadata[] archiveMetadatas)
+        public XeusStorageContent(XeusDirectoryMetadata[] directories)
         {
-            if (archiveMetadatas is null) throw new System.ArgumentNullException("archiveMetadatas");
-            if (archiveMetadatas.Length > 32768) throw new System.ArgumentOutOfRangeException("archiveMetadatas");
-            foreach (var n in archiveMetadatas)
+            if (directories is null) throw new System.ArgumentNullException("directories");
+            if (directories.Length > 32768) throw new System.ArgumentOutOfRangeException("directories");
+            foreach (var n in directories)
             {
                 if (n is null) throw new System.ArgumentNullException("n");
             }
 
-            this.ArchiveMetadatas = new Omnix.Collections.ReadOnlyListSlim<ArchiveMetadata>(archiveMetadatas);
+            this.Directories = new Omnix.Collections.ReadOnlyListSlim<XeusDirectoryMetadata>(directories);
 
             {
                 var __h = new System.HashCode();
-                foreach (var n in this.ArchiveMetadatas)
+                foreach (var n in this.Directories)
                 {
                     if (n != default) __h.Add(n.GetHashCode());
                 }
@@ -574,90 +738,90 @@ namespace Xeus.Messages
             }
         }
 
-        public Omnix.Collections.ReadOnlyListSlim<ArchiveMetadata> ArchiveMetadatas { get; }
+        public Omnix.Collections.ReadOnlyListSlim<XeusDirectoryMetadata> Directories { get; }
 
-        public override bool Equals(StoreContent? target)
+        public override bool Equals(XeusStorageContent? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.ArchiveMetadatas, target.ArchiveMetadatas)) return false;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.Directories, target.Directories)) return false;
 
             return true;
         }
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<StoreContent>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<XeusStorageContent>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, StoreContent value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, XeusStorageContent value, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
                 {
                     uint propertyCount = 0;
-                    if (value.ArchiveMetadatas.Count != 0)
+                    if (value.Directories.Count != 0)
                     {
                         propertyCount++;
                     }
                     w.Write(propertyCount);
                 }
 
-                if (value.ArchiveMetadatas.Count != 0)
+                if (value.Directories.Count != 0)
                 {
                     w.Write((uint)0);
-                    w.Write((uint)value.ArchiveMetadatas.Count);
-                    foreach (var n in value.ArchiveMetadatas)
+                    w.Write((uint)value.Directories.Count);
+                    foreach (var n in value.Directories)
                     {
-                        ArchiveMetadata.Formatter.Serialize(w, n, rank + 1);
+                        XeusDirectoryMetadata.Formatter.Serialize(w, n, rank + 1);
                     }
                 }
             }
 
-            public StoreContent Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public XeusStorageContent Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
                 // Read property count
                 uint propertyCount = r.GetUInt32();
 
-                ArchiveMetadata[] p_archiveMetadatas = System.Array.Empty<ArchiveMetadata>();
+                XeusDirectoryMetadata[] p_directories = System.Array.Empty<XeusDirectoryMetadata>();
 
                 for (; propertyCount > 0; propertyCount--)
                 {
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // ArchiveMetadatas
+                        case 0: // Directories
                             {
                                 var length = r.GetUInt32();
-                                p_archiveMetadatas = new ArchiveMetadata[length];
-                                for (int i = 0; i < p_archiveMetadatas.Length; i++)
+                                p_directories = new XeusDirectoryMetadata[length];
+                                for (int i = 0; i < p_directories.Length; i++)
                                 {
-                                    p_archiveMetadatas[i] = ArchiveMetadata.Formatter.Deserialize(r, rank + 1);
+                                    p_directories[i] = XeusDirectoryMetadata.Formatter.Deserialize(r, rank + 1);
                                 }
                                 break;
                             }
                     }
                 }
 
-                return new StoreContent(p_archiveMetadatas);
+                return new XeusStorageContent(p_directories);
             }
         }
     }
 
-    public sealed partial class CommentContent : Omnix.Serialization.RocketPack.RocketPackMessageBase<CommentContent>
+    public sealed partial class XeusCommentContent : Omnix.Serialization.RocketPack.RocketPackMessageBase<XeusCommentContent>
     {
-        static CommentContent()
+        static XeusCommentContent()
         {
-            CommentContent.Formatter = new CustomFormatter();
-            CommentContent.Empty = new CommentContent(string.Empty);
+            XeusCommentContent.Formatter = new CustomFormatter();
+            XeusCommentContent.Empty = new XeusCommentContent(string.Empty);
         }
 
         private readonly int __hashCode;
 
         public static readonly int MaxCommentLength = 8192;
 
-        public CommentContent(string comment)
+        public XeusCommentContent(string comment)
         {
             if (comment is null) throw new System.ArgumentNullException("comment");
             if (comment.Length > 8192) throw new System.ArgumentOutOfRangeException("comment");
@@ -673,7 +837,7 @@ namespace Xeus.Messages
 
         public string Comment { get; }
 
-        public override bool Equals(CommentContent? target)
+        public override bool Equals(XeusCommentContent? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -684,9 +848,9 @@ namespace Xeus.Messages
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<CommentContent>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<XeusCommentContent>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, CommentContent value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, XeusCommentContent value, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -706,7 +870,7 @@ namespace Xeus.Messages
                 }
             }
 
-            public CommentContent Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public XeusCommentContent Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -728,22 +892,22 @@ namespace Xeus.Messages
                     }
                 }
 
-                return new CommentContent(p_comment);
+                return new XeusCommentContent(p_comment);
             }
         }
     }
 
-    public sealed partial class BroadcastProfileMessage : Omnix.Serialization.RocketPack.RocketPackMessageBase<BroadcastProfileMessage>
+    public sealed partial class XeusBroadcastProfileMessage : Omnix.Serialization.RocketPack.RocketPackMessageBase<XeusBroadcastProfileMessage>
     {
-        static BroadcastProfileMessage()
+        static XeusBroadcastProfileMessage()
         {
-            BroadcastProfileMessage.Formatter = new CustomFormatter();
-            BroadcastProfileMessage.Empty = new BroadcastProfileMessage(OmniSignature.Empty, Omnix.Serialization.RocketPack.Timestamp.Zero, ProfileContent.Empty);
+            XeusBroadcastProfileMessage.Formatter = new CustomFormatter();
+            XeusBroadcastProfileMessage.Empty = new XeusBroadcastProfileMessage(OmniSignature.Empty, Omnix.Serialization.RocketPack.Timestamp.Zero, XeusProfileContent.Empty);
         }
 
         private readonly int __hashCode;
 
-        public BroadcastProfileMessage(OmniSignature authorSignature, Omnix.Serialization.RocketPack.Timestamp creationTime, ProfileContent value)
+        public XeusBroadcastProfileMessage(OmniSignature authorSignature, Omnix.Serialization.RocketPack.Timestamp creationTime, XeusProfileContent value)
         {
             if (authorSignature is null) throw new System.ArgumentNullException("authorSignature");
             if (value is null) throw new System.ArgumentNullException("value");
@@ -763,9 +927,9 @@ namespace Xeus.Messages
 
         public OmniSignature AuthorSignature { get; }
         public Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
-        public ProfileContent Value { get; }
+        public XeusProfileContent Value { get; }
 
-        public override bool Equals(BroadcastProfileMessage? target)
+        public override bool Equals(XeusBroadcastProfileMessage? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -778,9 +942,9 @@ namespace Xeus.Messages
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<BroadcastProfileMessage>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<XeusBroadcastProfileMessage>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, BroadcastProfileMessage value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, XeusBroadcastProfileMessage value, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -794,7 +958,7 @@ namespace Xeus.Messages
                     {
                         propertyCount++;
                     }
-                    if (value.Value != ProfileContent.Empty)
+                    if (value.Value != XeusProfileContent.Empty)
                     {
                         propertyCount++;
                     }
@@ -811,14 +975,14 @@ namespace Xeus.Messages
                     w.Write((uint)1);
                     w.Write(value.CreationTime);
                 }
-                if (value.Value != ProfileContent.Empty)
+                if (value.Value != XeusProfileContent.Empty)
                 {
                     w.Write((uint)2);
-                    ProfileContent.Formatter.Serialize(w, value.Value, rank + 1);
+                    XeusProfileContent.Formatter.Serialize(w, value.Value, rank + 1);
                 }
             }
 
-            public BroadcastProfileMessage Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public XeusBroadcastProfileMessage Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -827,7 +991,7 @@ namespace Xeus.Messages
 
                 OmniSignature p_authorSignature = OmniSignature.Empty;
                 Omnix.Serialization.RocketPack.Timestamp p_creationTime = Omnix.Serialization.RocketPack.Timestamp.Zero;
-                ProfileContent p_value = ProfileContent.Empty;
+                XeusProfileContent p_value = XeusProfileContent.Empty;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -846,28 +1010,28 @@ namespace Xeus.Messages
                             }
                         case 2: // Value
                             {
-                                p_value = ProfileContent.Formatter.Deserialize(r, rank + 1);
+                                p_value = XeusProfileContent.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
                     }
                 }
 
-                return new BroadcastProfileMessage(p_authorSignature, p_creationTime, p_value);
+                return new XeusBroadcastProfileMessage(p_authorSignature, p_creationTime, p_value);
             }
         }
     }
 
-    public sealed partial class BroadcastStoreMessage : Omnix.Serialization.RocketPack.RocketPackMessageBase<BroadcastStoreMessage>
+    public sealed partial class XeusBroadcastStoreMessage : Omnix.Serialization.RocketPack.RocketPackMessageBase<XeusBroadcastStoreMessage>
     {
-        static BroadcastStoreMessage()
+        static XeusBroadcastStoreMessage()
         {
-            BroadcastStoreMessage.Formatter = new CustomFormatter();
-            BroadcastStoreMessage.Empty = new BroadcastStoreMessage(OmniSignature.Empty, Omnix.Serialization.RocketPack.Timestamp.Zero, StoreContent.Empty);
+            XeusBroadcastStoreMessage.Formatter = new CustomFormatter();
+            XeusBroadcastStoreMessage.Empty = new XeusBroadcastStoreMessage(OmniSignature.Empty, Omnix.Serialization.RocketPack.Timestamp.Zero, XeusStorageContent.Empty);
         }
 
         private readonly int __hashCode;
 
-        public BroadcastStoreMessage(OmniSignature authorSignature, Omnix.Serialization.RocketPack.Timestamp creationTime, StoreContent value)
+        public XeusBroadcastStoreMessage(OmniSignature authorSignature, Omnix.Serialization.RocketPack.Timestamp creationTime, XeusStorageContent value)
         {
             if (authorSignature is null) throw new System.ArgumentNullException("authorSignature");
             if (value is null) throw new System.ArgumentNullException("value");
@@ -887,9 +1051,9 @@ namespace Xeus.Messages
 
         public OmniSignature AuthorSignature { get; }
         public Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
-        public StoreContent Value { get; }
+        public XeusStorageContent Value { get; }
 
-        public override bool Equals(BroadcastStoreMessage? target)
+        public override bool Equals(XeusBroadcastStoreMessage? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -902,9 +1066,9 @@ namespace Xeus.Messages
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<BroadcastStoreMessage>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<XeusBroadcastStoreMessage>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, BroadcastStoreMessage value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, XeusBroadcastStoreMessage value, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -918,7 +1082,7 @@ namespace Xeus.Messages
                     {
                         propertyCount++;
                     }
-                    if (value.Value != StoreContent.Empty)
+                    if (value.Value != XeusStorageContent.Empty)
                     {
                         propertyCount++;
                     }
@@ -935,14 +1099,14 @@ namespace Xeus.Messages
                     w.Write((uint)1);
                     w.Write(value.CreationTime);
                 }
-                if (value.Value != StoreContent.Empty)
+                if (value.Value != XeusStorageContent.Empty)
                 {
                     w.Write((uint)2);
-                    StoreContent.Formatter.Serialize(w, value.Value, rank + 1);
+                    XeusStorageContent.Formatter.Serialize(w, value.Value, rank + 1);
                 }
             }
 
-            public BroadcastStoreMessage Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public XeusBroadcastStoreMessage Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -951,7 +1115,7 @@ namespace Xeus.Messages
 
                 OmniSignature p_authorSignature = OmniSignature.Empty;
                 Omnix.Serialization.RocketPack.Timestamp p_creationTime = Omnix.Serialization.RocketPack.Timestamp.Zero;
-                StoreContent p_value = StoreContent.Empty;
+                XeusStorageContent p_value = XeusStorageContent.Empty;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -970,55 +1134,55 @@ namespace Xeus.Messages
                             }
                         case 2: // Value
                             {
-                                p_value = StoreContent.Formatter.Deserialize(r, rank + 1);
+                                p_value = XeusStorageContent.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
                     }
                 }
 
-                return new BroadcastStoreMessage(p_authorSignature, p_creationTime, p_value);
+                return new XeusBroadcastStoreMessage(p_authorSignature, p_creationTime, p_value);
             }
         }
     }
 
-    public sealed partial class Channel : Omnix.Serialization.RocketPack.RocketPackMessageBase<Channel>
+    public sealed partial class XeusChannelId : Omnix.Serialization.RocketPack.RocketPackMessageBase<XeusChannelId>
     {
-        static Channel()
+        static XeusChannelId()
         {
-            Channel.Formatter = new CustomFormatter();
-            Channel.Empty = new Channel(System.ReadOnlyMemory<byte>.Empty, string.Empty);
+            XeusChannelId.Formatter = new CustomFormatter();
+            XeusChannelId.Empty = new XeusChannelId(System.ReadOnlyMemory<byte>.Empty, string.Empty);
         }
 
         private readonly int __hashCode;
 
-        public static readonly int MaxIdLength = 32;
+        public static readonly int MaxKeyLength = 32;
         public static readonly int MaxNameLength = 256;
 
-        public Channel(System.ReadOnlyMemory<byte> id, string name)
+        public XeusChannelId(System.ReadOnlyMemory<byte> key, string name)
         {
-            if (id.Length > 32) throw new System.ArgumentOutOfRangeException("id");
+            if (key.Length > 32) throw new System.ArgumentOutOfRangeException("key");
             if (name is null) throw new System.ArgumentNullException("name");
             if (name.Length > 256) throw new System.ArgumentOutOfRangeException("name");
 
-            this.Id = id;
+            this.Key = key;
             this.Name = name;
 
             {
                 var __h = new System.HashCode();
-                if (!this.Id.IsEmpty) __h.Add(Omnix.Base.Helpers.ObjectHelper.GetHashCode(this.Id.Span));
+                if (!this.Key.IsEmpty) __h.Add(Omnix.Base.Helpers.ObjectHelper.GetHashCode(this.Key.Span));
                 if (this.Name != default) __h.Add(this.Name.GetHashCode());
                 __hashCode = __h.ToHashCode();
             }
         }
 
-        public System.ReadOnlyMemory<byte> Id { get; }
+        public System.ReadOnlyMemory<byte> Key { get; }
         public string Name { get; }
 
-        public override bool Equals(Channel? target)
+        public override bool Equals(XeusChannelId? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (!Omnix.Base.BytesOperations.SequenceEqual(this.Id.Span, target.Id.Span)) return false;
+            if (!Omnix.Base.BytesOperations.SequenceEqual(this.Key.Span, target.Key.Span)) return false;
             if (this.Name != target.Name) return false;
 
             return true;
@@ -1026,15 +1190,15 @@ namespace Xeus.Messages
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<Channel>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<XeusChannelId>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, Channel value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, XeusChannelId value, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
                 {
                     uint propertyCount = 0;
-                    if (!value.Id.IsEmpty)
+                    if (!value.Key.IsEmpty)
                     {
                         propertyCount++;
                     }
@@ -1045,10 +1209,10 @@ namespace Xeus.Messages
                     w.Write(propertyCount);
                 }
 
-                if (!value.Id.IsEmpty)
+                if (!value.Key.IsEmpty)
                 {
                     w.Write((uint)0);
-                    w.Write(value.Id.Span);
+                    w.Write(value.Key.Span);
                 }
                 if (value.Name != string.Empty)
                 {
@@ -1057,14 +1221,14 @@ namespace Xeus.Messages
                 }
             }
 
-            public Channel Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public XeusChannelId Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
                 // Read property count
                 uint propertyCount = r.GetUInt32();
 
-                System.ReadOnlyMemory<byte> p_id = System.ReadOnlyMemory<byte>.Empty;
+                System.ReadOnlyMemory<byte> p_key = System.ReadOnlyMemory<byte>.Empty;
                 string p_name = string.Empty;
 
                 for (; propertyCount > 0; propertyCount--)
@@ -1072,9 +1236,9 @@ namespace Xeus.Messages
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Id
+                        case 0: // Key
                             {
-                                p_id = r.GetMemory(32);
+                                p_key = r.GetMemory(32);
                                 break;
                             }
                         case 1: // Name
@@ -1085,28 +1249,28 @@ namespace Xeus.Messages
                     }
                 }
 
-                return new Channel(p_id, p_name);
+                return new XeusChannelId(p_key, p_name);
             }
         }
     }
 
-    public sealed partial class MulticastCommentMessage : Omnix.Serialization.RocketPack.RocketPackMessageBase<MulticastCommentMessage>
+    public sealed partial class XeusMulticastCommentMessage : Omnix.Serialization.RocketPack.RocketPackMessageBase<XeusMulticastCommentMessage>
     {
-        static MulticastCommentMessage()
+        static XeusMulticastCommentMessage()
         {
-            MulticastCommentMessage.Formatter = new CustomFormatter();
-            MulticastCommentMessage.Empty = new MulticastCommentMessage(Channel.Empty, OmniSignature.Empty, Omnix.Serialization.RocketPack.Timestamp.Zero, 0, CommentContent.Empty);
+            XeusMulticastCommentMessage.Formatter = new CustomFormatter();
+            XeusMulticastCommentMessage.Empty = new XeusMulticastCommentMessage(XeusChannelId.Empty, OmniSignature.Empty, Omnix.Serialization.RocketPack.Timestamp.Zero, 0, XeusCommentContent.Empty);
         }
 
         private readonly int __hashCode;
 
-        public MulticastCommentMessage(Channel channel, OmniSignature authorSignature, Omnix.Serialization.RocketPack.Timestamp creationTime, uint cost, CommentContent value)
+        public XeusMulticastCommentMessage(XeusChannelId channelId, OmniSignature authorSignature, Omnix.Serialization.RocketPack.Timestamp creationTime, uint cost, XeusCommentContent value)
         {
-            if (channel is null) throw new System.ArgumentNullException("channel");
+            if (channelId is null) throw new System.ArgumentNullException("channelId");
             if (authorSignature is null) throw new System.ArgumentNullException("authorSignature");
             if (value is null) throw new System.ArgumentNullException("value");
 
-            this.Channel = channel;
+            this.ChannelId = channelId;
             this.AuthorSignature = authorSignature;
             this.CreationTime = creationTime;
             this.Cost = cost;
@@ -1114,7 +1278,7 @@ namespace Xeus.Messages
 
             {
                 var __h = new System.HashCode();
-                if (this.Channel != default) __h.Add(this.Channel.GetHashCode());
+                if (this.ChannelId != default) __h.Add(this.ChannelId.GetHashCode());
                 if (this.AuthorSignature != default) __h.Add(this.AuthorSignature.GetHashCode());
                 if (this.CreationTime != default) __h.Add(this.CreationTime.GetHashCode());
                 if (this.Cost != default) __h.Add(this.Cost.GetHashCode());
@@ -1123,17 +1287,17 @@ namespace Xeus.Messages
             }
         }
 
-        public Channel Channel { get; }
+        public XeusChannelId ChannelId { get; }
         public OmniSignature AuthorSignature { get; }
         public Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
         public uint Cost { get; }
-        public CommentContent Value { get; }
+        public XeusCommentContent Value { get; }
 
-        public override bool Equals(MulticastCommentMessage? target)
+        public override bool Equals(XeusMulticastCommentMessage? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.Channel != target.Channel) return false;
+            if (this.ChannelId != target.ChannelId) return false;
             if (this.AuthorSignature != target.AuthorSignature) return false;
             if (this.CreationTime != target.CreationTime) return false;
             if (this.Cost != target.Cost) return false;
@@ -1144,15 +1308,15 @@ namespace Xeus.Messages
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<MulticastCommentMessage>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<XeusMulticastCommentMessage>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, MulticastCommentMessage value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, XeusMulticastCommentMessage value, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
                 {
                     uint propertyCount = 0;
-                    if (value.Channel != Channel.Empty)
+                    if (value.ChannelId != XeusChannelId.Empty)
                     {
                         propertyCount++;
                     }
@@ -1168,17 +1332,17 @@ namespace Xeus.Messages
                     {
                         propertyCount++;
                     }
-                    if (value.Value != CommentContent.Empty)
+                    if (value.Value != XeusCommentContent.Empty)
                     {
                         propertyCount++;
                     }
                     w.Write(propertyCount);
                 }
 
-                if (value.Channel != Channel.Empty)
+                if (value.ChannelId != XeusChannelId.Empty)
                 {
                     w.Write((uint)0);
-                    Channel.Formatter.Serialize(w, value.Channel, rank + 1);
+                    XeusChannelId.Formatter.Serialize(w, value.ChannelId, rank + 1);
                 }
                 if (value.AuthorSignature != OmniSignature.Empty)
                 {
@@ -1195,34 +1359,34 @@ namespace Xeus.Messages
                     w.Write((uint)3);
                     w.Write(value.Cost);
                 }
-                if (value.Value != CommentContent.Empty)
+                if (value.Value != XeusCommentContent.Empty)
                 {
                     w.Write((uint)4);
-                    CommentContent.Formatter.Serialize(w, value.Value, rank + 1);
+                    XeusCommentContent.Formatter.Serialize(w, value.Value, rank + 1);
                 }
             }
 
-            public MulticastCommentMessage Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public XeusMulticastCommentMessage Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
                 // Read property count
                 uint propertyCount = r.GetUInt32();
 
-                Channel p_channel = Channel.Empty;
+                XeusChannelId p_channelId = XeusChannelId.Empty;
                 OmniSignature p_authorSignature = OmniSignature.Empty;
                 Omnix.Serialization.RocketPack.Timestamp p_creationTime = Omnix.Serialization.RocketPack.Timestamp.Zero;
                 uint p_cost = 0;
-                CommentContent p_value = CommentContent.Empty;
+                XeusCommentContent p_value = XeusCommentContent.Empty;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Channel
+                        case 0: // ChannelId
                             {
-                                p_channel = Channel.Formatter.Deserialize(r, rank + 1);
+                                p_channelId = XeusChannelId.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
                         case 1: // AuthorSignature
@@ -1242,28 +1406,28 @@ namespace Xeus.Messages
                             }
                         case 4: // Value
                             {
-                                p_value = CommentContent.Formatter.Deserialize(r, rank + 1);
+                                p_value = XeusCommentContent.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
                     }
                 }
 
-                return new MulticastCommentMessage(p_channel, p_authorSignature, p_creationTime, p_cost, p_value);
+                return new XeusMulticastCommentMessage(p_channelId, p_authorSignature, p_creationTime, p_cost, p_value);
             }
         }
     }
 
-    public sealed partial class UnicastCommentMessage : Omnix.Serialization.RocketPack.RocketPackMessageBase<UnicastCommentMessage>
+    public sealed partial class XeusUnicastCommentMessage : Omnix.Serialization.RocketPack.RocketPackMessageBase<XeusUnicastCommentMessage>
     {
-        static UnicastCommentMessage()
+        static XeusUnicastCommentMessage()
         {
-            UnicastCommentMessage.Formatter = new CustomFormatter();
-            UnicastCommentMessage.Empty = new UnicastCommentMessage(OmniSignature.Empty, OmniSignature.Empty, Omnix.Serialization.RocketPack.Timestamp.Zero, CommentContent.Empty);
+            XeusUnicastCommentMessage.Formatter = new CustomFormatter();
+            XeusUnicastCommentMessage.Empty = new XeusUnicastCommentMessage(OmniSignature.Empty, OmniSignature.Empty, Omnix.Serialization.RocketPack.Timestamp.Zero, XeusCommentContent.Empty);
         }
 
         private readonly int __hashCode;
 
-        public UnicastCommentMessage(OmniSignature targetSignature, OmniSignature authorSignature, Omnix.Serialization.RocketPack.Timestamp creationTime, CommentContent value)
+        public XeusUnicastCommentMessage(OmniSignature targetSignature, OmniSignature authorSignature, Omnix.Serialization.RocketPack.Timestamp creationTime, XeusCommentContent value)
         {
             if (targetSignature is null) throw new System.ArgumentNullException("targetSignature");
             if (authorSignature is null) throw new System.ArgumentNullException("authorSignature");
@@ -1287,9 +1451,9 @@ namespace Xeus.Messages
         public OmniSignature TargetSignature { get; }
         public OmniSignature AuthorSignature { get; }
         public Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
-        public CommentContent Value { get; }
+        public XeusCommentContent Value { get; }
 
-        public override bool Equals(UnicastCommentMessage? target)
+        public override bool Equals(XeusUnicastCommentMessage? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -1303,9 +1467,9 @@ namespace Xeus.Messages
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<UnicastCommentMessage>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<XeusUnicastCommentMessage>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, UnicastCommentMessage value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, XeusUnicastCommentMessage value, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -1323,7 +1487,7 @@ namespace Xeus.Messages
                     {
                         propertyCount++;
                     }
-                    if (value.Value != CommentContent.Empty)
+                    if (value.Value != XeusCommentContent.Empty)
                     {
                         propertyCount++;
                     }
@@ -1345,14 +1509,14 @@ namespace Xeus.Messages
                     w.Write((uint)2);
                     w.Write(value.CreationTime);
                 }
-                if (value.Value != CommentContent.Empty)
+                if (value.Value != XeusCommentContent.Empty)
                 {
                     w.Write((uint)3);
-                    CommentContent.Formatter.Serialize(w, value.Value, rank + 1);
+                    XeusCommentContent.Formatter.Serialize(w, value.Value, rank + 1);
                 }
             }
 
-            public UnicastCommentMessage Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public XeusUnicastCommentMessage Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -1362,7 +1526,7 @@ namespace Xeus.Messages
                 OmniSignature p_targetSignature = OmniSignature.Empty;
                 OmniSignature p_authorSignature = OmniSignature.Empty;
                 Omnix.Serialization.RocketPack.Timestamp p_creationTime = Omnix.Serialization.RocketPack.Timestamp.Zero;
-                CommentContent p_value = CommentContent.Empty;
+                XeusCommentContent p_value = XeusCommentContent.Empty;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -1386,13 +1550,13 @@ namespace Xeus.Messages
                             }
                         case 3: // Value
                             {
-                                p_value = CommentContent.Formatter.Deserialize(r, rank + 1);
+                                p_value = XeusCommentContent.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
                     }
                 }
 
-                return new UnicastCommentMessage(p_targetSignature, p_authorSignature, p_creationTime, p_value);
+                return new XeusUnicastCommentMessage(p_targetSignature, p_authorSignature, p_creationTime, p_value);
             }
         }
     }

@@ -8,7 +8,7 @@ using Xeus.Core.Internal;
 
 namespace Xeus.Core.Contents.Internal
 {
-    internal sealed class UsingSectorsPool : DisposableBase
+    internal sealed class UsingSectorPool : DisposableBase
     {
         private readonly BitmapStorage _bitmapStorage;
         private readonly BufferPool _bufferPool;
@@ -23,7 +23,7 @@ namespace Xeus.Core.Contents.Internal
 
         public static readonly uint SectorSize = 1024 * 256;
 
-        public UsingSectorsPool(BufferPool bufferPool)
+        public UsingSectorPool(BufferPool bufferPool)
         {
             _bitmapStorage = new BitmapStorage(bufferPool);
             _bufferPool = bufferPool;
