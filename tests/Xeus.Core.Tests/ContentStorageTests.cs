@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Xeus.Core.Tests
 {
-    public class ContentsStorageTests
+    public class ContentStorageTests
     {
         [Fact]
         public void Test()
