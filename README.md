@@ -12,7 +12,8 @@ Support sharing of data between individuals in a decentralized network.
 
 ## Features
 
-+ (WIP)
++ Chat function. (WIP)
++ File sharing function. (WIP)
 
 ## Website
 
