@@ -68,6 +68,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xeus.Core.Tests", "tests\Xe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xeus.Daemon", "src\Xeus.Daemon\Xeus.Daemon.csproj", "{B7A4616B-7D7D-4618-906B-F0999D294B06}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnix.Network.Proxy", "refs\omnix\src\Omnix.Network.Proxy\Omnix.Network.Proxy.csproj", "{D3D4995E-42A9-4207-A74D-D3A551C8950C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -158,6 +160,10 @@ Global
 		{B7A4616B-7D7D-4618-906B-F0999D294B06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B7A4616B-7D7D-4618-906B-F0999D294B06}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B7A4616B-7D7D-4618-906B-F0999D294B06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3D4995E-42A9-4207-A74D-D3A551C8950C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3D4995E-42A9-4207-A74D-D3A551C8950C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3D4995E-42A9-4207-A74D-D3A551C8950C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3D4995E-42A9-4207-A74D-D3A551C8950C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -191,6 +197,7 @@ Global
 		{A87E41B4-DE1B-4BC6-90E3-332DD014B494} = {FC402F19-33B3-4CCA-8CDE-7A1CD9A1CA31}
 		{AD95325C-774F-4EF7-B593-765754F2B116} = {4D0DF5A7-4EBE-44E7-B7D9-F8B699535AE1}
 		{B7A4616B-7D7D-4618-906B-F0999D294B06} = {3F18D6D5-FC27-423F-8CC3-41B6CC5EE172}
+		{D3D4995E-42A9-4207-A74D-D3A551C8950C} = {FC402F19-33B3-4CCA-8CDE-7A1CD9A1CA31}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A25DF952-3624-4265-88C1-43E6D20BA69A}

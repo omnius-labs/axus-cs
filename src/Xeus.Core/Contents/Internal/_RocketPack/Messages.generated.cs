@@ -1,8 +1,6 @@
 ﻿using Omnix.Cryptography;
 using Omnix.Network;
 using Xeus.Messages;
-using Xeus.Messages.Options;
-using Xeus.Messages.Reports;
 
 #nullable enable
 
@@ -105,7 +103,6 @@ namespace Xeus.Core.Contents.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 ulong[] p_sectors = System.Array.Empty<ulong>();
@@ -117,7 +114,7 @@ namespace Xeus.Core.Contents.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Sectors
+                        case 0:
                             {
                                 var length = r.GetUInt32();
                                 p_sectors = new ulong[length];
@@ -127,12 +124,12 @@ namespace Xeus.Core.Contents.Internal
                                 }
                                 break;
                             }
-                        case 1: // Length
+                        case 1:
                             {
                                 p_length = r.GetUInt32();
                                 break;
                             }
-                        case 2: // LastAccessTime
+                        case 2:
                             {
                                 p_lastAccessTime = r.GetTimestamp();
                                 break;
@@ -150,27 +147,25 @@ namespace Xeus.Core.Contents.Internal
         static ContentMetadata()
         {
             ContentMetadata.Formatter = new CustomFormatter();
-            ContentMetadata.Empty = new ContentMetadata(XeusClue.Empty, Omnix.Serialization.RocketPack.Timestamp.Zero, System.Array.Empty<OmniHash>(), null);
+            ContentMetadata.Empty = new ContentMetadata(XeusClue.Empty, System.Array.Empty<OmniHash>(), null);
         }
 
         private readonly int __hashCode;
 
         public static readonly int MaxLockedHashesCount = 1073741824;
 
-        public ContentMetadata(XeusClue clue, Omnix.Serialization.RocketPack.Timestamp creationTime, OmniHash[] lockedHashes, SharedBlocksMetadata? sharedBlocksMetadata)
+        public ContentMetadata(XeusClue clue, OmniHash[] lockedHashes, SharedBlocksMetadata? sharedBlocksMetadata)
         {
             if (clue is null) throw new System.ArgumentNullException("clue");
             if (lockedHashes is null) throw new System.ArgumentNullException("lockedHashes");
             if (lockedHashes.Length > 1073741824) throw new System.ArgumentOutOfRangeException("lockedHashes");
             this.Clue = clue;
-            this.CreationTime = creationTime;
             this.LockedHashes = new Omnix.Collections.ReadOnlyListSlim<OmniHash>(lockedHashes);
             this.SharedBlocksMetadata = sharedBlocksMetadata;
 
             {
                 var __h = new System.HashCode();
                 if (this.Clue != default) __h.Add(this.Clue.GetHashCode());
-                if (this.CreationTime != default) __h.Add(this.CreationTime.GetHashCode());
                 foreach (var n in this.LockedHashes)
                 {
                     if (n != default) __h.Add(n.GetHashCode());
@@ -181,7 +176,6 @@ namespace Xeus.Core.Contents.Internal
         }
 
         public XeusClue Clue { get; }
-        public Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
         public Omnix.Collections.ReadOnlyListSlim<OmniHash> LockedHashes { get; }
         public SharedBlocksMetadata? SharedBlocksMetadata { get; }
 
@@ -190,7 +184,6 @@ namespace Xeus.Core.Contents.Internal
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.Clue != target.Clue) return false;
-            if (this.CreationTime != target.CreationTime) return false;
             if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.LockedHashes, target.LockedHashes)) return false;
             if ((this.SharedBlocksMetadata is null) != (target.SharedBlocksMetadata is null)) return false;
             if (!(this.SharedBlocksMetadata is null) && !(target.SharedBlocksMetadata is null) && this.SharedBlocksMetadata != target.SharedBlocksMetadata) return false;
@@ -212,10 +205,6 @@ namespace Xeus.Core.Contents.Internal
                     {
                         propertyCount++;
                     }
-                    if (value.CreationTime != Omnix.Serialization.RocketPack.Timestamp.Zero)
-                    {
-                        propertyCount++;
-                    }
                     if (value.LockedHashes.Count != 0)
                     {
                         propertyCount++;
@@ -232,14 +221,9 @@ namespace Xeus.Core.Contents.Internal
                     w.Write((uint)0);
                     XeusClue.Formatter.Serialize(w, value.Clue, rank + 1);
                 }
-                if (value.CreationTime != Omnix.Serialization.RocketPack.Timestamp.Zero)
-                {
-                    w.Write((uint)1);
-                    w.Write(value.CreationTime);
-                }
                 if (value.LockedHashes.Count != 0)
                 {
-                    w.Write((uint)2);
+                    w.Write((uint)1);
                     w.Write((uint)value.LockedHashes.Count);
                     foreach (var n in value.LockedHashes)
                     {
@@ -248,7 +232,7 @@ namespace Xeus.Core.Contents.Internal
                 }
                 if (value.SharedBlocksMetadata != null)
                 {
-                    w.Write((uint)3);
+                    w.Write((uint)2);
                     SharedBlocksMetadata.Formatter.Serialize(w, value.SharedBlocksMetadata, rank + 1);
                 }
             }
@@ -257,11 +241,9 @@ namespace Xeus.Core.Contents.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 XeusClue p_clue = XeusClue.Empty;
-                Omnix.Serialization.RocketPack.Timestamp p_creationTime = Omnix.Serialization.RocketPack.Timestamp.Zero;
                 OmniHash[] p_lockedHashes = System.Array.Empty<OmniHash>();
                 SharedBlocksMetadata? p_sharedBlocksMetadata = null;
 
@@ -270,17 +252,12 @@ namespace Xeus.Core.Contents.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Clue
+                        case 0:
                             {
                                 p_clue = XeusClue.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
-                        case 1: // CreationTime
-                            {
-                                p_creationTime = r.GetTimestamp();
-                                break;
-                            }
-                        case 2: // LockedHashes
+                        case 1:
                             {
                                 var length = r.GetUInt32();
                                 p_lockedHashes = new OmniHash[length];
@@ -290,7 +267,7 @@ namespace Xeus.Core.Contents.Internal
                                 }
                                 break;
                             }
-                        case 3: // SharedBlocksMetadata
+                        case 2:
                             {
                                 p_sharedBlocksMetadata = SharedBlocksMetadata.Formatter.Deserialize(r, rank + 1);
                                 break;
@@ -298,7 +275,7 @@ namespace Xeus.Core.Contents.Internal
                     }
                 }
 
-                return new ContentMetadata(p_clue, p_creationTime, p_lockedHashes, p_sharedBlocksMetadata);
+                return new ContentMetadata(p_clue, p_lockedHashes, p_sharedBlocksMetadata);
             }
         }
     }
@@ -417,7 +394,6 @@ namespace Xeus.Core.Contents.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 string p_path = string.Empty;
@@ -430,22 +406,22 @@ namespace Xeus.Core.Contents.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Path
+                        case 0:
                             {
                                 p_path = r.GetString(1024);
                                 break;
                             }
-                        case 1: // Length
+                        case 1:
                             {
                                 p_length = r.GetUInt64();
                                 break;
                             }
-                        case 2: // BlockLength
+                        case 2:
                             {
                                 p_blockLength = r.GetUInt32();
                                 break;
                             }
-                        case 3: // Hashes
+                        case 3:
                             {
                                 var length = r.GetUInt32();
                                 p_hashes = new OmniHash[length];
@@ -463,19 +439,19 @@ namespace Xeus.Core.Contents.Internal
         }
     }
 
-    internal sealed partial class BlocksStorageConfig : Omnix.Serialization.RocketPack.RocketPackMessageBase<BlocksStorageConfig>
+    internal sealed partial class BlockStorageConfig : Omnix.Serialization.RocketPack.RocketPackMessageBase<BlockStorageConfig>
     {
-        static BlocksStorageConfig()
+        static BlockStorageConfig()
         {
-            BlocksStorageConfig.Formatter = new CustomFormatter();
-            BlocksStorageConfig.Empty = new BlocksStorageConfig(0, new System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>(), 0);
+            BlockStorageConfig.Formatter = new CustomFormatter();
+            BlockStorageConfig.Empty = new BlockStorageConfig(0, new System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>(), 0);
         }
 
         private readonly int __hashCode;
 
         public static readonly int MaxClusterMetadataMapCount = 1073741824;
 
-        public BlocksStorageConfig(uint version, System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata> clusterMetadataMap, ulong size)
+        public BlockStorageConfig(uint version, System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata> clusterMetadataMap, ulong size)
         {
             if (clusterMetadataMap is null) throw new System.ArgumentNullException("clusterMetadataMap");
             if (clusterMetadataMap.Count > 1073741824) throw new System.ArgumentOutOfRangeException("clusterMetadataMap");
@@ -504,7 +480,7 @@ namespace Xeus.Core.Contents.Internal
         public Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata> ClusterMetadataMap { get; }
         public ulong Size { get; }
 
-        public override bool Equals(BlocksStorageConfig? target)
+        public override bool Equals(BlockStorageConfig? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -517,9 +493,9 @@ namespace Xeus.Core.Contents.Internal
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<BlocksStorageConfig>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<BlockStorageConfig>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, BlocksStorageConfig value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, BlockStorageConfig value, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -562,11 +538,10 @@ namespace Xeus.Core.Contents.Internal
                 }
             }
 
-            public BlocksStorageConfig Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public BlockStorageConfig Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 uint p_version = 0;
@@ -578,12 +553,12 @@ namespace Xeus.Core.Contents.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Version
+                        case 0:
                             {
                                 p_version = r.GetUInt32();
                                 break;
                             }
-                        case 1: // ClusterMetadataMap
+                        case 1:
                             {
                                 var length = r.GetUInt32();
                                 p_clusterMetadataMap = new System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>();
@@ -597,7 +572,7 @@ namespace Xeus.Core.Contents.Internal
                                 }
                                 break;
                             }
-                        case 2: // Size
+                        case 2:
                             {
                                 p_size = r.GetUInt64();
                                 break;
@@ -605,24 +580,24 @@ namespace Xeus.Core.Contents.Internal
                     }
                 }
 
-                return new BlocksStorageConfig(p_version, p_clusterMetadataMap, p_size);
+                return new BlockStorageConfig(p_version, p_clusterMetadataMap, p_size);
             }
         }
     }
 
-    internal sealed partial class ContentsManagerConfig : Omnix.Serialization.RocketPack.RocketPackMessageBase<ContentsManagerConfig>
+    internal sealed partial class ContentStorageConfig : Omnix.Serialization.RocketPack.RocketPackMessageBase<ContentStorageConfig>
     {
-        static ContentsManagerConfig()
+        static ContentStorageConfig()
         {
-            ContentsManagerConfig.Formatter = new CustomFormatter();
-            ContentsManagerConfig.Empty = new ContentsManagerConfig(0, System.Array.Empty<ContentMetadata>());
+            ContentStorageConfig.Formatter = new CustomFormatter();
+            ContentStorageConfig.Empty = new ContentStorageConfig(0, System.Array.Empty<ContentMetadata>());
         }
 
         private readonly int __hashCode;
 
         public static readonly int MaxContentMetadatasCount = 1073741824;
 
-        public ContentsManagerConfig(uint version, ContentMetadata[] contentMetadatas)
+        public ContentStorageConfig(uint version, ContentMetadata[] contentMetadatas)
         {
             if (contentMetadatas is null) throw new System.ArgumentNullException("contentMetadatas");
             if (contentMetadatas.Length > 1073741824) throw new System.ArgumentOutOfRangeException("contentMetadatas");
@@ -648,7 +623,7 @@ namespace Xeus.Core.Contents.Internal
         public uint Version { get; }
         public Omnix.Collections.ReadOnlyListSlim<ContentMetadata> ContentMetadatas { get; }
 
-        public override bool Equals(ContentsManagerConfig? target)
+        public override bool Equals(ContentStorageConfig? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -660,9 +635,9 @@ namespace Xeus.Core.Contents.Internal
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<ContentsManagerConfig>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<ContentStorageConfig>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, ContentsManagerConfig value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, ContentStorageConfig value, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -695,11 +670,10 @@ namespace Xeus.Core.Contents.Internal
                 }
             }
 
-            public ContentsManagerConfig Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public ContentStorageConfig Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 uint p_version = 0;
@@ -710,12 +684,12 @@ namespace Xeus.Core.Contents.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Version
+                        case 0:
                             {
                                 p_version = r.GetUInt32();
                                 break;
                             }
-                        case 1: // ContentMetadatas
+                        case 1:
                             {
                                 var length = r.GetUInt32();
                                 p_contentMetadatas = new ContentMetadata[length];
@@ -728,7 +702,7 @@ namespace Xeus.Core.Contents.Internal
                     }
                 }
 
-                return new ContentsManagerConfig(p_version, p_contentMetadatas);
+                return new ContentStorageConfig(p_version, p_contentMetadatas);
             }
         }
     }

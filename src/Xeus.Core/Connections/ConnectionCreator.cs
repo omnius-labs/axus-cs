@@ -1,15 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Amoeba.Messages;
 using Omnix.Base;
 using Omnix.Configuration;
-using Omnix.Net;
-using Omnix.Utils;
+using Xeus.Rpc.Primitives;
 
-namespace Xeus.Core.Connections
+namespace Xeus.Core.Connections.Internal
 {
-    sealed partial class ConnectionManager : StateManagerBase, ISettings
+    sealed partial class ConnectionCreator : DisposableBase, ISettings
     {
         private BufferPool _bufferPool;
         private CoreManager _coreManager;

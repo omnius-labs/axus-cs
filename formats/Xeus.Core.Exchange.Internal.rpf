@@ -1,10 +1,8 @@
 syntax = v1;
 
-using "../refs/Omnix/formats/Omnix.Cryptography.rpf";
-using "../refs/Omnix/formats/Omnix.Network.rpf";
+using "../refs/omnix/formats/Omnix.Cryptography.rpf";
+using "../refs/omnix/formats/Omnix.Network.rpf";
 using "Xeus.Messages.rpf";
-using "Xeus.Messages.Options.rpf";
-using "Xeus.Messages.Reports.rpf";
 
 option csharp_namespace = "Xeus.Core.Exchange.Internal";
 option csharp_access_level = "internal";
@@ -26,7 +24,7 @@ message UnicastClue {
 
 message MulticastClue {
     Type: string(256) = 0,
-    ChannelId: XeusChannelId = 1,
+    Signature: OmniSignature = 1,
     CreationTime: timestamp = 2,
     Clue: XeusClue = 3,
     Hashcash: OmniHashcash = 4,
@@ -64,7 +62,7 @@ message WantUnicastCluesMessage {
 }
 
 message WantMulticastCluesMessage {
-    Parameters: map<XeusChannelId, RelayOption>(8192) = 0,
+    Parameters: map<OmniSignature, RelayOption>(8192) = 0,
 }
 
 message BroadcastCluesMessage {

@@ -1,74 +1,42 @@
 ﻿syntax = v1;
 
-using "../refs/Omnix/formats/Omnix.Cryptography.rpf";
+using "../refs/omnix/formats/Omnix.Cryptography.rpf";
+using "../refs/omnix/formats/Omnix.Network.rpf";
 
 option csharp_namespace = "Xeus.Messages";
-
-message XeusOptions {
-    ConfigDirectoryPath: string(1024) = 0,
-}
 
 message XeusClue {
     Hash: OmniHash = 0,
     Depth: uint8 = 1,
 }
 
-message XeusFileMetadata {
-    Clue: XeusClue = 0,
-    Name: string(1024) = 1,
-    Length: uint64 = 2,
-    CreationTime: timestamp = 3,
-    Tags: vector<string(32)>(6) = 4,
+enum TcpProxyType : uint8 {
+    Socks5Proxy = 0,
+    HttpProxy = 1,
 }
 
-message XeusDirectoryMetadata {
-    Name: string(1024) = 0,
-    Files: vector<XeusFileMetadata>(32768) = 1,
-    Directories: vector<XeusDirectoryMetadata>(32768) = 2,
+message TcpProxyConfig {
+    Type: TcpProxyType = 0,
+    Address: OmniAddress = 1,
 }
 
-message XeusProfileContent {
-    AgreementPublicKey: OmniAgreementPublicKey = 0,
-    TrustedSignatures: vector<OmniSignature>(256) = 1,
-    InvalidSignatures: vector<OmniSignature>(256) = 2,
+message TcpConnectConfig {
+    Enabled: bool = 0,
+    TcpProxyConfig: TcpProxyConfig? = 1,
 }
 
-message XeusStorageContent {
-    Directories: vector<XeusDirectoryMetadata>(32768) = 0,
+message TcpAcceptConfig {
+    Enabled: bool = 0,
+    ListenIpv4Port: uint16 = 1,
+    ListenIpv6Port: uint16 = 2,
+    UseUpnp: bool = 3,
 }
 
-message XeusCommentContent {
-    Comment: string(8192) = 0,
+message ConnectionCreatorConfig {
+    TcpConnectConfig: TcpConnectConfig = 0,
+    TcpAcceptConfig: TcpAcceptConfig = 1,
 }
 
-message XeusBroadcastProfileMessage {
-    AuthorSignature: OmniSignature = 0,
-    CreationTime: timestamp = 1,
-    Value: XeusProfileContent = 2,
-}
-
-message XeusBroadcastStoreMessage {
-    AuthorSignature: OmniSignature = 0,
-    CreationTime: timestamp = 1,
-    Value: XeusStorageContent = 2,
-}
-
-message XeusChannelId {
-    Key: memory(32) = 0,
-    Name: string(256) = 1,
-}
-
-message XeusMulticastCommentMessage {
-    ChannelId: XeusChannelId = 0,
-    AuthorSignature: OmniSignature = 1,
-    CreationTime: timestamp = 2,
-    Cost: uint32 = 3,
-    Value: XeusCommentContent = 4,
-}
-
-message XeusUnicastCommentMessage {
-    TargetSignature: OmniSignature = 0,
-    AuthorSignature: OmniSignature = 1,
-    CreationTime: timestamp = 2,
-    Value: XeusCommentContent = 3,
+message XeusOptions {
+    ConfigDirectoryPath: string(1024) = 0,
 }

@@ -6,6 +6,7 @@
     <PackageReference Include="NLog" Version="4.6.3" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\omnix\src\Omnix.Network.Proxy\Omnix.Network.Proxy.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Base\Omnix.Base.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Collections\Omnix.Collections.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Configuration\Omnix.Configuration.csproj" />
@@ -16,6 +17,7 @@
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Serialization.RocketPack\Omnix.Serialization.RocketPack.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Serialization\Omnix.Serialization.csproj" />
     <ProjectReference Include="..\Xeus.Messages\Xeus.Messages.csproj" />
+    <ProjectReference Include="..\Xeus.Rpc\Xeus.Rpc.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="excluded_folder\**\*" />

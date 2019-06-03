@@ -1,0 +1,1 @@
+mklink /D %cd%\refs\omnix %cd%\..\omnix
