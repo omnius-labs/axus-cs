@@ -1,10 +1,8 @@
 ﻿syntax = v1;
 
-using "../refs/Omnix/formats/Omnix.Cryptography.rpf";
-using "../refs/Omnix/formats/Omnix.Network.rpf";
+using "../refs/omnix/formats/Omnix.Cryptography.rpf";
+using "../refs/omnix/formats/Omnix.Network.rpf";
 using "Xeus.Messages.rpf";
-using "Xeus.Messages.Options.rpf";
-using "Xeus.Messages.Reports.rpf";
 
 option csharp_namespace = "Xeus.Core.Contents.Internal";
 option csharp_access_level = "internal";
@@ -17,9 +15,8 @@ message ClusterMetadata {
 
 message ContentMetadata {
     Clue: XeusClue = 0,
-    CreationTime: timestamp = 1,
-    LockedHashes: vector<OmniHash>(1073741824) = 2,
-    SharedBlocksMetadata: SharedBlocksMetadata? = 3, 
+    LockedHashes: vector<OmniHash>(1073741824) = 1,
+    SharedBlocksMetadata: SharedBlocksMetadata? = 2, 
 }
 
 message SharedBlocksMetadata {
@@ -29,13 +26,13 @@ message SharedBlocksMetadata {
     Hashes: vector<OmniHash>(1073741824) = 3,
 }
 
-message BlocksStorageConfig {
+message BlockStorageConfig {
     Version: uint32 = 0,
     ClusterMetadataMap: map<OmniHash, ClusterMetadata>(1073741824) = 1,
     Size: uint64 = 2,
 }
 
-message ContentsManagerConfig {
+message ContentStorageConfig {
     Version: uint32 = 0,
     ContentMetadatas: vector<ContentMetadata>(1073741824) = 1,
 }

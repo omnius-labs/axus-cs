@@ -14,7 +14,7 @@ using Omnix.Cryptography;
 using Omnix.Serialization;
 using Omnix.Serialization.RocketPack;
 using Xeus.Core.Internal;
-using Xeus.Core.Primitives;
+using Xeus.Rpc.Primitives;
 using Xeus.Messages;
 using Xeus.Messages.Reports;
 
@@ -590,7 +590,7 @@ namespace Xeus.Core.Contents.Internal
                 _size = 0;
                 _clusterMetadataMap.Clear();
 
-                if (_settings.TryGetContent<BlocksStorageConfig>("config", out var config))
+                if (_settings.TryGetContent<BlockStorageConfig>("config", out var config))
                 {
                     _size = config.Size;
 
@@ -608,7 +608,7 @@ namespace Xeus.Core.Contents.Internal
         {
             lock (_lockObject)
             {
-                var config = new BlocksStorageConfig(0, _clusterMetadataMap, _size);
+                var config = new BlockStorageConfig(0, _clusterMetadataMap, _size);
                 _settings.SetContent("config", config);
                 _settings.Commit();
             }

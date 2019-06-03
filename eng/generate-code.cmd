@@ -11,9 +11,8 @@ if %PROCESSOR_ARCHITECTURE% == AMD64 (
 )
 
 "%TOOL_PATH%" %cd%\formats\Xeus.Messages.rpf %cd%\src\Xeus.Messages\_RocketPack\Messages.generated.cs
-"%TOOL_PATH%" %cd%\formats\Xeus.Messages.Reports.rpf %cd%\src\Xeus.Messages\Reports\_RocketPack\Messages.generated.cs
-"%TOOL_PATH%" %cd%\formats\Xeus.Messages.Options.rpf %cd%\src\Xeus.Messages\Options\_RocketPack\Messages.generated.cs
 
+"%TOOL_PATH%" %cd%\formats\Xeus.Core.Connections.Internal.rpf %cd%\src\Xeus.Core\Connections\Internal\_RocketPack\Messages.generated.cs
 "%TOOL_PATH%" %cd%\formats\Xeus.Core.Internal.rpf %cd%\src\Xeus.Core\Internal\_RocketPack\Messages.generated.cs
 "%TOOL_PATH%" %cd%\formats\Xeus.Core.Contents.Internal.rpf %cd%\src\Xeus.Core\Contents\Internal\_RocketPack\Messages.generated.cs
 "%TOOL_PATH%" %cd%\formats\Xeus.Core.Exchange.Internal.rpf %cd%\src\Xeus.Core\Exchange\Internal\_RocketPack\Messages.generated.cs

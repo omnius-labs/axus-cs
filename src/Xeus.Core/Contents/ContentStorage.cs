@@ -18,7 +18,7 @@ using Omnix.Serialization.RocketPack.Helpers;
 using Xeus.Core.Contents.Internal;
 using Xeus.Core.Contents.Primitives;
 using Xeus.Core.Internal;
-using Xeus.Core.Primitives;
+using Xeus.Rpc.Primitives;
 using Xeus.Messages;
 using Xeus.Messages.Reports;
 
@@ -502,7 +502,7 @@ namespace Xeus.Core.Contents
                 {
                     if (!_contentMetadataStorage.ContainsMessageContentMetadata(clue))
                     {
-                        _contentMetadataStorage.Add(new ContentMetadata(clue, Timestamp.FromDateTime(DateTime.UtcNow), lockedHashes.ToArray(), null));
+                        _contentMetadataStorage.Add(new ContentMetadata(clue, lockedHashes.ToArray(), null));
                     }
                     else
                     {
@@ -517,7 +517,7 @@ namespace Xeus.Core.Contents
             }, token);
         }
 
-        public async ValueTask<XeusClue> Import(string path, DateTime creationTime, CancellationToken token = default)
+        public async ValueTask<XeusClue> Import(string path, CancellationToken token = default)
         {
             if (path == null) throw new ArgumentNullException(nameof(path));
 
@@ -754,7 +754,7 @@ namespace Xeus.Core.Contents
                 {
                     if (!_contentMetadataStorage.ContainsFileContentMetadata(path))
                     {
-                        _contentMetadataStorage.Add(new ContentMetadata(clue, Timestamp.FromDateTime(creationTime), lockedHashes.ToArray(), sharedBlocksInfo));
+                        _contentMetadataStorage.Add(new ContentMetadata(clue, lockedHashes.ToArray(), sharedBlocksInfo));
 
                         foreach (var hash in lockedHashes)
                         {
@@ -973,7 +973,7 @@ namespace Xeus.Core.Contents
             {
                 _blockStorage.Load();
 
-                if (_settings.TryGetContent<ContentsManagerConfig>("Config", out var config))
+                if (_settings.TryGetContent<ContentStorageConfig>("Config", out var config))
                 {
                     foreach (var contentInfo in config.ContentMetadatas)
                     {
@@ -996,7 +996,7 @@ namespace Xeus.Core.Contents
             {
                 _blockStorage.Save();
 
-                var config = new ContentsManagerConfig(0, _contentMetadataStorage.ToArray());
+                var config = new ContentStorageConfig(0, _contentMetadataStorage.ToArray());
                 _settings.SetContent("Config", config);
                 _settings.Commit();
             }

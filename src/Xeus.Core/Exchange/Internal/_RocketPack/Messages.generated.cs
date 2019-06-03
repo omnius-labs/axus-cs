@@ -1,8 +1,6 @@
 ﻿using Omnix.Cryptography;
 using Omnix.Network;
 using Xeus.Messages;
-using Xeus.Messages.Options;
-using Xeus.Messages.Reports;
 
 #nullable enable
 
@@ -119,7 +117,6 @@ namespace Xeus.Core.Exchange.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 string p_type = string.Empty;
@@ -132,22 +129,22 @@ namespace Xeus.Core.Exchange.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Type
+                        case 0:
                             {
                                 p_type = r.GetString(256);
                                 break;
                             }
-                        case 1: // CreationTime
+                        case 1:
                             {
                                 p_creationTime = r.GetTimestamp();
                                 break;
                             }
-                        case 2: // Clue
+                        case 2:
                             {
                                 p_clue = XeusClue.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
-                        case 3: // Certificate
+                        case 3:
                             {
                                 p_certificate = OmniCertificate.Formatter.Deserialize(r, rank + 1);
                                 break;
@@ -280,7 +277,6 @@ namespace Xeus.Core.Exchange.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 string p_type = string.Empty;
@@ -294,27 +290,27 @@ namespace Xeus.Core.Exchange.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Type
+                        case 0:
                             {
                                 p_type = r.GetString(256);
                                 break;
                             }
-                        case 1: // Signature
+                        case 1:
                             {
                                 p_signature = OmniSignature.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
-                        case 2: // CreationTime
+                        case 2:
                             {
                                 p_creationTime = r.GetTimestamp();
                                 break;
                             }
-                        case 3: // Clue
+                        case 3:
                             {
                                 p_clue = XeusClue.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
-                        case 4: // Certificate
+                        case 4:
                             {
                                 p_certificate = OmniCertificate.Formatter.Deserialize(r, rank + 1);
                                 break;
@@ -332,24 +328,24 @@ namespace Xeus.Core.Exchange.Internal
         static MulticastClue()
         {
             MulticastClue.Formatter = new CustomFormatter();
-            MulticastClue.Empty = new MulticastClue(string.Empty, XeusChannelId.Empty, Omnix.Serialization.RocketPack.Timestamp.Zero, XeusClue.Empty, OmniHashcash.Empty, OmniCertificate.Empty);
+            MulticastClue.Empty = new MulticastClue(string.Empty, OmniSignature.Empty, Omnix.Serialization.RocketPack.Timestamp.Zero, XeusClue.Empty, OmniHashcash.Empty, OmniCertificate.Empty);
         }
 
         private readonly int __hashCode;
 
         public static readonly int MaxTypeLength = 256;
 
-        public MulticastClue(string type, XeusChannelId channelId, Omnix.Serialization.RocketPack.Timestamp creationTime, XeusClue clue, OmniHashcash hashcash, OmniCertificate certificate)
+        public MulticastClue(string type, OmniSignature signature, Omnix.Serialization.RocketPack.Timestamp creationTime, XeusClue clue, OmniHashcash hashcash, OmniCertificate certificate)
         {
             if (type is null) throw new System.ArgumentNullException("type");
             if (type.Length > 256) throw new System.ArgumentOutOfRangeException("type");
-            if (channelId is null) throw new System.ArgumentNullException("channelId");
+            if (signature is null) throw new System.ArgumentNullException("signature");
             if (clue is null) throw new System.ArgumentNullException("clue");
             if (hashcash is null) throw new System.ArgumentNullException("hashcash");
             if (certificate is null) throw new System.ArgumentNullException("certificate");
 
             this.Type = type;
-            this.ChannelId = channelId;
+            this.Signature = signature;
             this.CreationTime = creationTime;
             this.Clue = clue;
             this.Hashcash = hashcash;
@@ -358,7 +354,7 @@ namespace Xeus.Core.Exchange.Internal
             {
                 var __h = new System.HashCode();
                 if (this.Type != default) __h.Add(this.Type.GetHashCode());
-                if (this.ChannelId != default) __h.Add(this.ChannelId.GetHashCode());
+                if (this.Signature != default) __h.Add(this.Signature.GetHashCode());
                 if (this.CreationTime != default) __h.Add(this.CreationTime.GetHashCode());
                 if (this.Clue != default) __h.Add(this.Clue.GetHashCode());
                 if (this.Hashcash != default) __h.Add(this.Hashcash.GetHashCode());
@@ -368,7 +364,7 @@ namespace Xeus.Core.Exchange.Internal
         }
 
         public string Type { get; }
-        public XeusChannelId ChannelId { get; }
+        public OmniSignature Signature { get; }
         public Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
         public XeusClue Clue { get; }
         public OmniHashcash Hashcash { get; }
@@ -379,7 +375,7 @@ namespace Xeus.Core.Exchange.Internal
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.Type != target.Type) return false;
-            if (this.ChannelId != target.ChannelId) return false;
+            if (this.Signature != target.Signature) return false;
             if (this.CreationTime != target.CreationTime) return false;
             if (this.Clue != target.Clue) return false;
             if (this.Hashcash != target.Hashcash) return false;
@@ -402,7 +398,7 @@ namespace Xeus.Core.Exchange.Internal
                     {
                         propertyCount++;
                     }
-                    if (value.ChannelId != XeusChannelId.Empty)
+                    if (value.Signature != OmniSignature.Empty)
                     {
                         propertyCount++;
                     }
@@ -430,10 +426,10 @@ namespace Xeus.Core.Exchange.Internal
                     w.Write((uint)0);
                     w.Write(value.Type);
                 }
-                if (value.ChannelId != XeusChannelId.Empty)
+                if (value.Signature != OmniSignature.Empty)
                 {
                     w.Write((uint)1);
-                    XeusChannelId.Formatter.Serialize(w, value.ChannelId, rank + 1);
+                    OmniSignature.Formatter.Serialize(w, value.Signature, rank + 1);
                 }
                 if (value.CreationTime != Omnix.Serialization.RocketPack.Timestamp.Zero)
                 {
@@ -461,11 +457,10 @@ namespace Xeus.Core.Exchange.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 string p_type = string.Empty;
-                XeusChannelId p_channelId = XeusChannelId.Empty;
+                OmniSignature p_signature = OmniSignature.Empty;
                 Omnix.Serialization.RocketPack.Timestamp p_creationTime = Omnix.Serialization.RocketPack.Timestamp.Zero;
                 XeusClue p_clue = XeusClue.Empty;
                 OmniHashcash p_hashcash = OmniHashcash.Empty;
@@ -476,32 +471,32 @@ namespace Xeus.Core.Exchange.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Type
+                        case 0:
                             {
                                 p_type = r.GetString(256);
                                 break;
                             }
-                        case 1: // ChannelId
+                        case 1:
                             {
-                                p_channelId = XeusChannelId.Formatter.Deserialize(r, rank + 1);
+                                p_signature = OmniSignature.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
-                        case 2: // CreationTime
+                        case 2:
                             {
                                 p_creationTime = r.GetTimestamp();
                                 break;
                             }
-                        case 3: // Clue
+                        case 3:
                             {
                                 p_clue = XeusClue.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
-                        case 4: // Hashcash
+                        case 4:
                             {
                                 p_hashcash = OmniHashcash.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
-                        case 5: // Certificate
+                        case 5:
                             {
                                 p_certificate = OmniCertificate.Formatter.Deserialize(r, rank + 1);
                                 break;
@@ -509,7 +504,7 @@ namespace Xeus.Core.Exchange.Internal
                     }
                 }
 
-                return new MulticastClue(p_type, p_channelId, p_creationTime, p_clue, p_hashcash, p_certificate);
+                return new MulticastClue(p_type, p_signature, p_creationTime, p_clue, p_hashcash, p_certificate);
             }
         }
     }
@@ -586,7 +581,6 @@ namespace Xeus.Core.Exchange.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 ProtocolVersion[] p_protocolVersions = System.Array.Empty<ProtocolVersion>();
@@ -596,7 +590,7 @@ namespace Xeus.Core.Exchange.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // ProtocolVersions
+                        case 0:
                             {
                                 var length = r.GetUInt32();
                                 p_protocolVersions = new ProtocolVersion[length];
@@ -692,7 +686,6 @@ namespace Xeus.Core.Exchange.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 System.ReadOnlyMemory<byte> p_id = System.ReadOnlyMemory<byte>.Empty;
@@ -703,12 +696,12 @@ namespace Xeus.Core.Exchange.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Id
+                        case 0:
                             {
                                 p_id = r.GetMemory(32);
                                 break;
                             }
-                        case 1: // Address
+                        case 1:
                             {
                                 p_address = OmniAddress.Formatter.Deserialize(r, rank + 1);
                                 break;
@@ -797,7 +790,6 @@ namespace Xeus.Core.Exchange.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 OmniAddress[] p_addresses = System.Array.Empty<OmniAddress>();
@@ -807,7 +799,7 @@ namespace Xeus.Core.Exchange.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Addresses
+                        case 0:
                             {
                                 var length = r.GetUInt32();
                                 p_addresses = new OmniAddress[length];
@@ -898,7 +890,6 @@ namespace Xeus.Core.Exchange.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 byte p_hopLimit = 0;
@@ -909,12 +900,12 @@ namespace Xeus.Core.Exchange.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // HopLimit
+                        case 0:
                             {
                                 p_hopLimit = r.GetUInt8();
                                 break;
                             }
-                        case 1: // Priority
+                        case 1:
                             {
                                 p_priority = r.GetUInt8();
                                 break;
@@ -1006,7 +997,6 @@ namespace Xeus.Core.Exchange.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 System.Collections.Generic.Dictionary<OmniSignature, RelayOption> p_parameters = new System.Collections.Generic.Dictionary<OmniSignature, RelayOption>();
@@ -1016,7 +1006,7 @@ namespace Xeus.Core.Exchange.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Parameters
+                        case 0:
                             {
                                 var length = r.GetUInt32();
                                 p_parameters = new System.Collections.Generic.Dictionary<OmniSignature, RelayOption>();
@@ -1117,7 +1107,6 @@ namespace Xeus.Core.Exchange.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 System.Collections.Generic.Dictionary<OmniSignature, RelayOption> p_parameters = new System.Collections.Generic.Dictionary<OmniSignature, RelayOption>();
@@ -1127,7 +1116,7 @@ namespace Xeus.Core.Exchange.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Parameters
+                        case 0:
                             {
                                 var length = r.GetUInt32();
                                 p_parameters = new System.Collections.Generic.Dictionary<OmniSignature, RelayOption>();
@@ -1154,14 +1143,14 @@ namespace Xeus.Core.Exchange.Internal
         static WantMulticastCluesMessage()
         {
             WantMulticastCluesMessage.Formatter = new CustomFormatter();
-            WantMulticastCluesMessage.Empty = new WantMulticastCluesMessage(new System.Collections.Generic.Dictionary<XeusChannelId, RelayOption>());
+            WantMulticastCluesMessage.Empty = new WantMulticastCluesMessage(new System.Collections.Generic.Dictionary<OmniSignature, RelayOption>());
         }
 
         private readonly int __hashCode;
 
         public static readonly int MaxParametersCount = 8192;
 
-        public WantMulticastCluesMessage(System.Collections.Generic.Dictionary<XeusChannelId, RelayOption> parameters)
+        public WantMulticastCluesMessage(System.Collections.Generic.Dictionary<OmniSignature, RelayOption> parameters)
         {
             if (parameters is null) throw new System.ArgumentNullException("parameters");
             if (parameters.Count > 8192) throw new System.ArgumentOutOfRangeException("parameters");
@@ -1171,7 +1160,7 @@ namespace Xeus.Core.Exchange.Internal
                 if (n.Value is null) throw new System.ArgumentNullException("n.Value");
             }
 
-            this.Parameters = new Omnix.Collections.ReadOnlyDictionarySlim<XeusChannelId, RelayOption>(parameters);
+            this.Parameters = new Omnix.Collections.ReadOnlyDictionarySlim<OmniSignature, RelayOption>(parameters);
 
             {
                 var __h = new System.HashCode();
@@ -1184,7 +1173,7 @@ namespace Xeus.Core.Exchange.Internal
             }
         }
 
-        public Omnix.Collections.ReadOnlyDictionarySlim<XeusChannelId, RelayOption> Parameters { get; }
+        public Omnix.Collections.ReadOnlyDictionarySlim<OmniSignature, RelayOption> Parameters { get; }
 
         public override bool Equals(WantMulticastCluesMessage? target)
         {
@@ -1218,7 +1207,7 @@ namespace Xeus.Core.Exchange.Internal
                     w.Write((uint)value.Parameters.Count);
                     foreach (var n in value.Parameters)
                     {
-                        XeusChannelId.Formatter.Serialize(w, n.Key, rank + 1);
+                        OmniSignature.Formatter.Serialize(w, n.Key, rank + 1);
                         RelayOption.Formatter.Serialize(w, n.Value, rank + 1);
                     }
                 }
@@ -1228,25 +1217,24 @@ namespace Xeus.Core.Exchange.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
-                System.Collections.Generic.Dictionary<XeusChannelId, RelayOption> p_parameters = new System.Collections.Generic.Dictionary<XeusChannelId, RelayOption>();
+                System.Collections.Generic.Dictionary<OmniSignature, RelayOption> p_parameters = new System.Collections.Generic.Dictionary<OmniSignature, RelayOption>();
 
                 for (; propertyCount > 0; propertyCount--)
                 {
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Parameters
+                        case 0:
                             {
                                 var length = r.GetUInt32();
-                                p_parameters = new System.Collections.Generic.Dictionary<XeusChannelId, RelayOption>();
-                                XeusChannelId t_key = XeusChannelId.Empty;
+                                p_parameters = new System.Collections.Generic.Dictionary<OmniSignature, RelayOption>();
+                                OmniSignature t_key = OmniSignature.Empty;
                                 RelayOption t_value = RelayOption.Empty;
                                 for (int i = 0; i < length; i++)
                                 {
-                                    t_key = XeusChannelId.Formatter.Deserialize(r, rank + 1);
+                                    t_key = OmniSignature.Formatter.Deserialize(r, rank + 1);
                                     t_value = RelayOption.Formatter.Deserialize(r, rank + 1);
                                     p_parameters[t_key] = t_value;
                                 }
@@ -1336,7 +1324,6 @@ namespace Xeus.Core.Exchange.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 BroadcastClue[] p_results = System.Array.Empty<BroadcastClue>();
@@ -1346,7 +1333,7 @@ namespace Xeus.Core.Exchange.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Results
+                        case 0:
                             {
                                 var length = r.GetUInt32();
                                 p_results = new BroadcastClue[length];
@@ -1440,7 +1427,6 @@ namespace Xeus.Core.Exchange.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 UnicastClue[] p_results = System.Array.Empty<UnicastClue>();
@@ -1450,7 +1436,7 @@ namespace Xeus.Core.Exchange.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Results
+                        case 0:
                             {
                                 var length = r.GetUInt32();
                                 p_results = new UnicastClue[length];
@@ -1544,7 +1530,6 @@ namespace Xeus.Core.Exchange.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 MulticastClue[] p_results = System.Array.Empty<MulticastClue>();
@@ -1554,7 +1539,7 @@ namespace Xeus.Core.Exchange.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Results
+                        case 0:
                             {
                                 var length = r.GetUInt32();
                                 p_results = new MulticastClue[length];
@@ -1650,7 +1635,6 @@ namespace Xeus.Core.Exchange.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 System.Collections.Generic.Dictionary<OmniHash, RelayOption> p_parameters = new System.Collections.Generic.Dictionary<OmniHash, RelayOption>();
@@ -1660,7 +1644,7 @@ namespace Xeus.Core.Exchange.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Parameters
+                        case 0:
                             {
                                 var length = r.GetUInt32();
                                 p_parameters = new System.Collections.Generic.Dictionary<OmniHash, RelayOption>();
@@ -1760,7 +1744,6 @@ namespace Xeus.Core.Exchange.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 System.Collections.Generic.Dictionary<OmniHash, RelayOption> p_parameters = new System.Collections.Generic.Dictionary<OmniHash, RelayOption>();
@@ -1770,7 +1753,7 @@ namespace Xeus.Core.Exchange.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Parameters
+                        case 0:
                             {
                                 var length = r.GetUInt32();
                                 p_parameters = new System.Collections.Generic.Dictionary<OmniHash, RelayOption>();
@@ -1890,7 +1873,6 @@ namespace Xeus.Core.Exchange.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 OmniHash p_hash = OmniHash.Empty;
@@ -1902,17 +1884,17 @@ namespace Xeus.Core.Exchange.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Hash
+                        case 0:
                             {
                                 p_hash = OmniHash.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
-                        case 1: // RelayOption
+                        case 1:
                             {
                                 p_relayOption = RelayOption.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
-                        case 2: // Value
+                        case 2:
                             {
                                 p_value = r.GetRecyclableMemory(4194304);
                                 break;
@@ -2009,7 +1991,6 @@ namespace Xeus.Core.Exchange.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 OmniHash p_hash = OmniHash.Empty;
@@ -2020,12 +2001,12 @@ namespace Xeus.Core.Exchange.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Hash
+                        case 0:
                             {
                                 p_hash = OmniHash.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
-                        case 1: // Value
+                        case 1:
                             {
                                 p_value = r.GetRecyclableMemory(4194304);
                                 break;
@@ -2126,7 +2107,6 @@ namespace Xeus.Core.Exchange.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 Omnix.Serialization.RocketPack.Timestamp p_creationTime = Omnix.Serialization.RocketPack.Timestamp.Zero;
@@ -2138,17 +2118,17 @@ namespace Xeus.Core.Exchange.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // CreationTime
+                        case 0:
                             {
                                 p_creationTime = r.GetTimestamp();
                                 break;
                             }
-                        case 1: // Hash
+                        case 1:
                             {
                                 p_hash = OmniHash.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
-                        case 2: // RelayOption
+                        case 2:
                             {
                                 p_relayOption = RelayOption.Formatter.Deserialize(r, rank + 1);
                                 break;
@@ -2221,7 +2201,6 @@ namespace Xeus.Core.Exchange.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 uint p_version = 0;
@@ -2231,7 +2210,7 @@ namespace Xeus.Core.Exchange.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Version
+                        case 0:
                             {
                                 p_version = r.GetUInt32();
                                 break;

@@ -1,8 +1,6 @@
 ﻿using Omnix.Cryptography;
 using Omnix.Network;
 using Xeus.Messages;
-using Xeus.Messages.Options;
-using Xeus.Messages.Reports;
 
 #nullable enable
 
@@ -111,7 +109,6 @@ namespace Xeus.Core.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 CorrectionAlgorithmType p_correctionAlgorithmType = (CorrectionAlgorithmType)0;
@@ -123,17 +120,17 @@ namespace Xeus.Core.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // CorrectionAlgorithmType
+                        case 0:
                             {
                                 p_correctionAlgorithmType = (CorrectionAlgorithmType)r.GetUInt64();
                                 break;
                             }
-                        case 1: // Length
+                        case 1:
                             {
                                 p_length = r.GetUInt64();
                                 break;
                             }
-                        case 2: // Hashes
+                        case 2:
                             {
                                 var length = r.GetUInt32();
                                 p_hashes = new OmniHash[length];
@@ -227,7 +224,6 @@ namespace Xeus.Core.Internal
             {
                 if (rank > 256) throw new System.FormatException();
 
-                // Read property count
                 uint propertyCount = r.GetUInt32();
 
                 MerkleTreeSection[] p_sections = System.Array.Empty<MerkleTreeSection>();
@@ -237,7 +233,7 @@ namespace Xeus.Core.Internal
                     uint id = r.GetUInt32();
                     switch (id)
                     {
-                        case 0: // Sections
+                        case 0:
                             {
                                 var length = r.GetUInt32();
                                 p_sections = new MerkleTreeSection[length];
