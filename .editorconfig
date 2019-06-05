@@ -14,6 +14,7 @@ indent_size = 4
 # C# files
 [*.cs]
 end_of_line = lf
+charset = utf-8
 
 # New line preferences
 csharp_new_line_before_open_brace = all
@@ -80,8 +81,8 @@ dotnet_naming_style.camel_case_underscore_style.capitalization = camel_case
 
 # Code style defaults
 dotnet_sort_system_directives_first = true
-csharp_preserve_single_line_blocks = true
-csharp_preserve_single_line_statements = true
+csharp_preserve_single_line_blocks = false
+csharp_preserve_single_line_statements = false
 
 # Expression-level preferences
 dotnet_style_object_initializer = true:suggestion
@@ -131,21 +132,12 @@ csharp_space_between_method_declaration_parameter_list_parentheses = false
 csharp_space_between_parentheses = false
 csharp_space_between_square_brackets = false
 
-# C++ Files
-[*.{cpp,h,in}]
-curly_bracket_next_line = true
-indent_brace_style = Allman
-
 # Xml project files
-[*.{csproj,vcxproj,vcxproj.filters,proj,nativeproj,locproj}]
-indent_size = 2
-
-# Xml build files
-[*.builds]
+[*.{csproj}]
 indent_size = 2
 
 # Xml files
-[*.{xml,stylecop,resx,ruleset}]
+[*.{xml}]
 indent_size = 2
 
 # Xml config files

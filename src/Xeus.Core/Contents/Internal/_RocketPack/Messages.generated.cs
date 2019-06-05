@@ -444,14 +444,14 @@ namespace Xeus.Core.Contents.Internal
         static BlockStorageConfig()
         {
             BlockStorageConfig.Formatter = new CustomFormatter();
-            BlockStorageConfig.Empty = new BlockStorageConfig(0, new System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>(), 0);
+            BlockStorageConfig.Empty = new BlockStorageConfig(0, 0, new System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>());
         }
 
         private readonly int __hashCode;
 
         public static readonly int MaxClusterMetadataMapCount = 1073741824;
 
-        public BlockStorageConfig(uint version, System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata> clusterMetadataMap, ulong size)
+        public BlockStorageConfig(uint version, ulong size, System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata> clusterMetadataMap)
         {
             if (clusterMetadataMap is null) throw new System.ArgumentNullException("clusterMetadataMap");
             if (clusterMetadataMap.Count > 1073741824) throw new System.ArgumentOutOfRangeException("clusterMetadataMap");
@@ -459,34 +459,35 @@ namespace Xeus.Core.Contents.Internal
             {
                 if (n.Value is null) throw new System.ArgumentNullException("n.Value");
             }
+
             this.Version = version;
-            this.ClusterMetadataMap = new Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata>(clusterMetadataMap);
             this.Size = size;
+            this.ClusterMetadataMap = new Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata>(clusterMetadataMap);
 
             {
                 var __h = new System.HashCode();
                 if (this.Version != default) __h.Add(this.Version.GetHashCode());
+                if (this.Size != default) __h.Add(this.Size.GetHashCode());
                 foreach (var n in this.ClusterMetadataMap)
                 {
                     if (n.Key != default) __h.Add(n.Key.GetHashCode());
                     if (n.Value != default) __h.Add(n.Value.GetHashCode());
                 }
-                if (this.Size != default) __h.Add(this.Size.GetHashCode());
                 __hashCode = __h.ToHashCode();
             }
         }
 
         public uint Version { get; }
-        public Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata> ClusterMetadataMap { get; }
         public ulong Size { get; }
+        public Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata> ClusterMetadataMap { get; }
 
         public override bool Equals(BlockStorageConfig? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.Version != target.Version) return false;
-            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.ClusterMetadataMap, target.ClusterMetadataMap)) return false;
             if (this.Size != target.Size) return false;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.ClusterMetadataMap, target.ClusterMetadataMap)) return false;
 
             return true;
         }
@@ -505,11 +506,11 @@ namespace Xeus.Core.Contents.Internal
                     {
                         propertyCount++;
                     }
-                    if (value.ClusterMetadataMap.Count != 0)
+                    if (value.Size != 0)
                     {
                         propertyCount++;
                     }
-                    if (value.Size != 0)
+                    if (value.ClusterMetadataMap.Count != 0)
                     {
                         propertyCount++;
                     }
@@ -521,20 +522,20 @@ namespace Xeus.Core.Contents.Internal
                     w.Write((uint)0);
                     w.Write(value.Version);
                 }
-                if (value.ClusterMetadataMap.Count != 0)
+                if (value.Size != 0)
                 {
                     w.Write((uint)1);
+                    w.Write(value.Size);
+                }
+                if (value.ClusterMetadataMap.Count != 0)
+                {
+                    w.Write((uint)2);
                     w.Write((uint)value.ClusterMetadataMap.Count);
                     foreach (var n in value.ClusterMetadataMap)
                     {
                         OmniHash.Formatter.Serialize(w, n.Key, rank + 1);
                         ClusterMetadata.Formatter.Serialize(w, n.Value, rank + 1);
                     }
-                }
-                if (value.Size != 0)
-                {
-                    w.Write((uint)2);
-                    w.Write(value.Size);
                 }
             }
 
@@ -545,8 +546,8 @@ namespace Xeus.Core.Contents.Internal
                 uint propertyCount = r.GetUInt32();
 
                 uint p_version = 0;
-                System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata> p_clusterMetadataMap = new System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>();
                 ulong p_size = 0;
+                System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata> p_clusterMetadataMap = new System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>();
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -560,6 +561,11 @@ namespace Xeus.Core.Contents.Internal
                             }
                         case 1:
                             {
+                                p_size = r.GetUInt64();
+                                break;
+                            }
+                        case 2:
+                            {
                                 var length = r.GetUInt32();
                                 p_clusterMetadataMap = new System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>();
                                 OmniHash t_key = OmniHash.Empty;
@@ -572,15 +578,10 @@ namespace Xeus.Core.Contents.Internal
                                 }
                                 break;
                             }
-                        case 2:
-                            {
-                                p_size = r.GetUInt64();
-                                break;
-                            }
                     }
                 }
 
-                return new BlockStorageConfig(p_version, p_clusterMetadataMap, p_size);
+                return new BlockStorageConfig(p_version, p_size, p_clusterMetadataMap);
             }
         }
     }

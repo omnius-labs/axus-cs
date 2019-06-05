@@ -29,7 +29,10 @@ namespace Xeus.Core.Internal
 
         private void Timer()
         {
-            if (_isDisposed) return;
+            if (_isDisposed)
+            {
+                return;
+            }
 
             bool taken = false;
 
@@ -39,7 +42,10 @@ namespace Xeus.Core.Internal
 
                 if (taken)
                 {
-                    if (!_running) return;
+                    if (!_running)
+                    {
+                        return;
+                    }
 
                     _callback();
                 }
@@ -50,7 +56,10 @@ namespace Xeus.Core.Internal
             }
             finally
             {
-                if (taken) Monitor.Exit(_callbackLockObject);
+                if (taken)
+                {
+                    Monitor.Exit(_callbackLockObject);
+                }
             }
         }
 
@@ -58,7 +67,10 @@ namespace Xeus.Core.Internal
         {
             lock (_lockObject)
             {
-                if (!_running) return;
+                if (!_running)
+                {
+                    return;
+                }
 
                 Task.Run(() => this.Timer());
             }
@@ -123,14 +135,21 @@ namespace Xeus.Core.Internal
                 }
                 finally
                 {
-                    if (taken) Monitor.Exit(_callbackLockObject);
+                    if (taken)
+                    {
+                        Monitor.Exit(_callbackLockObject);
+                    }
                 }
             }
         }
 
         protected override void Dispose(bool isDisposing)
         {
-            if (_isDisposed) return;
+            if (_isDisposed)
+            {
+                return;
+            }
+
             _isDisposed = true;
 
             if (isDisposing)

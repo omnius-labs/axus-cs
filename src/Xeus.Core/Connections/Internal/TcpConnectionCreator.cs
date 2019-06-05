@@ -23,12 +23,12 @@ namespace Xeus.Core.Connections.Internal
 
         private readonly Random _random = new Random();
 
-        private TcpListener? _ipv4TcpListener;
-        private TcpListener? _ipv6TcpListener;
+        private readonly List<TcpListener> _tcpListeners = new List<TcpListener>();
 
-        private EventScheduler? _watchTimer;
+        private readonly EventScheduler _watchTimer;
 
-        private readonly List<string> _locationUris = new List<string>();
+        private readonly List<OmniAddress> _myAddresses = new List<OmniAddress>();
+        private readonly Dictionary<OmniAddress, ushort> OpenedPortsByUpnp = new Dictionary<OmniAddress, ushort>();
 
         private TcpConnectConfig? _tcpConnectConfig;
         private TcpAcceptConfig? _tcpAcceptConfig;
@@ -41,22 +41,42 @@ namespace Xeus.Core.Connections.Internal
         public TcpConnectionCreator(BufferPool bufferPool)
         {
             _bufferPool = bufferPool;
+
+            _watchTimer = new EventScheduler(this.WatchListenerThread);
         }
 
-        public void SetConfig(TcpConnectConfig tcpConnectConfig, TcpAcceptConfig tcpAcceptConfig)
+        public TcpConnectConfig? ConnectConfig => _tcpConnectConfig;
+
+        public TcpAcceptConfig? AcceptConfig => _tcpAcceptConfig;
+
+        public void SetConnectConfig(TcpConnectConfig tcpConnectConfig)
         {
             lock (_lockObject)
             {
-                if (_tcpConnectConfig == tcpConnectConfig && _tcpAcceptConfig == tcpAcceptConfig)
+                if (_tcpConnectConfig == tcpConnectConfig)
                 {
                     return;
                 }
 
                 _tcpConnectConfig = tcpConnectConfig;
+            }
+
+            _watchTimer.Run();
+        }
+
+        public void SetAcceptConfig(TcpAcceptConfig tcpAcceptConfig)
+        {
+            lock (_lockObject)
+            {
+                if (_tcpAcceptConfig == tcpAcceptConfig)
+                {
+                    return;
+                }
+
                 _tcpAcceptConfig = tcpAcceptConfig;
             }
 
-            _watchTimer?.Run();
+            _watchTimer.Run();
         }
 
         private static bool IsGlobalIpAddress(IPAddress ipAddress)
@@ -132,25 +152,72 @@ namespace Xeus.Core.Connections.Internal
             return list;
         }
 
-        private static bool TryGetIpAddress(string host, out IPAddress ipAddress)
+        private static bool TryGetEndpoint(OmniAddress omniAddress, out IPAddress ipAddress, out ushort port, bool nameResolving = false)
         {
-            if (IPAddress.TryParse(host, out ipAddress))
+            ipAddress = IPAddress.None;
+            port = 0;
+
+            var sections = omniAddress.Parse();
+
+            // フォーマットのチェック
+            if (sections.Length != 4 || !(sections[0] == "ip4" || sections[0] == "ip6") || !(sections[2] == "tcp"))
             {
-                return true;
+                return false;
             }
 
-            var hostEntry = Dns.GetHostEntryAsync(host).Result;
-
-            if (hostEntry.AddressList.Length > 0)
+            // IPアドレスのパース処理
             {
-                ipAddress = hostEntry.AddressList[0];
-                return true;
+                if (nameResolving)
+                {
+                    if (!IPAddress.TryParse(sections[1], out ipAddress))
+                    {
+                        try
+                        {
+                            var hostEntry = Dns.GetHostEntry(sections[1]);
+
+                            if (hostEntry.AddressList.Length == 0)
+                            {
+                                return false;
+                            }
+
+                            ipAddress = hostEntry.AddressList[0];
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.Error(e);
+                            return false;
+                        }
+                    }
+                }
+                else
+                {
+                    if (!IPAddress.TryParse(sections[1], out ipAddress))
+                    {
+                        return false;
+                    }
+                }
+
+                if (sections[0] == "ip4" && ipAddress.AddressFamily != AddressFamily.InterNetwork)
+                {
+                    return false;
+                }
+
+                if (sections[0] == "ip6" && ipAddress.AddressFamily != AddressFamily.InterNetworkV6)
+                {
+                    return false;
+                }
             }
 
-            return false;
+            // ポート番号のパース処理
+            if (ushort.TryParse(sections[3], out port))
+            {
+                return false;
+            }
+
+            return true;
         }
 
-        private static Socket? Connect(IPEndPoint remoteEndPoint)
+        private static Socket? CreateSocket(IPEndPoint remoteEndPoint)
         {
             Socket? socket = null;
 
@@ -174,30 +241,30 @@ namespace Xeus.Core.Connections.Internal
             }
         }
 
-        public Cap? ConnectCap(OmniAddress address, CancellationToken token = default)
+        public Cap? Connect(OmniAddress address, CancellationToken token = default)
         {
-            if (_disposed) return null;
-            if (this.StateType != ServiceStateType.Running) return null;
+            if (_disposed)
+            {
+                return null;
+            }
+
+            if (this.StateType != ServiceStateType.Running)
+            {
+                return null;
+            }
 
             var config = _tcpConnectConfig;
-            if (config == null || !config.Enabled) return null;
+            if (config == null || !config.Enabled)
+            {
+                return null;
+            }
 
             IPAddress ipAddress;
             ushort port;
 
+            if (!TryGetEndpoint(address, out ipAddress, out port))
             {
-                var sections = address.Parse();
-                if (sections.Length < 4) return null;
-
-                if (!((sections[0] == "ip4" || sections[0] == "ip6") && IPAddress.TryParse(sections[1], out ipAddress)))
-                {
-                    return null;
-                }
-
-                if (!(sections[2] == "tcp" && ushort.TryParse(sections[3], out port)))
-                {
-                    return null;
-                }
+                return null;
             }
 
             var disposableList = new List<IDisposable>();
@@ -208,30 +275,24 @@ namespace Xeus.Core.Connections.Internal
                 if (!IsGlobalIpAddress(ipAddress)) return null;
 #endif
 
-                if (config.TcpProxyConfig != null)
+                if (config.ProxyConfig != null)
                 {
                     IPAddress proxyAddress;
                     ushort proxyPort;
 
+                    if (!TryGetEndpoint(config.ProxyConfig.Address, out proxyAddress, out proxyPort, true))
                     {
-                        var sections = config.TcpProxyConfig.Address.Parse();
-                        if (sections.Length < 4) return null;
-
-                        if (!((sections[0] == "ip4" || sections[0] == "ip6") && TryGetIpAddress(sections[1], out proxyAddress)))
-                        {
-                            return null;
-                        }
-
-                        if (!(sections[2] == "tcp" && ushort.TryParse(sections[3], out proxyPort)))
-                        {
-                            return null;
-                        }
+                        return null;
                     }
 
-                    if (config.TcpProxyConfig.Type == TcpProxyType.Socks5Proxy)
+                    if (config.ProxyConfig.Type == TcpProxyType.Socks5Proxy)
                     {
-                        var socket = Connect(new IPEndPoint(proxyAddress, proxyPort));
-                        if (socket == null) return null;
+                        var socket = CreateSocket(new IPEndPoint(proxyAddress, proxyPort));
+                        if (socket == null)
+                        {
+                            return null;
+                        }
+
                         disposableList.Add(socket);
 
                         var proxy = new Socks5ProxyClient(ipAddress.ToString(), port);
@@ -242,10 +303,14 @@ namespace Xeus.Core.Connections.Internal
 
                         return cap;
                     }
-                    else if (config.TcpProxyConfig.Type == TcpProxyType.HttpProxy)
+                    else if (config.ProxyConfig.Type == TcpProxyType.HttpProxy)
                     {
-                        var socket = Connect(new IPEndPoint(proxyAddress, proxyPort));
-                        if (socket == null) return null;
+                        var socket = CreateSocket(new IPEndPoint(proxyAddress, proxyPort));
+                        if (socket == null)
+                        {
+                            return null;
+                        }
+
                         disposableList.Add(socket);
 
                         var proxy = new HttpProxyClient(ipAddress.ToString(), port);
@@ -259,8 +324,12 @@ namespace Xeus.Core.Connections.Internal
                 }
                 else
                 {
-                    var socket = Connect(new IPEndPoint(ipAddress, port));
-                    if (socket == null) return null;
+                    var socket = CreateSocket(new IPEndPoint(ipAddress, port));
+                    if (socket == null)
+                    {
+                        return null;
+                    }
+
                     disposableList.Add(socket);
 
                     var cap = new SocketCap(socket, false);
@@ -282,51 +351,51 @@ namespace Xeus.Core.Connections.Internal
             return null;
         }
 
-        public Cap? AcceptCap(out OmniAddress? address, CancellationToken token = default)
+        public Cap? Accept(out OmniAddress? address, CancellationToken token = default)
         {
             address = null;
 
-            if (_disposed) return null;
-            if (this.StateType != ServiceStateType.Running) return null;
+            if (_disposed)
+            {
+                return null;
+            }
+
+            if (this.StateType != ServiceStateType.Running)
+            {
+                return null;
+            }
 
             var garbages = new List<IDisposable>();
 
             try
             {
                 var config = _tcpAcceptConfig;
-                if (config == null || !config.Enabled) return null;
-
-                foreach (int p in new int[] { 0, 1 }.Randomize())
+                if (config == null || !config.Enabled)
                 {
-                    if (p == 0 && _ipv4TcpListener != null && _ipv4TcpListener.Pending())
+                    return null;
+                }
+
+                foreach (var tcpListener in _tcpListeners.Randomize())
+                {
+                    var socket = tcpListener.AcceptSocket();
+                    garbages.Add(socket);
+
+                    var endpoint = (IPEndPoint)socket.RemoteEndPoint;
+
+                    if (endpoint.AddressFamily == AddressFamily.InterNetwork)
                     {
-                        var socket = _ipv4TcpListener.AcceptSocket();
-                        garbages.Add(socket);
-
-                        // Check
-                        {
-                            var ipEndPoint = ((IPEndPoint)socket.RemoteEndPoint);
-
-                            address = new OmniAddress($"/ip4/{ipEndPoint.Address}/tcp/{ipEndPoint.Port}");
-                        }
-
-                        return new SocketCap(socket, false);
+                        address = new OmniAddress($"/ip4/{endpoint.Address}/tcp/{endpoint.Port}");
+                    }
+                    else if (endpoint.AddressFamily == AddressFamily.InterNetworkV6)
+                    {
+                        address = new OmniAddress($"/ip6/{endpoint.Address}/tcp/{endpoint.Port}");
+                    }
+                    else
+                    {
+                        throw new NotSupportedException();
                     }
 
-                    if (p == 1 && _ipv6TcpListener != null && _ipv6TcpListener.Pending())
-                    {
-                        var socket = _ipv6TcpListener.AcceptSocket();
-                        garbages.Add(socket);
-
-                        // Check
-                        {
-                            var ipEndPoint = ((IPEndPoint)socket.RemoteEndPoint);
-
-                            address = new OmniAddress($"/ip6/{ipEndPoint.Address}/tcp/{ipEndPoint.Port}");
-                        }
-
-                        return new SocketCap(socket, false);
-                    }
+                    return new SocketCap(socket, false);
                 }
             }
             catch (Exception e)
@@ -342,21 +411,36 @@ namespace Xeus.Core.Connections.Internal
             return null;
         }
 
-        private int _watchIpv4Port = -1;
-        private int _watchIpv6Port = -1;
-
         private void WatchListenerThread()
         {
             try
             {
                 for (; ; )
                 {
-                    var config = this.Config;
+                    var config = _tcpAcceptConfig;
 
-                    string ipv4Uri = null;
-                    string ipv6Uri = null;
+                    // 
+                    if (config == null || !config.Enabled)
+                    {
 
-                    if (config.Type.HasFlag(TcpConnectionType.Ipv4) && config.Ipv4Port != 0)
+                    }
+                    else
+                    {
+                        foreach (var omniAddress in config.ListenAddresses)
+                        {
+                            IPAddress ipAddress;
+                            ushort port;
+
+                            if (!TryGetEndpoint(omniAddress, out ipAddress, out port, false))
+                            {
+                                continue;
+                            }
+
+
+                        }
+                    }
+
+                    if (config..Type.HasFlag(TcpConnectionType.Ipv4) && config.Ipv4Port != 0)
                     {
                         UpnpClient upnpClient = null;
 
@@ -521,11 +605,21 @@ namespace Xeus.Core.Connections.Internal
 
                     lock (_lockObject)
                     {
-                        if (this.Config != config) continue;
+                        if (this.Config != config)
+                        {
+                            continue;
+                        }
 
                         _locationUris.Clear();
-                        if (ipv4Uri != null) _locationUris.Add(ipv4Uri);
-                        if (ipv6Uri != null) _locationUris.Add(ipv6Uri);
+                        if (ipv4Uri != null)
+                        {
+                            _locationUris.Add(ipv4Uri);
+                        }
+
+                        if (ipv6Uri != null)
+                        {
+                            _locationUris.Add(ipv6Uri);
+                        }
                     }
 
                     return;
@@ -555,7 +649,11 @@ namespace Xeus.Core.Connections.Internal
             {
                 lock (_lockObject)
                 {
-                    if (this.State == ManagerState.Start) return;
+                    if (this.State == ManagerState.Start)
+                    {
+                        return;
+                    }
+
                     _state = ManagerState.Start;
 
                     _watchTimer.Start(new TimeSpan(0, 0, 0), new TimeSpan(1, 0, 0, 0));
@@ -569,7 +667,11 @@ namespace Xeus.Core.Connections.Internal
             {
                 lock (_lockObject)
                 {
-                    if (this.State == ManagerState.Stop) return;
+                    if (this.State == ManagerState.Stop)
+                    {
+                        return;
+                    }
+
                     _state = ManagerState.Stop;
                 }
 
@@ -654,7 +756,11 @@ namespace Xeus.Core.Connections.Internal
 
         protected override void Dispose(bool disposing)
         {
-            if (_disposed) return;
+            if (_disposed)
+            {
+                return;
+            }
+
             _disposed = true;
 
             if (disposing)

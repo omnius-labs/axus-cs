@@ -7,8 +7,7 @@ using "Xeus.Messages.rpf";
 option csharp_namespace = "Xeus.Core.Internal";
 option csharp_access_level = "internal";
 
-enum CorrectionAlgorithmType : uint8
-{
+enum CorrectionAlgorithmType : uint8 {
     ReedSolomon8 = 0,
 }
 

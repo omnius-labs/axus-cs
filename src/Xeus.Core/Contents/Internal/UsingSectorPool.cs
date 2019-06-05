@@ -67,7 +67,10 @@ namespace Xeus.Core.Contents.Internal
                 if (_bitmapStorage.Get(sector))
                 {
                     _bitmapStorage.Set(sector, false);
-                    if (_freeSectors.Count < 1024 * 4) _freeSectors.Add(sector);
+                    if (_freeSectors.Count < 1024 * 4)
+                    {
+                        _freeSectors.Add(sector);
+                    }
 
                     _usingSectorCount--;
                 }
@@ -83,7 +86,10 @@ namespace Xeus.Core.Contents.Internal
                     if (!_bitmapStorage.Get(i))
                     {
                         _freeSectors.Add(i);
-                        if (_freeSectors.Count >= Math.Max(count, 1024 * 4)) break;
+                        if (_freeSectors.Count >= Math.Max(count, 1024 * 4))
+                        {
+                            break;
+                        }
                     }
                 }
             }
@@ -104,7 +110,11 @@ namespace Xeus.Core.Contents.Internal
 
         protected override void Dispose(bool disposing)
         {
-            if (_disposed) return;
+            if (_disposed)
+            {
+                return;
+            }
+
             _disposed = true;
 
             if (disposing)

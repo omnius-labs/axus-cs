@@ -72,13 +72,31 @@ namespace Xeus.Core.Connections.Internal
 
         public Cap ConnectCap(string uri)
         {
-            if (_disposed) return null;
-            if (this.State == ManagerState.Stop) return null;
+            if (_disposed)
+            {
+                return null;
+            }
+
+            if (this.State == ManagerState.Stop)
+            {
+                return null;
+            }
 
             Cap cap;
-            if ((cap = _tcpConnectionManager.ConnectCap(uri)) != null) return cap;
-            if ((cap = _i2pConnectionManager.ConnectCap(uri)) != null) return cap;
-            if ((cap = _customConnectionManager.ConnectCap(uri)) != null) return cap;
+            if ((cap = _tcpConnectionManager.ConnectCap(uri)) != null)
+            {
+                return cap;
+            }
+
+            if ((cap = _i2pConnectionManager.ConnectCap(uri)) != null)
+            {
+                return cap;
+            }
+
+            if ((cap = _customConnectionManager.ConnectCap(uri)) != null)
+            {
+                return cap;
+            }
 
             return null;
         }
@@ -87,13 +105,31 @@ namespace Xeus.Core.Connections.Internal
         {
             uri = null;
 
-            if (_disposed) return null;
-            if (this.State == ManagerState.Stop) return null;
+            if (_disposed)
+            {
+                return null;
+            }
+
+            if (this.State == ManagerState.Stop)
+            {
+                return null;
+            }
 
             Cap cap;
-            if ((cap = _tcpConnectionManager.AcceptCap(out uri)) != null) return cap;
-            if ((cap = _i2pConnectionManager.AcceptCap(out uri)) != null) return cap;
-            if ((cap = _customConnectionManager.AcceptCap(out uri)) != null) return cap;
+            if ((cap = _tcpConnectionManager.AcceptCap(out uri)) != null)
+            {
+                return cap;
+            }
+
+            if ((cap = _i2pConnectionManager.AcceptCap(out uri)) != null)
+            {
+                return cap;
+            }
+
+            if ((cap = _customConnectionManager.AcceptCap(out uri)) != null)
+            {
+                return cap;
+            }
 
             return null;
         }
@@ -125,7 +161,11 @@ namespace Xeus.Core.Connections.Internal
             {
                 lock (_lockObject)
                 {
-                    if (this.State == ManagerState.Start) return;
+                    if (this.State == ManagerState.Start)
+                    {
+                        return;
+                    }
+
                     _state = ManagerState.Start;
 
                     _catharsisManager.Start();
@@ -144,7 +184,11 @@ namespace Xeus.Core.Connections.Internal
             {
                 lock (_lockObject)
                 {
-                    if (this.State == ManagerState.Stop) return;
+                    if (this.State == ManagerState.Stop)
+                    {
+                        return;
+                    }
+
                     _state = ManagerState.Stop;
                 }
 
@@ -185,7 +229,11 @@ namespace Xeus.Core.Connections.Internal
 
         protected override void Dispose(bool disposing)
         {
-            if (_disposed) return;
+            if (_disposed)
+            {
+                return;
+            }
+
             _disposed = true;
 
             if (disposing)

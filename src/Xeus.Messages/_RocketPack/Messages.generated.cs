@@ -7,8 +7,8 @@ namespace Xeus.Messages
 {
     public enum TcpProxyType : byte
     {
-        Socks5Proxy = 0,
-        HttpProxy = 1,
+        HttpProxy = 0,
+        Socks5Proxy = 1,
     }
 
     public sealed partial class XeusClue : Omnix.Serialization.RocketPack.RocketPackMessageBase<XeusClue>
@@ -225,29 +225,29 @@ namespace Xeus.Messages
 
         private readonly int __hashCode;
 
-        public TcpConnectConfig(bool enabled, TcpProxyConfig? tcpProxyConfig)
+        public TcpConnectConfig(bool enabled, TcpProxyConfig? proxyConfig)
         {
             this.Enabled = enabled;
-            this.TcpProxyConfig = tcpProxyConfig;
+            this.ProxyConfig = proxyConfig;
 
             {
                 var __h = new System.HashCode();
                 if (this.Enabled != default) __h.Add(this.Enabled.GetHashCode());
-                if (this.TcpProxyConfig != default) __h.Add(this.TcpProxyConfig.GetHashCode());
+                if (this.ProxyConfig != default) __h.Add(this.ProxyConfig.GetHashCode());
                 __hashCode = __h.ToHashCode();
             }
         }
 
         public bool Enabled { get; }
-        public TcpProxyConfig? TcpProxyConfig { get; }
+        public TcpProxyConfig? ProxyConfig { get; }
 
         public override bool Equals(TcpConnectConfig? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.Enabled != target.Enabled) return false;
-            if ((this.TcpProxyConfig is null) != (target.TcpProxyConfig is null)) return false;
-            if (!(this.TcpProxyConfig is null) && !(target.TcpProxyConfig is null) && this.TcpProxyConfig != target.TcpProxyConfig) return false;
+            if ((this.ProxyConfig is null) != (target.ProxyConfig is null)) return false;
+            if (!(this.ProxyConfig is null) && !(target.ProxyConfig is null) && this.ProxyConfig != target.ProxyConfig) return false;
 
             return true;
         }
@@ -266,7 +266,7 @@ namespace Xeus.Messages
                     {
                         propertyCount++;
                     }
-                    if (value.TcpProxyConfig != null)
+                    if (value.ProxyConfig != null)
                     {
                         propertyCount++;
                     }
@@ -278,10 +278,10 @@ namespace Xeus.Messages
                     w.Write((uint)0);
                     w.Write(value.Enabled);
                 }
-                if (value.TcpProxyConfig != null)
+                if (value.ProxyConfig != null)
                 {
                     w.Write((uint)1);
-                    TcpProxyConfig.Formatter.Serialize(w, value.TcpProxyConfig, rank + 1);
+                    TcpProxyConfig.Formatter.Serialize(w, value.ProxyConfig, rank + 1);
                 }
             }
 
@@ -292,7 +292,7 @@ namespace Xeus.Messages
                 uint propertyCount = r.GetUInt32();
 
                 bool p_enabled = false;
-                TcpProxyConfig? p_tcpProxyConfig = null;
+                TcpProxyConfig? p_proxyConfig = null;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -306,13 +306,13 @@ namespace Xeus.Messages
                             }
                         case 1:
                             {
-                                p_tcpProxyConfig = TcpProxyConfig.Formatter.Deserialize(r, rank + 1);
+                                p_proxyConfig = TcpProxyConfig.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
                     }
                 }
 
-                return new TcpConnectConfig(p_enabled, p_tcpProxyConfig);
+                return new TcpConnectConfig(p_enabled, p_proxyConfig);
             }
         }
     }
@@ -322,31 +322,39 @@ namespace Xeus.Messages
         static TcpAcceptConfig()
         {
             TcpAcceptConfig.Formatter = new CustomFormatter();
-            TcpAcceptConfig.Empty = new TcpAcceptConfig(false, 0, 0, false);
+            TcpAcceptConfig.Empty = new TcpAcceptConfig(false, System.Array.Empty<OmniAddress>(), false);
         }
 
         private readonly int __hashCode;
 
-        public TcpAcceptConfig(bool enabled, ushort listenIpv4Port, ushort listenIpv6Port, bool useUpnp)
+        public static readonly int MaxListenAddressesCount = 32;
+
+        public TcpAcceptConfig(bool enabled, OmniAddress[] listenAddresses, bool useUpnp)
         {
+            if (listenAddresses is null) throw new System.ArgumentNullException("listenAddresses");
+            if (listenAddresses.Length > 32) throw new System.ArgumentOutOfRangeException("listenAddresses");
+            foreach (var n in listenAddresses)
+            {
+                if (n is null) throw new System.ArgumentNullException("n");
+            }
             this.Enabled = enabled;
-            this.ListenIpv4Port = listenIpv4Port;
-            this.ListenIpv6Port = listenIpv6Port;
+            this.ListenAddresses = new Omnix.Collections.ReadOnlyListSlim<OmniAddress>(listenAddresses);
             this.UseUpnp = useUpnp;
 
             {
                 var __h = new System.HashCode();
                 if (this.Enabled != default) __h.Add(this.Enabled.GetHashCode());
-                if (this.ListenIpv4Port != default) __h.Add(this.ListenIpv4Port.GetHashCode());
-                if (this.ListenIpv6Port != default) __h.Add(this.ListenIpv6Port.GetHashCode());
+                foreach (var n in this.ListenAddresses)
+                {
+                    if (n != default) __h.Add(n.GetHashCode());
+                }
                 if (this.UseUpnp != default) __h.Add(this.UseUpnp.GetHashCode());
                 __hashCode = __h.ToHashCode();
             }
         }
 
         public bool Enabled { get; }
-        public ushort ListenIpv4Port { get; }
-        public ushort ListenIpv6Port { get; }
+        public Omnix.Collections.ReadOnlyListSlim<OmniAddress> ListenAddresses { get; }
         public bool UseUpnp { get; }
 
         public override bool Equals(TcpAcceptConfig? target)
@@ -354,8 +362,7 @@ namespace Xeus.Messages
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.Enabled != target.Enabled) return false;
-            if (this.ListenIpv4Port != target.ListenIpv4Port) return false;
-            if (this.ListenIpv6Port != target.ListenIpv6Port) return false;
+            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.ListenAddresses, target.ListenAddresses)) return false;
             if (this.UseUpnp != target.UseUpnp) return false;
 
             return true;
@@ -375,11 +382,7 @@ namespace Xeus.Messages
                     {
                         propertyCount++;
                     }
-                    if (value.ListenIpv4Port != 0)
-                    {
-                        propertyCount++;
-                    }
-                    if (value.ListenIpv6Port != 0)
+                    if (value.ListenAddresses.Count != 0)
                     {
                         propertyCount++;
                     }
@@ -395,19 +398,18 @@ namespace Xeus.Messages
                     w.Write((uint)0);
                     w.Write(value.Enabled);
                 }
-                if (value.ListenIpv4Port != 0)
+                if (value.ListenAddresses.Count != 0)
                 {
                     w.Write((uint)1);
-                    w.Write(value.ListenIpv4Port);
-                }
-                if (value.ListenIpv6Port != 0)
-                {
-                    w.Write((uint)2);
-                    w.Write(value.ListenIpv6Port);
+                    w.Write((uint)value.ListenAddresses.Count);
+                    foreach (var n in value.ListenAddresses)
+                    {
+                        OmniAddress.Formatter.Serialize(w, n, rank + 1);
+                    }
                 }
                 if (value.UseUpnp != false)
                 {
-                    w.Write((uint)3);
+                    w.Write((uint)2);
                     w.Write(value.UseUpnp);
                 }
             }
@@ -419,8 +421,7 @@ namespace Xeus.Messages
                 uint propertyCount = r.GetUInt32();
 
                 bool p_enabled = false;
-                ushort p_listenIpv4Port = 0;
-                ushort p_listenIpv6Port = 0;
+                OmniAddress[] p_listenAddresses = System.Array.Empty<OmniAddress>();
                 bool p_useUpnp = false;
 
                 for (; propertyCount > 0; propertyCount--)
@@ -435,15 +436,15 @@ namespace Xeus.Messages
                             }
                         case 1:
                             {
-                                p_listenIpv4Port = r.GetUInt16();
+                                var length = r.GetUInt32();
+                                p_listenAddresses = new OmniAddress[length];
+                                for (int i = 0; i < p_listenAddresses.Length; i++)
+                                {
+                                    p_listenAddresses[i] = OmniAddress.Formatter.Deserialize(r, rank + 1);
+                                }
                                 break;
                             }
                         case 2:
-                            {
-                                p_listenIpv6Port = r.GetUInt16();
-                                break;
-                            }
-                        case 3:
                             {
                                 p_useUpnp = r.GetBoolean();
                                 break;
@@ -451,7 +452,7 @@ namespace Xeus.Messages
                     }
                 }
 
-                return new TcpAcceptConfig(p_enabled, p_listenIpv4Port, p_listenIpv6Port, p_useUpnp);
+                return new TcpAcceptConfig(p_enabled, p_listenAddresses, p_useUpnp);
             }
         }
     }
