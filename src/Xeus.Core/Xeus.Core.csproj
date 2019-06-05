@@ -6,13 +6,13 @@
     <PackageReference Include="NLog" Version="4.6.3" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\omnix\src\Omnix.Network.Proxy\Omnix.Network.Proxy.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Base\Omnix.Base.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Collections\Omnix.Collections.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Configuration\Omnix.Configuration.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Correction\Omnix.Correction.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Io\Omnix.Io.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Network.Connection\Omnix.Network.Connection.csproj" />
+    <ProjectReference Include="..\..\refs\omnix\src\Omnix.Network.Proxy\Omnix.Network.Proxy.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Network\Omnix.Network.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Serialization.RocketPack\Omnix.Serialization.RocketPack.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Serialization\Omnix.Serialization.csproj" />

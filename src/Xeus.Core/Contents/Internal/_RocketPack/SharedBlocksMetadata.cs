@@ -25,7 +25,10 @@ namespace Xeus.Core.Contents.Internal
 
             {
                 int result;
-                if (!_hashMap.TryGetValue(hash, out result)) return -1;
+                if (!_hashMap.TryGetValue(hash, out result))
+                {
+                    return -1;
+                }
 
                 return result;
             }

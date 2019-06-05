@@ -195,7 +195,10 @@ namespace Xeus.Core.Contents.Internal
                     {
                         this.Remove(hash);
 
-                        if (_usingSectorPool.FreeSectorCount >= 1024 * 4) break;
+                        if (_usingSectorPool.FreeSectorCount >= 1024 * 4)
+                        {
+                            break;
+                        }
                     }
 
                     if (_usingSectorPool.FreeSectorCount < (uint)count)
@@ -279,7 +282,10 @@ namespace Xeus.Core.Contents.Internal
 
         public void Resize(ulong size)
         {
-            if (size < 0) throw new ArgumentOutOfRangeException(nameof(size));
+            if (size < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(size));
+            }
 
             lock (_lockObject)
             {
@@ -398,7 +404,10 @@ namespace Xeus.Core.Contents.Internal
 
         public bool TryGet(OmniHash hash, out IMemoryOwner<byte>? memoryOwner)
         {
-            if (!EnumHelper.IsValid(hash.AlgorithmType)) throw new ArgumentException($"Incorrect HashAlgorithmType: {hash.AlgorithmType}");
+            if (!EnumHelper.IsValid(hash.AlgorithmType))
+            {
+                throw new ArgumentException($"Incorrect HashAlgorithmType: {hash.AlgorithmType}");
+            }
 
             memoryOwner = null;
             bool success = false;
@@ -415,7 +424,10 @@ namespace Xeus.Core.Contents.Internal
                         _clusterMetadataMap[hash] = clusterInfo;
                     }
 
-                    if (clusterInfo == null) return false;
+                    if (clusterInfo == null)
+                    {
+                        return false;
+                    }
 
                     memoryOwner = _bufferPool.Rent((int)clusterInfo.Length);
 
@@ -484,7 +496,10 @@ namespace Xeus.Core.Contents.Internal
 
         public bool TrySet(OmniHash hash, ReadOnlySpan<byte> value)
         {
-            if (!EnumHelper.IsValid(hash.AlgorithmType)) throw new ArgumentException($"Incorrect HashAlgorithmType: {hash.AlgorithmType}");
+            if (!EnumHelper.IsValid(hash.AlgorithmType))
+            {
+                throw new ArgumentException($"Incorrect HashAlgorithmType: {hash.AlgorithmType}");
+            }
 
             if (value.Length > 1024 * 1024 * 32)
             {
@@ -645,7 +660,11 @@ namespace Xeus.Core.Contents.Internal
 
         protected override void Dispose(bool disposing)
         {
-            if (_disposed) return;
+            if (_disposed)
+            {
+                return;
+            }
+
             _disposed = true;
 
             if (disposing)

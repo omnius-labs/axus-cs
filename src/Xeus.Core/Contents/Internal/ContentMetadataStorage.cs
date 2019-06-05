@@ -60,7 +60,10 @@ namespace Xeus.Core.Contents.Internal
         public ContentMetadata? GetMessageContentMetadata(XeusClue clue)
         {
             ContentMetadata contentInfo;
-            if (!_messageContentMetadatas.TryGetValue(clue, out contentInfo)) return null;
+            if (!_messageContentMetadatas.TryGetValue(clue, out contentInfo))
+            {
+                return null;
+            }
 
             return contentInfo;
         }
@@ -95,7 +98,10 @@ namespace Xeus.Core.Contents.Internal
         public ContentMetadata? GetFileContentMetadata(string path)
         {
             ContentMetadata contentInfo;
-            if (!_fileContentMetadatas.TryGetValue(path, out contentInfo)) return null;
+            if (!_fileContentMetadatas.TryGetValue(path, out contentInfo))
+            {
+                return null;
+            }
 
             return contentInfo;
         }

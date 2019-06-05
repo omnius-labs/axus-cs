@@ -4,13 +4,11 @@ using "Xeus.Messages.rpf";
 
 option csharp_namespace = "Xeus.Messages.Reports";
 
-enum ErrorReportType : uint8
-{
+enum ErrorReportType : uint8 {
     SpaceNotFound = 0,
 }
 
-message ErrorReport
-{
+message ErrorReport {
     CreationTime: timestamp = 0,
     Type: ErrorReportType = 1,
 }
@@ -35,8 +33,7 @@ message CacheReport {
     FreeArea: uint64 = 3,
 }
 
-enum DownloadStateType : uint8 
-{
+enum DownloadStateType : uint8 {
     Downloading = 0,
     ParityDecoding = 1,
     Decoding = 2,

@@ -28,8 +28,8 @@ message SharedBlocksMetadata {
 
 message BlockStorageConfig {
     Version: uint32 = 0,
-    ClusterMetadataMap: map<OmniHash, ClusterMetadata>(1073741824) = 1,
-    Size: uint64 = 2,
+    Size: uint64 = 1,
+    ClusterMetadataMap: map<OmniHash, ClusterMetadata>(1073741824) = 2,
 }
 
 message ContentStorageConfig {

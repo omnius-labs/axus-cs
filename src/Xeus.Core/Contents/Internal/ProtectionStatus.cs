@@ -40,7 +40,10 @@ namespace Xeus.Core.Contents.Internal
         public void Remove(OmniHash hash)
         {
             int count;
-            if (!_lockedHashMap.TryGetValue(hash, out count)) throw new KeyNotFoundException();
+            if (!_lockedHashMap.TryGetValue(hash, out count))
+            {
+                throw new KeyNotFoundException();
+            }
 
             count--;
 

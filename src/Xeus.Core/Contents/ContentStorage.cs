@@ -110,11 +110,17 @@ namespace Xeus.Core.Contents
 
         public bool Contains(OmniHash hash)
         {
-            if (_blockStorage.Contains(hash)) return true;
+            if (_blockStorage.Contains(hash))
+            {
+                return true;
+            }
 
             lock (_lockObject)
             {
-                if (_contentMetadataStorage.Contains(hash)) return true;
+                if (_contentMetadataStorage.Contains(hash))
+                {
+                    return true;
+                }
             }
 
             return false;
@@ -158,7 +164,10 @@ namespace Xeus.Core.Contents
 
         public bool TryGetBlock(OmniHash hash, out IMemoryOwner<byte>? memoryOwner)
         {
-            if (!EnumHelper.IsValid(hash.AlgorithmType)) throw new ArgumentException($"Incorrect HashAlgorithmType: {hash.AlgorithmType}");
+            if (!EnumHelper.IsValid(hash.AlgorithmType))
+            {
+                throw new ArgumentException($"Incorrect HashAlgorithmType: {hash.AlgorithmType}");
+            }
 
             // Cache
             {
@@ -254,7 +263,10 @@ namespace Xeus.Core.Contents
             // Cache
             {
                 uint length = _blockStorage.GetLength(hash);
-                if (length != 0) return length;
+                if (length != 0)
+                {
+                    return length;
+                }
             }
 
             // Share
@@ -321,10 +333,16 @@ namespace Xeus.Core.Contents
 
                                 count++;
 
-                                if (count >= informationCount) break;
+                                if (count >= informationCount)
+                                {
+                                    break;
+                                }
                             }
 
-                            if (count < informationCount) throw new BlockNotFoundException();
+                            if (count < informationCount)
+                            {
+                                throw new BlockNotFoundException();
+                            }
                         }
 
                         var reedSolomon = new ReedSolomon8(informationCount, _threadCount, _bufferPool);
@@ -364,7 +382,10 @@ namespace Xeus.Core.Contents
 
         public async ValueTask<XeusClue> Import(Stream stream, CancellationToken token = default)
         {
-            if (stream == null) throw new ArgumentNullException(nameof(stream));
+            if (stream == null)
+            {
+                throw new ArgumentNullException(nameof(stream));
+            }
 
             return await Task.Run(async () =>
             {
@@ -464,7 +485,10 @@ namespace Xeus.Core.Contents
                                         targetHashes.Add(hash);
                                         targetMemoryOwners.Add(bufferMemoryOwner);
 
-                                        if (targetMemoryOwners.Count >= 128) break;
+                                        if (targetMemoryOwners.Count >= 128)
+                                        {
+                                            break;
+                                        }
                                     }
 
                                     var parityHashes = await this.ParityEncode(targetMemoryOwners.Select(n => n.Memory), hashAlgorithmType, correctionAlgorithmType, token);
@@ -480,7 +504,10 @@ namespace Xeus.Core.Contents
                                     }
                                 }
 
-                                if (stream.Position == stream.Length) break;
+                                if (stream.Position == stream.Length)
+                                {
+                                    break;
+                                }
                             }
 
                             depth++;
@@ -519,7 +546,10 @@ namespace Xeus.Core.Contents
 
         public async ValueTask<XeusClue> Import(string path, CancellationToken token = default)
         {
-            if (path == null) throw new ArgumentNullException(nameof(path));
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
 
             return await Task.Run(async () =>
             {
@@ -527,7 +557,10 @@ namespace Xeus.Core.Contents
                 lock (_lockObject)
                 {
                     var info = _contentMetadataStorage.GetFileContentMetadata(path);
-                    if (info != null) return info.Clue;
+                    if (info != null)
+                    {
+                        return info.Clue;
+                    }
                 }
 
                 XeusClue? clue = null;
@@ -607,7 +640,10 @@ namespace Xeus.Core.Contents
                                         targetHashes.Add(hash);
                                         targetMemoryOwners.Add(bufferMemoryOwner);
 
-                                        if (targetMemoryOwners.Count >= 128) break;
+                                        if (targetMemoryOwners.Count >= 128)
+                                        {
+                                            break;
+                                        }
                                     }
 
                                     var parityHashes = await this.ParityEncode(targetMemoryOwners.Select(n=>n.Memory), hashAlgorithmType, correctionAlgorithmType, token);
@@ -623,7 +659,10 @@ namespace Xeus.Core.Contents
                                     }
                                 }
 
-                                if (stream.Position == stream.Length) break;
+                                if (stream.Position == stream.Length)
+                                {
+                                    break;
+                                }
                             }
 
                             sharedBlocksInfo = new SharedBlocksMetadata(path, (ulong)stream.Length, blockLength, sharedHashes.ToArray());
@@ -720,7 +759,10 @@ namespace Xeus.Core.Contents
                                             targetHashes.Add(hash);
                                            targetMemoryOwners.Add(bufferMemoryOwner);
 
-                                            if (targetMemoryOwners.Count >= 128) break;
+                                            if (targetMemoryOwners.Count >= 128)
+                                            {
+                                                break;
+                                            }
                                         }
 
                                         var parityHashes = await this.ParityEncode(targetMemoryOwners.Select(n=>n.Memory), hashAlgorithmType, correctionAlgorithmType, token);
@@ -736,7 +778,10 @@ namespace Xeus.Core.Contents
                                         }
                                     }
 
-                                    if (stream.Position == stream.Length) break;
+                                    if (stream.Position == stream.Length)
+                                    {
+                                        break;
+                                    }
                                 }
 
                                 depth++;
@@ -773,7 +818,10 @@ namespace Xeus.Core.Contents
             {
                 if (correctionAlgorithmType == CorrectionAlgorithmType.ReedSolomon8)
                 {
-                    if (buffers.Count() > 128) throw new ArgumentOutOfRangeException(nameof(buffers));
+                    if (buffers.Count() > 128)
+                    {
+                        throw new ArgumentOutOfRangeException(nameof(buffers));
+                    }
 
                     var createdMemoryOwners = new List<IMemoryOwner<byte>>();
 
@@ -881,7 +929,10 @@ namespace Xeus.Core.Contents
             {
                 foreach (var contentInfo in _contentMetadataStorage.GetMessageContentMetadatas())
                 {
-                    if (contentInfo.LockedHashes.All(n => this.Contains(n))) continue;
+                    if (contentInfo.LockedHashes.All(n => this.Contains(n)))
+                    {
+                        continue;
+                    }
 
                     this.RemoveMessage(contentInfo.Clue);
                 }
@@ -893,7 +944,10 @@ namespace Xeus.Core.Contents
             lock (_lockObject)
             {
                 var contentInfo = _contentMetadataStorage.GetMessageContentMetadata(clue);
-                if (contentInfo == null) return;
+                if (contentInfo == null)
+                {
+                    return;
+                }
 
                 _contentMetadataStorage.RemoveMessageContentMetadata(clue);
 
@@ -920,7 +974,10 @@ namespace Xeus.Core.Contents
             {
                 foreach (var contentInfo in _contentMetadataStorage.GetFileContentMetadatas())
                 {
-                    if (contentInfo.LockedHashes.All(n => this.Contains(n))) continue;
+                    if (contentInfo.LockedHashes.All(n => this.Contains(n)))
+                    {
+                        continue;
+                    }
 
                     if (contentInfo.SharedBlocksMetadata != null)
                     {
@@ -935,7 +992,10 @@ namespace Xeus.Core.Contents
             lock (_lockObject)
             {
                 var contentInfo = _contentMetadataStorage.GetFileContentMetadata(path);
-                if (contentInfo == null) return;
+                if (contentInfo == null)
+                {
+                    return;
+                }
 
                 _contentMetadataStorage.RemoveFileContentMetadata(path);
 
@@ -957,7 +1017,10 @@ namespace Xeus.Core.Contents
             lock (_lockObject)
             {
                 var contentInfo = _contentMetadataStorage.GetFileContentMetadata(path);
-                if (contentInfo == null) return Enumerable.Empty<OmniHash>();
+                if (contentInfo == null)
+                {
+                    return Enumerable.Empty<OmniHash>();
+                }
 
                 return contentInfo.LockedHashes.ToArray();
             }
@@ -1045,7 +1108,11 @@ namespace Xeus.Core.Contents
 
         protected override void Dispose(bool disposing)
         {
-            if (_disposed) return;
+            if (_disposed)
+            {
+                return;
+            }
+
             _disposed = true;
 
             if (disposing)

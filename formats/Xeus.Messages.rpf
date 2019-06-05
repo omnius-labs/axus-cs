@@ -11,8 +11,8 @@ message XeusClue {
 }
 
 enum TcpProxyType : uint8 {
-    Socks5Proxy = 0,
-    HttpProxy = 1,
+    HttpProxy = 0,
+    Socks5Proxy = 1,
 }
 
 message TcpProxyConfig {
@@ -22,14 +22,13 @@ message TcpProxyConfig {
 
 message TcpConnectConfig {
     Enabled: bool = 0,
-    TcpProxyConfig: TcpProxyConfig? = 1,
+    ProxyConfig: TcpProxyConfig? = 1,
 }
 
 message TcpAcceptConfig {
     Enabled: bool = 0,
-    ListenIpv4Port: uint16 = 1,
-    ListenIpv6Port: uint16 = 2,
-    UseUpnp: bool = 3,
+    ListenAddresses: vector<OmniAddress>(32) = 1,
+    UseUpnp: bool = 2,
 }
 
 message ConnectionCreatorConfig {

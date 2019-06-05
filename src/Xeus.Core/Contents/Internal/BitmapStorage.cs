@@ -45,7 +45,10 @@ namespace Xeus.Core.Contents.Internal
 
         public bool Get(ulong point)
         {
-            if (point >= _length) throw new ArgumentOutOfRangeException(nameof(point));
+            if (point >= _length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(point));
+            }
 
             if (_bufferList is null)
             {
@@ -62,7 +65,10 @@ namespace Xeus.Core.Contents.Internal
 
         public void Set(ulong point, bool state)
         {
-            if (point >= _length) throw new ArgumentOutOfRangeException(nameof(point));
+            if (point >= _length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(point));
+            }
 
             if (_bufferList is null)
             {
@@ -87,7 +93,11 @@ namespace Xeus.Core.Contents.Internal
 
         protected override void Dispose(bool disposing)
         {
-            if (_disposed) return;
+            if (_disposed)
+            {
+                return;
+            }
+
             _disposed = true;
 
             if (disposing)
