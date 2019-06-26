@@ -24,6 +24,10 @@ Support sharing of data between individuals in a decentralized network.
 + [IPFS](https://github.com/ipfs)
 + [Freenet](https://github.com/Freenet)
 
+## Links
+
++ <https://gitlab.com/omnius-labs/xeus>
+
 ## License
 
 + MIT License.

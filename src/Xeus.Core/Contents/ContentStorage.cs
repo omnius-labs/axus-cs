@@ -18,7 +18,7 @@ using Omnix.Serialization.RocketPack.Helpers;
 using Xeus.Core.Contents.Internal;
 using Xeus.Core.Contents.Primitives;
 using Xeus.Core.Internal;
-using Xeus.Rpc.Primitives;
+using Xeus.Core.Primitives;
 using Xeus.Messages;
 using Xeus.Messages.Reports;
 
@@ -37,7 +37,7 @@ namespace Xeus.Core.Contents
 
         private readonly EventScheduler _checkTimer;
 
-        private readonly EventQueue<OmniHash> _removedBlockEventQueue = new EventQueue<OmniHash>(new TimeSpan(0, 0, 3));
+        private readonly LazyEvent<OmniHash> _removedBlockEventQueue = new LazyEvent<OmniHash>(new TimeSpan(0, 0, 3));
 
         private readonly object _lockObject = new object();
 

@@ -9,7 +9,7 @@ option csharp_access_level = "internal";
 
 message TcpConnectionCreatorConfig {
     Version: uint32 = 0,
-    TcpConnectConfig = 1,
-    TcpAcceptConfig = 2,
-    OpenedPortsByUpnp: map<OmniAddress, uint16>(32) = 3,
+    TcpConnectConfig: TcpConnectConfig? = 1,
+    TcpAcceptConfig: TcpAcceptConfig? = 2,
+    OpenedPortsByUpnp: vector<uint16>(32) = 3,
 }
