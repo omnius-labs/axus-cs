@@ -14,7 +14,7 @@ using Omnix.Cryptography;
 using Omnix.Serialization;
 using Omnix.Serialization.RocketPack;
 using Xeus.Core.Internal;
-using Xeus.Rpc.Primitives;
+using Xeus.Core.Primitives;
 using Xeus.Messages;
 using Xeus.Messages.Reports;
 
@@ -36,9 +36,9 @@ namespace Xeus.Core.Contents.Internal
         private ulong _size;
         private readonly Dictionary<OmniHash, ClusterMetadata> _clusterMetadataMap = new Dictionary<OmniHash, ClusterMetadata>();
 
-        private readonly EventQueue<OmniHash> _addedBlockEventQueue = new EventQueue<OmniHash>(new TimeSpan(0, 0, 3));
-        private readonly EventQueue<OmniHash> _removedBlockEventQueue = new EventQueue<OmniHash>(new TimeSpan(0, 0, 3));
-        private readonly EventQueue<ErrorReport> _errorReportEventQueue = new EventQueue<ErrorReport>(new TimeSpan(0, 0, 3));
+        private readonly LazyEvent<OmniHash> _addedBlockEventQueue = new LazyEvent<OmniHash>(new TimeSpan(0, 0, 3));
+        private readonly LazyEvent<OmniHash> _removedBlockEventQueue = new LazyEvent<OmniHash>(new TimeSpan(0, 0, 3));
+        private readonly LazyEvent<ErrorReport> _errorReportEventQueue = new LazyEvent<ErrorReport>(new TimeSpan(0, 0, 3));
 
         private readonly object _lockObject = new object();
 
@@ -323,7 +323,7 @@ namespace Xeus.Core.Contents.Internal
         {
             await Task.Run(() =>
             {
-                // d•¡‚·‚éƒZƒNƒ^‚ğŠm•Û‚µ‚½ƒuƒƒbƒN‚ğŒŸo‚µRemove‚·‚éB
+                // é‡è¤‡ã™ã‚‹ã‚»ã‚¯ã‚¿ã‚’ç¢ºä¿ã—ãŸãƒ–ãƒ­ãƒƒã‚¯ã‚’æ¤œå‡ºã—Removeã™ã‚‹ã€‚
                 lock (_lockObject)
                 {
                     using (var bitmapManager = new BitmapStorage(_bufferPool))
@@ -356,7 +356,7 @@ namespace Xeus.Core.Contents.Internal
                     }
                 }
 
-                // “Ç‚ß‚È‚¢ƒuƒƒbƒN‚ğŒŸo‚µRemove‚·‚éB
+                // èª­ã‚ãªã„ãƒ–ãƒ­ãƒƒã‚¯ã‚’æ¤œå‡ºã—Removeã™ã‚‹ã€‚
                 {
                     var list = this.ToArray();
 
@@ -623,7 +623,7 @@ namespace Xeus.Core.Contents.Internal
         {
             lock (_lockObject)
             {
-                var config = new BlockStorageConfig(0, _clusterMetadataMap, _size);
+                var config = new BlockStorageConfig(0, _size, _clusterMetadataMap);
                 _settings.SetContent("config", config);
                 _settings.Commit();
             }

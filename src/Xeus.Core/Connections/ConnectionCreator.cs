@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Omnix.Base;
 using Omnix.Configuration;
-using Xeus.Rpc.Primitives;
+using Xeus.Core.Primitives;
 
 namespace Xeus.Core.Connections.Internal
 {
