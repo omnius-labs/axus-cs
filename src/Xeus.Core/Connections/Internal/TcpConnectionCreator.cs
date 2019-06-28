@@ -43,9 +43,11 @@ namespace Xeus.Core.Connections.Internal
         private readonly object _lockObject = new object();
         private volatile bool _disposed;
 
-        public TcpConnectionCreator(BufferPool bufferPool)
+        public TcpConnectionCreator(string configPath, BufferPool bufferPool)
         {
             _bufferPool = bufferPool;
+
+            _settings = new SettingsDatabase(configPath);
 
             _watchEventScheduler = new EventScheduler(this.WatchThread);
         }
@@ -54,7 +56,7 @@ namespace Xeus.Core.Connections.Internal
 
         public TcpAcceptConfig? TcpAcceptConfig => _tcpAcceptConfig;
 
-        public void SetConnectConfig(TcpConnectConfig? tcpConnectConfig)
+        public void SetTcpConnectConfig(TcpConnectConfig? tcpConnectConfig)
         {
             lock (_lockObject)
             {
@@ -69,7 +71,7 @@ namespace Xeus.Core.Connections.Internal
             _watchEventScheduler.ExecuteImmediate();
         }
 
-        public void SetAcceptConfig(TcpAcceptConfig? tcpAcceptConfig)
+        public void SetTcpAcceptConfig(TcpAcceptConfig? tcpAcceptConfig)
         {
             lock (_lockObject)
             {
@@ -615,7 +617,11 @@ namespace Xeus.Core.Connections.Internal
         {
             using (await _asyncLock.LockAsync())
             {
-                await this.InternalStop();
+                if (this.StateType != ServiceStateType.Stopped)
+                {
+                    await this.InternalStop();
+                }
+
                 await this.InternalStart();
             }
         }
@@ -626,16 +632,25 @@ namespace Xeus.Core.Connections.Internal
             {
                 lock (_lockObject)
                 {
-                    if (_settings.TryGetContent<TcpConnectionCreatorConfig>("Config", out var config))
+                    try
                     {
-                        this.SetConnectConfig(config.TcpConnectConfig);
-                        this.SetAcceptConfig(config.TcpAcceptConfig);
-
-                        lock (_lastOpenedPortsByUpnp.LockObject)
+                        if (_settings.TryGetContent<TcpConnectionCreatorConfig>("Config", out var config))
                         {
-                            _lastOpenedPortsByUpnp.Clear();
-                            _lastOpenedPortsByUpnp.AddRange(config.OpenedPortsByUpnp);
+                            this.SetTcpConnectConfig(config.TcpConnectConfig);
+                            this.SetTcpAcceptConfig(config.TcpAcceptConfig);
+
+                            lock (_lastOpenedPortsByUpnp.LockObject)
+                            {
+                                _lastOpenedPortsByUpnp.Clear();
+                                _lastOpenedPortsByUpnp.AddRange(config.OpenedPortsByUpnp);
+                            }
                         }
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Error(e);
+
+                        throw e;
                     }
                 }
             });
@@ -658,6 +673,8 @@ namespace Xeus.Core.Connections.Internal
                         _logger.Error(e);
 
                         _settings.Rollback();
+
+                        throw e;
                     }
                 }
             });

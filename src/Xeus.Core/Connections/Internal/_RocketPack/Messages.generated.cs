@@ -18,21 +18,21 @@ namespace Xeus.Core.Connections.Internal
 
         public static readonly int MaxOpenedPortsByUpnpCount = 32;
 
-        public TcpConnectionCreatorConfig(uint version, TcpConnectConfig? tcpConnectConfig, TcpAcceptConfig? tcpAcceptConfig, ushort[] openedPortsByUpnp)
+        public TcpConnectionCreatorConfig(uint version, TcpConnectOptions? connectOptions, TcpAcceptOptions? acceptOptions, ushort[] openedPortsByUpnp)
         {
             if (openedPortsByUpnp is null) throw new System.ArgumentNullException("openedPortsByUpnp");
             if (openedPortsByUpnp.Length > 32) throw new System.ArgumentOutOfRangeException("openedPortsByUpnp");
 
             this.Version = version;
-            this.TcpConnectConfig = tcpConnectConfig;
-            this.TcpAcceptConfig = tcpAcceptConfig;
+            this.ConnectOptions = connectOptions;
+            this.AcceptOptions = acceptOptions;
             this.OpenedPortsByUpnp = new Omnix.Collections.ReadOnlyListSlim<ushort>(openedPortsByUpnp);
 
             {
                 var __h = new System.HashCode();
                 if (this.Version != default) __h.Add(this.Version.GetHashCode());
-                if (this.TcpConnectConfig != default) __h.Add(this.TcpConnectConfig.GetHashCode());
-                if (this.TcpAcceptConfig != default) __h.Add(this.TcpAcceptConfig.GetHashCode());
+                if (this.ConnectOptions != default) __h.Add(this.ConnectOptions.GetHashCode());
+                if (this.AcceptOptions != default) __h.Add(this.AcceptOptions.GetHashCode());
                 foreach (var n in this.OpenedPortsByUpnp)
                 {
                     if (n != default) __h.Add(n.GetHashCode());
@@ -42,8 +42,8 @@ namespace Xeus.Core.Connections.Internal
         }
 
         public uint Version { get; }
-        public TcpConnectConfig? TcpConnectConfig { get; }
-        public TcpAcceptConfig? TcpAcceptConfig { get; }
+        public TcpConnectOptions? ConnectOptions { get; }
+        public TcpAcceptOptions? AcceptOptions { get; }
         public Omnix.Collections.ReadOnlyListSlim<ushort> OpenedPortsByUpnp { get; }
 
         public override bool Equals(TcpConnectionCreatorConfig? target)
@@ -51,10 +51,10 @@ namespace Xeus.Core.Connections.Internal
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.Version != target.Version) return false;
-            if ((this.TcpConnectConfig is null) != (target.TcpConnectConfig is null)) return false;
-            if (!(this.TcpConnectConfig is null) && !(target.TcpConnectConfig is null) && this.TcpConnectConfig != target.TcpConnectConfig) return false;
-            if ((this.TcpAcceptConfig is null) != (target.TcpAcceptConfig is null)) return false;
-            if (!(this.TcpAcceptConfig is null) && !(target.TcpAcceptConfig is null) && this.TcpAcceptConfig != target.TcpAcceptConfig) return false;
+            if ((this.ConnectOptions is null) != (target.ConnectOptions is null)) return false;
+            if (!(this.ConnectOptions is null) && !(target.ConnectOptions is null) && this.ConnectOptions != target.ConnectOptions) return false;
+            if ((this.AcceptOptions is null) != (target.AcceptOptions is null)) return false;
+            if (!(this.AcceptOptions is null) && !(target.AcceptOptions is null) && this.AcceptOptions != target.AcceptOptions) return false;
             if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.OpenedPortsByUpnp, target.OpenedPortsByUpnp)) return false;
 
             return true;
@@ -74,11 +74,11 @@ namespace Xeus.Core.Connections.Internal
                     {
                         propertyCount++;
                     }
-                    if (value.TcpConnectConfig != null)
+                    if (value.ConnectOptions != null)
                     {
                         propertyCount++;
                     }
-                    if (value.TcpAcceptConfig != null)
+                    if (value.AcceptOptions != null)
                     {
                         propertyCount++;
                     }
@@ -94,15 +94,15 @@ namespace Xeus.Core.Connections.Internal
                     w.Write((uint)0);
                     w.Write(value.Version);
                 }
-                if (value.TcpConnectConfig != null)
+                if (value.ConnectOptions != null)
                 {
                     w.Write((uint)1);
-                    TcpConnectConfig.Formatter.Serialize(w, value.TcpConnectConfig, rank + 1);
+                    TcpConnectOptions.Formatter.Serialize(w, value.ConnectOptions, rank + 1);
                 }
-                if (value.TcpAcceptConfig != null)
+                if (value.AcceptOptions != null)
                 {
                     w.Write((uint)2);
-                    TcpAcceptConfig.Formatter.Serialize(w, value.TcpAcceptConfig, rank + 1);
+                    TcpAcceptOptions.Formatter.Serialize(w, value.AcceptOptions, rank + 1);
                 }
                 if (value.OpenedPortsByUpnp.Count != 0)
                 {
@@ -122,8 +122,8 @@ namespace Xeus.Core.Connections.Internal
                 uint propertyCount = r.GetUInt32();
 
                 uint p_version = 0;
-                TcpConnectConfig? p_tcpConnectConfig = null;
-                TcpAcceptConfig? p_tcpAcceptConfig = null;
+                TcpConnectOptions? p_connectOptions = null;
+                TcpAcceptOptions? p_acceptOptions = null;
                 ushort[] p_openedPortsByUpnp = System.Array.Empty<ushort>();
 
                 for (; propertyCount > 0; propertyCount--)
@@ -138,12 +138,12 @@ namespace Xeus.Core.Connections.Internal
                             }
                         case 1:
                             {
-                                p_tcpConnectConfig = TcpConnectConfig.Formatter.Deserialize(r, rank + 1);
+                                p_connectOptions = TcpConnectOptions.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
                         case 2:
                             {
-                                p_tcpAcceptConfig = TcpAcceptConfig.Formatter.Deserialize(r, rank + 1);
+                                p_acceptOptions = TcpAcceptOptions.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
                         case 3:
@@ -159,7 +159,7 @@ namespace Xeus.Core.Connections.Internal
                     }
                 }
 
-                return new TcpConnectionCreatorConfig(p_version, p_tcpConnectConfig, p_tcpAcceptConfig, p_openedPortsByUpnp);
+                return new TcpConnectionCreatorConfig(p_version, p_connectOptions, p_acceptOptions, p_openedPortsByUpnp);
             }
         }
     }

@@ -9,57 +9,28 @@ namespace Xeus.Core.Connections.Internal
 {
     sealed partial class ConnectionCreator : DisposableBase, ISettings
     {
-        private BufferPool _bufferPool;
-        private CoreManager _coreManager;
-        private CatharsisManager _catharsisManager;
-        private TcpConnectionManager _tcpConnectionManager;
-        private I2pConnectionManager _i2pConnectionManager;
-        private CustomConnectionManager _customConnectionManager;
-        private TimerScheduler _watchTimer;
+        private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private volatile ManagerState _state = ManagerState.Stop;
+        private readonly BufferPool _bufferPool;
+        private readonly TcpConnectionCreator _tcpConnectionCreator;
 
+        private readonly SettingsDatabase _settings;
+
+        private ServiceStateType _stateType = ServiceStateType.Stopped;
+
+        private readonly AsyncLock _asyncLock = new AsyncLock();
         private readonly object _lockObject = new object();
         private volatile bool _disposed;
 
-        public ConnectionManager(string configPath, CoreManager coreManager, BufferPool bufferPool)
+        public ConnectionCreator(string configPath, BufferPool bufferPool)
         {
             _bufferPool = bufferPool;
-            _coreManager = coreManager;
-            _catharsisManager = new CatharsisManager(Path.Combine(configPath, "Catharsis"), _bufferPool);
-            _tcpConnectionManager = new TcpConnectionManager(Path.Combine(configPath, "TcpConnection"), _catharsisManager, _bufferPool);
-            _i2pConnectionManager = new I2pConnectionManager(Path.Combine(configPath, "I2pConnection"), _bufferPool);
-            _customConnectionManager = new CustomConnectionManager(Path.Combine(configPath, "CustomConnection"), _catharsisManager, _bufferPool);
+            _tcpConnectionCreator = new TcpConnectionCreator(configPath, bufferPool);
 
-            _coreManager.ConnectCapEvent = (_, uri) => this.ConnectCap(uri);
-            _coreManager.AcceptCapEvent = (object _, out string uri) => this.AcceptCap(out uri);
-
-            _watchTimer = new TimerScheduler(this.WatchThread);
+            _settings = new SettingsDatabase(Path.Combine(configPath, "TcpConnectionCreator"));
         }
 
-        public ConnectionReport Report
-        {
-            get
-            {
-                lock (_lockObject)
-                {
-                    return new ConnectionReport(_tcpConnectionManager.Report, _customConnectionManager.Report);
-                }
-            }
-        }
-
-        public ConnectionConfig Config
-        {
-            get
-            {
-                lock (_lockObject)
-                {
-                    return new ConnectionConfig(_tcpConnectionManager.Config, _i2pConnectionManager.Config, _customConnectionManager.Config, _catharsisManager.Config);
-                }
-            }
-        }
-
-        public void SetConfig(ConnectionConfig config)
+        public void SetConfig(ConnectionCreator ConnectionConfig config)
         {
             lock (_lockObject)
             {
