@@ -112,17 +112,17 @@ namespace Xeus.Messages
         }
     }
 
-    public sealed partial class TcpProxyConfig : Omnix.Serialization.RocketPack.RocketPackMessageBase<TcpProxyConfig>
+    public sealed partial class TcpProxyOptions : Omnix.Serialization.RocketPack.RocketPackMessageBase<TcpProxyOptions>
     {
-        static TcpProxyConfig()
+        static TcpProxyOptions()
         {
-            TcpProxyConfig.Formatter = new CustomFormatter();
-            TcpProxyConfig.Empty = new TcpProxyConfig((TcpProxyType)0, OmniAddress.Empty);
+            TcpProxyOptions.Formatter = new CustomFormatter();
+            TcpProxyOptions.Empty = new TcpProxyOptions((TcpProxyType)0, OmniAddress.Empty);
         }
 
         private readonly int __hashCode;
 
-        public TcpProxyConfig(TcpProxyType type, OmniAddress address)
+        public TcpProxyOptions(TcpProxyType type, OmniAddress address)
         {
             if (address is null) throw new System.ArgumentNullException("address");
 
@@ -140,7 +140,7 @@ namespace Xeus.Messages
         public TcpProxyType Type { get; }
         public OmniAddress Address { get; }
 
-        public override bool Equals(TcpProxyConfig? target)
+        public override bool Equals(TcpProxyOptions? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -152,9 +152,9 @@ namespace Xeus.Messages
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<TcpProxyConfig>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<TcpProxyOptions>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, TcpProxyConfig value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, TcpProxyOptions value, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -183,7 +183,7 @@ namespace Xeus.Messages
                 }
             }
 
-            public TcpProxyConfig Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public TcpProxyOptions Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -210,53 +210,53 @@ namespace Xeus.Messages
                     }
                 }
 
-                return new TcpProxyConfig(p_type, p_address);
+                return new TcpProxyOptions(p_type, p_address);
             }
         }
     }
 
-    public sealed partial class TcpConnectConfig : Omnix.Serialization.RocketPack.RocketPackMessageBase<TcpConnectConfig>
+    public sealed partial class TcpConnectOptions : Omnix.Serialization.RocketPack.RocketPackMessageBase<TcpConnectOptions>
     {
-        static TcpConnectConfig()
+        static TcpConnectOptions()
         {
-            TcpConnectConfig.Formatter = new CustomFormatter();
-            TcpConnectConfig.Empty = new TcpConnectConfig(false, null);
+            TcpConnectOptions.Formatter = new CustomFormatter();
+            TcpConnectOptions.Empty = new TcpConnectOptions(false, null);
         }
 
         private readonly int __hashCode;
 
-        public TcpConnectConfig(bool enabled, TcpProxyConfig? proxyConfig)
+        public TcpConnectOptions(bool enabled, TcpProxyOptions? proxyOptions)
         {
             this.Enabled = enabled;
-            this.ProxyConfig = proxyConfig;
+            this.ProxyOptions = proxyOptions;
 
             {
                 var __h = new System.HashCode();
                 if (this.Enabled != default) __h.Add(this.Enabled.GetHashCode());
-                if (this.ProxyConfig != default) __h.Add(this.ProxyConfig.GetHashCode());
+                if (this.ProxyOptions != default) __h.Add(this.ProxyOptions.GetHashCode());
                 __hashCode = __h.ToHashCode();
             }
         }
 
         public bool Enabled { get; }
-        public TcpProxyConfig? ProxyConfig { get; }
+        public TcpProxyOptions? ProxyOptions { get; }
 
-        public override bool Equals(TcpConnectConfig? target)
+        public override bool Equals(TcpConnectOptions? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.Enabled != target.Enabled) return false;
-            if ((this.ProxyConfig is null) != (target.ProxyConfig is null)) return false;
-            if (!(this.ProxyConfig is null) && !(target.ProxyConfig is null) && this.ProxyConfig != target.ProxyConfig) return false;
+            if ((this.ProxyOptions is null) != (target.ProxyOptions is null)) return false;
+            if (!(this.ProxyOptions is null) && !(target.ProxyOptions is null) && this.ProxyOptions != target.ProxyOptions) return false;
 
             return true;
         }
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<TcpConnectConfig>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<TcpConnectOptions>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, TcpConnectConfig value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, TcpConnectOptions value, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -266,7 +266,7 @@ namespace Xeus.Messages
                     {
                         propertyCount++;
                     }
-                    if (value.ProxyConfig != null)
+                    if (value.ProxyOptions != null)
                     {
                         propertyCount++;
                     }
@@ -278,21 +278,21 @@ namespace Xeus.Messages
                     w.Write((uint)0);
                     w.Write(value.Enabled);
                 }
-                if (value.ProxyConfig != null)
+                if (value.ProxyOptions != null)
                 {
                     w.Write((uint)1);
-                    TcpProxyConfig.Formatter.Serialize(w, value.ProxyConfig, rank + 1);
+                    TcpProxyOptions.Formatter.Serialize(w, value.ProxyOptions, rank + 1);
                 }
             }
 
-            public TcpConnectConfig Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public TcpConnectOptions Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
                 uint propertyCount = r.GetUInt32();
 
                 bool p_enabled = false;
-                TcpProxyConfig? p_proxyConfig = null;
+                TcpProxyOptions? p_proxyOptions = null;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -306,30 +306,30 @@ namespace Xeus.Messages
                             }
                         case 1:
                             {
-                                p_proxyConfig = TcpProxyConfig.Formatter.Deserialize(r, rank + 1);
+                                p_proxyOptions = TcpProxyOptions.Formatter.Deserialize(r, rank + 1);
                                 break;
                             }
                     }
                 }
 
-                return new TcpConnectConfig(p_enabled, p_proxyConfig);
+                return new TcpConnectOptions(p_enabled, p_proxyOptions);
             }
         }
     }
 
-    public sealed partial class TcpAcceptConfig : Omnix.Serialization.RocketPack.RocketPackMessageBase<TcpAcceptConfig>
+    public sealed partial class TcpAcceptOptions : Omnix.Serialization.RocketPack.RocketPackMessageBase<TcpAcceptOptions>
     {
-        static TcpAcceptConfig()
+        static TcpAcceptOptions()
         {
-            TcpAcceptConfig.Formatter = new CustomFormatter();
-            TcpAcceptConfig.Empty = new TcpAcceptConfig(false, System.Array.Empty<OmniAddress>(), false);
+            TcpAcceptOptions.Formatter = new CustomFormatter();
+            TcpAcceptOptions.Empty = new TcpAcceptOptions(false, System.Array.Empty<OmniAddress>(), false);
         }
 
         private readonly int __hashCode;
 
         public static readonly int MaxListenAddressesCount = 32;
 
-        public TcpAcceptConfig(bool enabled, OmniAddress[] listenAddresses, bool useUpnp)
+        public TcpAcceptOptions(bool enabled, OmniAddress[] listenAddresses, bool useUpnp)
         {
             if (listenAddresses is null) throw new System.ArgumentNullException("listenAddresses");
             if (listenAddresses.Length > 32) throw new System.ArgumentOutOfRangeException("listenAddresses");
@@ -357,7 +357,7 @@ namespace Xeus.Messages
         public Omnix.Collections.ReadOnlyListSlim<OmniAddress> ListenAddresses { get; }
         public bool UseUpnp { get; }
 
-        public override bool Equals(TcpAcceptConfig? target)
+        public override bool Equals(TcpAcceptOptions? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -370,9 +370,9 @@ namespace Xeus.Messages
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<TcpAcceptConfig>
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<TcpAcceptOptions>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, TcpAcceptConfig value, int rank)
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, TcpAcceptOptions value, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -414,7 +414,7 @@ namespace Xeus.Messages
                 }
             }
 
-            public TcpAcceptConfig Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public TcpAcceptOptions Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
                 if (rank > 256) throw new System.FormatException();
 
@@ -452,111 +452,7 @@ namespace Xeus.Messages
                     }
                 }
 
-                return new TcpAcceptConfig(p_enabled, p_listenAddresses, p_useUpnp);
-            }
-        }
-    }
-
-    public sealed partial class ConnectionCreatorConfig : Omnix.Serialization.RocketPack.RocketPackMessageBase<ConnectionCreatorConfig>
-    {
-        static ConnectionCreatorConfig()
-        {
-            ConnectionCreatorConfig.Formatter = new CustomFormatter();
-            ConnectionCreatorConfig.Empty = new ConnectionCreatorConfig(TcpConnectConfig.Empty, TcpAcceptConfig.Empty);
-        }
-
-        private readonly int __hashCode;
-
-        public ConnectionCreatorConfig(TcpConnectConfig tcpConnectConfig, TcpAcceptConfig tcpAcceptConfig)
-        {
-            if (tcpConnectConfig is null) throw new System.ArgumentNullException("tcpConnectConfig");
-            if (tcpAcceptConfig is null) throw new System.ArgumentNullException("tcpAcceptConfig");
-
-            this.TcpConnectConfig = tcpConnectConfig;
-            this.TcpAcceptConfig = tcpAcceptConfig;
-
-            {
-                var __h = new System.HashCode();
-                if (this.TcpConnectConfig != default) __h.Add(this.TcpConnectConfig.GetHashCode());
-                if (this.TcpAcceptConfig != default) __h.Add(this.TcpAcceptConfig.GetHashCode());
-                __hashCode = __h.ToHashCode();
-            }
-        }
-
-        public TcpConnectConfig TcpConnectConfig { get; }
-        public TcpAcceptConfig TcpAcceptConfig { get; }
-
-        public override bool Equals(ConnectionCreatorConfig? target)
-        {
-            if (target is null) return false;
-            if (object.ReferenceEquals(this, target)) return true;
-            if (this.TcpConnectConfig != target.TcpConnectConfig) return false;
-            if (this.TcpAcceptConfig != target.TcpAcceptConfig) return false;
-
-            return true;
-        }
-
-        public override int GetHashCode() => __hashCode;
-
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<ConnectionCreatorConfig>
-        {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, ConnectionCreatorConfig value, int rank)
-            {
-                if (rank > 256) throw new System.FormatException();
-
-                {
-                    uint propertyCount = 0;
-                    if (value.TcpConnectConfig != TcpConnectConfig.Empty)
-                    {
-                        propertyCount++;
-                    }
-                    if (value.TcpAcceptConfig != TcpAcceptConfig.Empty)
-                    {
-                        propertyCount++;
-                    }
-                    w.Write(propertyCount);
-                }
-
-                if (value.TcpConnectConfig != TcpConnectConfig.Empty)
-                {
-                    w.Write((uint)0);
-                    TcpConnectConfig.Formatter.Serialize(w, value.TcpConnectConfig, rank + 1);
-                }
-                if (value.TcpAcceptConfig != TcpAcceptConfig.Empty)
-                {
-                    w.Write((uint)1);
-                    TcpAcceptConfig.Formatter.Serialize(w, value.TcpAcceptConfig, rank + 1);
-                }
-            }
-
-            public ConnectionCreatorConfig Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
-            {
-                if (rank > 256) throw new System.FormatException();
-
-                uint propertyCount = r.GetUInt32();
-
-                TcpConnectConfig p_tcpConnectConfig = TcpConnectConfig.Empty;
-                TcpAcceptConfig p_tcpAcceptConfig = TcpAcceptConfig.Empty;
-
-                for (; propertyCount > 0; propertyCount--)
-                {
-                    uint id = r.GetUInt32();
-                    switch (id)
-                    {
-                        case 0:
-                            {
-                                p_tcpConnectConfig = TcpConnectConfig.Formatter.Deserialize(r, rank + 1);
-                                break;
-                            }
-                        case 1:
-                            {
-                                p_tcpAcceptConfig = TcpAcceptConfig.Formatter.Deserialize(r, rank + 1);
-                                break;
-                            }
-                    }
-                }
-
-                return new ConnectionCreatorConfig(p_tcpConnectConfig, p_tcpAcceptConfig);
+                return new TcpAcceptOptions(p_enabled, p_listenAddresses, p_useUpnp);
             }
         }
     }

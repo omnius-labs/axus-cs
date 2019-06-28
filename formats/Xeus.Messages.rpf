@@ -15,25 +15,20 @@ enum TcpProxyType : uint8 {
     Socks5Proxy = 1,
 }
 
-message TcpProxyConfig {
+message TcpProxyOptions {
     Type: TcpProxyType = 0,
     Address: OmniAddress = 1,
 }
 
-message TcpConnectConfig {
+message TcpConnectOptions {
     Enabled: bool = 0,
-    ProxyConfig: TcpProxyConfig? = 1,
+    ProxyOptions: TcpProxyOptions? = 1,
 }
 
-message TcpAcceptConfig {
+message TcpAcceptOptions {
     Enabled: bool = 0,
     ListenAddresses: vector<OmniAddress>(32) = 1,
     UseUpnp: bool = 2,
-}
-
-message ConnectionCreatorConfig {
-    TcpConnectConfig: TcpConnectConfig = 0,
-    TcpAcceptConfig: TcpAcceptConfig = 1,
 }
 
 message XeusOptions {
