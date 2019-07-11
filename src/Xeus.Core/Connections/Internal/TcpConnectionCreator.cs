@@ -17,7 +17,7 @@ using Xeus.Messages;
 
 namespace Xeus.Core.Connections.Internal
 {
-    public sealed class TcpConnectionCreator : ServiceBase, ISettings
+    internal sealed class TcpConnectionCreator : ServiceBase, ISettings
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -34,8 +34,8 @@ namespace Xeus.Core.Connections.Internal
 
         private readonly LockedList<ushort> _lastOpenedPortsByUpnp = new LockedList<ushort>();
 
-        private TcpConnectConfig? _tcpConnectConfig;
-        private TcpAcceptConfig? _tcpAcceptConfig;
+        private TcpConnectOptions? _tcpConnectOptions;
+        private TcpAcceptOptions? _tcpAcceptOptions;
 
         private ServiceStateType _stateType = ServiceStateType.Stopped;
 
@@ -52,35 +52,35 @@ namespace Xeus.Core.Connections.Internal
             _watchEventScheduler = new EventScheduler(this.WatchThread);
         }
 
-        public TcpConnectConfig? TcpConnectConfig => _tcpConnectConfig;
+        public TcpConnectOptions? TcpConnectOptions => _tcpConnectOptions;
 
-        public TcpAcceptConfig? TcpAcceptConfig => _tcpAcceptConfig;
+        public TcpAcceptOptions? TcpAcceptOptions => _tcpAcceptOptions;
 
-        public void SetTcpConnectConfig(TcpConnectConfig? tcpConnectConfig)
+        public void SetTcpConnectOptions(TcpConnectOptions? tcpConnectConfig)
         {
             lock (_lockObject)
             {
-                if (_tcpConnectConfig == tcpConnectConfig)
+                if (_tcpConnectOptions == tcpConnectConfig)
                 {
                     return;
                 }
 
-                _tcpConnectConfig = tcpConnectConfig;
+                _tcpConnectOptions = tcpConnectConfig;
             }
 
             _watchEventScheduler.ExecuteImmediate();
         }
 
-        public void SetTcpAcceptConfig(TcpAcceptConfig? tcpAcceptConfig)
+        public void SetTcpAcceptOptions(TcpAcceptOptions? tcpAcceptConfig)
         {
             lock (_lockObject)
             {
-                if (_tcpAcceptConfig == tcpAcceptConfig)
+                if (_tcpAcceptOptions == tcpAcceptConfig)
                 {
                     return;
                 }
 
-                _tcpAcceptConfig = tcpAcceptConfig;
+                _tcpAcceptOptions = tcpAcceptConfig;
             }
 
             _watchEventScheduler.ExecuteImmediate();
@@ -260,7 +260,7 @@ namespace Xeus.Core.Connections.Internal
                 return null;
             }
 
-            var config = _tcpConnectConfig;
+            var config = _tcpConnectOptions;
             if (config == null || !config.Enabled)
             {
                 return null;
@@ -282,17 +282,17 @@ namespace Xeus.Core.Connections.Internal
                 if (!IsGlobalIpAddress(ipAddress)) return null;
 #endif
 
-                if (config.ProxyConfig != null)
+                if (config.ProxyOptions != null)
                 {
                     IPAddress proxyAddress;
                     ushort proxyPort;
 
-                    if (!TryGetEndpoint(config.ProxyConfig.Address, out proxyAddress, out proxyPort, true))
+                    if (!TryGetEndpoint(config.ProxyOptions.Address, out proxyAddress, out proxyPort, true))
                     {
                         return null;
                     }
 
-                    if (config.ProxyConfig.Type == TcpProxyType.Socks5Proxy)
+                    if (config.ProxyOptions.Type == TcpProxyType.Socks5Proxy)
                     {
                         var socket = CreateSocket(new IPEndPoint(proxyAddress, proxyPort));
                         if (socket == null)
@@ -310,7 +310,7 @@ namespace Xeus.Core.Connections.Internal
 
                         return cap;
                     }
-                    else if (config.ProxyConfig.Type == TcpProxyType.HttpProxy)
+                    else if (config.ProxyOptions.Type == TcpProxyType.HttpProxy)
                     {
                         var socket = CreateSocket(new IPEndPoint(proxyAddress, proxyPort));
                         if (socket == null)
@@ -376,7 +376,7 @@ namespace Xeus.Core.Connections.Internal
 
             try
             {
-                var config = _tcpAcceptConfig;
+                var config = _tcpAcceptOptions;
                 if (config == null || !config.Enabled)
                 {
                     return null;
@@ -424,7 +424,7 @@ namespace Xeus.Core.Connections.Internal
             {
                 for (; ; )
                 {
-                    var config = _tcpAcceptConfig;
+                    var config = _tcpAcceptOptions;
                     var listenAddressSet = new HashSet<OmniAddress>(config?.ListenAddresses.ToArray() ?? Array.Empty<OmniAddress>());
                     var useUpnp = config?.UseUpnp ?? false;
 
@@ -636,8 +636,8 @@ namespace Xeus.Core.Connections.Internal
                     {
                         if (_settings.TryGetContent<TcpConnectionCreatorConfig>("Config", out var config))
                         {
-                            this.SetTcpConnectConfig(config.TcpConnectConfig);
-                            this.SetTcpAcceptConfig(config.TcpAcceptConfig);
+                            this.SetTcpConnectOptions(config.TcpConnectOptions);
+                            this.SetTcpAcceptOptions(config.TcpAcceptOptions);
 
                             lock (_lastOpenedPortsByUpnp.LockObject)
                             {
@@ -664,7 +664,7 @@ namespace Xeus.Core.Connections.Internal
                 {
                     try
                     {
-                        var config = new TcpConnectionCreatorConfig(0, _tcpConnectConfig, _tcpAcceptConfig, _openedPortsByUpnp.Values.ToArray());
+                        var config = new TcpConnectionCreatorConfig(0, _tcpConnectOptions, _tcpAcceptOptions, _openedPortsByUpnp.Values.ToArray());
                         _settings.SetContent("Config", config);
                         _settings.Commit();
                     }
