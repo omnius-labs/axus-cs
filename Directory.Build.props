@@ -1,9 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <Import Project="..\Directory.Build.props" Condition="Exists('..\Directory.Build.props')" />
+
   <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <BaseOutputPath Condition=" '$(BaseOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\bin\$(MSBuildProjectName)\</BaseOutputPath>
+
     <LangVersion>8.0</LangVersion>
     <NullableContextOptions>enable</NullableContextOptions>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <RootNamespace>$(ProjectName)</RootNamespace>
+    <AssemblyName>$(ProjectName)</AssemblyName>
+    <Title>$(ProjectName)</Title>
+    <Description>$(ProjectName)</Description>
+    <BuildVersion>1</BuildVersion>
+    <Version>0.0.1-alpha$(BuildVersion)</Version>
+    <AssemblyVersion>0.0.1.$(BuildVersion)</AssemblyVersion>
+    <FileVersion>$(AssemblyVersion)</FileVersion>
+    <Authors>Lyrise</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/omnius-labs/xeus</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/omnius-labs/xeus</RepositoryUrl>
+    <PackageTags>Xeus</PackageTags>
+    <Copyright>Copyright (c) 2019 Lyrise</Copyright>
+    <RepositoryType>git</RepositoryType>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -11,11 +40,15 @@
     <PathMap>$(RepoRoot)=.</PathMap>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <Version>0.0.0</Version>
-    <BuildVersion>0</BuildVersion>
-    <AssemblyVersion>$(Version).$(BuildVersion)</AssemblyVersion>
-    <FileVersion>$(Version).$(BuildVersion)</FileVersion>
+  <!-- Autodetect platform -->
+  <PropertyGroup Condition=" '$(OS)' != 'Unix' ">
+    <NativeDepsPlatform>Windows</NativeDepsPlatform>
   </PropertyGroup>
-
+  <PropertyGroup Condition=" '$(OS)' == 'Unix' And Exists('/Applications') And Exists('/Library') And Exists('/System') ">
+    <NativeDepsPlatform>Mac</NativeDepsPlatform>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(OS)' == 'Unix' And '$(NativeDepsPlatform)' == '' ">
+    <NativeDepsPlatform>Linux</NativeDepsPlatform>
+  </PropertyGroup>
+   
 </Project>
