@@ -32,6 +32,9 @@ namespace Xeus.Core.Connections.Internal
         private readonly LockedHashDictionary<OmniAddress, TcpListener> _tcpListenerMap = new LockedHashDictionary<OmniAddress, TcpListener>();
         private readonly LockedHashDictionary<OmniAddress, ushort> _openedPortsByUpnp = new LockedHashDictionary<OmniAddress, ushort>();
 
+        /// <summary>
+        /// 前回ポート開放していたポートのリスト
+        /// </summary>
         private readonly LockedList<ushort> _lastOpenedPortsByUpnp = new LockedList<ushort>();
 
         private TcpConnectOptions? _tcpConnectOptions;
@@ -418,7 +421,7 @@ namespace Xeus.Core.Connections.Internal
             return null;
         }
 
-        private async Task WatchThread(CancellationToken token)
+        private async ValueTask WatchThread(CancellationToken token)
         {
             try
             {
@@ -531,11 +534,11 @@ namespace Xeus.Core.Connections.Internal
             }
         }
 
-        public override ServiceStateType StateType { get; }
+        protected override async ValueTask OnInitializeAsync()
+        {
+        }
 
-        private readonly object _stateLockObject = new object();
-
-        private async ValueTask InternalStart()
+        protected override async ValueTask OnStartAsync()
         {
             _stateType = ServiceStateType.Starting;
 
@@ -545,7 +548,7 @@ namespace Xeus.Core.Connections.Internal
             _stateType = ServiceStateType.Running;
         }
 
-        private async ValueTask InternalStop()
+        protected override async ValueTask OnStopAsync()
         {
             _stateType = ServiceStateType.Stopping;
 
@@ -585,45 +588,6 @@ namespace Xeus.Core.Connections.Internal
             }
 
             _stateType = ServiceStateType.Stopped;
-        }
-
-        public override async ValueTask StartAsync()
-        {
-            using (await _asyncLock.LockAsync())
-            {
-                if (this.StateType != ServiceStateType.Stopped)
-                {
-                    return;
-                }
-
-                await this.InternalStart();
-            }
-        }
-
-        public override async ValueTask StopAsync()
-        {
-            using (await _asyncLock.LockAsync())
-            {
-                if (this.StateType != ServiceStateType.Running)
-                {
-                    return;
-                }
-
-                await this.InternalStop();
-            }
-        }
-
-        public override async ValueTask RestartAsync()
-        {
-            using (await _asyncLock.LockAsync())
-            {
-                if (this.StateType != ServiceStateType.Stopped)
-                {
-                    await this.InternalStop();
-                }
-
-                await this.InternalStart();
-            }
         }
 
         public async ValueTask LoadAsync()

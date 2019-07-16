@@ -4,23 +4,26 @@
   <Import Project="..\Directory.Build.props" Condition="Exists('..\Directory.Build.props')" />
 
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
-    <BaseOutputPath Condition=" '$(BaseOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\bin\$(MSBuildProjectName)\</BaseOutputPath>
-
     <LangVersion>8.0</LangVersion>
     <NullableContextOptions>enable</NullableContextOptions>
     <IsPackable>false</IsPackable>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+  </PropertyGroup>
+
+  <PropertyGroup>  
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreLockedMode Condition=" '$(ContinuousIntegrationBuild)' == 'true' " >true</RestoreLockedMode>
   </PropertyGroup>
 
   <PropertyGroup>
     <RootNamespace>$(ProjectName)</RootNamespace>
-    <AssemblyName>$(ProjectName)</AssemblyName>
     <Title>$(ProjectName)</Title>
     <Description>$(ProjectName)</Description>
     <BuildVersion>1</BuildVersion>
-    <Version>0.0.1-alpha$(BuildVersion)</Version>
-    <AssemblyVersion>0.0.1.$(BuildVersion)</AssemblyVersion>
+    <VersionPrefix>0.0.1</VersionPrefix>
+    <VersionSuffix>-alpha</VersionSuffix>
+    <Version>$(VersionPrefix)$(VersionSuffix).$(BuildVersion)</Version>
+    <AssemblyVersion>$(VersionPrefix).$(BuildVersion)</AssemblyVersion>
     <FileVersion>$(AssemblyVersion)</FileVersion>
     <Authors>Lyrise</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -35,11 +38,6 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))</RepoRoot>
-    <PathMap>$(RepoRoot)=.</PathMap>
-  </PropertyGroup>
-
   <!-- Autodetect platform -->
   <PropertyGroup Condition=" '$(OS)' != 'Unix' ">
     <NativeDepsPlatform>Windows</NativeDepsPlatform>
@@ -50,5 +48,31 @@
   <PropertyGroup Condition=" '$(OS)' == 'Unix' And '$(NativeDepsPlatform)' == '' ">
     <NativeDepsPlatform>Linux</NativeDepsPlatform>
   </PropertyGroup>
-   
+    
+  <PropertyGroup Condition=" '$(NativeDepsPlatform)' == 'Windows' ">
+    <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\obj\win\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <BaseOutputPath Condition=" '$(BaseOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\bin\win\$(MSBuildProjectName)\</BaseOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(NativeDepsPlatform)' == 'Mac' ">
+    <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\obj\mac\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <BaseOutputPath Condition=" '$(BaseOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\bin\mac\$(MSBuildProjectName)\</BaseOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(NativeDepsPlatform)' == 'Linux' ">
+    <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\obj\linux\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <BaseOutputPath Condition=" '$(BaseOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\bin\linux\$(MSBuildProjectName)\</BaseOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))</RepoRoot>
+    <PathMap>$(RepoRoot)=.</PathMap>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NLog" Version="4.6.5" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-18618-05">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  
 </Project>
