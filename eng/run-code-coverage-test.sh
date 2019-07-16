@@ -1,15 +1,18 @@
-apt-get update
-apt-get install -y --no-install-recommends libc6-dev
-
 dotnet tool install --global coverlet.console
 dotnet tool update --global coverlet.console
-dotnet tool install --global dotnet-reportgenerator-globaltool
-dotnet tool update --global dotnet-reportgenerator-globaltool
 
 for path in `find "tests" -maxdepth 2 -type f -name "*.csproj"`
 do
-    output="../results/$(basename ${path%.*})-opencover.xml"
-    dotnet test "$path" -p:CollectCoverage=true -p:CoverletOutputFormat=opencover -p:CoverletOutput=$output;
+    name=$(basename ${path%.*})
+    output="../../tmp/tests/linux/${name}.opencover.xml"
+    dotnet test "$path" -p:CollectCoverage=true -p:CoverletOutputFormat=opencover -p:CoverletOutput="$output" -p:Exclude="[xunit*]*%2c[*.Tests]*" -v:n;
+
+    ret=$?
+
+    if [ $ret -gt 0 ]; then
+        exit $ret
+    fi
 done
 
-reportgenerator "--reports:tests/results/*-opencover.xml" "--targetdir:tests/results/html"
+dotnet tool install dotnet-reportgenerator-globaltool --tool-path tools/linux/
+./tools/linux/reportgenerator "--reports:tmp/tests/linux/*.opencover.xml" "--targetdir:publish/code-coverage/linux"

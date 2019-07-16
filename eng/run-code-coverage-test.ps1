@@ -1,11 +1,18 @@
 dotnet tool install --global coverlet.console
 dotnet tool update --global coverlet.console
-dotnet tool install --global dotnet-reportgenerator-globaltool
-dotnet tool update --global dotnet-reportgenerator-globaltool
 
 ForEach ($folder in (Get-ChildItem -Path "tests" -Directory)) 
 {
-    dotnet test $folder.FullName /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput="../results/$folder-opencover.xml" /p:Exclude="[xunit*]*%2c[*.Tests]*" -v:n;
+    $path = $folder.FullName;
+    $name = $folder.Name;
+    $output = "../../tmp/tests/win/${name}.opencover.xml";
+
+    dotnet test "$path" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput="$output" /p:Exclude="[xunit*]*%2c[*.Tests]*" -v:n;
+   
+	if (!$?) {
+        exit 1
+    }
 }
 
-reportgenerator.exe "--reports:tests/results/*-opencover.xml" "--targetdir:tests/results/html"
+dotnet tool install dotnet-reportgenerator-globaltool --tool-path tools/win/
+.\tools\win\reportgenerator.exe "--reports:tmp/tests/win/*.opencover.xml" "--targetdir:publish/code-coverage/win"
