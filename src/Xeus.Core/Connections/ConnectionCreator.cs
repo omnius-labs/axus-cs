@@ -1,13 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Omnix.Base;
 using Omnix.Configuration;
+using Omnix.Network;
 using Xeus.Core.Primitives;
+using Xeus.Messages;
 
 namespace Xeus.Core.Connections.Internal
 {
-    sealed partial class ConnectionCreator : DisposableBase, ISettings
+    sealed partial class ConnectionCreator : ServiceBase, ISettings
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -16,11 +20,8 @@ namespace Xeus.Core.Connections.Internal
 
         private readonly SettingsDatabase _settings;
 
-        private ServiceStateType _stateType = ServiceStateType.Stopped;
-
         private readonly AsyncLock _asyncLock = new AsyncLock();
         private readonly object _lockObject = new object();
-        private volatile bool _disposed;
 
         public ConnectionCreator(string configPath, BufferPool bufferPool)
         {
@@ -30,79 +31,57 @@ namespace Xeus.Core.Connections.Internal
             _settings = new SettingsDatabase(Path.Combine(configPath, "TcpConnectionCreator"));
         }
 
-        public void SetConfig(ConnectionCreator ConnectionConfig config)
+        public void SetOptions(ConnectionCreatorOptions options)
         {
             lock (_lockObject)
             {
-                _catharsisManager.SetConfig(config.Catharsis);
-                _customConnectionManager.SetConfig(config.Custom);
-                _tcpConnectionManager.SetConfig(config.Tcp);
-                _i2pConnectionManager.SetConfig(config.I2p);
+                _tcpConnectionCreator.SetTcpConnectOptions(options.TcpConnectOptions);
+                _tcpConnectionCreator.SetTcpAcceptOptions(options.TcpAcceptOptions);
             }
         }
 
-        public Cap ConnectCap(string uri)
+        public async ValueTask<Cap?> ConnectAsync(OmniAddress address, CancellationToken token = default)
         {
-            if (_disposed)
+            if (this.IsDisposed)
             {
                 return null;
             }
 
-            if (this.State == ManagerState.Stop)
+            if (this.StateType != ServiceStateType.Running)
             {
                 return null;
             }
 
-            Cap cap;
-            if ((cap = _tcpConnectionManager.ConnectCap(uri)) != null)
-            {
-                return cap;
-            }
+            Cap? result;
 
-            if ((cap = _i2pConnectionManager.ConnectCap(uri)) != null)
+            if ((result = await _tcpConnectionCreator.ConnectAsync(address, token)) != null)
             {
-                return cap;
-            }
-
-            if ((cap = _customConnectionManager.ConnectCap(uri)) != null)
-            {
-                return cap;
+                return result;
             }
 
             return null;
         }
 
-        public Cap AcceptCap(out string uri)
+        public async ValueTask<(Cap?, OmniAddress?)> AcceptAsync(CancellationToken token = default)
         {
-            uri = null;
-
-            if (_disposed)
+            if (this.IsDisposed)
             {
-                return null;
+                return default;
             }
 
-            if (this.State == ManagerState.Stop)
+            if (this.StateType != ServiceStateType.Running)
             {
-                return null;
+                return default;
             }
 
-            Cap cap;
-            if ((cap = _tcpConnectionManager.AcceptCap(out uri)) != null)
+            (Cap?, OmniAddress?) result;
+
+            if ((result = await _tcpConnectionCreator.AcceptAsync(token)) != default)
             {
-                return cap;
+                return result;
             }
 
-            if ((cap = _i2pConnectionManager.AcceptCap(out uri)) != null)
-            {
-                return cap;
-            }
-
-            if ((cap = _customConnectionManager.AcceptCap(out uri)) != null)
-            {
-                return cap;
-            }
-
-            return null;
+            return default;
         }
 
         private void WatchThread()
@@ -214,6 +193,16 @@ namespace Xeus.Core.Connections.Internal
                 _i2pConnectionManager.Dispose();
                 _customConnectionManager.Dispose();
             }
+        }
+
+        ValueTask ISettings.LoadAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        ValueTask ISettings.SaveAsync()
+        {
+            throw new NotImplementedException();
         }
     }
 }

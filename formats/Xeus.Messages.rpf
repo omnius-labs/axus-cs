@@ -31,6 +31,11 @@ message TcpAcceptOptions {
     UseUpnp: bool = 2,
 }
 
+message ConnectionCreatorOptions {
+    TcpConnectOptions: TcpConnectOptions = 0,
+    TcpAcceptOptions: TcpAcceptOptions = 1,
+}
+
 message XeusOptions {
     ConfigDirectoryPath: string(1024) = 0,
 }

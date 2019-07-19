@@ -457,6 +457,110 @@ namespace Xeus.Messages
         }
     }
 
+    public sealed partial class ConnectionCreatorOptions : Omnix.Serialization.RocketPack.RocketPackMessageBase<ConnectionCreatorOptions>
+    {
+        static ConnectionCreatorOptions()
+        {
+            ConnectionCreatorOptions.Formatter = new CustomFormatter();
+            ConnectionCreatorOptions.Empty = new ConnectionCreatorOptions(TcpConnectOptions.Empty, TcpAcceptOptions.Empty);
+        }
+
+        private readonly int __hashCode;
+
+        public ConnectionCreatorOptions(TcpConnectOptions tcpConnectOptions, TcpAcceptOptions tcpAcceptOptions)
+        {
+            if (tcpConnectOptions is null) throw new System.ArgumentNullException("tcpConnectOptions");
+            if (tcpAcceptOptions is null) throw new System.ArgumentNullException("tcpAcceptOptions");
+
+            this.TcpConnectOptions = tcpConnectOptions;
+            this.TcpAcceptOptions = tcpAcceptOptions;
+
+            {
+                var __h = new System.HashCode();
+                if (this.TcpConnectOptions != default) __h.Add(this.TcpConnectOptions.GetHashCode());
+                if (this.TcpAcceptOptions != default) __h.Add(this.TcpAcceptOptions.GetHashCode());
+                __hashCode = __h.ToHashCode();
+            }
+        }
+
+        public TcpConnectOptions TcpConnectOptions { get; }
+        public TcpAcceptOptions TcpAcceptOptions { get; }
+
+        public override bool Equals(ConnectionCreatorOptions? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (this.TcpConnectOptions != target.TcpConnectOptions) return false;
+            if (this.TcpAcceptOptions != target.TcpAcceptOptions) return false;
+
+            return true;
+        }
+
+        public override int GetHashCode() => __hashCode;
+
+        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<ConnectionCreatorOptions>
+        {
+            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, ConnectionCreatorOptions value, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                {
+                    uint propertyCount = 0;
+                    if (value.TcpConnectOptions != TcpConnectOptions.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.TcpAcceptOptions != TcpAcceptOptions.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
+                }
+
+                if (value.TcpConnectOptions != TcpConnectOptions.Empty)
+                {
+                    w.Write((uint)0);
+                    TcpConnectOptions.Formatter.Serialize(w, value.TcpConnectOptions, rank + 1);
+                }
+                if (value.TcpAcceptOptions != TcpAcceptOptions.Empty)
+                {
+                    w.Write((uint)1);
+                    TcpAcceptOptions.Formatter.Serialize(w, value.TcpAcceptOptions, rank + 1);
+                }
+            }
+
+            public ConnectionCreatorOptions Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            {
+                if (rank > 256) throw new System.FormatException();
+
+                uint propertyCount = r.GetUInt32();
+
+                TcpConnectOptions p_tcpConnectOptions = TcpConnectOptions.Empty;
+                TcpAcceptOptions p_tcpAcceptOptions = TcpAcceptOptions.Empty;
+
+                for (; propertyCount > 0; propertyCount--)
+                {
+                    uint id = r.GetUInt32();
+                    switch (id)
+                    {
+                        case 0:
+                            {
+                                p_tcpConnectOptions = TcpConnectOptions.Formatter.Deserialize(r, rank + 1);
+                                break;
+                            }
+                        case 1:
+                            {
+                                p_tcpAcceptOptions = TcpAcceptOptions.Formatter.Deserialize(r, rank + 1);
+                                break;
+                            }
+                    }
+                }
+
+                return new ConnectionCreatorOptions(p_tcpConnectOptions, p_tcpAcceptOptions);
+            }
+        }
+    }
+
     public sealed partial class XeusOptions : Omnix.Serialization.RocketPack.RocketPackMessageBase<XeusOptions>
     {
         static XeusOptions()
