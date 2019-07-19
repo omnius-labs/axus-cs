@@ -32,19 +32,11 @@ namespace Xeus.Core.Connections.Internal
         private readonly LockedHashDictionary<OmniAddress, TcpListener> _tcpListenerMap = new LockedHashDictionary<OmniAddress, TcpListener>();
         private readonly LockedHashDictionary<OmniAddress, ushort> _openedPortsByUpnp = new LockedHashDictionary<OmniAddress, ushort>();
 
-        /// <summary>
-        /// 前回ポート開放していたポートのリスト
-        /// </summary>
-        private readonly LockedList<ushort> _lastOpenedPortsByUpnp = new LockedList<ushort>();
-
         private TcpConnectOptions? _tcpConnectOptions;
         private TcpAcceptOptions? _tcpAcceptOptions;
 
-        private ServiceStateType _stateType = ServiceStateType.Stopped;
-
         private readonly AsyncLock _asyncLock = new AsyncLock();
         private readonly object _lockObject = new object();
-        private volatile bool _disposed;
 
         public TcpConnectionCreator(string configPath, BufferPool bufferPool)
         {
@@ -227,33 +219,36 @@ namespace Xeus.Core.Connections.Internal
             return true;
         }
 
-        private static Socket? CreateSocket(IPEndPoint remoteEndPoint)
+        private static async ValueTask<Socket?> ConnectSocketAsync(IPEndPoint remoteEndPoint)
         {
-            Socket? socket = null;
-
-            try
+            return await Task.Run(() =>
             {
-                socket = new Socket(remoteEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                socket.SendTimeout = 1000 * 10;
-                socket.ReceiveTimeout = 1000 * 10;
-                socket.Connect(remoteEndPoint);
+                Socket? socket = null;
 
-                return socket;
-            }
-            catch (SocketException)
-            {
-                if (socket != null)
+                try
                 {
-                    socket.Dispose();
-                }
+                    socket = new Socket(remoteEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                    socket.SendTimeout = 1000 * 10;
+                    socket.ReceiveTimeout = 1000 * 10;
+                    socket.Connect(remoteEndPoint);
 
-                return null;
-            }
+                    return socket;
+                }
+                catch (SocketException)
+                {
+                    if (socket != null)
+                    {
+                        socket.Dispose();
+                    }
+
+                    return null;
+                }
+            });
         }
 
-        public Cap? Connect(OmniAddress address, CancellationToken token = default)
+        public async ValueTask<Cap?> ConnectAsync(OmniAddress address, CancellationToken token = default)
         {
-            if (_disposed)
+            if (this.IsDisposed)
             {
                 return null;
             }
@@ -297,7 +292,7 @@ namespace Xeus.Core.Connections.Internal
 
                     if (config.ProxyOptions.Type == TcpProxyType.Socks5Proxy)
                     {
-                        var socket = CreateSocket(new IPEndPoint(proxyAddress, proxyPort));
+                        var socket = await ConnectSocketAsync(new IPEndPoint(proxyAddress, proxyPort));
                         if (socket == null)
                         {
                             return null;
@@ -315,7 +310,7 @@ namespace Xeus.Core.Connections.Internal
                     }
                     else if (config.ProxyOptions.Type == TcpProxyType.HttpProxy)
                     {
-                        var socket = CreateSocket(new IPEndPoint(proxyAddress, proxyPort));
+                        var socket = await ConnectSocketAsync(new IPEndPoint(proxyAddress, proxyPort));
                         if (socket == null)
                         {
                             return null;
@@ -334,7 +329,7 @@ namespace Xeus.Core.Connections.Internal
                 }
                 else
                 {
-                    var socket = CreateSocket(new IPEndPoint(ipAddress, port));
+                    var socket = await ConnectSocketAsync(new IPEndPoint(ipAddress, port));
                     if (socket == null)
                     {
                         return null;
@@ -361,18 +356,16 @@ namespace Xeus.Core.Connections.Internal
             return null;
         }
 
-        public Cap? Accept(out OmniAddress? address, CancellationToken token = default)
+        public async ValueTask<(Cap?, OmniAddress?)> AcceptAsync(CancellationToken token = default)
         {
-            address = null;
-
-            if (_disposed)
+            if (this.IsDisposed)
             {
-                return null;
+                return default;
             }
 
             if (this.StateType != ServiceStateType.Running)
             {
-                return null;
+                return default;
             }
 
             var garbages = new List<IDisposable>();
@@ -382,15 +375,17 @@ namespace Xeus.Core.Connections.Internal
                 var config = _tcpAcceptOptions;
                 if (config == null || !config.Enabled)
                 {
-                    return null;
+                    return default;
                 }
 
                 foreach (var tcpListener in _tcpListenerMap.ToArray().Randomize().Select(n => n.Value))
                 {
-                    var socket = tcpListener.AcceptSocket();
+                    var socket = await tcpListener.AcceptSocketAsync();
                     garbages.Add(socket);
 
                     var endpoint = (IPEndPoint)socket.RemoteEndPoint;
+
+                    OmniAddress address;
 
                     if (endpoint.AddressFamily == AddressFamily.InterNetwork)
                     {
@@ -405,7 +400,7 @@ namespace Xeus.Core.Connections.Internal
                         throw new NotSupportedException();
                     }
 
-                    return new SocketCap(socket, false);
+                    return (new SocketCap(socket, false), address);
                 }
             }
             catch (Exception e)
@@ -418,7 +413,7 @@ namespace Xeus.Core.Connections.Internal
                 }
             }
 
-            return null;
+            return default;
         }
 
         private async ValueTask WatchThread(CancellationToken token)
@@ -449,21 +444,50 @@ namespace Xeus.Core.Connections.Internal
                             _tcpListenerMap.Remove(omniAddress);
                         }
 
-                        // UPnPで開放していた利用されていないポートを閉じる
-                        foreach (var (omniAddress, port) in _openedPortsByUpnp.ToArray())
                         {
-                            if (listenAddressSet.Contains(omniAddress))
+                            var unusedPortSet = new HashSet<ushort>();
+
+                            if (!useUpnp)
                             {
-                                continue;
+                                // UPnPで開放していたポートをすべて閉じる
+                                unusedPortSet.UnionWith(_openedPortsByUpnp.Select(n => n.Value).ToArray());
+                                _openedPortsByUpnp.Clear();
+                            }
+                            else
+                            {
+                                // UPnPで開放していた利用されていないポートを閉じる
+                                foreach (var (omniAddress, port) in _openedPortsByUpnp.ToArray())
+                                {
+                                    if (listenAddressSet.Contains(omniAddress))
+                                    {
+                                        continue;
+                                    }
+
+                                    unusedPortSet.Add(port);
+                                    _openedPortsByUpnp.Remove(omniAddress);
+                                }
                             }
 
-                            if (upnpClient == null)
+                            if (unusedPortSet.Count > 0)
                             {
-                                upnpClient = new UpnpClient();
-                                await upnpClient.ConnectAsync(token);
-                            }
+                                try
+                                {
+                                    if (upnpClient == null)
+                                    {
+                                        upnpClient = new UpnpClient();
+                                        await upnpClient.ConnectAsync(token);
+                                    }
 
-                            await upnpClient.ClosePortAsync(UpnpProtocolType.Tcp, port, token);
+                                    foreach (var port in unusedPortSet)
+                                    {
+                                        await upnpClient.ClosePortAsync(UpnpProtocolType.Tcp, port, token);
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    _logger.Error(e);
+                                }
+                            }
                         }
 
                         // TcpListenerの追加処理
@@ -482,46 +506,47 @@ namespace Xeus.Core.Connections.Internal
                                 continue;
                             }
 
-                            var tcpListener = new TcpListener(IPAddress.Any, port);
+                            var tcpListener = new TcpListener(ipAddress, port);
                             tcpListener.Start(3);
 
                             _tcpListenerMap.Add(listenAddress, tcpListener);
                         }
 
-                        // TcpListenerの追加処理
-                        foreach (var listenAddress in listenAddressSet)
+                        // UPnPでのポート開放
+                        if (useUpnp)
                         {
-                            if (_openedPortsByUpnp.ContainsKey(listenAddress))
+                            foreach (var listenAddress in listenAddressSet)
                             {
-                                continue;
+                                if (_openedPortsByUpnp.ContainsKey(listenAddress))
+                                {
+                                    continue;
+                                }
+
+                                IPAddress ipAddress;
+                                ushort port;
+
+                                if (!TryGetEndpoint(listenAddress, out ipAddress, out port, false))
+                                {
+                                    continue;
+                                }
+
+                                // "0.0.0.0"以外はUPnPでのポート開放対象外
+                                if (ipAddress == IPAddress.Any)
+                                {
+                                    if (upnpClient == null)
+                                    {
+                                        upnpClient = new UpnpClient();
+                                        await upnpClient.ConnectAsync(token);
+                                    }
+
+                                    await upnpClient.OpenPortAsync(UpnpProtocolType.Tcp, port, port, "Xeus", token);
+                                }
                             }
-
-                            IPAddress ipAddress;
-                            ushort port;
-
-                            if (!TryGetEndpoint(listenAddress, out ipAddress, out port, false))
-                            {
-                                continue;
-                            }
-
-                            // "0.0.0.0"以外は対象外
-                            if (ipAddress != IPAddress.Any)
-                            {
-                                continue;
-                            }
-
-                            if (upnpClient == null)
-                            {
-                                upnpClient = new UpnpClient();
-                                await upnpClient.ConnectAsync(token);
-                            }
-
-                            await upnpClient.OpenPortAsync(UpnpProtocolType.Tcp, port, port, "Xeus", token);
                         }
                     }
                     finally
                     {
-                        if(upnpClient != null)
+                        if (upnpClient != null)
                         {
                             upnpClient.Dispose();
                         }
@@ -540,17 +565,17 @@ namespace Xeus.Core.Connections.Internal
 
         protected override async ValueTask OnStartAsync()
         {
-            _stateType = ServiceStateType.Starting;
+            this.StateType = ServiceStateType.Starting;
 
             _watchEventScheduler.ChangeInterval(new TimeSpan(0, 30, 0));
             await _watchEventScheduler.StartAsync();
 
-            _stateType = ServiceStateType.Running;
+            this.StateType = ServiceStateType.Running;
         }
 
         protected override async ValueTask OnStopAsync()
         {
-            _stateType = ServiceStateType.Stopping;
+            this.StateType = ServiceStateType.Stopping;
 
             await _watchEventScheduler.StopAsync();
 
@@ -587,7 +612,7 @@ namespace Xeus.Core.Connections.Internal
                 }
             }
 
-            _stateType = ServiceStateType.Stopped;
+            this.StateType = ServiceStateType.Stopped;
         }
 
         public async ValueTask LoadAsync()
@@ -602,18 +627,11 @@ namespace Xeus.Core.Connections.Internal
                         {
                             this.SetTcpConnectOptions(config.TcpConnectOptions);
                             this.SetTcpAcceptOptions(config.TcpAcceptOptions);
-
-                            lock (_lastOpenedPortsByUpnp.LockObject)
-                            {
-                                _lastOpenedPortsByUpnp.Clear();
-                                _lastOpenedPortsByUpnp.AddRange(config.OpenedPortsByUpnp);
-                            }
                         }
                     }
                     catch (Exception e)
                     {
                         _logger.Error(e);
-
                         throw e;
                     }
                 }
@@ -628,16 +646,12 @@ namespace Xeus.Core.Connections.Internal
                 {
                     try
                     {
-                        var config = new TcpConnectionCreatorConfig(0, _tcpConnectOptions, _tcpAcceptOptions, _openedPortsByUpnp.Values.ToArray());
+                        var config = new TcpConnectionCreatorConfig(0, _tcpConnectOptions, _tcpAcceptOptions);
                         _settings.SetContent("Config", config);
-                        _settings.Commit();
                     }
                     catch (Exception e)
                     {
                         _logger.Error(e);
-
-                        _settings.Rollback();
-
                         throw e;
                     }
                 }
@@ -646,13 +660,6 @@ namespace Xeus.Core.Connections.Internal
 
         protected override void Dispose(bool disposing)
         {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _disposed = true;
-
             if (disposing)
             {
                 this.StopAsync().AsTask().Wait();
