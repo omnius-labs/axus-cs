@@ -1,4 +1,4 @@
-﻿syntax = v1;
+﻿syntax = v1.0;
 
 using "../refs/omnix/formats/Omnix.Cryptography.rpf";
 using "../refs/omnix/formats/Omnix.Network.rpf";

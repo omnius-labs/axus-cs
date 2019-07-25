@@ -11,7 +11,12 @@ namespace Xeus.Messages
         Socks5Proxy = 1,
     }
 
-    public sealed partial class XeusClue : Omnix.Serialization.RocketPack.RocketPackMessageBase<XeusClue>
+    public enum ErrorReportType : byte
+    {
+        SpaceNotFound = 0,
+    }
+
+    public sealed partial class XeusClue : global::Omnix.Serialization.RocketPack.RocketPackMessageBase<XeusClue>
     {
         static XeusClue()
         {
@@ -27,7 +32,7 @@ namespace Xeus.Messages
             this.Depth = depth;
 
             {
-                var __h = new System.HashCode();
+                var __h = new global::System.HashCode();
                 if (this.Hash != default) __h.Add(this.Hash.GetHashCode());
                 if (this.Depth != default) __h.Add(this.Depth.GetHashCode());
                 __hashCode = __h.ToHashCode();
@@ -49,11 +54,11 @@ namespace Xeus.Messages
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<XeusClue>
+        private sealed class CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<XeusClue>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, XeusClue value, int rank)
+            public void Serialize(global::Omnix.Serialization.RocketPack.RocketPackWriter w, XeusClue value, int rank)
             {
-                if (rank > 256) throw new System.FormatException();
+                if (rank > 256) throw new global::System.FormatException();
 
                 {
                     uint propertyCount = 0;
@@ -80,9 +85,9 @@ namespace Xeus.Messages
                 }
             }
 
-            public XeusClue Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public XeusClue Deserialize(global::Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new System.FormatException();
+                if (rank > 256) throw new global::System.FormatException();
 
                 uint propertyCount = r.GetUInt32();
 
@@ -112,7 +117,7 @@ namespace Xeus.Messages
         }
     }
 
-    public sealed partial class TcpProxyOptions : Omnix.Serialization.RocketPack.RocketPackMessageBase<TcpProxyOptions>
+    public sealed partial class TcpProxyOptions : global::Omnix.Serialization.RocketPack.RocketPackMessageBase<TcpProxyOptions>
     {
         static TcpProxyOptions()
         {
@@ -124,13 +129,13 @@ namespace Xeus.Messages
 
         public TcpProxyOptions(TcpProxyType type, OmniAddress address)
         {
-            if (address is null) throw new System.ArgumentNullException("address");
+            if (address is null) throw new global::System.ArgumentNullException("address");
 
             this.Type = type;
             this.Address = address;
 
             {
-                var __h = new System.HashCode();
+                var __h = new global::System.HashCode();
                 if (this.Type != default) __h.Add(this.Type.GetHashCode());
                 if (this.Address != default) __h.Add(this.Address.GetHashCode());
                 __hashCode = __h.ToHashCode();
@@ -152,11 +157,11 @@ namespace Xeus.Messages
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<TcpProxyOptions>
+        private sealed class CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<TcpProxyOptions>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, TcpProxyOptions value, int rank)
+            public void Serialize(global::Omnix.Serialization.RocketPack.RocketPackWriter w, TcpProxyOptions value, int rank)
             {
-                if (rank > 256) throw new System.FormatException();
+                if (rank > 256) throw new global::System.FormatException();
 
                 {
                     uint propertyCount = 0;
@@ -183,9 +188,9 @@ namespace Xeus.Messages
                 }
             }
 
-            public TcpProxyOptions Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public TcpProxyOptions Deserialize(global::Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new System.FormatException();
+                if (rank > 256) throw new global::System.FormatException();
 
                 uint propertyCount = r.GetUInt32();
 
@@ -215,7 +220,7 @@ namespace Xeus.Messages
         }
     }
 
-    public sealed partial class TcpConnectOptions : Omnix.Serialization.RocketPack.RocketPackMessageBase<TcpConnectOptions>
+    public sealed partial class TcpConnectOptions : global::Omnix.Serialization.RocketPack.RocketPackMessageBase<TcpConnectOptions>
     {
         static TcpConnectOptions()
         {
@@ -231,7 +236,7 @@ namespace Xeus.Messages
             this.ProxyOptions = proxyOptions;
 
             {
-                var __h = new System.HashCode();
+                var __h = new global::System.HashCode();
                 if (this.Enabled != default) __h.Add(this.Enabled.GetHashCode());
                 if (this.ProxyOptions != default) __h.Add(this.ProxyOptions.GetHashCode());
                 __hashCode = __h.ToHashCode();
@@ -254,11 +259,11 @@ namespace Xeus.Messages
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<TcpConnectOptions>
+        private sealed class CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<TcpConnectOptions>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, TcpConnectOptions value, int rank)
+            public void Serialize(global::Omnix.Serialization.RocketPack.RocketPackWriter w, TcpConnectOptions value, int rank)
             {
-                if (rank > 256) throw new System.FormatException();
+                if (rank > 256) throw new global::System.FormatException();
 
                 {
                     uint propertyCount = 0;
@@ -285,9 +290,9 @@ namespace Xeus.Messages
                 }
             }
 
-            public TcpConnectOptions Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public TcpConnectOptions Deserialize(global::Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new System.FormatException();
+                if (rank > 256) throw new global::System.FormatException();
 
                 uint propertyCount = r.GetUInt32();
 
@@ -317,12 +322,12 @@ namespace Xeus.Messages
         }
     }
 
-    public sealed partial class TcpAcceptOptions : Omnix.Serialization.RocketPack.RocketPackMessageBase<TcpAcceptOptions>
+    public sealed partial class TcpAcceptOptions : global::Omnix.Serialization.RocketPack.RocketPackMessageBase<TcpAcceptOptions>
     {
         static TcpAcceptOptions()
         {
             TcpAcceptOptions.Formatter = new CustomFormatter();
-            TcpAcceptOptions.Empty = new TcpAcceptOptions(false, System.Array.Empty<OmniAddress>(), false);
+            TcpAcceptOptions.Empty = new TcpAcceptOptions(false, global::System.Array.Empty<OmniAddress>(), false);
         }
 
         private readonly int __hashCode;
@@ -331,18 +336,18 @@ namespace Xeus.Messages
 
         public TcpAcceptOptions(bool enabled, OmniAddress[] listenAddresses, bool useUpnp)
         {
-            if (listenAddresses is null) throw new System.ArgumentNullException("listenAddresses");
-            if (listenAddresses.Length > 32) throw new System.ArgumentOutOfRangeException("listenAddresses");
+            if (listenAddresses is null) throw new global::System.ArgumentNullException("listenAddresses");
+            if (listenAddresses.Length > 32) throw new global::System.ArgumentOutOfRangeException("listenAddresses");
             foreach (var n in listenAddresses)
             {
-                if (n is null) throw new System.ArgumentNullException("n");
+                if (n is null) throw new global::System.ArgumentNullException("n");
             }
             this.Enabled = enabled;
-            this.ListenAddresses = new Omnix.Collections.ReadOnlyListSlim<OmniAddress>(listenAddresses);
+            this.ListenAddresses = new global::Omnix.Collections.ReadOnlyListSlim<OmniAddress>(listenAddresses);
             this.UseUpnp = useUpnp;
 
             {
-                var __h = new System.HashCode();
+                var __h = new global::System.HashCode();
                 if (this.Enabled != default) __h.Add(this.Enabled.GetHashCode());
                 foreach (var n in this.ListenAddresses)
                 {
@@ -354,7 +359,7 @@ namespace Xeus.Messages
         }
 
         public bool Enabled { get; }
-        public Omnix.Collections.ReadOnlyListSlim<OmniAddress> ListenAddresses { get; }
+        public global::Omnix.Collections.ReadOnlyListSlim<OmniAddress> ListenAddresses { get; }
         public bool UseUpnp { get; }
 
         public override bool Equals(TcpAcceptOptions? target)
@@ -362,7 +367,7 @@ namespace Xeus.Messages
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.Enabled != target.Enabled) return false;
-            if (!Omnix.Base.Helpers.CollectionHelper.Equals(this.ListenAddresses, target.ListenAddresses)) return false;
+            if (!global::Omnix.Base.Helpers.CollectionHelper.Equals(this.ListenAddresses, target.ListenAddresses)) return false;
             if (this.UseUpnp != target.UseUpnp) return false;
 
             return true;
@@ -370,11 +375,11 @@ namespace Xeus.Messages
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<TcpAcceptOptions>
+        private sealed class CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<TcpAcceptOptions>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, TcpAcceptOptions value, int rank)
+            public void Serialize(global::Omnix.Serialization.RocketPack.RocketPackWriter w, TcpAcceptOptions value, int rank)
             {
-                if (rank > 256) throw new System.FormatException();
+                if (rank > 256) throw new global::System.FormatException();
 
                 {
                     uint propertyCount = 0;
@@ -414,14 +419,14 @@ namespace Xeus.Messages
                 }
             }
 
-            public TcpAcceptOptions Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public TcpAcceptOptions Deserialize(global::Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new System.FormatException();
+                if (rank > 256) throw new global::System.FormatException();
 
                 uint propertyCount = r.GetUInt32();
 
                 bool p_enabled = false;
-                OmniAddress[] p_listenAddresses = System.Array.Empty<OmniAddress>();
+                OmniAddress[] p_listenAddresses = global::System.Array.Empty<OmniAddress>();
                 bool p_useUpnp = false;
 
                 for (; propertyCount > 0; propertyCount--)
@@ -457,7 +462,7 @@ namespace Xeus.Messages
         }
     }
 
-    public sealed partial class ConnectionCreatorOptions : Omnix.Serialization.RocketPack.RocketPackMessageBase<ConnectionCreatorOptions>
+    public sealed partial class ConnectionCreatorOptions : global::Omnix.Serialization.RocketPack.RocketPackMessageBase<ConnectionCreatorOptions>
     {
         static ConnectionCreatorOptions()
         {
@@ -469,14 +474,14 @@ namespace Xeus.Messages
 
         public ConnectionCreatorOptions(TcpConnectOptions tcpConnectOptions, TcpAcceptOptions tcpAcceptOptions)
         {
-            if (tcpConnectOptions is null) throw new System.ArgumentNullException("tcpConnectOptions");
-            if (tcpAcceptOptions is null) throw new System.ArgumentNullException("tcpAcceptOptions");
+            if (tcpConnectOptions is null) throw new global::System.ArgumentNullException("tcpConnectOptions");
+            if (tcpAcceptOptions is null) throw new global::System.ArgumentNullException("tcpAcceptOptions");
 
             this.TcpConnectOptions = tcpConnectOptions;
             this.TcpAcceptOptions = tcpAcceptOptions;
 
             {
-                var __h = new System.HashCode();
+                var __h = new global::System.HashCode();
                 if (this.TcpConnectOptions != default) __h.Add(this.TcpConnectOptions.GetHashCode());
                 if (this.TcpAcceptOptions != default) __h.Add(this.TcpAcceptOptions.GetHashCode());
                 __hashCode = __h.ToHashCode();
@@ -498,11 +503,11 @@ namespace Xeus.Messages
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<ConnectionCreatorOptions>
+        private sealed class CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<ConnectionCreatorOptions>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, ConnectionCreatorOptions value, int rank)
+            public void Serialize(global::Omnix.Serialization.RocketPack.RocketPackWriter w, ConnectionCreatorOptions value, int rank)
             {
-                if (rank > 256) throw new System.FormatException();
+                if (rank > 256) throw new global::System.FormatException();
 
                 {
                     uint propertyCount = 0;
@@ -529,9 +534,9 @@ namespace Xeus.Messages
                 }
             }
 
-            public ConnectionCreatorOptions Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public ConnectionCreatorOptions Deserialize(global::Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new System.FormatException();
+                if (rank > 256) throw new global::System.FormatException();
 
                 uint propertyCount = r.GetUInt32();
 
@@ -561,7 +566,7 @@ namespace Xeus.Messages
         }
     }
 
-    public sealed partial class XeusOptions : Omnix.Serialization.RocketPack.RocketPackMessageBase<XeusOptions>
+    public sealed partial class XeusOptions : global::Omnix.Serialization.RocketPack.RocketPackMessageBase<XeusOptions>
     {
         static XeusOptions()
         {
@@ -575,13 +580,13 @@ namespace Xeus.Messages
 
         public XeusOptions(string configDirectoryPath)
         {
-            if (configDirectoryPath is null) throw new System.ArgumentNullException("configDirectoryPath");
-            if (configDirectoryPath.Length > 1024) throw new System.ArgumentOutOfRangeException("configDirectoryPath");
+            if (configDirectoryPath is null) throw new global::System.ArgumentNullException("configDirectoryPath");
+            if (configDirectoryPath.Length > 1024) throw new global::System.ArgumentOutOfRangeException("configDirectoryPath");
 
             this.ConfigDirectoryPath = configDirectoryPath;
 
             {
-                var __h = new System.HashCode();
+                var __h = new global::System.HashCode();
                 if (this.ConfigDirectoryPath != default) __h.Add(this.ConfigDirectoryPath.GetHashCode());
                 __hashCode = __h.ToHashCode();
             }
@@ -600,11 +605,11 @@ namespace Xeus.Messages
 
         public override int GetHashCode() => __hashCode;
 
-        private sealed class CustomFormatter : Omnix.Serialization.RocketPack.IRocketPackFormatter<XeusOptions>
+        private sealed class CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<XeusOptions>
         {
-            public void Serialize(Omnix.Serialization.RocketPack.RocketPackWriter w, XeusOptions value, int rank)
+            public void Serialize(global::Omnix.Serialization.RocketPack.RocketPackWriter w, XeusOptions value, int rank)
             {
-                if (rank > 256) throw new System.FormatException();
+                if (rank > 256) throw new global::System.FormatException();
 
                 {
                     uint propertyCount = 0;
@@ -622,9 +627,9 @@ namespace Xeus.Messages
                 }
             }
 
-            public XeusOptions Deserialize(Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public XeusOptions Deserialize(global::Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
             {
-                if (rank > 256) throw new System.FormatException();
+                if (rank > 256) throw new global::System.FormatException();
 
                 uint propertyCount = r.GetUInt32();
 
@@ -644,6 +649,227 @@ namespace Xeus.Messages
                 }
 
                 return new XeusOptions(p_configDirectoryPath);
+            }
+        }
+    }
+
+    public sealed partial class ErrorReport : global::Omnix.Serialization.RocketPack.RocketPackMessageBase<ErrorReport>
+    {
+        static ErrorReport()
+        {
+            ErrorReport.Formatter = new CustomFormatter();
+            ErrorReport.Empty = new ErrorReport(global::Omnix.Serialization.RocketPack.Timestamp.Zero, (ErrorReportType)0);
+        }
+
+        private readonly int __hashCode;
+
+        public ErrorReport(global::Omnix.Serialization.RocketPack.Timestamp creationTime, ErrorReportType type)
+        {
+            this.CreationTime = creationTime;
+            this.Type = type;
+
+            {
+                var __h = new global::System.HashCode();
+                if (this.CreationTime != default) __h.Add(this.CreationTime.GetHashCode());
+                if (this.Type != default) __h.Add(this.Type.GetHashCode());
+                __hashCode = __h.ToHashCode();
+            }
+        }
+
+        public global::Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
+        public ErrorReportType Type { get; }
+
+        public override bool Equals(ErrorReport? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (this.CreationTime != target.CreationTime) return false;
+            if (this.Type != target.Type) return false;
+
+            return true;
+        }
+
+        public override int GetHashCode() => __hashCode;
+
+        private sealed class CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<ErrorReport>
+        {
+            public void Serialize(global::Omnix.Serialization.RocketPack.RocketPackWriter w, ErrorReport value, int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                {
+                    uint propertyCount = 0;
+                    if (value.CreationTime != global::Omnix.Serialization.RocketPack.Timestamp.Zero)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Type != (ErrorReportType)0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
+                }
+
+                if (value.CreationTime != global::Omnix.Serialization.RocketPack.Timestamp.Zero)
+                {
+                    w.Write((uint)0);
+                    w.Write(value.CreationTime);
+                }
+                if (value.Type != (ErrorReportType)0)
+                {
+                    w.Write((uint)1);
+                    w.Write((ulong)value.Type);
+                }
+            }
+
+            public ErrorReport Deserialize(global::Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                uint propertyCount = r.GetUInt32();
+
+                global::Omnix.Serialization.RocketPack.Timestamp p_creationTime = global::Omnix.Serialization.RocketPack.Timestamp.Zero;
+                ErrorReportType p_type = (ErrorReportType)0;
+
+                for (; propertyCount > 0; propertyCount--)
+                {
+                    uint id = r.GetUInt32();
+                    switch (id)
+                    {
+                        case 0:
+                            {
+                                p_creationTime = r.GetTimestamp();
+                                break;
+                            }
+                        case 1:
+                            {
+                                p_type = (ErrorReportType)r.GetUInt64();
+                                break;
+                            }
+                    }
+                }
+
+                return new ErrorReport(p_creationTime, p_type);
+            }
+        }
+    }
+
+    public sealed partial class CheckBlocksProgressReport : global::Omnix.Serialization.RocketPack.RocketPackMessageBase<CheckBlocksProgressReport>
+    {
+        static CheckBlocksProgressReport()
+        {
+            CheckBlocksProgressReport.Formatter = new CustomFormatter();
+            CheckBlocksProgressReport.Empty = new CheckBlocksProgressReport(0, 0, 0);
+        }
+
+        private readonly int __hashCode;
+
+        public CheckBlocksProgressReport(uint badBlockCount, uint checkedBlockCount, uint totalBlockCount)
+        {
+            this.BadBlockCount = badBlockCount;
+            this.CheckedBlockCount = checkedBlockCount;
+            this.TotalBlockCount = totalBlockCount;
+
+            {
+                var __h = new global::System.HashCode();
+                if (this.BadBlockCount != default) __h.Add(this.BadBlockCount.GetHashCode());
+                if (this.CheckedBlockCount != default) __h.Add(this.CheckedBlockCount.GetHashCode());
+                if (this.TotalBlockCount != default) __h.Add(this.TotalBlockCount.GetHashCode());
+                __hashCode = __h.ToHashCode();
+            }
+        }
+
+        public uint BadBlockCount { get; }
+        public uint CheckedBlockCount { get; }
+        public uint TotalBlockCount { get; }
+
+        public override bool Equals(CheckBlocksProgressReport? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (this.BadBlockCount != target.BadBlockCount) return false;
+            if (this.CheckedBlockCount != target.CheckedBlockCount) return false;
+            if (this.TotalBlockCount != target.TotalBlockCount) return false;
+
+            return true;
+        }
+
+        public override int GetHashCode() => __hashCode;
+
+        private sealed class CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<CheckBlocksProgressReport>
+        {
+            public void Serialize(global::Omnix.Serialization.RocketPack.RocketPackWriter w, CheckBlocksProgressReport value, int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                {
+                    uint propertyCount = 0;
+                    if (value.BadBlockCount != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.CheckedBlockCount != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.TotalBlockCount != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
+                }
+
+                if (value.BadBlockCount != 0)
+                {
+                    w.Write((uint)0);
+                    w.Write(value.BadBlockCount);
+                }
+                if (value.CheckedBlockCount != 0)
+                {
+                    w.Write((uint)1);
+                    w.Write(value.CheckedBlockCount);
+                }
+                if (value.TotalBlockCount != 0)
+                {
+                    w.Write((uint)2);
+                    w.Write(value.TotalBlockCount);
+                }
+            }
+
+            public CheckBlocksProgressReport Deserialize(global::Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                uint propertyCount = r.GetUInt32();
+
+                uint p_badBlockCount = 0;
+                uint p_checkedBlockCount = 0;
+                uint p_totalBlockCount = 0;
+
+                for (; propertyCount > 0; propertyCount--)
+                {
+                    uint id = r.GetUInt32();
+                    switch (id)
+                    {
+                        case 0:
+                            {
+                                p_badBlockCount = r.GetUInt32();
+                                break;
+                            }
+                        case 1:
+                            {
+                                p_checkedBlockCount = r.GetUInt32();
+                                break;
+                            }
+                        case 2:
+                            {
+                                p_totalBlockCount = r.GetUInt32();
+                                break;
+                            }
+                    }
+                }
+
+                return new CheckBlocksProgressReport(p_badBlockCount, p_checkedBlockCount, p_totalBlockCount);
             }
         }
     }

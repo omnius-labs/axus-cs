@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnix.Base;
 using Omnix.Cryptography;
-using Xeus.Core.Contents.Internal;
+using Xeus.Core.Internal.Contents.Primitives;
 using Xeus.Core.Tests.Primitives;
 using Xeus.Messages;
 using Xunit;
@@ -16,7 +16,7 @@ namespace Xeus.Core.Tests
     public class BlockStorageTests : TestsBase
     {
         [Fact]
-        public void Test()
+        public async Task Test()
         {
             var random = new Random();
             var options = new XeusOptions(UnitTestEnvironment.TempDirectoryPath);
@@ -30,7 +30,7 @@ namespace Xeus.Core.Tests
                 sizeList.Add(random.Next(0, 1024 * 32));
             }
 
-            blockStorage.Load();
+            await blockStorage.LoadAsync();
             blockStorage.Resize(1024 * 1024 * 1024);
 
             foreach (var size in sizeList)
