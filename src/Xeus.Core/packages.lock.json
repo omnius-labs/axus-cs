@@ -1,0 +1,224 @@
+{
+  "version": 1,
+  "dependencies": {
+    ".NETCoreApp,Version=v2.2": {
+      "Microsoft.NETCore.App": {
+        "type": "Direct",
+        "requested": "[2.2.0, )",
+        "resolved": "2.2.0",
+        "contentHash": "7z5l8Jp324S8bU8+yyWeYHXUFYvKyiI5lqS1dXgTzOx1H69Qbf6df12kCKlNX45LpMfCMd4U3M6p7Rl5Zk7SLA==",
+        "dependencies": {
+          "Microsoft.NETCore.DotNetHostPolicy": "2.2.0",
+          "Microsoft.NETCore.Platforms": "2.2.0",
+          "Microsoft.NETCore.Targets": "2.0.0",
+          "NETStandard.Library": "2.0.3"
+        }
+      },
+      "Microsoft.SourceLink.GitHub": {
+        "type": "Direct",
+        "requested": "[1.0.0-beta2-18618-05, )",
+        "resolved": "1.0.0-beta2-18618-05",
+        "contentHash": "MTBBSI7ggTcnULTFLmud9Qp/SLjyrOlFijJXjMXHSe+3JGMCZeYF4tUNKQwQ989+7gR0nlQMhin63mJB0Tmb6g==",
+        "dependencies": {
+          "Microsoft.Build.Tasks.Git": "1.0.0-beta2-18618-05",
+          "Microsoft.SourceLink.Common": "1.0.0-beta2-18618-05"
+        }
+      },
+      "NLog": {
+        "type": "Direct",
+        "requested": "[4.6.5, )",
+        "resolved": "4.6.5",
+        "contentHash": "DTVz1+irQo7IyXLwaGUj/jteTeCK5ZINZ92kzU+WKD6GQvObI53/CXj4mU88Hx2Z9QsvIjLhhPV3lAVdDK8ULg=="
+      },
+      "Microsoft.Build.Tasks.Git": {
+        "type": "Transitive",
+        "resolved": "1.0.0-beta2-18618-05",
+        "contentHash": "GcxvC20U34k0LNBHxpvO1Nl3YjAbgU3oBn7BxyI6+woB4I0lryHu8bvp4SSRYXF6V2p6QueLw0hPtvaBSa6+5w=="
+      },
+      "Microsoft.NETCore.DotNetAppHost": {
+        "type": "Transitive",
+        "resolved": "2.2.0",
+        "contentHash": "DrhaKInRKKvN6Ns2VNIlC7ZffLOp9THf8cO6X4fytPRJovJUbF49/zzx4WfgX9E44FMsw9hT8hrKiIqDSHvGvA=="
+      },
+      "Microsoft.NETCore.DotNetHostPolicy": {
+        "type": "Transitive",
+        "resolved": "2.2.0",
+        "contentHash": "FJie7IoPZFaPgNDxhZGmDBQP/Bs5vPdfca/G2Wf9gd6LIvMYkZcibtmJwB4tcf4KXkaOYfIOo4Cl9sEPMsSzkw==",
+        "dependencies": {
+          "Microsoft.NETCore.DotNetHostResolver": "2.2.0"
+        }
+      },
+      "Microsoft.NETCore.DotNetHostResolver": {
+        "type": "Transitive",
+        "resolved": "2.2.0",
+        "contentHash": "spDm3AJYmebthDNhzY17YLPtvbc+Y1lCLVeiIH1uLJ/hZaM+40pBiPefFR8J1u66Ndkqi8ipR2tEbqPnYnjRhw==",
+        "dependencies": {
+          "Microsoft.NETCore.DotNetAppHost": "2.2.0"
+        }
+      },
+      "Microsoft.NETCore.Platforms": {
+        "type": "Transitive",
+        "resolved": "2.2.0",
+        "contentHash": "T/J+XZo+YheFTJh8/4uoeJDdz5qOmOMkjg6/VL8mHJ9AnP8+fmV/kcbxeXsob0irRNiChf+V0ig1MCRLp/+Kog=="
+      },
+      "Microsoft.NETCore.Targets": {
+        "type": "Transitive",
+        "resolved": "2.0.0",
+        "contentHash": "odP/tJj1z6GylFpNo7pMtbd/xQgTC3Ex2If63dRTL38bBNMwsBnJ+RceUIyHdRBC0oik/3NehYT+oECwBhIM3Q=="
+      },
+      "Microsoft.SourceLink.Common": {
+        "type": "Transitive",
+        "resolved": "1.0.0-beta2-18618-05",
+        "contentHash": "obLbR9apXZwID0woyykZzhUuU+K4xyLKwyZ8HKSW/SKd7wfywQ19ei6i4MM+ieVF0S7QJQFxGvuTWPlEBsFF6A=="
+      },
+      "NETStandard.Library": {
+        "type": "Transitive",
+        "resolved": "2.0.3",
+        "contentHash": "st47PosZSHrjECdjeIzZQbzivYBJFv6P2nv4cj2ypdI204DO+vZ7l5raGMiX4eXMJ53RfOIg+/s4DHVZ54Nu2A==",
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.1.0"
+        }
+      },
+      "System.IO.Pipelines": {
+        "type": "Transitive",
+        "resolved": "4.5.3",
+        "contentHash": "k6Ac5MuJ/GbFo7l/bB0Bxg0JxHReDi19eW1wuDGIy/iSIAJob0cNHChvILde/v4fdX1ZNmL2Nr7axKG21wbNLw=="
+      },
+      "System.Memory": {
+        "type": "Transitive",
+        "resolved": "4.5.2",
+        "contentHash": "fvq1GNmUFwbKv+aLVYYdgu/+gc8Nu9oFujOxIjPrsf+meis9JBzTPDL6aP/eeGOz9yPj6rRLUbOjKMpsMEWpNg=="
+      },
+      "System.Threading.Channels": {
+        "type": "Transitive",
+        "resolved": "4.5.0",
+        "contentHash": "MEH06N0rIGmRT4LOKQ2BmUO0IxfvmIY/PaouSq+DFQku72OL8cxfw8W99uGpTCFf2vx2QHLRSh374iSM3asdTA=="
+      },
+      "Omnix.Base": {
+        "type": "Project",
+        "dependencies": {
+          "NLog": "4.6.5",
+          "System.IO.Pipelines": "4.5.3"
+        }
+      },
+      "Omnix.Collections": {
+        "type": "Project",
+        "dependencies": {
+          "NLog": "4.6.5",
+          "Omnix.Base": "0.0.2-alpha.1",
+          "System.IO.Pipelines": "4.5.3"
+        }
+      },
+      "Omnix.Configuration": {
+        "type": "Project",
+        "dependencies": {
+          "C:\\home\\dev\\repos\\omnius-labs\\xeus\\refs\\omnix\\src\\Omnix.Algorithms\\Omnix.Algorithms.csproj": "1.0.0",
+          "NLog": "4.6.5",
+          "Omnix.Base": "0.0.2-alpha.1",
+          "Omnix.Io": "0.0.2-alpha.1",
+          "Omnix.Serialization": "0.0.2-alpha.1",
+          "Omnix.Serialization.RocketPack": "0.0.2-alpha.1"
+        }
+      },
+      "Omnix.Correction": {
+        "type": "Project",
+        "dependencies": {
+          "NLog": "4.6.5",
+          "Omnix.Base": "0.0.2-alpha.1"
+        }
+      },
+      "Omnix.Cryptography": {
+        "type": "Project",
+        "dependencies": {
+          "NLog": "4.6.5",
+          "Omnix.Base": "0.0.2-alpha.1",
+          "Omnix.Collections": "0.0.2-alpha.1",
+          "Omnix.Io": "0.0.2-alpha.1",
+          "Omnix.Serialization": "0.0.2-alpha.1",
+          "Omnix.Serialization.RocketPack": "0.0.2-alpha.1",
+          "System.IO.Pipelines": "4.5.3"
+        }
+      },
+      "Omnix.Io": {
+        "type": "Project",
+        "dependencies": {
+          "NLog": "4.6.5",
+          "Omnix.Base": "0.0.2-alpha.1"
+        }
+      },
+      "Omnix.Network": {
+        "type": "Project",
+        "dependencies": {
+          "C:\\home\\dev\\repos\\omnius-labs\\xeus\\refs\\omnix\\src\\Omnix.DataStructures\\Omnix.DataStructures.csproj": "1.0.0",
+          "NLog": "4.6.5",
+          "Omnix.Base": "0.0.2-alpha.1",
+          "Omnix.Serialization": "0.0.2-alpha.1",
+          "Omnix.Serialization.RocketPack": "0.0.2-alpha.1"
+        }
+      },
+      "Omnix.Network.Connection": {
+        "type": "Project",
+        "dependencies": {
+          "C:\\home\\dev\\repos\\omnius-labs\\xeus\\refs\\omnix\\src\\Omnix.Algorithms\\Omnix.Algorithms.csproj": "1.0.0",
+          "C:\\home\\dev\\repos\\omnius-labs\\xeus\\refs\\omnix\\src\\Omnix.DataStructures\\Omnix.DataStructures.csproj": "1.0.0",
+          "NLog": "4.6.5",
+          "Omnix.Base": "0.0.2-alpha.1",
+          "Omnix.Network": "0.0.2-alpha.1",
+          "Omnix.Serialization": "0.0.2-alpha.1",
+          "Omnix.Serialization.RocketPack": "0.0.2-alpha.1",
+          "System.IO.Pipelines": "4.5.3",
+          "System.Memory": "4.5.2",
+          "System.Threading.Channels": "4.5.0"
+        }
+      },
+      "Omnix.Network.Proxy": {
+        "type": "Project",
+        "dependencies": {
+          "NLog": "4.6.5",
+          "Omnix.Base": "0.0.2-alpha.1"
+        }
+      },
+      "Omnix.Network.Upnp": {
+        "type": "Project",
+        "dependencies": {
+          "NLog": "4.6.5",
+          "Omnix.Base": "0.0.2-alpha.1"
+        }
+      },
+      "Omnix.Serialization": {
+        "type": "Project",
+        "dependencies": {
+          "NLog": "4.6.5",
+          "Omnix.Base": "0.0.2-alpha.1",
+          "System.IO.Pipelines": "4.5.3"
+        }
+      },
+      "Omnix.Serialization.RocketPack": {
+        "type": "Project",
+        "dependencies": {
+          "NLog": "4.6.5",
+          "Omnix.Base": "0.0.2-alpha.1",
+          "Omnix.Io": "0.0.2-alpha.1",
+          "Omnix.Serialization": "0.0.2-alpha.1"
+        }
+      },
+      "Xeus.Messages": {
+        "type": "Project",
+        "dependencies": {
+          "NLog": "4.6.5",
+          "Omnix.Base": "0.0.2-alpha.1",
+          "Omnix.Cryptography": "0.0.2-alpha.1",
+          "Omnix.Network": "0.0.2-alpha.1",
+          "Omnix.Serialization": "0.0.2-alpha.1",
+          "Omnix.Serialization.RocketPack": "0.0.2-alpha.1"
+        }
+      },
+      "Xeus.Rpc": {
+        "type": "Project",
+        "dependencies": {
+          "NLog": "4.6.5"
+        }
+      }
+    }
+  }
+}

@@ -1,4 +1,4 @@
-﻿syntax = v1;
+﻿syntax = v1.0;
 
 using "../refs/omnix/formats/Omnix.Cryptography.rpf";
 using "../refs/omnix/formats/Omnix.Network.rpf";
@@ -38,4 +38,19 @@ message ConnectionCreatorOptions {
 
 message XeusOptions {
     ConfigDirectoryPath: string(1024) = 0,
+}
+
+enum ErrorReportType : uint8 {
+    SpaceNotFound = 0,
+}
+
+message ErrorReport {
+    CreationTime: timestamp = 0,
+    Type: ErrorReportType = 1,
+}
+
+message CheckBlocksProgressReport {
+    BadBlockCount: uint32 = 0,
+    CheckedBlockCount: uint32 = 1,
+    TotalBlockCount: uint32 = 2,
 }
