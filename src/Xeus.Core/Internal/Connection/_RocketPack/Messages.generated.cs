@@ -1,11 +1,11 @@
-﻿using Omnix.Cryptography;
+using Omnix.Algorithms.Cryptography;
 using Omnix.Network;
 using Xeus.Core.Internal;
 using Xeus.Messages;
 
 #nullable enable
 
-namespace Xeus.Core.Internal.Connections
+namespace Xeus.Core.Internal.Connection
 {
     internal sealed partial class TcpConnectionCreatorConfig : global::Omnix.Serialization.RocketPack.RocketPackMessageBase<TcpConnectionCreatorConfig>
     {

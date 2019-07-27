@@ -1,4 +1,4 @@
-﻿using Omnix.Cryptography;
+﻿using Omnix.Algorithms.Cryptography;
 using Omnix.Network;
 using Xeus.Messages;
 
@@ -30,7 +30,7 @@ namespace Xeus.Core.Internal
 
             this.CorrectionAlgorithmType = correctionAlgorithmType;
             this.Length = length;
-            this.Hashes = new global::Omnix.Collections.ReadOnlyListSlim<OmniHash>(hashes);
+            this.Hashes = new global::Omnix.DataStructures.ReadOnlyListSlim<OmniHash>(hashes);
 
             {
                 var __h = new global::System.HashCode();
@@ -46,7 +46,7 @@ namespace Xeus.Core.Internal
 
         public CorrectionAlgorithmType CorrectionAlgorithmType { get; }
         public ulong Length { get; }
-        public global::Omnix.Collections.ReadOnlyListSlim<OmniHash> Hashes { get; }
+        public global::Omnix.DataStructures.ReadOnlyListSlim<OmniHash> Hashes { get; }
 
         public override bool Equals(MerkleTreeSection? target)
         {
@@ -169,7 +169,7 @@ namespace Xeus.Core.Internal
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
 
-            this.Sections = new global::Omnix.Collections.ReadOnlyListSlim<MerkleTreeSection>(sections);
+            this.Sections = new global::Omnix.DataStructures.ReadOnlyListSlim<MerkleTreeSection>(sections);
 
             {
                 var __h = new global::System.HashCode();
@@ -181,7 +181,7 @@ namespace Xeus.Core.Internal
             }
         }
 
-        public global::Omnix.Collections.ReadOnlyListSlim<MerkleTreeSection> Sections { get; }
+        public global::Omnix.DataStructures.ReadOnlyListSlim<MerkleTreeSection> Sections { get; }
 
         public override bool Equals(MerkleTreeNode? target)
         {

@@ -7,18 +7,16 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Omnix.Algorithms.Cryptography;
 using Omnix.Base;
 using Omnix.Base.Helpers;
 using Omnix.Configuration;
-using Omnix.Cryptography;
-using Omnix.Serialization;
 using Omnix.Serialization.RocketPack;
-using Xeus.Core.Internal;
 using Xeus.Core.Internal.Helpers;
 using Xeus.Core.Internal.Primitives;
 using Xeus.Messages;
 
-namespace Xeus.Core.Internal.Contents.Primitives
+namespace Xeus.Core.Internal.Content.Primitives
 {
     internal sealed partial class BlockStorage : DisposableBase, ISettings, IEnumerable<OmniHash>
     {
@@ -400,7 +398,7 @@ namespace Xeus.Core.Internal.Contents.Primitives
             }, token);
         }
 
-        private byte[] _sectorBuffer = new byte[SectorSize];
+        private readonly byte[] _sectorBuffer = new byte[SectorSize];
 
         public bool TryGet(OmniHash hash, out IMemoryOwner<byte>? memoryOwner)
         {
@@ -416,9 +414,8 @@ namespace Xeus.Core.Internal.Contents.Primitives
             {
                 lock (_lockObject)
                 {
-                    ClusterMetadata? clusterInfo = null;
 
-                    if (_clusterMetadataMap.TryGetValue(hash, out clusterInfo))
+                    if (_clusterMetadataMap.TryGetValue(hash, out var clusterInfo))
                     {
                         clusterInfo = new ClusterMetadata(clusterInfo.Sectors.ToArray(), clusterInfo.Length, Timestamp.FromDateTime(DateTime.UtcNow));
                         _clusterMetadataMap[hash] = clusterInfo;
@@ -525,9 +522,8 @@ namespace Xeus.Core.Internal.Contents.Primitives
                     return true;
                 }
 
-                ulong[] sectors;
 
-                if (!this.TryGetFreeSectors((int)((value.Length + (SectorSize - 1)) / SectorSize), out sectors))
+                if (!this.TryGetFreeSectors((int)((value.Length + (SectorSize - 1)) / SectorSize), out var sectors))
                 {
                     _errorReportEventQueue.Enqueue(new ErrorReport(Timestamp.FromDateTime(DateTime.UtcNow), ErrorReportType.SpaceNotFound));
 

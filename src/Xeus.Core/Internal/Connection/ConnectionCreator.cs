@@ -1,16 +1,14 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnix.Base;
 using Omnix.Configuration;
 using Omnix.Network;
-using Xeus.Core.Internal.Connections.Primitives;
+using Xeus.Core.Internal.Connection.Primitives;
 using Xeus.Core.Internal.Primitives;
 using Xeus.Messages;
 
-namespace Xeus.Core.Internal.Connections
+namespace Xeus.Core.Internal.Connection
 {
     internal sealed class ConnectionCreator : ServiceBase, ISettings
     {

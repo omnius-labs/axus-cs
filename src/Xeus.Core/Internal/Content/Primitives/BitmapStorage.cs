@@ -1,12 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
 using Omnix.Base;
-using Omnix.Io;
-using Xeus.Core.Internal;
 using Xeus.Core.Internal.Helpers;
 
-namespace Xeus.Core.Internal.Contents.Primitives
+namespace Xeus.Core.Internal.Content.Primitives
 {
     internal sealed class BitmapStorage : DisposableBase
     {

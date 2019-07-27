@@ -1,11 +1,11 @@
-﻿using Omnix.Cryptography;
+using Omnix.Algorithms.Cryptography;
 using Omnix.Network;
 using Xeus.Core.Internal;
 using Xeus.Messages;
 
 #nullable enable
 
-namespace Xeus.Core.Internal.Contents
+namespace Xeus.Core.Internal.Content
 {
     internal sealed partial class ClusterMetadata : global::Omnix.Serialization.RocketPack.RocketPackMessageBase<ClusterMetadata>
     {
@@ -23,7 +23,7 @@ namespace Xeus.Core.Internal.Contents
         {
             if (sectors is null) throw new global::System.ArgumentNullException("sectors");
             if (sectors.Length > 256) throw new global::System.ArgumentOutOfRangeException("sectors");
-            this.Sectors = new global::Omnix.Collections.ReadOnlyListSlim<ulong>(sectors);
+            this.Sectors = new global::Omnix.DataStructures.ReadOnlyListSlim<ulong>(sectors);
             this.Length = length;
             this.LastAccessTime = lastAccessTime;
 
@@ -39,7 +39,7 @@ namespace Xeus.Core.Internal.Contents
             }
         }
 
-        public global::Omnix.Collections.ReadOnlyListSlim<ulong> Sectors { get; }
+        public global::Omnix.DataStructures.ReadOnlyListSlim<ulong> Sectors { get; }
         public uint Length { get; }
         public global::Omnix.Serialization.RocketPack.Timestamp LastAccessTime { get; }
 
@@ -161,7 +161,7 @@ namespace Xeus.Core.Internal.Contents
             if (lockedHashes is null) throw new global::System.ArgumentNullException("lockedHashes");
             if (lockedHashes.Length > 1073741824) throw new global::System.ArgumentOutOfRangeException("lockedHashes");
             this.Clue = clue;
-            this.LockedHashes = new global::Omnix.Collections.ReadOnlyListSlim<OmniHash>(lockedHashes);
+            this.LockedHashes = new global::Omnix.DataStructures.ReadOnlyListSlim<OmniHash>(lockedHashes);
             this.SharedBlocksMetadata = sharedBlocksMetadata;
 
             {
@@ -177,7 +177,7 @@ namespace Xeus.Core.Internal.Contents
         }
 
         public XeusClue Clue { get; }
-        public global::Omnix.Collections.ReadOnlyListSlim<OmniHash> LockedHashes { get; }
+        public global::Omnix.DataStructures.ReadOnlyListSlim<OmniHash> LockedHashes { get; }
         public SharedBlocksMetadata? SharedBlocksMetadata { get; }
 
         public override bool Equals(ContentMetadata? target)
@@ -304,7 +304,7 @@ namespace Xeus.Core.Internal.Contents
             this.Path = path;
             this.Length = length;
             this.BlockLength = blockLength;
-            this.Hashes = new global::Omnix.Collections.ReadOnlyListSlim<OmniHash>(hashes);
+            this.Hashes = new global::Omnix.DataStructures.ReadOnlyListSlim<OmniHash>(hashes);
 
             {
                 var __h = new global::System.HashCode();
@@ -322,7 +322,7 @@ namespace Xeus.Core.Internal.Contents
         public string Path { get; }
         public ulong Length { get; }
         public uint BlockLength { get; }
-        public global::Omnix.Collections.ReadOnlyListSlim<OmniHash> Hashes { get; }
+        public global::Omnix.DataStructures.ReadOnlyListSlim<OmniHash> Hashes { get; }
 
         public override bool Equals(SharedBlocksMetadata? target)
         {
@@ -463,7 +463,7 @@ namespace Xeus.Core.Internal.Contents
 
             this.Version = version;
             this.Size = size;
-            this.ClusterMetadataMap = new global::Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata>(clusterMetadataMap);
+            this.ClusterMetadataMap = new global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata>(clusterMetadataMap);
 
             {
                 var __h = new global::System.HashCode();
@@ -480,7 +480,7 @@ namespace Xeus.Core.Internal.Contents
 
         public uint Version { get; }
         public ulong Size { get; }
-        public global::Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata> ClusterMetadataMap { get; }
+        public global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata> ClusterMetadataMap { get; }
 
         public override bool Equals(BlockStorageConfig? target)
         {
@@ -609,7 +609,7 @@ namespace Xeus.Core.Internal.Contents
             }
 
             this.Version = version;
-            this.ContentMetadatas = new global::Omnix.Collections.ReadOnlyListSlim<ContentMetadata>(contentMetadatas);
+            this.ContentMetadatas = new global::Omnix.DataStructures.ReadOnlyListSlim<ContentMetadata>(contentMetadatas);
 
             {
                 var __h = new global::System.HashCode();
@@ -623,7 +623,7 @@ namespace Xeus.Core.Internal.Contents
         }
 
         public uint Version { get; }
-        public global::Omnix.Collections.ReadOnlyListSlim<ContentMetadata> ContentMetadatas { get; }
+        public global::Omnix.DataStructures.ReadOnlyListSlim<ContentMetadata> ContentMetadatas { get; }
 
         public override bool Equals(ContentStorageConfig? target)
         {

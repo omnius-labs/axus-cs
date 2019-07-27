@@ -1,16 +1,12 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
-using Omnix.Base;
-using Omnix.Io;
 using System.Linq;
-using Omnix.Cryptography;
+using Omnix.Algorithms.Cryptography;
 
-namespace Xeus.Core.Internal.Contents.Primitives
+namespace Xeus.Core.Internal.Content.Primitives
 {
     internal sealed class ProtectionStatus
     {
-        private Dictionary<OmniHash, int> _lockedHashMap = new Dictionary<OmniHash, int>();
+        private readonly Dictionary<OmniHash, int> _lockedHashMap = new Dictionary<OmniHash, int>();
 
         public ProtectionStatus()
         {
@@ -29,8 +25,7 @@ namespace Xeus.Core.Internal.Contents.Primitives
 
         public void Add(OmniHash hash)
         {
-            int count;
-            _lockedHashMap.TryGetValue(hash, out count);
+            _lockedHashMap.TryGetValue(hash, out int count);
 
             count++;
 
@@ -39,8 +34,7 @@ namespace Xeus.Core.Internal.Contents.Primitives
 
         public void Remove(OmniHash hash)
         {
-            int count;
-            if (!_lockedHashMap.TryGetValue(hash, out count))
+            if (!_lockedHashMap.TryGetValue(hash, out int count))
             {
                 throw new KeyNotFoundException();
             }

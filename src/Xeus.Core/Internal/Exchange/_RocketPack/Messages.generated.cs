@@ -1,4 +1,4 @@
-﻿using Omnix.Cryptography;
+﻿using Omnix.Algorithms.Cryptography;
 using Omnix.Network;
 using Xeus.Core.Internal;
 using Xeus.Messages;
@@ -527,7 +527,7 @@ namespace Xeus.Core.Internal.Exchange
             if (protocolVersions is null) throw new global::System.ArgumentNullException("protocolVersions");
             if (protocolVersions.Length > 32) throw new global::System.ArgumentOutOfRangeException("protocolVersions");
 
-            this.ProtocolVersions = new global::Omnix.Collections.ReadOnlyListSlim<ProtocolVersion>(protocolVersions);
+            this.ProtocolVersions = new global::Omnix.DataStructures.ReadOnlyListSlim<ProtocolVersion>(protocolVersions);
 
             {
                 var __h = new global::System.HashCode();
@@ -539,7 +539,7 @@ namespace Xeus.Core.Internal.Exchange
             }
         }
 
-        public global::Omnix.Collections.ReadOnlyListSlim<ProtocolVersion> ProtocolVersions { get; }
+        public global::Omnix.DataStructures.ReadOnlyListSlim<ProtocolVersion> ProtocolVersions { get; }
 
         public override bool Equals(HelloMessage? target)
         {
@@ -736,7 +736,7 @@ namespace Xeus.Core.Internal.Exchange
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
 
-            this.Addresses = new global::Omnix.Collections.ReadOnlyListSlim<OmniAddress>(addresses);
+            this.Addresses = new global::Omnix.DataStructures.ReadOnlyListSlim<OmniAddress>(addresses);
 
             {
                 var __h = new global::System.HashCode();
@@ -748,7 +748,7 @@ namespace Xeus.Core.Internal.Exchange
             }
         }
 
-        public global::Omnix.Collections.ReadOnlyListSlim<OmniAddress> Addresses { get; }
+        public global::Omnix.DataStructures.ReadOnlyListSlim<OmniAddress> Addresses { get; }
 
         public override bool Equals(NodeAddressesMessage? target)
         {
@@ -941,7 +941,7 @@ namespace Xeus.Core.Internal.Exchange
                 if (n.Value is null) throw new global::System.ArgumentNullException("n.Value");
             }
 
-            this.Parameters = new global::Omnix.Collections.ReadOnlyDictionarySlim<OmniSignature, RelayOption>(parameters);
+            this.Parameters = new global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniSignature, RelayOption>(parameters);
 
             {
                 var __h = new global::System.HashCode();
@@ -954,7 +954,7 @@ namespace Xeus.Core.Internal.Exchange
             }
         }
 
-        public global::Omnix.Collections.ReadOnlyDictionarySlim<OmniSignature, RelayOption> Parameters { get; }
+        public global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniSignature, RelayOption> Parameters { get; }
 
         public override bool Equals(WantBroadcastCluesMessage? target)
         {
@@ -1051,7 +1051,7 @@ namespace Xeus.Core.Internal.Exchange
                 if (n.Value is null) throw new global::System.ArgumentNullException("n.Value");
             }
 
-            this.Parameters = new global::Omnix.Collections.ReadOnlyDictionarySlim<OmniSignature, RelayOption>(parameters);
+            this.Parameters = new global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniSignature, RelayOption>(parameters);
 
             {
                 var __h = new global::System.HashCode();
@@ -1064,7 +1064,7 @@ namespace Xeus.Core.Internal.Exchange
             }
         }
 
-        public global::Omnix.Collections.ReadOnlyDictionarySlim<OmniSignature, RelayOption> Parameters { get; }
+        public global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniSignature, RelayOption> Parameters { get; }
 
         public override bool Equals(WantUnicastCluesMessage? target)
         {
@@ -1161,7 +1161,7 @@ namespace Xeus.Core.Internal.Exchange
                 if (n.Value is null) throw new global::System.ArgumentNullException("n.Value");
             }
 
-            this.Parameters = new global::Omnix.Collections.ReadOnlyDictionarySlim<OmniSignature, RelayOption>(parameters);
+            this.Parameters = new global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniSignature, RelayOption>(parameters);
 
             {
                 var __h = new global::System.HashCode();
@@ -1174,7 +1174,7 @@ namespace Xeus.Core.Internal.Exchange
             }
         }
 
-        public global::Omnix.Collections.ReadOnlyDictionarySlim<OmniSignature, RelayOption> Parameters { get; }
+        public global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniSignature, RelayOption> Parameters { get; }
 
         public override bool Equals(WantMulticastCluesMessage? target)
         {
@@ -1270,7 +1270,7 @@ namespace Xeus.Core.Internal.Exchange
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
 
-            this.Results = new global::Omnix.Collections.ReadOnlyListSlim<BroadcastClue>(results);
+            this.Results = new global::Omnix.DataStructures.ReadOnlyListSlim<BroadcastClue>(results);
 
             {
                 var __h = new global::System.HashCode();
@@ -1282,7 +1282,7 @@ namespace Xeus.Core.Internal.Exchange
             }
         }
 
-        public global::Omnix.Collections.ReadOnlyListSlim<BroadcastClue> Results { get; }
+        public global::Omnix.DataStructures.ReadOnlyListSlim<BroadcastClue> Results { get; }
 
         public override bool Equals(BroadcastCluesMessage? target)
         {
@@ -1373,7 +1373,7 @@ namespace Xeus.Core.Internal.Exchange
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
 
-            this.Results = new global::Omnix.Collections.ReadOnlyListSlim<UnicastClue>(results);
+            this.Results = new global::Omnix.DataStructures.ReadOnlyListSlim<UnicastClue>(results);
 
             {
                 var __h = new global::System.HashCode();
@@ -1385,7 +1385,7 @@ namespace Xeus.Core.Internal.Exchange
             }
         }
 
-        public global::Omnix.Collections.ReadOnlyListSlim<UnicastClue> Results { get; }
+        public global::Omnix.DataStructures.ReadOnlyListSlim<UnicastClue> Results { get; }
 
         public override bool Equals(UnicastCluesMessage? target)
         {
@@ -1476,7 +1476,7 @@ namespace Xeus.Core.Internal.Exchange
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
 
-            this.Results = new global::Omnix.Collections.ReadOnlyListSlim<MulticastClue>(results);
+            this.Results = new global::Omnix.DataStructures.ReadOnlyListSlim<MulticastClue>(results);
 
             {
                 var __h = new global::System.HashCode();
@@ -1488,7 +1488,7 @@ namespace Xeus.Core.Internal.Exchange
             }
         }
 
-        public global::Omnix.Collections.ReadOnlyListSlim<MulticastClue> Results { get; }
+        public global::Omnix.DataStructures.ReadOnlyListSlim<MulticastClue> Results { get; }
 
         public override bool Equals(MulticastCluesMessage? target)
         {
@@ -1579,7 +1579,7 @@ namespace Xeus.Core.Internal.Exchange
                 if (n.Value is null) throw new global::System.ArgumentNullException("n.Value");
             }
 
-            this.Parameters = new global::Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, RelayOption>(parameters);
+            this.Parameters = new global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniHash, RelayOption>(parameters);
 
             {
                 var __h = new global::System.HashCode();
@@ -1592,7 +1592,7 @@ namespace Xeus.Core.Internal.Exchange
             }
         }
 
-        public global::Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, RelayOption> Parameters { get; }
+        public global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniHash, RelayOption> Parameters { get; }
 
         public override bool Equals(PublishBlocksMessage? target)
         {
@@ -1688,7 +1688,7 @@ namespace Xeus.Core.Internal.Exchange
                 if (n.Value is null) throw new global::System.ArgumentNullException("n.Value");
             }
 
-            this.Parameters = new global::Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, RelayOption>(parameters);
+            this.Parameters = new global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniHash, RelayOption>(parameters);
 
             {
                 var __h = new global::System.HashCode();
@@ -1701,7 +1701,7 @@ namespace Xeus.Core.Internal.Exchange
             }
         }
 
-        public global::Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, RelayOption> Parameters { get; }
+        public global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniHash, RelayOption> Parameters { get; }
 
         public override bool Equals(WantBlocksMessage? target)
         {
