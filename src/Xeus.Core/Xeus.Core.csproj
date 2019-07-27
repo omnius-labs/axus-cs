@@ -4,11 +4,11 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Base\Omnix.Base.csproj" />
-    <ProjectReference Include="..\..\refs\omnix\src\Omnix.Collections\Omnix.Collections.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Configuration\Omnix.Configuration.csproj" />
-    <ProjectReference Include="..\..\refs\omnix\src\Omnix.Correction\Omnix.Correction.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Io\Omnix.Io.csproj" />
+    <ProjectReference Include="..\..\refs\omnix\src\Omnix.Network.Connections\Omnix.Network.Connections.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Network.Connection\Omnix.Network.Connection.csproj" />
+    <ProjectReference Include="..\..\refs\omnix\src\Omnix.Network.Proxies\Omnix.Network.Proxies.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Network.Proxy\Omnix.Network.Proxy.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Network.Upnp\Omnix.Network.Upnp.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Network\Omnix.Network.csproj" />

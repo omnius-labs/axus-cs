@@ -4,11 +4,11 @@
     ".NETCoreApp,Version=v3.0": {
       "Microsoft.NETCore.App": {
         "type": "Direct",
-        "requested": "[3.0.0-preview6-27804-01, )",
-        "resolved": "3.0.0-preview6-27804-01",
-        "contentHash": "ZusFeFw4lm4f3W1GyaTDbEdqln8N0fWFijKpykPLLvrEEsppfZwx8n/UeMm/e56QspzGHKpJfmKi4YF2Z6+G6A==",
+        "requested": "[3.0.0-preview7-27912-14, )",
+        "resolved": "3.0.0-preview7-27912-14",
+        "contentHash": "TNDdHAcfUqEaWXXJoCMUGZnsIP53jlShQV4Ccw8Nqbl8SWkkz1llq4ckfoRl7QrHoq328JhEyCSnPaaYHAB5Xg==",
         "dependencies": {
-          "Microsoft.NETCore.Platforms": "3.0.0-preview6.19303.8"
+          "Microsoft.NETCore.Platforms": "3.0.0-preview7.19362.9"
         }
       },
       "Microsoft.SourceLink.GitHub": {
@@ -34,8 +34,8 @@
       },
       "Microsoft.NETCore.Platforms": {
         "type": "Transitive",
-        "resolved": "3.0.0-preview6.19303.8",
-        "contentHash": "9nE9InmtkWL1ZIAvzZPoe8zzr8JNrmyofR5++0NCLomrLSbR70b60hLXFE/7vXIVgbKdTo3CTsCcFTOSZoOIEw=="
+        "resolved": "3.0.0-preview7.19362.9",
+        "contentHash": "gc5/X1m73JO8ETxOHC3IbgM7JRa7LPsSY+/lVs88YGwKn0QYuU568EmpC8yPk9UKaAOq+82PWG61vFcXdNfsvQ=="
       },
       "Microsoft.SourceLink.Common": {
         "type": "Transitive",

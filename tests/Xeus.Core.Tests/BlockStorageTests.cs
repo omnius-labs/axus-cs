@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
+using Omnix.Algorithms.Cryptography;
 using Omnix.Base;
-using Omnix.Cryptography;
-using Xeus.Core.Internal.Contents.Primitives;
+using Xeus.Core.Internal.Content.Primitives;
 using Xeus.Core.Tests.Primitives;
 using Xeus.Messages;
 using Xunit;
@@ -33,20 +30,25 @@ namespace Xeus.Core.Tests
             await blockStorage.LoadAsync();
             blockStorage.Resize(1024 * 1024 * 1024);
 
+            var hashList = new List<OmniHash>();
+
             foreach (var size in sizeList)
             {
-                var hashList = new List<OmniHash>();
+                using var memoryOwner = BufferPool.Shared.Rent(size);
+                random.NextBytes(memoryOwner.Memory.Span);
+                var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(memoryOwner.Memory.Span));
 
-                {
-                    using var memoryOwner = BufferPool.Shared.Rent(size);
-                    random.NextBytes(memoryOwner.Memory.Span);
-                    var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(memoryOwner.Memory.Span));
+                Assert.True(blockStorage.TrySet(hash, memoryOwner.Memory.Span));
 
-                    Assert.True(blockStorage.TrySet(hash, memoryOwner.Memory.Span));
+                hashList.Add(hash);
+            }
 
-                    hashList.Add(hash);
-                }
+            foreach (var hash in hashList)
+            {
+                Assert.True(blockStorage.TryGet(hash, out var memoryOwner));
+                Assert.True(BytesOperations.SequenceEqual(hash.Value.Span, Sha2_256.ComputeHash(memoryOwner.Memory.Span)));
             }
         }
     }
 }
+

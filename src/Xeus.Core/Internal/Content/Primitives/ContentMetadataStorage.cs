@@ -1,14 +1,11 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Omnix.Base.Extensions;
+using Omnix.Algorithms.Cryptography;
 using Omnix.Base.Helpers;
-using Omnix.Collections;
-using Omnix.Cryptography;
 using Xeus.Messages;
 
-namespace Xeus.Core.Internal.Contents.Primitives
+namespace Xeus.Core.Internal.Content.Primitives
 {
     internal sealed class ContentMetadataStorage : ISetOperators<OmniHash>, IEnumerable<ContentMetadata>
     {
@@ -58,8 +55,7 @@ namespace Xeus.Core.Internal.Contents.Primitives
 
         public ContentMetadata? GetMessageContentMetadata(XeusClue clue)
         {
-            ContentMetadata contentInfo;
-            if (!_messageContentMetadatas.TryGetValue(clue, out contentInfo))
+            if (!_messageContentMetadatas.TryGetValue(clue, out var contentInfo))
             {
                 return null;
             }
@@ -96,8 +92,7 @@ namespace Xeus.Core.Internal.Contents.Primitives
 
         public ContentMetadata? GetFileContentMetadata(string path)
         {
-            ContentMetadata contentInfo;
-            if (!_fileContentMetadatas.TryGetValue(path, out contentInfo))
+            if (!_fileContentMetadatas.TryGetValue(path, out var contentInfo))
             {
                 return null;
             }
@@ -169,7 +164,7 @@ namespace Xeus.Core.Internal.Contents.Primitives
 
         #endregion
 
-        sealed class HashMap
+        private sealed class HashMap
         {
             private readonly HashSet<SharedBlocksMetadata> _hashSet = new HashSet<SharedBlocksMetadata>();
 

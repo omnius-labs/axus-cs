@@ -9,7 +9,7 @@ namespace Xeus.Core.Internal.Primitives
         ValueTask SaveAsync();
     }
 
-    sealed class SettingsAlreadyLoadedException : Exception
+    internal sealed class SettingsAlreadyLoadedException : Exception
     {
         public SettingsAlreadyLoadedException() { }
         public SettingsAlreadyLoadedException(string message) : base(message) { }

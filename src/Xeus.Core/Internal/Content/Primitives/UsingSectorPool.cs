@@ -1,19 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.IO;
 using Omnix.Base;
-using Omnix.Io;
 using Xeus.Core.Internal.Helpers;
 
-namespace Xeus.Core.Internal.Contents.Primitives
+namespace Xeus.Core.Internal.Content.Primitives
 {
     internal sealed class UsingSectorPool : DisposableBase
     {
         private readonly BitmapStorage _bitmapStorage;
         private readonly BufferPool _bufferPool;
 
-        private HashSet<ulong> _freeSectors = new HashSet<ulong>();
+        private readonly HashSet<ulong> _freeSectors = new HashSet<ulong>();
         private ulong _size;
 
         private ulong _totalSectorCount;
@@ -41,6 +39,7 @@ namespace Xeus.Core.Internal.Contents.Primitives
             _totalSectorCount = MathHelper.Roundup(_size, SectorSize) / SectorSize;
             _usingSectorCount = 0;
 
+            _bitmapStorage.SetLength(_totalSectorCount);
         }
 
         public void SetUsingSectors(IEnumerable<ulong> sectors)

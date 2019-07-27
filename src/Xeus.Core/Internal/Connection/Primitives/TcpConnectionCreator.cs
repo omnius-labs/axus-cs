@@ -8,15 +8,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnix.Base;
 using Omnix.Base.Extensions;
-using Omnix.Collections;
 using Omnix.Configuration;
+using Omnix.DataStructures;
 using Omnix.Net.Upnp;
 using Omnix.Network;
-using Omnix.Network.Proxy;
+using Omnix.Network.Proxies;
 using Xeus.Core.Internal.Primitives;
 using Xeus.Messages;
 
-namespace Xeus.Core.Internal.Connections.Primitives
+namespace Xeus.Core.Internal.Connection.Primitives
 {
     internal sealed class TcpConnectionCreator : ServiceBase, ISettings
     {
@@ -228,9 +228,11 @@ namespace Xeus.Core.Internal.Connections.Primitives
 
                 try
                 {
-                    socket = new Socket(remoteEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                    socket.SendTimeout = 1000 * 10;
-                    socket.ReceiveTimeout = 1000 * 10;
+                    socket = new Socket(remoteEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp)
+                    {
+                        SendTimeout = 1000 * 10,
+                        ReceiveTimeout = 1000 * 10
+                    };
                     socket.Connect(remoteEndPoint);
 
                     return socket;
@@ -265,10 +267,8 @@ namespace Xeus.Core.Internal.Connections.Primitives
                 return null;
             }
 
-            IPAddress ipAddress;
-            ushort port;
 
-            if (!TryGetEndpoint(address, out ipAddress, out port))
+            if (!TryGetEndpoint(address, out var ipAddress, out ushort port))
             {
                 return null;
             }
@@ -283,10 +283,8 @@ namespace Xeus.Core.Internal.Connections.Primitives
 
                 if (config.ProxyOptions != null)
                 {
-                    IPAddress proxyAddress;
-                    ushort proxyPort;
 
-                    if (!TryGetEndpoint(config.ProxyOptions.Address, out proxyAddress, out proxyPort, true))
+                    if (!TryGetEndpoint(config.ProxyOptions.Address, out var proxyAddress, out ushort proxyPort, true))
                     {
                         return null;
                     }
@@ -499,10 +497,8 @@ namespace Xeus.Core.Internal.Connections.Primitives
                                 continue;
                             }
 
-                            IPAddress ipAddress;
-                            ushort port;
 
-                            if (!TryGetEndpoint(listenAddress, out ipAddress, out port, false))
+                            if (!TryGetEndpoint(listenAddress, out var ipAddress, out ushort port, false))
                             {
                                 continue;
                             }
@@ -523,10 +519,8 @@ namespace Xeus.Core.Internal.Connections.Primitives
                                     continue;
                                 }
 
-                                IPAddress ipAddress;
-                                ushort port;
 
-                                if (!TryGetEndpoint(listenAddress, out ipAddress, out port, false))
+                                if (!TryGetEndpoint(listenAddress, out var ipAddress, out ushort port, false))
                                 {
                                     continue;
                                 }
@@ -620,7 +614,7 @@ namespace Xeus.Core.Internal.Connections.Primitives
         {
             await Task.Run(async () =>
             {
-                using(await _settingsAsyncLock.LockAsync())
+                using (await _settingsAsyncLock.LockAsync())
                 {
                     try
                     {

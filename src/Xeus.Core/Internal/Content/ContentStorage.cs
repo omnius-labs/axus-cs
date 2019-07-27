@@ -6,23 +6,20 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Omnix.Algorithms.Correction;
+using Omnix.Algorithms.Cryptography;
 using Omnix.Base;
 using Omnix.Base.Helpers;
 using Omnix.Configuration;
-using Omnix.Correction;
-using Omnix.Cryptography;
 using Omnix.Io;
-using Omnix.Serialization;
-using Omnix.Serialization.RocketPack;
 using Omnix.Serialization.RocketPack.Helpers;
-using Xeus.Core.Internal;
-using Xeus.Core.Internal.Contents.Primitives;
+using Xeus.Core.Internal.Content.Primitives;
 using Xeus.Core.Internal.Primitives;
 using Xeus.Messages;
 
-namespace Xeus.Core.Internal.Contents
+namespace Xeus.Core.Internal.Content
 {
-    sealed class ContentStorage : DisposableBase, ISettings, ISetOperators<OmniHash>, IEnumerable<OmniHash>
+    internal sealed class ContentStorage : DisposableBase, ISettings, ISetOperators<OmniHash>, IEnumerable<OmniHash>
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -628,7 +625,7 @@ namespace Xeus.Core.Internal.Contents
 
                                         if (hashAlgorithmType == OmniHashAlgorithmType.Sha2_256)
                                         {
-                                            hash = new OmniHash( OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(bufferMemoryOwner.Memory.Span));
+                                            hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(bufferMemoryOwner.Memory.Span));
                                         }
 
                                         sharedHashes.Add(hash);
@@ -642,7 +639,7 @@ namespace Xeus.Core.Internal.Contents
                                         }
                                     }
 
-                                    var parityHashes = await this.ParityEncode(targetMemoryOwners.Select(n=>n.Memory), hashAlgorithmType, correctionAlgorithmType, token);
+                                    var parityHashes = await this.ParityEncode(targetMemoryOwners.Select(n => n.Memory), hashAlgorithmType, correctionAlgorithmType, token);
                                     lockedHashes.UnionWith(parityHashes);
 
                                     merkleTreeSectionList.Add(new MerkleTreeSection(correctionAlgorithmType, sumLength, CollectionHelper.Unite(targetHashes, parityHashes).ToArray()));
@@ -684,7 +681,7 @@ namespace Xeus.Core.Internal.Contents
                                 using (var bufferMemoryOwner = _bufferPool.Rent((int)stream.Length))
                                 {
                                     stream.Read(bufferMemoryOwner.Memory.Span);
- 
+
                                     if (hashAlgorithmType == OmniHashAlgorithmType.Sha2_256)
                                     {
                                         hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(bufferMemoryOwner.Memory.Span));
@@ -736,7 +733,7 @@ namespace Xeus.Core.Internal.Contents
 
                                             OmniHash hash;
 
-                                            if (hashAlgorithmType ==  OmniHashAlgorithmType.Sha2_256)
+                                            if (hashAlgorithmType == OmniHashAlgorithmType.Sha2_256)
                                             {
                                                 hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(bufferMemoryOwner.Memory.Span));
                                             }
@@ -753,7 +750,7 @@ namespace Xeus.Core.Internal.Contents
                                             lockedHashes.Add(hash);
 
                                             targetHashes.Add(hash);
-                                           targetMemoryOwners.Add(bufferMemoryOwner);
+                                            targetMemoryOwners.Add(bufferMemoryOwner);
 
                                             if (targetMemoryOwners.Count >= 128)
                                             {
@@ -761,7 +758,7 @@ namespace Xeus.Core.Internal.Contents
                                             }
                                         }
 
-                                        var parityHashes = await this.ParityEncode(targetMemoryOwners.Select(n=>n.Memory), hashAlgorithmType, correctionAlgorithmType, token);
+                                        var parityHashes = await this.ParityEncode(targetMemoryOwners.Select(n => n.Memory), hashAlgorithmType, correctionAlgorithmType, token);
                                         lockedHashes.UnionWith(parityHashes);
 
                                         merkleTreeSectionList.Add(new MerkleTreeSection(correctionAlgorithmType, sumLength, CollectionHelper.Unite(targetHashes, parityHashes).ToArray()));
@@ -810,7 +807,7 @@ namespace Xeus.Core.Internal.Contents
 
         private async ValueTask<OmniHash[]> ParityEncode(IEnumerable<Memory<byte>> buffers, OmniHashAlgorithmType hashAlgorithmType, CorrectionAlgorithmType correctionAlgorithmType, CancellationToken token = default)
         {
-            return await Task.Run(() =>
+            return await Task.Run(async () =>
             {
                 if (correctionAlgorithmType == CorrectionAlgorithmType.ReedSolomon8)
                 {
@@ -824,7 +821,7 @@ namespace Xeus.Core.Internal.Contents
                     try
                     {
                         var targetBuffers = new ReadOnlyMemory<byte>[buffers.Count()];
-                        var parityMemoryOwners = new IMemoryOwner<byte>[buffers.Count()];
+                        var parityMemoryOwners = new IMemoryOwner<byte>[128];
 
                         int blockLength = buffers.Max(n => n.Length);
 
@@ -838,7 +835,7 @@ namespace Xeus.Core.Internal.Contents
 
                                 if (buffer.Length < blockLength)
                                 {
-                                    var tempMemoryOwner = _bufferPool.Rent((int)blockLength);
+                                    var tempMemoryOwner = _bufferPool.Rent(blockLength);
 
                                     BytesOperations.Copy(buffer.Span, tempMemoryOwner.Memory.Span, buffer.Length);
                                     BytesOperations.Zero(tempMemoryOwner.Memory.Span.Slice(buffer.Length));
@@ -869,7 +866,7 @@ namespace Xeus.Core.Internal.Contents
                         }
 
                         var reedSolomon = new ReedSolomon8(targetBuffers.Length, targetBuffers.Length + parityMemoryOwners.Length, _bufferPool);
-                        reedSolomon.Encode(targetBuffers, indexes, parityMemoryOwners.Select(n => n.Memory).ToArray(), blockLength, _threadCount, token).Wait();
+                        await reedSolomon.Encode(targetBuffers, indexes, parityMemoryOwners.Select(n => n.Memory).ToArray(), blockLength, _threadCount, token);
 
                         token.ThrowIfCancellationRequested();
 
@@ -1033,7 +1030,7 @@ namespace Xeus.Core.Internal.Contents
         {
             using (await _settingsAsyncLock.LockAsync())
             {
-                if(_loaded)
+                if (_loaded)
                 {
                     throw new SettingsAlreadyLoadedException();
                 }
@@ -1126,21 +1123,21 @@ namespace Xeus.Core.Internal.Contents
         }
     }
 
-    sealed class BlockNotFoundException : Exception
+    internal sealed class BlockNotFoundException : Exception
     {
         public BlockNotFoundException() { }
         public BlockNotFoundException(string message) : base(message) { }
         public BlockNotFoundException(string message, Exception innerException) : base(message, innerException) { }
     }
 
-    sealed class ParityDecodeFailed : Exception
+    internal sealed class ParityDecodeFailed : Exception
     {
         public ParityDecodeFailed() { }
         public ParityDecodeFailed(string message) : base(message) { }
         public ParityDecodeFailed(string message, Exception innerException) : base(message, innerException) { }
     }
 
-    sealed class ImportFailed : Exception
+    internal sealed class ImportFailed : Exception
     {
         public ImportFailed() { }
         public ImportFailed(string message) : base(message) { }

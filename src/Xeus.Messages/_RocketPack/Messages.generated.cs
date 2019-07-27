@@ -1,4 +1,4 @@
-﻿using Omnix.Cryptography;
+﻿using Omnix.Algorithms.Cryptography;
 using Omnix.Network;
 
 #nullable enable
@@ -343,7 +343,7 @@ namespace Xeus.Messages
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
             this.Enabled = enabled;
-            this.ListenAddresses = new global::Omnix.Collections.ReadOnlyListSlim<OmniAddress>(listenAddresses);
+            this.ListenAddresses = new global::Omnix.DataStructures.ReadOnlyListSlim<OmniAddress>(listenAddresses);
             this.UseUpnp = useUpnp;
 
             {
@@ -359,7 +359,7 @@ namespace Xeus.Messages
         }
 
         public bool Enabled { get; }
-        public global::Omnix.Collections.ReadOnlyListSlim<OmniAddress> ListenAddresses { get; }
+        public global::Omnix.DataStructures.ReadOnlyListSlim<OmniAddress> ListenAddresses { get; }
         public bool UseUpnp { get; }
 
         public override bool Equals(TcpAcceptOptions? target)

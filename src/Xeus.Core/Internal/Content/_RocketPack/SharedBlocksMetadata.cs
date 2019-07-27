@@ -1,11 +1,9 @@
-using System;
 using System.Collections.Generic;
-using System.Text;
-using Omnix.Cryptography;
+using Omnix.Algorithms.Cryptography;
 
-namespace Xeus.Core.Internal.Contents
+namespace Xeus.Core.Internal.Content
 {
-    partial class SharedBlocksMetadata
+    internal partial class SharedBlocksMetadata
     {
         #region OmniHash to Index
 
@@ -24,8 +22,7 @@ namespace Xeus.Core.Internal.Contents
             }
 
             {
-                int result;
-                if (!_hashMap.TryGetValue(hash, out result))
+                if (!_hashMap.TryGetValue(hash, out int result))
                 {
                     return -1;
                 }
