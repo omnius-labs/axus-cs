@@ -10,10 +10,10 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
   </PropertyGroup>
 
-  <PropertyGroup>  
+  <!-- <PropertyGroup>  
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <RestoreLockedMode Condition=" '$(ContinuousIntegrationBuild)' == 'true' " >true</RestoreLockedMode>
-  </PropertyGroup>
+  </PropertyGroup> -->
 
   <PropertyGroup>
     <RootNamespace>$(ProjectName)</RootNamespace>

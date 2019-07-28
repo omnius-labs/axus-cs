@@ -1,6 +1,6 @@
-﻿using System.IO;
+using System.IO;
 
-namespace Xeus.Core.Tests.Primitives
+namespace Xeus.Core.Primitives
 {
     internal static class UnitTestEnvironment
     {
