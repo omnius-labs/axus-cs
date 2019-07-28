@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Omnix.Algorithms.Cryptography;
 using Omnix.Base;
-using Xeus.Core.Internal.Content.Primitives;
-using Xeus.Core.Tests.Primitives;
+using Xeus.Core.Primitives;
 using Xeus.Messages;
 using Xunit;
 
-namespace Xeus.Core.Tests
+namespace Xeus.Core.Internal.Content.Primitives
 {
     public class BlockStorageTests : TestsBase
     {
