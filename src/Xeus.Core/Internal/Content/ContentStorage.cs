@@ -821,7 +821,7 @@ namespace Xeus.Core.Internal.Content
                     try
                     {
                         var targetBuffers = new ReadOnlyMemory<byte>[buffers.Count()];
-                        var parityMemoryOwners = new IMemoryOwner<byte>[128];
+                        var parityMemoryOwners = new IMemoryOwner<byte>[buffers.Count()];
 
                         int blockLength = buffers.Max(n => n.Length);
 
