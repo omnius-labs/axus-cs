@@ -8,7 +8,7 @@ namespace Xeus.Core.Internal.Content.Primitives
 {
     internal sealed class UsingSectorPool : DisposableBase
     {
-        private readonly BitmapStorage _bitmapStorage;
+        private readonly BitStorage _bitmapStorage;
         private readonly BufferPool _bufferPool;
 
         private readonly HashSet<ulong> _freeSectors = new HashSet<ulong>();
@@ -21,7 +21,7 @@ namespace Xeus.Core.Internal.Content.Primitives
 
         public UsingSectorPool(BufferPool bufferPool)
         {
-            _bitmapStorage = new BitmapStorage(bufferPool);
+            _bitmapStorage = new BitStorage(bufferPool);
             _bufferPool = bufferPool;
         }
 

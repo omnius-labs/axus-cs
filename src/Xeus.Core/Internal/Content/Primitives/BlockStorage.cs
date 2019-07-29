@@ -324,7 +324,7 @@ namespace Xeus.Core.Internal.Content.Primitives
                 // 重複するセクタを確保したブロックを検出しRemoveする。
                 lock (_lockObject)
                 {
-                    using (var bitmapManager = new BitmapStorage(_bufferPool))
+                    using (var bitmapManager = new BitStorage(_bufferPool))
                     {
                         bitmapManager.SetLength(this.Size / SectorSize);
 
