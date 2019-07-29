@@ -4,7 +4,7 @@ using Xeus.Core.Internal.Helpers;
 
 namespace Xeus.Core.Internal.Content.Primitives
 {
-    internal sealed class BitmapStorage : DisposableBase
+    internal sealed class BitStorage : DisposableBase
     {
         private readonly BufferPool _bufferPool;
 
@@ -13,7 +13,7 @@ namespace Xeus.Core.Internal.Content.Primitives
 
         public static readonly uint SectorSize = 32 * 1024; // 32 KB
 
-        public BitmapStorage(BufferPool bufferPool)
+        public BitStorage(BufferPool bufferPool)
         {
             _bufferPool = bufferPool;
         }
