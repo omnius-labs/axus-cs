@@ -7,6 +7,6 @@ set TOOL_PATH=%cd%\tools\win\Omnix.Serialization.RocketPack.CodeGenerator\Omnix.
 "%TOOL_PATH%" %cd%\formats\Xeus.Messages.rpf %cd%\src\Xeus.Messages\_RocketPack\Messages.generated.cs
 
 "%TOOL_PATH%" %cd%\formats\Xeus.Core.Internal.rpf %cd%\src\Xeus.Core\Internal\_RocketPack\Messages.generated.cs
-"%TOOL_PATH%" %cd%\formats\Xeus.Core.Internal.Connections.rpf %cd%\src\Xeus.Core\Internal\Connections\_RocketPack\Messages.generated.cs
-"%TOOL_PATH%" %cd%\formats\Xeus.Core.Internal.Contents.rpf %cd%\src\Xeus.Core\Internal\Contents\_RocketPack\Messages.generated.cs
+"%TOOL_PATH%" %cd%\formats\Xeus.Core.Internal.Connection.rpf %cd%\src\Xeus.Core\Internal\Connection\_RocketPack\Messages.generated.cs
+"%TOOL_PATH%" %cd%\formats\Xeus.Core.Internal.Content.rpf %cd%\src\Xeus.Core\Internal\Content\_RocketPack\Messages.generated.cs
 "%TOOL_PATH%" %cd%\formats\Xeus.Core.Internal.Exchange.rpf %cd%\src\Xeus.Core\Internal\Exchange\_RocketPack\Messages.generated.cs

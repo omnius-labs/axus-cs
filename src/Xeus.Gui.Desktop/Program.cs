@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Logging.Serilog;
 using Xeus.Gui.Desktop.Windows;
 

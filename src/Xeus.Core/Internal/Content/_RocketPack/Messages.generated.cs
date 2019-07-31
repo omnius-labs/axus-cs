@@ -43,7 +43,7 @@ namespace Xeus.Core.Internal.Content
         public uint Length { get; }
         public global::Omnix.Serialization.RocketPack.Timestamp LastAccessTime { get; }
 
-        public override bool Equals(ClusterMetadata? target)
+        public override bool Equals(ClusterMetadata target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -180,7 +180,7 @@ namespace Xeus.Core.Internal.Content
         public global::Omnix.DataStructures.ReadOnlyListSlim<OmniHash> LockedHashes { get; }
         public SharedBlocksMetadata? SharedBlocksMetadata { get; }
 
-        public override bool Equals(ContentMetadata? target)
+        public override bool Equals(ContentMetadata target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -324,7 +324,7 @@ namespace Xeus.Core.Internal.Content
         public uint BlockLength { get; }
         public global::Omnix.DataStructures.ReadOnlyListSlim<OmniHash> Hashes { get; }
 
-        public override bool Equals(SharedBlocksMetadata? target)
+        public override bool Equals(SharedBlocksMetadata target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -482,7 +482,7 @@ namespace Xeus.Core.Internal.Content
         public ulong Size { get; }
         public global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata> ClusterMetadataMap { get; }
 
-        public override bool Equals(BlockStorageConfig? target)
+        public override bool Equals(BlockStorageConfig target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -625,7 +625,7 @@ namespace Xeus.Core.Internal.Content
         public uint Version { get; }
         public global::Omnix.DataStructures.ReadOnlyListSlim<ContentMetadata> ContentMetadatas { get; }
 
-        public override bool Equals(ContentStorageConfig? target)
+        public override bool Equals(ContentStorageConfig target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;

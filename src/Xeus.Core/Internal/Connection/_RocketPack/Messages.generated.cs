@@ -36,7 +36,7 @@ namespace Xeus.Core.Internal.Connection
         public TcpConnectOptions? TcpConnectOptions { get; }
         public TcpAcceptOptions? TcpAcceptOptions { get; }
 
-        public override bool Equals(TcpConnectionCreatorConfig? target)
+        public override bool Equals(TcpConnectionCreatorConfig target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;

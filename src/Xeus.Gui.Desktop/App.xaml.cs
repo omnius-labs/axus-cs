@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Markup.Xaml;
 
 namespace Xeus.Gui.Desktop

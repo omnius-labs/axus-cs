@@ -1,4 +1,4 @@
-﻿using Omnix.Algorithms.Cryptography;
+using Omnix.Algorithms.Cryptography;
 using Omnix.Network;
 
 #nullable enable
@@ -42,7 +42,7 @@ namespace Xeus.Messages
         public OmniHash Hash { get; }
         public byte Depth { get; }
 
-        public override bool Equals(XeusClue? target)
+        public override bool Equals(XeusClue target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -145,7 +145,7 @@ namespace Xeus.Messages
         public TcpProxyType Type { get; }
         public OmniAddress Address { get; }
 
-        public override bool Equals(TcpProxyOptions? target)
+        public override bool Equals(TcpProxyOptions target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -246,7 +246,7 @@ namespace Xeus.Messages
         public bool Enabled { get; }
         public TcpProxyOptions? ProxyOptions { get; }
 
-        public override bool Equals(TcpConnectOptions? target)
+        public override bool Equals(TcpConnectOptions target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -362,7 +362,7 @@ namespace Xeus.Messages
         public global::Omnix.DataStructures.ReadOnlyListSlim<OmniAddress> ListenAddresses { get; }
         public bool UseUpnp { get; }
 
-        public override bool Equals(TcpAcceptOptions? target)
+        public override bool Equals(TcpAcceptOptions target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -491,7 +491,7 @@ namespace Xeus.Messages
         public TcpConnectOptions TcpConnectOptions { get; }
         public TcpAcceptOptions TcpAcceptOptions { get; }
 
-        public override bool Equals(ConnectionCreatorOptions? target)
+        public override bool Equals(ConnectionCreatorOptions target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -594,7 +594,7 @@ namespace Xeus.Messages
 
         public string ConfigDirectoryPath { get; }
 
-        public override bool Equals(XeusOptions? target)
+        public override bool Equals(XeusOptions target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -679,7 +679,7 @@ namespace Xeus.Messages
         public global::Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
         public ErrorReportType Type { get; }
 
-        public override bool Equals(ErrorReport? target)
+        public override bool Equals(ErrorReport target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -783,7 +783,7 @@ namespace Xeus.Messages
         public uint CheckedBlockCount { get; }
         public uint TotalBlockCount { get; }
 
-        public override bool Equals(CheckBlocksProgressReport? target)
+        public override bool Equals(CheckBlocksProgressReport target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;

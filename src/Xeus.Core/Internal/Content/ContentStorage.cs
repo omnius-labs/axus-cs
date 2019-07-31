@@ -2,6 +2,7 @@ using System;
 using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -23,7 +24,6 @@ namespace Xeus.Core.Internal.Content
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly XeusOptions _options;
         private readonly BufferPool _bufferPool;
         private readonly BlockStorage _blockStorage;
         private readonly ContentMetadataStorage _contentMetadataStorage;
@@ -38,15 +38,16 @@ namespace Xeus.Core.Internal.Content
 
         private readonly int _threadCount = 2;
 
-        public ContentStorage(XeusOptions options, BufferPool bufferPool)
+        public ContentStorage(string basePath, BufferPool bufferPool)
         {
-            _options = options;
+            var settingsPath = Path.Combine(basePath, "Settings");
+            var childrenPath = Path.Combine(basePath, "Children");
+
             _bufferPool = bufferPool;
-            _blockStorage = new BlockStorage(options, _bufferPool);
+            _blockStorage = new BlockStorage(Path.Combine(childrenPath, nameof(ContentStorage)), _bufferPool);
             _contentMetadataStorage = new ContentMetadataStorage();
 
-            string configPath = Path.Combine(options.ConfigDirectoryPath, nameof(ContentStorage));
-            _settings = new SettingsDatabase(Path.Combine(configPath, "settings"));
+            _settings = new SettingsDatabase(settingsPath);
 
             _checkEventScheduler = new EventScheduler(this.CheckThread);
         }
@@ -155,7 +156,7 @@ namespace Xeus.Core.Internal.Content
             await _blockStorage.CheckBlocks(progress, token);
         }
 
-        public bool TryGetBlock(OmniHash hash, out IMemoryOwner<byte>? memoryOwner)
+        public bool TryGetBlock(OmniHash hash, [NotNullWhen(true)] out IMemoryOwner<byte>? memoryOwner)
         {
             if (!EnumHelper.IsValid(hash.AlgorithmType))
             {
@@ -278,38 +279,206 @@ namespace Xeus.Core.Internal.Content
             return 0;
         }
 
+        private async ValueTask<OmniHash[]> ParityEncode(IEnumerable<Memory<byte>> blocks, OmniHashAlgorithmType hashAlgorithmType, CorrectionAlgorithmType correctionAlgorithmType, CancellationToken token = default)
+        {
+            if (correctionAlgorithmType == CorrectionAlgorithmType.ReedSolomon8)
+            {
+                var blockList = blocks.ToList();
+
+                // blocksの要素数をチェックする
+                if (blockList.Count <= 0 || blockList.Count > 128)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(blocks));
+                }
+
+                // 最大ブロック長
+                int blockLength = blockList[0].Length;
+
+                // 各ブロックの長さをチェックする
+                for (int i = 1; i < blockList.Count; i++)
+                {
+                    // 末尾以外
+                    if (i < (blockList.Count - 1))
+                    {
+                        // 先頭ブロックと同一の長さでなければならない
+                        if (!(blockList[i].Length == blockLength))
+                        {
+                            throw new ArgumentOutOfRangeException(nameof(blocks), $"{nameof(blocks)}[{i}].Length");
+                        }
+                    }
+                    // 末尾
+                    else
+                    {
+                        // 先頭ブロックと同一かそれ以下の長さでなければならない
+                        if (!(blockList[i].Length <= blockLength))
+                        {
+                            throw new ArgumentOutOfRangeException(nameof(blocks), $"{nameof(blocks)}[{i}].Length");
+                        }
+                    }
+                }
+
+                return await Task.Run(async () =>
+                {
+                    var memoryOwners = new List<IMemoryOwner<byte>>();
+
+                    try
+                    {
+                        var targetBuffers = new ReadOnlyMemory<byte>[128];
+                        var parityBuffers = new Memory<byte>[128];
+
+                        // Load
+                        {
+                            int index = 0;
+
+                            foreach (var buffer in blocks)
+                            {
+                                token.ThrowIfCancellationRequested();
+
+                                // 実ブロックの長さが足りない場合、0byteでpaddingを行う
+                                if (buffer.Length < blockLength)
+                                {
+                                    var tempMemoryOwner = _bufferPool.Rent(blockLength);
+
+                                    BytesOperations.Copy(buffer.Span, tempMemoryOwner.Memory.Span, buffer.Length);
+                                    BytesOperations.Zero(tempMemoryOwner.Memory.Span.Slice(buffer.Length));
+
+                                    memoryOwners.Add(tempMemoryOwner);
+
+                                    targetBuffers[index++] = tempMemoryOwner.Memory;
+                                }
+                                else
+                                {
+                                    targetBuffers[index++] = buffer;
+                                }
+                            }
+
+                            // 実ブロック数が128に満たない場合、0byte配列でPaddingを行う。
+                            for (int i = (128 - blocks.Count()) - 1; i >= 0; i--)
+                            {
+                                var tempMemoryOwner = _bufferPool.Rent(blockLength);
+
+                                BytesOperations.Zero(tempMemoryOwner.Memory.Span);
+
+                                memoryOwners.Add(tempMemoryOwner);
+
+                                targetBuffers[index++] = tempMemoryOwner.Memory;
+                            }
+                        }
+
+                        for (int i = 0; i < parityBuffers.Length; i++)
+                        {
+                            var tempMemoryOwner = _bufferPool.Rent(blockLength);
+
+                            BytesOperations.Zero(tempMemoryOwner.Memory.Span);
+
+                            memoryOwners.Add(tempMemoryOwner);
+
+                            parityBuffers[i] = tempMemoryOwner.Memory;
+                        }
+
+                        var indexes = new int[parityBuffers.Length];
+
+                        for (int i = 0; i < parityBuffers.Length; i++)
+                        {
+                            indexes[i] = targetBuffers.Length + i;
+                        }
+
+                        var reedSolomon = new ReedSolomon8(targetBuffers.Length, targetBuffers.Length + parityBuffers.Length, _bufferPool);
+                        await reedSolomon.Encode(targetBuffers, indexes, parityBuffers, blockLength, _threadCount, token);
+
+                        token.ThrowIfCancellationRequested();
+
+                        var parityHashes = new List<OmniHash>();
+
+                        for (int i = 0; i < parityBuffers.Length; i++)
+                        {
+                            OmniHash hash;
+
+                            if (hashAlgorithmType == OmniHashAlgorithmType.Sha2_256)
+                            {
+                                hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(parityBuffers[i].Span));
+                            }
+                            else
+                            {
+                                throw new NotSupportedException();
+                            }
+
+                            _blockStorage.Lock(hash);
+
+                            bool result = _blockStorage.TrySet(hash, parityBuffers[i].Span);
+
+                            if (!result)
+                            {
+                                throw new ImportFailed("Failed to save Block.");
+                            }
+
+                            parityHashes.Add(hash);
+                        }
+
+                        return parityHashes.ToArray();
+                    }
+                    finally
+                    {
+                        foreach (var memoryOwner in memoryOwners)
+                        {
+                            memoryOwner.Dispose();
+                        }
+                    }
+                });
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
         public async ValueTask<OmniHash[]> ParityDecode(MerkleTreeSection merkleTreeSection, CancellationToken token = default)
         {
             return await Task.Run(async () =>
             {
                 if (merkleTreeSection.CorrectionAlgorithmType == CorrectionAlgorithmType.ReedSolomon8)
                 {
-                    uint blockLength = merkleTreeSection.Hashes.Max(n => this.GetLength(n));
-                    int informationCount = merkleTreeSection.Hashes.Count / 2;
+                    // 実ブロック数
+                    int informationCount = merkleTreeSection.Hashes.Count - 128;
 
+                    // デコード可能かチェックする
+                    if (merkleTreeSection.Hashes.Count(n => this.Contains(n)) < informationCount)
+                    {
+                        throw new ParityDecodeFailed();
+                    }
+
+                    // デコードする必要がない場合
                     if (merkleTreeSection.Hashes.Take(informationCount).All(n => this.Contains(n)))
                     {
                         return merkleTreeSection.Hashes.Take(informationCount).ToArray();
                     }
 
-                    var blockMemoryOwners = new IMemoryOwner<byte>[informationCount];
-                    var indexes = new int[informationCount];
+                    // 最大ブロック長
+                    uint blockLength = merkleTreeSection.Hashes.Max(n => this.GetLength(n));
+
+                    var memoryOwners = new List<IMemoryOwner<byte>>();
 
                     try
                     {
+                        var targetBuffers = new Memory<byte>[128];
+                        var indexes = new int[128];
+
                         // Load
                         {
                             int count = 0;
+                            int index = 0;
+                            int position = 0;
 
-                            for (int i = 0; i < merkleTreeSection.Hashes.Count; i++)
+                            for (; index < informationCount && count < informationCount; index++, position++)
                             {
                                 token.ThrowIfCancellationRequested();
 
-                                if (!this.TryGetBlock(merkleTreeSection.Hashes[i], out var blockMemoryOwner) || blockMemoryOwner == null)
+                                if (!this.TryGetBlock(merkleTreeSection.Hashes[position], out var blockMemoryOwner))
                                 {
                                     continue;
                                 }
 
+                                // 実ブロックの長さが足りない場合、0byteでpaddingを行う
                                 if (blockMemoryOwner.Memory.Length < blockLength)
                                 {
                                     var tempMemoryOwner = _bufferPool.Rent((int)blockLength);
@@ -321,15 +490,46 @@ namespace Xeus.Core.Internal.Content
                                     blockMemoryOwner = tempMemoryOwner;
                                 }
 
-                                indexes[count] = i;
-                                blockMemoryOwners[count] = blockMemoryOwner;
+                                memoryOwners.Add(blockMemoryOwner);
+
+                                indexes[count] = index;
+                                targetBuffers[count] = blockMemoryOwner.Memory;
 
                                 count++;
+                            }
 
-                                if (count >= informationCount)
+                            // 実ブロック数が128に満たない場合、0byte配列でPaddingを行う。
+                            for (; index < 128 && count < informationCount; index++)
+                            {
+                                token.ThrowIfCancellationRequested();
+
+                                var tempMemoryOwner = _bufferPool.Rent((int)blockLength);
+
+                                BytesOperations.Zero(tempMemoryOwner.Memory.Span);
+
+                                memoryOwners.Add(tempMemoryOwner);
+
+                                indexes[count] = index;
+                                targetBuffers[count] = tempMemoryOwner.Memory;
+
+                                count++;
+                            }
+
+                            for (; index < 256 && count < informationCount; index++, position++)
+                            {
+                                token.ThrowIfCancellationRequested();
+
+                                if (!this.TryGetBlock(merkleTreeSection.Hashes[position], out var blockMemoryOwner))
                                 {
-                                    break;
+                                    continue;
                                 }
+
+                                memoryOwners.Add(blockMemoryOwner);
+
+                                indexes[count] = index;
+                                targetBuffers[count] = blockMemoryOwner.Memory;
+
+                                count++;
                             }
 
                             if (count < informationCount)
@@ -339,7 +539,7 @@ namespace Xeus.Core.Internal.Content
                         }
 
                         var reedSolomon = new ReedSolomon8(informationCount, _threadCount, _bufferPool);
-                        await reedSolomon.Decode(blockMemoryOwners.Select(n => n.Memory).ToArray(), indexes, (int)blockLength, informationCount * 2, token);
+                        await reedSolomon.Decode(targetBuffers, indexes, (int)blockLength, informationCount * 2, token);
 
                         // Set
                         {
@@ -347,7 +547,7 @@ namespace Xeus.Core.Internal.Content
 
                             for (int i = 0; i < informationCount; length -= blockLength, i++)
                             {
-                                bool result = _blockStorage.TrySet(merkleTreeSection.Hashes[i], blockMemoryOwners[i].Memory.Span.Slice(0, (int)Math.Min(length, blockLength)));
+                                bool result = _blockStorage.TrySet(merkleTreeSection.Hashes[i], memoryOwners[i].Memory.Span.Slice(0, (int)Math.Min(length, blockLength)));
 
                                 if (!result)
                                 {
@@ -358,7 +558,7 @@ namespace Xeus.Core.Internal.Content
                     }
                     finally
                     {
-                        foreach (var memoryOwner in blockMemoryOwners)
+                        foreach (var memoryOwner in memoryOwners)
                         {
                             memoryOwner.Dispose();
                         }
@@ -803,115 +1003,6 @@ namespace Xeus.Core.Internal.Content
 
                 return clue;
             }, token);
-        }
-
-        private async ValueTask<OmniHash[]> ParityEncode(IEnumerable<Memory<byte>> buffers, OmniHashAlgorithmType hashAlgorithmType, CorrectionAlgorithmType correctionAlgorithmType, CancellationToken token = default)
-        {
-            return await Task.Run(async () =>
-            {
-                if (correctionAlgorithmType == CorrectionAlgorithmType.ReedSolomon8)
-                {
-                    if (buffers.Count() > 128)
-                    {
-                        throw new ArgumentOutOfRangeException(nameof(buffers));
-                    }
-
-                    var createdMemoryOwners = new List<IMemoryOwner<byte>>();
-
-                    try
-                    {
-                        var targetBuffers = new ReadOnlyMemory<byte>[buffers.Count()];
-                        var parityMemoryOwners = new IMemoryOwner<byte>[buffers.Count()];
-
-                        int blockLength = buffers.Max(n => n.Length);
-
-                        // Normalize
-                        {
-                            int index = 0;
-
-                            foreach (var buffer in buffers)
-                            {
-                                token.ThrowIfCancellationRequested();
-
-                                if (buffer.Length < blockLength)
-                                {
-                                    var tempMemoryOwner = _bufferPool.Rent(blockLength);
-
-                                    BytesOperations.Copy(buffer.Span, tempMemoryOwner.Memory.Span, buffer.Length);
-                                    BytesOperations.Zero(tempMemoryOwner.Memory.Span.Slice(buffer.Length));
-
-                                    createdMemoryOwners.Add(tempMemoryOwner);
-
-                                    targetBuffers[index] = tempMemoryOwner.Memory;
-                                }
-                                else
-                                {
-                                    targetBuffers[index] = buffer;
-                                }
-
-                                index++;
-                            }
-                        }
-
-                        for (int i = 0; i < parityMemoryOwners.Length; i++)
-                        {
-                            parityMemoryOwners[i] = _bufferPool.Rent(blockLength);
-                        }
-
-                        var indexes = new int[parityMemoryOwners.Length];
-
-                        for (int i = 0; i < parityMemoryOwners.Length; i++)
-                        {
-                            indexes[i] = targetBuffers.Length + i;
-                        }
-
-                        var reedSolomon = new ReedSolomon8(targetBuffers.Length, targetBuffers.Length + parityMemoryOwners.Length, _bufferPool);
-                        await reedSolomon.Encode(targetBuffers, indexes, parityMemoryOwners.Select(n => n.Memory).ToArray(), blockLength, _threadCount, token);
-
-                        token.ThrowIfCancellationRequested();
-
-                        var parityHashes = new List<OmniHash>();
-
-                        for (int i = 0; i < parityMemoryOwners.Length; i++)
-                        {
-                            OmniHash hash;
-
-                            if (hashAlgorithmType == OmniHashAlgorithmType.Sha2_256)
-                            {
-                                hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(parityMemoryOwners[i].Memory.Span));
-                            }
-                            else
-                            {
-                                throw new NotSupportedException();
-                            }
-
-                            _blockStorage.Lock(hash);
-
-                            bool result = _blockStorage.TrySet(hash, parityMemoryOwners[i].Memory.Span);
-
-                            if (!result)
-                            {
-                                throw new ImportFailed("Failed to save Block.");
-                            }
-
-                            parityHashes.Add(hash);
-                        }
-
-                        return parityHashes.ToArray();
-                    }
-                    finally
-                    {
-                        foreach (var memoryOwner in createdMemoryOwners)
-                        {
-                            memoryOwner.Dispose();
-                        }
-                    }
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            });
         }
 
         #region Message

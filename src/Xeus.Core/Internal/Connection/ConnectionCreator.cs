@@ -17,17 +17,15 @@ namespace Xeus.Core.Internal.Connection
         private readonly BufferPool _bufferPool;
         private readonly TcpConnectionCreator _tcpConnectionCreator;
 
-        private readonly SettingsDatabase _settings;
-
-        private readonly AsyncLock _asyncLock = new AsyncLock();
         private readonly object _lockObject = new object();
 
-        public ConnectionCreator(string configPath, BufferPool bufferPool)
+        public ConnectionCreator(string basePath, BufferPool bufferPool)
         {
-            _bufferPool = bufferPool;
-            _tcpConnectionCreator = new TcpConnectionCreator(configPath, bufferPool);
+            var settingsPath = Path.Combine(basePath, "Settings");
+            var childrenPath = Path.Combine(basePath, "Children");
 
-            _settings = new SettingsDatabase(Path.Combine(configPath, nameof(ConnectionCreator)));
+            _bufferPool = bufferPool;
+            _tcpConnectionCreator = new TcpConnectionCreator(Path.Combine(childrenPath, nameof(TcpConnectionCreator)), bufferPool);
         }
 
         public void SetOptions(ConnectionCreatorOptions options)
