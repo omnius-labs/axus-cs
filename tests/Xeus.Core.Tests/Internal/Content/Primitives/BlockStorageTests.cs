@@ -15,8 +15,7 @@ namespace Xeus.Core.Internal.Content.Primitives
         public async Task Test()
         {
             var random = new Random();
-            var options = new XeusOptions(UnitTestEnvironment.TempDirectoryPath);
-            using var blockStorage = new BlockStorage(options, BufferPool.Shared);
+            using var blockStorage = new BlockStorage(UnitTestEnvironment.TempDirectoryPath, BufferPool.Shared);
             var sizeList = new List<int>(new[] { 0, 1, 10, 100, 1000, 10000 });
 
             for (int i = 0; i < 32; i++)

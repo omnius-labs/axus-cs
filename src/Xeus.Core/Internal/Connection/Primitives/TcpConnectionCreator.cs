@@ -39,11 +39,14 @@ namespace Xeus.Core.Internal.Connection.Primitives
         private readonly object _lockObject = new object();
         private readonly AsyncLock _settingsAsyncLock = new AsyncLock();
 
-        public TcpConnectionCreator(string configPath, BufferPool bufferPool)
+        public TcpConnectionCreator(string basePath, BufferPool bufferPool)
         {
+            var settingsPath = Path.Combine(basePath, "Settings");
+            var childrenPath = Path.Combine(basePath, "Children");
+
             _bufferPool = bufferPool;
 
-            _settings = new SettingsDatabase(Path.Combine(configPath, nameof(TcpConnectionCreator)));
+            _settings = new SettingsDatabase(settingsPath);
 
             _watchEventScheduler = new EventScheduler(this.WatchThread);
         }

@@ -1,4 +1,4 @@
-﻿using Omnix.Algorithms.Cryptography;
+using Omnix.Algorithms.Cryptography;
 using Omnix.Network;
 using Xeus.Core.Internal;
 using Xeus.Messages;
@@ -51,7 +51,7 @@ namespace Xeus.Core.Internal.Exchange
         public XeusClue Clue { get; }
         public OmniCertificate Certificate { get; }
 
-        public override bool Equals(BroadcastClue? target)
+        public override bool Equals(BroadcastClue target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -201,7 +201,7 @@ namespace Xeus.Core.Internal.Exchange
         public XeusClue Clue { get; }
         public OmniCertificate Certificate { get; }
 
-        public override bool Equals(UnicastClue? target)
+        public override bool Equals(UnicastClue target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -371,7 +371,7 @@ namespace Xeus.Core.Internal.Exchange
         public OmniHashcash Hashcash { get; }
         public OmniCertificate Certificate { get; }
 
-        public override bool Equals(MulticastClue? target)
+        public override bool Equals(MulticastClue target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -541,7 +541,7 @@ namespace Xeus.Core.Internal.Exchange
 
         public global::Omnix.DataStructures.ReadOnlyListSlim<ProtocolVersion> ProtocolVersions { get; }
 
-        public override bool Equals(HelloMessage? target)
+        public override bool Equals(HelloMessage target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -640,7 +640,7 @@ namespace Xeus.Core.Internal.Exchange
         public global::System.ReadOnlyMemory<byte> Id { get; }
         public OmniAddress Address { get; }
 
-        public override bool Equals(ProfileMessage? target)
+        public override bool Equals(ProfileMessage target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -750,7 +750,7 @@ namespace Xeus.Core.Internal.Exchange
 
         public global::Omnix.DataStructures.ReadOnlyListSlim<OmniAddress> Addresses { get; }
 
-        public override bool Equals(NodeAddressesMessage? target)
+        public override bool Equals(NodeAddressesMessage target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -844,7 +844,7 @@ namespace Xeus.Core.Internal.Exchange
         public byte HopLimit { get; }
         public byte Priority { get; }
 
-        public override bool Equals(RelayOption? target)
+        public override bool Equals(RelayOption target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -956,7 +956,7 @@ namespace Xeus.Core.Internal.Exchange
 
         public global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniSignature, RelayOption> Parameters { get; }
 
-        public override bool Equals(WantBroadcastCluesMessage? target)
+        public override bool Equals(WantBroadcastCluesMessage target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -1066,7 +1066,7 @@ namespace Xeus.Core.Internal.Exchange
 
         public global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniSignature, RelayOption> Parameters { get; }
 
-        public override bool Equals(WantUnicastCluesMessage? target)
+        public override bool Equals(WantUnicastCluesMessage target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -1176,7 +1176,7 @@ namespace Xeus.Core.Internal.Exchange
 
         public global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniSignature, RelayOption> Parameters { get; }
 
-        public override bool Equals(WantMulticastCluesMessage? target)
+        public override bool Equals(WantMulticastCluesMessage target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -1284,7 +1284,7 @@ namespace Xeus.Core.Internal.Exchange
 
         public global::Omnix.DataStructures.ReadOnlyListSlim<BroadcastClue> Results { get; }
 
-        public override bool Equals(BroadcastCluesMessage? target)
+        public override bool Equals(BroadcastCluesMessage target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -1387,7 +1387,7 @@ namespace Xeus.Core.Internal.Exchange
 
         public global::Omnix.DataStructures.ReadOnlyListSlim<UnicastClue> Results { get; }
 
-        public override bool Equals(UnicastCluesMessage? target)
+        public override bool Equals(UnicastCluesMessage target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -1490,7 +1490,7 @@ namespace Xeus.Core.Internal.Exchange
 
         public global::Omnix.DataStructures.ReadOnlyListSlim<MulticastClue> Results { get; }
 
-        public override bool Equals(MulticastCluesMessage? target)
+        public override bool Equals(MulticastCluesMessage target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -1594,7 +1594,7 @@ namespace Xeus.Core.Internal.Exchange
 
         public global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniHash, RelayOption> Parameters { get; }
 
-        public override bool Equals(PublishBlocksMessage? target)
+        public override bool Equals(PublishBlocksMessage target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -1703,7 +1703,7 @@ namespace Xeus.Core.Internal.Exchange
 
         public global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniHash, RelayOption> Parameters { get; }
 
-        public override bool Equals(WantBlocksMessage? target)
+        public override bool Equals(WantBlocksMessage target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -1812,7 +1812,7 @@ namespace Xeus.Core.Internal.Exchange
         private readonly global::System.Buffers.IMemoryOwner<byte> _value;
         public global::System.ReadOnlyMemory<byte> Value => _value.Memory;
 
-        public override bool Equals(DiffuseBlockMessage? target)
+        public override bool Equals(DiffuseBlockMessage target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -1940,7 +1940,7 @@ namespace Xeus.Core.Internal.Exchange
         private readonly global::System.Buffers.IMemoryOwner<byte> _value;
         public global::System.ReadOnlyMemory<byte> Value => _value.Memory;
 
-        public override bool Equals(BlockMessage? target)
+        public override bool Equals(BlockMessage target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -2051,7 +2051,7 @@ namespace Xeus.Core.Internal.Exchange
         public OmniHash Hash { get; }
         public RelayOption RelayOption { get; }
 
-        public override bool Equals(DiffuseBlockInfo? target)
+        public override bool Equals(DiffuseBlockInfo target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -2165,7 +2165,7 @@ namespace Xeus.Core.Internal.Exchange
 
         public uint Version { get; }
 
-        public override bool Equals(ExchangeManagerConfig? target)
+        public override bool Equals(ExchangeManagerConfig target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;

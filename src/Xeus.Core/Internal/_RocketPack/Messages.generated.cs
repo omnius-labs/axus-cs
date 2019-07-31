@@ -1,4 +1,4 @@
-﻿using Omnix.Algorithms.Cryptography;
+using Omnix.Algorithms.Cryptography;
 using Omnix.Network;
 using Xeus.Messages;
 
@@ -48,7 +48,7 @@ namespace Xeus.Core.Internal
         public ulong Length { get; }
         public global::Omnix.DataStructures.ReadOnlyListSlim<OmniHash> Hashes { get; }
 
-        public override bool Equals(MerkleTreeSection? target)
+        public override bool Equals(MerkleTreeSection target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -183,7 +183,7 @@ namespace Xeus.Core.Internal
 
         public global::Omnix.DataStructures.ReadOnlyListSlim<MerkleTreeSection> Sections { get; }
 
-        public override bool Equals(MerkleTreeNode? target)
+        public override bool Equals(MerkleTreeNode target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;

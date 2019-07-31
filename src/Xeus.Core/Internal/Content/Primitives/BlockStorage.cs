@@ -24,7 +24,6 @@ namespace Xeus.Core.Internal.Content.Primitives
 
         private readonly Stream _fileStream;
 
-        private readonly XeusOptions _options;
         private readonly BufferPool _bufferPool;
         private readonly UsingSectorPool _usingSectorPool;
         private readonly ProtectionStatus _protectionStatus;
@@ -44,20 +43,21 @@ namespace Xeus.Core.Internal.Content.Primitives
 
         public static readonly uint SectorSize = 1024 * 256; // 256 KB
 
-        public BlockStorage(XeusOptions options, BufferPool bufferPool)
+        public BlockStorage(string basePath, BufferPool bufferPool)
         {
-            _options = options;
+            var settingsPath = Path.Combine(basePath, "Settings");
+            var childrenPath = Path.Combine(basePath, "Children");
+
             _bufferPool = bufferPool;
 
-            string configPath = Path.Combine(options.ConfigDirectoryPath, nameof(BlockStorage));
+            _settings = new SettingsDatabase(settingsPath);
 
-            if (!Directory.Exists(configPath))
+            if (!Directory.Exists(basePath))
             {
-                Directory.CreateDirectory(configPath);
+                Directory.CreateDirectory(basePath);
             }
 
-            string blocksPath = Path.Combine(configPath, "blocks");
-            _settings = new SettingsDatabase(Path.Combine(configPath, "settings"));
+            string blocksPath = Path.Combine(basePath, "Storage.blocks");
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {

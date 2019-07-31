@@ -5,7 +5,7 @@ using "../refs/omnix/formats/Omnix.Network.rpf";
 using "Xeus.Messages.rpf";
 using "Xeus.Core.Internal.rpf";
 
-option csharp_namespace = "Xeus.Core.Internal.Connections";
+option csharp_namespace = "Xeus.Core.Internal.Connection";
 option csharp_access_level = "internal";
 
 message TcpConnectionCreatorConfig {
