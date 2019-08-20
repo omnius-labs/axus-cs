@@ -12,7 +12,7 @@ message BroadcastClue {
     Type: string(256) = 0,
     CreationTime: timestamp = 1,
     Clue: XeusClue = 2,
-    Certificate: OmniCertificate = 3,
+    Certificate: OmniCertificate? = 3,
 }
 
 message UnicastClue {
@@ -20,7 +20,7 @@ message UnicastClue {
     Signature: OmniSignature = 1,
     CreationTime: timestamp = 2,
     Clue: XeusClue = 3,
-    Certificate: OmniCertificate = 4,
+    Certificate: OmniCertificate? = 4,
 }
 
 message MulticastClue {
@@ -28,8 +28,8 @@ message MulticastClue {
     Signature: OmniSignature = 1,
     CreationTime: timestamp = 2,
     Clue: XeusClue = 3,
-    Hashcash: OmniHashcash = 4,
-    Certificate: OmniCertificate = 5,
+    Hashcash: OmniHashcash? = 4,
+    Certificate: OmniCertificate? = 5,
 }
 
 enum ProtocolVersion : uint8 {
@@ -45,7 +45,7 @@ message ProfileMessage {
     Address: OmniAddress = 1,
 }
 
-message NodeAddressesMessage {
+message PublishNodeAddressesMessage {
     Addresses: vector<OmniAddress>(256) = 0,
 }
 
@@ -78,24 +78,20 @@ message MulticastCluesMessage {
     Results: vector<MulticastClue>(8192) = 0,
 }
 
-message PublishBlocksMessage {
-    Parameters: map<OmniHash, RelayOption>(8192) = 0,
-}
-
 message WantBlocksMessage {
     Parameters: map<OmniHash, RelayOption>(8192) = 0,
 }
 
-message DiffuseBlockMessage {
+message PublishBlockMessage {
     Hash: OmniHash = 0,
     RelayOption: RelayOption = 1,
-    [Recyclable]
+    [csharp_recyclable]
     Value: memory(4194304) = 2,
 }
 
 message BlockMessage {
     Hash: OmniHash = 0,
-    [Recyclable]
+    [csharp_recyclable]
     Value: memory(4194304) = 1,
 }
 

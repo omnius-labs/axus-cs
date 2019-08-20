@@ -7,15 +7,18 @@ using Xeus.Messages;
 
 namespace Xeus.Core.Internal.Connection
 {
-    internal sealed partial class TcpConnectionCreatorConfig : global::Omnix.Serialization.RocketPack.RocketPackMessageBase<TcpConnectionCreatorConfig>
+    internal sealed partial class TcpConnectionCreatorConfig : global::Omnix.Serialization.RocketPack.IRocketPackMessage<TcpConnectionCreatorConfig>
     {
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<TcpConnectionCreatorConfig> Formatter { get; }
+        public static TcpConnectionCreatorConfig Empty { get; }
+
         static TcpConnectionCreatorConfig()
         {
-            TcpConnectionCreatorConfig.Formatter = new CustomFormatter();
+            TcpConnectionCreatorConfig.Formatter = new ___CustomFormatter();
             TcpConnectionCreatorConfig.Empty = new TcpConnectionCreatorConfig(0, null, null);
         }
 
-        private readonly int __hashCode;
+        private readonly global::System.Lazy<int> ___hashCode;
 
         public TcpConnectionCreatorConfig(uint version, TcpConnectOptions? tcpConnectOptions, TcpAcceptOptions? tcpAcceptOptions)
         {
@@ -23,20 +26,45 @@ namespace Xeus.Core.Internal.Connection
             this.TcpConnectOptions = tcpConnectOptions;
             this.TcpAcceptOptions = tcpAcceptOptions;
 
+            ___hashCode = new global::System.Lazy<int>(() =>
             {
-                var __h = new global::System.HashCode();
-                if (this.Version != default) __h.Add(this.Version.GetHashCode());
-                if (this.TcpConnectOptions != default) __h.Add(this.TcpConnectOptions.GetHashCode());
-                if (this.TcpAcceptOptions != default) __h.Add(this.TcpAcceptOptions.GetHashCode());
-                __hashCode = __h.ToHashCode();
-            }
+                var ___h = new global::System.HashCode();
+                if (version != default) ___h.Add(version.GetHashCode());
+                if (tcpConnectOptions != default) ___h.Add(tcpConnectOptions.GetHashCode());
+                if (tcpAcceptOptions != default) ___h.Add(tcpAcceptOptions.GetHashCode());
+                return ___h.ToHashCode();
+            });
         }
 
         public uint Version { get; }
         public TcpConnectOptions? TcpConnectOptions { get; }
         public TcpAcceptOptions? TcpAcceptOptions { get; }
 
-        public override bool Equals(TcpConnectionCreatorConfig target)
+        public static TcpConnectionCreatorConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        {
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
+            return Formatter.Deserialize(ref reader, 0);
+        }
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        {
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
+            Formatter.Serialize(ref writer, this, 0);
+        }
+
+        public static bool operator ==(TcpConnectionCreatorConfig? left, TcpConnectionCreatorConfig? right)
+        {
+            return (right is null) ? (left is null) : right.Equals(left);
+        }
+        public static bool operator !=(TcpConnectionCreatorConfig? left, TcpConnectionCreatorConfig? right)
+        {
+            return !(left == right);
+        }
+        public override bool Equals(object? other)
+        {
+            if (!(other is TcpConnectionCreatorConfig)) return false;
+            return this.Equals((TcpConnectionCreatorConfig)other);
+        }
+        public bool Equals(TcpConnectionCreatorConfig? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -48,12 +76,11 @@ namespace Xeus.Core.Internal.Connection
 
             return true;
         }
+        public override int GetHashCode() => ___hashCode.Value;
 
-        public override int GetHashCode() => __hashCode;
-
-        private sealed class CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<TcpConnectionCreatorConfig>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<TcpConnectionCreatorConfig>
         {
-            public void Serialize(global::Omnix.Serialization.RocketPack.RocketPackWriter w, TcpConnectionCreatorConfig value, int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in TcpConnectionCreatorConfig value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -82,16 +109,16 @@ namespace Xeus.Core.Internal.Connection
                 if (value.TcpConnectOptions != null)
                 {
                     w.Write((uint)1);
-                    TcpConnectOptions.Formatter.Serialize(w, value.TcpConnectOptions, rank + 1);
+                    TcpConnectOptions.Formatter.Serialize(ref w, value.TcpConnectOptions, rank + 1);
                 }
                 if (value.TcpAcceptOptions != null)
                 {
                     w.Write((uint)2);
-                    TcpAcceptOptions.Formatter.Serialize(w, value.TcpAcceptOptions, rank + 1);
+                    TcpAcceptOptions.Formatter.Serialize(ref w, value.TcpAcceptOptions, rank + 1);
                 }
             }
 
-            public TcpConnectionCreatorConfig Deserialize(global::Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public TcpConnectionCreatorConfig Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -113,12 +140,12 @@ namespace Xeus.Core.Internal.Connection
                             }
                         case 1:
                             {
-                                p_tcpConnectOptions = TcpConnectOptions.Formatter.Deserialize(r, rank + 1);
+                                p_tcpConnectOptions = TcpConnectOptions.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 2:
                             {
-                                p_tcpAcceptOptions = TcpAcceptOptions.Formatter.Deserialize(r, rank + 1);
+                                p_tcpAcceptOptions = TcpAcceptOptions.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }

@@ -105,7 +105,7 @@ namespace Xeus.Core.Internal.Content.Primitives
             return result;
         }
 
-        protected override void Dispose(bool disposing)
+        protected override void OnDispose(bool disposing)
         {
             if (disposing)
             {

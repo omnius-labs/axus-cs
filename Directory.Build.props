@@ -5,10 +5,10 @@
 
   <PropertyGroup>
     <LangVersion>8.0</LangVersion>
-    <NullableContextOptions>enable</NullableContextOptions>
+    <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <NoWarn>CS1591,CS1998</NoWarn>
+    <NoWarn>CS1591,CS1998,NU5105</NoWarn>
   </PropertyGroup>
 
   <!-- <PropertyGroup>  

@@ -5,58 +5,66 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
+using System.Threading.Tasks;
+using Omnix.Algorithms.Cryptography;
 using Omnix.Base;
-using Omnix.Collections;
+using Omnix.Base.Extensions;
+using Omnix.Base.Helpers;
 using Omnix.Configuration;
-using Omnix.Cryptography;
+using Omnix.DataStructures;
 using Omnix.Io;
 using Omnix.Network;
-using Omnix.Network.Connection.Secure;
-using Omnix.Serialization;
-using Xeus.Core.Contents;
-using Xeus.Messages;
+using Omnix.Network.Connections;
+using Omnix.Network.Connections.Secure;
+using Xeus.Core.Internal.Connection;
+using Xeus.Core.Internal.Content;
+using Xeus.Core.Internal.Exchange.Primitives;
+using Xeus.Core.Internal.Primitives;
 
-namespace Xeus.Core.Exchange
+namespace Xeus.Core.Internal.Exchange
 {
-    sealed partial class ExchangeManager : ServiceBase, ISettings
+    sealed partial class ExchangeEngine : ServiceBase, ISettings
     {
-        private BufferPool _bufferPool;
-        private ContentsStorage _contentsManager;
-        private MetadataManager _metadataManager;
+        private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private Settings _settings;
+        private readonly BufferPool _bufferPool;
+        private readonly ContentStorage _contentStorage;
+        private readonly ConnectionCreator _connectionCreator;
+        private readonly MetadataManager _metadataManager;
+        private readonly BandwidthController _bandwidthController;
 
-        private volatile ExchangeManagerConfig _config;
+        private readonly SettingsDatabase _settings;
 
-        private LockedHashSet<OmniAddress> _otherNodeAdressess = new LockedHashSet<OmniAddress>();
-        private LockedHashSet<OmniHash> _uploadBlockHashes = new LockedHashSet<OmniHash>();
-        private LockedHashSet<OmniHash> _diffusionBlockHashes = new LockedHashSet<OmniHash>();
+        private string[]? _passwords;
+        private byte[]? _baseId;
+        private readonly HopLimitComputer _myHopLimitComputer;
 
-        private volatile byte[] _baseId;
-        private LockedHashDictionary<OmniSecureConnection, SessionInfo> _connections = new LockedHashDictionary<OmniSecureConnection, SessionInfo>();
+        /// <summary>
+        /// 接続試行済みのアドレスリスト
+        /// </summary>
+        private readonly VolatileHashSet<OmniAddress> _connectionAttemptedAddressSet = new VolatileHashSet<OmniAddress>(new TimeSpan(0, 3, 0));
 
-        private List<TaskManager> _connectTaskManagers = new List<TaskManager>();
-        private List<TaskManager> _acceptTaskManagers = new List<TaskManager>();
+        private readonly LockedHashDictionary<IConnection, SessionStatus> _connections = new LockedHashDictionary<IConnection, SessionStatus>();
+        private readonly ReaderWriterLockProvider _connectionsLock = new ReaderWriterLockProvider(LockRecursionPolicy.SupportsRecursion);
 
-        private TaskManager _sendTaskManager;
-        private TaskManager _receiveTaskManager;
+        private readonly LockedHashSet<OmniAddress> _myNodeAddressSet = new LockedHashSet<OmniAddress>();
+        private readonly LockedHashSet<OmniAddress> _cloudNodeAdresseSet = new LockedHashSet<OmniAddress>();
+        private readonly LockedHashDictionary<OmniHash, DiffuseBlockInfo> _myDiffuseBlockInfoMap = new LockedHashDictionary<OmniHash, DiffuseBlockInfo>();
+        private readonly LockedHashDictionary<OmniHash, DiffuseBlockInfo> _cloudDiffuseBlockInfoMap = new LockedHashDictionary<OmniHash, DiffuseBlockInfo>();
 
-        private TaskManager _computeTaskManager;
+        private readonly VolatileHashSet<OmniSignature> _wantBroadcastClueSet = new VolatileHashSet<OmniSignature>(new TimeSpan(0, 10, 0));
+        private readonly VolatileHashSet<OmniSignature> _wantUnicastClueSet = new VolatileHashSet<OmniSignature>(new TimeSpan(0, 10, 0));
+        private readonly VolatileHashSet<OmniSignature> _wantMulticastClueSet = new VolatileHashSet<OmniSignature>(new TimeSpan(0, 10, 0));
+        private readonly VolatileHashSet<OmniHash> _wantBlocksRequestSet = new VolatileHashSet<OmniHash>(new TimeSpan(0, 10, 0));
 
-        private List<TaskManager> _enqueueTaskManagers = new List<TaskManager>();
-        private List<TaskManager> _dequeueTaskManagers = new List<TaskManager>();
-
-        private VolatileHashSet<OmniHash> _pushBlocksRequestSet = new VolatileHashSet<OmniHash>(new TimeSpan(0, 10, 0));
-        private VolatileHashSet<OmniSignature> _pushBroadcastMetadatasRequestSet = new VolatileHashSet<OmniSignature>(new TimeSpan(0, 10, 0));
-        private VolatileHashSet<OmniSignature> _pushUnicastMetadatasRequestSet = new VolatileHashSet<OmniSignature>(new TimeSpan(0, 10, 0));
-        private VolatileHashSet<Channel> _pushMulticastMetadatasRequestSet = new VolatileHashSet<Channel>(new TimeSpan(0, 10, 0));
-
-        private ServiceStateType _type = ServiceStateType.Stopped;
-
-        private ReaderWriterLockProvider _connectionLockProvider = new ReaderWriterLockProvider(LockRecursionPolicy.SupportsRecursion);
+        private readonly List<TaskManager> _connectTaskManagers = new List<TaskManager>();
+        private readonly List<TaskManager> _acceptTaskManagers = new List<TaskManager>();
+        private TaskManager? _computeTaskManager;
+        private TaskManager? _doEventTaskManager;
+        private readonly List<TaskManager> _enqueueTaskManagers = new List<TaskManager>();
+        private readonly List<TaskManager> _dequeueTaskManagers = new List<TaskManager>();
 
         private readonly object _lockObject = new object();
-        private volatile bool _disposed;
 
         private const int MaxLocationCount = 256;
         private const int MaxMetadataRequestCount = 256;
@@ -64,107 +72,70 @@ namespace Xeus.Core.Exchange
         private const int MaxBlockLinkCount = 256;
         private const int MaxBlockRequestCount = 256;
 
+        private const int ConnectionCountUpperLimit = 8;
+
         private readonly int _threadCount = Math.Max((Environment.ProcessorCount / 2), 2);
 
-        public RelayExchangeManager(string configPath, CacheManager cacheManager, BufferPool bufferPool)
+        public ExchangeEngine(string configPath, ConnectionCreator connectionCreator, ContentStorage contentStorage, BufferPool bufferPool)
         {
             _bufferPool = bufferPool;
-            _contentsManager = cacheManager;
+            _contentStorage = contentStorage;
+            _connectionCreator = connectionCreator;
             _metadataManager = new MetadataManager();
-            _metadataManager.GetLockSignaturesEvent += (_) => this.OnGetLockSignatures();
+            _metadataManager.GetLockedSignaturesEvent = () => this.OnGetLockedSignatures();
+            _bandwidthController = new BandwidthController();
 
-            _settings = new Settings(configPath);
+            _settings = new SettingsDatabase(configPath);
 
-            for (int i = 0; i < 3; i++)
+            var random = RandomProvider.GetThreadRandom();
+            _myHopLimitComputer = new HopLimitComputer()
             {
-                _connectTaskManagers.Add(new TaskManager(this.ConnectThread));
-                _acceptTaskManagers.Add(new TaskManager(this.AcceptThread));
-            }
-
-            _sendTaskManager = new TaskManager(this.SendThread);
-            _receiveTaskManager = new TaskManager(this.ReceiveThread);
-
-            _computeTaskManager = new TaskManager(this.ComputeThread);
-
-            foreach (int i in Enumerable.Range(0, _threadCount))
-            {
-                _enqueueTaskManagers.Add(new TaskManager((token) => this.EnqueueThread(i, token)));
-                _dequeueTaskManagers.Add(new TaskManager((token) => this.DequeueThread(i, token)));
-            }
+                DecrementAtHopLimitMaximum = (random.Next(0, int.MaxValue) % 2 == 0),
+                DecrementAtHopLimitMinimum = (random.Next(0, int.MaxValue) % 2 == 0),
+            };
 
             this.UpdateBaseId();
         }
 
-        private volatile NetworkStatus _status = new NetworkStatus();
+        private readonly NetworkStatus _networkStatus = new NetworkStatus();
 
-        public class NetworkStatus
+        private sealed class NetworkStatus
         {
-            public AtomicInteger ConnectCount { get; } = new AtomicInteger();
-            public AtomicInteger AcceptCount { get; } = new AtomicInteger();
+            public AtomicCounter ConnectCount { get; } = new AtomicCounter();
+            public AtomicCounter AcceptCount { get; } = new AtomicCounter();
 
-            public AtomicInteger ReceivedByteCount { get; } = new AtomicInteger();
-            public AtomicInteger SentByteCount { get; } = new AtomicInteger();
+            public AtomicCounter ReceivedByteCount { get; } = new AtomicCounter();
+            public AtomicCounter SentByteCount { get; } = new AtomicCounter();
 
-            public AtomicInteger PushLocationCount { get; } = new AtomicInteger();
-            public AtomicInteger PushBlockLinkCount { get; } = new AtomicInteger();
-            public AtomicInteger PushBlockRequestCount { get; } = new AtomicInteger();
-            public AtomicInteger PushBlockResultCount { get; } = new AtomicInteger();
-            public AtomicInteger PushMessageRequestCount { get; } = new AtomicInteger();
-            public AtomicInteger PushMessageResultCount { get; } = new AtomicInteger();
+            public AtomicCounter PushLocationCount { get; } = new AtomicCounter();
+            public AtomicCounter PushBlockLinkCount { get; } = new AtomicCounter();
+            public AtomicCounter PushBlockRequestCount { get; } = new AtomicCounter();
+            public AtomicCounter PushBlockResultCount { get; } = new AtomicCounter();
+            public AtomicCounter PushMessageRequestCount { get; } = new AtomicCounter();
+            public AtomicCounter PushMessageResultCount { get; } = new AtomicCounter();
 
-            public AtomicInteger PullLocationCount { get; } = new AtomicInteger();
-            public AtomicInteger PullBlockLinkCount { get; } = new AtomicInteger();
-            public AtomicInteger PullBlockRequestCount { get; } = new AtomicInteger();
-            public AtomicInteger PullBlockResultCount { get; } = new AtomicInteger();
-            public AtomicInteger PullMessageRequestCount { get; } = new AtomicInteger();
-            public AtomicInteger PullMessageResultCount { get; } = new AtomicInteger();
-        }
-
-        public RelayExchangeReport Report
-        {
-            get
-            {
-                if (_disposed) throw new ObjectDisposedException(this.GetType().FullName);
-
-                return new RelayExchangeReport(
-                    _config.MyLocation,
-                    _status.ConnectCount,
-                    _status.AcceptCount,
-                    _connections.Count,
-                    _metadataManager.Count,
-                    _uploadBlockHashes.Count,
-                    _diffusionBlockHashes.Count,
-                    _status.ReceivedByteCount,
-                    _status.SentByteCount,
-                    _status.PushLocationCount,
-                    _status.PushBlockLinkCount,
-                    _status.PushBlockRequestCount,
-                    _status.PushBlockResultCount,
-                    _status.PushMessageRequestCount,
-                    _status.PushMessageResultCount,
-                    _status.PullLocationCount,
-                    _status.PullBlockLinkCount,
-                    _status.PullBlockRequestCount,
-                    _status.PullBlockResultCount,
-                    _status.PullMessageRequestCount,
-                    _status.PullMessageResultCount);
-            }
+            public AtomicCounter PullLocationCount { get; } = new AtomicCounter();
+            public AtomicCounter PullBlockLinkCount { get; } = new AtomicCounter();
+            public AtomicCounter PullBlockRequestCount { get; } = new AtomicCounter();
+            public AtomicCounter PullBlockResultCount { get; } = new AtomicCounter();
+            public AtomicCounter PullMessageRequestCount { get; } = new AtomicCounter();
+            public AtomicCounter PullMessageResultCount { get; } = new AtomicCounter();
         }
 
         public IEnumerable<RelayExchangeConnectionReport> GetRelayExchangeConnectionReports()
         {
             var list = new List<RelayExchangeConnectionReport>();
 
-            foreach (var (connection, sessionInfo) in _connections.ToArray())
+            foreach (var (connection, SessionStatus) in _connections.ToArray())
             {
-                if (sessionInfo.Id == null) continue;
+                if (SessionStatus.Id == null) continue;
 
                 list.Add(new RelayExchangeConnectionReport(
-                    sessionInfo.Id,
+                    SessionStatus.Id,
                     connection.Type,
-                    sessionInfo.Uri,
-                    sessionInfo.Location,
-                    sessionInfo.Priority.GetValue(),
+                    SessionStatus.Uri,
+                    SessionStatus.Location,
+                    SessionStatus.Priority.GetValue(),
                     connection.ReceivedByteCount,
                     connection.SentByteCount));
             }
@@ -172,53 +143,21 @@ namespace Xeus.Core.Exchange
             return list;
         }
 
-        public RelayExchangeConfig Config
+        public void SetCloudNodeAddresses(IEnumerable<OmniAddress> addresses)
         {
-            get
-            {
-                return _config;
-            }
+            _cloudNodeAdresseSet.UnionWith(addresses);
         }
 
-        public void SetConfig(RelayExchangeConfig config)
+        public GetSignaturesEventHandler GetLockedSignaturesEvent { private get; set; } = () => Enumerable.Empty<OmniSignature>();
+
+        private IEnumerable<OmniSignature> OnGetLockedSignatures()
         {
-            _config = config;
+            return this.GetLockedSignaturesEvent?.Invoke() ?? Enumerable.Empty<OmniSignature>();
         }
 
-        public IEnumerable<Location> CloudLocations
-        {
-            get
-            {
-                return _otherNodeAdressess.ToArray();
-            }
-        }
-
-        public void SetCloudLocations(IEnumerable<Location> locations)
-        {
-            _otherNodeAdressess.UnionWith(locations);
-        }
-
-        public GetSignaturesEventHandler GetLockSignaturesEvent { get; set; }
-
-        public ConnectCapEventHandler ConnectCapEvent { private get; set; }
-        public AcceptCapEventHandler AcceptCapEvent { private get; set; }
-
-        private IEnumerable<Signature> OnGetLockSignatures()
-        {
-            return this.GetLockSignaturesEvent?.Invoke(this) ?? new Signature[0];
-        }
-
-        private Cap OnConnectCap(string uri)
-        {
-            return this.ConnectCapEvent?.Invoke(this, uri);
-        }
-
-        private Cap OnAcceptCap(out string uri)
-        {
-            uri = null;
-            return this.AcceptCapEvent?.Invoke(this, out uri);
-        }
-
+        /// <summary>
+        /// 256bitのIdを生成する。
+        /// </summary>
         private void UpdateBaseId()
         {
             var baseId = new byte[32];
@@ -231,9 +170,7 @@ namespace Xeus.Core.Exchange
             _baseId = baseId;
         }
 
-        private VolatileHashSet<string> _connectedUris = new VolatileHashSet<string>(new TimeSpan(0, 3, 0));
-
-        private void ConnectThread(CancellationToken token)
+        private async ValueTask ConnectThread(CancellationToken token)
         {
             try
             {
@@ -245,66 +182,65 @@ namespace Xeus.Core.Exchange
 
                     // 接続数を制限する。
                     {
-                        int connectionCount = _connections.ToArray().Count(n => n.Key.Type == SecureConnectionType.Connect);
-                        if (connectionCount >= (_config.ConnectionCountUpperLimit / 2)) continue;
+                        int connectionCount = _connections.ToArray().Count(n => n.Value.Type == SessionType.Conneced);
+                        if (connectionCount >= (ConnectionCountUpperLimit / 2)) continue;
                     }
-                    string uri = null;
+                    OmniAddress? targetAddress = null;
 
-                    lock (_connectedUris.LockObject)
+                    lock (_connectionAttemptedAddressSet.LockObject)
                     {
-                        _connectedUris.Update();
+                        _connectionAttemptedAddressSet.Refresh();
 
                         switch (random.Next(0, 2))
                         {
                             case 0:
-                                uri = _otherNodeAdressess.Randomize()
-                                    .SelectMany(n => n.Uris)
-                                    .Where(n => !_connectedUris.Contains(n))
+                                targetAddress = _cloudNodeAdresseSet.Randomize()
+                                    .Where(n => !_connectionAttemptedAddressSet.Contains(n))
                                     .FirstOrDefault();
                                 break;
                             case 1:
                                 var sessionInfo = _connections.Randomize().Select(n => n.Value).FirstOrDefault();
                                 if (sessionInfo == null) break;
 
-                                uri = sessionInfo.Receive.PulledLocationSet.Randomize()
-                                    .SelectMany(n => n.Uris)
-                                    .Where(n => !_connectedUris.Contains(n))
+                                targetAddress = sessionInfo.Receive.NodeAddressSet.Randomize()
+                                    .Where(n => !_connectionAttemptedAddressSet.Contains(n))
                                     .FirstOrDefault();
                                 break;
                         }
 
-                        if (uri == null || _config.MyLocation.Uris.Contains(uri) || _connections.Any(n => n.Value.Location?.Uris?.Contains(uri) ?? false)) continue;
+                        if (targetAddress == null || _myNodeAddressSet.Contains(targetAddress)
+                            || _connections.Values.Any(n => n.NodeAddress == targetAddress)) continue;
 
-                        _connectedUris.Add(uri);
+                        _connectionAttemptedAddressSet.Add(targetAddress);
                     }
 
-                    Cap cap = this.OnConnectCap(uri);
+                    var cap = await _connectionCreator.ConnectAsync(targetAddress, token);
 
                     if (cap == null)
                     {
-                        lock (_otherNodeAdressess.LockObject)
+                        lock (_cloudNodeAdresseSet.LockObject)
                         {
-                            if (_otherNodeAdressess.Count > 1024)
+                            if (_cloudNodeAdresseSet.Count > 1024)
                             {
-                                _otherNodeAdressess.ExceptWith(_otherNodeAdressess.Where(n => n.Uris.Contains(uri)).ToArray());
+                                _cloudNodeAdresseSet.Remove(targetAddress);
                             }
                         }
 
                         continue;
                     }
 
-                    _status.ConnectCount.Increment();
+                    _networkStatus.ConnectCount.Increment();
 
-                    this.CreateConnection(cap, SecureConnectionType.Connect, uri);
+                    this.CreateConnection(OmniSecureConnectionType.Connected, cap, targetAddress);
                 }
             }
             catch (Exception e)
             {
-                Log.Error(e);
+                _logger.Error(e);
             }
         }
 
-        private void AcceptThread(CancellationToken token)
+        private async ValueTask AcceptThread(CancellationToken token)
         {
             try
             {
@@ -314,56 +250,70 @@ namespace Xeus.Core.Exchange
 
                     // 接続数を制限する。
                     {
-                        int connectionCount = _connections.ToArray().Count(n => n.Key.Type == SecureConnectionType.Accept);
-                        if (connectionCount >= (_config.ConnectionCountUpperLimit / 2)) continue;
+                        int connectionCount = _connections.ToArray().Count(n => n.Value.Type == SessionType.Accepted);
+                        if (connectionCount >= (ConnectionCountUpperLimit / 2)) continue;
                     }
 
-                    var cap = this.OnAcceptCap(out string uri);
-                    if (cap == null) continue;
+                    var result = await _connectionCreator.AcceptAsync(token);
+                    if (result == null) continue;
 
-                    _status.AcceptCount.Increment();
+                    _networkStatus.AcceptCount.Increment();
 
-                    this.CreateConnection(cap, SecureConnectionType.Accept, uri);
+                    this.CreateConnection(OmniSecureConnectionType.Accepted, result.Value.Cap, result.Value.Address);
                 }
             }
             catch (Exception e)
             {
-                Log.Error(e);
+                _logger.Error(e);
             }
         }
 
-        public void CreateConnection(Cap cap, SecureConnectionType type, string uri)
+        private OmniNonblockingConnectionOptions CreateOmniNonblockingConnectionOptions()
         {
-            SecureConnection connection = null;
+            return new OmniNonblockingConnectionOptions()
+            {
+                MaxSendByteCount = 1024 * 1024 * 4,
+                MaxReceiveByteCount = 1024 * 1024 * 4,
+                BandwidthController = _bandwidthController,
+                BufferPool = _bufferPool,
+            };
+        }
+
+        private OmniSecureConnectionOptions CreateOmniSecureConnectionOptions(OmniSecureConnectionType type)
+        {
+            return new OmniSecureConnectionOptions()
+            {
+                Passwords = _passwords,
+                Type = type,
+                BufferPool = _bufferPool,
+            };
+        }
+
+        private void CreateConnection(OmniSecureConnectionType type, Cap cap, OmniAddress targetAddress)
+        {
+            OmniSecureConnection? connection = null;
 
             {
                 var garbages = new List<IDisposable>();
 
                 try
                 {
-                    var baseConnection = new BaseConnection(cap, 3, 1024 * 1024 * 4, _bufferPool);
-                    garbages.Add(baseConnection);
 
-                    var secureConnection = new SecureConnection(baseConnection, type, _bufferPool);
+                    var nonblockingConnection = new OmniNonblockingConnection(cap, this.CreateOmniNonblockingConnectionOptions());
+                    garbages.Add(nonblockingConnection);
+
+                    var secureConnection = new OmniSecureConnection(nonblockingConnection, this.CreateOmniSecureConnectionOptions(type));
                     garbages.Add(secureConnection);
 
                     using (var tokenSource = new CancellationTokenSource(new TimeSpan(0, 0, 30)))
                     {
-                        var task = Task.Run(() =>
+                        var task = secureConnection.Handshake(tokenSource.Token);
+
+                        while (!task.IsCompleted)
                         {
-                            for (; ; )
-                            {
-                                if (!tokenSource.Token.WaitHandle.WaitOne(500)) return;
-
-                                secureConnection.Send(1024 * 8);
-                                secureConnection.Receive(1024 * 8);
-                            }
-                        });
-
-                        secureConnection.Handshake(tokenSource.Token);
-
-                        tokenSource.Cancel();
-                        task.Wait();
+                            Thread.Sleep(300);
+                            secureConnection.DoEvents();
+                        }
                     }
 
                     connection = secureConnection;
@@ -374,6 +324,8 @@ namespace Xeus.Core.Exchange
                     {
                         item.Dispose();
                     }
+
+                    throw;
                 }
             }
 
@@ -381,10 +333,10 @@ namespace Xeus.Core.Exchange
 
             lock (_connections.LockObject)
             {
-                if (_connections.Count >= _config.ConnectionCountUpperLimit) return;
+                if (_connections.Count >= ConnectionCountUpperLimit) return;
 
-                var sessionInfo = new SessionInfo();
-                sessionInfo.Uri = uri;
+                var sessionInfo = new SessionStatus();
+                sessionInfo.NodeAddress = targetAddress;
                 sessionInfo.ThreadId = GetThreadId();
 
                 _connections.Add(connection, sessionInfo);
@@ -409,123 +361,55 @@ namespace Xeus.Core.Exchange
             }
         }
 
-        private void RemoveConnection(SecureConnection connection)
+        private void RemoveConnection(IConnection connection)
         {
-            lock (_connections.LockObject)
+            using (_connectionsLock.WriteLock())
             {
-                if (_connections.TryGetValue(connection, out var sessionInfo))
+                lock (_connections.LockObject)
                 {
-                    _connections.Remove(connection);
+                    if (_connections.TryGetValue(connection, out var sessionInfo))
+                    {
+                        _connections.Remove(connection);
 
-                    connection.Dispose();
+                        connection.Dispose();
 
-                    var location = sessionInfo.Location;
-                    if (location != null) _otherNodeAdressess.Add(location);
+                        _cloudNodeAdresseSet.Add(sessionInfo.NodeAddress);
+                    }
                 }
             }
         }
 
-        private void SendThread(CancellationToken token)
+        private void DoEventThread(CancellationToken token)
         {
-            var sw = Stopwatch.StartNew();
-
             try
             {
                 for (; ; )
                 {
-                    if (sw.ElapsedMilliseconds > 1000) Debug.WriteLine("Relay SendThread: " + sw.ElapsedMilliseconds);
+                    // Wait
+                    if (token.WaitHandle.WaitOne(300)) return;
 
-                    // Timer
+                    // DoEvent
+                    foreach (var (connection, sessionInfo) in _connections.Randomize())
                     {
-                        if (token.WaitHandle.WaitOne((int)(Math.Max(0, 1000 - sw.ElapsedMilliseconds)))) return;
-                        sw.Restart();
-                    }
-
-                    // Send
-                    {
-                        int remain = (_config.BandwidthUpperLimit != 0) ? _config.BandwidthUpperLimit : int.MaxValue;
-
-                        foreach (var (connection, sessionInfo) in _connections.Randomize())
+                        try
                         {
-                            try
+                            using (_connectionsLock.ReadLock())
                             {
-                                using (_connectionLockProvider.ReadLock())
-                                {
-                                    int count = connection.Send(Math.Min(remain, 1024 * 1024 * 4));
-                                    _status.SentByteCount.Add(count);
-
-                                    remain -= count;
-                                    if (remain <= 0) break;
-                                }
+                                connection.DoEvents();
                             }
-                            catch (Exception e)
-                            {
-                                Log.Debug(e);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.Debug(e);
 
-                                using (_connectionLockProvider.WriteLock())
-                                {
-                                    this.RemoveConnection(connection);
-                                }
-                            }
+                            this.RemoveConnection(connection);
                         }
                     }
                 }
             }
             catch (Exception e)
             {
-                Log.Error(e);
-            }
-        }
-
-        private void ReceiveThread(CancellationToken token)
-        {
-            var sw = Stopwatch.StartNew();
-
-            try
-            {
-                for (; ; )
-                {
-                    if (sw.ElapsedMilliseconds > 1000) Debug.WriteLine("Relay ReceiveThread: " + sw.ElapsedMilliseconds);
-
-                    // Timer
-                    {
-                        if (token.WaitHandle.WaitOne((int)(Math.Max(0, 1000 - sw.ElapsedMilliseconds)))) return;
-                        sw.Restart();
-                    }
-
-                    // Receive
-                    {
-                        int remain = (_config.BandwidthUpperLimit != 0) ? _config.BandwidthUpperLimit : int.MaxValue;
-
-                        foreach (var (connection, sessionInfo) in _connections.Randomize())
-                        {
-                            try
-                            {
-                                using (_connectionLockProvider.ReadLock())
-                                {
-                                    int count = connection.Receive(Math.Min(remain, 1024 * 1024 * 4));
-                                    _status.SentByteCount.Add(count);
-
-                                    remain -= count;
-                                    if (remain <= 0) break;
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                Log.Debug(e);
-
-                                using (_connectionLockProvider.WriteLock())
-                                {
-                                    this.RemoveConnection(connection);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
+                _logger.Debug(e);
             }
         }
 
@@ -536,11 +420,11 @@ namespace Xeus.Core.Exchange
             var refreshStopwatch = Stopwatch.StartNew();
             var reduceStopwatch = Stopwatch.StartNew();
 
-            var pushBlockUploadStopwatch = Stopwatch.StartNew();
-            var pushBlockDownloadStopwatch = Stopwatch.StartNew();
+            var publishBlockStopwatch = Stopwatch.StartNew();
+            var wantBlockStopwatch = Stopwatch.StartNew();
 
-            var pushMetadataUploadStopwatch = Stopwatch.StartNew();
-            var pushMetadataDownloadStopwatch = Stopwatch.StartNew();
+            var publishMetadataStopwatch = Stopwatch.StartNew();
+            var wantMetadataStopwatch = Stopwatch.StartNew();
 
             try
             {
@@ -559,22 +443,22 @@ namespace Xeus.Core.Exchange
 
                         // 古いPushリクエスト情報を削除する。
                         {
-                            _pushBlocksRequestSet.Update();
-                            _pushBroadcastMetadatasRequestSet.Update();
-                            _pushUnicastMetadatasRequestSet.Update();
-                            _pushMulticastMetadatasRequestSet.Update();
+                            _wantBroadcastClueSet.Refresh();
+                            _wantUnicastClueSet.Refresh();
+                            _wantMulticastClueSet.Refresh();
+                            _wantBlocksRequestSet.Refresh();
                         }
 
                         // 古いセッション情報を破棄する。
-                        foreach (var sessionInfo in _connections.Values)
+                        foreach (var SessionStatus in _connections.Values)
                         {
-                            sessionInfo.Update();
+                            SessionStatus.Refresh();
                         }
 
                         // 長い間通信の無い接続を切断する。
-                        foreach (var (connection, sessionInfo) in _connections.ToArray())
+                        foreach (var (connection, SessionStatus) in _connections.ToArray())
                         {
-                            if (sessionInfo.Receive.Stopwatch.Elapsed.TotalMinutes < 3) continue;
+                            if (SessionStatus.Receive.Stopwatches.ReceiveBlockStopwatch.Elapsed.TotalMinutes < 3) continue;
 
                             this.RemoveConnection(connection);
                         }
@@ -592,7 +476,7 @@ namespace Xeus.Core.Exchange
                             random.Shuffle(tempList);
                             tempList.Sort((x, y) => x.Value.Priority.GetValue().CompareTo(y.Value.Priority.GetValue()));
 
-                            foreach (var (connection, sessionInfo) in tempList.Take(3))
+                            foreach (var (connection, SessionStatus) in tempList.Take(3))
                             {
                                 this.RemoveConnection(connection);
                             }
@@ -602,69 +486,102 @@ namespace Xeus.Core.Exchange
                         {
                             const int maxCount = 1024 * 256;
 
-                            if (_diffusionBlockHashes.Count > maxCount)
+                            if (_cloudDiffuseBlockInfoMap.Count > maxCount)
                             {
-                                var targetHashes = _diffusionBlockHashes.Randomize().Take(_diffusionBlockHashes.Count - maxCount).ToArray();
-                                _diffusionBlockHashes.ExceptWith(targetHashes);
+                                var targetHashes = _cloudDiffuseBlockInfoMap.Randomize().Take(_cloudDiffuseBlockInfoMap.Count - maxCount).Select(n => n.Key).ToArray();
+
+                                foreach (var hash in targetHashes)
+                                {
+                                    _cloudDiffuseBlockInfoMap.Remove(hash);
+                                }
                             }
                         }
 
                         // キャッシュに存在しないブロックのアップロード情報を削除する。
                         {
                             {
-                                var targetHashes = _contentsManager.ExceptFrom(_diffusionBlockHashes.ToArray()).ToArray();
-                                _diffusionBlockHashes.ExceptWith(targetHashes);
+                                var targetHashes = new HashSet<OmniHash>(_contentStorage.ExceptFrom(_myDiffuseBlockInfoMap.Select(n => n.Key).ToArray()));
+
+                                foreach (var hash in targetHashes)
+                                {
+                                    _myDiffuseBlockInfoMap.Remove(hash);
+                                }
                             }
 
                             {
-                                var targetHashes = _contentsManager.ExceptFrom(_uploadBlockHashes.ToArray()).ToArray();
-                                _uploadBlockHashes.ExceptWith(targetHashes);
+                                var targetHashes = new HashSet<OmniHash>(_contentStorage.ExceptFrom(_cloudDiffuseBlockInfoMap.Select(n => n.Key).ToArray()));
+
+                                foreach (var hash in targetHashes)
+                                {
+                                    _cloudDiffuseBlockInfoMap.Remove(hash);
+                                }
                             }
                         }
                     }
 
-                    var cloudNodes = new List<Node<SessionInfo>>();
+                    var cloudNodes = new List<NodeInfo<SessionStatus>>();
                     {
-                        foreach (var sessionInfo in _connections.Values.ToArray())
+                        foreach (var SessionStatus in _connections.Values.ToArray())
                         {
-                            if (sessionInfo.Id == null) continue;
+                            if (SessionStatus.Id == null) continue;
 
-                            cloudNodes.Add(new Node<SessionInfo>(sessionInfo.Id, sessionInfo));
+                            cloudNodes.Add(new NodeInfo<SessionStatus>(SessionStatus.Id, SessionStatus));
                         }
 
                         if (cloudNodes.Count < 3) continue;
                     }
 
                     // アップロード
-                    if (pushBlockUploadStopwatch.Elapsed.TotalSeconds >= 5)
+                    if (publishBlockStopwatch.Elapsed.TotalSeconds >= 5)
                     {
-                        pushBlockUploadStopwatch.Restart();
+                        publishBlockStopwatch.Restart();
 
-                        var diffusionMap = new Dictionary<Node<SessionInfo>, List<Hash>>();
-                        var uploadMap = new Dictionary<Node<SessionInfo>, List<Hash>>();
+                        var publishBlockMap = new Dictionary<NodeInfo<SessionStatus>, List<DiffuseBlockInfo>>();
 
-                        foreach (var hash in CollectionUtils.Unite(_diffusionBlockHashes.ToArray(), _uploadBlockHashes.ToArray()).Randomize())
+                        // 拡散アップロードの対象となっているブロックをアップロード候補として登録する。
                         {
-                            foreach (var node in RouteTableMethods.Search(_baseId, hash.Value, cloudNodes, 2))
-                            {
-                                var tempList = diffusionMap.GetOrAdd(node, (_) => new List<Hash>());
-                                if (tempList.Count > 128) continue;
+                            var tempList = new List<DiffuseBlockInfo>();
+                            tempList.AddRange(_myDiffuseBlockInfoMap.Select(n => n.Value).ToArray().Randomize().Take(1024));
+                            tempList.AddRange(_cloudDiffuseBlockInfoMap.Select(n => n.Value).ToArray().Randomize().Take(1024));
+                            random.Shuffle(tempList);
 
-                                tempList.Add(hash);
+                            foreach (var diffuseBlockInfo in tempList)
+                            {
+                                var targetNode = RouteTableMethods.Search(_baseId, diffuseBlockInfo.Hash.Value.Span, cloudNodes, 1).FirstOrDefault();
+                                if (targetNode == default) continue;
+
+                                var targetList = publishBlockMap.GetOrAdd(targetNode, (_) => new List<DiffuseBlockInfo>());
+                                if (targetList.Count > 128) continue;
+
+                                targetList.Add(diffuseBlockInfo);
                             }
                         }
 
+                        // 相手ノードからリクエストされたブロックをアップロード候補として登録する
                         foreach (var node in cloudNodes)
                         {
-                            uploadMap.GetOrAdd(node, (_) => new List<Hash>())
-                                .AddRange(_contentsManager.IntersectFrom(node.Value.Receive.PulledBlockRequestSet.Randomize()).Take(256));
+                            var targetList = publishBlockMap.GetOrAdd(node, (_) => new List<DiffuseBlockInfo>());
+
+                            // 要求されているブロック情報
+                            var map = node.Value.Receive.Queues.WantBlocksMap;
+
+                            lock (map.LockObject)
+                            {
+                                // 所有しているブロックのハッシュのみ抽出する
+                                var tempList = _contentStorage.IntersectFrom(map.Keys).Take(256).ToList();
+
+                                foreach(var hash in tempList)
+                                {
+                                    targetList.Add(new DiffuseBlockInfo();
+                                }
+                            }
                         }
 
                         foreach (var node in cloudNodes)
                         {
                             var tempList = new List<Hash>();
                             {
-                                if (diffusionMap.TryGetValue(node, out var diffusionList))
+                                if (publishBlockMap.TryGetValue(node, out var diffusionList))
                                 {
                                     tempList.AddRange(diffusionList);
                                 }
@@ -690,9 +607,9 @@ namespace Xeus.Core.Exchange
                     }
 
                     // ダウンロード
-                    if (pushBlockDownloadStopwatch.Elapsed.TotalSeconds >= 30)
+                    if (wantBlockStopwatch.Elapsed.TotalSeconds >= 30)
                     {
-                        pushBlockDownloadStopwatch.Restart();
+                        wantBlockStopwatch.Restart();
 
                         var pushBlockLinkSet = new HashSet<Hash>();
                         var pushBlockRequestSet = new HashSet<Hash>();
@@ -701,7 +618,7 @@ namespace Xeus.Core.Exchange
                             // Link
                             {
                                 {
-                                    var tempList = _contentsManager.ToArray();
+                                    var tempList = _contentStorage.ToArray();
                                     random.Shuffle(tempList);
 
                                     pushBlockLinkSet.UnionWith(tempList.Take(_maxBlockLinkCount * cloudNodes.Count));
@@ -722,7 +639,7 @@ namespace Xeus.Core.Exchange
                             // Request
                             {
                                 {
-                                    var tempList = _contentsManager.ExceptFrom(_pushBlocksRequestSet.ToArray()).ToArray();
+                                    var tempList = _contentStorage.ExceptFrom(_pushBlocksRequestSet.ToArray()).ToArray();
                                     random.Shuffle(tempList);
 
                                     pushBlockRequestSet.UnionWith(tempList.Take(_maxBlockRequestCount * cloudNodes.Count));
@@ -731,7 +648,7 @@ namespace Xeus.Core.Exchange
                                 {
                                     foreach (var node in cloudNodes)
                                     {
-                                        var tempList = _contentsManager.ExceptFrom(node.Value.Receive.PulledBlockRequestSet.ToArray()).ToArray();
+                                        var tempList = _contentStorage.ExceptFrom(node.Value.Receive.PulledBlockRequestSet.ToArray()).ToArray();
                                         random.Shuffle(tempList);
 
                                         var count = Math.Max(16, _maxBlockRequestCount * node.Value.Priority.GetValue());
@@ -744,7 +661,7 @@ namespace Xeus.Core.Exchange
                         {
                             // Link
                             {
-                                var tempMap = new Dictionary<Node<SessionInfo>, List<Hash>>();
+                                var tempMap = new Dictionary<NodeInfo<SessionStatus>, List<Hash>>();
 
                                 foreach (var hash in pushBlockLinkSet.Randomize())
                                 {
@@ -776,7 +693,7 @@ namespace Xeus.Core.Exchange
 
                             // Request
                             {
-                                var tempMap = new Dictionary<Node<SessionInfo>, List<Hash>>();
+                                var tempMap = new Dictionary<NodeInfo<SessionStatus>, List<Hash>>();
 
                                 foreach (var hash in pushBlockRequestSet.Randomize())
                                 {
@@ -819,9 +736,9 @@ namespace Xeus.Core.Exchange
                     }
 
                     // アップロード
-                    if (pushMetadataUploadStopwatch.Elapsed.TotalSeconds >= 30)
+                    if (publishMetadataStopwatch.Elapsed.TotalSeconds >= 30)
                     {
-                        pushMetadataUploadStopwatch.Restart();
+                        publishMetadataStopwatch.Restart();
 
                         // BroadcastMetadata
                         foreach (var signature in _metadataManager.GetBroadcastSignatures())
@@ -852,9 +769,9 @@ namespace Xeus.Core.Exchange
                     }
 
                     // ダウンロード
-                    if (pushMetadataDownloadStopwatch.Elapsed.TotalSeconds >= 30)
+                    if (wantMetadataStopwatch.Elapsed.TotalSeconds >= 30)
                     {
-                        pushMetadataDownloadStopwatch.Restart();
+                        wantMetadataStopwatch.Restart();
 
                         var pushBroadcastMetadatasRequestSet = new HashSet<Signature>();
                         var pushUnicastMetadatasRequestSet = new HashSet<Signature>();
@@ -919,7 +836,7 @@ namespace Xeus.Core.Exchange
                         {
                             // BroadcastMetadata
                             {
-                                var tempMap = new Dictionary<Node<SessionInfo>, List<Signature>>();
+                                var tempMap = new Dictionary<NodeInfo<SessionStatus>, List<Signature>>();
 
                                 foreach (var signature in pushBroadcastMetadatasRequestSet.Randomize())
                                 {
@@ -947,7 +864,7 @@ namespace Xeus.Core.Exchange
 
                             // UnicastMetadata
                             {
-                                var tempMap = new Dictionary<Node<SessionInfo>, List<Signature>>();
+                                var tempMap = new Dictionary<NodeInfo<SessionStatus>, List<Signature>>();
 
                                 foreach (var signature in pushUnicastMetadatasRequestSet.Randomize())
                                 {
@@ -975,7 +892,7 @@ namespace Xeus.Core.Exchange
 
                             // MulticastMetadata
                             {
-                                var tempMap = new Dictionary<Node<SessionInfo>, List<Tag>>();
+                                var tempMap = new Dictionary<NodeInfo<SessionStatus>, List<Tag>>();
 
                                 foreach (var tag in pushMulticastMetadatasRequestSet.Randomize())
                                 {
@@ -1028,15 +945,15 @@ namespace Xeus.Core.Exchange
 
                     // Enqueue
                     {
-                        foreach (var (connection, sessionInfo) in _connections.Where(n => n.Value.ThreadId == threadId).Randomize())
+                        foreach (var (connection, SessionStatus) in _connections.Where(n => n.Value.ThreadId == threadId).Randomize())
                         {
                             try
                             {
-                                using (_connectionLockProvider.ReadLock())
+                                using (_connectionsLock.ReadLock())
                                 {
                                     for (int i = 0; i < 3; i++)
                                     {
-                                        if (!connection.TryEnqueue(() => this.GetSendStream(sessionInfo))) break;
+                                        if (!connection.TryEnqueue(() => this.GetSendStream(SessionStatus))) break;
                                     }
                                 }
                             }
@@ -1044,10 +961,7 @@ namespace Xeus.Core.Exchange
                             {
                                 Log.Debug(e);
 
-                                using (_connectionLockProvider.WriteLock())
-                                {
-                                    this.RemoveConnection(connection);
-                                }
+                                this.RemoveConnection(connection);
                             }
                         }
                     }
@@ -1077,15 +991,15 @@ namespace Xeus.Core.Exchange
 
                     // Dequeue
                     {
-                        foreach (var (connection, sessionInfo) in _connections.Where(n => n.Value.ThreadId == threadId).Randomize())
+                        foreach (var (connection, SessionStatus) in _connections.Where(n => n.Value.ThreadId == threadId).Randomize())
                         {
                             try
                             {
-                                using (_connectionLockProvider.ReadLock())
+                                using (_connectionsLock.ReadLock())
                                 {
                                     for (int i = 0; i < 3; i++)
                                     {
-                                        if (!connection.TryDequeue((stream) => this.SetReceiveStream(sessionInfo, stream))) break;
+                                        if (!connection.TryDequeue((stream) => this.SetReceiveStream(SessionStatus, stream))) break;
                                     }
                                 }
                             }
@@ -1093,10 +1007,7 @@ namespace Xeus.Core.Exchange
                             {
                                 Log.Debug(e);
 
-                                using (_connectionLockProvider.WriteLock())
-                                {
-                                    this.RemoveConnection(connection);
-                                }
+                                this.RemoveConnection(connection);
                             }
                         }
                     }
@@ -1108,13 +1019,13 @@ namespace Xeus.Core.Exchange
             }
         }
 
-        private Stream GetSendStream(SessionInfo sessionInfo)
+        private Stream GetSendStream(SessionStatus SessionStatus)
         {
             try
             {
-                if (!sessionInfo.Send.IsSentVersion)
+                if (!SessionStatus.Send.IsSentVersion)
                 {
-                    sessionInfo.Send.IsSentVersion = true;
+                    SessionStatus.Send.IsSentVersion = true;
 
                     var versionStream = new RecyclableMemoryStream(_bufferPool);
                     Varint.SetUInt64(versionStream, (uint)ProtocolVersion.Version0);
@@ -1124,9 +1035,9 @@ namespace Xeus.Core.Exchange
 
                     return versionStream;
                 }
-                else if (!sessionInfo.Send.IsSentProfile)
+                else if (!SessionStatus.Send.IsSentProfile)
                 {
-                    sessionInfo.Send.IsSentProfile = true;
+                    SessionStatus.Send.IsSentProfile = true;
 
                     var packet = new ProfilePacket(_baseId, _config.MyLocation);
 
@@ -1138,15 +1049,15 @@ namespace Xeus.Core.Exchange
                 }
                 else
                 {
-                    if (sessionInfo.Send.LocationResultStopwatch.Elapsed.TotalMinutes > 3)
+                    if (SessionStatus.Send.LocationResultStopwatch.Elapsed.TotalMinutes > 3)
                     {
-                        sessionInfo.Send.LocationResultStopwatch.Restart();
+                        SessionStatus.Send.LocationResultStopwatch.Restart();
 
                         var random = RandomProvider.GetThreadRandom();
 
                         var tempLocations = new List<Location>();
                         tempLocations.Add(_config.MyLocation);
-                        tempLocations.AddRange(_otherNodeAdressess);
+                        tempLocations.AddRange(_cloudNodeAdresseSet);
 
                         random.Shuffle(tempLocations);
 
@@ -1155,66 +1066,66 @@ namespace Xeus.Core.Exchange
                         Stream typeStream = new RecyclableMemoryStream(_bufferPool);
                         Varint.SetUInt64(typeStream, (uint)MessageId.LocationsPublish);
 
-                        _status.PushLocationCount.Add(packet.Locations.Count());
+                        _networkStatus.PushLocationCount.Add(packet.Locations.Count());
 
                         Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " ExchangeManager: Send LocationResult");
 
                         return new UniteStream(typeStream, packet.Export(_bufferPool));
                     }
-                    else if (sessionInfo.Send.PushBlockLinkQueue.Count > 0)
+                    else if (SessionStatus.Send.PushBlockLinkQueue.Count > 0)
                     {
                         BlocksLinkPacket packet;
 
-                        lock (sessionInfo.Send.PushBlockLinkQueue.LockObject)
+                        lock (SessionStatus.Send.PushBlockLinkQueue.LockObject)
                         {
-                            sessionInfo.Send.PushedBlockLinkFilter.AddRange(sessionInfo.Send.PushBlockLinkQueue);
+                            SessionStatus.Send.PushedBlockLinkFilter.AddRange(SessionStatus.Send.PushBlockLinkQueue);
 
-                            packet = new BlocksLinkPacket(sessionInfo.Send.PushBlockLinkQueue.ToArray());
-                            sessionInfo.Send.PushBlockLinkQueue.Clear();
+                            packet = new BlocksLinkPacket(SessionStatus.Send.PushBlockLinkQueue.ToArray());
+                            SessionStatus.Send.PushBlockLinkQueue.Clear();
                         }
 
                         Stream typeStream = new RecyclableMemoryStream(_bufferPool);
                         Varint.SetUInt64(typeStream, (uint)MessageId.BlocksLink);
 
-                        _status.PushBlockLinkCount.Add(packet.Hashes.Count());
+                        _networkStatus.PushBlockLinkCount.Add(packet.Hashes.Count());
 
                         Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " ExchangeManager: Send BlockLink");
 
                         return new UniteStream(typeStream, packet.Export(_bufferPool));
                     }
-                    else if (sessionInfo.Send.PushBlockRequestQueue.Count > 0)
+                    else if (SessionStatus.Send.PushBlockRequestQueue.Count > 0)
                     {
                         BlocksRequestPacket packet;
 
-                        lock (sessionInfo.Send.PushBlockRequestQueue.LockObject)
+                        lock (SessionStatus.Send.PushBlockRequestQueue.LockObject)
                         {
-                            sessionInfo.Send.PushedBlockRequestFilter.AddRange(sessionInfo.Send.PushBlockRequestQueue);
+                            SessionStatus.Send.PushedBlockRequestFilter.AddRange(SessionStatus.Send.PushBlockRequestQueue);
 
-                            packet = new BlocksRequestPacket(sessionInfo.Send.PushBlockRequestQueue.ToArray());
-                            sessionInfo.Send.PushBlockRequestQueue.Clear();
+                            packet = new BlocksRequestPacket(SessionStatus.Send.PushBlockRequestQueue.ToArray());
+                            SessionStatus.Send.PushBlockRequestQueue.Clear();
                         }
 
                         Stream typeStream = new RecyclableMemoryStream(_bufferPool);
                         Varint.SetUInt64(typeStream, (uint)MessageId.BlocksRequest);
 
-                        _status.PushBlockRequestCount.Add(packet.Hashes.Count());
+                        _networkStatus.PushBlockRequestCount.Add(packet.Hashes.Count());
 
                         Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " ExchangeManager: Send BlockRequest");
 
                         return new UniteStream(typeStream, packet.Export(_bufferPool));
                     }
-                    else if (sessionInfo.Send.BlockResultStopwatch.Elapsed.TotalSeconds > 0.5 && sessionInfo.Send.PushBlockResultQueue.Count > 0)
+                    else if (SessionStatus.Send.BlockResultStopwatch.Elapsed.TotalSeconds > 0.5 && SessionStatus.Send.PushBlockResultQueue.Count > 0)
                     {
-                        sessionInfo.Send.BlockResultStopwatch.Restart();
+                        SessionStatus.Send.BlockResultStopwatch.Restart();
 
                         Hash? hash = null;
 
-                        lock (sessionInfo.Send.PushBlockResultQueue.LockObject)
+                        lock (SessionStatus.Send.PushBlockResultQueue.LockObject)
                         {
-                            if (sessionInfo.Send.PushBlockResultQueue.Count > 0)
+                            if (SessionStatus.Send.PushBlockResultQueue.Count > 0)
                             {
-                                hash = sessionInfo.Send.PushBlockResultQueue.Dequeue();
-                                sessionInfo.Receive.PulledBlockRequestSet.Remove(hash.Value);
+                                hash = SessionStatus.Send.PushBlockResultQueue.Dequeue();
+                                SessionStatus.Receive.PulledBlockRequestSet.Remove(hash.Value);
                             }
                         }
 
@@ -1226,7 +1137,7 @@ namespace Xeus.Core.Exchange
 
                                 try
                                 {
-                                    buffer = _contentsManager.GetBlock(hash.Value);
+                                    buffer = _contentStorage.GetBlock(hash.Value);
 
                                     dataStream = (new BlockResultPacket(hash.Value, buffer)).Export(_bufferPool);
                                 }
@@ -1248,7 +1159,7 @@ namespace Xeus.Core.Exchange
                                 Stream typeStream = new RecyclableMemoryStream(_bufferPool);
                                 Varint.SetUInt64(typeStream, (uint)MessageId.BlockResult);
 
-                                _status.PushBlockResultCount.Increment();
+                                _networkStatus.PushBlockResultCount.Increment();
 
                                 _diffusionBlockHashes.Remove(hash.Value);
                                 _uploadBlockHashes.Remove(hash.Value);
@@ -1259,28 +1170,28 @@ namespace Xeus.Core.Exchange
                             }
                         }
                     }
-                    else if (sessionInfo.Send.PushBroadcastMetadataRequestQueue.Count > 0)
+                    else if (SessionStatus.Send.PushBroadcastMetadataRequestQueue.Count > 0)
                     {
                         BroadcastMetadatasRequestPacket packet;
 
-                        lock (sessionInfo.Send.PushBroadcastMetadataRequestQueue.LockObject)
+                        lock (SessionStatus.Send.PushBroadcastMetadataRequestQueue.LockObject)
                         {
-                            packet = new BroadcastMetadatasRequestPacket(sessionInfo.Send.PushBroadcastMetadataRequestQueue.ToArray());
-                            sessionInfo.Send.PushBroadcastMetadataRequestQueue.Clear();
+                            packet = new BroadcastMetadatasRequestPacket(SessionStatus.Send.PushBroadcastMetadataRequestQueue.ToArray());
+                            SessionStatus.Send.PushBroadcastMetadataRequestQueue.Clear();
                         }
 
                         Stream typeStream = new RecyclableMemoryStream(_bufferPool);
                         Varint.SetUInt64(typeStream, (uint)MessageId.BroadcastMetadatasRequest);
 
-                        _status.PushMessageRequestCount.Add(packet.Signatures.Count());
+                        _networkStatus.PushMessageRequestCount.Add(packet.Signatures.Count());
 
                         Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " ExchangeManager: Send BroadcastMetadataRequest");
 
                         return new UniteStream(typeStream, packet.Export(_bufferPool));
                     }
-                    else if (sessionInfo.Send.BroadcastMetadataResultStopwatch.Elapsed.TotalSeconds > 30)
+                    else if (SessionStatus.Send.BroadcastMetadataResultStopwatch.Elapsed.TotalSeconds > 30)
                     {
-                        sessionInfo.Send.BroadcastMetadataResultStopwatch.Restart();
+                        SessionStatus.Send.BroadcastMetadataResultStopwatch.Restart();
 
                         var random = RandomProvider.GetThreadRandom();
 
@@ -1288,9 +1199,9 @@ namespace Xeus.Core.Exchange
 
                         var signatures = new List<Signature>();
 
-                        lock (sessionInfo.Receive.PulledBroadcastMetadataRequestSet.LockObject)
+                        lock (SessionStatus.Receive.PulledBroadcastMetadataRequestSet.LockObject)
                         {
-                            signatures.AddRange(sessionInfo.Receive.PulledBroadcastMetadataRequestSet);
+                            signatures.AddRange(SessionStatus.Receive.PulledBroadcastMetadataRequestSet);
                         }
 
                         random.Shuffle(signatures);
@@ -1314,35 +1225,35 @@ namespace Xeus.Core.Exchange
                             Stream typeStream = new RecyclableMemoryStream(_bufferPool);
                             Varint.SetUInt64(typeStream, (uint)MessageId.BroadcastMetadatasResult);
 
-                            _status.PushMessageResultCount.Add(packet.BroadcastMetadatas.Count());
+                            _networkStatus.PushMessageResultCount.Add(packet.BroadcastMetadatas.Count());
 
                             Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " ExchangeManager: Send MetadataResult");
 
                             return new UniteStream(typeStream, packet.Export(_bufferPool));
                         }
                     }
-                    else if (sessionInfo.Send.PushUnicastMetadataRequestQueue.Count > 0)
+                    else if (SessionStatus.Send.PushUnicastMetadataRequestQueue.Count > 0)
                     {
                         UnicastMetadatasRequestPacket packet;
 
-                        lock (sessionInfo.Send.PushUnicastMetadataRequestQueue.LockObject)
+                        lock (SessionStatus.Send.PushUnicastMetadataRequestQueue.LockObject)
                         {
-                            packet = new UnicastMetadatasRequestPacket(sessionInfo.Send.PushUnicastMetadataRequestQueue.ToArray());
-                            sessionInfo.Send.PushUnicastMetadataRequestQueue.Clear();
+                            packet = new UnicastMetadatasRequestPacket(SessionStatus.Send.PushUnicastMetadataRequestQueue.ToArray());
+                            SessionStatus.Send.PushUnicastMetadataRequestQueue.Clear();
                         }
 
                         Stream typeStream = new RecyclableMemoryStream(_bufferPool);
                         Varint.SetUInt64(typeStream, (uint)MessageId.UnicastMetadatasRequest);
 
-                        _status.PushMessageRequestCount.Add(packet.Signatures.Count());
+                        _networkStatus.PushMessageRequestCount.Add(packet.Signatures.Count());
 
                         Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " ExchangeManager: Send UnicastMetadataRequest");
 
                         return new UniteStream(typeStream, packet.Export(_bufferPool));
                     }
-                    else if (sessionInfo.Send.UnicastMetadataResultStopwatch.Elapsed.TotalSeconds > 30)
+                    else if (SessionStatus.Send.UnicastMetadataResultStopwatch.Elapsed.TotalSeconds > 30)
                     {
-                        sessionInfo.Send.UnicastMetadataResultStopwatch.Restart();
+                        SessionStatus.Send.UnicastMetadataResultStopwatch.Restart();
 
                         var random = RandomProvider.GetThreadRandom();
 
@@ -1350,9 +1261,9 @@ namespace Xeus.Core.Exchange
 
                         var signatures = new List<Signature>();
 
-                        lock (sessionInfo.Receive.PulledUnicastMetadataRequestSet.LockObject)
+                        lock (SessionStatus.Receive.PulledUnicastMetadataRequestSet.LockObject)
                         {
-                            signatures.AddRange(sessionInfo.Receive.PulledUnicastMetadataRequestSet);
+                            signatures.AddRange(SessionStatus.Receive.PulledUnicastMetadataRequestSet);
                         }
 
                         random.Shuffle(signatures);
@@ -1376,35 +1287,35 @@ namespace Xeus.Core.Exchange
                             Stream typeStream = new RecyclableMemoryStream(_bufferPool);
                             Varint.SetUInt64(typeStream, (uint)MessageId.UnicastMetadatasResult);
 
-                            _status.PushMessageResultCount.Add(packet.UnicastMetadatas.Count());
+                            _networkStatus.PushMessageResultCount.Add(packet.UnicastMetadatas.Count());
 
                             Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " ExchangeManager: Send MetadataResult");
 
                             return new UniteStream(typeStream, packet.Export(_bufferPool));
                         }
                     }
-                    else if (sessionInfo.Send.PushMulticastMetadataRequestQueue.Count > 0)
+                    else if (SessionStatus.Send.PushMulticastMetadataRequestQueue.Count > 0)
                     {
                         MulticastMetadatasRequestPacket packet;
 
-                        lock (sessionInfo.Send.PushMulticastMetadataRequestQueue.LockObject)
+                        lock (SessionStatus.Send.PushMulticastMetadataRequestQueue.LockObject)
                         {
-                            packet = new MulticastMetadatasRequestPacket(sessionInfo.Send.PushMulticastMetadataRequestQueue.ToArray());
-                            sessionInfo.Send.PushMulticastMetadataRequestQueue.Clear();
+                            packet = new MulticastMetadatasRequestPacket(SessionStatus.Send.PushMulticastMetadataRequestQueue.ToArray());
+                            SessionStatus.Send.PushMulticastMetadataRequestQueue.Clear();
                         }
 
                         Stream typeStream = new RecyclableMemoryStream(_bufferPool);
                         Varint.SetUInt64(typeStream, (uint)MessageId.MulticastMetadatasRequest);
 
-                        _status.PushMessageRequestCount.Add(packet.Tags.Count());
+                        _networkStatus.PushMessageRequestCount.Add(packet.Tags.Count());
 
                         Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " ExchangeManager: Send MulticastMetadataRequest");
 
                         return new UniteStream(typeStream, packet.Export(_bufferPool));
                     }
-                    else if (sessionInfo.Send.MulticastMetadataResultStopwatch.Elapsed.TotalSeconds > 30)
+                    else if (SessionStatus.Send.MulticastMetadataResultStopwatch.Elapsed.TotalSeconds > 30)
                     {
-                        sessionInfo.Send.MulticastMetadataResultStopwatch.Restart();
+                        SessionStatus.Send.MulticastMetadataResultStopwatch.Restart();
 
                         var random = RandomProvider.GetThreadRandom();
 
@@ -1412,9 +1323,9 @@ namespace Xeus.Core.Exchange
 
                         var tags = new List<Tag>();
 
-                        lock (sessionInfo.Receive.PulledMulticastMetadataRequestSet.LockObject)
+                        lock (SessionStatus.Receive.PulledMulticastMetadataRequestSet.LockObject)
                         {
-                            tags.AddRange(sessionInfo.Receive.PulledMulticastMetadataRequestSet);
+                            tags.AddRange(SessionStatus.Receive.PulledMulticastMetadataRequestSet);
                         }
 
                         random.Shuffle(tags);
@@ -1438,7 +1349,7 @@ namespace Xeus.Core.Exchange
                             Stream typeStream = new RecyclableMemoryStream(_bufferPool);
                             Varint.SetUInt64(typeStream, (uint)MessageId.MulticastMetadatasResult);
 
-                            _status.PushMessageResultCount.Add(packet.MulticastMetadatas.Count());
+                            _networkStatus.PushMessageResultCount.Add(packet.MulticastMetadatas.Count());
 
                             Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " ExchangeManager: Send MetadataResult");
 
@@ -1459,22 +1370,22 @@ namespace Xeus.Core.Exchange
             return null;
         }
 
-        private void SetReceiveStream(SessionInfo sessionInfo, Stream stream)
+        private void SetReceiveStream(SessionStatus SessionStatus, Stream stream)
         {
             try
             {
-                sessionInfo.Receive.Stopwatch.Restart();
+                SessionStatus.Receive.Stopwatch.Restart();
 
-                if (!sessionInfo.Receive.IsReceivedVersion)
+                if (!SessionStatus.Receive.IsReceivedVersion)
                 {
                     var targetVersion = (ProtocolVersion)Varint.GetUInt64(stream);
-                    sessionInfo.Version = (ProtocolVersion)Math.Min((uint)targetVersion, (uint)ProtocolVersion.Version0);
+                    SessionStatus.Version = (ProtocolVersion)Math.Min((uint)targetVersion, (uint)ProtocolVersion.Version0);
 
-                    sessionInfo.Receive.IsReceivedVersion = true;
+                    SessionStatus.Receive.IsReceivedVersion = true;
 
                     Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " ExchangeManager: Receive Version");
                 }
-                else if (!sessionInfo.Receive.IsReceivedProfile)
+                else if (!SessionStatus.Receive.IsReceivedProfile)
                 {
                     using (var dataStream = new RangeStream(stream))
                     {
@@ -1494,11 +1405,11 @@ namespace Xeus.Core.Exchange
                             if (count > 128) throw new ReceiveException("ExchangeManager: RouteTable Overflow");
                         }
 
-                        sessionInfo.Id = profile.Id;
-                        sessionInfo.Location = profile.Location;
+                        SessionStatus.Id = profile.Id;
+                        SessionStatus.Location = profile.Location;
                     }
 
-                    sessionInfo.Receive.IsReceivedProfile = true;
+                    SessionStatus.Receive.IsReceivedProfile = true;
 
                     Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " ExchangeManager: Receive Profile");
                 }
@@ -1512,12 +1423,12 @@ namespace Xeus.Core.Exchange
                         {
                             var packet = LocationsPublishPacket.Import(dataStream, _bufferPool);
 
-                            if (sessionInfo.Receive.PulledLocationSet.Count + packet.Locations.Count()
-                                > _maxLocationCount * sessionInfo.Receive.PulledLocationSet.SurvivalTime.TotalMinutes / 3) return;
+                            if (SessionStatus.Receive.PulledLocationSet.Count + packet.Locations.Count()
+                                > _maxLocationCount * SessionStatus.Receive.PulledLocationSet.SurvivalTime.TotalMinutes / 3) return;
 
-                            sessionInfo.Receive.PulledLocationSet.UnionWith(packet.Locations);
+                            SessionStatus.Receive.PulledLocationSet.UnionWith(packet.Locations);
 
-                            _status.PullLocationCount.Add(packet.Locations.Count());
+                            _networkStatus.PullLocationCount.Add(packet.Locations.Count());
 
                             Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " ExchangeManager: Receive LocationResult");
                         }
@@ -1525,13 +1436,13 @@ namespace Xeus.Core.Exchange
                         {
                             var packet = BlocksLinkPacket.Import(dataStream, _bufferPool);
 
-                            if (sessionInfo.Receive.PulledBlockLinkSet.Count + packet.Hashes.Count()
-                                > _maxBlockLinkCount * sessionInfo.Receive.PulledBlockLinkSet.SurvivalTime.TotalMinutes * 2) return;
+                            if (SessionStatus.Receive.PulledBlockLinkSet.Count + packet.Hashes.Count()
+                                > _maxBlockLinkCount * SessionStatus.Receive.PulledBlockLinkSet.SurvivalTime.TotalMinutes * 2) return;
 
-                            sessionInfo.Receive.PulledBlockLinkSet.UnionWith(packet.Hashes);
-                            sessionInfo.Receive.PulledBlockLinkFilter.AddRange(packet.Hashes);
+                            SessionStatus.Receive.PulledBlockLinkSet.UnionWith(packet.Hashes);
+                            SessionStatus.Receive.PulledBlockLinkFilter.AddRange(packet.Hashes);
 
-                            _status.PullBlockLinkCount.Add(packet.Hashes.Count());
+                            _networkStatus.PullBlockLinkCount.Add(packet.Hashes.Count());
 
                             Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " ExchangeManager: Receive BlocksLink");
                         }
@@ -1539,12 +1450,12 @@ namespace Xeus.Core.Exchange
                         {
                             var packet = BlocksRequestPacket.Import(dataStream, _bufferPool);
 
-                            if (sessionInfo.Receive.PulledBlockRequestSet.Count + packet.Hashes.Count()
-                                > _maxBlockRequestCount * sessionInfo.Receive.PulledBlockRequestSet.SurvivalTime.TotalMinutes * 2) return;
+                            if (SessionStatus.Receive.PulledBlockRequestSet.Count + packet.Hashes.Count()
+                                > _maxBlockRequestCount * SessionStatus.Receive.PulledBlockRequestSet.SurvivalTime.TotalMinutes * 2) return;
 
-                            sessionInfo.Receive.PulledBlockRequestSet.UnionWith(packet.Hashes);
+                            SessionStatus.Receive.PulledBlockRequestSet.UnionWith(packet.Hashes);
 
-                            _status.PullBlockRequestCount.Add(packet.Hashes.Count());
+                            _networkStatus.PullBlockRequestCount.Add(packet.Hashes.Count());
 
                             Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " ExchangeManager: Receive BlocksRequest");
                         }
@@ -1552,16 +1463,16 @@ namespace Xeus.Core.Exchange
                         {
                             var packet = BlockResultPacket.Import(dataStream, _bufferPool);
 
-                            _status.PullBlockResultCount.Increment();
+                            _networkStatus.PullBlockResultCount.Increment();
 
                             try
                             {
-                                _contentsManager.Set(packet.Hash, packet.Value);
+                                _contentStorage.Set(packet.Hash, packet.Value);
 
-                                if (sessionInfo.Send.PushedBlockRequestFilter.Contains(packet.Hash))
+                                if (SessionStatus.Send.PushedBlockRequestFilter.Contains(packet.Hash))
                                 {
-                                    var priority = (int)(sessionInfo.Send.PushedBlockRequestFilter.SurvivalTime.TotalMinutes - sessionInfo.Send.PushedBlockRequestFilter.GetElapsedTime(packet.Hash).TotalMinutes);
-                                    sessionInfo.Priority.Add(priority);
+                                    var priority = (int)(SessionStatus.Send.PushedBlockRequestFilter.SurvivalTime.TotalMinutes - SessionStatus.Send.PushedBlockRequestFilter.GetElapsedTime(packet.Hash).TotalMinutes);
+                                    SessionStatus.Priority.Add(priority);
                                 }
                                 else
                                 {
@@ -1582,12 +1493,12 @@ namespace Xeus.Core.Exchange
                         {
                             var packet = BroadcastMetadatasRequestPacket.Import(dataStream, _bufferPool);
 
-                            if (sessionInfo.Receive.PulledBroadcastMetadataRequestSet.Count + packet.Signatures.Count()
-                                > _maxMetadataRequestCount * sessionInfo.Receive.PulledBroadcastMetadataRequestSet.SurvivalTime.TotalMinutes * 2) return;
+                            if (SessionStatus.Receive.PulledBroadcastMetadataRequestSet.Count + packet.Signatures.Count()
+                                > _maxMetadataRequestCount * SessionStatus.Receive.PulledBroadcastMetadataRequestSet.SurvivalTime.TotalMinutes * 2) return;
 
-                            sessionInfo.Receive.PulledBroadcastMetadataRequestSet.UnionWith(packet.Signatures);
+                            SessionStatus.Receive.PulledBroadcastMetadataRequestSet.UnionWith(packet.Signatures);
 
-                            _status.PullMessageRequestCount.Add(packet.Signatures.Count());
+                            _networkStatus.PullMessageRequestCount.Add(packet.Signatures.Count());
 
                             Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " ExchangeManager: Receive BroadcastMetadatasRequest");
                         }
@@ -1597,7 +1508,7 @@ namespace Xeus.Core.Exchange
 
                             if (packet.BroadcastMetadatas.Count() > _maxMetadataResultCount) return;
 
-                            _status.PullMessageResultCount.Add(packet.BroadcastMetadatas.Count());
+                            _networkStatus.PullMessageResultCount.Add(packet.BroadcastMetadatas.Count());
 
                             foreach (var metadata in packet.BroadcastMetadatas)
                             {
@@ -1610,12 +1521,12 @@ namespace Xeus.Core.Exchange
                         {
                             var packet = UnicastMetadatasRequestPacket.Import(dataStream, _bufferPool);
 
-                            if (sessionInfo.Receive.PulledUnicastMetadataRequestSet.Count + packet.Signatures.Count()
-                                > _maxMetadataRequestCount * sessionInfo.Receive.PulledUnicastMetadataRequestSet.SurvivalTime.TotalMinutes * 2) return;
+                            if (SessionStatus.Receive.PulledUnicastMetadataRequestSet.Count + packet.Signatures.Count()
+                                > _maxMetadataRequestCount * SessionStatus.Receive.PulledUnicastMetadataRequestSet.SurvivalTime.TotalMinutes * 2) return;
 
-                            sessionInfo.Receive.PulledUnicastMetadataRequestSet.UnionWith(packet.Signatures);
+                            SessionStatus.Receive.PulledUnicastMetadataRequestSet.UnionWith(packet.Signatures);
 
-                            _status.PullMessageRequestCount.Add(packet.Signatures.Count());
+                            _networkStatus.PullMessageRequestCount.Add(packet.Signatures.Count());
 
                             Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " ExchangeManager: Receive UnicastMetadatasRequest");
                         }
@@ -1625,7 +1536,7 @@ namespace Xeus.Core.Exchange
 
                             if (packet.UnicastMetadatas.Count() > _maxMetadataResultCount) return;
 
-                            _status.PullMessageResultCount.Add(packet.UnicastMetadatas.Count());
+                            _networkStatus.PullMessageResultCount.Add(packet.UnicastMetadatas.Count());
 
                             foreach (var metadata in packet.UnicastMetadatas)
                             {
@@ -1638,12 +1549,12 @@ namespace Xeus.Core.Exchange
                         {
                             var packet = MulticastMetadatasRequestPacket.Import(dataStream, _bufferPool);
 
-                            if (sessionInfo.Receive.PulledMulticastMetadataRequestSet.Count + packet.Tags.Count()
-                                > _maxMetadataRequestCount * sessionInfo.Receive.PulledMulticastMetadataRequestSet.SurvivalTime.TotalMinutes * 2) return;
+                            if (SessionStatus.Receive.PulledMulticastMetadataRequestSet.Count + packet.Tags.Count()
+                                > _maxMetadataRequestCount * SessionStatus.Receive.PulledMulticastMetadataRequestSet.SurvivalTime.TotalMinutes * 2) return;
 
-                            sessionInfo.Receive.PulledMulticastMetadataRequestSet.UnionWith(packet.Tags);
+                            SessionStatus.Receive.PulledMulticastMetadataRequestSet.UnionWith(packet.Tags);
 
-                            _status.PullMessageRequestCount.Add(packet.Tags.Count());
+                            _networkStatus.PullMessageRequestCount.Add(packet.Tags.Count());
 
                             Debug.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " ExchangeManager: Receive MulticastMetadatasRequest");
                         }
@@ -1653,7 +1564,7 @@ namespace Xeus.Core.Exchange
 
                             if (packet.MulticastMetadatas.Count() > _maxMetadataResultCount) return;
 
-                            _status.PullMessageResultCount.Add(packet.MulticastMetadatas.Count());
+                            _networkStatus.PullMessageResultCount.Add(packet.MulticastMetadatas.Count());
 
                             foreach (var metadata in packet.MulticastMetadatas)
                             {
@@ -1723,8 +1634,31 @@ namespace Xeus.Core.Exchange
 
         public void DiffuseContent(string path)
         {
-            var hashes = _contentsManager.GetContentHashes(path);
+            var hashes = _contentStorage.GetContentHashes(path);
             _uploadBlockHashes.UnionWith(hashes);
+        }
+
+        protected override async ValueTask OnStartAsync()
+        {
+            _computeTaskManager = new TaskManager(this.ComputeThread);
+            _doEventTaskManager = new TaskManager(this.DoEventThread);
+            for (int i = 0; i < 3; i++)
+            {
+                _connectTaskManagers.Add(new TaskManager(this.ConnectThread));
+                _acceptTaskManagers.Add(new TaskManager(this.AcceptThread));
+            }
+
+            foreach (int i in Enumerable.Range(0, _threadCount))
+            {
+                _enqueueTaskManagers.Add(new TaskManager((token) => this.EnqueueThread(i, token)));
+                _dequeueTaskManagers.Add(new TaskManager((token) => this.DequeueThread(i, token)));
+            }
+
+        }
+
+        protected override async ValueTask OnStopAsync()
+        {
+            throw new NotImplementedException();
         }
 
         public override ManagerState State
@@ -1840,7 +1774,7 @@ namespace Xeus.Core.Exchange
 
                 _settings.Save("Config", _config);
 
-                _settings.Save("CloudLocations", _otherNodeAdressess);
+                _settings.Save("CloudLocations", _cloudNodeAdresseSet);
 
                 // MetadataManager
                 {
@@ -1896,10 +1830,10 @@ namespace Xeus.Core.Exchange
                 }
                 _dequeueTaskManagers.Clear();
 
-                if (_connectionLockProvider != null)
+                if (_connectionsLock != null)
                 {
-                    _connectionLockProvider.Dispose();
-                    _connectionLockProvider = null;
+                    _connectionsLock.Dispose();
+                    _connectionLock = null;
                 }
             }
         }

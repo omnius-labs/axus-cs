@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Omnix.Base;
 
-namespace Xeus.Core.Exchange.Internal
+namespace Xeus.Core.Internal.Exchange.Primitives
 {
-    internal class HopLimitComputer
+    internal sealed class HopLimitComputer
     {
         public HopLimitComputer()
         {
@@ -13,8 +13,10 @@ namespace Xeus.Core.Exchange.Internal
         }
 
         public int MaxHopLimit { get; set; }
+        public bool DecrementAtHopLimitMaximum { get; set; }
+        public bool DecrementAtHopLimitMinimum { get; set; }
 
-        public int Decrement(int current, bool decrementAtHopLimitMaximum, bool decrementAtHopLimitMinimum)
+        public void Decrement(ref int current)
         {
             if (current > this.MaxHopLimit)
             {
@@ -23,30 +25,30 @@ namespace Xeus.Core.Exchange.Internal
 
             if (current <= 0)
             {
-                return 0;
+                current = 0;
             }
 
             if (current == this.MaxHopLimit)
             {
-                if (decrementAtHopLimitMaximum)
+                if (this.DecrementAtHopLimitMaximum)
                 {
-                    return current - 1;
+                    current--;
                 }
 
-                return current;
+                return;
             }
 
             if (current == 1)
             {
-                if (decrementAtHopLimitMinimum)
+                if (this.DecrementAtHopLimitMinimum)
                 {
-                    return current - 1;
+                    current--;
                 }
 
-                return current;
+                return;
             }
 
-            return current - 1;
+            current--;
         }
     }
 }

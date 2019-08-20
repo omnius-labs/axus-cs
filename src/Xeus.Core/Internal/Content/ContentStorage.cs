@@ -320,6 +320,7 @@ namespace Xeus.Core.Internal.Content
                 return await Task.Run(async () =>
                 {
                     var memoryOwners = new List<IMemoryOwner<byte>>();
+                    var lockedHashes = new List<OmniHash>();
 
                     try
                     {
@@ -404,6 +405,7 @@ namespace Xeus.Core.Internal.Content
                             }
 
                             _blockStorage.Lock(hash);
+                            lockedHashes.Add(hash);
 
                             bool result = _blockStorage.TrySet(hash, parityBuffers[i].Span);
 
@@ -416,6 +418,17 @@ namespace Xeus.Core.Internal.Content
                         }
 
                         return parityHashes.ToArray();
+                    }
+                    catch (Exception e)
+                    {
+                        foreach (var hash in lockedHashes)
+                        {
+                            _blockStorage.Unlock(hash);
+                        }
+
+                        _logger.Error(e);
+
+                        throw e;
                     }
                     finally
                     {
@@ -447,7 +460,7 @@ namespace Xeus.Core.Internal.Content
                         throw new ParityDecodeFailed();
                     }
 
-                    // デコードする必要がない場合
+                    // デコードする必要がないかチェックする
                     if (merkleTreeSection.Hashes.Take(informationCount).All(n => this.Contains(n)))
                     {
                         return merkleTreeSection.Hashes.Take(informationCount).ToArray();
@@ -539,7 +552,7 @@ namespace Xeus.Core.Internal.Content
                         }
 
                         var reedSolomon = new ReedSolomon8(informationCount, _threadCount, _bufferPool);
-                        await reedSolomon.Decode(targetBuffers, indexes, (int)blockLength, informationCount * 2, token);
+                        await reedSolomon.Decode(targetBuffers, indexes, (int)blockLength, _threadCount, token);
 
                         // Set
                         {
@@ -712,6 +725,22 @@ namespace Xeus.Core.Internal.Content
                             stream.Seek(0, SeekOrigin.Begin);
                         }
                     }
+
+                    if (clue == null)
+                    {
+                        throw new ImportFailed("clue is null");
+                    }
+                }
+                catch (Exception e)
+                {
+                    foreach (var hash in lockedHashes)
+                    {
+                        _blockStorage.Unlock(hash);
+                    }
+
+                    _logger.Error(e);
+
+                    throw e;
                 }
                 finally
                 {
@@ -760,6 +789,7 @@ namespace Xeus.Core.Internal.Content
                 var lockedHashes = new HashSet<OmniHash>();
                 SharedBlocksMetadata? sharedBlocksInfo = null;
 
+                try
                 {
                     const int blockLength = 1024 * 1024;
                     const OmniHashAlgorithmType hashAlgorithmType = OmniHashAlgorithmType.Sha2_256;
@@ -888,6 +918,7 @@ namespace Xeus.Core.Internal.Content
                                     }
 
                                     _blockStorage.Lock(hash);
+                                    lockedHashes.Add(hash);
 
                                     bool result = _blockStorage.TrySet(hash, bufferMemoryOwner.Memory.Span);
 
@@ -895,8 +926,6 @@ namespace Xeus.Core.Internal.Content
                                     {
                                         throw new ImportFailed("Failed to save Block.");
                                     }
-
-                                    lockedHashes.Add(hash);
                                 }
 
                                 clue = new XeusClue(hash, depth);
@@ -939,6 +968,7 @@ namespace Xeus.Core.Internal.Content
                                             }
 
                                             _blockStorage.Lock(hash);
+                                            lockedHashes.Add(hash);
 
                                             bool result = _blockStorage.TrySet(hash, bufferMemoryOwner.Memory.Span);
 
@@ -946,8 +976,6 @@ namespace Xeus.Core.Internal.Content
                                             {
                                                 throw new ImportFailed("Failed to save Block.");
                                             }
-
-                                            lockedHashes.Add(hash);
 
                                             targetHashes.Add(hash);
                                             targetMemoryOwners.Add(bufferMemoryOwner);
@@ -981,11 +1009,22 @@ namespace Xeus.Core.Internal.Content
                             }
                         }
                     }
-                }
 
-                if (clue == null)
+                    if (clue == null)
+                    {
+                        throw new ImportFailed("clue is null");
+                    }
+                }
+                catch (Exception e)
                 {
-                    throw new ImportFailed("clue is null");
+                    foreach (var hash in lockedHashes)
+                    {
+                        _blockStorage.Unlock(hash);
+                    }
+
+                    _logger.Error(e);
+
+                    throw e;
                 }
 
                 lock (_lockObject)
@@ -993,10 +1032,12 @@ namespace Xeus.Core.Internal.Content
                     if (!_contentMetadataStorage.ContainsFileContentMetadata(path))
                     {
                         _contentMetadataStorage.Add(new ContentMetadata(clue, lockedHashes.ToArray(), sharedBlocksInfo));
-
+                    }
+                    else
+                    {
                         foreach (var hash in lockedHashes)
                         {
-                            _blockStorage.Lock(hash);
+                            _blockStorage.Unlock(hash);
                         }
                     }
                 }
@@ -1200,7 +1241,7 @@ namespace Xeus.Core.Internal.Content
 
         #endregion
 
-        protected override void Dispose(bool disposing)
+        protected override void OnDispose(bool disposing)
         {
             if (disposing)
             {

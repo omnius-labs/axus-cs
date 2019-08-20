@@ -1,31 +1,29 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Amoeba.Messages;
+using Omnix.Algorithms.Cryptography;
 using Omnix.Base;
 using Omnix.Base.Extensions;
-using Omnix.Collections;
-using Omnix.Cryptography;
+using Xeus.Core.Internal.Exchange;
 using Xeus.Messages;
 
-namespace Xeus.Core.Exchange.Internal
+namespace Xeus.Core.Internal.Exchange.Primitives
 {
+    public delegate IEnumerable<OmniSignature> GetSignaturesEventHandler();
+
     internal sealed class MetadataManager
     {
         // Type, AuthorSignature
-        private Dictionary<string, Dictionary<OmniSignature, BroadcastClue>> _BroadcastClues = new Dictionary<string, Dictionary<OmniSignature, BroadcastClue>>();
+        private readonly Dictionary<string, Dictionary<OmniSignature, BroadcastClue>> _broadcastClues = new Dictionary<string, Dictionary<OmniSignature, BroadcastClue>>();
         // Type, Signature, AuthorSignature
-        private Dictionary<string, Dictionary<OmniSignature, Dictionary<OmniSignature, HashSet<UnicastClue>>>> _UnicastClues = new Dictionary<string, Dictionary<OmniSignature, Dictionary<OmniSignature, HashSet<UnicastClue>>>>();
-        // Type, Channel, AuthorSignature
-        private Dictionary<string, Dictionary<Channel, Dictionary<OmniSignature, HashSet<MulticastClue>>>> _MulticastClues = new Dictionary<string, Dictionary<Channel, Dictionary<OmniSignature, HashSet<MulticastClue>>>>();
+        private readonly Dictionary<string, Dictionary<OmniSignature, Dictionary<OmniSignature, HashSet<UnicastClue>>>> _unicastClues = new Dictionary<string, Dictionary<OmniSignature, Dictionary<OmniSignature, HashSet<UnicastClue>>>>();
+        // Type, Signature, AuthorSignature
+        private readonly Dictionary<string, Dictionary<OmniSignature, Dictionary<OmniSignature, HashSet<MulticastClue>>>> _multicastClues = new Dictionary<string, Dictionary<OmniSignature, Dictionary<OmniSignature, HashSet<MulticastClue>>>>();
 
         // UpdateTime
-        private Dictionary<string, DateTime> _broadcastTypes = new Dictionary<string, DateTime>();
-        private Dictionary<string, DateTime> _unicastTypes = new Dictionary<string, DateTime>();
-        private Dictionary<string, DateTime> _multicastTypes = new Dictionary<string, DateTime>();
-
-        // Alive
-        private VolatileHashSet<Channel> _aliveChannels = new VolatileHashSet<Channel>(new TimeSpan(0, 30, 0));
+        private readonly Dictionary<string, DateTime> _broadcastTypes = new Dictionary<string, DateTime>();
+        private readonly Dictionary<string, DateTime> _unicastTypes = new Dictionary<string, DateTime>();
+        private readonly Dictionary<string, DateTime> _multicastTypes = new Dictionary<string, DateTime>();
 
         private readonly object _lockObject = new object();
 
@@ -34,11 +32,11 @@ namespace Xeus.Core.Exchange.Internal
 
         }
 
-        public GetSignaturesEventHandler GetLockedSignaturesEvent { get; set; }
+        public GetSignaturesEventHandler GetLockedSignaturesEvent { private get; set; } = () => Enumerable.Empty<OmniSignature>();
 
         private IEnumerable<OmniSignature> OnGetLockedSignaturesEvent()
         {
-            return this.GetLockedSignaturesEvent?.Invoke(this) ?? Enumerable.Empty<OmniSignature>();
+            return this.GetLockedSignaturesEvent.Invoke();
         }
 
         public void Refresh()
@@ -46,9 +44,6 @@ namespace Xeus.Core.Exchange.Internal
             lock (_lockObject)
             {
                 var lockedSignatures = new HashSet<OmniSignature>(this.OnGetLockedSignaturesEvent());
-                var lockedChannels = new HashSet<Channel>(_aliveChannels);
-
-                _aliveChannels.Update();
 
                 // Broadcast
                 {
@@ -60,14 +55,14 @@ namespace Xeus.Core.Exchange.Internal
                             _broadcastTypes.Remove(type);
                         }
 
-                        foreach (string type in _BroadcastClues.Keys.ToArray())
+                        foreach (string type in _broadcastClues.Keys.ToArray())
                         {
                             if (!removeTypes.Contains(type)) continue;
-                            _BroadcastClues.Remove(type);
+                            _broadcastClues.Remove(type);
                         }
                     }
 
-                    foreach (var dic in _BroadcastClues.Values)
+                    foreach (var dic in _broadcastClues.Values)
                     {
                         var keys = dic.Keys.Where(n => !lockedSignatures.Contains(n)).ToList();
 
@@ -88,14 +83,14 @@ namespace Xeus.Core.Exchange.Internal
                             _unicastTypes.Remove(type);
                         }
 
-                        foreach (string type in _UnicastClues.Keys.ToArray())
+                        foreach (string type in _unicastClues.Keys.ToArray())
                         {
                             if (!removeTypes.Contains(type)) continue;
-                            _UnicastClues.Remove(type);
+                            _unicastClues.Remove(type);
                         }
                     }
 
-                    foreach (var dic in _UnicastClues.Values)
+                    foreach (var dic in _unicastClues.Values)
                     {
                         var keys = dic.Keys.Where(n => !lockedSignatures.Contains(n)).ToList();
 
@@ -105,7 +100,7 @@ namespace Xeus.Core.Exchange.Internal
                         }
                     }
 
-                    foreach (var dic in _UnicastClues.Values.SelectMany(n => n.Values))
+                    foreach (var dic in _unicastClues.Values.SelectMany(n => n.Values))
                     {
                         var keys = dic.Keys.Where(n => !lockedSignatures.Contains(n)).ToList();
 
@@ -115,7 +110,7 @@ namespace Xeus.Core.Exchange.Internal
                         }
                     }
 
-                    foreach (var hashset in _UnicastClues.Values.SelectMany(n => n.Values.SelectMany(m => m.Values)).ToArray())
+                    foreach (var hashset in _unicastClues.Values.SelectMany(n => n.Values.SelectMany(m => m.Values)).ToArray())
                     {
                         if (hashset.Count <= 32) continue;
 
@@ -139,16 +134,16 @@ namespace Xeus.Core.Exchange.Internal
                             _multicastTypes.Remove(type);
                         }
 
-                        foreach (string type in _MulticastClues.Keys.ToArray())
+                        foreach (string type in _multicastClues.Keys.ToArray())
                         {
                             if (!removeTypes.Contains(type)) continue;
-                            _MulticastClues.Remove(type);
+                            _multicastClues.Remove(type);
                         }
                     }
 
-                    foreach (var dic in _MulticastClues.Values)
+                    foreach (var dic in _multicastClues.Values)
                     {
-                        var keys = dic.Keys.Where(n => !lockedChannels.Contains(n)).ToList();
+                        var keys = dic.Keys.Where(n => !lockedSignatures.Contains(n)).ToList();
 
                         foreach (var key in keys.Randomize().Take(keys.Count - 1024))
                         {
@@ -156,7 +151,7 @@ namespace Xeus.Core.Exchange.Internal
                         }
                     }
 
-                    foreach (var dic in _MulticastClues.Values.SelectMany(n => n.Values))
+                    foreach (var dic in _multicastClues.Values.SelectMany(n => n.Values))
                     {
                         var keys = dic.Keys.Where(n => !lockedSignatures.Contains(n)).ToList();
 
@@ -166,7 +161,7 @@ namespace Xeus.Core.Exchange.Internal
                         }
                     }
 
-                    foreach (var hashset in _MulticastClues.Values.SelectMany(n => n.Values.SelectMany(m => m.Values)).ToArray())
+                    foreach (var hashset in _multicastClues.Values.SelectMany(n => n.Values.SelectMany(m => m.Values)).ToArray())
                     {
                         if (hashset.Count <= 32) continue;
 
@@ -190,9 +185,9 @@ namespace Xeus.Core.Exchange.Internal
                 {
                     int count = 0;
 
-                    count += _BroadcastClues.Values.Sum(n => n.Count);
-                    count += _UnicastClues.Values.Sum(n => n.Values.Sum(m => m.Values.Sum(o => o.Count)));
-                    count += _MulticastClues.Values.Sum(n => n.Values.Sum(m => m.Values.Sum(o => o.Count)));
+                    count += _broadcastClues.Values.Sum(n => n.Count);
+                    count += _unicastClues.Values.Sum(n => n.Values.Sum(m => m.Values.Sum(o => o.Count)));
+                    count += _multicastClues.Values.Sum(n => n.Values.Sum(m => m.Values.Sum(o => o.Count)));
 
                     return count;
                 }
@@ -205,7 +200,7 @@ namespace Xeus.Core.Exchange.Internal
             {
                 var hashset = new HashSet<OmniSignature>();
 
-                hashset.UnionWith(_BroadcastClues.Values.SelectMany(n => n.Keys));
+                hashset.UnionWith(_broadcastClues.Values.SelectMany(n => n.Keys));
 
                 return hashset;
             }
@@ -217,19 +212,19 @@ namespace Xeus.Core.Exchange.Internal
             {
                 var hashset = new HashSet<OmniSignature>();
 
-                hashset.UnionWith(_UnicastClues.Values.SelectMany(n => n.Keys));
+                hashset.UnionWith(_unicastClues.Values.SelectMany(n => n.Keys));
 
                 return hashset;
             }
         }
 
-        public IEnumerable<Channel> GetMulticastChannels()
+        public IEnumerable<OmniSignature> GetMulticastSignatures()
         {
             lock (_lockObject)
             {
-                var hashset = new HashSet<Channel>();
+                var hashset = new HashSet<OmniSignature>();
 
-                hashset.UnionWith(_MulticastClues.Values.SelectMany(n => n.Keys));
+                hashset.UnionWith(_multicastClues.Values.SelectMany(n => n.Keys));
 
                 return hashset;
             }
@@ -239,7 +234,7 @@ namespace Xeus.Core.Exchange.Internal
         {
             lock (_lockObject)
             {
-                return _BroadcastClues.Values.SelectMany(n => n.Values).ToArray();
+                return _broadcastClues.Values.SelectMany(n => n.Values).ToArray();
             }
         }
 
@@ -249,7 +244,7 @@ namespace Xeus.Core.Exchange.Internal
             {
                 var list = new List<BroadcastClue>();
 
-                foreach (var dic in _BroadcastClues.Values)
+                foreach (var dic in _broadcastClues.Values)
                 {
                     if (dic.TryGetValue(signature, out var BroadcastClue))
                     {
@@ -267,7 +262,7 @@ namespace Xeus.Core.Exchange.Internal
             {
                 _broadcastTypes[type] = DateTime.UtcNow;
 
-                if (_BroadcastClues.TryGetValue(type, out var dic))
+                if (_broadcastClues.TryGetValue(type, out var dic))
                 {
                     if (dic.TryGetValue(signature, out var BroadcastClue))
                     {
@@ -283,7 +278,7 @@ namespace Xeus.Core.Exchange.Internal
         {
             lock (_lockObject)
             {
-                return _UnicastClues.Values.SelectMany(n => n.Values.SelectMany(m => m.Values.SelectMany(o => o))).ToArray();
+                return _unicastClues.Values.SelectMany(n => n.Values.SelectMany(m => m.Values.SelectMany(o => o))).ToArray();
             }
         }
 
@@ -293,7 +288,7 @@ namespace Xeus.Core.Exchange.Internal
             {
                 var list = new List<UnicastClue>();
 
-                foreach (var dic in _UnicastClues.Values)
+                foreach (var dic in _unicastClues.Values)
                 {
                     if (dic.TryGetValue(signature, out var dic2))
                     {
@@ -313,7 +308,7 @@ namespace Xeus.Core.Exchange.Internal
 
                 var list = new List<UnicastClue>();
 
-                if (_UnicastClues.TryGetValue(type, out var dic))
+                if (_unicastClues.TryGetValue(type, out var dic))
                 {
                     if (dic.TryGetValue(signature, out var dic2))
                     {
@@ -329,19 +324,19 @@ namespace Xeus.Core.Exchange.Internal
         {
             lock (_lockObject)
             {
-                return _MulticastClues.Values.SelectMany(n => n.Values.SelectMany(m => m.Values.SelectMany(o => o))).ToArray();
+                return _multicastClues.Values.SelectMany(n => n.Values.SelectMany(m => m.Values.SelectMany(o => o))).ToArray();
             }
         }
 
-        public IEnumerable<MulticastClue> GetMulticastClues(Channel channel)
+        public IEnumerable<MulticastClue> GetMulticastClues(OmniSignature signature)
         {
             lock (_lockObject)
             {
                 var list = new List<MulticastClue>();
 
-                foreach (var dic in _MulticastClues.Values)
+                foreach (var dic in _multicastClues.Values)
                 {
-                    if (dic.TryGetValue(channel, out var dic2))
+                    if (dic.TryGetValue(signature, out var dic2))
                     {
                         list.AddRange(dic2.Values.SelectMany(n => n));
                     }
@@ -351,18 +346,17 @@ namespace Xeus.Core.Exchange.Internal
             }
         }
 
-        public IEnumerable<MulticastClue> GetMulticastClues(Channel channel, string type)
+        public IEnumerable<MulticastClue> GetMulticastClues(OmniSignature signature, string type)
         {
             lock (_lockObject)
             {
-                _aliveChannels.Add(channel);
                 _multicastTypes[type] = DateTime.UtcNow;
 
                 var list = new List<MulticastClue>();
 
-                if (_MulticastClues.TryGetValue(type, out var dic))
+                if (_multicastClues.TryGetValue(type, out var dic))
                 {
-                    if (dic.TryGetValue(channel, out var dic2))
+                    if (dic.TryGetValue(signature, out var dic2))
                     {
                         list.AddRange(dic2.Values.SelectMany(n => n));
                     }
@@ -372,64 +366,64 @@ namespace Xeus.Core.Exchange.Internal
             }
         }
 
-        public bool SetMetadata(BroadcastClue BroadcastClue)
+        public bool SetMetadata(BroadcastClue broadcastClue)
         {
             lock (_lockObject)
             {
                 var now = DateTime.UtcNow;
 
-                if (BroadcastClue == null
-                    || BroadcastClue.Type == null
-                    || (BroadcastClue.CreationTime.ToDateTime() - now).TotalMinutes > 30
-                    || BroadcastClue.Certificate == null) return false;
+                if (broadcastClue == null
+                    || broadcastClue.Type == null
+                    || (broadcastClue.CreationTime.ToDateTime() - now).TotalMinutes > 30
+                    || broadcastClue.Certificate == null) return false;
 
-                if (!_BroadcastClues.TryGetValue(BroadcastClue.Type, out var dic))
+                if (!_broadcastClues.TryGetValue(broadcastClue.Type, out var dic))
                 {
                     dic = new Dictionary<OmniSignature, BroadcastClue>();
-                    _BroadcastClues[BroadcastClue.Type] = dic;
+                    _broadcastClues[broadcastClue.Type] = dic;
                 }
 
-                var signature = BroadcastClue.Certificate.GetOmniSignature();
+                var signature = broadcastClue.Certificate.GetOmniSignature();
 
                 if (!dic.TryGetValue(signature, out var tempMetadata)
-                    || BroadcastClue.CreationTime.ToDateTime() > tempMetadata.CreationTime.ToDateTime())
+                    || broadcastClue.CreationTime.ToDateTime() > tempMetadata.CreationTime.ToDateTime())
                 {
-                    if (!BroadcastClue.VerifyCertificate()) return false;
+                    if (!broadcastClue.VerifyCertificate()) return false;
 
-                    dic[signature] = BroadcastClue;
+                    dic[signature] = broadcastClue;
                 }
 
                 return true;
             }
         }
 
-        public bool SetMetadata(UnicastClue UnicastClue)
+        public bool SetMetadata(UnicastClue unicastClue)
         {
             lock (_lockObject)
             {
                 var now = DateTime.UtcNow;
 
-                if (UnicastClue == null
-                    || UnicastClue.Type == null
-                    || UnicastClue.Signature == null
-                        || UnicastClue.Signature.Hash.Value.Length == 0
-                        || string.IsNullOrWhiteSpace(UnicastClue.Signature.Name)
-                    || (UnicastClue.CreationTime.ToDateTime() - now).TotalMinutes > 30
-                    || UnicastClue.Certificate == null) return false;
+                if (unicastClue == null
+                    || unicastClue.Type == null
+                    || unicastClue.Signature == null
+                        || unicastClue.Signature.Hash.Value.Length == 0
+                        || string.IsNullOrWhiteSpace(unicastClue.Signature.Name)
+                    || (unicastClue.CreationTime.ToDateTime() - now).TotalMinutes > 30
+                    || unicastClue.Certificate == null) return false;
 
-                if (!_UnicastClues.TryGetValue(UnicastClue.Type, out var dic))
+                if (!_unicastClues.TryGetValue(unicastClue.Type, out var dic))
                 {
                     dic = new Dictionary<OmniSignature, Dictionary<OmniSignature, HashSet<UnicastClue>>>();
-                    _UnicastClues[UnicastClue.Type] = dic;
+                    _unicastClues[unicastClue.Type] = dic;
                 }
 
-                if (!dic.TryGetValue(UnicastClue.Signature, out var dic2))
+                if (!dic.TryGetValue(unicastClue.Signature, out var dic2))
                 {
                     dic2 = new Dictionary<OmniSignature, HashSet<UnicastClue>>();
-                    dic[UnicastClue.Signature] = dic2;
+                    dic[unicastClue.Signature] = dic2;
                 }
 
-                var signature = UnicastClue.Certificate.GetOmniSignature();
+                var signature = unicastClue.Certificate.GetOmniSignature();
 
                 if (!dic2.TryGetValue(signature, out var hashset))
                 {
@@ -437,44 +431,44 @@ namespace Xeus.Core.Exchange.Internal
                     dic2[signature] = hashset;
                 }
 
-                if (!hashset.Contains(UnicastClue))
+                if (!hashset.Contains(unicastClue))
                 {
-                    if (!UnicastClue.VerifyCertificate()) return false;
+                    if (!unicastClue.VerifyCertificate()) return false;
 
-                    hashset.Add(UnicastClue);
+                    hashset.Add(unicastClue);
                 }
 
                 return true;
             }
         }
 
-        public bool SetMetadata(MulticastClue MulticastClue)
+        public bool SetMetadata(MulticastClue multicastClue)
         {
             lock (_lockObject)
             {
                 var now = DateTime.UtcNow;
 
-                if (MulticastClue == null
-                    || MulticastClue.Type == null
-                    || MulticastClue.Channel == null
-                        || MulticastClue.Channel.Id.Length == 0
-                        || string.IsNullOrWhiteSpace(MulticastClue.Channel.Name)
-                    || (MulticastClue.CreationTime.ToDateTime() - now).TotalMinutes > 30
-                    || MulticastClue.Certificate == null) return false;
+                if (multicastClue == null
+                    || multicastClue.Type == null
+                    || multicastClue.Signature == null
+                        || multicastClue.Signature.Hash.Value.Length == 0
+                        || string.IsNullOrWhiteSpace(multicastClue.Signature.Name)
+                    || (multicastClue.CreationTime.ToDateTime() - now).TotalMinutes > 30
+                    || multicastClue.Certificate == null) return false;
 
-                if (!_MulticastClues.TryGetValue(MulticastClue.Type, out var dic))
+                if (!_multicastClues.TryGetValue(multicastClue.Type, out var dic))
                 {
-                    dic = new Dictionary<Channel, Dictionary<OmniSignature, HashSet<MulticastClue>>>();
-                    _MulticastClues[MulticastClue.Type] = dic;
+                    dic = new Dictionary<OmniSignature, Dictionary<OmniSignature, HashSet<MulticastClue>>>();
+                    _multicastClues[multicastClue.Type] = dic;
                 }
 
-                if (!dic.TryGetValue(MulticastClue.Channel, out var dic2))
+                if (!dic.TryGetValue(multicastClue.Signature, out var dic2))
                 {
                     dic2 = new Dictionary<OmniSignature, HashSet<MulticastClue>>();
-                    dic[MulticastClue.Channel] = dic2;
+                    dic[multicastClue.Signature] = dic2;
                 }
 
-                var signature = MulticastClue.Certificate.GetOmniSignature();
+                var signature = multicastClue.Certificate.GetOmniSignature();
 
                 if (!dic2.TryGetValue(signature, out var hashset))
                 {
@@ -482,11 +476,11 @@ namespace Xeus.Core.Exchange.Internal
                     dic2[signature] = hashset;
                 }
 
-                if (!hashset.Contains(MulticastClue))
+                if (!hashset.Contains(multicastClue))
                 {
-                    if (!MulticastClue.VerifyCertificate()) return false;
+                    if (!multicastClue.VerifyCertificate()) return false;
 
-                    hashset.Add(MulticastClue);
+                    hashset.Add(multicastClue);
                 }
 
                 return true;
