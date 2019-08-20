@@ -11,15 +11,18 @@ namespace Xeus.Core.Internal
         ReedSolomon8 = 0,
     }
 
-    internal sealed partial class MerkleTreeSection : global::Omnix.Serialization.RocketPack.RocketPackMessageBase<MerkleTreeSection>
+    internal sealed partial class MerkleTreeSection : global::Omnix.Serialization.RocketPack.IRocketPackMessage<MerkleTreeSection>
     {
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<MerkleTreeSection> Formatter { get; }
+        public static MerkleTreeSection Empty { get; }
+
         static MerkleTreeSection()
         {
-            MerkleTreeSection.Formatter = new CustomFormatter();
+            MerkleTreeSection.Formatter = new ___CustomFormatter();
             MerkleTreeSection.Empty = new MerkleTreeSection((CorrectionAlgorithmType)0, 0, global::System.Array.Empty<OmniHash>());
         }
 
-        private readonly int __hashCode;
+        private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxHashesCount = 1048576;
 
@@ -32,23 +35,48 @@ namespace Xeus.Core.Internal
             this.Length = length;
             this.Hashes = new global::Omnix.DataStructures.ReadOnlyListSlim<OmniHash>(hashes);
 
+            ___hashCode = new global::System.Lazy<int>(() =>
             {
-                var __h = new global::System.HashCode();
-                if (this.CorrectionAlgorithmType != default) __h.Add(this.CorrectionAlgorithmType.GetHashCode());
-                if (this.Length != default) __h.Add(this.Length.GetHashCode());
-                foreach (var n in this.Hashes)
+                var ___h = new global::System.HashCode();
+                if (correctionAlgorithmType != default) ___h.Add(correctionAlgorithmType.GetHashCode());
+                if (length != default) ___h.Add(length.GetHashCode());
+                foreach (var n in hashes)
                 {
-                    if (n != default) __h.Add(n.GetHashCode());
+                    if (n != default) ___h.Add(n.GetHashCode());
                 }
-                __hashCode = __h.ToHashCode();
-            }
+                return ___h.ToHashCode();
+            });
         }
 
         public CorrectionAlgorithmType CorrectionAlgorithmType { get; }
         public ulong Length { get; }
         public global::Omnix.DataStructures.ReadOnlyListSlim<OmniHash> Hashes { get; }
 
-        public override bool Equals(MerkleTreeSection target)
+        public static MerkleTreeSection Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        {
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
+            return Formatter.Deserialize(ref reader, 0);
+        }
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        {
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
+            Formatter.Serialize(ref writer, this, 0);
+        }
+
+        public static bool operator ==(MerkleTreeSection? left, MerkleTreeSection? right)
+        {
+            return (right is null) ? (left is null) : right.Equals(left);
+        }
+        public static bool operator !=(MerkleTreeSection? left, MerkleTreeSection? right)
+        {
+            return !(left == right);
+        }
+        public override bool Equals(object? other)
+        {
+            if (!(other is MerkleTreeSection)) return false;
+            return this.Equals((MerkleTreeSection)other);
+        }
+        public bool Equals(MerkleTreeSection? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -58,12 +86,11 @@ namespace Xeus.Core.Internal
 
             return true;
         }
+        public override int GetHashCode() => ___hashCode.Value;
 
-        public override int GetHashCode() => __hashCode;
-
-        private sealed class CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<MerkleTreeSection>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<MerkleTreeSection>
         {
-            public void Serialize(global::Omnix.Serialization.RocketPack.RocketPackWriter w, MerkleTreeSection value, int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in MerkleTreeSection value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -100,12 +127,12 @@ namespace Xeus.Core.Internal
                     w.Write((uint)value.Hashes.Count);
                     foreach (var n in value.Hashes)
                     {
-                        OmniHash.Formatter.Serialize(w, n, rank + 1);
+                        OmniHash.Formatter.Serialize(ref w, n, rank + 1);
                     }
                 }
             }
 
-            public MerkleTreeSection Deserialize(global::Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public MerkleTreeSection Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -136,7 +163,7 @@ namespace Xeus.Core.Internal
                                 p_hashes = new OmniHash[length];
                                 for (int i = 0; i < p_hashes.Length; i++)
                                 {
-                                    p_hashes[i] = OmniHash.Formatter.Deserialize(r, rank + 1);
+                                    p_hashes[i] = OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
@@ -148,15 +175,18 @@ namespace Xeus.Core.Internal
         }
     }
 
-    internal sealed partial class MerkleTreeNode : global::Omnix.Serialization.RocketPack.RocketPackMessageBase<MerkleTreeNode>
+    internal sealed partial class MerkleTreeNode : global::Omnix.Serialization.RocketPack.IRocketPackMessage<MerkleTreeNode>
     {
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<MerkleTreeNode> Formatter { get; }
+        public static MerkleTreeNode Empty { get; }
+
         static MerkleTreeNode()
         {
-            MerkleTreeNode.Formatter = new CustomFormatter();
+            MerkleTreeNode.Formatter = new ___CustomFormatter();
             MerkleTreeNode.Empty = new MerkleTreeNode(global::System.Array.Empty<MerkleTreeSection>());
         }
 
-        private readonly int __hashCode;
+        private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxSectionsCount = 1048576;
 
@@ -171,19 +201,44 @@ namespace Xeus.Core.Internal
 
             this.Sections = new global::Omnix.DataStructures.ReadOnlyListSlim<MerkleTreeSection>(sections);
 
+            ___hashCode = new global::System.Lazy<int>(() =>
             {
-                var __h = new global::System.HashCode();
-                foreach (var n in this.Sections)
+                var ___h = new global::System.HashCode();
+                foreach (var n in sections)
                 {
-                    if (n != default) __h.Add(n.GetHashCode());
+                    if (n != default) ___h.Add(n.GetHashCode());
                 }
-                __hashCode = __h.ToHashCode();
-            }
+                return ___h.ToHashCode();
+            });
         }
 
         public global::Omnix.DataStructures.ReadOnlyListSlim<MerkleTreeSection> Sections { get; }
 
-        public override bool Equals(MerkleTreeNode target)
+        public static MerkleTreeNode Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        {
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
+            return Formatter.Deserialize(ref reader, 0);
+        }
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        {
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
+            Formatter.Serialize(ref writer, this, 0);
+        }
+
+        public static bool operator ==(MerkleTreeNode? left, MerkleTreeNode? right)
+        {
+            return (right is null) ? (left is null) : right.Equals(left);
+        }
+        public static bool operator !=(MerkleTreeNode? left, MerkleTreeNode? right)
+        {
+            return !(left == right);
+        }
+        public override bool Equals(object? other)
+        {
+            if (!(other is MerkleTreeNode)) return false;
+            return this.Equals((MerkleTreeNode)other);
+        }
+        public bool Equals(MerkleTreeNode? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -191,12 +246,11 @@ namespace Xeus.Core.Internal
 
             return true;
         }
+        public override int GetHashCode() => ___hashCode.Value;
 
-        public override int GetHashCode() => __hashCode;
-
-        private sealed class CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<MerkleTreeNode>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<MerkleTreeNode>
         {
-            public void Serialize(global::Omnix.Serialization.RocketPack.RocketPackWriter w, MerkleTreeNode value, int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in MerkleTreeNode value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -215,12 +269,12 @@ namespace Xeus.Core.Internal
                     w.Write((uint)value.Sections.Count);
                     foreach (var n in value.Sections)
                     {
-                        MerkleTreeSection.Formatter.Serialize(w, n, rank + 1);
+                        MerkleTreeSection.Formatter.Serialize(ref w, n, rank + 1);
                     }
                 }
             }
 
-            public MerkleTreeNode Deserialize(global::Omnix.Serialization.RocketPack.RocketPackReader r, int rank)
+            public MerkleTreeNode Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -239,7 +293,7 @@ namespace Xeus.Core.Internal
                                 p_sections = new MerkleTreeSection[length];
                                 for (int i = 0; i < p_sections.Length; i++)
                                 {
-                                    p_sections[i] = MerkleTreeSection.Formatter.Deserialize(r, rank + 1);
+                                    p_sections[i] = MerkleTreeSection.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }

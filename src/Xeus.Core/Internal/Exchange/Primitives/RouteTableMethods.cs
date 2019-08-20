@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Omnix.Base;
 
-namespace Xeus.Core.Exchange.Internal
+namespace Xeus.Core.Internal.Exchange.Primitives
 {
-    internal sealed class RouteTableMethods
+    internal static class RouteTableMethods
     {
-        private static byte[] _distanceHashTable = new byte[256];
+        private static readonly byte[] _distanceHashTable = new byte[256];
 
         static RouteTableMethods()
         {
@@ -50,6 +50,7 @@ namespace Xeus.Core.Exchange.Internal
         }
 
         public static IEnumerable<NodeInfo<T>> Search<T>(ReadOnlySpan<byte> baseId, ReadOnlySpan<byte> targetId, IEnumerable<NodeInfo<T>> nodeList, int count)
+            where T : notnull
         {
             if (targetId == null) throw new ArgumentNullException(nameof(targetId));
             if (nodeList == null) throw new ArgumentNullException(nameof(nodeList));
@@ -100,10 +101,11 @@ namespace Xeus.Core.Exchange.Internal
                 targetList[left] = temp;
             }
 
-            return targetList.Take(count).TakeWhile(n => n.Node.HasValue).Select(n => n.Node.Value).ToList();
+            return targetList.Take(count).TakeWhile(n => n.Node.HasValue).Select(n => n.Node!.Value).ToList();
         }
 
         private readonly struct SortInfo<T>
+            where T : notnull
         {
             private readonly NodeInfo<T>? _node;
             private readonly byte[] _xor;

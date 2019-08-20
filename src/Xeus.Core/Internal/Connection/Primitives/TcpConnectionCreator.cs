@@ -358,7 +358,7 @@ namespace Xeus.Core.Internal.Connection.Primitives
             return null;
         }
 
-        public async ValueTask<(Cap?, OmniAddress?)> AcceptAsync(CancellationToken token = default)
+        public async ValueTask<ConnectionCreatorAcceptResult?> AcceptAsync(CancellationToken token = default)
         {
             if (this.IsDisposed)
             {
@@ -402,7 +402,7 @@ namespace Xeus.Core.Internal.Connection.Primitives
                         throw new NotSupportedException();
                     }
 
-                    return (new SocketCap(socket, false), address);
+                    return new ConnectionCreatorAcceptResult(new SocketCap(socket, false), address);
                 }
             }
             catch (Exception e)
@@ -415,7 +415,7 @@ namespace Xeus.Core.Internal.Connection.Primitives
                 }
             }
 
-            return default;
+            return null;
         }
 
         private async ValueTask WatchThread(CancellationToken token)
@@ -656,7 +656,7 @@ namespace Xeus.Core.Internal.Connection.Primitives
             });
         }
 
-        protected override void Dispose(bool disposing)
+        protected override void OnDispose(bool disposing)
         {
             if (disposing)
             {

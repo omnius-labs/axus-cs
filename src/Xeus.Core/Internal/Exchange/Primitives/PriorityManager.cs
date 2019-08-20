@@ -4,13 +4,13 @@ using System.Linq;
 using Omnix.Base;
 using Omnix.Base.Extensions;
 
-namespace Xeus.Core.Exchange.Internal
+namespace Xeus.Core.Internal.Exchange.Primitives
 {
     internal sealed class PriorityManager
     {
         private readonly TimeSpan _survivalTime;
 
-        private Dictionary<DateTime, int> _table = new Dictionary<DateTime, int>();
+        private readonly Dictionary<DateTime, int> _table = new Dictionary<DateTime, int>();
 
         private readonly object _lockObject = new object();
 
@@ -39,7 +39,7 @@ namespace Xeus.Core.Exchange.Internal
             }
         }
 
-        public void Update()
+        public void Refresh()
         {
             lock (_lockObject)
             {

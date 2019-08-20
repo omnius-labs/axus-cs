@@ -2,9 +2,10 @@ using System;
 using Omnix.Base;
 using Omnix.Base.Helpers;
 
-namespace Xeus.Core.Exchange.Internal
+namespace Xeus.Core.Internal.Exchange.Primitives
 {
     public readonly struct NodeInfo<T> : IEquatable<NodeInfo<T>>
+        where T : notnull
     {
         private readonly byte[] _id;
         private readonly T _value;
@@ -33,7 +34,7 @@ namespace Xeus.Core.Exchange.Internal
             return (this.Id is null) ? 0 : ObjectHelper.GetHashCode(this.Id);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj == null || !(obj is NodeInfo<T>)) return false;
 

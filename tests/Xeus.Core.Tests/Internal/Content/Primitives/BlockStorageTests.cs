@@ -12,7 +12,7 @@ namespace Xeus.Core.Internal.Content.Primitives
     public class BlockStorageTests : TestsBase
     {
         [Fact]
-        public async Task Test()
+        public async Task RandomReadAndWriteTest()
         {
             var random = new Random();
             using var blockStorage = new BlockStorage(UnitTestEnvironment.TempDirectoryPath, BufferPool.Shared);

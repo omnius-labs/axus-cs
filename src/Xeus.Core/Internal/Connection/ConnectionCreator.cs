@@ -59,7 +59,7 @@ namespace Xeus.Core.Internal.Connection
             return null;
         }
 
-        public async ValueTask<(Cap?, OmniAddress?)> AcceptAsync(CancellationToken token = default)
+        public async ValueTask<ConnectionCreatorAcceptResult?> AcceptAsync(CancellationToken token = default)
         {
             if (this.IsDisposed)
             {
@@ -71,14 +71,14 @@ namespace Xeus.Core.Internal.Connection
                 return default;
             }
 
-            (Cap?, OmniAddress?) result;
+            ConnectionCreatorAcceptResult? result;
 
-            if ((result = await _tcpConnectionCreator.AcceptAsync(token)) != default)
+            if ((result = await _tcpConnectionCreator.AcceptAsync(token)) != null)
             {
                 return result;
             }
 
-            return default;
+            return null;
         }
 
         protected override async ValueTask OnInitializeAsync()
@@ -113,7 +113,7 @@ namespace Xeus.Core.Internal.Connection
             await _tcpConnectionCreator.SaveAsync();
         }
 
-        protected override void Dispose(bool disposing)
+        protected override void OnDispose(bool disposing)
         {
             if (disposing)
             {
