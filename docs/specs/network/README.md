@@ -1,10 +1,16 @@
-# Exchange
+# Network
+
+## Overview
 
 ## Protocol
 
+### 1. HandShake
+
+### 2. Search
+
 | Name | Id | Description |
 | --- | --- | --- |
-| Nodes | 0 |  |
+| NodeAddresses | 0 |  |
 | PublishBroadcastClues | 1 |  |
 | WantBroadcastClues | 2 |  |
 | BroadcastClues | 3 |  |
@@ -17,8 +23,13 @@
 | PublishContentLocations | 10 |  |
 | WantContentLocations | 11 |  |
 | ContentLocations | 12 |  |
-| WantBlocks | 13 |  |
-| CancelBlocks | 14 |  |
-| Blocks | 15 |  |
+
+### 3. Swap
+
+| Name | Id | Description |
+| --- | --- | --- |
+| WantBlocks | 0 |  |
+| CancelBlocks | 1 |  |
+| Blocks | 2 |  |
 
 ## References
