@@ -1,16 +1,16 @@
 ﻿syntax = v1.0;
 
-using "../refs/omnix/formats/Omnix.Algorithms.Cryptography.rpf";
-using "../refs/omnix/formats/Omnix.Network.rpf";
-using "Xeus.Messages.rpf";
-using "Xeus.Core.Internal.rpf";
+using "Omnix.Algorithms.Cryptography";
+using "Omnix.Network";
+using "Xeus.Messages";
+using "Xeus.Core.Internal";
 
-option csharp_namespace = "Xeus.Core.Internal.Download";
+namespace "Xeus.Core.Internal.Download";
 option csharp_access_level = "internal";
 
-message DownloadItemInfo {
+table DownloadItemInfo {
     Clue: XeusClue = 0,
-    Path: string(1024) = 1,
+    Path: string(capacity: 1024) = 1,
     MaxLength: uint64 = 2,
     DownloadingDepth: uint32 = 3,
     DownloadingMerkleTreeNode: MerkleTreeNode = 4,

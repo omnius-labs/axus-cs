@@ -1,39 +1,39 @@
 ﻿syntax = v1.0;
 
-using "../refs/omnix/formats/Omnix.Algorithms.Cryptography.rpf";
-using "../refs/omnix/formats/Omnix.Network.rpf";
-using "Xeus.Messages.rpf";
-using "Xeus.Core.Internal.rpf";
+using "Omnix.Algorithms.Cryptography";
+using "Omnix.Network";
+using "Xeus.Messages";
+using "Xeus.Core.Internal";
 
-option csharp_namespace = "Xeus.Core.Internal.Content";
+namespace "Xeus.Core.Internal.Content";
 option csharp_access_level = "internal";
 
-message ClusterMetadata {
-    Sectors: vector<uint64>(256) = 0,
+table ClusterMetadata {
+    Sectors: vector<uint64>(capacity: 256) = 0,
     Length: uint32 = 1,
     LastAccessTime: timestamp = 2,
 }
 
-message ContentMetadata {
-    Clue: XeusClue = 0,
-    LockedHashes: vector<OmniHash>(1073741824) = 1,
-    SharedBlocksMetadata: SharedBlocksMetadata? = 2, 
-}
-
-message SharedBlocksMetadata {
+table SharedBlocksMetadata {
     Path: string(1024) = 0,
     Length: uint64 = 1,
     BlockLength: uint32 = 2,
-    Hashes: vector<OmniHash>(1073741824) = 3,
+    Hashes: vector<OmniHash>(capacity: 1073741824) = 3,
 }
 
-message BlockStorageConfig {
+table ContentMetadata {
+    Clue: XeusClue = 0,
+    LockedHashes: vector<OmniHash>(capacity: 1073741824) = 1,
+    SharedBlocksMetadata: SharedBlocksMetadata? = 2, 
+}
+
+table BlockStorageConfig {
     Version: uint32 = 0,
     Size: uint64 = 1,
-    ClusterMetadataMap: map<OmniHash, ClusterMetadata>(1073741824) = 2,
+    ClusterMetadataMap: map<OmniHash, ClusterMetadata>(capacity: 1073741824) = 2,
 }
 
-message ContentStorageConfig {
+table ContentStorageConfig {
     Version: uint32 = 0,
-    ContentMetadatas: vector<ContentMetadata>(1073741824) = 1,
+    ContentMetadatas: vector<ContentMetadata>(capacity: 1073741824) = 1,
 }
