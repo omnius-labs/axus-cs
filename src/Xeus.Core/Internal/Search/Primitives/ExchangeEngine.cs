@@ -17,11 +17,11 @@ using Omnix.Network;
 using Omnix.Network.Connections;
 using Omnix.Network.Connections.Secure;
 using Xeus.Core.Internal.Connection;
-using Xeus.Core.Internal.Content;
-using Xeus.Core.Internal.Exchange.Primitives;
+using Xeus.Core.Internal.Storage;
+using Xeus.Core.Internal.Search.Primitives;
 using Xeus.Core.Internal.Primitives;
 
-namespace Xeus.Core.Internal.Exchange
+namespace Xeus.Core.Internal.Search
 {
     sealed partial class ExchangeEngine : ServiceBase, ISettings
     {

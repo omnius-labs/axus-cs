@@ -3,7 +3,6 @@
 using "Omnix.Algorithms.Cryptography";
 using "Omnix.Network";
 using "Xeus.Messages";
-using "Xeus.Core.Internal";
 
 namespace "Xeus.Core.Internal.Download";
 option csharp_access_level = "internal";

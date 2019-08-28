@@ -2,7 +2,7 @@ using System;
 using Omnix.Base;
 using Omnix.Base.Helpers;
 
-namespace Xeus.Core.Internal.Exchange.Primitives
+namespace Xeus.Core.Internal.Search.Primitives
 {
     public readonly struct NodeInfo<T> : IEquatable<NodeInfo<T>>
         where T : notnull

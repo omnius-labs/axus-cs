@@ -14,4 +14,3 @@ namespace Xeus.Core.Internal.Connection
         public OmniAddress Address { get; }
     }
 }
-

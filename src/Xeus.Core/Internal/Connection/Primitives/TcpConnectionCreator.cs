@@ -615,9 +615,9 @@ namespace Xeus.Core.Internal.Connection.Primitives
 
         public async ValueTask LoadAsync()
         {
-            await Task.Run(async () =>
+            using (await _settingsAsyncLock.LockAsync())
             {
-                using (await _settingsAsyncLock.LockAsync())
+                await Task.Run(async () =>
                 {
                     try
                     {
@@ -632,15 +632,15 @@ namespace Xeus.Core.Internal.Connection.Primitives
                         _logger.Error(e);
                         throw e;
                     }
-                }
-            });
+                });
+            }
         }
 
         public async ValueTask SaveAsync()
         {
-            await Task.Run(async () =>
+            using (await _settingsAsyncLock.LockAsync())
             {
-                using (await _settingsAsyncLock.LockAsync())
+                await Task.Run(async () =>
                 {
                     try
                     {
@@ -652,8 +652,8 @@ namespace Xeus.Core.Internal.Connection.Primitives
                         _logger.Error(e);
                         throw e;
                     }
-                }
-            });
+                });
+            }
         }
 
         protected override void OnDispose(bool disposing)

@@ -1,0 +1,42 @@
+syntax = v1.0;
+
+using "Omnix.Algorithms.Cryptography";
+using "Omnix.Network";
+using "Xeus.Messages";
+
+namespace "Xeus.Core.Internal.Swap";
+option csharp_access_level = "internal";
+
+/* HandShake */
+
+enum ProtocolVersion : uint8 {
+    Version1 = 1,
+}
+
+table HelloMessage {
+    ProtocolVersions: vector<ProtocolVersion>(capacity: 32) = 0,
+}
+
+table ProfileMessage {
+    Id: bytes(capacity: 32) = 0,
+    Address: OmniAddress = 1,
+}
+
+/* Messages */
+
+table NodeAddressesMessage {
+    Values: vector<OmniAddress>(capacity: 256) = 0,
+}
+
+table WantBlocksMessage {
+    Parameters: vector<OmniHash>(capacity: 8192) = 0,
+}
+
+table CancelBlocksMessage {
+    Parameters: vector<OmniHash>(capacity: 8192) = 0,
+}
+
+table BlocksMessages {
+    HashAlgorithm: OmniHashAlgorithmType = 0,
+    Blocks: vector<bytes(capacity: 4194304, recyclable: true)>(capacity: 32) = 1,
+}

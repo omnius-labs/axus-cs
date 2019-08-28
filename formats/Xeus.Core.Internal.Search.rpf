@@ -3,9 +3,8 @@ syntax = v1.0;
 using "Omnix.Algorithms.Cryptography";
 using "Omnix.Network";
 using "Xeus.Messages";
-using "Xeus.Core.Internal";
 
-namespace "Xeus.Core.Internal.Network";
+namespace "Xeus.Core.Internal.Search";
 option csharp_access_level = "internal";
 
 table BroadcastClue {
@@ -57,7 +56,7 @@ table ProfileMessage {
     Address: OmniAddress = 1,
 }
 
-/* Search */
+/* Messages */
 
 table NodeAddressesMessage {
     Values: vector<OmniAddress>(capacity: 256) = 0,
@@ -109,19 +108,4 @@ table PublishContentLocations {
 
 table ContentLocations {
     Values: vector<ContentLocation>(capacity: 8192) = 0,
-}
-
-/* Swap */
-
-table WantBlocksMessage {
-    Parameters: vector<OmniHash>(capacity: 8192) = 0,
-}
-
-table CancelBlocksMessage {
-    Parameters: vector<OmniHash>(capacity: 8192) = 0,
-}
-
-table BlockMessages {
-    HashAlgorithm: OmniHashAlgorithmType = 0,
-    Blocks: vector<bytes(capacity: 4194304, recyclable: true)>(capacity: 32) = 1,
 }

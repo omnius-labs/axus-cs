@@ -3,10 +3,23 @@
 using "Omnix.Algorithms.Cryptography";
 using "Omnix.Network";
 using "Xeus.Messages";
-using "Xeus.Core.Internal";
 
-namespace "Xeus.Core.Internal.Content";
+namespace "Xeus.Core.Internal.Storage";
 option csharp_access_level = "internal";
+
+enum CorrectionAlgorithmType : uint8 {
+    ReedSolomon8 = 0,
+}
+
+table MerkleTreeSection {
+    CorrectionAlgorithmType: CorrectionAlgorithmType = 0,
+    Length: uint64 = 1,
+    Hashes: vector<OmniHash>(capacity: 1048576) = 2,
+}
+
+table MerkleTreeNode {
+    Sections: vector<MerkleTreeSection>(capacity: 1048576) = 0,
+}
 
 table ClusterMetadata {
     Sectors: vector<uint64>(capacity: 256) = 0,
@@ -15,7 +28,7 @@ table ClusterMetadata {
 }
 
 table SharedBlocksMetadata {
-    Path: string(1024) = 0,
+    Path: string(capacity: 1024) = 0,
     Length: uint64 = 1,
     BlockLength: uint32 = 2,
     Hashes: vector<OmniHash>(capacity: 1073741824) = 3,

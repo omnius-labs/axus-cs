@@ -1,6 +1,5 @@
 using Omnix.Algorithms.Cryptography;
 using Omnix.Network;
-using Xeus.Core.Internal;
 using Xeus.Messages;
 
 #nullable enable
