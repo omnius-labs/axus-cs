@@ -2,7 +2,7 @@ using System;
 using Omnix.Base;
 using Xeus.Core.Internal.Helpers;
 
-namespace Xeus.Core.Internal.Content.Primitives
+namespace Xeus.Core.Internal.Storage.Primitives
 {
     internal sealed class BitStorage : DisposableBase
     {

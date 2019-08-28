@@ -16,7 +16,7 @@ using Xeus.Core.Internal.Helpers;
 using Xeus.Core.Internal.Primitives;
 using Xeus.Messages;
 
-namespace Xeus.Core.Internal.Content.Primitives
+namespace Xeus.Core.Internal.Storage.Primitives
 {
     internal sealed partial class BlockStorage : DisposableBase, ISettings, IEnumerable<OmniHash>
     {

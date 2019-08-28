@@ -4,7 +4,7 @@ using Omnix.Serialization;
 using Omnix.Serialization.RocketPack;
 using Xeus.Messages;
 
-namespace Xeus.Core.Internal.Exchange
+namespace Xeus.Core.Internal.Search
 {
     sealed partial class BroadcastClue
     {

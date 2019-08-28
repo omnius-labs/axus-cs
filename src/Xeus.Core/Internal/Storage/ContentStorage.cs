@@ -14,11 +14,11 @@ using Omnix.Base.Helpers;
 using Omnix.Configuration;
 using Omnix.Io;
 using Omnix.Serialization.RocketPack.Helpers;
-using Xeus.Core.Internal.Content.Primitives;
+using Xeus.Core.Internal.Storage.Primitives;
 using Xeus.Core.Internal.Primitives;
 using Xeus.Messages;
 
-namespace Xeus.Core.Internal.Content
+namespace Xeus.Core.Internal.Storage
 {
     internal sealed class ContentStorage : DisposableBase, ISettings, ISetOperators<OmniHash>, IEnumerable<OmniHash>
     {

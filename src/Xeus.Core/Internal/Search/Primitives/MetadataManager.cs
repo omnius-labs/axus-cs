@@ -4,10 +4,10 @@ using System.Linq;
 using Omnix.Algorithms.Cryptography;
 using Omnix.Base;
 using Omnix.Base.Extensions;
-using Xeus.Core.Internal.Exchange;
+using Xeus.Core.Internal.Search;
 using Xeus.Messages;
 
-namespace Xeus.Core.Internal.Exchange.Primitives
+namespace Xeus.Core.Internal.Search.Primitives
 {
     public delegate IEnumerable<OmniSignature> GetSignaturesEventHandler();
 

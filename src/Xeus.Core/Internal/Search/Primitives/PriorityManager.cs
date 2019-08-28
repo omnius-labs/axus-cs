@@ -4,7 +4,7 @@ using System.Linq;
 using Omnix.Base;
 using Omnix.Base.Extensions;
 
-namespace Xeus.Core.Internal.Exchange.Primitives
+namespace Xeus.Core.Internal.Search.Primitives
 {
     internal sealed class PriorityManager
     {

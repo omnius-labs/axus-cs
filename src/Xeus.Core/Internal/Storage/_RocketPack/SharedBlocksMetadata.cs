@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Omnix.Algorithms.Cryptography;
 
-namespace Xeus.Core.Internal.Content
+namespace Xeus.Core.Internal.Storage
 {
     internal partial class SharedBlocksMetadata
     {

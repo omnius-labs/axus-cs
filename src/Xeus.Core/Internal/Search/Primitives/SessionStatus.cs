@@ -7,7 +7,7 @@ using Omnix.DataStructures;
 using Omnix.Network;
 using Xeus.Messages;
 
-namespace Xeus.Core.Internal.Exchange.Primitives
+namespace Xeus.Core.Internal.Search.Primitives
 {
     internal enum SessionType
     {

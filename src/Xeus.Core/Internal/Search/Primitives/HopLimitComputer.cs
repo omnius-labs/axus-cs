@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Omnix.Base;
 
-namespace Xeus.Core.Internal.Exchange.Primitives
+namespace Xeus.Core.Internal.Search.Primitives
 {
     internal sealed class HopLimitComputer
     {

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Omnix.Base;
 
-namespace Xeus.Core.Internal.Exchange.Primitives
+namespace Xeus.Core.Internal.Search.Primitives
 {
     internal static class RouteTableMethods
     {
