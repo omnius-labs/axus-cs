@@ -19,7 +19,7 @@ using Omnix.Network.Connections.Secure;
 using Xeus.Core.Internal.Connection;
 using Xeus.Core.Internal.Storage;
 using Xeus.Core.Internal.Search.Primitives;
-using Xeus.Core.Internal.Primitives;
+using Xeus.Core.Internal.Common;
 
 namespace Xeus.Core.Internal.Search
 {

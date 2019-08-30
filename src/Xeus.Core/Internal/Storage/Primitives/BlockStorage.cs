@@ -13,7 +13,7 @@ using Omnix.Base.Helpers;
 using Omnix.Configuration;
 using Omnix.Serialization.RocketPack;
 using Xeus.Core.Internal.Helpers;
-using Xeus.Core.Internal.Primitives;
+using Xeus.Core.Internal.Common;
 using Xeus.Messages;
 
 namespace Xeus.Core.Internal.Storage.Primitives

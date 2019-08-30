@@ -5,7 +5,7 @@ using Omnix.Base;
 using Omnix.Configuration;
 using Omnix.Network;
 using Xeus.Core.Internal.Connection.Primitives;
-using Xeus.Core.Internal.Primitives;
+using Xeus.Core.Internal.Common;
 using Xeus.Messages;
 
 namespace Xeus.Core.Internal.Connection

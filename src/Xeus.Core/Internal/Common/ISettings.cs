@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Xeus.Core.Internal.Primitives
+namespace Xeus.Core.Internal.Common
 {
     internal interface ISettings
     {
