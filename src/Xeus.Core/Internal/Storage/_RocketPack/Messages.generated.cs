@@ -6,305 +6,6 @@ using Xeus.Messages;
 
 namespace Xeus.Core.Internal.Storage
 {
-    internal enum CorrectionAlgorithmType : byte
-    {
-        ReedSolomon8 = 0,
-    }
-
-    internal sealed partial class MerkleTreeSection : global::Omnix.Serialization.RocketPack.IRocketPackMessage<MerkleTreeSection>
-    {
-        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<MerkleTreeSection> Formatter { get; }
-        public static MerkleTreeSection Empty { get; }
-
-        static MerkleTreeSection()
-        {
-            MerkleTreeSection.Formatter = new ___CustomFormatter();
-            MerkleTreeSection.Empty = new MerkleTreeSection((CorrectionAlgorithmType)0, 0, global::System.Array.Empty<OmniHash>());
-        }
-
-        private readonly global::System.Lazy<int> ___hashCode;
-
-        public static readonly int MaxHashesCount = 1048576;
-
-        public MerkleTreeSection(CorrectionAlgorithmType correctionAlgorithmType, ulong length, OmniHash[] hashes)
-        {
-            if (hashes is null) throw new global::System.ArgumentNullException("hashes");
-            if (hashes.Length > 1048576) throw new global::System.ArgumentOutOfRangeException("hashes");
-
-            this.CorrectionAlgorithmType = correctionAlgorithmType;
-            this.Length = length;
-            this.Hashes = new global::Omnix.DataStructures.ReadOnlyListSlim<OmniHash>(hashes);
-
-            ___hashCode = new global::System.Lazy<int>(() =>
-            {
-                var ___h = new global::System.HashCode();
-                if (correctionAlgorithmType != default) ___h.Add(correctionAlgorithmType.GetHashCode());
-                if (length != default) ___h.Add(length.GetHashCode());
-                foreach (var n in hashes)
-                {
-                    if (n != default) ___h.Add(n.GetHashCode());
-                }
-                return ___h.ToHashCode();
-            });
-        }
-
-        public CorrectionAlgorithmType CorrectionAlgorithmType { get; }
-        public ulong Length { get; }
-        public global::Omnix.DataStructures.ReadOnlyListSlim<OmniHash> Hashes { get; }
-
-        public static MerkleTreeSection Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
-        {
-            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
-            return Formatter.Deserialize(ref reader, 0);
-        }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
-        {
-            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
-            Formatter.Serialize(ref writer, this, 0);
-        }
-
-        public static bool operator ==(MerkleTreeSection? left, MerkleTreeSection? right)
-        {
-            return (right is null) ? (left is null) : right.Equals(left);
-        }
-        public static bool operator !=(MerkleTreeSection? left, MerkleTreeSection? right)
-        {
-            return !(left == right);
-        }
-        public override bool Equals(object? other)
-        {
-            if (!(other is MerkleTreeSection)) return false;
-            return this.Equals((MerkleTreeSection)other);
-        }
-        public bool Equals(MerkleTreeSection? target)
-        {
-            if (target is null) return false;
-            if (object.ReferenceEquals(this, target)) return true;
-            if (this.CorrectionAlgorithmType != target.CorrectionAlgorithmType) return false;
-            if (this.Length != target.Length) return false;
-            if (!global::Omnix.Base.Helpers.CollectionHelper.Equals(this.Hashes, target.Hashes)) return false;
-
-            return true;
-        }
-        public override int GetHashCode() => ___hashCode.Value;
-
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<MerkleTreeSection>
-        {
-            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in MerkleTreeSection value, in int rank)
-            {
-                if (rank > 256) throw new global::System.FormatException();
-
-                {
-                    uint propertyCount = 0;
-                    if (value.CorrectionAlgorithmType != (CorrectionAlgorithmType)0)
-                    {
-                        propertyCount++;
-                    }
-                    if (value.Length != 0)
-                    {
-                        propertyCount++;
-                    }
-                    if (value.Hashes.Count != 0)
-                    {
-                        propertyCount++;
-                    }
-                    w.Write(propertyCount);
-                }
-
-                if (value.CorrectionAlgorithmType != (CorrectionAlgorithmType)0)
-                {
-                    w.Write((uint)0);
-                    w.Write((ulong)value.CorrectionAlgorithmType);
-                }
-                if (value.Length != 0)
-                {
-                    w.Write((uint)1);
-                    w.Write(value.Length);
-                }
-                if (value.Hashes.Count != 0)
-                {
-                    w.Write((uint)2);
-                    w.Write((uint)value.Hashes.Count);
-                    foreach (var n in value.Hashes)
-                    {
-                        OmniHash.Formatter.Serialize(ref w, n, rank + 1);
-                    }
-                }
-            }
-
-            public MerkleTreeSection Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
-            {
-                if (rank > 256) throw new global::System.FormatException();
-
-                uint propertyCount = r.GetUInt32();
-
-                CorrectionAlgorithmType p_correctionAlgorithmType = (CorrectionAlgorithmType)0;
-                ulong p_length = 0;
-                OmniHash[] p_hashes = global::System.Array.Empty<OmniHash>();
-
-                for (; propertyCount > 0; propertyCount--)
-                {
-                    uint id = r.GetUInt32();
-                    switch (id)
-                    {
-                        case 0:
-                            {
-                                p_correctionAlgorithmType = (CorrectionAlgorithmType)r.GetUInt64();
-                                break;
-                            }
-                        case 1:
-                            {
-                                p_length = r.GetUInt64();
-                                break;
-                            }
-                        case 2:
-                            {
-                                var length = r.GetUInt32();
-                                p_hashes = new OmniHash[length];
-                                for (int i = 0; i < p_hashes.Length; i++)
-                                {
-                                    p_hashes[i] = OmniHash.Formatter.Deserialize(ref r, rank + 1);
-                                }
-                                break;
-                            }
-                    }
-                }
-
-                return new MerkleTreeSection(p_correctionAlgorithmType, p_length, p_hashes);
-            }
-        }
-    }
-
-    internal sealed partial class MerkleTreeNode : global::Omnix.Serialization.RocketPack.IRocketPackMessage<MerkleTreeNode>
-    {
-        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<MerkleTreeNode> Formatter { get; }
-        public static MerkleTreeNode Empty { get; }
-
-        static MerkleTreeNode()
-        {
-            MerkleTreeNode.Formatter = new ___CustomFormatter();
-            MerkleTreeNode.Empty = new MerkleTreeNode(global::System.Array.Empty<MerkleTreeSection>());
-        }
-
-        private readonly global::System.Lazy<int> ___hashCode;
-
-        public static readonly int MaxSectionsCount = 1048576;
-
-        public MerkleTreeNode(MerkleTreeSection[] sections)
-        {
-            if (sections is null) throw new global::System.ArgumentNullException("sections");
-            if (sections.Length > 1048576) throw new global::System.ArgumentOutOfRangeException("sections");
-            foreach (var n in sections)
-            {
-                if (n is null) throw new global::System.ArgumentNullException("n");
-            }
-
-            this.Sections = new global::Omnix.DataStructures.ReadOnlyListSlim<MerkleTreeSection>(sections);
-
-            ___hashCode = new global::System.Lazy<int>(() =>
-            {
-                var ___h = new global::System.HashCode();
-                foreach (var n in sections)
-                {
-                    if (n != default) ___h.Add(n.GetHashCode());
-                }
-                return ___h.ToHashCode();
-            });
-        }
-
-        public global::Omnix.DataStructures.ReadOnlyListSlim<MerkleTreeSection> Sections { get; }
-
-        public static MerkleTreeNode Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
-        {
-            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
-            return Formatter.Deserialize(ref reader, 0);
-        }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
-        {
-            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
-            Formatter.Serialize(ref writer, this, 0);
-        }
-
-        public static bool operator ==(MerkleTreeNode? left, MerkleTreeNode? right)
-        {
-            return (right is null) ? (left is null) : right.Equals(left);
-        }
-        public static bool operator !=(MerkleTreeNode? left, MerkleTreeNode? right)
-        {
-            return !(left == right);
-        }
-        public override bool Equals(object? other)
-        {
-            if (!(other is MerkleTreeNode)) return false;
-            return this.Equals((MerkleTreeNode)other);
-        }
-        public bool Equals(MerkleTreeNode? target)
-        {
-            if (target is null) return false;
-            if (object.ReferenceEquals(this, target)) return true;
-            if (!global::Omnix.Base.Helpers.CollectionHelper.Equals(this.Sections, target.Sections)) return false;
-
-            return true;
-        }
-        public override int GetHashCode() => ___hashCode.Value;
-
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<MerkleTreeNode>
-        {
-            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in MerkleTreeNode value, in int rank)
-            {
-                if (rank > 256) throw new global::System.FormatException();
-
-                {
-                    uint propertyCount = 0;
-                    if (value.Sections.Count != 0)
-                    {
-                        propertyCount++;
-                    }
-                    w.Write(propertyCount);
-                }
-
-                if (value.Sections.Count != 0)
-                {
-                    w.Write((uint)0);
-                    w.Write((uint)value.Sections.Count);
-                    foreach (var n in value.Sections)
-                    {
-                        MerkleTreeSection.Formatter.Serialize(ref w, n, rank + 1);
-                    }
-                }
-            }
-
-            public MerkleTreeNode Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
-            {
-                if (rank > 256) throw new global::System.FormatException();
-
-                uint propertyCount = r.GetUInt32();
-
-                MerkleTreeSection[] p_sections = global::System.Array.Empty<MerkleTreeSection>();
-
-                for (; propertyCount > 0; propertyCount--)
-                {
-                    uint id = r.GetUInt32();
-                    switch (id)
-                    {
-                        case 0:
-                            {
-                                var length = r.GetUInt32();
-                                p_sections = new MerkleTreeSection[length];
-                                for (int i = 0; i < p_sections.Length; i++)
-                                {
-                                    p_sections[i] = MerkleTreeSection.Formatter.Deserialize(ref r, rank + 1);
-                                }
-                                break;
-                            }
-                    }
-                }
-
-                return new MerkleTreeNode(p_sections);
-            }
-        }
-    }
-
     internal sealed partial class ClusterMetadata : global::Omnix.Serialization.RocketPack.IRocketPackMessage<ClusterMetadata>
     {
         public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<ClusterMetadata> Formatter { get; }
@@ -464,6 +165,180 @@ namespace Xeus.Core.Internal.Storage
                 }
 
                 return new ClusterMetadata(p_sectors, p_length, p_lastAccessTime);
+            }
+        }
+    }
+
+    internal sealed partial class BlockStorageConfig : global::Omnix.Serialization.RocketPack.IRocketPackMessage<BlockStorageConfig>
+    {
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<BlockStorageConfig> Formatter { get; }
+        public static BlockStorageConfig Empty { get; }
+
+        static BlockStorageConfig()
+        {
+            BlockStorageConfig.Formatter = new ___CustomFormatter();
+            BlockStorageConfig.Empty = new BlockStorageConfig(0, 0, new global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>());
+        }
+
+        private readonly global::System.Lazy<int> ___hashCode;
+
+        public static readonly int MaxClusterMetadataMapCount = 1073741824;
+
+        public BlockStorageConfig(uint version, ulong size, global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata> clusterMetadataMap)
+        {
+            if (clusterMetadataMap is null) throw new global::System.ArgumentNullException("clusterMetadataMap");
+            if (clusterMetadataMap.Count > 1073741824) throw new global::System.ArgumentOutOfRangeException("clusterMetadataMap");
+            foreach (var n in clusterMetadataMap)
+            {
+                if (n.Value is null) throw new global::System.ArgumentNullException("n.Value");
+            }
+
+            this.Version = version;
+            this.Size = size;
+            this.ClusterMetadataMap = new global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata>(clusterMetadataMap);
+
+            ___hashCode = new global::System.Lazy<int>(() =>
+            {
+                var ___h = new global::System.HashCode();
+                if (version != default) ___h.Add(version.GetHashCode());
+                if (size != default) ___h.Add(size.GetHashCode());
+                foreach (var n in clusterMetadataMap)
+                {
+                    if (n.Key != default) ___h.Add(n.Key.GetHashCode());
+                    if (n.Value != default) ___h.Add(n.Value.GetHashCode());
+                }
+                return ___h.ToHashCode();
+            });
+        }
+
+        public uint Version { get; }
+        public ulong Size { get; }
+        public global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata> ClusterMetadataMap { get; }
+
+        public static BlockStorageConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        {
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
+            return Formatter.Deserialize(ref reader, 0);
+        }
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        {
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
+            Formatter.Serialize(ref writer, this, 0);
+        }
+
+        public static bool operator ==(BlockStorageConfig? left, BlockStorageConfig? right)
+        {
+            return (right is null) ? (left is null) : right.Equals(left);
+        }
+        public static bool operator !=(BlockStorageConfig? left, BlockStorageConfig? right)
+        {
+            return !(left == right);
+        }
+        public override bool Equals(object? other)
+        {
+            if (!(other is BlockStorageConfig)) return false;
+            return this.Equals((BlockStorageConfig)other);
+        }
+        public bool Equals(BlockStorageConfig? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (this.Version != target.Version) return false;
+            if (this.Size != target.Size) return false;
+            if (!global::Omnix.Base.Helpers.CollectionHelper.Equals(this.ClusterMetadataMap, target.ClusterMetadataMap)) return false;
+
+            return true;
+        }
+        public override int GetHashCode() => ___hashCode.Value;
+
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<BlockStorageConfig>
+        {
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in BlockStorageConfig value, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                {
+                    uint propertyCount = 0;
+                    if (value.Version != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Size != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.ClusterMetadataMap.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
+                }
+
+                if (value.Version != 0)
+                {
+                    w.Write((uint)0);
+                    w.Write(value.Version);
+                }
+                if (value.Size != 0)
+                {
+                    w.Write((uint)1);
+                    w.Write(value.Size);
+                }
+                if (value.ClusterMetadataMap.Count != 0)
+                {
+                    w.Write((uint)2);
+                    w.Write((uint)value.ClusterMetadataMap.Count);
+                    foreach (var n in value.ClusterMetadataMap)
+                    {
+                        OmniHash.Formatter.Serialize(ref w, n.Key, rank + 1);
+                        ClusterMetadata.Formatter.Serialize(ref w, n.Value, rank + 1);
+                    }
+                }
+            }
+
+            public BlockStorageConfig Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                uint propertyCount = r.GetUInt32();
+
+                uint p_version = 0;
+                ulong p_size = 0;
+                global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata> p_clusterMetadataMap = new global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>();
+
+                for (; propertyCount > 0; propertyCount--)
+                {
+                    uint id = r.GetUInt32();
+                    switch (id)
+                    {
+                        case 0:
+                            {
+                                p_version = r.GetUInt32();
+                                break;
+                            }
+                        case 1:
+                            {
+                                p_size = r.GetUInt64();
+                                break;
+                            }
+                        case 2:
+                            {
+                                var length = r.GetUInt32();
+                                p_clusterMetadataMap = new global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>();
+                                OmniHash t_key = OmniHash.Empty;
+                                ClusterMetadata t_value = ClusterMetadata.Empty;
+                                for (int i = 0; i < length; i++)
+                                {
+                                    t_key = OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                    t_value = ClusterMetadata.Formatter.Deserialize(ref r, rank + 1);
+                                    p_clusterMetadataMap[t_key] = t_value;
+                                }
+                                break;
+                            }
+                    }
+                }
+
+                return new BlockStorageConfig(p_version, p_size, p_clusterMetadataMap);
             }
         }
     }
@@ -815,180 +690,6 @@ namespace Xeus.Core.Internal.Storage
                 }
 
                 return new ContentMetadata(p_clue, p_lockedHashes, p_sharedBlocksMetadata);
-            }
-        }
-    }
-
-    internal sealed partial class BlockStorageConfig : global::Omnix.Serialization.RocketPack.IRocketPackMessage<BlockStorageConfig>
-    {
-        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<BlockStorageConfig> Formatter { get; }
-        public static BlockStorageConfig Empty { get; }
-
-        static BlockStorageConfig()
-        {
-            BlockStorageConfig.Formatter = new ___CustomFormatter();
-            BlockStorageConfig.Empty = new BlockStorageConfig(0, 0, new global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>());
-        }
-
-        private readonly global::System.Lazy<int> ___hashCode;
-
-        public static readonly int MaxClusterMetadataMapCount = 1073741824;
-
-        public BlockStorageConfig(uint version, ulong size, global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata> clusterMetadataMap)
-        {
-            if (clusterMetadataMap is null) throw new global::System.ArgumentNullException("clusterMetadataMap");
-            if (clusterMetadataMap.Count > 1073741824) throw new global::System.ArgumentOutOfRangeException("clusterMetadataMap");
-            foreach (var n in clusterMetadataMap)
-            {
-                if (n.Value is null) throw new global::System.ArgumentNullException("n.Value");
-            }
-
-            this.Version = version;
-            this.Size = size;
-            this.ClusterMetadataMap = new global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata>(clusterMetadataMap);
-
-            ___hashCode = new global::System.Lazy<int>(() =>
-            {
-                var ___h = new global::System.HashCode();
-                if (version != default) ___h.Add(version.GetHashCode());
-                if (size != default) ___h.Add(size.GetHashCode());
-                foreach (var n in clusterMetadataMap)
-                {
-                    if (n.Key != default) ___h.Add(n.Key.GetHashCode());
-                    if (n.Value != default) ___h.Add(n.Value.GetHashCode());
-                }
-                return ___h.ToHashCode();
-            });
-        }
-
-        public uint Version { get; }
-        public ulong Size { get; }
-        public global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata> ClusterMetadataMap { get; }
-
-        public static BlockStorageConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
-        {
-            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
-            return Formatter.Deserialize(ref reader, 0);
-        }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
-        {
-            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
-            Formatter.Serialize(ref writer, this, 0);
-        }
-
-        public static bool operator ==(BlockStorageConfig? left, BlockStorageConfig? right)
-        {
-            return (right is null) ? (left is null) : right.Equals(left);
-        }
-        public static bool operator !=(BlockStorageConfig? left, BlockStorageConfig? right)
-        {
-            return !(left == right);
-        }
-        public override bool Equals(object? other)
-        {
-            if (!(other is BlockStorageConfig)) return false;
-            return this.Equals((BlockStorageConfig)other);
-        }
-        public bool Equals(BlockStorageConfig? target)
-        {
-            if (target is null) return false;
-            if (object.ReferenceEquals(this, target)) return true;
-            if (this.Version != target.Version) return false;
-            if (this.Size != target.Size) return false;
-            if (!global::Omnix.Base.Helpers.CollectionHelper.Equals(this.ClusterMetadataMap, target.ClusterMetadataMap)) return false;
-
-            return true;
-        }
-        public override int GetHashCode() => ___hashCode.Value;
-
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<BlockStorageConfig>
-        {
-            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in BlockStorageConfig value, in int rank)
-            {
-                if (rank > 256) throw new global::System.FormatException();
-
-                {
-                    uint propertyCount = 0;
-                    if (value.Version != 0)
-                    {
-                        propertyCount++;
-                    }
-                    if (value.Size != 0)
-                    {
-                        propertyCount++;
-                    }
-                    if (value.ClusterMetadataMap.Count != 0)
-                    {
-                        propertyCount++;
-                    }
-                    w.Write(propertyCount);
-                }
-
-                if (value.Version != 0)
-                {
-                    w.Write((uint)0);
-                    w.Write(value.Version);
-                }
-                if (value.Size != 0)
-                {
-                    w.Write((uint)1);
-                    w.Write(value.Size);
-                }
-                if (value.ClusterMetadataMap.Count != 0)
-                {
-                    w.Write((uint)2);
-                    w.Write((uint)value.ClusterMetadataMap.Count);
-                    foreach (var n in value.ClusterMetadataMap)
-                    {
-                        OmniHash.Formatter.Serialize(ref w, n.Key, rank + 1);
-                        ClusterMetadata.Formatter.Serialize(ref w, n.Value, rank + 1);
-                    }
-                }
-            }
-
-            public BlockStorageConfig Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
-            {
-                if (rank > 256) throw new global::System.FormatException();
-
-                uint propertyCount = r.GetUInt32();
-
-                uint p_version = 0;
-                ulong p_size = 0;
-                global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata> p_clusterMetadataMap = new global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>();
-
-                for (; propertyCount > 0; propertyCount--)
-                {
-                    uint id = r.GetUInt32();
-                    switch (id)
-                    {
-                        case 0:
-                            {
-                                p_version = r.GetUInt32();
-                                break;
-                            }
-                        case 1:
-                            {
-                                p_size = r.GetUInt64();
-                                break;
-                            }
-                        case 2:
-                            {
-                                var length = r.GetUInt32();
-                                p_clusterMetadataMap = new global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>();
-                                OmniHash t_key = OmniHash.Empty;
-                                ClusterMetadata t_value = ClusterMetadata.Empty;
-                                for (int i = 0; i < length; i++)
-                                {
-                                    t_key = OmniHash.Formatter.Deserialize(ref r, rank + 1);
-                                    t_value = ClusterMetadata.Formatter.Deserialize(ref r, rank + 1);
-                                    p_clusterMetadataMap[t_key] = t_value;
-                                }
-                                break;
-                            }
-                    }
-                }
-
-                return new BlockStorageConfig(p_version, p_size, p_clusterMetadataMap);
             }
         }
     }

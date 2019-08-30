@@ -13,7 +13,7 @@ using Omnix.DataStructures;
 using Omnix.Net.Upnp;
 using Omnix.Network;
 using Omnix.Network.Proxies;
-using Xeus.Core.Internal.Primitives;
+using Xeus.Core.Internal.Common;
 using Xeus.Messages;
 
 namespace Xeus.Core.Internal.Connection.Primitives
