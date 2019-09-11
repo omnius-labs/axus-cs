@@ -1,0 +1,40 @@
+﻿syntax = v1.0;
+
+using "Omnix.Algorithms.Cryptography";
+using "Omnix.Network";
+using "Xeus.Core";
+
+namespace "Xeus.Core.Repositories.Internal";
+option csharp_access_level = "internal";
+
+table MerkleTreeNode {
+    Length: uint64 = 0,
+    Hashes: vector<OmniHash>(capacity: 1048576) = 1,
+}
+
+table SharedBlocksMetadata {
+    Path: string(capacity: 1024) = 0,
+    Length: uint64 = 1,
+    BlockLength: uint32 = 2,
+    Hashes: vector<OmniHash>(capacity: 1073741824) = 3,
+}
+
+table ContentMetadata {
+    Clue: XeusClue = 0,
+    LockedHashes: vector<OmniHash>(capacity: 1073741824) = 1,
+    SharedBlocksMetadata: SharedBlocksMetadata? = 2, 
+}
+
+table ContentStorageConfig {
+    Version: uint32 = 0,
+    ContentMetadatas: vector<ContentMetadata>(capacity: 1073741824) = 1,
+}
+
+table DownloadingContentMetadata {
+    Clue: XeusClue = 0,
+    Path: string(capacity: 1024) = 1,
+    MaxLength: uint64 = 2,
+    DownloadingDepth: uint32 = 3,
+    DownloadingMerkleTreeNode: MerkleTreeNode = 4,
+    //StateType: DownloadStateType = 5,
+}

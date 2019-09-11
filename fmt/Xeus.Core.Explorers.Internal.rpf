@@ -1,0 +1,111 @@
+syntax = v1.0;
+
+using "Omnix.Algorithms.Cryptography";
+using "Omnix.Network";
+using "Xeus.Core";
+
+namespace "Xeus.Core.Explorers.Internal";
+option csharp_access_level = "internal";
+
+table BroadcastClue {
+    Type: string(capacity: 256) = 0,
+    CreationTime: timestamp = 1,
+    Clue: XeusClue = 2,
+    Certificate: OmniCertificate? = 3,
+}
+
+table UnicastClue {
+    Type: string(capacity: 256) = 0,
+    Signature: OmniSignature = 1,
+    CreationTime: timestamp = 2,
+    Clue: XeusClue = 3,
+    Certificate: OmniCertificate? = 4,
+}
+
+table MulticastClue {
+    Type: string(capacity: 256) = 0,
+    Signature: OmniSignature = 1,
+    CreationTime: timestamp = 2,
+    Clue: XeusClue = 3,
+    Hashcash: OmniHashcash? = 4,
+    Certificate: OmniCertificate? = 5,
+}
+
+table ContentLocation {
+    Address: OmniAddress = 0,
+    Clues: vector<XeusClue>(capacity: 65536) = 1,
+}
+
+table RelayOption {
+    HopLimit: uint8 = 0,
+    Priority: uint8 = 1,
+}
+
+/* HandShake */
+
+enum ProtocolVersion : uint8 {
+    Version1 = 1,
+}
+
+table HelloMessage {
+    ProtocolVersions: vector<ProtocolVersion>(capacity: 32) = 0,
+}
+
+table ProfileMessage {
+    Id: bytes(capacity: 32) = 0,
+    Address: OmniAddress = 1,
+}
+
+/* Messages */
+
+table NodeAddressesMessage {
+    Values: vector<OmniAddress>(capacity: 256) = 0,
+}
+
+table WantBroadcastCluesMessage {
+    Parameters: map<OmniSignature, RelayOption>(capacity: 8192) = 0,
+}
+
+table PublishBroadcastCluesMessage {
+    Values: vector<BroadcastClue>(capacity: 8192) = 0,
+}
+
+table BroadcastCluesMessage {
+    Values: vector<BroadcastClue>(capacity: 8192) = 0,
+}
+
+table WantUnicastCluesMessage {
+    Parameters: map<OmniSignature, RelayOption>(capacity: 8192) = 0,
+}
+
+table PublishUnicastCluesMessage {
+    Values: vector<UnicastClue>(capacity: 8192) = 0,
+}
+
+table UnicastCluesMessage {
+    Values: vector<UnicastClue>(capacity: 8192) = 0,
+}
+
+table WantMulticastCluesMessage {
+    Parameters: map<OmniSignature, RelayOption>(capacity: 8192) = 0,
+}
+
+table PublishMulticastCluesMessage {
+    Values: vector<MulticastClue>(capacity: 8192) = 0,
+}
+
+table MulticastCluesMessage {
+    Values: vector<MulticastClue>(capacity: 8192) = 0,
+}
+
+table WantContentLocations {
+    Parameters: map<XeusClue, RelayOption>(capacity: 8192) = 0,
+}
+
+table PublishContentLocations {
+    Values: vector<ContentLocation>(capacity: 8192) = 0,
+}
+
+table ContentLocations {
+    Values: vector<ContentLocation>(capacity: 8192) = 0,
+}

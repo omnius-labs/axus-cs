@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\refs\omnix\src\Omnix.Base\Omnix.Base.csproj" />
+    <ProjectReference Include="..\..\refs\omnix\src\Omnix.Configuration\Omnix.Configuration.csproj" />
+    <ProjectReference Include="..\..\refs\omnix\src\Omnix.Network\Omnix.Network.csproj" />
+    <ProjectReference Include="..\Xeus.Core\Xeus.Core.csproj" />
+  </ItemGroup>
+
+</Project>
