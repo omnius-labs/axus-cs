@@ -13,7 +13,7 @@ using Omnix.Base;
 using Omnix.Base.Helpers;
 using Omnix.Configuration;
 using Omnix.Io;
-using Omnix.Serialization.RocketPack.Helpers;
+using Omnix.Serialization.OmniPack.Helpers;
 using Xeus.Core.Internal.Storage.Primitives;
 using Xeus.Core.Internal.Common;
 using Xeus.Messages;
@@ -414,7 +414,7 @@ namespace Xeus.Core.Internal.Storage
                             stream.Dispose();
 
                             stream = new RecyclableMemoryStream(_bufferPool);
-                            RocketPackHelper.MessageToStream(new MerkleTreeNode(merkleTreeSectionList.ToArray()), stream);
+                            OmniPackHelper.MessageToStream(new MerkleTreeNode(merkleTreeSectionList.ToArray()), stream);
                             stream.Seek(0, SeekOrigin.Begin);
                         }
                     }
@@ -592,7 +592,7 @@ namespace Xeus.Core.Internal.Storage
                         // Index
                         using (var stream = new RecyclableMemoryStream(_bufferPool))
                         {
-                            RocketPackHelper.MessageToStream(new MerkleTreeNode(merkleTreeSectionList.ToArray()), stream);
+                            OmniPackHelper.MessageToStream(new MerkleTreeNode(merkleTreeSectionList.ToArray()), stream);
                             stream.Seek(0, SeekOrigin.Begin);
 
                             merkleTreeSectionList.Clear();

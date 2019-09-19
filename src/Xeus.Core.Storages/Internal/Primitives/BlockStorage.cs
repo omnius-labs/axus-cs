@@ -11,7 +11,7 @@ using Omnix.Algorithms.Cryptography;
 using Omnix.Base;
 using Omnix.Base.Helpers;
 using Omnix.Configuration;
-using Omnix.Serialization.RocketPack;
+using Omnix.Serialization.OmniPack;
 using Xeus.Core.Internal.Helpers;
 using Xeus.Core.Internal.Common;
 using Xeus.Messages;

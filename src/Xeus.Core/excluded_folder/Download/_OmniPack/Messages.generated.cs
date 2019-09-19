@@ -3,7 +3,7 @@ using Omnix.Base.Helpers;
 using Omnix.Cryptography;
 using Omnix.Network;
 using Omnix.Serialization;
-using Omnix.Serialization.RocketPack;
+using Omnix.Serialization.OmniPack;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -15,7 +15,7 @@ using Xeus.Messages.Reports;
 
 namespace Xeus.Core.Download
 {
-    public sealed partial class DownloadItemInfo : RocketPackMessageBase<DownloadItemInfo>
+    public sealed partial class DownloadItemInfo : OmniPackMessageBase<DownloadItemInfo>
     {
         static DownloadItemInfo()
         {
@@ -73,9 +73,9 @@ namespace Xeus.Core.Download
         private readonly int _hashCode;
         public override int GetHashCode() => _hashCode;
 
-        private sealed class CustomFormatter : IRocketPackFormatter<DownloadItemInfo>
+        private sealed class CustomFormatter : IOmniPackFormatter<DownloadItemInfo>
         {
-            public void Serialize(RocketPackWriter w, DownloadItemInfo value, int rank)
+            public void Serialize(OmniPackWriter w, DownloadItemInfo value, int rank)
             {
                 if (rank > 256) throw new FormatException();
 
@@ -129,7 +129,7 @@ namespace Xeus.Core.Download
                 }
             }
 
-            public DownloadItemInfo Deserialize(RocketPackReader r, int rank)
+            public DownloadItemInfo Deserialize(OmniPackReader r, int rank)
             {
                 if (rank > 256) throw new FormatException();
 
