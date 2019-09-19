@@ -3,34 +3,34 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnix.Base;
 using Omnix.Network;
-using Xeus.Core.Internal.Connection.Primitives;
+using Xeus.Core.Connectors.Internal;
 
-namespace Xeus.Core.Internal.Connection
+namespace Xeus.Core.Connectors
 {
-    internal sealed class ConnectionCreator : ServiceBase, ISettings, IConnector
+    internal sealed class XeusConnector : ServiceBase, ISettings, IConnector
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly BufferPool _bufferPool;
-        private readonly TcpConnectionCreator _tcpConnectionCreator;
+        private readonly IMemoryPool<byte> _bufferPool;
+        private readonly TcpConnector _tcpConnector;
 
         private readonly object _lockObject = new object();
 
-        public ConnectionCreator(string basePath, BufferPool bufferPool)
+        public XeusConnector(string basePath, IMemoryPool<byte> bufferPool)
         {
             var settingsPath = Path.Combine(basePath, "Settings");
             var childrenPath = Path.Combine(basePath, "Children");
 
             _bufferPool = bufferPool;
-            _tcpConnectionCreator = new TcpConnectionCreator(Path.Combine(childrenPath, nameof(TcpConnectionCreator)), bufferPool);
+            _tcpConnector = new TcpConnector(Path.Combine(childrenPath, nameof(TcpConnector)), bufferPool);
         }
 
         public void SetOptions(ConnectorOptions options)
         {
             lock (_lockObject)
             {
-                _tcpConnectionCreator.SetTcpConnectOptions(options.TcpConnectOptions);
-                _tcpConnectionCreator.SetTcpAcceptOptions(options.TcpAcceptOptions);
+                _tcpConnector.SetTcpConnectOptions(options.TcpConnectOptions);
+                _tcpConnector.SetTcpAcceptOptions(options.TcpAcceptOptions);
             }
         }
 
@@ -38,44 +38,44 @@ namespace Xeus.Core.Internal.Connection
         {
             if (this.IsDisposed)
             {
-                return new ConnectorResult(ConnectorResultType.Failed, null, null);
+                return new ConnectorResult(ConnectorResultType.Failed);
             }
 
             if (this.StateType != ServiceStateType.Running)
             {
-                return new ConnectorResult(ConnectorResultType.Failed, null, null);
+                return new ConnectorResult(ConnectorResultType.Failed);
             }
 
-            Cap? result;
+            var result = await _tcpConnector.ConnectAsync(address, token);
 
-            if ((result = await _tcpConnectionCreator.ConnectAsync(address, token)) != null)
+            if (result.Type == ConnectorResultType.Succeeded)
             {
-                return new ConnectorResult(ConnectorResultType.Succeeded, result, address);
+                return result;
             }
 
-            return new ConnectorResult(ConnectorResultType.Failed, null, null);
+            return new ConnectorResult(ConnectorResultType.Failed);
         }
 
         public async ValueTask<ConnectorResult> AcceptAsync(CancellationToken token = default)
         {
             if (this.IsDisposed)
             {
-                return new ConnectorResult(ConnectorResultType.Failed, null, null);
+                return new ConnectorResult(ConnectorResultType.Failed);
             }
 
             if (this.StateType != ServiceStateType.Running)
             {
-                return new ConnectorResult(ConnectorResultType.Failed, null, null);
+                return new ConnectorResult(ConnectorResultType.Failed);
             }
 
-            ConnectionCreatorAcceptResult? result;
+            var result = await _tcpConnector.AcceptAsync(token);
 
-            if ((result = await _tcpConnectionCreator.AcceptAsync(token)) != null)
+            if (result.Type == ConnectorResultType.Succeeded)
             {
                 return result;
             }
 
-            return null;
+            return new ConnectorResult(ConnectorResultType.Failed);
         }
 
         protected override async ValueTask OnInitializeAsync()
@@ -86,7 +86,7 @@ namespace Xeus.Core.Internal.Connection
         {
             this.StateType = ServiceStateType.Starting;
 
-            await _tcpConnectionCreator.StartAsync();
+            await _tcpConnector.StartAsync();
 
             this.StateType = ServiceStateType.Running;
         }
@@ -95,26 +95,26 @@ namespace Xeus.Core.Internal.Connection
         {
             this.StateType = ServiceStateType.Stopping;
 
-            await _tcpConnectionCreator.StopAsync();
+            await _tcpConnector.StopAsync();
 
             this.StateType = ServiceStateType.Stopped;
         }
 
         public async ValueTask LoadAsync()
         {
-            await _tcpConnectionCreator.LoadAsync();
+            await _tcpConnector.LoadAsync();
         }
 
         public async ValueTask SaveAsync()
         {
-            await _tcpConnectionCreator.SaveAsync();
+            await _tcpConnector.SaveAsync();
         }
 
         protected override void OnDispose(bool disposing)
         {
             if (disposing)
             {
-                _tcpConnectionCreator.Dispose();
+                _tcpConnector.Dispose();
             }
         }
     }

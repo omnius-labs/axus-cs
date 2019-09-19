@@ -6,9 +6,9 @@ using Xeus.Core;
 
 namespace Xeus.Core.Connectors.Internal
 {
-    internal sealed partial class TcpConnectorConfig : global::Omnix.Serialization.RocketPack.IRocketPackMessage<TcpConnectorConfig>
+    internal sealed partial class TcpConnectorConfig : global::Omnix.Serialization.OmniPack.IOmniPackMessage<TcpConnectorConfig>
     {
-        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<TcpConnectorConfig> Formatter { get; }
+        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<TcpConnectorConfig> Formatter { get; }
         public static TcpConnectorConfig Empty { get; }
 
         static TcpConnectorConfig()
@@ -41,12 +41,12 @@ namespace Xeus.Core.Connectors.Internal
 
         public static TcpConnectorConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
         {
-            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
         {
-            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -77,9 +77,9 @@ namespace Xeus.Core.Connectors.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<TcpConnectorConfig>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<TcpConnectorConfig>
         {
-            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in TcpConnectorConfig value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in TcpConnectorConfig value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -117,7 +117,7 @@ namespace Xeus.Core.Connectors.Internal
                 }
             }
 
-            public TcpConnectorConfig Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public TcpConnectorConfig Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 

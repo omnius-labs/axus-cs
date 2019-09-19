@@ -13,16 +13,14 @@ using Omnix.DataStructures;
 using Omnix.Net.Upnp;
 using Omnix.Network;
 using Omnix.Network.Proxies;
-using Xeus.Core.Internal.Common;
-using Xeus.Messages;
 
-namespace Xeus.Core.Internal.Connection.Primitives
+namespace Xeus.Core.Connectors.Internal
 {
-    internal sealed class TcpConnectionCreator : ServiceBase, ISettings
+    internal sealed class TcpConnector : ServiceBase, ISettings
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly BufferPool _bufferPool;
+        private readonly IMemoryPool<byte> _bufferPool;
 
         private readonly SettingsDatabase _settings;
 
@@ -39,7 +37,7 @@ namespace Xeus.Core.Internal.Connection.Primitives
         private readonly object _lockObject = new object();
         private readonly AsyncLock _settingsAsyncLock = new AsyncLock();
 
-        public TcpConnectionCreator(string basePath, BufferPool bufferPool)
+        public TcpConnector(string basePath, IMemoryPool<byte> bufferPool)
         {
             var settingsPath = Path.Combine(basePath, "Settings");
             var childrenPath = Path.Combine(basePath, "Children");
@@ -256,23 +254,23 @@ namespace Xeus.Core.Internal.Connection.Primitives
         {
             if (this.IsDisposed)
             {
-                return new ConnectorResult(ConnectorResultType.Failed, null, null);
+                return new ConnectorResult(ConnectorResultType.Failed);
             }
 
             if (this.StateType != ServiceStateType.Running)
             {
-                return new ConnectorResult(ConnectorResultType.Failed, null, null);
+                return new ConnectorResult(ConnectorResultType.Failed);
             }
 
             var config = _tcpConnectOptions;
             if (config == null || !config.Enabled)
             {
-                return new ConnectorResult(ConnectorResultType.Failed, null, null);
+                return new ConnectorResult(ConnectorResultType.Failed);
             }
 
             if (!TryGetEndpoint(address, out var ipAddress, out ushort port))
             {
-                return new ConnectorResult(ConnectorResultType.Failed, null, null);
+                return new ConnectorResult(ConnectorResultType.Failed);
             }
 
             var disposableList = new List<IDisposable>();
@@ -287,7 +285,7 @@ namespace Xeus.Core.Internal.Connection.Primitives
                 {
                     if (!TryGetEndpoint(config.ProxyOptions.Address, out var proxyAddress, out ushort proxyPort, true))
                     {
-                        return new ConnectorResult(ConnectorResultType.Failed, null, null);
+                        return new ConnectorResult(ConnectorResultType.Failed);
                     }
 
                     if (config.ProxyOptions.Type == TcpProxyType.Socks5Proxy)
@@ -295,7 +293,7 @@ namespace Xeus.Core.Internal.Connection.Primitives
                         var socket = await ConnectSocketAsync(new IPEndPoint(proxyAddress, proxyPort));
                         if (socket == null)
                         {
-                            return new ConnectorResult(ConnectorResultType.Failed, null, null);
+                            return new ConnectorResult(ConnectorResultType.Failed);
                         }
 
                         disposableList.Add(socket);
@@ -313,7 +311,7 @@ namespace Xeus.Core.Internal.Connection.Primitives
                         var socket = await ConnectSocketAsync(new IPEndPoint(proxyAddress, proxyPort));
                         if (socket == null)
                         {
-                            return new ConnectorResult(ConnectorResultType.Failed, null, null);
+                            return new ConnectorResult(ConnectorResultType.Failed);
                         }
 
                         disposableList.Add(socket);
@@ -332,7 +330,7 @@ namespace Xeus.Core.Internal.Connection.Primitives
                     var socket = await ConnectSocketAsync(new IPEndPoint(ipAddress, port));
                     if (socket == null)
                     {
-                        return new ConnectorResult(ConnectorResultType.Failed, null, null);
+                        return new ConnectorResult(ConnectorResultType.Failed);
                     }
 
                     disposableList.Add(socket);
@@ -353,19 +351,19 @@ namespace Xeus.Core.Internal.Connection.Primitives
                 }
             }
 
-            return new ConnectorResult(ConnectorResultType.Failed, null, null);
+            return new ConnectorResult(ConnectorResultType.Failed);
         }
 
-        public async ValueTask<ConnectionCreatorAcceptResult?> AcceptAsync(CancellationToken token = default)
+        public async ValueTask<ConnectorResult> AcceptAsync(CancellationToken token = default)
         {
             if (this.IsDisposed)
             {
-                return default;
+                return new ConnectorResult(ConnectorResultType.Failed);
             }
 
             if (this.StateType != ServiceStateType.Running)
             {
-                return default;
+                return new ConnectorResult(ConnectorResultType.Failed);
             }
 
             var garbages = new List<IDisposable>();
@@ -375,7 +373,7 @@ namespace Xeus.Core.Internal.Connection.Primitives
                 var config = _tcpAcceptOptions;
                 if (config == null || !config.Enabled)
                 {
-                    return default;
+                    return new ConnectorResult(ConnectorResultType.Failed);
                 }
 
                 foreach (var tcpListener in _tcpListenerMap.ToArray().Randomize().Select(n => n.Value))
@@ -400,7 +398,7 @@ namespace Xeus.Core.Internal.Connection.Primitives
                         throw new NotSupportedException();
                     }
 
-                    return new ConnectionCreatorAcceptResult(new SocketCap(socket, false), address);
+                    return new ConnectorResult(ConnectorResultType.Succeeded, new SocketCap(socket, false), address);
                 }
             }
             catch (Exception e)
@@ -413,7 +411,7 @@ namespace Xeus.Core.Internal.Connection.Primitives
                 }
             }
 
-            return null;
+            return new ConnectorResult(ConnectorResultType.Failed);
         }
 
         private async ValueTask WatchThread(CancellationToken token)
@@ -619,7 +617,7 @@ namespace Xeus.Core.Internal.Connection.Primitives
                 {
                     try
                     {
-                        if (_settings.TryGetContent<TcpConnectionCreatorConfig>("Config", out var config))
+                        if (_settings.TryGetContent<TcpConnectorConfig>("Config", out var config))
                         {
                             this.SetTcpConnectOptions(config.TcpConnectOptions);
                             this.SetTcpAcceptOptions(config.TcpAcceptOptions);
@@ -642,7 +640,7 @@ namespace Xeus.Core.Internal.Connection.Primitives
                 {
                     try
                     {
-                        var config = new TcpConnectionCreatorConfig(0, _tcpConnectOptions, _tcpAcceptOptions);
+                        var config = new TcpConnectorConfig(0, _tcpConnectOptions, _tcpAcceptOptions);
                         _settings.SetContent("Config", config);
                     }
                     catch (Exception e)
