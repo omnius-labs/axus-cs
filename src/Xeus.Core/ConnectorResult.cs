@@ -10,7 +10,7 @@ namespace Xeus.Core
 
     public readonly struct ConnectorResult
     {
-        public ConnectorResult(ConnectorResultType type, Cap? cap, OmniAddress? address)
+        public ConnectorResult(ConnectorResultType type, Cap? cap = null, OmniAddress? address = null)
         {
             this.Type = type;
             this.Cap = cap;
