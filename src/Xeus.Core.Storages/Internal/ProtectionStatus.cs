@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Omnix.Algorithms.Cryptography;
 
-namespace Xeus.Core.Internal.Storage.Primitives
+namespace Xeus.Core.Storage.Internal
 {
     internal sealed class ProtectionStatus
     {

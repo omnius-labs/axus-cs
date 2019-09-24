@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Omnix.Base;
-using Xeus.Core.Internal.Helpers;
+using Omnix.Base.Helpers;
 
-namespace Xeus.Core.Internal.Storage.Primitives
+namespace Xeus.Core.Storage.Internal
 {
     internal sealed class UsingSectorPool : DisposableBase
     {
         private readonly BitStorage _bitmapStorage;
-        private readonly BufferPool _bufferPool;
+        private readonly IBufferPool<byte> _bufferPool;
 
         private readonly HashSet<ulong> _freeSectors = new HashSet<ulong>();
         private ulong _size;
@@ -19,7 +19,7 @@ namespace Xeus.Core.Internal.Storage.Primitives
 
         public static readonly uint SectorSize = 1024 * 256;
 
-        public UsingSectorPool(BufferPool bufferPool)
+        public UsingSectorPool(IBufferPool<byte> bufferPool)
         {
             _bitmapStorage = new BitStorage(bufferPool);
             _bufferPool = bufferPool;
@@ -36,7 +36,7 @@ namespace Xeus.Core.Internal.Storage.Primitives
             _freeSectors.Clear();
             _size = size;
 
-            _totalSectorCount = MathHelper.Roundup(_size, SectorSize) / SectorSize;
+            _totalSectorCount = MathHelper.RoundUp(_size, SectorSize) / SectorSize;
             _usingSectorCount = 0;
 
             _bitmapStorage.SetLength(_totalSectorCount);

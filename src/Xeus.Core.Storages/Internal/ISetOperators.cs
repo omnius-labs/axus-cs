@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Xeus.Core.Internal.Storage.Primitives
+namespace Xeus.Core.Storage.Internal
 {
     internal interface ISetOperators<T>
     {

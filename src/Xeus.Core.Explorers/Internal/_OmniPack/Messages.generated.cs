@@ -19,14 +19,14 @@ namespace Xeus.Core.Explorers.Internal
         static BroadcastClue()
         {
             BroadcastClue.Formatter = new ___CustomFormatter();
-            BroadcastClue.Empty = new BroadcastClue(string.Empty, global::Omnix.Serialization.OmniPack.Timestamp.Zero, XeusClue.Empty, null);
+            BroadcastClue.Empty = new BroadcastClue(string.Empty, global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero, Clue.Empty, null);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxTypeLength = 256;
 
-        public BroadcastClue(string type, global::Omnix.Serialization.OmniPack.Timestamp creationTime, XeusClue clue, OmniCertificate? certificate)
+        public BroadcastClue(string type, global::Omnix.Serialization.OmniPack.OmniTimestamp creationTime, Clue clue, OmniCertificate? certificate)
         {
             if (type is null) throw new global::System.ArgumentNullException("type");
             if (type.Length > 256) throw new global::System.ArgumentOutOfRangeException("type");
@@ -48,16 +48,16 @@ namespace Xeus.Core.Explorers.Internal
         }
 
         public string Type { get; }
-        public global::Omnix.Serialization.OmniPack.Timestamp CreationTime { get; }
-        public XeusClue Clue { get; }
+        public global::Omnix.Serialization.OmniPack.OmniTimestamp CreationTime { get; }
+        public Clue Clue { get; }
         public OmniCertificate? Certificate { get; }
 
-        public static BroadcastClue Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static BroadcastClue Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -102,11 +102,11 @@ namespace Xeus.Core.Explorers.Internal
                     {
                         propertyCount++;
                     }
-                    if (value.CreationTime != global::Omnix.Serialization.OmniPack.Timestamp.Zero)
+                    if (value.CreationTime != global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero)
                     {
                         propertyCount++;
                     }
-                    if (value.Clue != XeusClue.Empty)
+                    if (value.Clue != Clue.Empty)
                     {
                         propertyCount++;
                     }
@@ -122,15 +122,15 @@ namespace Xeus.Core.Explorers.Internal
                     w.Write((uint)0);
                     w.Write(value.Type);
                 }
-                if (value.CreationTime != global::Omnix.Serialization.OmniPack.Timestamp.Zero)
+                if (value.CreationTime != global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero)
                 {
                     w.Write((uint)1);
                     w.Write(value.CreationTime);
                 }
-                if (value.Clue != XeusClue.Empty)
+                if (value.Clue != Clue.Empty)
                 {
                     w.Write((uint)2);
-                    XeusClue.Formatter.Serialize(ref w, value.Clue, rank + 1);
+                    Clue.Formatter.Serialize(ref w, value.Clue, rank + 1);
                 }
                 if (value.Certificate != null)
                 {
@@ -146,8 +146,8 @@ namespace Xeus.Core.Explorers.Internal
                 uint propertyCount = r.GetUInt32();
 
                 string p_type = string.Empty;
-                global::Omnix.Serialization.OmniPack.Timestamp p_creationTime = global::Omnix.Serialization.OmniPack.Timestamp.Zero;
-                XeusClue p_clue = XeusClue.Empty;
+                global::Omnix.Serialization.OmniPack.OmniTimestamp p_creationTime = global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero;
+                Clue p_clue = Clue.Empty;
                 OmniCertificate? p_certificate = null;
 
                 for (; propertyCount > 0; propertyCount--)
@@ -167,7 +167,7 @@ namespace Xeus.Core.Explorers.Internal
                             }
                         case 2:
                             {
-                                p_clue = XeusClue.Formatter.Deserialize(ref r, rank + 1);
+                                p_clue = Clue.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 3:
@@ -191,14 +191,14 @@ namespace Xeus.Core.Explorers.Internal
         static UnicastClue()
         {
             UnicastClue.Formatter = new ___CustomFormatter();
-            UnicastClue.Empty = new UnicastClue(string.Empty, OmniSignature.Empty, global::Omnix.Serialization.OmniPack.Timestamp.Zero, XeusClue.Empty, null);
+            UnicastClue.Empty = new UnicastClue(string.Empty, OmniSignature.Empty, global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero, Clue.Empty, null);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxTypeLength = 256;
 
-        public UnicastClue(string type, OmniSignature signature, global::Omnix.Serialization.OmniPack.Timestamp creationTime, XeusClue clue, OmniCertificate? certificate)
+        public UnicastClue(string type, OmniSignature signature, global::Omnix.Serialization.OmniPack.OmniTimestamp creationTime, Clue clue, OmniCertificate? certificate)
         {
             if (type is null) throw new global::System.ArgumentNullException("type");
             if (type.Length > 256) throw new global::System.ArgumentOutOfRangeException("type");
@@ -224,16 +224,16 @@ namespace Xeus.Core.Explorers.Internal
 
         public string Type { get; }
         public OmniSignature Signature { get; }
-        public global::Omnix.Serialization.OmniPack.Timestamp CreationTime { get; }
-        public XeusClue Clue { get; }
+        public global::Omnix.Serialization.OmniPack.OmniTimestamp CreationTime { get; }
+        public Clue Clue { get; }
         public OmniCertificate? Certificate { get; }
 
-        public static UnicastClue Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static UnicastClue Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -283,11 +283,11 @@ namespace Xeus.Core.Explorers.Internal
                     {
                         propertyCount++;
                     }
-                    if (value.CreationTime != global::Omnix.Serialization.OmniPack.Timestamp.Zero)
+                    if (value.CreationTime != global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero)
                     {
                         propertyCount++;
                     }
-                    if (value.Clue != XeusClue.Empty)
+                    if (value.Clue != Clue.Empty)
                     {
                         propertyCount++;
                     }
@@ -308,15 +308,15 @@ namespace Xeus.Core.Explorers.Internal
                     w.Write((uint)1);
                     OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
                 }
-                if (value.CreationTime != global::Omnix.Serialization.OmniPack.Timestamp.Zero)
+                if (value.CreationTime != global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero)
                 {
                     w.Write((uint)2);
                     w.Write(value.CreationTime);
                 }
-                if (value.Clue != XeusClue.Empty)
+                if (value.Clue != Clue.Empty)
                 {
                     w.Write((uint)3);
-                    XeusClue.Formatter.Serialize(ref w, value.Clue, rank + 1);
+                    Clue.Formatter.Serialize(ref w, value.Clue, rank + 1);
                 }
                 if (value.Certificate != null)
                 {
@@ -333,8 +333,8 @@ namespace Xeus.Core.Explorers.Internal
 
                 string p_type = string.Empty;
                 OmniSignature p_signature = OmniSignature.Empty;
-                global::Omnix.Serialization.OmniPack.Timestamp p_creationTime = global::Omnix.Serialization.OmniPack.Timestamp.Zero;
-                XeusClue p_clue = XeusClue.Empty;
+                global::Omnix.Serialization.OmniPack.OmniTimestamp p_creationTime = global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero;
+                Clue p_clue = Clue.Empty;
                 OmniCertificate? p_certificate = null;
 
                 for (; propertyCount > 0; propertyCount--)
@@ -359,7 +359,7 @@ namespace Xeus.Core.Explorers.Internal
                             }
                         case 3:
                             {
-                                p_clue = XeusClue.Formatter.Deserialize(ref r, rank + 1);
+                                p_clue = Clue.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 4:
@@ -383,14 +383,14 @@ namespace Xeus.Core.Explorers.Internal
         static MulticastClue()
         {
             MulticastClue.Formatter = new ___CustomFormatter();
-            MulticastClue.Empty = new MulticastClue(string.Empty, OmniSignature.Empty, global::Omnix.Serialization.OmniPack.Timestamp.Zero, XeusClue.Empty, null, null);
+            MulticastClue.Empty = new MulticastClue(string.Empty, OmniSignature.Empty, global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero, Clue.Empty, null, null);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxTypeLength = 256;
 
-        public MulticastClue(string type, OmniSignature signature, global::Omnix.Serialization.OmniPack.Timestamp creationTime, XeusClue clue, OmniHashcash? hashcash, OmniCertificate? certificate)
+        public MulticastClue(string type, OmniSignature signature, global::Omnix.Serialization.OmniPack.OmniTimestamp creationTime, Clue clue, OmniHashcash? hashcash, OmniCertificate? certificate)
         {
             if (type is null) throw new global::System.ArgumentNullException("type");
             if (type.Length > 256) throw new global::System.ArgumentOutOfRangeException("type");
@@ -418,17 +418,17 @@ namespace Xeus.Core.Explorers.Internal
 
         public string Type { get; }
         public OmniSignature Signature { get; }
-        public global::Omnix.Serialization.OmniPack.Timestamp CreationTime { get; }
-        public XeusClue Clue { get; }
+        public global::Omnix.Serialization.OmniPack.OmniTimestamp CreationTime { get; }
+        public Clue Clue { get; }
         public OmniHashcash? Hashcash { get; }
         public OmniCertificate? Certificate { get; }
 
-        public static MulticastClue Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static MulticastClue Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -480,11 +480,11 @@ namespace Xeus.Core.Explorers.Internal
                     {
                         propertyCount++;
                     }
-                    if (value.CreationTime != global::Omnix.Serialization.OmniPack.Timestamp.Zero)
+                    if (value.CreationTime != global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero)
                     {
                         propertyCount++;
                     }
-                    if (value.Clue != XeusClue.Empty)
+                    if (value.Clue != Clue.Empty)
                     {
                         propertyCount++;
                     }
@@ -509,15 +509,15 @@ namespace Xeus.Core.Explorers.Internal
                     w.Write((uint)1);
                     OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
                 }
-                if (value.CreationTime != global::Omnix.Serialization.OmniPack.Timestamp.Zero)
+                if (value.CreationTime != global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero)
                 {
                     w.Write((uint)2);
                     w.Write(value.CreationTime);
                 }
-                if (value.Clue != XeusClue.Empty)
+                if (value.Clue != Clue.Empty)
                 {
                     w.Write((uint)3);
-                    XeusClue.Formatter.Serialize(ref w, value.Clue, rank + 1);
+                    Clue.Formatter.Serialize(ref w, value.Clue, rank + 1);
                 }
                 if (value.Hashcash != null)
                 {
@@ -539,8 +539,8 @@ namespace Xeus.Core.Explorers.Internal
 
                 string p_type = string.Empty;
                 OmniSignature p_signature = OmniSignature.Empty;
-                global::Omnix.Serialization.OmniPack.Timestamp p_creationTime = global::Omnix.Serialization.OmniPack.Timestamp.Zero;
-                XeusClue p_clue = XeusClue.Empty;
+                global::Omnix.Serialization.OmniPack.OmniTimestamp p_creationTime = global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero;
+                Clue p_clue = Clue.Empty;
                 OmniHashcash? p_hashcash = null;
                 OmniCertificate? p_certificate = null;
 
@@ -566,7 +566,7 @@ namespace Xeus.Core.Explorers.Internal
                             }
                         case 3:
                             {
-                                p_clue = XeusClue.Formatter.Deserialize(ref r, rank + 1);
+                                p_clue = Clue.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 4:
@@ -595,14 +595,14 @@ namespace Xeus.Core.Explorers.Internal
         static ContentLocation()
         {
             ContentLocation.Formatter = new ___CustomFormatter();
-            ContentLocation.Empty = new ContentLocation(OmniAddress.Empty, global::System.Array.Empty<XeusClue>());
+            ContentLocation.Empty = new ContentLocation(OmniAddress.Empty, global::System.Array.Empty<Clue>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxCluesCount = 65536;
 
-        public ContentLocation(OmniAddress address, XeusClue[] clues)
+        public ContentLocation(OmniAddress address, Clue[] clues)
         {
             if (address is null) throw new global::System.ArgumentNullException("address");
             if (clues is null) throw new global::System.ArgumentNullException("clues");
@@ -613,7 +613,7 @@ namespace Xeus.Core.Explorers.Internal
             }
 
             this.Address = address;
-            this.Clues = new global::Omnix.DataStructures.ReadOnlyListSlim<XeusClue>(clues);
+            this.Clues = new global::Omnix.DataStructures.ReadOnlyListSlim<Clue>(clues);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -628,14 +628,14 @@ namespace Xeus.Core.Explorers.Internal
         }
 
         public OmniAddress Address { get; }
-        public global::Omnix.DataStructures.ReadOnlyListSlim<XeusClue> Clues { get; }
+        public global::Omnix.DataStructures.ReadOnlyListSlim<Clue> Clues { get; }
 
-        public static ContentLocation Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static ContentLocation Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -695,7 +695,7 @@ namespace Xeus.Core.Explorers.Internal
                     w.Write((uint)value.Clues.Count);
                     foreach (var n in value.Clues)
                     {
-                        XeusClue.Formatter.Serialize(ref w, n, rank + 1);
+                        Clue.Formatter.Serialize(ref w, n, rank + 1);
                     }
                 }
             }
@@ -707,7 +707,7 @@ namespace Xeus.Core.Explorers.Internal
                 uint propertyCount = r.GetUInt32();
 
                 OmniAddress p_address = OmniAddress.Empty;
-                XeusClue[] p_clues = global::System.Array.Empty<XeusClue>();
+                Clue[] p_clues = global::System.Array.Empty<Clue>();
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -722,10 +722,10 @@ namespace Xeus.Core.Explorers.Internal
                         case 1:
                             {
                                 var length = r.GetUInt32();
-                                p_clues = new XeusClue[length];
+                                p_clues = new Clue[length];
                                 for (int i = 0; i < p_clues.Length; i++)
                                 {
-                                    p_clues[i] = XeusClue.Formatter.Deserialize(ref r, rank + 1);
+                                    p_clues[i] = Clue.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
@@ -767,12 +767,12 @@ namespace Xeus.Core.Explorers.Internal
         public byte HopLimit { get; }
         public byte Priority { get; }
 
-        public static RelayOption Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static RelayOption Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -900,12 +900,12 @@ namespace Xeus.Core.Explorers.Internal
 
         public global::Omnix.DataStructures.ReadOnlyListSlim<ProtocolVersion> ProtocolVersions { get; }
 
-        public static HelloMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static HelloMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -1026,12 +1026,12 @@ namespace Xeus.Core.Explorers.Internal
         public global::System.ReadOnlyMemory<byte> Id { get; }
         public OmniAddress Address { get; }
 
-        public static ProfileMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static ProfileMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -1163,12 +1163,12 @@ namespace Xeus.Core.Explorers.Internal
 
         public global::Omnix.DataStructures.ReadOnlyListSlim<OmniAddress> Values { get; }
 
-        public static NodeAddressesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static NodeAddressesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -1295,12 +1295,12 @@ namespace Xeus.Core.Explorers.Internal
 
         public global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniSignature, RelayOption> Parameters { get; }
 
-        public static WantBroadcastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static WantBroadcastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -1430,12 +1430,12 @@ namespace Xeus.Core.Explorers.Internal
 
         public global::Omnix.DataStructures.ReadOnlyListSlim<BroadcastClue> Values { get; }
 
-        public static PublishBroadcastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static PublishBroadcastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -1560,12 +1560,12 @@ namespace Xeus.Core.Explorers.Internal
 
         public global::Omnix.DataStructures.ReadOnlyListSlim<BroadcastClue> Values { get; }
 
-        public static BroadcastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static BroadcastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -1692,12 +1692,12 @@ namespace Xeus.Core.Explorers.Internal
 
         public global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniSignature, RelayOption> Parameters { get; }
 
-        public static WantUnicastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static WantUnicastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -1827,12 +1827,12 @@ namespace Xeus.Core.Explorers.Internal
 
         public global::Omnix.DataStructures.ReadOnlyListSlim<UnicastClue> Values { get; }
 
-        public static PublishUnicastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static PublishUnicastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -1957,12 +1957,12 @@ namespace Xeus.Core.Explorers.Internal
 
         public global::Omnix.DataStructures.ReadOnlyListSlim<UnicastClue> Values { get; }
 
-        public static UnicastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static UnicastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -2089,12 +2089,12 @@ namespace Xeus.Core.Explorers.Internal
 
         public global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniSignature, RelayOption> Parameters { get; }
 
-        public static WantMulticastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static WantMulticastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -2224,12 +2224,12 @@ namespace Xeus.Core.Explorers.Internal
 
         public global::Omnix.DataStructures.ReadOnlyListSlim<MulticastClue> Values { get; }
 
-        public static PublishMulticastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static PublishMulticastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -2354,12 +2354,12 @@ namespace Xeus.Core.Explorers.Internal
 
         public global::Omnix.DataStructures.ReadOnlyListSlim<MulticastClue> Values { get; }
 
-        public static MulticastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static MulticastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -2453,14 +2453,14 @@ namespace Xeus.Core.Explorers.Internal
         static WantContentLocations()
         {
             WantContentLocations.Formatter = new ___CustomFormatter();
-            WantContentLocations.Empty = new WantContentLocations(new global::System.Collections.Generic.Dictionary<XeusClue, RelayOption>());
+            WantContentLocations.Empty = new WantContentLocations(new global::System.Collections.Generic.Dictionary<Clue, RelayOption>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxParametersCount = 8192;
 
-        public WantContentLocations(global::System.Collections.Generic.Dictionary<XeusClue, RelayOption> parameters)
+        public WantContentLocations(global::System.Collections.Generic.Dictionary<Clue, RelayOption> parameters)
         {
             if (parameters is null) throw new global::System.ArgumentNullException("parameters");
             if (parameters.Count > 8192) throw new global::System.ArgumentOutOfRangeException("parameters");
@@ -2470,7 +2470,7 @@ namespace Xeus.Core.Explorers.Internal
                 if (n.Value is null) throw new global::System.ArgumentNullException("n.Value");
             }
 
-            this.Parameters = new global::Omnix.DataStructures.ReadOnlyDictionarySlim<XeusClue, RelayOption>(parameters);
+            this.Parameters = new global::Omnix.DataStructures.ReadOnlyDictionarySlim<Clue, RelayOption>(parameters);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -2484,14 +2484,14 @@ namespace Xeus.Core.Explorers.Internal
             });
         }
 
-        public global::Omnix.DataStructures.ReadOnlyDictionarySlim<XeusClue, RelayOption> Parameters { get; }
+        public global::Omnix.DataStructures.ReadOnlyDictionarySlim<Clue, RelayOption> Parameters { get; }
 
-        public static WantContentLocations Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static WantContentLocations Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -2541,7 +2541,7 @@ namespace Xeus.Core.Explorers.Internal
                     w.Write((uint)value.Parameters.Count);
                     foreach (var n in value.Parameters)
                     {
-                        XeusClue.Formatter.Serialize(ref w, n.Key, rank + 1);
+                        Clue.Formatter.Serialize(ref w, n.Key, rank + 1);
                         RelayOption.Formatter.Serialize(ref w, n.Value, rank + 1);
                     }
                 }
@@ -2553,7 +2553,7 @@ namespace Xeus.Core.Explorers.Internal
 
                 uint propertyCount = r.GetUInt32();
 
-                global::System.Collections.Generic.Dictionary<XeusClue, RelayOption> p_parameters = new global::System.Collections.Generic.Dictionary<XeusClue, RelayOption>();
+                global::System.Collections.Generic.Dictionary<Clue, RelayOption> p_parameters = new global::System.Collections.Generic.Dictionary<Clue, RelayOption>();
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -2563,12 +2563,12 @@ namespace Xeus.Core.Explorers.Internal
                         case 0:
                             {
                                 var length = r.GetUInt32();
-                                p_parameters = new global::System.Collections.Generic.Dictionary<XeusClue, RelayOption>();
-                                XeusClue t_key = XeusClue.Empty;
+                                p_parameters = new global::System.Collections.Generic.Dictionary<Clue, RelayOption>();
+                                Clue t_key = Clue.Empty;
                                 RelayOption t_value = RelayOption.Empty;
                                 for (int i = 0; i < length; i++)
                                 {
-                                    t_key = XeusClue.Formatter.Deserialize(ref r, rank + 1);
+                                    t_key = Clue.Formatter.Deserialize(ref r, rank + 1);
                                     t_value = RelayOption.Formatter.Deserialize(ref r, rank + 1);
                                     p_parameters[t_key] = t_value;
                                 }
@@ -2621,12 +2621,12 @@ namespace Xeus.Core.Explorers.Internal
 
         public global::Omnix.DataStructures.ReadOnlyListSlim<ContentLocation> Values { get; }
 
-        public static PublishContentLocations Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static PublishContentLocations Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -2751,12 +2751,12 @@ namespace Xeus.Core.Explorers.Internal
 
         public global::Omnix.DataStructures.ReadOnlyListSlim<ContentLocation> Values { get; }
 
-        public static ContentLocations Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static ContentLocations Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);

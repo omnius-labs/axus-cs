@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using Omnix.Algorithms.Cryptography;
 
-namespace Xeus.Core.Storage.Internal
+namespace Xeus.Core.Repositories.Internal
 {
-    internal partial class SharedBlocksMetadata
+    internal partial class SharedFileMetadata
     {
         #region OmniHash to Index
 

@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <RootNamespace>Xeus.Core.Connectors</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Xeus.Core.Connectors\Xeus.Core.Connectors.csproj" />
+    <ProjectReference Include="..\..\src\Xeus.Core\Xeus.Core.csproj" />
+  </ItemGroup>
+
+</Project>

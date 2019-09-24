@@ -8,7 +8,7 @@
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Algorithms\Omnix.Algorithms.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Base\Omnix.Base.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Network\Omnix.Network.csproj" />
-    <ProjectReference Include="..\..\refs\omnix\src\Omnix.Serialization.OmniPack\Omnix.Serialization.OmniPack.csproj" />
+    <ProjectReference Include="..\..\refs\omnix\src\Omnix.Serialization\Omnix.Serialization.csproj" />
     <ProjectReference Include="..\Xeus.Core\Xeus.Core.csproj" />
   </ItemGroup>
 
