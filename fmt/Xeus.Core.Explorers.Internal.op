@@ -10,7 +10,7 @@ option csharp_access_level = "internal";
 table BroadcastClue {
     Type: string(capacity: 256) = 0,
     CreationTime: timestamp = 1,
-    Clue: XeusClue = 2,
+    Clue: Clue = 2,
     Certificate: OmniCertificate? = 3,
 }
 
@@ -18,7 +18,7 @@ table UnicastClue {
     Type: string(capacity: 256) = 0,
     Signature: OmniSignature = 1,
     CreationTime: timestamp = 2,
-    Clue: XeusClue = 3,
+    Clue: Clue = 3,
     Certificate: OmniCertificate? = 4,
 }
 
@@ -26,14 +26,14 @@ table MulticastClue {
     Type: string(capacity: 256) = 0,
     Signature: OmniSignature = 1,
     CreationTime: timestamp = 2,
-    Clue: XeusClue = 3,
+    Clue: Clue = 3,
     Hashcash: OmniHashcash? = 4,
     Certificate: OmniCertificate? = 5,
 }
 
 table ContentLocation {
     Address: OmniAddress = 0,
-    Clues: vector<XeusClue>(capacity: 65536) = 1,
+    Clues: vector<Clue>(capacity: 65536) = 1,
 }
 
 table RelayOption {
@@ -99,7 +99,7 @@ table MulticastCluesMessage {
 }
 
 table WantContentLocations {
-    Parameters: map<XeusClue, RelayOption>(capacity: 8192) = 0,
+    Parameters: map<Clue, RelayOption>(capacity: 8192) = 0,
 }
 
 table PublishContentLocations {

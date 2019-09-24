@@ -14,14 +14,14 @@ namespace Xeus.Core.Storage.Internal
         static ClusterMetadata()
         {
             ClusterMetadata.Formatter = new ___CustomFormatter();
-            ClusterMetadata.Empty = new ClusterMetadata(global::System.Array.Empty<ulong>(), 0, global::Omnix.Serialization.OmniPack.Timestamp.Zero);
+            ClusterMetadata.Empty = new ClusterMetadata(global::System.Array.Empty<ulong>(), 0, global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxSectorsCount = 256;
 
-        public ClusterMetadata(ulong[] sectors, uint length, global::Omnix.Serialization.OmniPack.Timestamp lastAccessTime)
+        public ClusterMetadata(ulong[] sectors, uint length, global::Omnix.Serialization.OmniPack.OmniTimestamp lastAccessTime)
         {
             if (sectors is null) throw new global::System.ArgumentNullException("sectors");
             if (sectors.Length > 256) throw new global::System.ArgumentOutOfRangeException("sectors");
@@ -44,14 +44,14 @@ namespace Xeus.Core.Storage.Internal
 
         public global::Omnix.DataStructures.ReadOnlyListSlim<ulong> Sectors { get; }
         public uint Length { get; }
-        public global::Omnix.Serialization.OmniPack.Timestamp LastAccessTime { get; }
+        public global::Omnix.Serialization.OmniPack.OmniTimestamp LastAccessTime { get; }
 
-        public static ClusterMetadata Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static ClusterMetadata Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -98,7 +98,7 @@ namespace Xeus.Core.Storage.Internal
                     {
                         propertyCount++;
                     }
-                    if (value.LastAccessTime != global::Omnix.Serialization.OmniPack.Timestamp.Zero)
+                    if (value.LastAccessTime != global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero)
                     {
                         propertyCount++;
                     }
@@ -119,7 +119,7 @@ namespace Xeus.Core.Storage.Internal
                     w.Write((uint)1);
                     w.Write(value.Length);
                 }
-                if (value.LastAccessTime != global::Omnix.Serialization.OmniPack.Timestamp.Zero)
+                if (value.LastAccessTime != global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero)
                 {
                     w.Write((uint)2);
                     w.Write(value.LastAccessTime);
@@ -134,7 +134,7 @@ namespace Xeus.Core.Storage.Internal
 
                 ulong[] p_sectors = global::System.Array.Empty<ulong>();
                 uint p_length = 0;
-                global::Omnix.Serialization.OmniPack.Timestamp p_lastAccessTime = global::Omnix.Serialization.OmniPack.Timestamp.Zero;
+                global::Omnix.Serialization.OmniPack.OmniTimestamp p_lastAccessTime = global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -169,22 +169,22 @@ namespace Xeus.Core.Storage.Internal
         }
     }
 
-    internal sealed partial class BlockStorageConfig : global::Omnix.Serialization.OmniPack.IOmniPackMessage<BlockStorageConfig>
+    internal sealed partial class StorageConfig : global::Omnix.Serialization.OmniPack.IOmniPackMessage<StorageConfig>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<BlockStorageConfig> Formatter { get; }
-        public static BlockStorageConfig Empty { get; }
+        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<StorageConfig> Formatter { get; }
+        public static StorageConfig Empty { get; }
 
-        static BlockStorageConfig()
+        static StorageConfig()
         {
-            BlockStorageConfig.Formatter = new ___CustomFormatter();
-            BlockStorageConfig.Empty = new BlockStorageConfig(0, 0, new global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>());
+            StorageConfig.Formatter = new ___CustomFormatter();
+            StorageConfig.Empty = new StorageConfig(0, 0, new global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxClusterMetadataMapCount = 1073741824;
 
-        public BlockStorageConfig(uint version, ulong size, global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata> clusterMetadataMap)
+        public StorageConfig(uint version, ulong size, global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata> clusterMetadataMap)
         {
             if (clusterMetadataMap is null) throw new global::System.ArgumentNullException("clusterMetadataMap");
             if (clusterMetadataMap.Count > 1073741824) throw new global::System.ArgumentOutOfRangeException("clusterMetadataMap");
@@ -215,31 +215,31 @@ namespace Xeus.Core.Storage.Internal
         public ulong Size { get; }
         public global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata> ClusterMetadataMap { get; }
 
-        public static BlockStorageConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static StorageConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(BlockStorageConfig? left, BlockStorageConfig? right)
+        public static bool operator ==(StorageConfig? left, StorageConfig? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(BlockStorageConfig? left, BlockStorageConfig? right)
+        public static bool operator !=(StorageConfig? left, StorageConfig? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is BlockStorageConfig)) return false;
-            return this.Equals((BlockStorageConfig)other);
+            if (!(other is StorageConfig)) return false;
+            return this.Equals((StorageConfig)other);
         }
-        public bool Equals(BlockStorageConfig? target)
+        public bool Equals(StorageConfig? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -251,9 +251,9 @@ namespace Xeus.Core.Storage.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<BlockStorageConfig>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<StorageConfig>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in BlockStorageConfig value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in StorageConfig value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -296,7 +296,7 @@ namespace Xeus.Core.Storage.Internal
                 }
             }
 
-            public BlockStorageConfig Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public StorageConfig Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -338,7 +338,7 @@ namespace Xeus.Core.Storage.Internal
                     }
                 }
 
-                return new BlockStorageConfig(p_version, p_size, p_clusterMetadataMap);
+                return new StorageConfig(p_version, p_size, p_clusterMetadataMap);
             }
         }
     }

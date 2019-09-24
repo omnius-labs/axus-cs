@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -20,7 +21,7 @@ namespace Xeus.Core.Connectors.Internal
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly IMemoryPool<byte> _bufferPool;
+        private readonly IBufferPool<byte> _bufferPool;
 
         private readonly SettingsDatabase _settings;
 
@@ -37,7 +38,7 @@ namespace Xeus.Core.Connectors.Internal
         private readonly object _lockObject = new object();
         private readonly AsyncLock _settingsAsyncLock = new AsyncLock();
 
-        public TcpConnector(string basePath, IMemoryPool<byte> bufferPool)
+        public TcpConnector(string basePath, IBufferPool<byte> bufferPool)
         {
             var settingsPath = Path.Combine(basePath, "Settings");
             var childrenPath = Path.Combine(basePath, "Children");
@@ -156,69 +157,47 @@ namespace Xeus.Core.Connectors.Internal
             return list;
         }
 
-        private static bool TryGetEndpoint(OmniAddress omniAddress, out IPAddress ipAddress, out ushort port, bool nameResolving = false)
+        private static bool TryGetEndpoint(OmniAddress tcpAddress, [NotNullWhen(true)] out IPAddress? ipAddress, out ushort port, bool nameResolving = false)
         {
             ipAddress = IPAddress.None;
-            port = 0;
 
-            var sections = omniAddress.Decompose();
-
-            // フォーマットのチェック
-            if (sections.Length != 4 || !(sections[0] == "ip4" || sections[0] == "ip6") || !(sections[2] == "tcp"))
+            if (!OmniAddress.Tcp.TryDecoding(tcpAddress, out var hostAddress, out port))
             {
                 return false;
             }
 
-            // IPアドレスのパース処理
+            if (OmniAddress.Ip4.TryDecoding(hostAddress, out ipAddress))
             {
-                if (nameResolving)
-                {
-                    if (!IPAddress.TryParse(sections[1], out ipAddress))
-                    {
-                        try
-                        {
-                            var hostEntry = Dns.GetHostEntry(sections[1]);
+                return true;
+            }
 
-                            if (hostEntry.AddressList.Length == 0)
-                            {
-                                return false;
-                            }
+            if (OmniAddress.Ip6.TryDecoding(hostAddress, out ipAddress))
+            {
+                return true;
+            }
 
-                            ipAddress = hostEntry.AddressList[0];
-                        }
-                        catch (Exception e)
-                        {
-                            _logger.Error(e);
-                            return false;
-                        }
-                    }
-                }
-                else
+            if (nameResolving && OmniAddress.Dns.TryDecoding(hostAddress, out var hostname))
+            {
+                try
                 {
-                    if (!IPAddress.TryParse(sections[1], out ipAddress))
+                    var hostEntry = Dns.GetHostEntry(hostname);
+
+                    if (hostEntry.AddressList.Length == 0)
                     {
                         return false;
                     }
-                }
 
-                if (sections[0] == "ip4" && ipAddress.AddressFamily != AddressFamily.InterNetwork)
-                {
-                    return false;
+                    ipAddress = hostEntry.AddressList[0];
+                    return true;
                 }
-
-                if (sections[0] == "ip6" && ipAddress.AddressFamily != AddressFamily.InterNetworkV6)
+                catch (Exception e)
                 {
+                    _logger.Error(e);
                     return false;
                 }
             }
 
-            // ポート番号のパース処理
-            if (ushort.TryParse(sections[3], out port))
-            {
-                return false;
-            }
-
-            return true;
+            return false;
         }
 
         private static async ValueTask<Socket?> ConnectSocketAsync(IPEndPoint remoteEndPoint)

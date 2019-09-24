@@ -12,13 +12,10 @@ using Omnix.Base;
 using Omnix.Base.Helpers;
 using Omnix.Configuration;
 using Omnix.Serialization.OmniPack;
-using Xeus.Core.Internal.Helpers;
-using Xeus.Core.Internal.Common;
-using Xeus.Messages;
 
-namespace Xeus.Core.Internal.Storage.Primitives
+namespace Xeus.Core.Storage
 {
-    internal sealed partial class BlockStorage : DisposableBase, ISettings, IEnumerable<OmniHash>
+    internal sealed partial class XeusStorage : DisposableBase, IStorage
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 

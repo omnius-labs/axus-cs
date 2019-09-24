@@ -5,7 +5,7 @@ using Omnix.Algorithms.Cryptography;
 using Omnix.Base.Helpers;
 using Xeus.Messages;
 
-namespace Xeus.Core.Internal.Storage.Primitives
+namespace Xeus.Core.Storage.Internal
 {
     internal sealed class ContentMetadataStorage : ISetOperators<OmniHash>, IEnumerable<ContentMetadata>
     {

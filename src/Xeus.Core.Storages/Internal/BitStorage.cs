@@ -1,19 +1,19 @@
 using System;
 using Omnix.Base;
-using Xeus.Core.Internal.Helpers;
+using Omnix.Base.Helpers;
 
-namespace Xeus.Core.Internal.Storage.Primitives
+namespace Xeus.Core.Storage.Internal
 {
     internal sealed class BitStorage : DisposableBase
     {
-        private readonly BufferPool _bufferPool;
+        private readonly IBufferPool<byte> _bufferPool;
 
         private byte[][]? _bufferList;
         private ulong _length;
 
         public static readonly uint SectorSize = 32 * 1024; // 32 KB
 
-        public BitStorage(BufferPool bufferPool)
+        public BitStorage(IBufferPool<byte> bufferPool)
         {
             _bufferPool = bufferPool;
         }
@@ -22,14 +22,14 @@ namespace Xeus.Core.Internal.Storage.Primitives
 
         public void SetLength(ulong length)
         {
-            ulong byteCount = MathHelper.Roundup(length, 8);
-            ulong sectorCount = MathHelper.Roundup(byteCount, SectorSize);
+            ulong byteCount = MathHelper.RoundUp(length, 8);
+            ulong sectorCount = MathHelper.RoundUp(byteCount, SectorSize);
 
             _bufferList = new byte[sectorCount][];
 
             for (int i = 0; i < _bufferList.Length; i++)
             {
-                var buffer = _bufferPool.GetArrayPool().Rent((int)SectorSize);
+                var buffer = _bufferPool.RentArray((int)SectorSize);
                 BytesOperations.Zero(buffer);
 
                 _bufferList[i] = buffer;
@@ -94,7 +94,7 @@ namespace Xeus.Core.Internal.Storage.Primitives
                 {
                     for (int i = 0; i < _bufferList.Length; i++)
                     {
-                        _bufferPool.GetArrayPool().Return(_bufferList[i]);
+                        _bufferPool.ReturnArray(_bufferList[i]);
                     }
 
                     _bufferList = null;

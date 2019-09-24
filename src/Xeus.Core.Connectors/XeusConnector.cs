@@ -11,12 +11,12 @@ namespace Xeus.Core.Connectors
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly IMemoryPool<byte> _bufferPool;
+        private readonly IBufferPool<byte> _bufferPool;
         private readonly TcpConnector _tcpConnector;
 
         private readonly object _lockObject = new object();
 
-        public XeusConnector(string basePath, IMemoryPool<byte> bufferPool)
+        public XeusConnector(string basePath, IBufferPool<byte> bufferPool)
         {
             var settingsPath = Path.Combine(basePath, "Settings");
             var childrenPath = Path.Combine(basePath, "Children");

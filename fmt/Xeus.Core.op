@@ -5,7 +5,7 @@ using "Omnix.Network";
 
 namespace "Xeus.Core";
 
-table XeusClue {
+table Clue {
     Hash: OmniHash = 0,
     Depth: uint8 = 1,
 }
@@ -36,20 +36,16 @@ table ConnectorOptions {
     TcpAcceptOptions: TcpAcceptOptions = 1,
 }
 
-table XeusOptions {
-    ConfigDirectoryPath: string(capacity: 1024) = 0,
-}
-
-enum ErrorReportType : uint8 {
+enum ErrorStatusType : uint8 {
     SpaceNotFound = 0,
 }
 
-table ErrorReport {
+table ErrorStatus {
     CreationTime: timestamp = 0,
-    Type: ErrorReportType = 1,
+    Type: ErrorStatusType = 1,
 }
 
-table CheckBlocksProgressReport {
+table CheckBlocksProgressStatus {
     BadBlockCount: uint32 = 0,
     CheckedBlockCount: uint32 = 1,
     TotalBlockCount: uint32 = 2,

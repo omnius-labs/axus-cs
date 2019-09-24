@@ -11,25 +11,25 @@ namespace Xeus.Core
         Socks5Proxy = 1,
     }
 
-    public enum ErrorReportType : byte
+    public enum ErrorStatusType : byte
     {
         SpaceNotFound = 0,
     }
 
-    public sealed partial class XeusClue : global::Omnix.Serialization.OmniPack.IOmniPackMessage<XeusClue>
+    public sealed partial class Clue : global::Omnix.Serialization.OmniPack.IOmniPackMessage<Clue>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<XeusClue> Formatter { get; }
-        public static XeusClue Empty { get; }
+        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<Clue> Formatter { get; }
+        public static Clue Empty { get; }
 
-        static XeusClue()
+        static Clue()
         {
-            XeusClue.Formatter = new ___CustomFormatter();
-            XeusClue.Empty = new XeusClue(OmniHash.Empty, 0);
+            Clue.Formatter = new ___CustomFormatter();
+            Clue.Empty = new Clue(OmniHash.Empty, 0);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public XeusClue(OmniHash hash, byte depth)
+        public Clue(OmniHash hash, byte depth)
         {
             this.Hash = hash;
             this.Depth = depth;
@@ -46,31 +46,31 @@ namespace Xeus.Core
         public OmniHash Hash { get; }
         public byte Depth { get; }
 
-        public static XeusClue Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static Clue Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(XeusClue? left, XeusClue? right)
+        public static bool operator ==(Clue? left, Clue? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(XeusClue? left, XeusClue? right)
+        public static bool operator !=(Clue? left, Clue? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is XeusClue)) return false;
-            return this.Equals((XeusClue)other);
+            if (!(other is Clue)) return false;
+            return this.Equals((Clue)other);
         }
-        public bool Equals(XeusClue? target)
+        public bool Equals(Clue? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -81,9 +81,9 @@ namespace Xeus.Core
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<XeusClue>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<Clue>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in XeusClue value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in Clue value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -112,7 +112,7 @@ namespace Xeus.Core
                 }
             }
 
-            public XeusClue Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public Clue Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -139,7 +139,7 @@ namespace Xeus.Core
                     }
                 }
 
-                return new XeusClue(p_hash, p_depth);
+                return new Clue(p_hash, p_depth);
             }
         }
     }
@@ -176,12 +176,12 @@ namespace Xeus.Core
         public TcpProxyType Type { get; }
         public OmniAddress Address { get; }
 
-        public static TcpProxyOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static TcpProxyOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -304,12 +304,12 @@ namespace Xeus.Core
         public bool Enabled { get; }
         public TcpProxyOptions? ProxyOptions { get; }
 
-        public static TcpConnectOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static TcpConnectOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -447,12 +447,12 @@ namespace Xeus.Core
         public global::Omnix.DataStructures.ReadOnlyListSlim<OmniAddress> ListenAddresses { get; }
         public bool UseUpnp { get; }
 
-        public static TcpAcceptOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static TcpAcceptOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -603,12 +603,12 @@ namespace Xeus.Core
         public TcpConnectOptions TcpConnectOptions { get; }
         public TcpAcceptOptions TcpAcceptOptions { get; }
 
-        public static ConnectorOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static ConnectorOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
@@ -701,134 +701,20 @@ namespace Xeus.Core
         }
     }
 
-    public sealed partial class XeusOptions : global::Omnix.Serialization.OmniPack.IOmniPackMessage<XeusOptions>
+    public sealed partial class ErrorStatus : global::Omnix.Serialization.OmniPack.IOmniPackMessage<ErrorStatus>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<XeusOptions> Formatter { get; }
-        public static XeusOptions Empty { get; }
+        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<ErrorStatus> Formatter { get; }
+        public static ErrorStatus Empty { get; }
 
-        static XeusOptions()
+        static ErrorStatus()
         {
-            XeusOptions.Formatter = new ___CustomFormatter();
-            XeusOptions.Empty = new XeusOptions(string.Empty);
+            ErrorStatus.Formatter = new ___CustomFormatter();
+            ErrorStatus.Empty = new ErrorStatus(global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero, (ErrorStatusType)0);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public static readonly int MaxConfigDirectoryPathLength = 1024;
-
-        public XeusOptions(string configDirectoryPath)
-        {
-            if (configDirectoryPath is null) throw new global::System.ArgumentNullException("configDirectoryPath");
-            if (configDirectoryPath.Length > 1024) throw new global::System.ArgumentOutOfRangeException("configDirectoryPath");
-
-            this.ConfigDirectoryPath = configDirectoryPath;
-
-            ___hashCode = new global::System.Lazy<int>(() =>
-            {
-                var ___h = new global::System.HashCode();
-                if (configDirectoryPath != default) ___h.Add(configDirectoryPath.GetHashCode());
-                return ___h.ToHashCode();
-            });
-        }
-
-        public string ConfigDirectoryPath { get; }
-
-        public static XeusOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
-        {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
-            return Formatter.Deserialize(ref reader, 0);
-        }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
-        {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
-            Formatter.Serialize(ref writer, this, 0);
-        }
-
-        public static bool operator ==(XeusOptions? left, XeusOptions? right)
-        {
-            return (right is null) ? (left is null) : right.Equals(left);
-        }
-        public static bool operator !=(XeusOptions? left, XeusOptions? right)
-        {
-            return !(left == right);
-        }
-        public override bool Equals(object? other)
-        {
-            if (!(other is XeusOptions)) return false;
-            return this.Equals((XeusOptions)other);
-        }
-        public bool Equals(XeusOptions? target)
-        {
-            if (target is null) return false;
-            if (object.ReferenceEquals(this, target)) return true;
-            if (this.ConfigDirectoryPath != target.ConfigDirectoryPath) return false;
-
-            return true;
-        }
-        public override int GetHashCode() => ___hashCode.Value;
-
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<XeusOptions>
-        {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in XeusOptions value, in int rank)
-            {
-                if (rank > 256) throw new global::System.FormatException();
-
-                {
-                    uint propertyCount = 0;
-                    if (value.ConfigDirectoryPath != string.Empty)
-                    {
-                        propertyCount++;
-                    }
-                    w.Write(propertyCount);
-                }
-
-                if (value.ConfigDirectoryPath != string.Empty)
-                {
-                    w.Write((uint)0);
-                    w.Write(value.ConfigDirectoryPath);
-                }
-            }
-
-            public XeusOptions Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
-            {
-                if (rank > 256) throw new global::System.FormatException();
-
-                uint propertyCount = r.GetUInt32();
-
-                string p_configDirectoryPath = string.Empty;
-
-                for (; propertyCount > 0; propertyCount--)
-                {
-                    uint id = r.GetUInt32();
-                    switch (id)
-                    {
-                        case 0:
-                            {
-                                p_configDirectoryPath = r.GetString(1024);
-                                break;
-                            }
-                    }
-                }
-
-                return new XeusOptions(p_configDirectoryPath);
-            }
-        }
-    }
-
-    public sealed partial class ErrorReport : global::Omnix.Serialization.OmniPack.IOmniPackMessage<ErrorReport>
-    {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<ErrorReport> Formatter { get; }
-        public static ErrorReport Empty { get; }
-
-        static ErrorReport()
-        {
-            ErrorReport.Formatter = new ___CustomFormatter();
-            ErrorReport.Empty = new ErrorReport(global::Omnix.Serialization.OmniPack.Timestamp.Zero, (ErrorReportType)0);
-        }
-
-        private readonly global::System.Lazy<int> ___hashCode;
-
-        public ErrorReport(global::Omnix.Serialization.OmniPack.Timestamp creationTime, ErrorReportType type)
+        public ErrorStatus(global::Omnix.Serialization.OmniPack.OmniTimestamp creationTime, ErrorStatusType type)
         {
             this.CreationTime = creationTime;
             this.Type = type;
@@ -842,34 +728,34 @@ namespace Xeus.Core
             });
         }
 
-        public global::Omnix.Serialization.OmniPack.Timestamp CreationTime { get; }
-        public ErrorReportType Type { get; }
+        public global::Omnix.Serialization.OmniPack.OmniTimestamp CreationTime { get; }
+        public ErrorStatusType Type { get; }
 
-        public static ErrorReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static ErrorStatus Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(ErrorReport? left, ErrorReport? right)
+        public static bool operator ==(ErrorStatus? left, ErrorStatus? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(ErrorReport? left, ErrorReport? right)
+        public static bool operator !=(ErrorStatus? left, ErrorStatus? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is ErrorReport)) return false;
-            return this.Equals((ErrorReport)other);
+            if (!(other is ErrorStatus)) return false;
+            return this.Equals((ErrorStatus)other);
         }
-        public bool Equals(ErrorReport? target)
+        public bool Equals(ErrorStatus? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -880,45 +766,45 @@ namespace Xeus.Core
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<ErrorReport>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<ErrorStatus>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in ErrorReport value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in ErrorStatus value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
                 {
                     uint propertyCount = 0;
-                    if (value.CreationTime != global::Omnix.Serialization.OmniPack.Timestamp.Zero)
+                    if (value.CreationTime != global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero)
                     {
                         propertyCount++;
                     }
-                    if (value.Type != (ErrorReportType)0)
+                    if (value.Type != (ErrorStatusType)0)
                     {
                         propertyCount++;
                     }
                     w.Write(propertyCount);
                 }
 
-                if (value.CreationTime != global::Omnix.Serialization.OmniPack.Timestamp.Zero)
+                if (value.CreationTime != global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero)
                 {
                     w.Write((uint)0);
                     w.Write(value.CreationTime);
                 }
-                if (value.Type != (ErrorReportType)0)
+                if (value.Type != (ErrorStatusType)0)
                 {
                     w.Write((uint)1);
                     w.Write((ulong)value.Type);
                 }
             }
 
-            public ErrorReport Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public ErrorStatus Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
                 uint propertyCount = r.GetUInt32();
 
-                global::Omnix.Serialization.OmniPack.Timestamp p_creationTime = global::Omnix.Serialization.OmniPack.Timestamp.Zero;
-                ErrorReportType p_type = (ErrorReportType)0;
+                global::Omnix.Serialization.OmniPack.OmniTimestamp p_creationTime = global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero;
+                ErrorStatusType p_type = (ErrorStatusType)0;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -932,31 +818,31 @@ namespace Xeus.Core
                             }
                         case 1:
                             {
-                                p_type = (ErrorReportType)r.GetUInt64();
+                                p_type = (ErrorStatusType)r.GetUInt64();
                                 break;
                             }
                     }
                 }
 
-                return new ErrorReport(p_creationTime, p_type);
+                return new ErrorStatus(p_creationTime, p_type);
             }
         }
     }
 
-    public sealed partial class CheckBlocksProgressReport : global::Omnix.Serialization.OmniPack.IOmniPackMessage<CheckBlocksProgressReport>
+    public sealed partial class CheckBlocksProgressStatus : global::Omnix.Serialization.OmniPack.IOmniPackMessage<CheckBlocksProgressStatus>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<CheckBlocksProgressReport> Formatter { get; }
-        public static CheckBlocksProgressReport Empty { get; }
+        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<CheckBlocksProgressStatus> Formatter { get; }
+        public static CheckBlocksProgressStatus Empty { get; }
 
-        static CheckBlocksProgressReport()
+        static CheckBlocksProgressStatus()
         {
-            CheckBlocksProgressReport.Formatter = new ___CustomFormatter();
-            CheckBlocksProgressReport.Empty = new CheckBlocksProgressReport(0, 0, 0);
+            CheckBlocksProgressStatus.Formatter = new ___CustomFormatter();
+            CheckBlocksProgressStatus.Empty = new CheckBlocksProgressStatus(0, 0, 0);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public CheckBlocksProgressReport(uint badBlockCount, uint checkedBlockCount, uint totalBlockCount)
+        public CheckBlocksProgressStatus(uint badBlockCount, uint checkedBlockCount, uint totalBlockCount)
         {
             this.BadBlockCount = badBlockCount;
             this.CheckedBlockCount = checkedBlockCount;
@@ -976,31 +862,31 @@ namespace Xeus.Core
         public uint CheckedBlockCount { get; }
         public uint TotalBlockCount { get; }
 
-        public static CheckBlocksProgressReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.BufferPool bufferPool)
+        public static CheckBlocksProgressStatus Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.BufferPool bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(CheckBlocksProgressReport? left, CheckBlocksProgressReport? right)
+        public static bool operator ==(CheckBlocksProgressStatus? left, CheckBlocksProgressStatus? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(CheckBlocksProgressReport? left, CheckBlocksProgressReport? right)
+        public static bool operator !=(CheckBlocksProgressStatus? left, CheckBlocksProgressStatus? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is CheckBlocksProgressReport)) return false;
-            return this.Equals((CheckBlocksProgressReport)other);
+            if (!(other is CheckBlocksProgressStatus)) return false;
+            return this.Equals((CheckBlocksProgressStatus)other);
         }
-        public bool Equals(CheckBlocksProgressReport? target)
+        public bool Equals(CheckBlocksProgressStatus? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -1012,9 +898,9 @@ namespace Xeus.Core
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<CheckBlocksProgressReport>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<CheckBlocksProgressStatus>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in CheckBlocksProgressReport value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in CheckBlocksProgressStatus value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1052,7 +938,7 @@ namespace Xeus.Core
                 }
             }
 
-            public CheckBlocksProgressReport Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public CheckBlocksProgressStatus Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1085,7 +971,7 @@ namespace Xeus.Core
                     }
                 }
 
-                return new CheckBlocksProgressReport(p_badBlockCount, p_checkedBlockCount, p_totalBlockCount);
+                return new CheckBlocksProgressStatus(p_badBlockCount, p_checkedBlockCount, p_totalBlockCount);
             }
         }
     }
