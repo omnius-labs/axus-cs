@@ -157,47 +157,96 @@ namespace Xeus.Core.Connectors.Internal
             return list;
         }
 
-        private static bool TryGetEndpoint(OmniAddress tcpAddress, [NotNullWhen(true)] out IPAddress? ipAddress, out ushort port, bool nameResolving = false)
+        private static bool TryGetEndpoint(OmniAddress rootAddress, [NotNullWhen(true)] out IPAddress? ipAddress, out ushort port, bool nameResolving = false)
         {
             ipAddress = IPAddress.None;
+            port = 0;
 
-            if (!OmniAddress.Tcp.TryDecoding(tcpAddress, out var hostAddress, out port))
+            var rootFunction = rootAddress.Parse();
+
+            if (rootFunction == null)
             {
                 return false;
             }
 
-            if (OmniAddress.Ip4.TryDecoding(hostAddress, out ipAddress))
+            if (rootFunction.Name == "tcp")
             {
-                return true;
-            }
-
-            if (OmniAddress.Ip6.TryDecoding(hostAddress, out ipAddress))
-            {
-                return true;
-            }
-
-            if (nameResolving && OmniAddress.Dns.TryDecoding(hostAddress, out var hostname))
-            {
-                try
+                if (!(rootFunction.Arguments.Count == 2
+                    && rootFunction.Arguments[0] is OmniAddress.FunctionElement hostFunction
+                    && rootFunction.Arguments[1] is OmniAddress.ConstantElement portConstant))
                 {
-                    var hostEntry = Dns.GetHostEntry(hostname);
+                    return false;
+                }
 
-                    if (hostEntry.AddressList.Length == 0)
+                if (hostFunction.Name == "ip4")
+                {
+                    if (!(hostFunction.Arguments.Count == 1
+                        && hostFunction.Arguments[0] is OmniAddress.ConstantElement ipAddressConstant))
                     {
                         return false;
                     }
 
-                    ipAddress = hostEntry.AddressList[0];
-                    return true;
+                    if (!IPAddress.TryParse(ipAddressConstant.Text, out var temp)
+                        || temp.AddressFamily != AddressFamily.InterNetwork)
+                    {
+                        return false;
+                    }
+
+                    ipAddress = temp;
                 }
-                catch (Exception e)
+                else if (hostFunction.Name == "ip6")
                 {
-                    _logger.Error(e);
+                    if (!(hostFunction.Arguments.Count == 1
+                        && hostFunction.Arguments[0] is OmniAddress.ConstantElement ipAddressConstant))
+                    {
+                        return false;
+                    }
+
+                    if (!IPAddress.TryParse(ipAddressConstant.Text, out var temp)
+                        || temp.AddressFamily != AddressFamily.InterNetworkV6)
+                    {
+                        return false;
+                    }
+
+                    ipAddress = temp;
+                }
+                else if (nameResolving && hostFunction.Name == "dns")
+                {
+                    if (!(hostFunction.Arguments.Count == 1
+                        && hostFunction.Arguments[0] is OmniAddress.ConstantElement hostnameConstant))
+                    {
+                        return false;
+                    }
+
+                    try
+                    {
+                        var hostEntry = Dns.GetHostEntry(hostnameConstant.Text);
+
+                        if (hostEntry.AddressList.Length == 0)
+                        {
+                            return false;
+                        }
+
+                        ipAddress = hostEntry.AddressList[0];
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Error(e);
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+
+                if (!ushort.TryParse(portConstant.Text, out port))
+                {
                     return false;
                 }
             }
 
-            return false;
+            return true;
         }
 
         private static async ValueTask<Socket?> ConnectSocketAsync(IPEndPoint remoteEndPoint)
@@ -475,7 +524,6 @@ namespace Xeus.Core.Connectors.Internal
                                 continue;
                             }
 
-
                             if (!TryGetEndpoint(listenAddress, out var ipAddress, out ushort port, false))
                             {
                                 continue;
@@ -496,7 +544,6 @@ namespace Xeus.Core.Connectors.Internal
                                 {
                                     continue;
                                 }
-
 
                                 if (!TryGetEndpoint(listenAddress, out var ipAddress, out ushort port, false))
                                 {
