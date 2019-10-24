@@ -1,6 +1,6 @@
 ﻿syntax = v1.0;
 
-using "Omnix.Algorithms.Cryptography";
+using "Omnix.Cryptography";
 using "Omnix.Network";
 using "Xeus.Core";
 
@@ -13,7 +13,7 @@ table ClusterMetadata {
     LastAccessTime: timestamp = 2,
 }
 
-table StorageConfig {
+table XeusStorageConfig {
     Version: uint32 = 0,
     Size: uint64 = 1,
     ClusterMetadataMap: map<OmniHash, ClusterMetadata>(capacity: 1073741824) = 2,

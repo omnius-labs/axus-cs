@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace Xeus.Core.Primitives
+namespace Xeus.Core.Storages.Primitives
 {
     public class TestsBase : IDisposable
     {

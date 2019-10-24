@@ -7,11 +7,13 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Omnix.Algorithms.Cryptography;
+using Omnix.Cryptography;
 using Omnix.Base;
 using Omnix.Base.Helpers;
 using Omnix.Configuration;
-using Omnix.Serialization.OmniPack;
+using Omnix.Serialization.RocketPack;
+using Xeus.Core.Storage.Internal;
+using Omnix.Base.Extensions;
 
 namespace Xeus.Core.Storage
 {
@@ -21,11 +23,11 @@ namespace Xeus.Core.Storage
 
         private readonly Stream _fileStream;
 
-        private readonly BufferPool _bufferPool;
+        private readonly BufferPool<byte> _bufferPool;
         private readonly UsingSectorPool _usingSectorPool;
         private readonly ProtectionStatus _protectionStatus;
 
-        private readonly SettingsDatabase _settings;
+        private readonly OmniSettings _settings;
 
         private ulong _size;
         private readonly Dictionary<OmniHash, ClusterMetadata> _clusterMetadataMap = new Dictionary<OmniHash, ClusterMetadata>();
@@ -40,14 +42,14 @@ namespace Xeus.Core.Storage
 
         public static readonly uint SectorSize = 1024 * 256; // 256 KB
 
-        public BlockStorage(string basePath, BufferPool bufferPool)
+        public XeusStorage(string basePath, BufferPool<byte> bufferPool)
         {
             var settingsPath = Path.Combine(basePath, "Settings");
             var childrenPath = Path.Combine(basePath, "Children");
 
             _bufferPool = bufferPool;
 
-            _settings = new SettingsDatabase(settingsPath);
+            _settings = new OmniSettings(settingsPath);
 
             if (!Directory.Exists(basePath))
             {
@@ -285,7 +287,7 @@ namespace Xeus.Core.Storage
             lock (_lockObject)
             {
                 uint unit = 1024 * 1024 * 256; // 256MB
-                size = MathHelper.Roundup(size, unit);
+                size = MathHelper.RoundUp(size, unit);
 
                 foreach (var key in _clusterMetadataMap.Keys.ToArray()
                     .Where(n => _clusterMetadataMap[n].Sectors.Any(point => size < (point * SectorSize) + SectorSize))
@@ -294,7 +296,7 @@ namespace Xeus.Core.Storage
                     this.Remove(key);
                 }
 
-                _size = MathHelper.Roundup(size, SectorSize);
+                _size = MathHelper.RoundUp(size, SectorSize);
                 _fileStream.SetLength((long)Math.Min(_size, (ulong)_fileStream.Length));
 
                 this.UpdateUsingSectors();
@@ -423,7 +425,7 @@ namespace Xeus.Core.Storage
                         return false;
                     }
 
-                    memoryOwner = _bufferPool.Rent((int)clusterInfo.Length);
+                    memoryOwner = _bufferPool.RentMemory((int)clusterInfo.Length);
 
                     try
                     {
@@ -540,7 +542,7 @@ namespace Xeus.Core.Storage
                         if ((ulong)_fileStream.Length < position + SectorSize)
                         {
                             const uint unit = 1024 * 1024 * 256; // 256MB
-                            ulong size = MathHelper.Roundup((position + SectorSize), unit);
+                            ulong size = MathHelper.RoundUp((position + SectorSize), unit);
 
                             _fileStream.SetLength((long)Math.Min(size, this.Size));
                         }
@@ -608,7 +610,7 @@ namespace Xeus.Core.Storage
                 _size = 0;
                 _clusterMetadataMap.Clear();
 
-                if (_settings.TryGetContent<BlockStorageConfig>("config", out var config))
+                if (_settings.TryGetContent<XeusStorageConfig>("config", out var config))
                 {
                     _size = config.Size;
 
@@ -626,7 +628,7 @@ namespace Xeus.Core.Storage
         {
             using (await _settingsAsyncLock.LockAsync())
             {
-                var config = new BlockStorageConfig(0, _size, _clusterMetadataMap);
+                var config = new XeusStorageConfig(0, _size, _clusterMetadataMap);
                 _settings.SetContent("config", config);
             }
         }

@@ -10,9 +10,10 @@ using System.Threading.Tasks;
 using Omnix.Base;
 using Omnix.Base.Extensions;
 using Omnix.Configuration;
-using Omnix.DataStructures;
+using Omnix.Collections;
 using Omnix.Net.Upnp;
 using Omnix.Network;
+using Omnix.Network.Caps;
 using Omnix.Network.Proxies;
 
 namespace Xeus.Core.Connectors.Internal
@@ -23,7 +24,7 @@ namespace Xeus.Core.Connectors.Internal
 
         private readonly IBufferPool<byte> _bufferPool;
 
-        private readonly SettingsDatabase _settings;
+        private readonly OmniSettings _settings;
 
         private readonly Random _random = new Random();
 
@@ -45,7 +46,7 @@ namespace Xeus.Core.Connectors.Internal
 
             _bufferPool = bufferPool;
 
-            _settings = new SettingsDatabase(settingsPath);
+            _settings = new OmniSettings(settingsPath);
 
             _watchEventScheduler = new EventScheduler(this.WatchThread);
         }

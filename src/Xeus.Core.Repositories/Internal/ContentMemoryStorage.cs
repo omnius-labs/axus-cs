@@ -1,61 +1,60 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Omnix.Algorithms.Cryptography;
+using Omnix.Cryptography;
 using Omnix.Base.Helpers;
-using Xeus.Messages;
 
-namespace Xeus.Core.Storage.Internal
+namespace Xeus.Core.Repositories.Internal
 {
-    internal sealed class ContentMetadataStorage : ISetOperators<OmniHash>, IEnumerable<ContentMetadata>
+    internal sealed class ContentMemoryStorage : ISetOperators<OmniHash>, IEnumerable<ContentMetadata>
     {
-        private readonly Dictionary<XeusClue, ContentMetadata> _messageContentMetadatas;
-        private readonly Dictionary<string, ContentMetadata> _fileContentMetadatas;
+        private readonly Dictionary<Clue, ContentMetadata> _messageMap;
+        private readonly Dictionary<string, ContentMetadata> _fileMap;
 
         private readonly HashMap _hashMap;
 
-        public ContentMetadataStorage()
+        public ContentMemoryStorage()
         {
-            _messageContentMetadatas = new Dictionary<XeusClue, ContentMetadata>();
-            _fileContentMetadatas = new Dictionary<string, ContentMetadata>();
+            _messageMap = new Dictionary<Clue, ContentMetadata>();
+            _fileMap = new Dictionary<string, ContentMetadata>();
 
             _hashMap = new HashMap();
         }
 
-        public void Add(ContentMetadata info)
+        public void Add(ContentMetadata metadata)
         {
-            if (info.SharedBlocksMetadata == null)
+            if (metadata.SharedFileMetadata == null)
             {
-                _messageContentMetadatas.Add(info.Clue, info);
+                _messageMap.Add(metadata.Clue, metadata);
             }
             else
             {
-                _fileContentMetadatas.Add(info.SharedBlocksMetadata.Path, info);
+                _fileMap.Add(metadata.SharedFileMetadata.Path, metadata);
 
-                _hashMap.Add(info.SharedBlocksMetadata);
+                _hashMap.Add(metadata);
             }
         }
 
         #region Message
 
-        public void RemoveMessageContentMetadata(XeusClue clue)
+        public void RemoveMessageContentMetadata(Clue clue)
         {
-            _messageContentMetadatas.Remove(clue);
+            _messageMap.Remove(clue);
         }
 
-        public bool ContainsMessageContentMetadata(XeusClue clue)
+        public bool ContainsMessageContentMetadata(Clue clue)
         {
-            return _messageContentMetadatas.ContainsKey(clue);
+            return _messageMap.ContainsKey(clue);
         }
 
         public IEnumerable<ContentMetadata> GetMessageContentMetadatas()
         {
-            return _messageContentMetadatas.Values.ToArray();
+            return _messageMap.Values.ToArray();
         }
 
-        public ContentMetadata? GetMessageContentMetadata(XeusClue clue)
+        public ContentMetadata? GetMessageContentMetadata(Clue clue)
         {
-            if (!_messageContentMetadatas.TryGetValue(clue, out var contentInfo))
+            if (!_messageMap.TryGetValue(clue, out var contentInfo))
             {
                 return null;
             }
@@ -69,30 +68,30 @@ namespace Xeus.Core.Storage.Internal
 
         public void RemoveFileContentMetadata(string path)
         {
-            if (_fileContentMetadatas.TryGetValue(path, out var contentInfo))
+            if (_fileMap.TryGetValue(path, out var metadata))
             {
-                _fileContentMetadatas.Remove(path);
+                _fileMap.Remove(path);
 
-                if (contentInfo.SharedBlocksMetadata != null)
+                if (metadata != null)
                 {
-                    _hashMap.Remove(contentInfo.SharedBlocksMetadata);
+                    _hashMap.Remove(metadata);
                 }
             }
         }
 
         public bool ContainsFileContentMetadata(string path)
         {
-            return _fileContentMetadatas.ContainsKey(path);
+            return _fileMap.ContainsKey(path);
         }
 
         public IEnumerable<ContentMetadata> GetFileContentMetadatas()
         {
-            return _fileContentMetadatas.Values.ToArray();
+            return _fileMap.Values.ToArray();
         }
 
         public ContentMetadata? GetFileContentMetadata(string path)
         {
-            if (!_fileContentMetadatas.TryGetValue(path, out var contentInfo))
+            if (!_fileMap.TryGetValue(path, out var contentInfo))
             {
                 return null;
             }
@@ -147,9 +146,9 @@ namespace Xeus.Core.Storage.Internal
 
         public IEnumerator<ContentMetadata> GetEnumerator()
         {
-            foreach (var info in CollectionHelper.Unite(_messageContentMetadatas.Values, _fileContentMetadatas.Values))
+            foreach (var metadata in CollectionHelper.Unite(_messageMap.Values, _fileMap.Values))
             {
-                yield return info;
+                yield return metadata;
             }
         }
 
@@ -166,9 +165,9 @@ namespace Xeus.Core.Storage.Internal
 
         private sealed class HashMap
         {
-            private readonly HashSet<SharedBlocksMetadata> _hashSet = new HashSet<SharedBlocksMetadata>();
+            private readonly HashSet<ContentMetadata> _hashSet = new HashSet<ContentMetadata>();
 
-            private Dictionary<OmniHash, SharedBlocksMetadata>? _map = null;
+            private Dictionary<OmniHash, ContentMetadata>? _map = null;
 
             public HashMap()
             {
@@ -178,11 +177,11 @@ namespace Xeus.Core.Storage.Internal
             {
                 if (_map is null)
                 {
-                    _map = new Dictionary<OmniHash, SharedBlocksMetadata>();
+                    _map = new Dictionary<OmniHash, ContentMetadata>();
 
                     foreach (var metadata in _hashSet)
                     {
-                        foreach (var hash in metadata.Hashes)
+                        foreach (var hash in metadata.MerkleTreeNodes[^1].Hashes)
                         {
                             _map[hash] = metadata;
                         }
@@ -190,21 +189,21 @@ namespace Xeus.Core.Storage.Internal
                 }
             }
 
-            public void Add(SharedBlocksMetadata metadata)
+            public void Add(ContentMetadata metadata)
             {
                 _hashSet.Add(metadata);
 
                 _map = null;
             }
 
-            public void Remove(SharedBlocksMetadata metadata)
+            public void Remove(ContentMetadata metadata)
             {
                 _hashSet.Remove(metadata);
 
                 _map = null;
             }
 
-            public SharedBlocksMetadata? Get(OmniHash hash)
+            public ContentMetadata? Get(OmniHash hash)
             {
                 this.Update();
 

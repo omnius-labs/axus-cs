@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using Omnix.Algorithms.Cryptography;
+using Omnix.Cryptography;
 
 namespace Xeus.Core.Storage.Internal
 {

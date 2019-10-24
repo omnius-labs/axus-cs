@@ -7,8 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Omnix.Algorithms.Correction;
-using Omnix.Algorithms.Cryptography;
+using Omnix.Correction;
+using Omnix.Cryptography;
 using Omnix.Base;
 using Omnix.Base.Helpers;
 using Omnix.Configuration;
@@ -20,7 +20,7 @@ using Xeus.Messages;
 
 namespace Xeus.Core.Internal.Storage
 {
-    internal sealed class ContentStorage : DisposableBase, ISettings, ISetOperators<OmniHash>, IEnumerable<OmniHash>
+    internal sealed class XeusRepository : DisposableBase, ISettings, ISetOperators<OmniHash>, IEnumerable<OmniHash>
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -38,13 +38,13 @@ namespace Xeus.Core.Internal.Storage
 
         private readonly int _threadCount = 2;
 
-        public ContentStorage(string basePath, BufferPool bufferPool)
+        public XeusRepository(string basePath, BufferPool bufferPool)
         {
             var settingsPath = Path.Combine(basePath, "Settings");
             var childrenPath = Path.Combine(basePath, "Children");
 
             _bufferPool = bufferPool;
-            _blockStorage = new BlockStorage(Path.Combine(childrenPath, nameof(ContentStorage)), _bufferPool);
+            _blockStorage = new BlockStorage(Path.Combine(childrenPath, nameof(XeusRepository)), _bufferPool);
             _contentMetadataStorage = new ContentMetadataStorage();
 
             _settings = new SettingsDatabase(settingsPath);
