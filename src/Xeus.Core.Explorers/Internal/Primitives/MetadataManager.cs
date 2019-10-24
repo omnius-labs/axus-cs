@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Omnix.Algorithms.Cryptography;
+using Omnix.Cryptography;
 using Omnix.Base;
 using Omnix.Base.Extensions;
 using Xeus.Core.Internal.Search;

@@ -1,4 +1,5 @@
 using Omnix.Network;
+using Omnix.Network.Caps;
 
 namespace Xeus.Core
 {
@@ -10,7 +11,7 @@ namespace Xeus.Core
 
     public readonly struct ConnectorResult
     {
-        public ConnectorResult(ConnectorResultType type, Cap? cap = null, OmniAddress? address = null)
+        public ConnectorResult(ConnectorResultType type, ICap? cap = null, OmniAddress? address = null)
         {
             this.Type = type;
             this.Cap = cap;
@@ -18,7 +19,7 @@ namespace Xeus.Core
         }
 
         public ConnectorResultType Type { get; }
-        public Cap? Cap { get; }
+        public ICap? Cap { get; }
         public OmniAddress? Address { get; }
     }
 }

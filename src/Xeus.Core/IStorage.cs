@@ -2,13 +2,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnix.Base;
 using Omnix.Network;
+using System.Collections;
+using Omnix.Cryptography;
+using System.Collections.Generic;
 
 namespace Xeus.Core
 {
-    public interface IStorage : IService, ISettings
+    public interface IStorage : ISettings, IEnumerable<OmniHash>
     {
-        ValueTask<ConnectorResult> AcceptAsync(CancellationToken token = default);
-        ValueTask<ConnectorResult> ConnectAsync(OmniAddress address, CancellationToken token = default);
-        void SetOptions(ConnectorOptions options);
     }
 }

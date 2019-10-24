@@ -1,4 +1,4 @@
-using Omnix.Algorithms.Cryptography;
+using Omnix.Cryptography;
 using Omnix.Network;
 using Xeus.Core;
 
@@ -6,26 +6,26 @@ using Xeus.Core;
 
 namespace Xeus.Core.Storage.Internal
 {
-    internal sealed partial class ClusterMetadata : global::Omnix.Serialization.OmniPack.IOmniPackMessage<ClusterMetadata>
+    internal sealed partial class ClusterMetadata : global::Omnix.Serialization.RocketPack.IRocketPackMessage<ClusterMetadata>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<ClusterMetadata> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<ClusterMetadata> Formatter { get; }
         public static ClusterMetadata Empty { get; }
 
         static ClusterMetadata()
         {
             ClusterMetadata.Formatter = new ___CustomFormatter();
-            ClusterMetadata.Empty = new ClusterMetadata(global::System.Array.Empty<ulong>(), 0, global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero);
+            ClusterMetadata.Empty = new ClusterMetadata(global::System.Array.Empty<ulong>(), 0, global::Omnix.Serialization.RocketPack.Timestamp.Zero);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxSectorsCount = 256;
 
-        public ClusterMetadata(ulong[] sectors, uint length, global::Omnix.Serialization.OmniPack.OmniTimestamp lastAccessTime)
+        public ClusterMetadata(ulong[] sectors, uint length, global::Omnix.Serialization.RocketPack.Timestamp lastAccessTime)
         {
             if (sectors is null) throw new global::System.ArgumentNullException("sectors");
             if (sectors.Length > 256) throw new global::System.ArgumentOutOfRangeException("sectors");
-            this.Sectors = new global::Omnix.DataStructures.ReadOnlyListSlim<ulong>(sectors);
+            this.Sectors = new global::Omnix.Collections.ReadOnlyListSlim<ulong>(sectors);
             this.Length = length;
             this.LastAccessTime = lastAccessTime;
 
@@ -42,18 +42,18 @@ namespace Xeus.Core.Storage.Internal
             });
         }
 
-        public global::Omnix.DataStructures.ReadOnlyListSlim<ulong> Sectors { get; }
+        public global::Omnix.Collections.ReadOnlyListSlim<ulong> Sectors { get; }
         public uint Length { get; }
-        public global::Omnix.Serialization.OmniPack.OmniTimestamp LastAccessTime { get; }
+        public global::Omnix.Serialization.RocketPack.Timestamp LastAccessTime { get; }
 
         public static ClusterMetadata Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -82,9 +82,9 @@ namespace Xeus.Core.Storage.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<ClusterMetadata>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<ClusterMetadata>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in ClusterMetadata value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in ClusterMetadata value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -98,7 +98,7 @@ namespace Xeus.Core.Storage.Internal
                     {
                         propertyCount++;
                     }
-                    if (value.LastAccessTime != global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero)
+                    if (value.LastAccessTime != global::Omnix.Serialization.RocketPack.Timestamp.Zero)
                     {
                         propertyCount++;
                     }
@@ -119,14 +119,14 @@ namespace Xeus.Core.Storage.Internal
                     w.Write((uint)1);
                     w.Write(value.Length);
                 }
-                if (value.LastAccessTime != global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero)
+                if (value.LastAccessTime != global::Omnix.Serialization.RocketPack.Timestamp.Zero)
                 {
                     w.Write((uint)2);
                     w.Write(value.LastAccessTime);
                 }
             }
 
-            public ClusterMetadata Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public ClusterMetadata Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -134,7 +134,7 @@ namespace Xeus.Core.Storage.Internal
 
                 ulong[] p_sectors = global::System.Array.Empty<ulong>();
                 uint p_length = 0;
-                global::Omnix.Serialization.OmniPack.OmniTimestamp p_lastAccessTime = global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero;
+                global::Omnix.Serialization.RocketPack.Timestamp p_lastAccessTime = global::Omnix.Serialization.RocketPack.Timestamp.Zero;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -169,22 +169,22 @@ namespace Xeus.Core.Storage.Internal
         }
     }
 
-    internal sealed partial class StorageConfig : global::Omnix.Serialization.OmniPack.IOmniPackMessage<StorageConfig>
+    internal sealed partial class XeusStorageConfig : global::Omnix.Serialization.RocketPack.IRocketPackMessage<XeusStorageConfig>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<StorageConfig> Formatter { get; }
-        public static StorageConfig Empty { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<XeusStorageConfig> Formatter { get; }
+        public static XeusStorageConfig Empty { get; }
 
-        static StorageConfig()
+        static XeusStorageConfig()
         {
-            StorageConfig.Formatter = new ___CustomFormatter();
-            StorageConfig.Empty = new StorageConfig(0, 0, new global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>());
+            XeusStorageConfig.Formatter = new ___CustomFormatter();
+            XeusStorageConfig.Empty = new XeusStorageConfig(0, 0, new global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxClusterMetadataMapCount = 1073741824;
 
-        public StorageConfig(uint version, ulong size, global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata> clusterMetadataMap)
+        public XeusStorageConfig(uint version, ulong size, global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata> clusterMetadataMap)
         {
             if (clusterMetadataMap is null) throw new global::System.ArgumentNullException("clusterMetadataMap");
             if (clusterMetadataMap.Count > 1073741824) throw new global::System.ArgumentOutOfRangeException("clusterMetadataMap");
@@ -195,7 +195,7 @@ namespace Xeus.Core.Storage.Internal
 
             this.Version = version;
             this.Size = size;
-            this.ClusterMetadataMap = new global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata>(clusterMetadataMap);
+            this.ClusterMetadataMap = new global::Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata>(clusterMetadataMap);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -213,33 +213,33 @@ namespace Xeus.Core.Storage.Internal
 
         public uint Version { get; }
         public ulong Size { get; }
-        public global::Omnix.DataStructures.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata> ClusterMetadataMap { get; }
+        public global::Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata> ClusterMetadataMap { get; }
 
-        public static StorageConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
+        public static XeusStorageConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(StorageConfig? left, StorageConfig? right)
+        public static bool operator ==(XeusStorageConfig? left, XeusStorageConfig? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(StorageConfig? left, StorageConfig? right)
+        public static bool operator !=(XeusStorageConfig? left, XeusStorageConfig? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is StorageConfig)) return false;
-            return this.Equals((StorageConfig)other);
+            if (!(other is XeusStorageConfig)) return false;
+            return this.Equals((XeusStorageConfig)other);
         }
-        public bool Equals(StorageConfig? target)
+        public bool Equals(XeusStorageConfig? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -251,9 +251,9 @@ namespace Xeus.Core.Storage.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<StorageConfig>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<XeusStorageConfig>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in StorageConfig value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in XeusStorageConfig value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -296,7 +296,7 @@ namespace Xeus.Core.Storage.Internal
                 }
             }
 
-            public StorageConfig Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public XeusStorageConfig Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -338,7 +338,7 @@ namespace Xeus.Core.Storage.Internal
                     }
                 }
 
-                return new StorageConfig(p_version, p_size, p_clusterMetadataMap);
+                return new XeusStorageConfig(p_version, p_size, p_clusterMetadataMap);
             }
         }
     }

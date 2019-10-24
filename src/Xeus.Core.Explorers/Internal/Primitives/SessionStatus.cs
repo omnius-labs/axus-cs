@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Omnix.Algorithms.Cryptography;
+using Omnix.Cryptography;
 using Omnix.Base;
 using Omnix.DataStructures;
 using Omnix.Network;

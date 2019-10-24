@@ -11,22 +11,22 @@ namespace Xeus.Core.Explorers.Internal
         Version1 = 1,
     }
 
-    internal sealed partial class BroadcastClue : global::Omnix.Serialization.OmniPack.IOmniPackMessage<BroadcastClue>
+    internal sealed partial class BroadcastClue : global::Omnix.Serialization.RocketPack.IRocketPackMessage<BroadcastClue>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<BroadcastClue> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<BroadcastClue> Formatter { get; }
         public static BroadcastClue Empty { get; }
 
         static BroadcastClue()
         {
             BroadcastClue.Formatter = new ___CustomFormatter();
-            BroadcastClue.Empty = new BroadcastClue(string.Empty, global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero, Clue.Empty, null);
+            BroadcastClue.Empty = new BroadcastClue(string.Empty, global::Omnix.Serialization.RocketPack.Timestamp.Zero, Clue.Empty, null);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxTypeLength = 256;
 
-        public BroadcastClue(string type, global::Omnix.Serialization.OmniPack.OmniTimestamp creationTime, Clue clue, OmniCertificate? certificate)
+        public BroadcastClue(string type, global::Omnix.Serialization.RocketPack.Timestamp creationTime, Clue clue, OmniCertificate? certificate)
         {
             if (type is null) throw new global::System.ArgumentNullException("type");
             if (type.Length > 256) throw new global::System.ArgumentOutOfRangeException("type");
@@ -48,18 +48,18 @@ namespace Xeus.Core.Explorers.Internal
         }
 
         public string Type { get; }
-        public global::Omnix.Serialization.OmniPack.OmniTimestamp CreationTime { get; }
+        public global::Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
         public Clue Clue { get; }
         public OmniCertificate? Certificate { get; }
 
         public static BroadcastClue Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -90,9 +90,9 @@ namespace Xeus.Core.Explorers.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<BroadcastClue>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<BroadcastClue>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in BroadcastClue value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in BroadcastClue value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -102,7 +102,7 @@ namespace Xeus.Core.Explorers.Internal
                     {
                         propertyCount++;
                     }
-                    if (value.CreationTime != global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero)
+                    if (value.CreationTime != global::Omnix.Serialization.RocketPack.Timestamp.Zero)
                     {
                         propertyCount++;
                     }
@@ -122,7 +122,7 @@ namespace Xeus.Core.Explorers.Internal
                     w.Write((uint)0);
                     w.Write(value.Type);
                 }
-                if (value.CreationTime != global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero)
+                if (value.CreationTime != global::Omnix.Serialization.RocketPack.Timestamp.Zero)
                 {
                     w.Write((uint)1);
                     w.Write(value.CreationTime);
@@ -139,14 +139,14 @@ namespace Xeus.Core.Explorers.Internal
                 }
             }
 
-            public BroadcastClue Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public BroadcastClue Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
                 uint propertyCount = r.GetUInt32();
 
                 string p_type = string.Empty;
-                global::Omnix.Serialization.OmniPack.OmniTimestamp p_creationTime = global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero;
+                global::Omnix.Serialization.RocketPack.Timestamp p_creationTime = global::Omnix.Serialization.RocketPack.Timestamp.Zero;
                 Clue p_clue = Clue.Empty;
                 OmniCertificate? p_certificate = null;
 
@@ -183,22 +183,22 @@ namespace Xeus.Core.Explorers.Internal
         }
     }
 
-    internal sealed partial class UnicastClue : global::Omnix.Serialization.OmniPack.IOmniPackMessage<UnicastClue>
+    internal sealed partial class UnicastClue : global::Omnix.Serialization.RocketPack.IRocketPackMessage<UnicastClue>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<UnicastClue> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<UnicastClue> Formatter { get; }
         public static UnicastClue Empty { get; }
 
         static UnicastClue()
         {
             UnicastClue.Formatter = new ___CustomFormatter();
-            UnicastClue.Empty = new UnicastClue(string.Empty, OmniSignature.Empty, global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero, Clue.Empty, null);
+            UnicastClue.Empty = new UnicastClue(string.Empty, OmniSignature.Empty, global::Omnix.Serialization.RocketPack.Timestamp.Zero, Clue.Empty, null);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxTypeLength = 256;
 
-        public UnicastClue(string type, OmniSignature signature, global::Omnix.Serialization.OmniPack.OmniTimestamp creationTime, Clue clue, OmniCertificate? certificate)
+        public UnicastClue(string type, OmniSignature signature, global::Omnix.Serialization.RocketPack.Timestamp creationTime, Clue clue, OmniCertificate? certificate)
         {
             if (type is null) throw new global::System.ArgumentNullException("type");
             if (type.Length > 256) throw new global::System.ArgumentOutOfRangeException("type");
@@ -224,18 +224,18 @@ namespace Xeus.Core.Explorers.Internal
 
         public string Type { get; }
         public OmniSignature Signature { get; }
-        public global::Omnix.Serialization.OmniPack.OmniTimestamp CreationTime { get; }
+        public global::Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
         public Clue Clue { get; }
         public OmniCertificate? Certificate { get; }
 
         public static UnicastClue Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -267,9 +267,9 @@ namespace Xeus.Core.Explorers.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<UnicastClue>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<UnicastClue>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in UnicastClue value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in UnicastClue value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -283,7 +283,7 @@ namespace Xeus.Core.Explorers.Internal
                     {
                         propertyCount++;
                     }
-                    if (value.CreationTime != global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero)
+                    if (value.CreationTime != global::Omnix.Serialization.RocketPack.Timestamp.Zero)
                     {
                         propertyCount++;
                     }
@@ -308,7 +308,7 @@ namespace Xeus.Core.Explorers.Internal
                     w.Write((uint)1);
                     OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
                 }
-                if (value.CreationTime != global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero)
+                if (value.CreationTime != global::Omnix.Serialization.RocketPack.Timestamp.Zero)
                 {
                     w.Write((uint)2);
                     w.Write(value.CreationTime);
@@ -325,7 +325,7 @@ namespace Xeus.Core.Explorers.Internal
                 }
             }
 
-            public UnicastClue Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public UnicastClue Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -333,7 +333,7 @@ namespace Xeus.Core.Explorers.Internal
 
                 string p_type = string.Empty;
                 OmniSignature p_signature = OmniSignature.Empty;
-                global::Omnix.Serialization.OmniPack.OmniTimestamp p_creationTime = global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero;
+                global::Omnix.Serialization.RocketPack.Timestamp p_creationTime = global::Omnix.Serialization.RocketPack.Timestamp.Zero;
                 Clue p_clue = Clue.Empty;
                 OmniCertificate? p_certificate = null;
 
@@ -375,22 +375,22 @@ namespace Xeus.Core.Explorers.Internal
         }
     }
 
-    internal sealed partial class MulticastClue : global::Omnix.Serialization.OmniPack.IOmniPackMessage<MulticastClue>
+    internal sealed partial class MulticastClue : global::Omnix.Serialization.RocketPack.IRocketPackMessage<MulticastClue>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<MulticastClue> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<MulticastClue> Formatter { get; }
         public static MulticastClue Empty { get; }
 
         static MulticastClue()
         {
             MulticastClue.Formatter = new ___CustomFormatter();
-            MulticastClue.Empty = new MulticastClue(string.Empty, OmniSignature.Empty, global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero, Clue.Empty, null, null);
+            MulticastClue.Empty = new MulticastClue(string.Empty, OmniSignature.Empty, global::Omnix.Serialization.RocketPack.Timestamp.Zero, Clue.Empty, null, null);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxTypeLength = 256;
 
-        public MulticastClue(string type, OmniSignature signature, global::Omnix.Serialization.OmniPack.OmniTimestamp creationTime, Clue clue, OmniHashcash? hashcash, OmniCertificate? certificate)
+        public MulticastClue(string type, OmniSignature signature, global::Omnix.Serialization.RocketPack.Timestamp creationTime, Clue clue, OmniHashcash? hashcash, OmniCertificate? certificate)
         {
             if (type is null) throw new global::System.ArgumentNullException("type");
             if (type.Length > 256) throw new global::System.ArgumentOutOfRangeException("type");
@@ -418,19 +418,19 @@ namespace Xeus.Core.Explorers.Internal
 
         public string Type { get; }
         public OmniSignature Signature { get; }
-        public global::Omnix.Serialization.OmniPack.OmniTimestamp CreationTime { get; }
+        public global::Omnix.Serialization.RocketPack.Timestamp CreationTime { get; }
         public Clue Clue { get; }
         public OmniHashcash? Hashcash { get; }
         public OmniCertificate? Certificate { get; }
 
         public static MulticastClue Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -464,9 +464,9 @@ namespace Xeus.Core.Explorers.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<MulticastClue>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<MulticastClue>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in MulticastClue value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in MulticastClue value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -480,7 +480,7 @@ namespace Xeus.Core.Explorers.Internal
                     {
                         propertyCount++;
                     }
-                    if (value.CreationTime != global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero)
+                    if (value.CreationTime != global::Omnix.Serialization.RocketPack.Timestamp.Zero)
                     {
                         propertyCount++;
                     }
@@ -509,7 +509,7 @@ namespace Xeus.Core.Explorers.Internal
                     w.Write((uint)1);
                     OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
                 }
-                if (value.CreationTime != global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero)
+                if (value.CreationTime != global::Omnix.Serialization.RocketPack.Timestamp.Zero)
                 {
                     w.Write((uint)2);
                     w.Write(value.CreationTime);
@@ -531,7 +531,7 @@ namespace Xeus.Core.Explorers.Internal
                 }
             }
 
-            public MulticastClue Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public MulticastClue Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -539,7 +539,7 @@ namespace Xeus.Core.Explorers.Internal
 
                 string p_type = string.Empty;
                 OmniSignature p_signature = OmniSignature.Empty;
-                global::Omnix.Serialization.OmniPack.OmniTimestamp p_creationTime = global::Omnix.Serialization.OmniPack.OmniTimestamp.Zero;
+                global::Omnix.Serialization.RocketPack.Timestamp p_creationTime = global::Omnix.Serialization.RocketPack.Timestamp.Zero;
                 Clue p_clue = Clue.Empty;
                 OmniHashcash? p_hashcash = null;
                 OmniCertificate? p_certificate = null;
@@ -587,9 +587,9 @@ namespace Xeus.Core.Explorers.Internal
         }
     }
 
-    internal sealed partial class ContentLocation : global::Omnix.Serialization.OmniPack.IOmniPackMessage<ContentLocation>
+    internal sealed partial class ContentLocation : global::Omnix.Serialization.RocketPack.IRocketPackMessage<ContentLocation>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<ContentLocation> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<ContentLocation> Formatter { get; }
         public static ContentLocation Empty { get; }
 
         static ContentLocation()
@@ -613,7 +613,7 @@ namespace Xeus.Core.Explorers.Internal
             }
 
             this.Address = address;
-            this.Clues = new global::Omnix.ReadOnlyListSlim<Clue>(clues);
+            this.Clues = new global::Omnix.Collections.ReadOnlyListSlim<Clue>(clues);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -628,16 +628,16 @@ namespace Xeus.Core.Explorers.Internal
         }
 
         public OmniAddress Address { get; }
-        public global::Omnix.ReadOnlyListSlim<Clue> Clues { get; }
+        public global::Omnix.Collections.ReadOnlyListSlim<Clue> Clues { get; }
 
         public static ContentLocation Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -665,9 +665,9 @@ namespace Xeus.Core.Explorers.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<ContentLocation>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<ContentLocation>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in ContentLocation value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in ContentLocation value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -700,7 +700,7 @@ namespace Xeus.Core.Explorers.Internal
                 }
             }
 
-            public ContentLocation Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public ContentLocation Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -737,9 +737,9 @@ namespace Xeus.Core.Explorers.Internal
         }
     }
 
-    internal sealed partial class RelayOption : global::Omnix.Serialization.OmniPack.IOmniPackMessage<RelayOption>
+    internal sealed partial class RelayOption : global::Omnix.Serialization.RocketPack.IRocketPackMessage<RelayOption>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<RelayOption> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<RelayOption> Formatter { get; }
         public static RelayOption Empty { get; }
 
         static RelayOption()
@@ -769,12 +769,12 @@ namespace Xeus.Core.Explorers.Internal
 
         public static RelayOption Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -802,9 +802,9 @@ namespace Xeus.Core.Explorers.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<RelayOption>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<RelayOption>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in RelayOption value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in RelayOption value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -833,7 +833,7 @@ namespace Xeus.Core.Explorers.Internal
                 }
             }
 
-            public RelayOption Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public RelayOption Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -865,9 +865,9 @@ namespace Xeus.Core.Explorers.Internal
         }
     }
 
-    internal sealed partial class HelloMessage : global::Omnix.Serialization.OmniPack.IOmniPackMessage<HelloMessage>
+    internal sealed partial class HelloMessage : global::Omnix.Serialization.RocketPack.IRocketPackMessage<HelloMessage>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<HelloMessage> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<HelloMessage> Formatter { get; }
         public static HelloMessage Empty { get; }
 
         static HelloMessage()
@@ -885,7 +885,7 @@ namespace Xeus.Core.Explorers.Internal
             if (protocolVersions is null) throw new global::System.ArgumentNullException("protocolVersions");
             if (protocolVersions.Length > 32) throw new global::System.ArgumentOutOfRangeException("protocolVersions");
 
-            this.ProtocolVersions = new global::Omnix.ReadOnlyListSlim<ProtocolVersion>(protocolVersions);
+            this.ProtocolVersions = new global::Omnix.Collections.ReadOnlyListSlim<ProtocolVersion>(protocolVersions);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -898,16 +898,16 @@ namespace Xeus.Core.Explorers.Internal
             });
         }
 
-        public global::Omnix.ReadOnlyListSlim<ProtocolVersion> ProtocolVersions { get; }
+        public global::Omnix.Collections.ReadOnlyListSlim<ProtocolVersion> ProtocolVersions { get; }
 
         public static HelloMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -934,9 +934,9 @@ namespace Xeus.Core.Explorers.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<HelloMessage>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<HelloMessage>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in HelloMessage value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in HelloMessage value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -960,7 +960,7 @@ namespace Xeus.Core.Explorers.Internal
                 }
             }
 
-            public HelloMessage Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public HelloMessage Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -991,9 +991,9 @@ namespace Xeus.Core.Explorers.Internal
         }
     }
 
-    internal sealed partial class ProfileMessage : global::Omnix.Serialization.OmniPack.IOmniPackMessage<ProfileMessage>
+    internal sealed partial class ProfileMessage : global::Omnix.Serialization.RocketPack.IRocketPackMessage<ProfileMessage>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<ProfileMessage> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<ProfileMessage> Formatter { get; }
         public static ProfileMessage Empty { get; }
 
         static ProfileMessage()
@@ -1028,12 +1028,12 @@ namespace Xeus.Core.Explorers.Internal
 
         public static ProfileMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -1061,9 +1061,9 @@ namespace Xeus.Core.Explorers.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<ProfileMessage>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<ProfileMessage>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in ProfileMessage value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in ProfileMessage value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1092,7 +1092,7 @@ namespace Xeus.Core.Explorers.Internal
                 }
             }
 
-            public ProfileMessage Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public ProfileMessage Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1124,9 +1124,9 @@ namespace Xeus.Core.Explorers.Internal
         }
     }
 
-    internal sealed partial class NodeAddressesMessage : global::Omnix.Serialization.OmniPack.IOmniPackMessage<NodeAddressesMessage>
+    internal sealed partial class NodeAddressesMessage : global::Omnix.Serialization.RocketPack.IRocketPackMessage<NodeAddressesMessage>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<NodeAddressesMessage> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<NodeAddressesMessage> Formatter { get; }
         public static NodeAddressesMessage Empty { get; }
 
         static NodeAddressesMessage()
@@ -1148,7 +1148,7 @@ namespace Xeus.Core.Explorers.Internal
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
 
-            this.Values = new global::Omnix.ReadOnlyListSlim<OmniAddress>(values);
+            this.Values = new global::Omnix.Collections.ReadOnlyListSlim<OmniAddress>(values);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -1161,16 +1161,16 @@ namespace Xeus.Core.Explorers.Internal
             });
         }
 
-        public global::Omnix.ReadOnlyListSlim<OmniAddress> Values { get; }
+        public global::Omnix.Collections.ReadOnlyListSlim<OmniAddress> Values { get; }
 
         public static NodeAddressesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -1197,9 +1197,9 @@ namespace Xeus.Core.Explorers.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<NodeAddressesMessage>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<NodeAddressesMessage>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in NodeAddressesMessage value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in NodeAddressesMessage value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1223,7 +1223,7 @@ namespace Xeus.Core.Explorers.Internal
                 }
             }
 
-            public NodeAddressesMessage Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public NodeAddressesMessage Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1254,9 +1254,9 @@ namespace Xeus.Core.Explorers.Internal
         }
     }
 
-    internal sealed partial class WantBroadcastCluesMessage : global::Omnix.Serialization.OmniPack.IOmniPackMessage<WantBroadcastCluesMessage>
+    internal sealed partial class WantBroadcastCluesMessage : global::Omnix.Serialization.RocketPack.IRocketPackMessage<WantBroadcastCluesMessage>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<WantBroadcastCluesMessage> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<WantBroadcastCluesMessage> Formatter { get; }
         public static WantBroadcastCluesMessage Empty { get; }
 
         static WantBroadcastCluesMessage()
@@ -1279,7 +1279,7 @@ namespace Xeus.Core.Explorers.Internal
                 if (n.Value is null) throw new global::System.ArgumentNullException("n.Value");
             }
 
-            this.Parameters = new global::Omnix.ReadOnlyDictionarySlim<OmniSignature, RelayOption>(parameters);
+            this.Parameters = new global::Omnix.Collections.ReadOnlyDictionarySlim<OmniSignature, RelayOption>(parameters);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -1293,16 +1293,16 @@ namespace Xeus.Core.Explorers.Internal
             });
         }
 
-        public global::Omnix.ReadOnlyDictionarySlim<OmniSignature, RelayOption> Parameters { get; }
+        public global::Omnix.Collections.ReadOnlyDictionarySlim<OmniSignature, RelayOption> Parameters { get; }
 
         public static WantBroadcastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -1329,9 +1329,9 @@ namespace Xeus.Core.Explorers.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<WantBroadcastCluesMessage>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<WantBroadcastCluesMessage>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in WantBroadcastCluesMessage value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in WantBroadcastCluesMessage value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1356,7 +1356,7 @@ namespace Xeus.Core.Explorers.Internal
                 }
             }
 
-            public WantBroadcastCluesMessage Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public WantBroadcastCluesMessage Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1391,9 +1391,9 @@ namespace Xeus.Core.Explorers.Internal
         }
     }
 
-    internal sealed partial class PublishBroadcastCluesMessage : global::Omnix.Serialization.OmniPack.IOmniPackMessage<PublishBroadcastCluesMessage>
+    internal sealed partial class PublishBroadcastCluesMessage : global::Omnix.Serialization.RocketPack.IRocketPackMessage<PublishBroadcastCluesMessage>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<PublishBroadcastCluesMessage> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<PublishBroadcastCluesMessage> Formatter { get; }
         public static PublishBroadcastCluesMessage Empty { get; }
 
         static PublishBroadcastCluesMessage()
@@ -1415,7 +1415,7 @@ namespace Xeus.Core.Explorers.Internal
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
 
-            this.Values = new global::Omnix.ReadOnlyListSlim<BroadcastClue>(values);
+            this.Values = new global::Omnix.Collections.ReadOnlyListSlim<BroadcastClue>(values);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -1428,16 +1428,16 @@ namespace Xeus.Core.Explorers.Internal
             });
         }
 
-        public global::Omnix.ReadOnlyListSlim<BroadcastClue> Values { get; }
+        public global::Omnix.Collections.ReadOnlyListSlim<BroadcastClue> Values { get; }
 
         public static PublishBroadcastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -1464,9 +1464,9 @@ namespace Xeus.Core.Explorers.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<PublishBroadcastCluesMessage>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<PublishBroadcastCluesMessage>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in PublishBroadcastCluesMessage value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in PublishBroadcastCluesMessage value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1490,7 +1490,7 @@ namespace Xeus.Core.Explorers.Internal
                 }
             }
 
-            public PublishBroadcastCluesMessage Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public PublishBroadcastCluesMessage Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1521,9 +1521,9 @@ namespace Xeus.Core.Explorers.Internal
         }
     }
 
-    internal sealed partial class BroadcastCluesMessage : global::Omnix.Serialization.OmniPack.IOmniPackMessage<BroadcastCluesMessage>
+    internal sealed partial class BroadcastCluesMessage : global::Omnix.Serialization.RocketPack.IRocketPackMessage<BroadcastCluesMessage>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<BroadcastCluesMessage> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<BroadcastCluesMessage> Formatter { get; }
         public static BroadcastCluesMessage Empty { get; }
 
         static BroadcastCluesMessage()
@@ -1545,7 +1545,7 @@ namespace Xeus.Core.Explorers.Internal
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
 
-            this.Values = new global::Omnix.ReadOnlyListSlim<BroadcastClue>(values);
+            this.Values = new global::Omnix.Collections.ReadOnlyListSlim<BroadcastClue>(values);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -1558,16 +1558,16 @@ namespace Xeus.Core.Explorers.Internal
             });
         }
 
-        public global::Omnix.ReadOnlyListSlim<BroadcastClue> Values { get; }
+        public global::Omnix.Collections.ReadOnlyListSlim<BroadcastClue> Values { get; }
 
         public static BroadcastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -1594,9 +1594,9 @@ namespace Xeus.Core.Explorers.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<BroadcastCluesMessage>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<BroadcastCluesMessage>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in BroadcastCluesMessage value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in BroadcastCluesMessage value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1620,7 +1620,7 @@ namespace Xeus.Core.Explorers.Internal
                 }
             }
 
-            public BroadcastCluesMessage Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public BroadcastCluesMessage Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1651,9 +1651,9 @@ namespace Xeus.Core.Explorers.Internal
         }
     }
 
-    internal sealed partial class WantUnicastCluesMessage : global::Omnix.Serialization.OmniPack.IOmniPackMessage<WantUnicastCluesMessage>
+    internal sealed partial class WantUnicastCluesMessage : global::Omnix.Serialization.RocketPack.IRocketPackMessage<WantUnicastCluesMessage>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<WantUnicastCluesMessage> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<WantUnicastCluesMessage> Formatter { get; }
         public static WantUnicastCluesMessage Empty { get; }
 
         static WantUnicastCluesMessage()
@@ -1676,7 +1676,7 @@ namespace Xeus.Core.Explorers.Internal
                 if (n.Value is null) throw new global::System.ArgumentNullException("n.Value");
             }
 
-            this.Parameters = new global::Omnix.ReadOnlyDictionarySlim<OmniSignature, RelayOption>(parameters);
+            this.Parameters = new global::Omnix.Collections.ReadOnlyDictionarySlim<OmniSignature, RelayOption>(parameters);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -1690,16 +1690,16 @@ namespace Xeus.Core.Explorers.Internal
             });
         }
 
-        public global::Omnix.ReadOnlyDictionarySlim<OmniSignature, RelayOption> Parameters { get; }
+        public global::Omnix.Collections.ReadOnlyDictionarySlim<OmniSignature, RelayOption> Parameters { get; }
 
         public static WantUnicastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -1726,9 +1726,9 @@ namespace Xeus.Core.Explorers.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<WantUnicastCluesMessage>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<WantUnicastCluesMessage>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in WantUnicastCluesMessage value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in WantUnicastCluesMessage value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1753,7 +1753,7 @@ namespace Xeus.Core.Explorers.Internal
                 }
             }
 
-            public WantUnicastCluesMessage Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public WantUnicastCluesMessage Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1788,9 +1788,9 @@ namespace Xeus.Core.Explorers.Internal
         }
     }
 
-    internal sealed partial class PublishUnicastCluesMessage : global::Omnix.Serialization.OmniPack.IOmniPackMessage<PublishUnicastCluesMessage>
+    internal sealed partial class PublishUnicastCluesMessage : global::Omnix.Serialization.RocketPack.IRocketPackMessage<PublishUnicastCluesMessage>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<PublishUnicastCluesMessage> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<PublishUnicastCluesMessage> Formatter { get; }
         public static PublishUnicastCluesMessage Empty { get; }
 
         static PublishUnicastCluesMessage()
@@ -1812,7 +1812,7 @@ namespace Xeus.Core.Explorers.Internal
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
 
-            this.Values = new global::Omnix.ReadOnlyListSlim<UnicastClue>(values);
+            this.Values = new global::Omnix.Collections.ReadOnlyListSlim<UnicastClue>(values);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -1825,16 +1825,16 @@ namespace Xeus.Core.Explorers.Internal
             });
         }
 
-        public global::Omnix.ReadOnlyListSlim<UnicastClue> Values { get; }
+        public global::Omnix.Collections.ReadOnlyListSlim<UnicastClue> Values { get; }
 
         public static PublishUnicastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -1861,9 +1861,9 @@ namespace Xeus.Core.Explorers.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<PublishUnicastCluesMessage>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<PublishUnicastCluesMessage>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in PublishUnicastCluesMessage value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in PublishUnicastCluesMessage value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1887,7 +1887,7 @@ namespace Xeus.Core.Explorers.Internal
                 }
             }
 
-            public PublishUnicastCluesMessage Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public PublishUnicastCluesMessage Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1918,9 +1918,9 @@ namespace Xeus.Core.Explorers.Internal
         }
     }
 
-    internal sealed partial class UnicastCluesMessage : global::Omnix.Serialization.OmniPack.IOmniPackMessage<UnicastCluesMessage>
+    internal sealed partial class UnicastCluesMessage : global::Omnix.Serialization.RocketPack.IRocketPackMessage<UnicastCluesMessage>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<UnicastCluesMessage> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<UnicastCluesMessage> Formatter { get; }
         public static UnicastCluesMessage Empty { get; }
 
         static UnicastCluesMessage()
@@ -1942,7 +1942,7 @@ namespace Xeus.Core.Explorers.Internal
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
 
-            this.Values = new global::Omnix.ReadOnlyListSlim<UnicastClue>(values);
+            this.Values = new global::Omnix.Collections.ReadOnlyListSlim<UnicastClue>(values);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -1955,16 +1955,16 @@ namespace Xeus.Core.Explorers.Internal
             });
         }
 
-        public global::Omnix.ReadOnlyListSlim<UnicastClue> Values { get; }
+        public global::Omnix.Collections.ReadOnlyListSlim<UnicastClue> Values { get; }
 
         public static UnicastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -1991,9 +1991,9 @@ namespace Xeus.Core.Explorers.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<UnicastCluesMessage>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<UnicastCluesMessage>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in UnicastCluesMessage value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in UnicastCluesMessage value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2017,7 +2017,7 @@ namespace Xeus.Core.Explorers.Internal
                 }
             }
 
-            public UnicastCluesMessage Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public UnicastCluesMessage Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2048,9 +2048,9 @@ namespace Xeus.Core.Explorers.Internal
         }
     }
 
-    internal sealed partial class WantMulticastCluesMessage : global::Omnix.Serialization.OmniPack.IOmniPackMessage<WantMulticastCluesMessage>
+    internal sealed partial class WantMulticastCluesMessage : global::Omnix.Serialization.RocketPack.IRocketPackMessage<WantMulticastCluesMessage>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<WantMulticastCluesMessage> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<WantMulticastCluesMessage> Formatter { get; }
         public static WantMulticastCluesMessage Empty { get; }
 
         static WantMulticastCluesMessage()
@@ -2073,7 +2073,7 @@ namespace Xeus.Core.Explorers.Internal
                 if (n.Value is null) throw new global::System.ArgumentNullException("n.Value");
             }
 
-            this.Parameters = new global::Omnix.ReadOnlyDictionarySlim<OmniSignature, RelayOption>(parameters);
+            this.Parameters = new global::Omnix.Collections.ReadOnlyDictionarySlim<OmniSignature, RelayOption>(parameters);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -2087,16 +2087,16 @@ namespace Xeus.Core.Explorers.Internal
             });
         }
 
-        public global::Omnix.ReadOnlyDictionarySlim<OmniSignature, RelayOption> Parameters { get; }
+        public global::Omnix.Collections.ReadOnlyDictionarySlim<OmniSignature, RelayOption> Parameters { get; }
 
         public static WantMulticastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -2123,9 +2123,9 @@ namespace Xeus.Core.Explorers.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<WantMulticastCluesMessage>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<WantMulticastCluesMessage>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in WantMulticastCluesMessage value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in WantMulticastCluesMessage value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2150,7 +2150,7 @@ namespace Xeus.Core.Explorers.Internal
                 }
             }
 
-            public WantMulticastCluesMessage Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public WantMulticastCluesMessage Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2185,9 +2185,9 @@ namespace Xeus.Core.Explorers.Internal
         }
     }
 
-    internal sealed partial class PublishMulticastCluesMessage : global::Omnix.Serialization.OmniPack.IOmniPackMessage<PublishMulticastCluesMessage>
+    internal sealed partial class PublishMulticastCluesMessage : global::Omnix.Serialization.RocketPack.IRocketPackMessage<PublishMulticastCluesMessage>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<PublishMulticastCluesMessage> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<PublishMulticastCluesMessage> Formatter { get; }
         public static PublishMulticastCluesMessage Empty { get; }
 
         static PublishMulticastCluesMessage()
@@ -2209,7 +2209,7 @@ namespace Xeus.Core.Explorers.Internal
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
 
-            this.Values = new global::Omnix.ReadOnlyListSlim<MulticastClue>(values);
+            this.Values = new global::Omnix.Collections.ReadOnlyListSlim<MulticastClue>(values);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -2222,16 +2222,16 @@ namespace Xeus.Core.Explorers.Internal
             });
         }
 
-        public global::Omnix.ReadOnlyListSlim<MulticastClue> Values { get; }
+        public global::Omnix.Collections.ReadOnlyListSlim<MulticastClue> Values { get; }
 
         public static PublishMulticastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -2258,9 +2258,9 @@ namespace Xeus.Core.Explorers.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<PublishMulticastCluesMessage>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<PublishMulticastCluesMessage>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in PublishMulticastCluesMessage value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in PublishMulticastCluesMessage value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2284,7 +2284,7 @@ namespace Xeus.Core.Explorers.Internal
                 }
             }
 
-            public PublishMulticastCluesMessage Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public PublishMulticastCluesMessage Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2315,9 +2315,9 @@ namespace Xeus.Core.Explorers.Internal
         }
     }
 
-    internal sealed partial class MulticastCluesMessage : global::Omnix.Serialization.OmniPack.IOmniPackMessage<MulticastCluesMessage>
+    internal sealed partial class MulticastCluesMessage : global::Omnix.Serialization.RocketPack.IRocketPackMessage<MulticastCluesMessage>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<MulticastCluesMessage> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<MulticastCluesMessage> Formatter { get; }
         public static MulticastCluesMessage Empty { get; }
 
         static MulticastCluesMessage()
@@ -2339,7 +2339,7 @@ namespace Xeus.Core.Explorers.Internal
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
 
-            this.Values = new global::Omnix.ReadOnlyListSlim<MulticastClue>(values);
+            this.Values = new global::Omnix.Collections.ReadOnlyListSlim<MulticastClue>(values);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -2352,16 +2352,16 @@ namespace Xeus.Core.Explorers.Internal
             });
         }
 
-        public global::Omnix.ReadOnlyListSlim<MulticastClue> Values { get; }
+        public global::Omnix.Collections.ReadOnlyListSlim<MulticastClue> Values { get; }
 
         public static MulticastCluesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -2388,9 +2388,9 @@ namespace Xeus.Core.Explorers.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<MulticastCluesMessage>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<MulticastCluesMessage>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in MulticastCluesMessage value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in MulticastCluesMessage value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2414,7 +2414,7 @@ namespace Xeus.Core.Explorers.Internal
                 }
             }
 
-            public MulticastCluesMessage Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public MulticastCluesMessage Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2445,9 +2445,9 @@ namespace Xeus.Core.Explorers.Internal
         }
     }
 
-    internal sealed partial class WantContentLocations : global::Omnix.Serialization.OmniPack.IOmniPackMessage<WantContentLocations>
+    internal sealed partial class WantContentLocations : global::Omnix.Serialization.RocketPack.IRocketPackMessage<WantContentLocations>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<WantContentLocations> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<WantContentLocations> Formatter { get; }
         public static WantContentLocations Empty { get; }
 
         static WantContentLocations()
@@ -2470,7 +2470,7 @@ namespace Xeus.Core.Explorers.Internal
                 if (n.Value is null) throw new global::System.ArgumentNullException("n.Value");
             }
 
-            this.Parameters = new global::Omnix.ReadOnlyDictionarySlim<Clue, RelayOption>(parameters);
+            this.Parameters = new global::Omnix.Collections.ReadOnlyDictionarySlim<Clue, RelayOption>(parameters);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -2484,16 +2484,16 @@ namespace Xeus.Core.Explorers.Internal
             });
         }
 
-        public global::Omnix.ReadOnlyDictionarySlim<Clue, RelayOption> Parameters { get; }
+        public global::Omnix.Collections.ReadOnlyDictionarySlim<Clue, RelayOption> Parameters { get; }
 
         public static WantContentLocations Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -2520,9 +2520,9 @@ namespace Xeus.Core.Explorers.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<WantContentLocations>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<WantContentLocations>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in WantContentLocations value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in WantContentLocations value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2547,7 +2547,7 @@ namespace Xeus.Core.Explorers.Internal
                 }
             }
 
-            public WantContentLocations Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public WantContentLocations Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2582,9 +2582,9 @@ namespace Xeus.Core.Explorers.Internal
         }
     }
 
-    internal sealed partial class PublishContentLocations : global::Omnix.Serialization.OmniPack.IOmniPackMessage<PublishContentLocations>
+    internal sealed partial class PublishContentLocations : global::Omnix.Serialization.RocketPack.IRocketPackMessage<PublishContentLocations>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<PublishContentLocations> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<PublishContentLocations> Formatter { get; }
         public static PublishContentLocations Empty { get; }
 
         static PublishContentLocations()
@@ -2606,7 +2606,7 @@ namespace Xeus.Core.Explorers.Internal
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
 
-            this.Values = new global::Omnix.ReadOnlyListSlim<ContentLocation>(values);
+            this.Values = new global::Omnix.Collections.ReadOnlyListSlim<ContentLocation>(values);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -2619,16 +2619,16 @@ namespace Xeus.Core.Explorers.Internal
             });
         }
 
-        public global::Omnix.ReadOnlyListSlim<ContentLocation> Values { get; }
+        public global::Omnix.Collections.ReadOnlyListSlim<ContentLocation> Values { get; }
 
         public static PublishContentLocations Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -2655,9 +2655,9 @@ namespace Xeus.Core.Explorers.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<PublishContentLocations>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<PublishContentLocations>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in PublishContentLocations value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in PublishContentLocations value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2681,7 +2681,7 @@ namespace Xeus.Core.Explorers.Internal
                 }
             }
 
-            public PublishContentLocations Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public PublishContentLocations Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2712,9 +2712,9 @@ namespace Xeus.Core.Explorers.Internal
         }
     }
 
-    internal sealed partial class ContentLocations : global::Omnix.Serialization.OmniPack.IOmniPackMessage<ContentLocations>
+    internal sealed partial class ContentLocations : global::Omnix.Serialization.RocketPack.IRocketPackMessage<ContentLocations>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<ContentLocations> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<ContentLocations> Formatter { get; }
         public static ContentLocations Empty { get; }
 
         static ContentLocations()
@@ -2736,7 +2736,7 @@ namespace Xeus.Core.Explorers.Internal
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
 
-            this.Values = new global::Omnix.ReadOnlyListSlim<ContentLocation>(values);
+            this.Values = new global::Omnix.Collections.ReadOnlyListSlim<ContentLocation>(values);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -2749,16 +2749,16 @@ namespace Xeus.Core.Explorers.Internal
             });
         }
 
-        public global::Omnix.ReadOnlyListSlim<ContentLocation> Values { get; }
+        public global::Omnix.Collections.ReadOnlyListSlim<ContentLocation> Values { get; }
 
         public static ContentLocations Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -2785,9 +2785,9 @@ namespace Xeus.Core.Explorers.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<ContentLocations>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<ContentLocations>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in ContentLocations value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in ContentLocations value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2811,7 +2811,7 @@ namespace Xeus.Core.Explorers.Internal
                 }
             }
 
-            public ContentLocations Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public ContentLocations Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 

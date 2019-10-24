@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Omnix.Algorithms.Cryptography;
+using Omnix.Cryptography;
 using Omnix.Base;
 using Xunit;
 
-namespace Xeus.Core.Internal.Content.Primitives
+namespace Xeus.Core.Connectors
 {
     public class XeusConnectorTests
     {

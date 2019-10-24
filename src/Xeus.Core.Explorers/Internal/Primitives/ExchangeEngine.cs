@@ -6,7 +6,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using Omnix.Algorithms.Cryptography;
+using Omnix.Cryptography;
 using Omnix.Base;
 using Omnix.Base.Extensions;
 using Omnix.Base.Helpers;

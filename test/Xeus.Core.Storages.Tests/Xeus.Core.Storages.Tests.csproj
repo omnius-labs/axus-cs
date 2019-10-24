@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Xeus.Core.Storages\Xeus.Core.Storages.csproj" />
     <ProjectReference Include="..\..\src\Xeus.Core\Xeus.Core.csproj" />
   </ItemGroup>
 

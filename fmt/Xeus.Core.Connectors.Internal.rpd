@@ -1,6 +1,6 @@
 ﻿syntax = v1.0;
 
-using "Omnix.Algorithms.Cryptography";
+using "Omnix.Cryptography";
 using "Omnix.Network";
 using "Xeus.Core";
 

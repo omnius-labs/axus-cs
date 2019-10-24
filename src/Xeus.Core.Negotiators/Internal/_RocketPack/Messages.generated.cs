@@ -11,9 +11,9 @@ namespace Xeus.Core.Negotiators.Internal
         Version1 = 1,
     }
 
-    internal sealed partial class HelloMessage : global::Omnix.Serialization.OmniPack.IOmniPackMessage<HelloMessage>
+    internal sealed partial class HelloMessage : global::Omnix.Serialization.RocketPack.IRocketPackMessage<HelloMessage>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<HelloMessage> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<HelloMessage> Formatter { get; }
         public static HelloMessage Empty { get; }
 
         static HelloMessage()
@@ -31,7 +31,7 @@ namespace Xeus.Core.Negotiators.Internal
             if (protocolVersions is null) throw new global::System.ArgumentNullException("protocolVersions");
             if (protocolVersions.Length > 32) throw new global::System.ArgumentOutOfRangeException("protocolVersions");
 
-            this.ProtocolVersions = new global::Omnix.ReadOnlyListSlim<ProtocolVersion>(protocolVersions);
+            this.ProtocolVersions = new global::Omnix.Collections.ReadOnlyListSlim<ProtocolVersion>(protocolVersions);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -44,16 +44,16 @@ namespace Xeus.Core.Negotiators.Internal
             });
         }
 
-        public global::Omnix.ReadOnlyListSlim<ProtocolVersion> ProtocolVersions { get; }
+        public global::Omnix.Collections.ReadOnlyListSlim<ProtocolVersion> ProtocolVersions { get; }
 
         public static HelloMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -80,9 +80,9 @@ namespace Xeus.Core.Negotiators.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<HelloMessage>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<HelloMessage>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in HelloMessage value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in HelloMessage value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -106,7 +106,7 @@ namespace Xeus.Core.Negotiators.Internal
                 }
             }
 
-            public HelloMessage Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public HelloMessage Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -137,9 +137,9 @@ namespace Xeus.Core.Negotiators.Internal
         }
     }
 
-    internal sealed partial class ProfileMessage : global::Omnix.Serialization.OmniPack.IOmniPackMessage<ProfileMessage>
+    internal sealed partial class ProfileMessage : global::Omnix.Serialization.RocketPack.IRocketPackMessage<ProfileMessage>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<ProfileMessage> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<ProfileMessage> Formatter { get; }
         public static ProfileMessage Empty { get; }
 
         static ProfileMessage()
@@ -174,12 +174,12 @@ namespace Xeus.Core.Negotiators.Internal
 
         public static ProfileMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -207,9 +207,9 @@ namespace Xeus.Core.Negotiators.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<ProfileMessage>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<ProfileMessage>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in ProfileMessage value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in ProfileMessage value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -238,7 +238,7 @@ namespace Xeus.Core.Negotiators.Internal
                 }
             }
 
-            public ProfileMessage Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public ProfileMessage Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -270,9 +270,9 @@ namespace Xeus.Core.Negotiators.Internal
         }
     }
 
-    internal sealed partial class NodeAddressesMessage : global::Omnix.Serialization.OmniPack.IOmniPackMessage<NodeAddressesMessage>
+    internal sealed partial class NodeAddressesMessage : global::Omnix.Serialization.RocketPack.IRocketPackMessage<NodeAddressesMessage>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<NodeAddressesMessage> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<NodeAddressesMessage> Formatter { get; }
         public static NodeAddressesMessage Empty { get; }
 
         static NodeAddressesMessage()
@@ -294,7 +294,7 @@ namespace Xeus.Core.Negotiators.Internal
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
 
-            this.Values = new global::Omnix.ReadOnlyListSlim<OmniAddress>(values);
+            this.Values = new global::Omnix.Collections.ReadOnlyListSlim<OmniAddress>(values);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -307,16 +307,16 @@ namespace Xeus.Core.Negotiators.Internal
             });
         }
 
-        public global::Omnix.ReadOnlyListSlim<OmniAddress> Values { get; }
+        public global::Omnix.Collections.ReadOnlyListSlim<OmniAddress> Values { get; }
 
         public static NodeAddressesMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -343,9 +343,9 @@ namespace Xeus.Core.Negotiators.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<NodeAddressesMessage>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<NodeAddressesMessage>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in NodeAddressesMessage value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in NodeAddressesMessage value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -369,7 +369,7 @@ namespace Xeus.Core.Negotiators.Internal
                 }
             }
 
-            public NodeAddressesMessage Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public NodeAddressesMessage Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -400,9 +400,9 @@ namespace Xeus.Core.Negotiators.Internal
         }
     }
 
-    internal sealed partial class WantBlocksMessage : global::Omnix.Serialization.OmniPack.IOmniPackMessage<WantBlocksMessage>
+    internal sealed partial class WantBlocksMessage : global::Omnix.Serialization.RocketPack.IRocketPackMessage<WantBlocksMessage>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<WantBlocksMessage> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<WantBlocksMessage> Formatter { get; }
         public static WantBlocksMessage Empty { get; }
 
         static WantBlocksMessage()
@@ -420,7 +420,7 @@ namespace Xeus.Core.Negotiators.Internal
             if (parameters is null) throw new global::System.ArgumentNullException("parameters");
             if (parameters.Length > 8192) throw new global::System.ArgumentOutOfRangeException("parameters");
 
-            this.Parameters = new global::Omnix.ReadOnlyListSlim<OmniHash>(parameters);
+            this.Parameters = new global::Omnix.Collections.ReadOnlyListSlim<OmniHash>(parameters);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -433,16 +433,16 @@ namespace Xeus.Core.Negotiators.Internal
             });
         }
 
-        public global::Omnix.ReadOnlyListSlim<OmniHash> Parameters { get; }
+        public global::Omnix.Collections.ReadOnlyListSlim<OmniHash> Parameters { get; }
 
         public static WantBlocksMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -469,9 +469,9 @@ namespace Xeus.Core.Negotiators.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<WantBlocksMessage>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<WantBlocksMessage>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in WantBlocksMessage value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in WantBlocksMessage value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -495,7 +495,7 @@ namespace Xeus.Core.Negotiators.Internal
                 }
             }
 
-            public WantBlocksMessage Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public WantBlocksMessage Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -526,9 +526,9 @@ namespace Xeus.Core.Negotiators.Internal
         }
     }
 
-    internal sealed partial class CancelBlocksMessage : global::Omnix.Serialization.OmniPack.IOmniPackMessage<CancelBlocksMessage>
+    internal sealed partial class CancelBlocksMessage : global::Omnix.Serialization.RocketPack.IRocketPackMessage<CancelBlocksMessage>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<CancelBlocksMessage> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<CancelBlocksMessage> Formatter { get; }
         public static CancelBlocksMessage Empty { get; }
 
         static CancelBlocksMessage()
@@ -546,7 +546,7 @@ namespace Xeus.Core.Negotiators.Internal
             if (parameters is null) throw new global::System.ArgumentNullException("parameters");
             if (parameters.Length > 8192) throw new global::System.ArgumentOutOfRangeException("parameters");
 
-            this.Parameters = new global::Omnix.ReadOnlyListSlim<OmniHash>(parameters);
+            this.Parameters = new global::Omnix.Collections.ReadOnlyListSlim<OmniHash>(parameters);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -559,16 +559,16 @@ namespace Xeus.Core.Negotiators.Internal
             });
         }
 
-        public global::Omnix.ReadOnlyListSlim<OmniHash> Parameters { get; }
+        public global::Omnix.Collections.ReadOnlyListSlim<OmniHash> Parameters { get; }
 
         public static CancelBlocksMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -595,9 +595,9 @@ namespace Xeus.Core.Negotiators.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<CancelBlocksMessage>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<CancelBlocksMessage>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in CancelBlocksMessage value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in CancelBlocksMessage value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -621,7 +621,7 @@ namespace Xeus.Core.Negotiators.Internal
                 }
             }
 
-            public CancelBlocksMessage Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public CancelBlocksMessage Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -652,9 +652,9 @@ namespace Xeus.Core.Negotiators.Internal
         }
     }
 
-    internal sealed partial class BlocksMessages : global::Omnix.Serialization.OmniPack.IOmniPackMessage<BlocksMessages>
+    internal sealed partial class BlocksMessages : global::Omnix.Serialization.RocketPack.IRocketPackMessage<BlocksMessages>
     {
-        public static global::Omnix.Serialization.OmniPack.IOmniPackFormatter<BlocksMessages> Formatter { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<BlocksMessages> Formatter { get; }
         public static BlocksMessages Empty { get; }
 
         static BlocksMessages()
@@ -678,7 +678,7 @@ namespace Xeus.Core.Negotiators.Internal
             }
 
             this.HashAlgorithm = hashAlgorithm;
-            this.Blocks = new global::Omnix.ReadOnlyListSlim<global::System.Buffers.IMemoryOwner<byte>>(blocks);
+            this.Blocks = new global::Omnix.Collections.ReadOnlyListSlim<global::System.Buffers.IMemoryOwner<byte>>(blocks);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -693,16 +693,16 @@ namespace Xeus.Core.Negotiators.Internal
         }
 
         public OmniHashAlgorithmType HashAlgorithm { get; }
-        public global::Omnix.ReadOnlyListSlim<global::System.Buffers.IMemoryOwner<byte>> Blocks { get; }
+        public global::Omnix.Collections.ReadOnlyListSlim<global::System.Buffers.IMemoryOwner<byte>> Blocks { get; }
 
         public static BlocksMessages Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var reader = new global::Omnix.Serialization.OmniPack.OmniPackReader(sequence, bufferPool);
+            var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
-            var writer = new global::Omnix.Serialization.OmniPack.OmniPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnix.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -730,9 +730,9 @@ namespace Xeus.Core.Negotiators.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.OmniPack.IOmniPackFormatter<BlocksMessages>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<BlocksMessages>
         {
-            public void Serialize(ref global::Omnix.Serialization.OmniPack.OmniPackWriter w, in BlocksMessages value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in BlocksMessages value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -765,7 +765,7 @@ namespace Xeus.Core.Negotiators.Internal
                 }
             }
 
-            public BlocksMessages Deserialize(ref global::Omnix.Serialization.OmniPack.OmniPackReader r, in int rank)
+            public BlocksMessages Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
