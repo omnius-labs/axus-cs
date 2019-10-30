@@ -54,12 +54,12 @@ namespace Xeus.Core.Repositories.Internal
 
         public ContentMetadata? GetMessageContentMetadata(Clue clue)
         {
-            if (!_messageMap.TryGetValue(clue, out var contentInfo))
+            if (!_messageMap.TryGetValue(clue, out var metadata))
             {
                 return null;
             }
 
-            return contentInfo;
+            return metadata;
         }
 
         #endregion
@@ -130,9 +130,18 @@ namespace Xeus.Core.Repositories.Internal
             }
         }
 
-        public SharedBlocksMetadata? GetSharedBlocksInfo(OmniHash hash)
+        public bool TryGetSharedFileInfo(OmniHash hash)
         {
-            return _hashMap.Get(hash);
+            var metadata = _hashMap.Get(hash);
+            if (metadata == null)
+            {
+                return false;
+            }
+
+            // TODO
+            //metadata.SharedFileMetadata.
+
+            return true;
         }
 
         public IEnumerable<OmniHash> GetHashes()

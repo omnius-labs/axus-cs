@@ -8,6 +8,7 @@
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Cryptography\Omnix.Cryptography.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Base\Omnix.Base.csproj" />
     <ProjectReference Include="..\..\refs\omnix\src\Omnix.Network\Omnix.Network.csproj" />
+    <ProjectReference Include="..\Xeus.Core.Storages\Xeus.Core.Storages.csproj" />
     <ProjectReference Include="..\Xeus.Core\Xeus.Core.csproj" />
   </ItemGroup>
 
