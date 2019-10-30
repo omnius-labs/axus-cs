@@ -7,28 +7,24 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Omnix.Correction;
 using Omnix.Cryptography;
 using Omnix.Base;
 using Omnix.Base.Helpers;
 using Omnix.Configuration;
 using Omnix.Io;
-using Omnix.Serialization.OmniPack.Helpers;
-using Xeus.Core.Internal.Storage.Primitives;
-using Xeus.Core.Internal.Common;
-using Xeus.Messages;
+using Xeus.Core.Repositories.Internal;
 
-namespace Xeus.Core.Internal.Storage
+namespace Xeus.Core.Repositories
 {
     internal sealed class XeusRepository : DisposableBase, ISettings, ISetOperators<OmniHash>, IEnumerable<OmniHash>
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly BufferPool _bufferPool;
-        private readonly BlockStorage _blockStorage;
-        private readonly ContentMetadataStorage _contentMetadataStorage;
+        private readonly IBufferPool<byte> _bufferPool;
+        private readonly IStorage _storage;
+        private readonly ContentMemoryStorage _contentMemoryStorage;
 
-        private readonly SettingsDatabase _settings;
+        private readonly OmniSettings _settings;
 
         private readonly EventScheduler _checkEventScheduler;
 
@@ -38,16 +34,16 @@ namespace Xeus.Core.Internal.Storage
 
         private readonly int _threadCount = 2;
 
-        public XeusRepository(string basePath, BufferPool bufferPool)
+        public XeusRepository(string basePath, IStorage storage, IBufferPool<byte> bufferPool)
         {
             var settingsPath = Path.Combine(basePath, "Settings");
             var childrenPath = Path.Combine(basePath, "Children");
 
             _bufferPool = bufferPool;
-            _blockStorage = new BlockStorage(Path.Combine(childrenPath, nameof(XeusRepository)), _bufferPool);
-            _contentMetadataStorage = new ContentMetadataStorage();
+            _storage = storage;
+            _contentMemoryStorage = new ContentMemoryStorage();
 
-            _settings = new SettingsDatabase(settingsPath);
+            _settings = new OmniSettings(settingsPath);
 
             _checkEventScheduler = new EventScheduler(this.CheckThread);
         }
@@ -62,7 +58,7 @@ namespace Xeus.Core.Internal.Storage
         {
             get
             {
-                return _blockStorage.Size;
+                return _storage.Size;
             }
         }
 
@@ -70,11 +66,11 @@ namespace Xeus.Core.Internal.Storage
         {
             add
             {
-                _blockStorage.AddedBlockEvents += value;
+                _storage.AddedBlockEvents += value;
             }
             remove
             {
-                _blockStorage.AddedBlockEvents -= value;
+                _storage.AddedBlockEvents -= value;
             }
         }
 
@@ -82,29 +78,29 @@ namespace Xeus.Core.Internal.Storage
         {
             add
             {
-                _blockStorage.RemovedBlockEvents += value;
+                _storage.RemovedBlockEvents += value;
                 _removedBlockEventQueue.Events += value;
             }
             remove
             {
-                _blockStorage.RemovedBlockEvents -= value;
+                _storage.RemovedBlockEvents -= value;
                 _removedBlockEventQueue.Events -= value;
             }
         }
 
         public void Lock(OmniHash hash)
         {
-            _blockStorage.Lock(hash);
+            _storage.Lock(hash);
         }
 
         public void Unlock(OmniHash hash)
         {
-            _blockStorage.Unlock(hash);
+            _storage.Unlock(hash);
         }
 
         public bool Contains(OmniHash hash)
         {
-            if (_blockStorage.Contains(hash))
+            if (_storage.Contains(hash))
             {
                 return true;
             }
@@ -123,7 +119,7 @@ namespace Xeus.Core.Internal.Storage
         public IEnumerable<OmniHash> IntersectFrom(IEnumerable<OmniHash> collection)
         {
             var hashSet = new HashSet<OmniHash>();
-            hashSet.UnionWith(_blockStorage.IntersectFrom(collection));
+            hashSet.UnionWith(_storage.IntersectFrom(collection));
 
             lock (_lockObject)
             {
@@ -136,7 +132,7 @@ namespace Xeus.Core.Internal.Storage
         public IEnumerable<OmniHash> ExceptFrom(IEnumerable<OmniHash> collection)
         {
             var hashSet = new HashSet<OmniHash>(collection);
-            hashSet.ExceptWith(_blockStorage.IntersectFrom(collection));
+            hashSet.ExceptWith(_storage.IntersectFrom(collection));
 
             lock (_lockObject)
             {
@@ -148,12 +144,12 @@ namespace Xeus.Core.Internal.Storage
 
         public void Resize(ulong size)
         {
-            _blockStorage.Resize(size);
+            _storage.Resize(size);
         }
 
         public async ValueTask CheckBlocks(Action<CheckBlocksProgressReport> progress, CancellationToken token)
         {
-            await _blockStorage.CheckBlocks(progress, token);
+            await _storage.CheckBlocks(progress, token);
         }
 
         public bool TryGetBlock(OmniHash hash, [NotNullWhen(true)] out IMemoryOwner<byte>? memoryOwner)
@@ -165,7 +161,7 @@ namespace Xeus.Core.Internal.Storage
 
             // Cache
             {
-                var result = _blockStorage.TryGet(hash, out memoryOwner);
+                var result = _storage.TryGet(hash, out memoryOwner);
 
                 if (result)
                 {
@@ -249,14 +245,14 @@ namespace Xeus.Core.Internal.Storage
 
         public bool TrySetBlock(OmniHash hash, ReadOnlySpan<byte> value)
         {
-            return _blockStorage.TrySet(hash, value);
+            return _storage.TrySet(hash, value);
         }
 
         public uint GetLength(OmniHash hash)
         {
             // Cache
             {
-                uint length = _blockStorage.GetLength(hash);
+                uint length = _storage.GetLength(hash);
                 if (length != 0)
                 {
                     return length;
@@ -317,10 +313,10 @@ namespace Xeus.Core.Internal.Storage
                                     hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(bufferMemoryOwner.Memory.Span));
                                 }
 
-                                _blockStorage.Lock(hash);
+                                _storage.Lock(hash);
                                 lockedHashes.Add(hash);
 
-                                bool result = _blockStorage.TrySet(hash, bufferMemoryOwner.Memory.Span);
+                                bool result = _storage.TrySet(hash, bufferMemoryOwner.Memory.Span);
 
                                 if (!result)
                                 {
@@ -371,10 +367,10 @@ namespace Xeus.Core.Internal.Storage
                                             hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(bufferMemoryOwner.Memory.Span));
                                         }
 
-                                        _blockStorage.Lock(hash);
+                                        _storage.Lock(hash);
                                         lockedHashes.Add(hash);
 
-                                        bool result = _blockStorage.TrySet(hash, bufferMemoryOwner.Memory.Span);
+                                        bool result = _storage.TrySet(hash, bufferMemoryOwner.Memory.Span);
 
                                         if (!result)
                                         {
@@ -428,7 +424,7 @@ namespace Xeus.Core.Internal.Storage
                 {
                     foreach (var hash in lockedHashes)
                     {
-                        _blockStorage.Unlock(hash);
+                        _storage.Unlock(hash);
                     }
 
                     _logger.Error(e);
@@ -450,7 +446,7 @@ namespace Xeus.Core.Internal.Storage
                     {
                         foreach (var hash in lockedHashes)
                         {
-                            _blockStorage.Unlock(hash);
+                            _storage.Unlock(hash);
                         }
                     }
                 }
@@ -610,10 +606,10 @@ namespace Xeus.Core.Internal.Storage
                                         hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(bufferMemoryOwner.Memory.Span));
                                     }
 
-                                    _blockStorage.Lock(hash);
+                                    _storage.Lock(hash);
                                     lockedHashes.Add(hash);
 
-                                    bool result = _blockStorage.TrySet(hash, bufferMemoryOwner.Memory.Span);
+                                    bool result = _storage.TrySet(hash, bufferMemoryOwner.Memory.Span);
 
                                     if (!result)
                                     {
@@ -660,10 +656,10 @@ namespace Xeus.Core.Internal.Storage
                                                 hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(bufferMemoryOwner.Memory.Span));
                                             }
 
-                                            _blockStorage.Lock(hash);
+                                            _storage.Lock(hash);
                                             lockedHashes.Add(hash);
 
-                                            bool result = _blockStorage.TrySet(hash, bufferMemoryOwner.Memory.Span);
+                                            bool result = _storage.TrySet(hash, bufferMemoryOwner.Memory.Span);
 
                                             if (!result)
                                             {
@@ -712,7 +708,7 @@ namespace Xeus.Core.Internal.Storage
                 {
                     foreach (var hash in lockedHashes)
                     {
-                        _blockStorage.Unlock(hash);
+                        _storage.Unlock(hash);
                     }
 
                     _logger.Error(e);
@@ -730,7 +726,7 @@ namespace Xeus.Core.Internal.Storage
                     {
                         foreach (var hash in lockedHashes)
                         {
-                            _blockStorage.Unlock(hash);
+                            _storage.Unlock(hash);
                         }
                     }
                 }
@@ -771,7 +767,7 @@ namespace Xeus.Core.Internal.Storage
 
                 foreach (var hash in contentInfo.LockedHashes)
                 {
-                    _blockStorage.Unlock(hash);
+                    _storage.Unlock(hash);
                 }
 
                 if (contentInfo.SharedBlocksMetadata != null)
@@ -819,7 +815,7 @@ namespace Xeus.Core.Internal.Storage
 
                 foreach (var hash in contentInfo.LockedHashes)
                 {
-                    _blockStorage.Unlock(hash);
+                    _storage.Unlock(hash);
                 }
 
                 if (contentInfo.SharedBlocksMetadata != null)
@@ -862,7 +858,7 @@ namespace Xeus.Core.Internal.Storage
 
                 _loaded = true;
 
-                await _blockStorage.LoadAsync();
+                await _storage.LoadAsync();
 
                 if (_settings.TryGetContent<ContentStorageConfig>("Config", out var config))
                 {
@@ -872,7 +868,7 @@ namespace Xeus.Core.Internal.Storage
 
                         foreach (var hash in contentInfo.LockedHashes)
                         {
-                            _blockStorage.Lock(hash);
+                            _storage.Lock(hash);
                         }
                     }
                 }
@@ -886,7 +882,7 @@ namespace Xeus.Core.Internal.Storage
         {
             using (await _settingsAsyncLock.LockAsync())
             {
-                await _blockStorage.SaveAsync();
+                await _storage.SaveAsync();
 
                 var config = new ContentStorageConfig(0, _contentMetadataStorage.ToArray());
                 _settings.SetContent("Config", config);
@@ -900,7 +896,7 @@ namespace Xeus.Core.Internal.Storage
             lock (_lockObject)
             {
                 var hashSet = new HashSet<OmniHash>();
-                hashSet.UnionWith(_blockStorage.ToArray());
+                hashSet.UnionWith(_storage.ToArray());
                 hashSet.UnionWith(_contentMetadataStorage.GetHashes());
 
                 return hashSet.ToArray();
@@ -942,7 +938,7 @@ namespace Xeus.Core.Internal.Storage
 
                 _removedBlockEventQueue.Dispose();
 
-                _blockStorage.Dispose();
+                _storage.Dispose();
                 _checkEventScheduler.Dispose();
             }
         }

@@ -17,13 +17,13 @@ using Omnix.Base.Extensions;
 
 namespace Xeus.Core.Storage
 {
-    internal sealed partial class XeusStorage : DisposableBase, IStorage
+    public sealed partial class XeusStorage : DisposableBase, IStorage
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         private readonly Stream _fileStream;
 
-        private readonly BufferPool<byte> _bufferPool;
+        private readonly IBufferPool<byte> _bufferPool;
         private readonly UsingSectorPool _usingSectorPool;
         private readonly ProtectionStatus _protectionStatus;
 
@@ -42,7 +42,7 @@ namespace Xeus.Core.Storage
 
         public static readonly uint SectorSize = 1024 * 256; // 256 KB
 
-        public XeusStorage(string basePath, BufferPool<byte> bufferPool)
+        public XeusStorage(string basePath, IBufferPool<byte> bufferPool)
         {
             var settingsPath = Path.Combine(basePath, "Settings");
             var childrenPath = Path.Combine(basePath, "Children");
