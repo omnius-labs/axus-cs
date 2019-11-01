@@ -25,7 +25,7 @@ namespace Xeus.Core.Storages
                 sizeList.Add(random.Next(0, 1024 * 32));
             }
 
-            await blockStorage.LoadAsync();
+            await blockStorage.StartAsync();
             blockStorage.Resize(1024 * 1024 * 1024);
 
             var hashList = new List<OmniHash>();

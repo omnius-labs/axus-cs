@@ -2,7 +2,7 @@ using Omnix.Base;
 
 namespace Xeus.Core
 {
-    public interface IExplorer : IService, ISettings
+    public interface IExplorer : IService
     {
     }
 }

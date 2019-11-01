@@ -18,7 +18,7 @@ using Omnix.Network.Proxies;
 
 namespace Xeus.Core.Connectors.Internal
 {
-    internal sealed class TcpConnector : ServiceBase, ISettings
+    internal sealed class TcpConnector : ServiceBase
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -580,8 +580,52 @@ namespace Xeus.Core.Connectors.Internal
             }
         }
 
+        private async ValueTask LoadAsync()
+        {
+            using (await _settingsAsyncLock.LockAsync())
+            {
+                await Task.Run(async () =>
+                {
+                    try
+                    {
+                        if (_settings.TryGetContent<TcpConnectorConfig>("Config", out var config))
+                        {
+                            this.SetTcpConnectOptions(config.TcpConnectOptions);
+                            this.SetTcpAcceptOptions(config.TcpAcceptOptions);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Error(e);
+                        throw e;
+                    }
+                });
+            }
+        }
+
+        private async ValueTask SaveAsync()
+        {
+            using (await _settingsAsyncLock.LockAsync())
+            {
+                await Task.Run(async () =>
+                {
+                    try
+                    {
+                        var config = new TcpConnectorConfig(0, _tcpConnectOptions, _tcpAcceptOptions);
+                        _settings.SetContent("Config", config);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Error(e);
+                        throw e;
+                    }
+                });
+            }
+        }
+
         protected override async ValueTask OnInitializeAsync()
         {
+            await this.LoadAsync();
         }
 
         protected override async ValueTask OnStartAsync()
@@ -633,50 +677,9 @@ namespace Xeus.Core.Connectors.Internal
                 }
             }
 
+            await this.SaveAsync();
+
             this.StateType = ServiceStateType.Stopped;
-        }
-
-        public async ValueTask LoadAsync()
-        {
-            using (await _settingsAsyncLock.LockAsync())
-            {
-                await Task.Run(async () =>
-                {
-                    try
-                    {
-                        if (_settings.TryGetContent<TcpConnectorConfig>("Config", out var config))
-                        {
-                            this.SetTcpConnectOptions(config.TcpConnectOptions);
-                            this.SetTcpAcceptOptions(config.TcpAcceptOptions);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.Error(e);
-                        throw e;
-                    }
-                });
-            }
-        }
-
-        public async ValueTask SaveAsync()
-        {
-            using (await _settingsAsyncLock.LockAsync())
-            {
-                await Task.Run(async () =>
-                {
-                    try
-                    {
-                        var config = new TcpConnectorConfig(0, _tcpConnectOptions, _tcpAcceptOptions);
-                        _settings.SetContent("Config", config);
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.Error(e);
-                        throw e;
-                    }
-                });
-            }
         }
 
         protected override void OnDispose(bool disposing)
