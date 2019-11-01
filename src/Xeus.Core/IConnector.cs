@@ -5,7 +5,7 @@ using Omnix.Network;
 
 namespace Xeus.Core
 {
-    public interface IConnector : IService, ISettings
+    public interface IConnector : IService
     {
         ValueTask<ConnectorResult> AcceptAsync(CancellationToken token = default);
         ValueTask<ConnectorResult> ConnectAsync(OmniAddress address, CancellationToken token = default);

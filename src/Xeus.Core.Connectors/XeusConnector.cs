@@ -7,7 +7,7 @@ using Xeus.Core.Connectors.Internal;
 
 namespace Xeus.Core.Connectors
 {
-    internal sealed class XeusConnector : ServiceBase, ISettings, IConnector
+    internal sealed class XeusConnector : ServiceBase, IConnector
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -98,16 +98,6 @@ namespace Xeus.Core.Connectors
             await _tcpConnector.StopAsync();
 
             this.StateType = ServiceStateType.Stopped;
-        }
-
-        public async ValueTask LoadAsync()
-        {
-            await _tcpConnector.LoadAsync();
-        }
-
-        public async ValueTask SaveAsync()
-        {
-            await _tcpConnector.SaveAsync();
         }
 
         protected override void OnDispose(bool disposing)

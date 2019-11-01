@@ -2,7 +2,7 @@ using Omnix.Base;
 
 namespace Xeus.Core
 {
-    public interface INegotiator : IService, ISettings
+    public interface INegotiator : IService
     {
     }
 }

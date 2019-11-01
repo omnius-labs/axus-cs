@@ -17,7 +17,7 @@ using Omnix.Base.Extensions;
 
 namespace Xeus.Core.Storage
 {
-    public sealed partial class XeusStorage : DisposableBase, IStorage
+    public sealed partial class XeusStorage : ServiceBase, IStorage
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -36,6 +36,7 @@ namespace Xeus.Core.Storage
         private readonly LazyEvent<OmniHash> _removedBlockEventQueue = new LazyEvent<OmniHash>(new TimeSpan(0, 0, 3));
         private readonly LazyEvent<ErrorReport> _errorReportEventQueue = new LazyEvent<ErrorReport>(new TimeSpan(0, 0, 3));
 
+        private readonly AsyncLock _settingsAsyncLock = new AsyncLock();
         private readonly object _lockObject = new object();
 
         private volatile bool _disposed;
@@ -44,12 +45,9 @@ namespace Xeus.Core.Storage
 
         public XeusStorage(string basePath, IBufferPool<byte> bufferPool)
         {
-            var settingsPath = Path.Combine(basePath, "Settings");
-            var childrenPath = Path.Combine(basePath, "Children");
-
             _bufferPool = bufferPool;
 
-            _settings = new OmniSettings(settingsPath);
+            _settings = new OmniSettings(Path.Combine(basePath, "OmniSettings"));
 
             if (!Directory.Exists(basePath))
             {
@@ -76,7 +74,7 @@ namespace Xeus.Core.Storage
             _protectionStatus = new ProtectionStatus();
         }
 
-        public ulong UsingAreaSize
+        public ulong UsingBytes
         {
             get
             {
@@ -87,7 +85,7 @@ namespace Xeus.Core.Storage
             }
         }
 
-        public ulong ProtectionAreaSize
+        public ulong ProtectionBytes
         {
             get
             {
@@ -591,22 +589,10 @@ namespace Xeus.Core.Storage
             }
         }
 
-        #region ISettings
-
-        private bool _loaded = false;
-        private readonly AsyncLock _settingsAsyncLock = new AsyncLock();
-
-        public async ValueTask LoadAsync()
+        private async ValueTask LoadAsync()
         {
             using (await _settingsAsyncLock.LockAsync())
             {
-                if (_loaded)
-                {
-                    throw new SettingsAlreadyLoadedException();
-                }
-
-                _loaded = true;
-
                 _size = 0;
                 _clusterMetadataMap.Clear();
 
@@ -624,7 +610,7 @@ namespace Xeus.Core.Storage
             }
         }
 
-        public async ValueTask SaveAsync()
+        private async ValueTask SaveAsync()
         {
             using (await _settingsAsyncLock.LockAsync())
             {
@@ -633,7 +619,20 @@ namespace Xeus.Core.Storage
             }
         }
 
-        #endregion
+        protected override async ValueTask OnInitializeAsync()
+        {
+            await this.LoadAsync();
+        }
+
+        protected override async ValueTask OnStartAsync()
+        {
+
+        }
+
+        protected override async ValueTask OnStopAsync()
+        {
+            await this.SaveAsync();
+        }
 
         public OmniHash[] ToArray()
         {
@@ -673,13 +672,17 @@ namespace Xeus.Core.Storage
 
             if (disposing)
             {
+                _fileStream.Dispose();
+
+                _usingSectorPool.Dispose();
+
                 _settings.Dispose();
 
                 _addedBlockEventQueue.Dispose();
                 _removedBlockEventQueue.Dispose();
+                _errorReportEventQueue.Dispose();
 
-                _usingSectorPool.Dispose();
-                _fileStream.Dispose();
+                _settingsAsyncLock.Dispose();
             }
         }
     }
