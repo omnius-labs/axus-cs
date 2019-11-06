@@ -21,8 +21,8 @@ Support sharing of data between individuals in a decentralized network.
 
 ## Code Coverages
 
-+ [Windows](https://gitlab.com/omnius-labs/xeus/-/jobs/artifacts/master/file/publish/code-coverage/win/index.htm?job=test_windows_job)
-+ [Linux](https://gitlab.com/omnius-labs/xeus/-/jobs/artifacts/master/file/publish/code-coverage/linux/index.htm?job=test_linux_job)
++ [Windows](https://gitlab.com/omnius-labs/xeus/-/jobs/artifacts/develop/file/publish/code-coverage/win/index.htm?job=test_windows_job)
++ [Linux](https://gitlab.com/omnius-labs/xeus/-/jobs/artifacts/develop/file/publish/code-coverage/linux/index.htm?job=test_linux_job)
 
 ## Respects
 
