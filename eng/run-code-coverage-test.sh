@@ -14,5 +14,5 @@ do
     fi
 done
 
-dotnet tool install dotnet-reportgenerator-globaltool --tool-path tmp\tools/linux/
+dotnet tool install dotnet-reportgenerator-globaltool --tool-path tmp/tools/linux/
 ./tmp/tools/linux/reportgenerator "--reports:tmp/test/linux/*.opencover.xml" "--targetdir:publish/code-coverage/linux"
