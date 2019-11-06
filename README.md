@@ -6,7 +6,7 @@
 
 Xeus is peer-to-peer data sharing platform.
 
-## Goal
+## Goals
 
 Support sharing of data between individuals in a decentralized network.
 
@@ -17,7 +17,12 @@ Support sharing of data between individuals in a decentralized network.
 
 ## Website
 
-+ <https://omnius-labs.gitlab.io/docs/xeus/> (WIP)
++ <https://omnius-labs.com/>
+
+## Code Coverages
+
++ [Windows](https://gitlab.com/omnius-labs/xeus/-/jobs/artifacts/master/file/publish/code-coverage/win/index.htm?job=test_windows_job)
++ [Linux](https://gitlab.com/omnius-labs/xeus/-/jobs/artifacts/master/file/publish/code-coverage/linux/index.htm?job=test_linux_job)
 
 ## Respects
 
