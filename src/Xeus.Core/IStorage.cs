@@ -1,6 +1,7 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnix.Base;
@@ -8,42 +9,58 @@ using Omnix.Cryptography;
 
 namespace Xeus.Core
 {
-    public interface IStorage : IService, IEnumerable<OmniHash>
+    public interface IStorageAggregator : IMessageStorage, IFileStorage, ICacheStorage
     {
-        event Action<IEnumerable<OmniHash>> AddedBlockEvents;
+        ulong TotalProtectedBytes { get; }
 
-        event Action<IEnumerable<OmniHash>> RemovedBlockEvents;
+        ValueTask CheckBlocks(Action<CheckBlocksProgressStatus> callback, CancellationToken token);
 
-        event Action<IEnumerable<ErrorReport>> ErrorReportEvents;
+        void Lock(OmniHash hash);
+        void Unlock(OmniHash hash);
+    }
 
-        ulong ProtectionBytes { get; }
+    public interface IPrimitiveStorage
+    {
+        event EventHandler<IEnumerable<OmniHash>> BlocksAdded;
+        event EventHandler<IEnumerable<OmniHash>> BlocksRemoved;
 
-        ulong UsingBytes { get; }
+        ulong TotalBytes { get; }
 
-        ValueTask CheckBlocks(Action<CheckBlocksProgressReport> progress, CancellationToken token);
-
+        bool Contains(OmniHash hash);
         IEnumerable<OmniHash> ExceptFrom(IEnumerable<OmniHash> collection);
-
         IEnumerable<OmniHash> IntersectFrom(IEnumerable<OmniHash> collection);
 
         uint GetLength(OmniHash hash);
 
-        bool Contains(OmniHash hash);
+        IEnumerable<OmniHash> GetHashes();
 
-        OmniHash[] ToArray();
+        bool TryRead(OmniHash hash, [NotNullWhen(true)] out IMemoryOwner<byte>? memoryOwner);
+    }
 
-        void Lock(OmniHash hash);
+    public interface IMessageStorage : IPrimitiveStorage
+    {
+        ValueTask<Clue> ImportMessage(ReadOnlySequence<byte> sequence, CancellationToken cancellationToken = default);
+        ValueTask<IEnumerable<Clue>> ComputeRequiredBlocksForMessage(Clue clue);
+        ValueTask ExportMessage(Clue clue, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default);
+        void RemoveMessage(Clue clue);
+    }
 
-        void Unlock(OmniHash hash);
+    public interface IFileStorage : IPrimitiveStorage
+    {
+        ValueTask<Clue> ImportFile(string path, CancellationToken cancellationToken = default);
+        ValueTask<IEnumerable<Clue>> ComputeRequiredBlocksForFile(Clue clue);
+        ValueTask ExportFile(Clue clue, string path, CancellationToken cancellationToken = default);
+        void RemoveFile(string path);
+    }
 
-        ulong Size { get; }
+    public interface ICacheStorage : IPrimitiveStorage
+    {
+        ulong TotalUsingBytes { get; }
+        ulong TotalFreeBytes { get; }
 
         void Resize(ulong size);
 
-        bool TryGet(OmniHash hash, out IMemoryOwner<byte>? memoryOwner);
-
-        bool TrySet(OmniHash hash, ReadOnlySpan<byte> value);
-
-        void Remove(OmniHash hash);
+        bool TryWrite(OmniHash hash, ReadOnlySpan<byte> value);
+        void Delete(OmniHash hash);
     }
 }

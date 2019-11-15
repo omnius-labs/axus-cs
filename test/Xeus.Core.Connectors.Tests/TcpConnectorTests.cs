@@ -7,12 +7,9 @@ using Xunit;
 
 namespace Xeus.Core.Connectors
 {
-    public class XeusConnectorTests
+    public class TcpConnectorTests
     {
-        [Fact]
-        public async Task ConnectorTest()
-        {
-        }
+
     }
 }
 
