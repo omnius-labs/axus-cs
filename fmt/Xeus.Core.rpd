@@ -36,16 +36,16 @@ table ConnectorOptions {
     TcpAcceptOptions: TcpAcceptOptions = 1,
 }
 
-enum ErrorReportType : uint8 {
+enum ErrorStatusType : uint8 {
     SpaceNotFound = 0,
 }
 
-table ErrorReport {
+table ErrorStatus {
     CreationTime: timestamp = 0,
-    Type: ErrorReportType = 1,
+    Type: ErrorStatusType = 1,
 }
 
-table CheckBlocksProgressReport {
+table CheckBlocksProgressStatus {
     BadBlockCount: uint32 = 0,
     CheckedBlockCount: uint32 = 1,
     TotalBlockCount: uint32 = 2,

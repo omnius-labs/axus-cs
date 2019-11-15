@@ -4,49 +4,47 @@ using Xeus.Core;
 
 #nullable enable
 
-namespace Xeus.Core.Storage.Internal
+namespace Xeus.Core.Storages.Internal
 {
-    internal sealed partial class ClusterMetadata : global::Omnix.Serialization.RocketPack.IRocketPackMessage<ClusterMetadata>
+    internal sealed partial class MerkleTreeSection : global::Omnix.Serialization.RocketPack.IRocketPackMessage<MerkleTreeSection>
     {
-        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<ClusterMetadata> Formatter { get; }
-        public static ClusterMetadata Empty { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<MerkleTreeSection> Formatter { get; }
+        public static MerkleTreeSection Empty { get; }
 
-        static ClusterMetadata()
+        static MerkleTreeSection()
         {
-            ClusterMetadata.Formatter = new ___CustomFormatter();
-            ClusterMetadata.Empty = new ClusterMetadata(global::System.Array.Empty<ulong>(), 0, global::Omnix.Serialization.RocketPack.Timestamp.Zero);
+            MerkleTreeSection.Formatter = new ___CustomFormatter();
+            MerkleTreeSection.Empty = new MerkleTreeSection(0, global::System.Array.Empty<OmniHash>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public static readonly int MaxSectorsCount = 256;
+        public static readonly int MaxHashesCount = 1073741824;
 
-        public ClusterMetadata(ulong[] sectors, uint length, global::Omnix.Serialization.RocketPack.Timestamp lastAccessTime)
+        public MerkleTreeSection(ulong length, OmniHash[] hashes)
         {
-            if (sectors is null) throw new global::System.ArgumentNullException("sectors");
-            if (sectors.Length > 256) throw new global::System.ArgumentOutOfRangeException("sectors");
-            this.Sectors = new global::Omnix.Collections.ReadOnlyListSlim<ulong>(sectors);
+            if (hashes is null) throw new global::System.ArgumentNullException("hashes");
+            if (hashes.Length > 1073741824) throw new global::System.ArgumentOutOfRangeException("hashes");
+
             this.Length = length;
-            this.LastAccessTime = lastAccessTime;
+            this.Hashes = new global::Omnix.Collections.ReadOnlyListSlim<OmniHash>(hashes);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                foreach (var n in sectors)
+                if (length != default) ___h.Add(length.GetHashCode());
+                foreach (var n in hashes)
                 {
                     if (n != default) ___h.Add(n.GetHashCode());
                 }
-                if (length != default) ___h.Add(length.GetHashCode());
-                if (lastAccessTime != default) ___h.Add(lastAccessTime.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public global::Omnix.Collections.ReadOnlyListSlim<ulong> Sectors { get; }
-        public uint Length { get; }
-        public global::Omnix.Serialization.RocketPack.Timestamp LastAccessTime { get; }
+        public ulong Length { get; }
+        public global::Omnix.Collections.ReadOnlyListSlim<OmniHash> Hashes { get; }
 
-        public static ClusterMetadata Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
+        public static MerkleTreeSection Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -57,84 +55,73 @@ namespace Xeus.Core.Storage.Internal
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(ClusterMetadata? left, ClusterMetadata? right)
+        public static bool operator ==(MerkleTreeSection? left, MerkleTreeSection? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(ClusterMetadata? left, ClusterMetadata? right)
+        public static bool operator !=(MerkleTreeSection? left, MerkleTreeSection? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is ClusterMetadata)) return false;
-            return this.Equals((ClusterMetadata)other);
+            if (!(other is MerkleTreeSection)) return false;
+            return this.Equals((MerkleTreeSection)other);
         }
-        public bool Equals(ClusterMetadata? target)
+        public bool Equals(MerkleTreeSection? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (!global::Omnix.Base.Helpers.CollectionHelper.Equals(this.Sectors, target.Sectors)) return false;
             if (this.Length != target.Length) return false;
-            if (this.LastAccessTime != target.LastAccessTime) return false;
+            if (!global::Omnix.Base.Helpers.CollectionHelper.Equals(this.Hashes, target.Hashes)) return false;
 
             return true;
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<ClusterMetadata>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<MerkleTreeSection>
         {
-            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in ClusterMetadata value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in MerkleTreeSection value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
                 {
                     uint propertyCount = 0;
-                    if (value.Sectors.Count != 0)
-                    {
-                        propertyCount++;
-                    }
                     if (value.Length != 0)
                     {
                         propertyCount++;
                     }
-                    if (value.LastAccessTime != global::Omnix.Serialization.RocketPack.Timestamp.Zero)
+                    if (value.Hashes.Count != 0)
                     {
                         propertyCount++;
                     }
                     w.Write(propertyCount);
                 }
 
-                if (value.Sectors.Count != 0)
-                {
-                    w.Write((uint)0);
-                    w.Write((uint)value.Sectors.Count);
-                    foreach (var n in value.Sectors)
-                    {
-                        w.Write(n);
-                    }
-                }
                 if (value.Length != 0)
                 {
-                    w.Write((uint)1);
+                    w.Write((uint)0);
                     w.Write(value.Length);
                 }
-                if (value.LastAccessTime != global::Omnix.Serialization.RocketPack.Timestamp.Zero)
+                if (value.Hashes.Count != 0)
                 {
-                    w.Write((uint)2);
-                    w.Write(value.LastAccessTime);
+                    w.Write((uint)1);
+                    w.Write((uint)value.Hashes.Count);
+                    foreach (var n in value.Hashes)
+                    {
+                        OmniHash.Formatter.Serialize(ref w, n, rank + 1);
+                    }
                 }
             }
 
-            public ClusterMetadata Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public MerkleTreeSection Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
                 uint propertyCount = r.GetUInt32();
 
-                ulong[] p_sectors = global::System.Array.Empty<ulong>();
-                uint p_length = 0;
-                global::Omnix.Serialization.RocketPack.Timestamp p_lastAccessTime = global::Omnix.Serialization.RocketPack.Timestamp.Zero;
+                ulong p_length = 0;
+                OmniHash[] p_hashes = global::System.Array.Empty<OmniHash>();
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -143,79 +130,55 @@ namespace Xeus.Core.Storage.Internal
                     {
                         case 0:
                             {
-                                var length = r.GetUInt32();
-                                p_sectors = new ulong[length];
-                                for (int i = 0; i < p_sectors.Length; i++)
-                                {
-                                    p_sectors[i] = r.GetUInt64();
-                                }
+                                p_length = r.GetUInt64();
                                 break;
                             }
                         case 1:
                             {
-                                p_length = r.GetUInt32();
-                                break;
-                            }
-                        case 2:
-                            {
-                                p_lastAccessTime = r.GetTimestamp();
+                                var length = r.GetUInt32();
+                                p_hashes = new OmniHash[length];
+                                for (int i = 0; i < p_hashes.Length; i++)
+                                {
+                                    p_hashes[i] = OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                }
                                 break;
                             }
                     }
                 }
 
-                return new ClusterMetadata(p_sectors, p_length, p_lastAccessTime);
+                return new MerkleTreeSection(p_length, p_hashes);
             }
         }
     }
 
-    internal sealed partial class XeusStorageConfig : global::Omnix.Serialization.RocketPack.IRocketPackMessage<XeusStorageConfig>
+    internal sealed partial class CacheStorageConfig : global::Omnix.Serialization.RocketPack.IRocketPackMessage<CacheStorageConfig>
     {
-        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<XeusStorageConfig> Formatter { get; }
-        public static XeusStorageConfig Empty { get; }
+        public static global::Omnix.Serialization.RocketPack.IRocketPackFormatter<CacheStorageConfig> Formatter { get; }
+        public static CacheStorageConfig Empty { get; }
 
-        static XeusStorageConfig()
+        static CacheStorageConfig()
         {
-            XeusStorageConfig.Formatter = new ___CustomFormatter();
-            XeusStorageConfig.Empty = new XeusStorageConfig(0, 0, new global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>());
+            CacheStorageConfig.Formatter = new ___CustomFormatter();
+            CacheStorageConfig.Empty = new CacheStorageConfig(0);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public static readonly int MaxClusterMetadataMapCount = 1073741824;
-
-        public XeusStorageConfig(uint version, ulong size, global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata> clusterMetadataMap)
+        public CacheStorageConfig(ulong size)
         {
-            if (clusterMetadataMap is null) throw new global::System.ArgumentNullException("clusterMetadataMap");
-            if (clusterMetadataMap.Count > 1073741824) throw new global::System.ArgumentOutOfRangeException("clusterMetadataMap");
-            foreach (var n in clusterMetadataMap)
-            {
-                if (n.Value is null) throw new global::System.ArgumentNullException("n.Value");
-            }
-
-            this.Version = version;
             this.Size = size;
-            this.ClusterMetadataMap = new global::Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata>(clusterMetadataMap);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (version != default) ___h.Add(version.GetHashCode());
                 if (size != default) ___h.Add(size.GetHashCode());
-                foreach (var n in clusterMetadataMap)
-                {
-                    if (n.Key != default) ___h.Add(n.Key.GetHashCode());
-                    if (n.Value != default) ___h.Add(n.Value.GetHashCode());
-                }
                 return ___h.ToHashCode();
             });
         }
 
-        public uint Version { get; }
         public ulong Size { get; }
-        public global::Omnix.Collections.ReadOnlyDictionarySlim<OmniHash, ClusterMetadata> ClusterMetadataMap { get; }
 
-        public static XeusStorageConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
+        public static CacheStorageConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnix.Base.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnix.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -226,85 +189,58 @@ namespace Xeus.Core.Storage.Internal
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(XeusStorageConfig? left, XeusStorageConfig? right)
+        public static bool operator ==(CacheStorageConfig? left, CacheStorageConfig? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(XeusStorageConfig? left, XeusStorageConfig? right)
+        public static bool operator !=(CacheStorageConfig? left, CacheStorageConfig? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is XeusStorageConfig)) return false;
-            return this.Equals((XeusStorageConfig)other);
+            if (!(other is CacheStorageConfig)) return false;
+            return this.Equals((CacheStorageConfig)other);
         }
-        public bool Equals(XeusStorageConfig? target)
+        public bool Equals(CacheStorageConfig? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.Version != target.Version) return false;
             if (this.Size != target.Size) return false;
-            if (!global::Omnix.Base.Helpers.CollectionHelper.Equals(this.ClusterMetadataMap, target.ClusterMetadataMap)) return false;
 
             return true;
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<XeusStorageConfig>
+        private sealed class ___CustomFormatter : global::Omnix.Serialization.RocketPack.IRocketPackFormatter<CacheStorageConfig>
         {
-            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in XeusStorageConfig value, in int rank)
+            public void Serialize(ref global::Omnix.Serialization.RocketPack.RocketPackWriter w, in CacheStorageConfig value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
                 {
                     uint propertyCount = 0;
-                    if (value.Version != 0)
-                    {
-                        propertyCount++;
-                    }
                     if (value.Size != 0)
-                    {
-                        propertyCount++;
-                    }
-                    if (value.ClusterMetadataMap.Count != 0)
                     {
                         propertyCount++;
                     }
                     w.Write(propertyCount);
                 }
 
-                if (value.Version != 0)
-                {
-                    w.Write((uint)0);
-                    w.Write(value.Version);
-                }
                 if (value.Size != 0)
                 {
-                    w.Write((uint)1);
+                    w.Write((uint)0);
                     w.Write(value.Size);
-                }
-                if (value.ClusterMetadataMap.Count != 0)
-                {
-                    w.Write((uint)2);
-                    w.Write((uint)value.ClusterMetadataMap.Count);
-                    foreach (var n in value.ClusterMetadataMap)
-                    {
-                        OmniHash.Formatter.Serialize(ref w, n.Key, rank + 1);
-                        ClusterMetadata.Formatter.Serialize(ref w, n.Value, rank + 1);
-                    }
                 }
             }
 
-            public XeusStorageConfig Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public CacheStorageConfig Deserialize(ref global::Omnix.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
                 uint propertyCount = r.GetUInt32();
 
-                uint p_version = 0;
                 ulong p_size = 0;
-                global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata> p_clusterMetadataMap = new global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>();
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -313,32 +249,13 @@ namespace Xeus.Core.Storage.Internal
                     {
                         case 0:
                             {
-                                p_version = r.GetUInt32();
-                                break;
-                            }
-                        case 1:
-                            {
                                 p_size = r.GetUInt64();
-                                break;
-                            }
-                        case 2:
-                            {
-                                var length = r.GetUInt32();
-                                p_clusterMetadataMap = new global::System.Collections.Generic.Dictionary<OmniHash, ClusterMetadata>();
-                                OmniHash t_key = OmniHash.Empty;
-                                ClusterMetadata t_value = ClusterMetadata.Empty;
-                                for (int i = 0; i < length; i++)
-                                {
-                                    t_key = OmniHash.Formatter.Deserialize(ref r, rank + 1);
-                                    t_value = ClusterMetadata.Formatter.Deserialize(ref r, rank + 1);
-                                    p_clusterMetadataMap[t_key] = t_value;
-                                }
                                 break;
                             }
                     }
                 }
 
-                return new XeusStorageConfig(p_version, p_size, p_clusterMetadataMap);
+                return new CacheStorageConfig(p_size);
             }
         }
     }

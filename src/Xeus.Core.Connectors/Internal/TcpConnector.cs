@@ -18,7 +18,7 @@ using Omnix.Network.Proxies;
 
 namespace Xeus.Core.Connectors.Internal
 {
-    internal sealed class TcpConnector : ServiceBase
+    internal sealed class TcpConnector : ServiceBase, ITcpConnector
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -28,7 +28,7 @@ namespace Xeus.Core.Connectors.Internal
 
         private readonly Random _random = new Random();
 
-        private readonly EventScheduler _watchEventScheduler;
+        private readonly EventTimer _watchEventTimer;
 
         private readonly LockedHashDictionary<OmniAddress, TcpListener> _tcpListenerMap = new LockedHashDictionary<OmniAddress, TcpListener>();
         private readonly LockedHashDictionary<OmniAddress, ushort> _openedPortsByUpnp = new LockedHashDictionary<OmniAddress, ushort>();
@@ -48,7 +48,7 @@ namespace Xeus.Core.Connectors.Internal
 
             _settings = new OmniSettings(settingsPath);
 
-            _watchEventScheduler = new EventScheduler(this.WatchThread);
+            _watchEventTimer = new EventTimer(this.WatchThread);
         }
 
         public TcpConnectOptions? TcpConnectOptions => _tcpConnectOptions;
@@ -66,8 +66,6 @@ namespace Xeus.Core.Connectors.Internal
 
                 _tcpConnectOptions = tcpConnectConfig;
             }
-
-            _watchEventScheduler.ExecuteImmediate();
         }
 
         public void SetTcpAcceptOptions(TcpAcceptOptions? tcpAcceptConfig)
@@ -81,8 +79,6 @@ namespace Xeus.Core.Connectors.Internal
 
                 _tcpAcceptOptions = tcpAcceptConfig;
             }
-
-            _watchEventScheduler.ExecuteImmediate();
         }
 
         private static bool IsGlobalIpAddress(IPAddress ipAddress)
@@ -447,7 +443,7 @@ namespace Xeus.Core.Connectors.Internal
         {
             try
             {
-                for (; ; )
+                while (!token.IsCancellationRequested)
                 {
                     var config = _tcpAcceptOptions;
                     var listenAddressSet = new HashSet<OmniAddress>(config?.ListenAddresses.ToArray() ?? Array.Empty<OmniAddress>());
@@ -632,8 +628,8 @@ namespace Xeus.Core.Connectors.Internal
         {
             this.StateType = ServiceStateType.Starting;
 
-            _watchEventScheduler.ChangeInterval(new TimeSpan(0, 30, 0));
-            await _watchEventScheduler.StartAsync();
+            _watchEventTimer.Change(TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(5));
+            await _watchEventTimer.StartAsync();
 
             this.StateType = ServiceStateType.Running;
         }
@@ -642,7 +638,7 @@ namespace Xeus.Core.Connectors.Internal
         {
             this.StateType = ServiceStateType.Stopping;
 
-            await _watchEventScheduler.StopAsync();
+            await _watchEventTimer.StopAsync();
 
             UpnpClient? upnpClient = null;
 

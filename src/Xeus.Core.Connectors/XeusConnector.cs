@@ -7,7 +7,7 @@ using Xeus.Core.Connectors.Internal;
 
 namespace Xeus.Core.Connectors
 {
-    internal sealed class XeusConnector : ServiceBase, IConnector
+    internal sealed class XeusConnector : ServiceBase, IConnectorAggregator
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 

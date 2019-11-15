@@ -200,7 +200,7 @@ namespace Xeus.Core.Negotiators.Internal
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (!global::Omnix.Base.BytesOperations.SequenceEqual(this.Id.Span, target.Id.Span)) return false;
+            if (!global::Omnix.Base.BytesOperations.Equals(this.Id.Span, target.Id.Span)) return false;
             if (this.Address != target.Address) return false;
 
             return true;

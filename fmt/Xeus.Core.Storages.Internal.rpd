@@ -4,17 +4,14 @@ using "Omnix.Cryptography";
 using "Omnix.Network";
 using "Xeus.Core";
 
-namespace "Xeus.Core.Storage.Internal";
+namespace "Xeus.Core.Storages.Internal";
 option csharp_access_level = "internal";
 
-table ClusterMetadata {
-    Sectors: vector<uint64>(capacity: 256) = 0,
-    Length: uint32 = 1,
-    LastAccessTime: timestamp = 2,
+table MerkleTreeSection {
+    Length: uint64 = 0,
+    Hashes: vector<OmniHash>(capacity: 1073741824) = 1,
 }
 
-table XeusStorageConfig {
-    Version: uint32 = 0,
-    Size: uint64 = 1,
-    ClusterMetadataMap: map<OmniHash, ClusterMetadata>(capacity: 1073741824) = 2,
+table CacheStorageConfig {
+    Size: uint64 = 0,
 }
