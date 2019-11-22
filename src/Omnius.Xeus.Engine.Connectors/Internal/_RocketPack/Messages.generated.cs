@@ -1,10 +1,10 @@
 using Omnius.Core.Cryptography;
 using Omnius.Core.Network;
-using Xeus.Engine;
+using Omnius.Xeus.Engine;
 
 #nullable enable
 
-namespace Xeus.Engine.Connectors.Internal
+namespace Omnius.Xeus.Engine.Connectors.Internal
 {
     internal sealed partial class TcpConnectorConfig : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<TcpConnectorConfig>
     {

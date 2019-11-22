@@ -16,7 +16,7 @@ using Omnius.Core.Network;
 using Omnius.Core.Network.Caps;
 using Omnius.Core.Network.Proxies;
 
-namespace Xeus.Engine.Connectors.Internal
+namespace Omnius.Xeus.Engine.Connectors.Internal
 {
     internal sealed class TcpConnector : ServiceBase, ITcpConnector
     {

@@ -3,7 +3,7 @@ using Omnius.Core.Network;
 
 #nullable enable
 
-namespace Xeus.Engine
+namespace Omnius.Xeus.Engine
 {
     public enum TcpProxyType : byte
     {

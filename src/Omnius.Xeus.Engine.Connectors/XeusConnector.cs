@@ -3,9 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Network;
-using Xeus.Engine.Connectors.Internal;
+using Omnius.Xeus.Engine.Connectors.Internal;
 
-namespace Xeus.Engine.Connectors
+namespace Omnius.Xeus.Engine.Connectors
 {
     internal sealed class XeusConnector : ServiceBase, IConnectorAggregator
     {

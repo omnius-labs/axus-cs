@@ -5,7 +5,7 @@ using Omnius.Core.Cryptography;
 using Omnius.Core;
 using Xunit;
 
-namespace Xeus.Engine.Connectors
+namespace Omnius.Xeus.Engine.Connectors
 {
     public class TcpConnectorTests
     {

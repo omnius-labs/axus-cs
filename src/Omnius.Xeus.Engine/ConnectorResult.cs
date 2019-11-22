@@ -1,7 +1,7 @@
 using Omnius.Core.Network;
 using Omnius.Core.Network.Caps;
 
-namespace Xeus.Engine
+namespace Omnius.Xeus.Engine
 {
     public enum ConnectorResultType
     {

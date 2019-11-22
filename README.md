@@ -27,7 +27,6 @@ Support sharing of data between individuals in a decentralized network.
 ## Links
 
 + <https://github.com/omnius-labs/xeus>
-+ <https://gitlab.com/omnius-labs/xeus>
 
 ## License
 

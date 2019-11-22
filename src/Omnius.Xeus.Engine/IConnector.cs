@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Network;
 
-namespace Xeus.Engine
+namespace Omnius.Xeus.Engine
 {
     public interface IConnectorAggregator : ITcpConnector
     {

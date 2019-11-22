@@ -1,6 +1,6 @@
 using Omnius.Core;
 
-namespace Xeus.Engine
+namespace Omnius.Xeus.Engine
 {
     public interface INegotiator : IService
     {

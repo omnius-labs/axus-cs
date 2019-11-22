@@ -1,6 +1,6 @@
-using Xeus.Engine.Storages.Primitives;
+using Omnius.Xeus.Engine.Storages.Primitives;
 
-namespace Xeus.Engine.Storages
+namespace Omnius.Xeus.Engine.Storages
 {
     public class CacheStorageTests : TestsBase
     {

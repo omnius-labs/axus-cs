@@ -1,10 +1,10 @@
 using Omnius.Core.Cryptography;
 using Omnius.Core.Network;
-using Xeus.Engine;
+using Omnius.Xeus.Engine;
 
 #nullable enable
 
-namespace Xeus.Engine.Storages.Internal
+namespace Omnius.Xeus.Engine.Storages.Internal
 {
     internal sealed partial class MerkleTreeSection : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<MerkleTreeSection>
     {
