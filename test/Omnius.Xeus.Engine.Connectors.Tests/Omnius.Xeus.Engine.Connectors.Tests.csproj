@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <RootNamespace>Xeus.Engine.Connectors</RootNamespace>
+    <RootNamespace>Omnius.Xeus.Engine.Connectors</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

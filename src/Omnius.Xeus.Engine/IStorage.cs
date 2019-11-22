@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 
-namespace Xeus.Engine
+namespace Omnius.Xeus.Engine
 {
     public interface IStorageAggregator : IMessageStorage, IFileStorage
     {

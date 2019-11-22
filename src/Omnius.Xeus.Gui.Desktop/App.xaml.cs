@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Markup.Xaml;
 
-namespace Xeus.Gui.Desktop
+namespace Omnius.Xeus.Gui.Desktop
 {
     public class App : Application
     {
