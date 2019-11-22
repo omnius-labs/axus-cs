@@ -1,0 +1,17 @@
+﻿syntax = v1.0;
+
+using "Omnix.Cryptography";
+using "Omnix.Network";
+using "Xeus.Engine";
+
+namespace "Xeus.Engine.Storages.Internal";
+option csharp_access_level = "internal";
+
+table MerkleTreeSection {
+    Length: uint64 = 0,
+    Hashes: vector<OmniHash>(capacity: 1073741824) = 1,
+}
+
+table CacheStorageConfig {
+    Size: uint64 = 0,
+}
