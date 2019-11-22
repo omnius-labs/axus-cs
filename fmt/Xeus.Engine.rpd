@@ -1,0 +1,64 @@
+﻿syntax = v1.0;
+
+using "Omnix.Cryptography";
+using "Omnix.Network";
+
+namespace "Xeus.Engine";
+
+table Clue {
+    Hash: OmniHash = 0,
+    Depth: uint8 = 1,
+}
+
+enum TcpProxyType : uint8 {
+    HttpProxy = 0,
+    Socks5Proxy = 1,
+}
+
+table TcpProxyOptions {
+    Type: TcpProxyType = 0,
+    Address: OmniAddress = 1,
+}
+
+table TcpConnectOptions {
+    Enabled: bool = 0,
+    ProxyOptions: TcpProxyOptions? = 1,
+}
+
+table TcpAcceptOptions {
+    Enabled: bool = 0,
+    ListenAddresses: vector<OmniAddress>(capacity: 32) = 1,
+    UseUpnp: bool = 2,
+}
+
+table ConnectorOptions {
+    TcpConnectOptions: TcpConnectOptions = 0,
+    TcpAcceptOptions: TcpAcceptOptions = 1,
+}
+
+enum ErrorStatusType : uint8 {
+    SpaceNotFound = 0,
+}
+
+table ErrorStatus {
+    CreationTime: timestamp = 0,
+    Type: ErrorStatusType = 1,
+}
+
+table CheckConsistencyStatus {
+    BadBlockCount: uint32 = 0,
+    CheckedBlockCount: uint32 = 1,
+    TotalBlockCount: uint32 = 2,
+}
+
+table PublishMessageStatus {
+}
+
+table WantMessageStatus {
+}
+
+table PublishFileStatus {
+}
+
+table WantFileStatus {
+}
