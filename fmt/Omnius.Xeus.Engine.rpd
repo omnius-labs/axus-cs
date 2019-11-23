@@ -1,9 +1,9 @@
 ﻿syntax = v1.0;
 
-using "Omnix.Cryptography";
-using "Omnix.Network";
+using "Omnius.Core.Cryptography";
+using "Omnius.Core.Network";
 
-namespace "Xeus.Engine";
+namespace "Omnius.Xeus.Engine";
 
 table Clue {
     Hash: OmniHash = 0,

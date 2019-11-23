@@ -1,10 +1,10 @@
 using Omnius.Core.Cryptography;
 using Omnius.Core.Network;
-using Xeus.Engine;
+using Omnius.Xeus.Engine;
 
 #nullable enable
 
-namespace Xeus.Engine.Explorers.Internal
+namespace Omnius.Xeus.Engine.Explorers.Internal
 {
     internal enum ProtocolVersion : byte
     {
