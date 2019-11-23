@@ -1,10 +1,10 @@
 syntax = v1.0;
 
-using "Omnix.Cryptography";
-using "Omnix.Network";
-using "Xeus.Engine";
+using "Omnius.Core.Cryptography";
+using "Omnius.Core.Network";
+using "Omnius.Xeus.Engine";
 
-namespace "Xeus.Engine.Negotiators.Internal";
+namespace "Omnius.Xeus.Engine.Negotiators.Internal";
 option csharp_access_level = "internal";
 
 /* HandShake */

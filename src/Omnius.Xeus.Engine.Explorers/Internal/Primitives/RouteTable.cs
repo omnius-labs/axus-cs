@@ -1,16 +1,27 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Omnius.Core;
 
 namespace Xeus.Engine.Internal.Search.Primitives
 {
-    internal static class RouteTableMethods
+    internal readonly struct RouteTableElement<T>
+    {
+        public RouteTableElement(byte[] id, T value)
+        {
+            this.Id = id;
+            this.Value = value;
+        }
+
+        public byte[] Id { get; }
+        public T Value { get; }
+    }
+
+    internal static class RouteTable
     {
         private static readonly byte[] _distanceHashTable = new byte[256];
 
-        static RouteTableMethods()
+        static RouteTable()
         {
             _distanceHashTable[0] = 0;
             _distanceHashTable[1] = 1;
@@ -49,12 +60,12 @@ namespace Xeus.Engine.Internal.Search.Primitives
             return result;
         }
 
-        public static IEnumerable<NodeInfo<T>> Search<T>(ReadOnlySpan<byte> baseId, ReadOnlySpan<byte> targetId, IEnumerable<NodeInfo<T>> nodeList, int count)
+        public static IEnumerable<RouteTableElement<T>> Search<T>(ReadOnlySpan<byte> baseId, ReadOnlySpan<byte> targetId, IEnumerable<RouteTableElement<T>> elements, int count)
             where T : notnull
         {
             if (targetId == null) throw new ArgumentNullException(nameof(targetId));
-            if (nodeList == null) throw new ArgumentNullException(nameof(nodeList));
-            if (count == 0) return Array.Empty<NodeInfo<T>>();
+            if (elements == null) throw new ArgumentNullException(nameof(elements));
+            if (count == 0) return Array.Empty<RouteTableElement<T>>();
 
             var targetList = new List<SortInfo<T>>();
 
@@ -65,7 +76,7 @@ namespace Xeus.Engine.Internal.Search.Primitives
                 targetList.Add(new SortInfo<T>(null, xor));
             }
 
-            foreach (var node in nodeList)
+            foreach (var node in elements)
             {
                 var xor = new byte[targetId.Length];
                 BytesOperations.Xor(targetId, node.Id, xor);
@@ -105,19 +116,15 @@ namespace Xeus.Engine.Internal.Search.Primitives
         }
 
         private readonly struct SortInfo<T>
-            where T : notnull
         {
-            private readonly NodeInfo<T>? _node;
-            private readonly byte[] _xor;
-
-            public SortInfo(NodeInfo<T>? node, byte[] xor)
+            public SortInfo(RouteTableElement<T>? node, byte[] xor)
             {
-                _node = node;
-                _xor = xor;
+                this.Node = node;
+                this.Xor = xor;
             }
 
-            public NodeInfo<T>? Node => _node;
-            public byte[] Xor => _xor;
+            public RouteTableElement<T>? Node { get; }
+            public byte[] Xor { get; }
         }
     }
 }

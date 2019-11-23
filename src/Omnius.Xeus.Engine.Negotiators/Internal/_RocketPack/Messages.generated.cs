@@ -1,10 +1,10 @@
 using Omnius.Core.Cryptography;
 using Omnius.Core.Network;
-using Xeus.Engine;
+using Omnius.Xeus.Engine;
 
 #nullable enable
 
-namespace Xeus.Engine.Negotiators.Internal
+namespace Omnius.Xeus.Engine.Negotiators.Internal
 {
     internal enum ProtocolVersion : byte
     {
@@ -760,7 +760,7 @@ namespace Xeus.Engine.Negotiators.Internal
                     w.Write((uint)value.Blocks.Count);
                     foreach (var n in value.Blocks)
                     {
-                        w.Write(n.Span);
+                        w.Write(n.Memory.Span);
                     }
                 }
             }

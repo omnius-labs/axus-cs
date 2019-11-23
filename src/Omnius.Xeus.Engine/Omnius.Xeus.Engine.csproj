@@ -15,8 +15,4 @@
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Serialization\Omnius.Core.Serialization.csproj" />
   </ItemGroup>
  
-   <ItemGroup>
-    <Compile Remove="excluded_folder\**\*" />
-  </ItemGroup>
-
 </Project>
