@@ -1,5 +1,7 @@
 # Xeus - Peer-to-peer data sharing platform
 
+![](https://github.com/omnius-labs/xeus/workflows/Actions/badge.svg)
+
 ## Overview
 
 Xeus is peer-to-peer data sharing platform.
