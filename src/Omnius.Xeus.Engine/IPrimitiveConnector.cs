@@ -1,3 +1,6 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Omnius.Core.Network;
 using Omnius.Core.Network.Caps;
 
@@ -21,5 +24,11 @@ namespace Omnius.Xeus.Engine
         public ConnectorResultType Type { get; }
         public ICap? Cap { get; }
         public OmniAddress? Address { get; }
+    }
+
+    public interface IPrimitiveConnector : IDisposable
+    {
+        ValueTask<ConnectorResult> AcceptAsync(CancellationToken token = default);
+        ValueTask<ConnectorResult> ConnectAsync(OmniAddress address, CancellationToken token = default);
     }
 }

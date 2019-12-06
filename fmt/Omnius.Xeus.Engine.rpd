@@ -5,9 +5,13 @@ using "Omnius.Core.Network";
 
 namespace "Omnius.Xeus.Engine";
 
-table Clue {
-    Hash: OmniHash = 0,
-    Depth: uint8 = 1,
+enum ErrorReportType : uint8 {
+    SpaceNotFound = 0,
+}
+
+table ErrorReport {
+    CreationTime: timestamp = 0,
+    Type: ErrorReportType = 1,
 }
 
 enum TcpProxyType : uint8 {
@@ -31,34 +35,25 @@ table TcpAcceptOptions {
     UseUpnp: bool = 2,
 }
 
-table ConnectorOptions {
-    TcpConnectOptions: TcpConnectOptions = 0,
-    TcpAcceptOptions: TcpAcceptOptions = 1,
-}
-
-enum ErrorStatusType : uint8 {
-    SpaceNotFound = 0,
-}
-
-table ErrorStatus {
-    CreationTime: timestamp = 0,
-    Type: ErrorStatusType = 1,
-}
-
-table CheckConsistencyStatus {
+table CheckConsistencyReport {
     BadBlockCount: uint32 = 0,
     CheckedBlockCount: uint32 = 1,
     TotalBlockCount: uint32 = 2,
 }
 
-table PublishMessageStatus {
+table PublishMessageReport {
 }
 
-table WantMessageStatus {
+table WantMessageReport {
 }
 
-table PublishFileStatus {
+table PublishFileReport {
 }
 
-table WantFileStatus {
+table WantFileReport {
+}
+
+table NodeProfile {
+    Id: bytes(capacity: 256) = 0,
+    Addresses: vector<OmniAddress>(capacity: 32) = 1,
 }

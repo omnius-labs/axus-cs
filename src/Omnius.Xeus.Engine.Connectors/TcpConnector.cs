@@ -15,10 +15,11 @@ using Omnius.Core.Net.Upnp;
 using Omnius.Core.Network;
 using Omnius.Core.Network.Caps;
 using Omnius.Core.Network.Proxies;
+using Omnius.Xeus.Engine.Connectors.Internal;
 
-namespace Omnius.Xeus.Engine.Connectors.Internal
+namespace Omnius.Xeus.Engine.Connectors
 {
-    internal sealed class TcpConnector : ServiceBase, ITcpConnector
+    public sealed class TcpConnector : ServiceBase, ITcpConnector
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
