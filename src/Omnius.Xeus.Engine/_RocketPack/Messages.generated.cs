@@ -5,48 +5,48 @@ using Omnius.Core.Network;
 
 namespace Omnius.Xeus.Engine
 {
+    public enum ErrorReportType : byte
+    {
+        SpaceNotFound = 0,
+    }
+
     public enum TcpProxyType : byte
     {
         HttpProxy = 0,
         Socks5Proxy = 1,
     }
 
-    public enum ErrorStatusType : byte
+    public sealed partial class ErrorReport : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<ErrorReport>
     {
-        SpaceNotFound = 0,
-    }
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<ErrorReport> Formatter { get; }
+        public static ErrorReport Empty { get; }
 
-    public sealed partial class Clue : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<Clue>
-    {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<Clue> Formatter { get; }
-        public static Clue Empty { get; }
-
-        static Clue()
+        static ErrorReport()
         {
-            Clue.Formatter = new ___CustomFormatter();
-            Clue.Empty = new Clue(OmniHash.Empty, 0);
+            ErrorReport.Formatter = new ___CustomFormatter();
+            ErrorReport.Empty = new ErrorReport(global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero, (ErrorReportType)0);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public Clue(OmniHash hash, byte depth)
+        public ErrorReport(global::Omnius.Core.Serialization.RocketPack.Timestamp creationTime, ErrorReportType type)
         {
-            this.Hash = hash;
-            this.Depth = depth;
+            this.CreationTime = creationTime;
+            this.Type = type;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (hash != default) ___h.Add(hash.GetHashCode());
-                if (depth != default) ___h.Add(depth.GetHashCode());
+                if (creationTime != default) ___h.Add(creationTime.GetHashCode());
+                if (type != default) ___h.Add(type.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public OmniHash Hash { get; }
-        public byte Depth { get; }
+        public global::Omnius.Core.Serialization.RocketPack.Timestamp CreationTime { get; }
+        public ErrorReportType Type { get; }
 
-        public static Clue Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public static ErrorReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -57,69 +57,69 @@ namespace Omnius.Xeus.Engine
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(Clue? left, Clue? right)
+        public static bool operator ==(ErrorReport? left, ErrorReport? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(Clue? left, Clue? right)
+        public static bool operator !=(ErrorReport? left, ErrorReport? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is Clue)) return false;
-            return this.Equals((Clue)other);
+            if (!(other is ErrorReport)) return false;
+            return this.Equals((ErrorReport)other);
         }
-        public bool Equals(Clue? target)
+        public bool Equals(ErrorReport? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.Hash != target.Hash) return false;
-            if (this.Depth != target.Depth) return false;
+            if (this.CreationTime != target.CreationTime) return false;
+            if (this.Type != target.Type) return false;
 
             return true;
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<Clue>
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<ErrorReport>
         {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in Clue value, in int rank)
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in ErrorReport value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
                 {
                     uint propertyCount = 0;
-                    if (value.Hash != OmniHash.Empty)
+                    if (value.CreationTime != global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero)
                     {
                         propertyCount++;
                     }
-                    if (value.Depth != 0)
+                    if (value.Type != (ErrorReportType)0)
                     {
                         propertyCount++;
                     }
                     w.Write(propertyCount);
                 }
 
-                if (value.Hash != OmniHash.Empty)
+                if (value.CreationTime != global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero)
                 {
                     w.Write((uint)0);
-                    OmniHash.Formatter.Serialize(ref w, value.Hash, rank + 1);
+                    w.Write(value.CreationTime);
                 }
-                if (value.Depth != 0)
+                if (value.Type != (ErrorReportType)0)
                 {
                     w.Write((uint)1);
-                    w.Write(value.Depth);
+                    w.Write((ulong)value.Type);
                 }
             }
 
-            public Clue Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public ErrorReport Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
                 uint propertyCount = r.GetUInt32();
 
-                OmniHash p_hash = OmniHash.Empty;
-                byte p_depth = 0;
+                global::Omnius.Core.Serialization.RocketPack.Timestamp p_creationTime = global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero;
+                ErrorReportType p_type = (ErrorReportType)0;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -128,18 +128,18 @@ namespace Omnius.Xeus.Engine
                     {
                         case 0:
                             {
-                                p_hash = OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_creationTime = r.GetTimestamp();
                                 break;
                             }
                         case 1:
                             {
-                                p_depth = r.GetUInt8();
+                                p_type = (ErrorReportType)r.GetUInt64();
                                 break;
                             }
                     }
                 }
 
-                return new Clue(p_hash, p_depth);
+                return new ErrorReport(p_creationTime, p_type);
             }
         }
     }
@@ -570,279 +570,20 @@ namespace Omnius.Xeus.Engine
         }
     }
 
-    public sealed partial class ConnectorOptions : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<ConnectorOptions>
+    public sealed partial class CheckConsistencyReport : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<CheckConsistencyReport>
     {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<ConnectorOptions> Formatter { get; }
-        public static ConnectorOptions Empty { get; }
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<CheckConsistencyReport> Formatter { get; }
+        public static CheckConsistencyReport Empty { get; }
 
-        static ConnectorOptions()
+        static CheckConsistencyReport()
         {
-            ConnectorOptions.Formatter = new ___CustomFormatter();
-            ConnectorOptions.Empty = new ConnectorOptions(TcpConnectOptions.Empty, TcpAcceptOptions.Empty);
+            CheckConsistencyReport.Formatter = new ___CustomFormatter();
+            CheckConsistencyReport.Empty = new CheckConsistencyReport(0, 0, 0);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public ConnectorOptions(TcpConnectOptions tcpConnectOptions, TcpAcceptOptions tcpAcceptOptions)
-        {
-            if (tcpConnectOptions is null) throw new global::System.ArgumentNullException("tcpConnectOptions");
-            if (tcpAcceptOptions is null) throw new global::System.ArgumentNullException("tcpAcceptOptions");
-
-            this.TcpConnectOptions = tcpConnectOptions;
-            this.TcpAcceptOptions = tcpAcceptOptions;
-
-            ___hashCode = new global::System.Lazy<int>(() =>
-            {
-                var ___h = new global::System.HashCode();
-                if (tcpConnectOptions != default) ___h.Add(tcpConnectOptions.GetHashCode());
-                if (tcpAcceptOptions != default) ___h.Add(tcpAcceptOptions.GetHashCode());
-                return ___h.ToHashCode();
-            });
-        }
-
-        public TcpConnectOptions TcpConnectOptions { get; }
-        public TcpAcceptOptions TcpAcceptOptions { get; }
-
-        public static ConnectorOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
-        {
-            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
-            return Formatter.Deserialize(ref reader, 0);
-        }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBufferPool<byte> bufferPool)
-        {
-            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
-            Formatter.Serialize(ref writer, this, 0);
-        }
-
-        public static bool operator ==(ConnectorOptions? left, ConnectorOptions? right)
-        {
-            return (right is null) ? (left is null) : right.Equals(left);
-        }
-        public static bool operator !=(ConnectorOptions? left, ConnectorOptions? right)
-        {
-            return !(left == right);
-        }
-        public override bool Equals(object? other)
-        {
-            if (!(other is ConnectorOptions)) return false;
-            return this.Equals((ConnectorOptions)other);
-        }
-        public bool Equals(ConnectorOptions? target)
-        {
-            if (target is null) return false;
-            if (object.ReferenceEquals(this, target)) return true;
-            if (this.TcpConnectOptions != target.TcpConnectOptions) return false;
-            if (this.TcpAcceptOptions != target.TcpAcceptOptions) return false;
-
-            return true;
-        }
-        public override int GetHashCode() => ___hashCode.Value;
-
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<ConnectorOptions>
-        {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in ConnectorOptions value, in int rank)
-            {
-                if (rank > 256) throw new global::System.FormatException();
-
-                {
-                    uint propertyCount = 0;
-                    if (value.TcpConnectOptions != TcpConnectOptions.Empty)
-                    {
-                        propertyCount++;
-                    }
-                    if (value.TcpAcceptOptions != TcpAcceptOptions.Empty)
-                    {
-                        propertyCount++;
-                    }
-                    w.Write(propertyCount);
-                }
-
-                if (value.TcpConnectOptions != TcpConnectOptions.Empty)
-                {
-                    w.Write((uint)0);
-                    TcpConnectOptions.Formatter.Serialize(ref w, value.TcpConnectOptions, rank + 1);
-                }
-                if (value.TcpAcceptOptions != TcpAcceptOptions.Empty)
-                {
-                    w.Write((uint)1);
-                    TcpAcceptOptions.Formatter.Serialize(ref w, value.TcpAcceptOptions, rank + 1);
-                }
-            }
-
-            public ConnectorOptions Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
-            {
-                if (rank > 256) throw new global::System.FormatException();
-
-                uint propertyCount = r.GetUInt32();
-
-                TcpConnectOptions p_tcpConnectOptions = TcpConnectOptions.Empty;
-                TcpAcceptOptions p_tcpAcceptOptions = TcpAcceptOptions.Empty;
-
-                for (; propertyCount > 0; propertyCount--)
-                {
-                    uint id = r.GetUInt32();
-                    switch (id)
-                    {
-                        case 0:
-                            {
-                                p_tcpConnectOptions = TcpConnectOptions.Formatter.Deserialize(ref r, rank + 1);
-                                break;
-                            }
-                        case 1:
-                            {
-                                p_tcpAcceptOptions = TcpAcceptOptions.Formatter.Deserialize(ref r, rank + 1);
-                                break;
-                            }
-                    }
-                }
-
-                return new ConnectorOptions(p_tcpConnectOptions, p_tcpAcceptOptions);
-            }
-        }
-    }
-
-    public sealed partial class ErrorStatus : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<ErrorStatus>
-    {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<ErrorStatus> Formatter { get; }
-        public static ErrorStatus Empty { get; }
-
-        static ErrorStatus()
-        {
-            ErrorStatus.Formatter = new ___CustomFormatter();
-            ErrorStatus.Empty = new ErrorStatus(global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero, (ErrorStatusType)0);
-        }
-
-        private readonly global::System.Lazy<int> ___hashCode;
-
-        public ErrorStatus(global::Omnius.Core.Serialization.RocketPack.Timestamp creationTime, ErrorStatusType type)
-        {
-            this.CreationTime = creationTime;
-            this.Type = type;
-
-            ___hashCode = new global::System.Lazy<int>(() =>
-            {
-                var ___h = new global::System.HashCode();
-                if (creationTime != default) ___h.Add(creationTime.GetHashCode());
-                if (type != default) ___h.Add(type.GetHashCode());
-                return ___h.ToHashCode();
-            });
-        }
-
-        public global::Omnius.Core.Serialization.RocketPack.Timestamp CreationTime { get; }
-        public ErrorStatusType Type { get; }
-
-        public static ErrorStatus Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
-        {
-            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
-            return Formatter.Deserialize(ref reader, 0);
-        }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBufferPool<byte> bufferPool)
-        {
-            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
-            Formatter.Serialize(ref writer, this, 0);
-        }
-
-        public static bool operator ==(ErrorStatus? left, ErrorStatus? right)
-        {
-            return (right is null) ? (left is null) : right.Equals(left);
-        }
-        public static bool operator !=(ErrorStatus? left, ErrorStatus? right)
-        {
-            return !(left == right);
-        }
-        public override bool Equals(object? other)
-        {
-            if (!(other is ErrorStatus)) return false;
-            return this.Equals((ErrorStatus)other);
-        }
-        public bool Equals(ErrorStatus? target)
-        {
-            if (target is null) return false;
-            if (object.ReferenceEquals(this, target)) return true;
-            if (this.CreationTime != target.CreationTime) return false;
-            if (this.Type != target.Type) return false;
-
-            return true;
-        }
-        public override int GetHashCode() => ___hashCode.Value;
-
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<ErrorStatus>
-        {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in ErrorStatus value, in int rank)
-            {
-                if (rank > 256) throw new global::System.FormatException();
-
-                {
-                    uint propertyCount = 0;
-                    if (value.CreationTime != global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero)
-                    {
-                        propertyCount++;
-                    }
-                    if (value.Type != (ErrorStatusType)0)
-                    {
-                        propertyCount++;
-                    }
-                    w.Write(propertyCount);
-                }
-
-                if (value.CreationTime != global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero)
-                {
-                    w.Write((uint)0);
-                    w.Write(value.CreationTime);
-                }
-                if (value.Type != (ErrorStatusType)0)
-                {
-                    w.Write((uint)1);
-                    w.Write((ulong)value.Type);
-                }
-            }
-
-            public ErrorStatus Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
-            {
-                if (rank > 256) throw new global::System.FormatException();
-
-                uint propertyCount = r.GetUInt32();
-
-                global::Omnius.Core.Serialization.RocketPack.Timestamp p_creationTime = global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero;
-                ErrorStatusType p_type = (ErrorStatusType)0;
-
-                for (; propertyCount > 0; propertyCount--)
-                {
-                    uint id = r.GetUInt32();
-                    switch (id)
-                    {
-                        case 0:
-                            {
-                                p_creationTime = r.GetTimestamp();
-                                break;
-                            }
-                        case 1:
-                            {
-                                p_type = (ErrorStatusType)r.GetUInt64();
-                                break;
-                            }
-                    }
-                }
-
-                return new ErrorStatus(p_creationTime, p_type);
-            }
-        }
-    }
-
-    public sealed partial class CheckConsistencyStatus : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<CheckConsistencyStatus>
-    {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<CheckConsistencyStatus> Formatter { get; }
-        public static CheckConsistencyStatus Empty { get; }
-
-        static CheckConsistencyStatus()
-        {
-            CheckConsistencyStatus.Formatter = new ___CustomFormatter();
-            CheckConsistencyStatus.Empty = new CheckConsistencyStatus(0, 0, 0);
-        }
-
-        private readonly global::System.Lazy<int> ___hashCode;
-
-        public CheckConsistencyStatus(uint badBlockCount, uint checkedBlockCount, uint totalBlockCount)
+        public CheckConsistencyReport(uint badBlockCount, uint checkedBlockCount, uint totalBlockCount)
         {
             this.BadBlockCount = badBlockCount;
             this.CheckedBlockCount = checkedBlockCount;
@@ -862,7 +603,7 @@ namespace Omnius.Xeus.Engine
         public uint CheckedBlockCount { get; }
         public uint TotalBlockCount { get; }
 
-        public static CheckConsistencyStatus Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public static CheckConsistencyReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -873,20 +614,20 @@ namespace Omnius.Xeus.Engine
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(CheckConsistencyStatus? left, CheckConsistencyStatus? right)
+        public static bool operator ==(CheckConsistencyReport? left, CheckConsistencyReport? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(CheckConsistencyStatus? left, CheckConsistencyStatus? right)
+        public static bool operator !=(CheckConsistencyReport? left, CheckConsistencyReport? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is CheckConsistencyStatus)) return false;
-            return this.Equals((CheckConsistencyStatus)other);
+            if (!(other is CheckConsistencyReport)) return false;
+            return this.Equals((CheckConsistencyReport)other);
         }
-        public bool Equals(CheckConsistencyStatus? target)
+        public bool Equals(CheckConsistencyReport? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -898,9 +639,9 @@ namespace Omnius.Xeus.Engine
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<CheckConsistencyStatus>
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<CheckConsistencyReport>
         {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in CheckConsistencyStatus value, in int rank)
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in CheckConsistencyReport value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -938,7 +679,7 @@ namespace Omnius.Xeus.Engine
                 }
             }
 
-            public CheckConsistencyStatus Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public CheckConsistencyReport Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -971,25 +712,25 @@ namespace Omnius.Xeus.Engine
                     }
                 }
 
-                return new CheckConsistencyStatus(p_badBlockCount, p_checkedBlockCount, p_totalBlockCount);
+                return new CheckConsistencyReport(p_badBlockCount, p_checkedBlockCount, p_totalBlockCount);
             }
         }
     }
 
-    public sealed partial class PublishMessageStatus : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<PublishMessageStatus>
+    public sealed partial class PublishMessageReport : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<PublishMessageReport>
     {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<PublishMessageStatus> Formatter { get; }
-        public static PublishMessageStatus Empty { get; }
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<PublishMessageReport> Formatter { get; }
+        public static PublishMessageReport Empty { get; }
 
-        static PublishMessageStatus()
+        static PublishMessageReport()
         {
-            PublishMessageStatus.Formatter = new ___CustomFormatter();
-            PublishMessageStatus.Empty = new PublishMessageStatus();
+            PublishMessageReport.Formatter = new ___CustomFormatter();
+            PublishMessageReport.Empty = new PublishMessageReport();
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public PublishMessageStatus()
+        public PublishMessageReport()
         {
 
             ___hashCode = new global::System.Lazy<int>(() =>
@@ -1000,7 +741,7 @@ namespace Omnius.Xeus.Engine
         }
 
 
-        public static PublishMessageStatus Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public static PublishMessageReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -1011,20 +752,20 @@ namespace Omnius.Xeus.Engine
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(PublishMessageStatus? left, PublishMessageStatus? right)
+        public static bool operator ==(PublishMessageReport? left, PublishMessageReport? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(PublishMessageStatus? left, PublishMessageStatus? right)
+        public static bool operator !=(PublishMessageReport? left, PublishMessageReport? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is PublishMessageStatus)) return false;
-            return this.Equals((PublishMessageStatus)other);
+            if (!(other is PublishMessageReport)) return false;
+            return this.Equals((PublishMessageReport)other);
         }
-        public bool Equals(PublishMessageStatus? target)
+        public bool Equals(PublishMessageReport? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -1033,9 +774,9 @@ namespace Omnius.Xeus.Engine
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<PublishMessageStatus>
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<PublishMessageReport>
         {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in PublishMessageStatus value, in int rank)
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in PublishMessageReport value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1046,7 +787,7 @@ namespace Omnius.Xeus.Engine
 
             }
 
-            public PublishMessageStatus Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public PublishMessageReport Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1061,25 +802,25 @@ namespace Omnius.Xeus.Engine
                     }
                 }
 
-                return new PublishMessageStatus();
+                return new PublishMessageReport();
             }
         }
     }
 
-    public sealed partial class WantMessageStatus : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<WantMessageStatus>
+    public sealed partial class WantMessageReport : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<WantMessageReport>
     {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<WantMessageStatus> Formatter { get; }
-        public static WantMessageStatus Empty { get; }
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<WantMessageReport> Formatter { get; }
+        public static WantMessageReport Empty { get; }
 
-        static WantMessageStatus()
+        static WantMessageReport()
         {
-            WantMessageStatus.Formatter = new ___CustomFormatter();
-            WantMessageStatus.Empty = new WantMessageStatus();
+            WantMessageReport.Formatter = new ___CustomFormatter();
+            WantMessageReport.Empty = new WantMessageReport();
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public WantMessageStatus()
+        public WantMessageReport()
         {
 
             ___hashCode = new global::System.Lazy<int>(() =>
@@ -1090,7 +831,7 @@ namespace Omnius.Xeus.Engine
         }
 
 
-        public static WantMessageStatus Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public static WantMessageReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -1101,20 +842,20 @@ namespace Omnius.Xeus.Engine
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(WantMessageStatus? left, WantMessageStatus? right)
+        public static bool operator ==(WantMessageReport? left, WantMessageReport? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(WantMessageStatus? left, WantMessageStatus? right)
+        public static bool operator !=(WantMessageReport? left, WantMessageReport? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is WantMessageStatus)) return false;
-            return this.Equals((WantMessageStatus)other);
+            if (!(other is WantMessageReport)) return false;
+            return this.Equals((WantMessageReport)other);
         }
-        public bool Equals(WantMessageStatus? target)
+        public bool Equals(WantMessageReport? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -1123,9 +864,9 @@ namespace Omnius.Xeus.Engine
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<WantMessageStatus>
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<WantMessageReport>
         {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in WantMessageStatus value, in int rank)
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in WantMessageReport value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1136,7 +877,7 @@ namespace Omnius.Xeus.Engine
 
             }
 
-            public WantMessageStatus Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public WantMessageReport Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1151,25 +892,25 @@ namespace Omnius.Xeus.Engine
                     }
                 }
 
-                return new WantMessageStatus();
+                return new WantMessageReport();
             }
         }
     }
 
-    public sealed partial class PublishFileStatus : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<PublishFileStatus>
+    public sealed partial class PublishFileReport : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<PublishFileReport>
     {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<PublishFileStatus> Formatter { get; }
-        public static PublishFileStatus Empty { get; }
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<PublishFileReport> Formatter { get; }
+        public static PublishFileReport Empty { get; }
 
-        static PublishFileStatus()
+        static PublishFileReport()
         {
-            PublishFileStatus.Formatter = new ___CustomFormatter();
-            PublishFileStatus.Empty = new PublishFileStatus();
+            PublishFileReport.Formatter = new ___CustomFormatter();
+            PublishFileReport.Empty = new PublishFileReport();
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public PublishFileStatus()
+        public PublishFileReport()
         {
 
             ___hashCode = new global::System.Lazy<int>(() =>
@@ -1180,7 +921,7 @@ namespace Omnius.Xeus.Engine
         }
 
 
-        public static PublishFileStatus Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public static PublishFileReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -1191,20 +932,20 @@ namespace Omnius.Xeus.Engine
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(PublishFileStatus? left, PublishFileStatus? right)
+        public static bool operator ==(PublishFileReport? left, PublishFileReport? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(PublishFileStatus? left, PublishFileStatus? right)
+        public static bool operator !=(PublishFileReport? left, PublishFileReport? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is PublishFileStatus)) return false;
-            return this.Equals((PublishFileStatus)other);
+            if (!(other is PublishFileReport)) return false;
+            return this.Equals((PublishFileReport)other);
         }
-        public bool Equals(PublishFileStatus? target)
+        public bool Equals(PublishFileReport? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -1213,9 +954,9 @@ namespace Omnius.Xeus.Engine
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<PublishFileStatus>
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<PublishFileReport>
         {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in PublishFileStatus value, in int rank)
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in PublishFileReport value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1226,7 +967,7 @@ namespace Omnius.Xeus.Engine
 
             }
 
-            public PublishFileStatus Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public PublishFileReport Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1241,25 +982,25 @@ namespace Omnius.Xeus.Engine
                     }
                 }
 
-                return new PublishFileStatus();
+                return new PublishFileReport();
             }
         }
     }
 
-    public sealed partial class WantFileStatus : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<WantFileStatus>
+    public sealed partial class WantFileReport : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<WantFileReport>
     {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<WantFileStatus> Formatter { get; }
-        public static WantFileStatus Empty { get; }
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<WantFileReport> Formatter { get; }
+        public static WantFileReport Empty { get; }
 
-        static WantFileStatus()
+        static WantFileReport()
         {
-            WantFileStatus.Formatter = new ___CustomFormatter();
-            WantFileStatus.Empty = new WantFileStatus();
+            WantFileReport.Formatter = new ___CustomFormatter();
+            WantFileReport.Empty = new WantFileReport();
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public WantFileStatus()
+        public WantFileReport()
         {
 
             ___hashCode = new global::System.Lazy<int>(() =>
@@ -1270,7 +1011,7 @@ namespace Omnius.Xeus.Engine
         }
 
 
-        public static WantFileStatus Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public static WantFileReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
         {
             var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -1281,20 +1022,20 @@ namespace Omnius.Xeus.Engine
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(WantFileStatus? left, WantFileStatus? right)
+        public static bool operator ==(WantFileReport? left, WantFileReport? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(WantFileStatus? left, WantFileStatus? right)
+        public static bool operator !=(WantFileReport? left, WantFileReport? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is WantFileStatus)) return false;
-            return this.Equals((WantFileStatus)other);
+            if (!(other is WantFileReport)) return false;
+            return this.Equals((WantFileReport)other);
         }
-        public bool Equals(WantFileStatus? target)
+        public bool Equals(WantFileReport? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -1303,9 +1044,9 @@ namespace Omnius.Xeus.Engine
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<WantFileStatus>
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<WantFileReport>
         {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in WantFileStatus value, in int rank)
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in WantFileReport value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1316,7 +1057,7 @@ namespace Omnius.Xeus.Engine
 
             }
 
-            public WantFileStatus Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public WantFileReport Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1331,7 +1072,158 @@ namespace Omnius.Xeus.Engine
                     }
                 }
 
-                return new WantFileStatus();
+                return new WantFileReport();
+            }
+        }
+    }
+
+    public sealed partial class NodeProfile : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<NodeProfile>
+    {
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<NodeProfile> Formatter { get; }
+        public static NodeProfile Empty { get; }
+
+        static NodeProfile()
+        {
+            NodeProfile.Formatter = new ___CustomFormatter();
+            NodeProfile.Empty = new NodeProfile(global::System.ReadOnlyMemory<byte>.Empty, global::System.Array.Empty<OmniAddress>());
+        }
+
+        private readonly global::System.Lazy<int> ___hashCode;
+
+        public static readonly int MaxIdLength = 256;
+        public static readonly int MaxAddressesCount = 32;
+
+        public NodeProfile(global::System.ReadOnlyMemory<byte> id, OmniAddress[] addresses)
+        {
+            if (id.Length > 256) throw new global::System.ArgumentOutOfRangeException("id");
+            if (addresses is null) throw new global::System.ArgumentNullException("addresses");
+            if (addresses.Length > 32) throw new global::System.ArgumentOutOfRangeException("addresses");
+            foreach (var n in addresses)
+            {
+                if (n is null) throw new global::System.ArgumentNullException("n");
+            }
+
+            this.Id = id;
+            this.Addresses = new global::Omnius.Core.Collections.ReadOnlyListSlim<OmniAddress>(addresses);
+
+            ___hashCode = new global::System.Lazy<int>(() =>
+            {
+                var ___h = new global::System.HashCode();
+                if (!id.IsEmpty) ___h.Add(global::Omnius.Core.Helpers.ObjectHelper.GetHashCode(id.Span));
+                foreach (var n in addresses)
+                {
+                    if (n != default) ___h.Add(n.GetHashCode());
+                }
+                return ___h.ToHashCode();
+            });
+        }
+
+        public global::System.ReadOnlyMemory<byte> Id { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<OmniAddress> Addresses { get; }
+
+        public static NodeProfile Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        {
+            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
+            return Formatter.Deserialize(ref reader, 0);
+        }
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        {
+            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
+            Formatter.Serialize(ref writer, this, 0);
+        }
+
+        public static bool operator ==(NodeProfile? left, NodeProfile? right)
+        {
+            return (right is null) ? (left is null) : right.Equals(left);
+        }
+        public static bool operator !=(NodeProfile? left, NodeProfile? right)
+        {
+            return !(left == right);
+        }
+        public override bool Equals(object? other)
+        {
+            if (!(other is NodeProfile)) return false;
+            return this.Equals((NodeProfile)other);
+        }
+        public bool Equals(NodeProfile? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (!global::Omnius.Core.BytesOperations.Equals(this.Id.Span, target.Id.Span)) return false;
+            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Addresses, target.Addresses)) return false;
+
+            return true;
+        }
+        public override int GetHashCode() => ___hashCode.Value;
+
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<NodeProfile>
+        {
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in NodeProfile value, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                {
+                    uint propertyCount = 0;
+                    if (!value.Id.IsEmpty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Addresses.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
+                }
+
+                if (!value.Id.IsEmpty)
+                {
+                    w.Write((uint)0);
+                    w.Write(value.Id.Span);
+                }
+                if (value.Addresses.Count != 0)
+                {
+                    w.Write((uint)1);
+                    w.Write((uint)value.Addresses.Count);
+                    foreach (var n in value.Addresses)
+                    {
+                        OmniAddress.Formatter.Serialize(ref w, n, rank + 1);
+                    }
+                }
+            }
+
+            public NodeProfile Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                uint propertyCount = r.GetUInt32();
+
+                global::System.ReadOnlyMemory<byte> p_id = global::System.ReadOnlyMemory<byte>.Empty;
+                OmniAddress[] p_addresses = global::System.Array.Empty<OmniAddress>();
+
+                for (; propertyCount > 0; propertyCount--)
+                {
+                    uint id = r.GetUInt32();
+                    switch (id)
+                    {
+                        case 0:
+                            {
+                                p_id = r.GetMemory(256);
+                                break;
+                            }
+                        case 1:
+                            {
+                                var length = r.GetUInt32();
+                                p_addresses = new OmniAddress[length];
+                                for (int i = 0; i < p_addresses.Length; i++)
+                                {
+                                    p_addresses[i] = OmniAddress.Formatter.Deserialize(ref r, rank + 1);
+                                }
+                                break;
+                            }
+                    }
+                }
+
+                return new NodeProfile(p_id, p_addresses);
             }
         }
     }
