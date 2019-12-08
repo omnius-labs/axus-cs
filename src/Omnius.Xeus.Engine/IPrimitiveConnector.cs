@@ -28,7 +28,7 @@ namespace Omnius.Xeus.Engine
 
     public interface IPrimitiveConnector : IDisposable
     {
-        ValueTask<ConnectorResult> AcceptAsync(CancellationToken token = default);
-        ValueTask<ConnectorResult> ConnectAsync(OmniAddress address, CancellationToken token = default);
+        ValueTask<ConnectorResult> AcceptAsync(CancellationToken cancellationToken = default);
+        ValueTask<ConnectorResult> ConnectAsync(OmniAddress address, CancellationToken cancellationToken = default);
     }
 }

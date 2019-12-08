@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <RootNamespace>Omnius.Xeus.Engine.Connectors</RootNamespace>
+    <RootNamespace>Omnius.Xeus.Engine</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Omnius.Xeus.Engine.Connectors\Omnius.Xeus.Engine.Connectors.csproj" />
+    <ProjectReference Include="..\..\src\Omnius.Xeus.Engine.Implements\Omnius.Xeus.Engine.Implements.csproj" />
     <ProjectReference Include="..\..\src\Omnius.Xeus.Engine\Omnius.Xeus.Engine.csproj" />
   </ItemGroup>
 

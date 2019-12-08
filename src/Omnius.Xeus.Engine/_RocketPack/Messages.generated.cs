@@ -16,6 +16,302 @@ namespace Omnius.Xeus.Engine
         Socks5Proxy = 1,
     }
 
+    public sealed partial class NodeProfile : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<NodeProfile>
+    {
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<NodeProfile> Formatter { get; }
+        public static NodeProfile Empty { get; }
+
+        static NodeProfile()
+        {
+            NodeProfile.Formatter = new ___CustomFormatter();
+            NodeProfile.Empty = new NodeProfile(global::System.ReadOnlyMemory<byte>.Empty, global::System.Array.Empty<OmniAddress>());
+        }
+
+        private readonly global::System.Lazy<int> ___hashCode;
+
+        public static readonly int MaxIdLength = 256;
+        public static readonly int MaxAddressesCount = 32;
+
+        public NodeProfile(global::System.ReadOnlyMemory<byte> id, OmniAddress[] addresses)
+        {
+            if (id.Length > 256) throw new global::System.ArgumentOutOfRangeException("id");
+            if (addresses is null) throw new global::System.ArgumentNullException("addresses");
+            if (addresses.Length > 32) throw new global::System.ArgumentOutOfRangeException("addresses");
+            foreach (var n in addresses)
+            {
+                if (n is null) throw new global::System.ArgumentNullException("n");
+            }
+
+            this.Id = id;
+            this.Addresses = new global::Omnius.Core.Collections.ReadOnlyListSlim<OmniAddress>(addresses);
+
+            ___hashCode = new global::System.Lazy<int>(() =>
+            {
+                var ___h = new global::System.HashCode();
+                if (!id.IsEmpty) ___h.Add(global::Omnius.Core.Helpers.ObjectHelper.GetHashCode(id.Span));
+                foreach (var n in addresses)
+                {
+                    if (n != default) ___h.Add(n.GetHashCode());
+                }
+                return ___h.ToHashCode();
+            });
+        }
+
+        public global::System.ReadOnlyMemory<byte> Id { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<OmniAddress> Addresses { get; }
+
+        public static NodeProfile Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        {
+            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
+            return Formatter.Deserialize(ref reader, 0);
+        }
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        {
+            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
+            Formatter.Serialize(ref writer, this, 0);
+        }
+
+        public static bool operator ==(NodeProfile? left, NodeProfile? right)
+        {
+            return (right is null) ? (left is null) : right.Equals(left);
+        }
+        public static bool operator !=(NodeProfile? left, NodeProfile? right)
+        {
+            return !(left == right);
+        }
+        public override bool Equals(object? other)
+        {
+            if (!(other is NodeProfile)) return false;
+            return this.Equals((NodeProfile)other);
+        }
+        public bool Equals(NodeProfile? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (!global::Omnius.Core.BytesOperations.Equals(this.Id.Span, target.Id.Span)) return false;
+            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Addresses, target.Addresses)) return false;
+
+            return true;
+        }
+        public override int GetHashCode() => ___hashCode.Value;
+
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<NodeProfile>
+        {
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in NodeProfile value, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                {
+                    uint propertyCount = 0;
+                    if (!value.Id.IsEmpty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Addresses.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
+                }
+
+                if (!value.Id.IsEmpty)
+                {
+                    w.Write((uint)0);
+                    w.Write(value.Id.Span);
+                }
+                if (value.Addresses.Count != 0)
+                {
+                    w.Write((uint)1);
+                    w.Write((uint)value.Addresses.Count);
+                    foreach (var n in value.Addresses)
+                    {
+                        OmniAddress.Formatter.Serialize(ref w, n, rank + 1);
+                    }
+                }
+            }
+
+            public NodeProfile Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                uint propertyCount = r.GetUInt32();
+
+                global::System.ReadOnlyMemory<byte> p_id = global::System.ReadOnlyMemory<byte>.Empty;
+                OmniAddress[] p_addresses = global::System.Array.Empty<OmniAddress>();
+
+                for (; propertyCount > 0; propertyCount--)
+                {
+                    uint id = r.GetUInt32();
+                    switch (id)
+                    {
+                        case 0:
+                            {
+                                p_id = r.GetMemory(256);
+                                break;
+                            }
+                        case 1:
+                            {
+                                var length = r.GetUInt32();
+                                p_addresses = new OmniAddress[length];
+                                for (int i = 0; i < p_addresses.Length; i++)
+                                {
+                                    p_addresses[i] = OmniAddress.Formatter.Deserialize(ref r, rank + 1);
+                                }
+                                break;
+                            }
+                    }
+                }
+
+                return new NodeProfile(p_id, p_addresses);
+            }
+        }
+    }
+
+    public sealed partial class MerkleTreeSection : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<MerkleTreeSection>
+    {
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<MerkleTreeSection> Formatter { get; }
+        public static MerkleTreeSection Empty { get; }
+
+        static MerkleTreeSection()
+        {
+            MerkleTreeSection.Formatter = new ___CustomFormatter();
+            MerkleTreeSection.Empty = new MerkleTreeSection(0, global::System.Array.Empty<OmniHash>());
+        }
+
+        private readonly global::System.Lazy<int> ___hashCode;
+
+        public static readonly int MaxHashesCount = 1073741824;
+
+        public MerkleTreeSection(ulong length, OmniHash[] hashes)
+        {
+            if (hashes is null) throw new global::System.ArgumentNullException("hashes");
+            if (hashes.Length > 1073741824) throw new global::System.ArgumentOutOfRangeException("hashes");
+
+            this.Length = length;
+            this.Hashes = new global::Omnius.Core.Collections.ReadOnlyListSlim<OmniHash>(hashes);
+
+            ___hashCode = new global::System.Lazy<int>(() =>
+            {
+                var ___h = new global::System.HashCode();
+                if (length != default) ___h.Add(length.GetHashCode());
+                foreach (var n in hashes)
+                {
+                    if (n != default) ___h.Add(n.GetHashCode());
+                }
+                return ___h.ToHashCode();
+            });
+        }
+
+        public ulong Length { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<OmniHash> Hashes { get; }
+
+        public static MerkleTreeSection Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        {
+            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
+            return Formatter.Deserialize(ref reader, 0);
+        }
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        {
+            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
+            Formatter.Serialize(ref writer, this, 0);
+        }
+
+        public static bool operator ==(MerkleTreeSection? left, MerkleTreeSection? right)
+        {
+            return (right is null) ? (left is null) : right.Equals(left);
+        }
+        public static bool operator !=(MerkleTreeSection? left, MerkleTreeSection? right)
+        {
+            return !(left == right);
+        }
+        public override bool Equals(object? other)
+        {
+            if (!(other is MerkleTreeSection)) return false;
+            return this.Equals((MerkleTreeSection)other);
+        }
+        public bool Equals(MerkleTreeSection? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (this.Length != target.Length) return false;
+            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Hashes, target.Hashes)) return false;
+
+            return true;
+        }
+        public override int GetHashCode() => ___hashCode.Value;
+
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<MerkleTreeSection>
+        {
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in MerkleTreeSection value, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                {
+                    uint propertyCount = 0;
+                    if (value.Length != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Hashes.Count != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
+                }
+
+                if (value.Length != 0)
+                {
+                    w.Write((uint)0);
+                    w.Write(value.Length);
+                }
+                if (value.Hashes.Count != 0)
+                {
+                    w.Write((uint)1);
+                    w.Write((uint)value.Hashes.Count);
+                    foreach (var n in value.Hashes)
+                    {
+                        OmniHash.Formatter.Serialize(ref w, n, rank + 1);
+                    }
+                }
+            }
+
+            public MerkleTreeSection Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                uint propertyCount = r.GetUInt32();
+
+                ulong p_length = 0;
+                OmniHash[] p_hashes = global::System.Array.Empty<OmniHash>();
+
+                for (; propertyCount > 0; propertyCount--)
+                {
+                    uint id = r.GetUInt32();
+                    switch (id)
+                    {
+                        case 0:
+                            {
+                                p_length = r.GetUInt64();
+                                break;
+                            }
+                        case 1:
+                            {
+                                var length = r.GetUInt32();
+                                p_hashes = new OmniHash[length];
+                                for (int i = 0; i < p_hashes.Length; i++)
+                                {
+                                    p_hashes[i] = OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                }
+                                break;
+                            }
+                    }
+                }
+
+                return new MerkleTreeSection(p_length, p_hashes);
+            }
+        }
+    }
+
     public sealed partial class ErrorReport : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<ErrorReport>
     {
         public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<ErrorReport> Formatter { get; }
@@ -1073,157 +1369,6 @@ namespace Omnius.Xeus.Engine
                 }
 
                 return new WantFileReport();
-            }
-        }
-    }
-
-    public sealed partial class NodeProfile : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<NodeProfile>
-    {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<NodeProfile> Formatter { get; }
-        public static NodeProfile Empty { get; }
-
-        static NodeProfile()
-        {
-            NodeProfile.Formatter = new ___CustomFormatter();
-            NodeProfile.Empty = new NodeProfile(global::System.ReadOnlyMemory<byte>.Empty, global::System.Array.Empty<OmniAddress>());
-        }
-
-        private readonly global::System.Lazy<int> ___hashCode;
-
-        public static readonly int MaxIdLength = 256;
-        public static readonly int MaxAddressesCount = 32;
-
-        public NodeProfile(global::System.ReadOnlyMemory<byte> id, OmniAddress[] addresses)
-        {
-            if (id.Length > 256) throw new global::System.ArgumentOutOfRangeException("id");
-            if (addresses is null) throw new global::System.ArgumentNullException("addresses");
-            if (addresses.Length > 32) throw new global::System.ArgumentOutOfRangeException("addresses");
-            foreach (var n in addresses)
-            {
-                if (n is null) throw new global::System.ArgumentNullException("n");
-            }
-
-            this.Id = id;
-            this.Addresses = new global::Omnius.Core.Collections.ReadOnlyListSlim<OmniAddress>(addresses);
-
-            ___hashCode = new global::System.Lazy<int>(() =>
-            {
-                var ___h = new global::System.HashCode();
-                if (!id.IsEmpty) ___h.Add(global::Omnius.Core.Helpers.ObjectHelper.GetHashCode(id.Span));
-                foreach (var n in addresses)
-                {
-                    if (n != default) ___h.Add(n.GetHashCode());
-                }
-                return ___h.ToHashCode();
-            });
-        }
-
-        public global::System.ReadOnlyMemory<byte> Id { get; }
-        public global::Omnius.Core.Collections.ReadOnlyListSlim<OmniAddress> Addresses { get; }
-
-        public static NodeProfile Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
-        {
-            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
-            return Formatter.Deserialize(ref reader, 0);
-        }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBufferPool<byte> bufferPool)
-        {
-            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
-            Formatter.Serialize(ref writer, this, 0);
-        }
-
-        public static bool operator ==(NodeProfile? left, NodeProfile? right)
-        {
-            return (right is null) ? (left is null) : right.Equals(left);
-        }
-        public static bool operator !=(NodeProfile? left, NodeProfile? right)
-        {
-            return !(left == right);
-        }
-        public override bool Equals(object? other)
-        {
-            if (!(other is NodeProfile)) return false;
-            return this.Equals((NodeProfile)other);
-        }
-        public bool Equals(NodeProfile? target)
-        {
-            if (target is null) return false;
-            if (object.ReferenceEquals(this, target)) return true;
-            if (!global::Omnius.Core.BytesOperations.Equals(this.Id.Span, target.Id.Span)) return false;
-            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Addresses, target.Addresses)) return false;
-
-            return true;
-        }
-        public override int GetHashCode() => ___hashCode.Value;
-
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<NodeProfile>
-        {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in NodeProfile value, in int rank)
-            {
-                if (rank > 256) throw new global::System.FormatException();
-
-                {
-                    uint propertyCount = 0;
-                    if (!value.Id.IsEmpty)
-                    {
-                        propertyCount++;
-                    }
-                    if (value.Addresses.Count != 0)
-                    {
-                        propertyCount++;
-                    }
-                    w.Write(propertyCount);
-                }
-
-                if (!value.Id.IsEmpty)
-                {
-                    w.Write((uint)0);
-                    w.Write(value.Id.Span);
-                }
-                if (value.Addresses.Count != 0)
-                {
-                    w.Write((uint)1);
-                    w.Write((uint)value.Addresses.Count);
-                    foreach (var n in value.Addresses)
-                    {
-                        OmniAddress.Formatter.Serialize(ref w, n, rank + 1);
-                    }
-                }
-            }
-
-            public NodeProfile Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
-            {
-                if (rank > 256) throw new global::System.FormatException();
-
-                uint propertyCount = r.GetUInt32();
-
-                global::System.ReadOnlyMemory<byte> p_id = global::System.ReadOnlyMemory<byte>.Empty;
-                OmniAddress[] p_addresses = global::System.Array.Empty<OmniAddress>();
-
-                for (; propertyCount > 0; propertyCount--)
-                {
-                    uint id = r.GetUInt32();
-                    switch (id)
-                    {
-                        case 0:
-                            {
-                                p_id = r.GetMemory(256);
-                                break;
-                            }
-                        case 1:
-                            {
-                                var length = r.GetUInt32();
-                                p_addresses = new OmniAddress[length];
-                                for (int i = 0; i < p_addresses.Length; i++)
-                                {
-                                    p_addresses[i] = OmniAddress.Formatter.Deserialize(ref r, rank + 1);
-                                }
-                                break;
-                            }
-                    }
-                }
-
-                return new NodeProfile(p_id, p_addresses);
             }
         }
     }

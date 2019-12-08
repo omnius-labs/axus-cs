@@ -4,7 +4,7 @@ using Omnius.Xeus.Engine;
 
 #nullable enable
 
-namespace Omnius.Xeus.Engine.Connectors.Internal
+namespace Omnius.Xeus.Engine.Implements.Internal
 {
     internal sealed partial class TcpConnectorConfig : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<TcpConnectorConfig>
     {
