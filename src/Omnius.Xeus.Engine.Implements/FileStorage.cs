@@ -6,10 +6,12 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
+using Omnius.Core.Collections;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Extensions;
+using Omnius.Xeus.Engine.Implements.Internal;
 
-namespace Omnius.Xeus.Engine.Storages
+namespace Omnius.Xeus.Engine.Implements
 {
     public sealed class FileStorage : DisposableBase, IFileStorage
     {
@@ -105,18 +107,28 @@ namespace Omnius.Xeus.Engine.Storages
 
         }
 
+        ValueTask<OmniHash> IFileStorage.AddPublishFile(string filePath, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
         class PublishFileStatus
         {
-            public PublishFileStatus(string filePath)
+            private Dictionary<OmniHash, long> _indexMap = new Dictionary<OmniHash, long>();
+
+            public PublishFileStatus(string filePath, MerkleTreeSection[] merkleTreeSections)
             {
                 this.FilePath = filePath;
+                this.MerkleTreeSections = new ReadOnlyListSlim<MerkleTreeSection>(merkleTreeSections);
             }
 
             public string FilePath { get; }
+            public ReadOnlyListSlim<MerkleTreeSection> MerkleTreeSections { get; }
 
-            public OmniHash RootHash { get; set; }
-            public int CurrentDepth { get; set; }
-            public List<OmniHash> WantBlocks { get; } = new List<OmniHash>();
+            public bool TryGetBlockIndexForFile(OmniHash hash, out long index)
+            {
+                return _indexMap.TryGetValue(hash, out index);
+            }
         }
 
         class WantFileStatus

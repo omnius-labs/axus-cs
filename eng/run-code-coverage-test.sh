@@ -1,3 +1,5 @@
+#!/bin/bash
+
 dotnet tool install --global coverlet.console
 dotnet tool update --global coverlet.console
 

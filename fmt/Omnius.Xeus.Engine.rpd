@@ -5,6 +5,16 @@ using "Omnius.Core.Network";
 
 namespace "Omnius.Xeus.Engine";
 
+table NodeProfile {
+    Id: bytes(capacity: 256) = 0,
+    Addresses: vector<OmniAddress>(capacity: 32) = 1,
+}
+
+table MerkleTreeSection {
+    Length: uint64 = 0,
+    Hashes: vector<OmniHash>(capacity: 1073741824) = 1,
+}
+
 enum ErrorReportType : uint8 {
     SpaceNotFound = 0,
 }
@@ -51,9 +61,4 @@ table PublishFileReport {
 }
 
 table WantFileReport {
-}
-
-table NodeProfile {
-    Id: bytes(capacity: 256) = 0,
-    Addresses: vector<OmniAddress>(capacity: 32) = 1,
 }
