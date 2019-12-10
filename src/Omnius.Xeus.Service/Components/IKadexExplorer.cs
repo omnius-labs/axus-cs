@@ -4,7 +4,7 @@ using Omnius.Core;
 using Omnius.Core.Collections;
 using Omnius.Core.Network;
 
-namespace Omnius.Xeus.Engine
+namespace Omnius.Xeus.Service.Components
 {
     public interface IKadexExplorer
     {

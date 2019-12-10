@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Omnius.Core.Network;
 using Omnius.Core.Network.Caps;
 
-namespace Omnius.Xeus.Engine
+namespace Omnius.Xeus.Service.Components.Primitives
 {
     public enum ConnectorResultType
     {
