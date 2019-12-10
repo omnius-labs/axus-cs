@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Omnius.Core;
 
-namespace Omnius.Xeus.Engine.Implements.Internal
+namespace Omnius.Xeus.Engine.Implements.Components.Internal
 {
     internal readonly struct RouteTableElement<T>
     {

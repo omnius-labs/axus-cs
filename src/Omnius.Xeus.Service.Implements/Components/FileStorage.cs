@@ -11,7 +11,7 @@ using Omnius.Core.Cryptography;
 using Omnius.Core.Extensions;
 using Omnius.Xeus.Engine.Implements.Internal;
 
-namespace Omnius.Xeus.Engine.Implements
+namespace Omnius.Xeus.Engine.Implements.Components
 {
     public sealed class FileStorage : DisposableBase, IFileStorage
     {

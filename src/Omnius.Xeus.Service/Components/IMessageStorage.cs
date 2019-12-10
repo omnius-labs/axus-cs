@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core.Cryptography;
 
-namespace Omnius.Xeus.Engine
+namespace Omnius.Xeus.Service.Components
 {
     public interface IMessageStorage : IPrimitiveStorage
     {

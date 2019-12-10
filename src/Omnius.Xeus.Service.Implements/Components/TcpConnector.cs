@@ -9,16 +9,17 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Extensions;
-using Omnius.Core.Configuration;
-using Omnius.Core.Collections;
-using Omnius.Core.Net.Upnp;
 using Omnius.Core.Network;
 using Omnius.Core.Network.Caps;
-using Omnius.Core.Network.Proxies;
-using Omnius.Xeus.Engine.Implements.Internal;
 using System.Diagnostics;
+using Omnius.Xeus.Service.Components;
+using Omnius.Core.Configuration;
+using Omnius.Xeus.Service;
+using Omnius.Xeus.Service.Components.Primitives;
+using Omnius.Core.Network.Proxies;
+using Omnius.Core.Net.Upnp;
 
-namespace Omnius.Xeus.Engine.Implements
+namespace Omnius.Xeus.Engine.Implements.Components
 {
     public sealed class TcpConnector : DisposableBase, ITcpConnector
     {
@@ -41,7 +42,7 @@ namespace Omnius.Xeus.Engine.Implements
 
         private readonly object _lockObject = new object();
 
-        public TcpConnector(string basePath, IBufferPool<byte> bufferPool)
+        private TcpConnector(string basePath, IBufferPool<byte> bufferPool)
         {
             var configPath = Path.Combine(basePath, "config");
             var refsPath = Path.Combine(basePath, "refs");
@@ -90,11 +91,26 @@ namespace Omnius.Xeus.Engine.Implements
             });
         }
 
-        public TcpConnectOptions? TcpConnectOptions => _tcpConnectOptions;
+        protected override async ValueTask OnDisposeAsync()
+        {
+            _watchTaskEvent.Set();
+            await _watchTask;
+            _watchTaskEvent.Dispose();
 
-        public TcpAcceptOptions? TcpAcceptOptions => _tcpAcceptOptions;
+            await this.SaveAsync();
+            await _settings.DisposeAsync();
+        }
 
-        public void SetTcpConnectOptions(TcpConnectOptions? tcpConnectConfig)
+        protected override void OnDispose(bool disposing)
+        {
+            this.OnDisposeAsync().AsTask().Wait();
+        }
+
+        public TcpConnectOptions TcpConnectOptions => _tcpConnectOptions;
+
+        public TcpAcceptOptions TcpAcceptOptions => _tcpAcceptOptions;
+
+        public void SetTcpConnectOptions(TcpConnectOptions tcpConnectConfig)
         {
             lock (_lockObject)
             {
@@ -107,7 +123,7 @@ namespace Omnius.Xeus.Engine.Implements
             }
         }
 
-        public void SetTcpAcceptOptions(TcpAcceptOptions? tcpAcceptConfig)
+        public void SetTcpAcceptOptions(TcpAcceptOptions tcpAcceptConfig)
         {
             lock (_lockObject)
             {
@@ -620,21 +636,6 @@ namespace Omnius.Xeus.Engine.Implements
                     upnpClient.Dispose();
                 }
             }
-        }
-
-        protected override async ValueTask OnDisposeAsync()
-        {
-            _watchTaskEvent.Set();
-            await _watchTask;
-            _watchTaskEvent.Dispose();
-
-            await this.SaveAsync();
-            await _settings.DisposeAsync();
-        }
-
-        protected override void OnDispose(bool disposing)
-        {
-            this.OnDisposeAsync().AsTask().Wait();
         }
     }
 }

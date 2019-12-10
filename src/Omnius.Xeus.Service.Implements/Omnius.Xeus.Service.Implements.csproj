@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Collections\Omnius.Core.Collections.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Configuration\Omnius.Core.Configuration.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Cryptography\Omnius.Core.Cryptography.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Io\Omnius.Core.Io.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Network.Proxies\Omnius.Core.Network.Proxies.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Network.Upnp\Omnius.Core.Network.Upnp.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Network\Omnius.Core.Network.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Serialization.RocketPack\Omnius.Core.Serialization.RocketPack.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Serialization\Omnius.Core.Serialization.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core\Omnius.Core.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Service\Omnius.Xeus.Service.csproj" />
+  </ItemGroup>
+
+</Project>
