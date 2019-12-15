@@ -11,7 +11,7 @@ jobs:
           submodules: true
       - uses: actions/setup-dotnet@v1.0.2
         with:
-          dotnet-version: 3.0.100
+          dotnet-version: 3.1.100
       - run: sh run-test.sh
       - uses: actions/upload-artifact@v1
         with:
@@ -25,7 +25,7 @@ jobs:
           submodules: true
       - uses: actions/setup-dotnet@v1.0.2
         with:
-          dotnet-version: 3.0.100
+          dotnet-version: 3.1.100
       - run: ./run-test.cmd
       - uses: actions/upload-artifact@v1
         with:
