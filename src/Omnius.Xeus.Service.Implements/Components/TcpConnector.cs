@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -8,16 +9,15 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
+using Omnius.Core.Configuration;
 using Omnius.Core.Extensions;
+using Omnius.Core.Net.Upnp;
 using Omnius.Core.Network;
 using Omnius.Core.Network.Caps;
-using System.Diagnostics;
-using Omnius.Xeus.Service.Components;
-using Omnius.Core.Configuration;
-using Omnius.Xeus.Service;
-using Omnius.Xeus.Service.Components.Primitives;
 using Omnius.Core.Network.Proxies;
-using Omnius.Core.Net.Upnp;
+using Omnius.Xeus.Service;
+using Omnius.Xeus.Service.Components;
+using Omnius.Xeus.Service.Components.Primitives;
 
 namespace Omnius.Xeus.Engine.Implements.Components
 {
@@ -492,6 +492,8 @@ namespace Omnius.Xeus.Engine.Implements.Components
             try
             {
                 var upnpStopwatch = new Stopwatch();
+
+                Task.Delay()
 
                 while (!_watchTaskEvent.Wait(1000))
                 {

@@ -150,6 +150,15 @@ end_of_line = lf
 [*.{cmd, bat}]
 end_of_line = crlf
 
+# Config files
+[*.{yml,toml}]
+end_of_line = lf
+indent_size = 2
+
 # Document files
 [*.{md,txt}]
 end_of_line = lf
+
+# Makefile
+[Makefile]
+indent_style = tab
