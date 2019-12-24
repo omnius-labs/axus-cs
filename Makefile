@@ -5,7 +5,7 @@ gen-code:
 	docker-compose run --rm devenv sh ./eng/generate-code.sh
 
 test:
-	docker-compose run --rm devenv sh ./run-test.sh
+	docker-compose run --rm devenv sh ./eng/run-test.sh
 
 clean:
 	rm -rf ./bin

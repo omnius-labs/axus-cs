@@ -2,6 +2,7 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,14 +10,14 @@ using Omnius.Core;
 using Omnius.Core.Collections;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Extensions;
-using Omnius.Xeus.Engine.Implements.Internal;
+using Omnius.Xeus.Service.Components.Internal;
 
-namespace Omnius.Xeus.Engine.Implements.Components
+namespace Omnius.Xeus.Service.Components
 {
     public sealed class FileStorage : DisposableBase, IFileStorage
     {
-        private Dictionary<string, PublishFileStatus> _publishFileStatusMap = new Dictionary<string, PublishFileStatus>();
-        private Dictionary<(OmniHash, string), WantFileStatus> _wantFileStatusMap = new Dictionary<(OmniHash, string), WantFileStatus>();
+        private readonly Dictionary<string, PublishFileStatus> _publishFileStatusMap = new Dictionary<string, PublishFileStatus>();
+        private readonly Dictionary<string, WantFileStatus> _wantFileStatusMap = new Dictionary<string, WantFileStatus>();
 
         public ulong TotalUsingBytes { get; }
 
@@ -47,13 +48,29 @@ namespace Omnius.Xeus.Engine.Implements.Components
 
         #region PublishFile
 
-        public async ValueTask<OmniHash?> AddPublishFile(string filePath, CancellationToken cancellationToken = default)
+        public async ValueTask<OmniHash> AddPublishFile(string filePath, CancellationToken cancellationToken = default)
         {
-            if (_publishFileStatusMap.ContainsKey(filePath)) return null;
+            {
+                if (_publishFileStatusMap.TryGetValue(filePath, out var status))
+                {
+                    return status.RootHash;
+                }
+            }
 
-            var status = new PublishFileStatus(filePath);
+            {
+                const int MaxBlockLength = 1 * 1024 * 1024;
 
-            _publishFileStatusMap.Add(filePath, status);
+                using(var fileStream = new FileStream(filePath, FileMode.Open))
+                {
+
+                }
+
+                var status = new PublishFileStatus(filePath, default, null);
+
+                _publishFileStatusMap.Add(filePath, status);
+
+                throw new NotSupportedException();
+            }
         }
 
         public void RemovePublishFile(string path)
@@ -70,21 +87,19 @@ namespace Omnius.Xeus.Engine.Implements.Components
 
         #region WantFile
 
-        public void AddWantFile(OmniHash rootHash, string filePath)
+        public void AddWantFile( string filePath, OmniHash rootHash)
         {
-            var key = (rootHash, filePath);
-            if (_wantFileStatusMap.ContainsKey(key)) return;
+            if (_wantFileStatusMap.ContainsKey(filePath)) return;
 
             var status = new WantFileStatus(rootHash, filePath);
             status.CurrentDepth = 0;
 
-            _wantFileStatusMap.Add(key, status);
+            _wantFileStatusMap.Add(filePath, status);
         }
 
-        public void RemoveWantFile(OmniHash rootHash, string filePath)
+        public void RemoveWantFile(string filePath, OmniHash rootHash)
         {
-            var key = (rootHash, filePath);
-            _wantFileStatusMap.Remove(key);
+            _wantFileStatusMap.Remove(filePath);
         }
 
         public IEnumerable<WantFileReport> GetWantFileReports()
@@ -97,32 +112,24 @@ namespace Omnius.Xeus.Engine.Implements.Components
 
         #endregion
 
-        protected override async ValueTask OnDisposeAsync()
-        {
-
-        }
-
         protected override void OnDispose(bool disposing)
         {
 
-        }
-
-        ValueTask<OmniHash> IFileStorage.AddPublishFile(string filePath, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
         }
 
         class PublishFileStatus
         {
             private Dictionary<OmniHash, long> _indexMap = new Dictionary<OmniHash, long>();
 
-            public PublishFileStatus(string filePath, MerkleTreeSection[] merkleTreeSections)
+            public PublishFileStatus(string filePath, OmniHash rootHash, MerkleTreeSection[] merkleTreeSections)
             {
                 this.FilePath = filePath;
+                this.RootHash = rootHash;
                 this.MerkleTreeSections = new ReadOnlyListSlim<MerkleTreeSection>(merkleTreeSections);
             }
 
             public string FilePath { get; }
+            public OmniHash RootHash { get; }
             public ReadOnlyListSlim<MerkleTreeSection> MerkleTreeSections { get; }
 
             public bool TryGetBlockIndexForFile(OmniHash hash, out long index)
