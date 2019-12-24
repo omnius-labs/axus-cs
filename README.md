@@ -17,7 +17,7 @@ Support sharing of data between individuals in a decentralized network.
 
 ## Website
 
-+ <https://omnius-labs.com/>
++ <https://docs.omnius-labs.com/>
 
 ## Code Coverages
 
