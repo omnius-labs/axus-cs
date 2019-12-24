@@ -4,7 +4,7 @@ using Omnius.Xeus.Service;
 
 #nullable enable
 
-namespace Omnius.Xeus.Service.Implements.Components.Internal
+namespace Omnius.Xeus.Service.Components.Internal
 {
     internal sealed partial class MerkleTreeSection : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<MerkleTreeSection>
     {

@@ -26,7 +26,7 @@ namespace Omnius.Xeus.Service.Components.Primitives
         public OmniAddress? Address { get; }
     }
 
-    public interface IPrimitiveConnector : IDisposable
+    public interface IPrimitiveConnector
     {
         ValueTask<ConnectorResult> AcceptAsync(CancellationToken cancellationToken = default);
         ValueTask<ConnectorResult> ConnectAsync(OmniAddress address, CancellationToken cancellationToken = default);

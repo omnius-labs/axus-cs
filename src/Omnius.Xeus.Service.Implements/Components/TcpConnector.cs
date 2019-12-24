@@ -17,11 +17,12 @@ using Omnius.Core.Network.Caps;
 using Omnius.Core.Network.Proxies;
 using Omnius.Xeus.Service;
 using Omnius.Xeus.Service.Components;
+using Omnius.Xeus.Service.Components.Internal;
 using Omnius.Xeus.Service.Components.Primitives;
 
-namespace Omnius.Xeus.Engine.Implements.Components
+namespace Omnius.Xeus.Service.Components
 {
-    public sealed class TcpConnector : DisposableBase, ITcpConnector
+    public sealed class TcpConnector : AsyncDisposableBase, ITcpConnector
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -31,18 +32,18 @@ namespace Omnius.Xeus.Engine.Implements.Components
 
         private readonly Random _random = new Random();
 
-        private readonly Task _watchTask;
-        private readonly ManualResetEventSlim _watchTaskEvent = new ManualResetEventSlim();
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private readonly Task _eventLoopTask;
 
         private readonly Dictionary<OmniAddress, TcpListener> _tcpListenerMap = new Dictionary<OmniAddress, TcpListener>();
         private readonly Dictionary<OmniAddress, ushort> _openedPortsByUpnp = new Dictionary<OmniAddress, ushort>();
 
-        private TcpConnectOptions? _tcpConnectOptions;
-        private TcpAcceptOptions? _tcpAcceptOptions;
+        private TcpConnectOptions _tcpConnectOptions;
+        private TcpAcceptOptions _tcpAcceptOptions;
 
         private readonly object _lockObject = new object();
 
-        private TcpConnector(string basePath, IBufferPool<byte> bufferPool)
+        public TcpConnector(string basePath, IBufferPool<byte> bufferPool)
         {
             var configPath = Path.Combine(basePath, "config");
             var refsPath = Path.Combine(basePath, "refs");
@@ -51,27 +52,26 @@ namespace Omnius.Xeus.Engine.Implements.Components
 
             _settings = new OmniSettings(configPath);
 
-            _watchTask = this.Watch();
+            _eventLoopTask = this.EventLoop();
+
+            this.Load();
         }
 
-        private async ValueTask LoadAsync()
+        private void Load()
         {
-            await Task.Run(async () =>
+            try
             {
-                try
+                if (_settings.TryGetContent<TcpConnectorConfig>("Config", out var config))
                 {
-                    if (_settings.TryGetContent<TcpConnectorConfig>("Config", out var config))
-                    {
-                        this.SetTcpConnectOptions(config.TcpConnectOptions);
-                        this.SetTcpAcceptOptions(config.TcpAcceptOptions);
-                    }
+                    this.SetTcpConnectOptions(config.TcpConnectOptions);
+                    this.SetTcpAcceptOptions(config.TcpAcceptOptions);
                 }
-                catch (Exception e)
-                {
-                    _logger.Error(e);
-                    throw e;
-                }
-            });
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e);
+                throw e;
+            }
         }
 
         private async ValueTask SaveAsync()
@@ -93,17 +93,13 @@ namespace Omnius.Xeus.Engine.Implements.Components
 
         protected override async ValueTask OnDisposeAsync()
         {
-            _watchTaskEvent.Set();
-            await _watchTask;
-            _watchTaskEvent.Dispose();
+            _cancellationTokenSource.Cancel();
+            await _eventLoopTask;
+            _eventLoopTask.Dispose();
 
             await this.SaveAsync();
-            await _settings.DisposeAsync();
-        }
 
-        protected override void OnDispose(bool disposing)
-        {
-            this.OnDisposeAsync().AsTask().Wait();
+            _settings.Dispose();
         }
 
         public TcpConnectOptions TcpConnectOptions => _tcpConnectOptions;
@@ -487,16 +483,23 @@ namespace Omnius.Xeus.Engine.Implements.Components
             return new ConnectorResult(ConnectorResultType.Failed);
         }
 
-        private async Task Watch()
+        private async Task EventLoop()
         {
             try
             {
                 var upnpStopwatch = new Stopwatch();
 
-                Task.Delay()
-
-                while (!_watchTaskEvent.Wait(1000))
+                for (; ; )
                 {
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(3), _cancellationTokenSource.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        return;
+                    }
+
                     if (!upnpStopwatch.IsRunning || upnpStopwatch.Elapsed.TotalSeconds > 10)
                     {
                         await this.WatchUpnp();
@@ -533,18 +536,17 @@ namespace Omnius.Xeus.Engine.Implements.Components
                     _tcpListenerMap.Remove(omniAddress);
                 }
 
+                // UPnPで開放していた利用されていないポートを閉じる
                 {
                     var unusedPortSet = new HashSet<ushort>();
 
                     if (!useUpnp)
                     {
-                        // UPnPで開放していたポートをすべて閉じる
                         unusedPortSet.UnionWith(_openedPortsByUpnp.Select(n => n.Value).ToArray());
                         _openedPortsByUpnp.Clear();
                     }
                     else
                     {
-                        // UPnPで開放していた利用されていないポートを閉じる
                         foreach (var (omniAddress, port) in _openedPortsByUpnp.ToArray())
                         {
                             if (listenAddressSet.Contains(omniAddress))

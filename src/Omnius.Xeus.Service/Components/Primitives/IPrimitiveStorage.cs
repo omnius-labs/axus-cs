@@ -7,7 +7,7 @@ using Omnius.Core.Cryptography;
 
 namespace Omnius.Xeus.Service.Components.Primitives
 {
-    public interface IPrimitiveStorage : IDisposable
+    public interface IPrimitiveStorage
     {
         ulong TotalUsingBytes { get; }
 

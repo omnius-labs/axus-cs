@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace Omnius.Xeus.Engine.Storages.Primitives
+namespace Omnius.Xeus.Service.Primitives
 {
     internal static class UnitTestEnvironment
     {

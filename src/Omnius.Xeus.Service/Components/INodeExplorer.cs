@@ -6,7 +6,7 @@ using Omnius.Core.Network;
 
 namespace Omnius.Xeus.Service.Components
 {
-    public interface IKadexExplorer
+    public interface INodeExplorer
     {
         NodeProfile MyNodeProfile { get; }
         void SetMyNodeProfile(NodeProfile nodeProfile);

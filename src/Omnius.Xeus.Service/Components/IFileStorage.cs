@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
+using Omnius.Xeus.Service.Components.Primitives;
 
 namespace Omnius.Xeus.Service.Components
 {
@@ -12,8 +13,8 @@ namespace Omnius.Xeus.Service.Components
         void RemovePublishFile(string filePath);
         IEnumerable<PublishFileReport> GetPublishFileReports();
 
-        void AddWantFile(OmniHash rootHash, string filePath);
-        void RemoveWantFile(OmniHash rootHash, string filePath);
+        void AddWantFile(string filePath, OmniHash rootHash);
+        void RemoveWantFile(string filePath, OmniHash rootHash);
         IEnumerable<WantFileReport> GetWantFileReports();
     }
 }
