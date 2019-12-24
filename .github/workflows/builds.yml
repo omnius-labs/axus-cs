@@ -12,7 +12,7 @@ jobs:
       - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 3.1.100
-      - run: sh run-test.sh
+      - run: sh ./eng/run-test.sh
       - uses: actions/upload-artifact@v1
         with:
           name: artifact
@@ -26,7 +26,7 @@ jobs:
       - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 3.1.100
-      - run: ./run-test.cmd
+      - run: pwsh ./eng/run-test.ps1
       - uses: actions/upload-artifact@v1
         with:
           name: artifact
