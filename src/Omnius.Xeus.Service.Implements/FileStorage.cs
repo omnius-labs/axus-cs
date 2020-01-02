@@ -10,9 +10,9 @@ using Omnius.Core;
 using Omnius.Core.Collections;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Extensions;
-using Omnius.Xeus.Service.Components.Internal;
+using Omnius.Xeus.Service.Internal;
 
-namespace Omnius.Xeus.Service.Components
+namespace Omnius.Xeus.Service
 {
     public sealed class FileStorage : DisposableBase, IFileStorage
     {

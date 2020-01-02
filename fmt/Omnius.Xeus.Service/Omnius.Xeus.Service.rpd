@@ -40,6 +40,11 @@ table TcpAcceptOptions {
     UseUpnp: bool = 2,
 }
 
+table TcpConnectorOptions {
+    TcpConnectOptions: TcpConnectOptions = 0,
+    TcpAcceptOptions: TcpAcceptOptions = 1,
+}
+
 table CheckConsistencyReport {
     BadBlockCount: uint32 = 0,
     CheckedBlockCount: uint32 = 1,

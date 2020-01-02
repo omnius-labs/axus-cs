@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core.Cryptography;
 
-namespace Omnius.Xeus.Service.Components.Primitives
+namespace Omnius.Xeus.Service.Primitives
 {
     public interface IPrimitiveStorage
     {

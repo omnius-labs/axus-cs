@@ -4,7 +4,7 @@ using Omnius.Core;
 using Omnius.Core.Collections;
 using Omnius.Core.Network;
 
-namespace Omnius.Xeus.Service.Components
+namespace Omnius.Xeus.Service
 {
     public interface INodeExplorer
     {

@@ -1,6 +1,6 @@
 using Omnius.Core;
 
-namespace Omnius.Xeus.Service.Components
+namespace Omnius.Xeus.Service
 {
     public interface IBlocksExchanger
     {
