@@ -721,6 +721,137 @@ namespace Omnius.Xeus.Service
         }
     }
 
+    public sealed partial class TcpConnectorOptions : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<TcpConnectorOptions>
+    {
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<TcpConnectorOptions> Formatter { get; }
+        public static TcpConnectorOptions Empty { get; }
+
+        static TcpConnectorOptions()
+        {
+            TcpConnectorOptions.Formatter = new ___CustomFormatter();
+            TcpConnectorOptions.Empty = new TcpConnectorOptions(TcpConnectOptions.Empty, TcpAcceptOptions.Empty);
+        }
+
+        private readonly global::System.Lazy<int> ___hashCode;
+
+        public TcpConnectorOptions(TcpConnectOptions tcpConnectOptions, TcpAcceptOptions tcpAcceptOptions)
+        {
+            if (tcpConnectOptions is null) throw new global::System.ArgumentNullException("tcpConnectOptions");
+            if (tcpAcceptOptions is null) throw new global::System.ArgumentNullException("tcpAcceptOptions");
+
+            this.TcpConnectOptions = tcpConnectOptions;
+            this.TcpAcceptOptions = tcpAcceptOptions;
+
+            ___hashCode = new global::System.Lazy<int>(() =>
+            {
+                var ___h = new global::System.HashCode();
+                if (tcpConnectOptions != default) ___h.Add(tcpConnectOptions.GetHashCode());
+                if (tcpAcceptOptions != default) ___h.Add(tcpAcceptOptions.GetHashCode());
+                return ___h.ToHashCode();
+            });
+        }
+
+        public TcpConnectOptions TcpConnectOptions { get; }
+        public TcpAcceptOptions TcpAcceptOptions { get; }
+
+        public static TcpConnectorOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        {
+            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
+            return Formatter.Deserialize(ref reader, 0);
+        }
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        {
+            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
+            Formatter.Serialize(ref writer, this, 0);
+        }
+
+        public static bool operator ==(TcpConnectorOptions? left, TcpConnectorOptions? right)
+        {
+            return (right is null) ? (left is null) : right.Equals(left);
+        }
+        public static bool operator !=(TcpConnectorOptions? left, TcpConnectorOptions? right)
+        {
+            return !(left == right);
+        }
+        public override bool Equals(object? other)
+        {
+            if (!(other is TcpConnectorOptions)) return false;
+            return this.Equals((TcpConnectorOptions)other);
+        }
+        public bool Equals(TcpConnectorOptions? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (this.TcpConnectOptions != target.TcpConnectOptions) return false;
+            if (this.TcpAcceptOptions != target.TcpAcceptOptions) return false;
+
+            return true;
+        }
+        public override int GetHashCode() => ___hashCode.Value;
+
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<TcpConnectorOptions>
+        {
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in TcpConnectorOptions value, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                {
+                    uint propertyCount = 0;
+                    if (value.TcpConnectOptions != TcpConnectOptions.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.TcpAcceptOptions != TcpAcceptOptions.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
+                }
+
+                if (value.TcpConnectOptions != TcpConnectOptions.Empty)
+                {
+                    w.Write((uint)0);
+                    TcpConnectOptions.Formatter.Serialize(ref w, value.TcpConnectOptions, rank + 1);
+                }
+                if (value.TcpAcceptOptions != TcpAcceptOptions.Empty)
+                {
+                    w.Write((uint)1);
+                    TcpAcceptOptions.Formatter.Serialize(ref w, value.TcpAcceptOptions, rank + 1);
+                }
+            }
+
+            public TcpConnectorOptions Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                uint propertyCount = r.GetUInt32();
+
+                TcpConnectOptions p_tcpConnectOptions = TcpConnectOptions.Empty;
+                TcpAcceptOptions p_tcpAcceptOptions = TcpAcceptOptions.Empty;
+
+                for (; propertyCount > 0; propertyCount--)
+                {
+                    uint id = r.GetUInt32();
+                    switch (id)
+                    {
+                        case 0:
+                            {
+                                p_tcpConnectOptions = TcpConnectOptions.Formatter.Deserialize(ref r, rank + 1);
+                                break;
+                            }
+                        case 1:
+                            {
+                                p_tcpAcceptOptions = TcpAcceptOptions.Formatter.Deserialize(ref r, rank + 1);
+                                break;
+                            }
+                    }
+                }
+
+                return new TcpConnectorOptions(p_tcpConnectOptions, p_tcpAcceptOptions);
+            }
+        }
+    }
+
     public sealed partial class CheckConsistencyReport : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<CheckConsistencyReport>
     {
         public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<CheckConsistencyReport> Formatter { get; }

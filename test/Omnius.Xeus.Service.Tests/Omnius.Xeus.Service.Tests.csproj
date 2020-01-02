@@ -4,4 +4,13 @@
     <RootNamespace>Omnius.Xeus.Service</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Omnius.Xeus.Service.Implements\Omnius.Xeus.Service.Implements.csproj" />
+    <ProjectReference Include="..\..\src\Omnius.Xeus.Service\Omnius.Xeus.Service.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.NET.Test.Sdk" Version="16.4.0" />
+  </ItemGroup>
+
 </Project>
