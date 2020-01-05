@@ -18,7 +18,7 @@ namespace Omnius.Xeus.Service
             const string ipAddress = "127.0.0.1";
             var options = new TcpConnectorOptions(new TcpConnectOptions(true, null), new TcpAcceptOptions(false, Array.Empty<OmniAddress>(), false));
 
-            await using (var connector = await TcpConnector.Factory.Create(options, BufferPool<byte>.Shared))
+            await using (var connector = await TcpConnector.Create(options, BufferPool<byte>.Shared))
             {
                 var tcpListener = new TcpListener(IPAddress.Parse(ipAddress), port);
 
@@ -32,7 +32,7 @@ namespace Omnius.Xeus.Service
 
                     await acceptTask;
 
-                    Assert.True(connectorResult.Type == ConnectorResultType.Succeeded);
+                    Assert.Equal(ConnectorResultType.Succeeded, connectorResult.Type);
 
                     connectorResult.Cap?.Dispose();
                     tcpListener.Stop();
@@ -51,7 +51,7 @@ namespace Omnius.Xeus.Service
             const string ipAddress = "127.0.0.1";
             var options = new TcpConnectorOptions(new TcpConnectOptions(false, null), new TcpAcceptOptions(true, new[] { new OmniAddress($"tcp(ip4(\"{ipAddress}\"),{port})") }, false));
 
-            await using (var connector = await TcpConnector.Factory.Create(options, BufferPool<byte>.Shared))
+            await using (var connector = await TcpConnector.Create(options, BufferPool<byte>.Shared))
             {
                 var acceptTask = connector.AcceptAsync();
 
@@ -60,7 +60,7 @@ namespace Omnius.Xeus.Service
 
                 await acceptTask;
 
-                Assert.True(acceptTask.Result.Type == ConnectorResultType.Succeeded);
+                Assert.Equal(ConnectorResultType.Succeeded, acceptTask.Result.Type);
 
                 acceptTask.Result.Cap?.Dispose();
                 tcpClient.Dispose();
@@ -68,4 +68,3 @@ namespace Omnius.Xeus.Service
         }
     }
 }
-

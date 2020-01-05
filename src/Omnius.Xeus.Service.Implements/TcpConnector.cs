@@ -23,18 +23,6 @@ namespace Omnius.Xeus.Service
 {
     public sealed class TcpConnector : AsyncDisposableBase, ITcpConnector
     {
-        public static ITcpConnectorFactory Factory { get; } = new TcpConnectorFactory();
-
-        internal sealed class TcpConnectorFactory : ITcpConnectorFactory
-        {
-            public async ValueTask<ITcpConnector> Create(TcpConnectorOptions tcpConnectorOptions, IBufferPool<byte> bufferPool)
-            {
-                var result = new TcpConnector(tcpConnectorOptions, bufferPool);
-                await result.InitAsync();
-                return result;
-            }
-        }
-
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         private readonly IBufferPool<byte> _bufferPool;
@@ -53,6 +41,14 @@ namespace Omnius.Xeus.Service
             _tcpConnectOptions = tcpConnectorOptions.TcpConnectOptions;
             _tcpAcceptOptions = tcpConnectorOptions.TcpAcceptOptions;
             _bufferPool = bufferPool;
+        }
+
+        public static async ValueTask<ITcpConnector> Create(TcpConnectorOptions tcpConnectorOptions, IBufferPool<byte> bufferPool)
+        {
+            var result = new TcpConnector(tcpConnectorOptions, bufferPool);
+            await result.InitAsync();
+
+            return result;
         }
 
         public async ValueTask InitAsync()
@@ -230,7 +226,7 @@ namespace Omnius.Xeus.Service
             return true;
         }
 
-        private static async ValueTask<Socket?> ConnectSocketAsync(IPEndPoint remoteEndPoint)
+        private static async ValueTask<Socket?> ConnectAsync(IPEndPoint remoteEndPoint)
         {
             return await Task.Run(() =>
             {
@@ -296,7 +292,7 @@ namespace Omnius.Xeus.Service
 
                         if (config.ProxyOptions.Type == TcpProxyType.Socks5Proxy)
                         {
-                            var socket = await ConnectSocketAsync(new IPEndPoint(proxyAddress, proxyPort));
+                            var socket = await ConnectAsync(new IPEndPoint(proxyAddress, proxyPort));
                             if (socket == null)
                             {
                                 return new ConnectorResult(ConnectorResultType.Failed);
@@ -305,7 +301,7 @@ namespace Omnius.Xeus.Service
                             disposableList.Add(socket);
 
                             var proxy = new Socks5ProxyClient(ipAddress.ToString(), port);
-                            proxy.Create(socket, cancellationToken);
+                            await proxy.ConnectAsync(socket, cancellationToken);
 
                             var cap = new SocketCap(socket, false);
                             disposableList.Add(cap);
@@ -314,7 +310,7 @@ namespace Omnius.Xeus.Service
                         }
                         else if (config.ProxyOptions.Type == TcpProxyType.HttpProxy)
                         {
-                            var socket = await ConnectSocketAsync(new IPEndPoint(proxyAddress, proxyPort));
+                            var socket = await ConnectAsync(new IPEndPoint(proxyAddress, proxyPort));
                             if (socket == null)
                             {
                                 return new ConnectorResult(ConnectorResultType.Failed);
@@ -323,7 +319,7 @@ namespace Omnius.Xeus.Service
                             disposableList.Add(socket);
 
                             var proxy = new HttpProxyClient(ipAddress.ToString(), port);
-                            proxy.Create(socket, cancellationToken);
+                            await proxy.ConnectAsync(socket, cancellationToken);
 
                             var cap = new SocketCap(socket, false);
                             disposableList.Add(cap);
@@ -333,7 +329,7 @@ namespace Omnius.Xeus.Service
                     }
                     else
                     {
-                        var socket = await ConnectSocketAsync(new IPEndPoint(ipAddress, port));
+                        var socket = await ConnectAsync(new IPEndPoint(ipAddress, port));
                         if (socket == null)
                         {
                             return new ConnectorResult(ConnectorResultType.Failed);
