@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,14 +8,21 @@ using Omnius.Xeus.Service.Primitives;
 
 namespace Omnius.Xeus.Service
 {
-    public interface IFileStorage : IPrimitiveStorage
+    public interface IFileStorageFactory
     {
+        public ValueTask<IFileStorage> Create(string configPath, IBufferPool<byte> bufferPool);
+    }
+
+    public interface IFileStorage : IPrimitiveStorage, IAsyncDisposable
+    {
+        public static IFileStorageFactory Factory { get; }
+
         ValueTask<OmniHash> AddPublishFile(string filePath, CancellationToken cancellationToken = default);
         void RemovePublishFile(string filePath);
         IEnumerable<PublishFileReport> GetPublishFileReports();
 
-        void AddWantFile(string filePath, OmniHash rootHash);
-        void RemoveWantFile(string filePath, OmniHash rootHash);
+        void AddWantFile(OmniHash rootHash, string filePath);
+        void RemoveWantFile(OmniHash rootHash, string filePath);
         IEnumerable<WantFileReport> GetWantFileReports();
     }
 }

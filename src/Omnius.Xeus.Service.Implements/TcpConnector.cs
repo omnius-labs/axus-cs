@@ -36,6 +36,19 @@ namespace Omnius.Xeus.Service
 
         private readonly AsyncLock _asyncLock = new AsyncLock();
 
+        internal sealed class TcpConnectorFactory : ITcpConnectorFactory
+        {
+            public async ValueTask<ITcpConnector> Create(TcpConnectorOptions tcpConnectorOptions, IBufferPool<byte> bufferPool)
+            {
+                var result = new TcpConnector(tcpConnectorOptions, bufferPool);
+                await result.InitAsync();
+
+                return result;
+            }
+        }
+
+        public static ITcpConnectorFactory Factory { get; } = new TcpConnectorFactory();
+
         internal TcpConnector(TcpConnectorOptions tcpConnectorOptions, IBufferPool<byte> bufferPool)
         {
             _tcpConnectOptions = tcpConnectorOptions.TcpConnectOptions;
@@ -43,15 +56,7 @@ namespace Omnius.Xeus.Service
             _bufferPool = bufferPool;
         }
 
-        public static async ValueTask<ITcpConnector> Create(TcpConnectorOptions tcpConnectorOptions, IBufferPool<byte> bufferPool)
-        {
-            var result = new TcpConnector(tcpConnectorOptions, bufferPool);
-            await result.InitAsync();
-
-            return result;
-        }
-
-        public async ValueTask InitAsync()
+        internal async ValueTask InitAsync()
         {
             await this.StartTcpListen();
         }
