@@ -13,10 +13,10 @@ namespace Omnius.Xeus.Service.Primitives
 
         ValueTask CheckConsistency(Action<CheckConsistencyReport> callback, CancellationToken cancellationToken = default);
 
-        bool Contains(OmniHash hash);
-        uint GetLength(OmniHash hash);
+        bool Contains(OmniHash rootHash, OmniHash targetHash);
+        uint GetLength(OmniHash rootHash, OmniHash targetHash);
 
-        bool TryRead(OmniHash hash, [NotNullWhen(true)] out IMemoryOwner<byte>? memoryOwner);
-        bool TryWrite(OmniHash hash, ReadOnlySpan<byte> value);
+        bool TryRead(OmniHash rootHash, OmniHash targetHash, [NotNullWhen(true)] out IMemoryOwner<byte>? memoryOwner);
+        bool TryWrite(OmniHash rootHash, OmniHash targetHash, ReadOnlySpan<byte> value);
     }
 }
