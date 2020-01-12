@@ -14,24 +14,26 @@ namespace Omnius.Xeus.Service.Internal
         static MerkleTreeSection()
         {
             MerkleTreeSection.Formatter = new ___CustomFormatter();
-            MerkleTreeSection.Empty = new MerkleTreeSection(0, global::System.Array.Empty<OmniHash>());
+            MerkleTreeSection.Empty = new MerkleTreeSection(0, 0, global::System.Array.Empty<OmniHash>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxHashesCount = 1073741824;
 
-        public MerkleTreeSection(ulong length, OmniHash[] hashes)
+        public MerkleTreeSection(int depth, ulong length, OmniHash[] hashes)
         {
             if (hashes is null) throw new global::System.ArgumentNullException("hashes");
             if (hashes.Length > 1073741824) throw new global::System.ArgumentOutOfRangeException("hashes");
 
+            this.Depth = depth;
             this.Length = length;
             this.Hashes = new global::Omnius.Core.Collections.ReadOnlyListSlim<OmniHash>(hashes);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
+                if (depth != default) ___h.Add(depth.GetHashCode());
                 if (length != default) ___h.Add(length.GetHashCode());
                 foreach (var n in hashes)
                 {
@@ -41,6 +43,7 @@ namespace Omnius.Xeus.Service.Internal
             });
         }
 
+        public int Depth { get; }
         public ulong Length { get; }
         public global::Omnius.Core.Collections.ReadOnlyListSlim<OmniHash> Hashes { get; }
 
@@ -72,6 +75,7 @@ namespace Omnius.Xeus.Service.Internal
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
+            if (this.Depth != target.Depth) return false;
             if (this.Length != target.Length) return false;
             if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Hashes, target.Hashes)) return false;
 
@@ -87,6 +91,10 @@ namespace Omnius.Xeus.Service.Internal
 
                 {
                     uint propertyCount = 0;
+                    if (value.Depth != 0)
+                    {
+                        propertyCount++;
+                    }
                     if (value.Length != 0)
                     {
                         propertyCount++;
@@ -98,14 +106,19 @@ namespace Omnius.Xeus.Service.Internal
                     w.Write(propertyCount);
                 }
 
-                if (value.Length != 0)
+                if (value.Depth != 0)
                 {
                     w.Write((uint)0);
+                    w.Write(value.Depth);
+                }
+                if (value.Length != 0)
+                {
+                    w.Write((uint)1);
                     w.Write(value.Length);
                 }
                 if (value.Hashes.Count != 0)
                 {
-                    w.Write((uint)1);
+                    w.Write((uint)2);
                     w.Write((uint)value.Hashes.Count);
                     foreach (var n in value.Hashes)
                     {
@@ -120,6 +133,7 @@ namespace Omnius.Xeus.Service.Internal
 
                 uint propertyCount = r.GetUInt32();
 
+                int p_depth = 0;
                 ulong p_length = 0;
                 OmniHash[] p_hashes = global::System.Array.Empty<OmniHash>();
 
@@ -130,10 +144,15 @@ namespace Omnius.Xeus.Service.Internal
                     {
                         case 0:
                             {
-                                p_length = r.GetUInt64();
+                                p_depth = r.GetInt32();
                                 break;
                             }
                         case 1:
+                            {
+                                p_length = r.GetUInt64();
+                                break;
+                            }
+                        case 2:
                             {
                                 var length = r.GetUInt32();
                                 p_hashes = new OmniHash[length];
@@ -146,7 +165,7 @@ namespace Omnius.Xeus.Service.Internal
                     }
                 }
 
-                return new MerkleTreeSection(p_length, p_hashes);
+                return new MerkleTreeSection(p_depth, p_length, p_hashes);
             }
         }
     }

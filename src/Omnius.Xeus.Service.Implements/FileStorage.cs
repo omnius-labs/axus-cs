@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
@@ -15,10 +16,15 @@ namespace Omnius.Xeus.Service
 {
     public sealed partial class FileStorage : AsyncDisposableBase, IFileStorage
     {
+        private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
+
         private readonly string _configPath;
         private readonly IBufferPool<byte> _bufferPool;
 
-        private readonly AsyncLock _asyncLock = new AsyncLock();
+        private readonly WantFileStorage _wantFileStorage;
+        private readonly PublishFileStorage _publishFileStorage;
+
+        const int MaxBlockLength = 1 * 1024 * 1024;
 
         internal sealed class FileStorageFactory : IFileStorageFactory
         {
@@ -37,6 +43,9 @@ namespace Omnius.Xeus.Service
         {
             _configPath = configPath;
             _bufferPool = bufferPool;
+
+            _wantFileStorage = new WantFileStorage(_configPath, _bufferPool);
+            _publishFileStorage = new PublishFileStorage(_configPath, _bufferPool);
         }
 
         public async ValueTask InitAsync()
@@ -45,34 +54,71 @@ namespace Omnius.Xeus.Service
 
         protected override async ValueTask OnDisposeAsync()
         {
-
         }
 
-        public bool TryRead(OmniHash rootHash, OmniHash targetHash, [NotNullWhen(true)] out IMemoryOwner<byte>? memoryOwner)
+        public async ValueTask CheckConsistencyAsync(Action<CheckConsistencyReport> callback, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public bool TryWrite(OmniHash rootHash, OmniHash targetHash, ReadOnlySpan<byte> value)
+        public async ValueTask<IMemoryOwner<byte>?> ReadAsync(OmniHash rootHash, OmniHash targetHash, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            // WantFile
+            {
+                var memoryOwner = await _wantFileStorage.ReadAsync(rootHash, targetHash, cancellationToken);
+
+                if (memoryOwner != null)
+                {
+                    return memoryOwner;
+                }
+            }
+
+            // PublishFile
+            {
+                var memoryOwner = await _publishFileStorage.ReadAsync(rootHash, targetHash, cancellationToken);
+
+                if (memoryOwner != null)
+                {
+                    return memoryOwner;
+                }
+            }
+
+            return null;
         }
 
-        public ulong TotalUsingBytes { get; }
-
-        public ValueTask CheckConsistency(Action<CheckConsistencyReport> callback, CancellationToken cancellationToken = default)
+        public ValueTask WriteAsync(OmniHash rootHash, OmniHash targetHash, ReadOnlyMemory<byte> memory, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            return _wantFileStorage.WriteAsync(rootHash, targetHash, memory, cancellationToken);
         }
 
-        public bool Contains(OmniHash rootHash, OmniHash targetHash)
+        public ValueTask AddWantFileAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            return _wantFileStorage.AddWantFileAsync(rootHash, filePath, cancellationToken);
         }
 
-        public uint GetLength(OmniHash rootHash, OmniHash targetHash)
+        public ValueTask RemoveWantFileAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            return _wantFileStorage.RemoveWantFile(rootHash, filePath, cancellationToken);
+        }
+
+        public IAsyncEnumerable<WantFileReport> GetWantFileReportsAsync(CancellationToken cancellationToken = default)
+        {
+            return _wantFileStorage.GetWantFileReportsAsync(cancellationToken);
+        }
+
+        public ValueTask<OmniHash> AddPublishFileAsync(string filePath, CancellationToken cancellationToken = default)
+        {
+            return _publishFileStorage.AddPublishFileAsync(filePath, cancellationToken);
+        }
+
+        public ValueTask RemovePublishFileAsync(string filePath, CancellationToken cancellationToken = default)
+        {
+            return _publishFileStorage.RemovePublishFileAsync(filePath, cancellationToken);
+        }
+
+        public IAsyncEnumerable<PublishFileReport> GetPublishFileReportsAsync(CancellationToken cancellationToken = default)
+        {
+            return _publishFileStorage.GetPublishFileReportsAsync();
         }
     }
 }
