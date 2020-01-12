@@ -1187,21 +1187,32 @@ namespace Omnius.Xeus.Service
         static PublishFileReport()
         {
             PublishFileReport.Formatter = new ___CustomFormatter();
-            PublishFileReport.Empty = new PublishFileReport();
+            PublishFileReport.Empty = new PublishFileReport(OmniHash.Empty, string.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public PublishFileReport()
+        public static readonly int MaxFilePathLength = 2147483647;
+
+        public PublishFileReport(OmniHash rootHash, string filePath)
         {
+            if (filePath is null) throw new global::System.ArgumentNullException("filePath");
+            if (filePath.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("filePath");
+
+            this.RootHash = rootHash;
+            this.FilePath = filePath;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
+                if (rootHash != default) ___h.Add(rootHash.GetHashCode());
+                if (filePath != default) ___h.Add(filePath.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
+        public OmniHash RootHash { get; }
+        public string FilePath { get; }
 
         public static PublishFileReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
         {
@@ -1231,6 +1242,8 @@ namespace Omnius.Xeus.Service
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
+            if (this.RootHash != target.RootHash) return false;
+            if (this.FilePath != target.FilePath) return false;
 
             return true;
         }
@@ -1244,9 +1257,27 @@ namespace Omnius.Xeus.Service
 
                 {
                     uint propertyCount = 0;
+                    if (value.RootHash != OmniHash.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.FilePath != string.Empty)
+                    {
+                        propertyCount++;
+                    }
                     w.Write(propertyCount);
                 }
 
+                if (value.RootHash != OmniHash.Empty)
+                {
+                    w.Write((uint)0);
+                    OmniHash.Formatter.Serialize(ref w, value.RootHash, rank + 1);
+                }
+                if (value.FilePath != string.Empty)
+                {
+                    w.Write((uint)1);
+                    w.Write(value.FilePath);
+                }
             }
 
             public PublishFileReport Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
@@ -1255,16 +1286,28 @@ namespace Omnius.Xeus.Service
 
                 uint propertyCount = r.GetUInt32();
 
+                OmniHash p_rootHash = OmniHash.Empty;
+                string p_filePath = string.Empty;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
                     uint id = r.GetUInt32();
                     switch (id)
                     {
+                        case 0:
+                            {
+                                p_rootHash = OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                break;
+                            }
+                        case 1:
+                            {
+                                p_filePath = r.GetString(2147483647);
+                                break;
+                            }
                     }
                 }
 
-                return new PublishFileReport();
+                return new PublishFileReport(p_rootHash, p_filePath);
             }
         }
     }
@@ -1277,21 +1320,32 @@ namespace Omnius.Xeus.Service
         static WantFileReport()
         {
             WantFileReport.Formatter = new ___CustomFormatter();
-            WantFileReport.Empty = new WantFileReport();
+            WantFileReport.Empty = new WantFileReport(OmniHash.Empty, string.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public WantFileReport()
+        public static readonly int MaxFilePathLength = 2147483647;
+
+        public WantFileReport(OmniHash rootHash, string filePath)
         {
+            if (filePath is null) throw new global::System.ArgumentNullException("filePath");
+            if (filePath.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("filePath");
+
+            this.RootHash = rootHash;
+            this.FilePath = filePath;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
+                if (rootHash != default) ___h.Add(rootHash.GetHashCode());
+                if (filePath != default) ___h.Add(filePath.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
+        public OmniHash RootHash { get; }
+        public string FilePath { get; }
 
         public static WantFileReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
         {
@@ -1321,6 +1375,8 @@ namespace Omnius.Xeus.Service
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
+            if (this.RootHash != target.RootHash) return false;
+            if (this.FilePath != target.FilePath) return false;
 
             return true;
         }
@@ -1334,9 +1390,27 @@ namespace Omnius.Xeus.Service
 
                 {
                     uint propertyCount = 0;
+                    if (value.RootHash != OmniHash.Empty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.FilePath != string.Empty)
+                    {
+                        propertyCount++;
+                    }
                     w.Write(propertyCount);
                 }
 
+                if (value.RootHash != OmniHash.Empty)
+                {
+                    w.Write((uint)0);
+                    OmniHash.Formatter.Serialize(ref w, value.RootHash, rank + 1);
+                }
+                if (value.FilePath != string.Empty)
+                {
+                    w.Write((uint)1);
+                    w.Write(value.FilePath);
+                }
             }
 
             public WantFileReport Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
@@ -1345,16 +1419,28 @@ namespace Omnius.Xeus.Service
 
                 uint propertyCount = r.GetUInt32();
 
+                OmniHash p_rootHash = OmniHash.Empty;
+                string p_filePath = string.Empty;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
                     uint id = r.GetUInt32();
                     switch (id)
                     {
+                        case 0:
+                            {
+                                p_rootHash = OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                break;
+                            }
+                        case 1:
+                            {
+                                p_filePath = r.GetString(2147483647);
+                                break;
+                            }
                     }
                 }
 
-                return new WantFileReport();
+                return new WantFileReport(p_rootHash, p_filePath);
             }
         }
     }

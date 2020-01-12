@@ -9,14 +9,9 @@ namespace Omnius.Xeus.Service.Primitives
 {
     public interface IPrimitiveStorage
     {
-        ulong TotalUsingBytes { get; }
+        ValueTask CheckConsistencyAsync(Action<CheckConsistencyReport> callback, CancellationToken cancellationToken = default);
 
-        ValueTask CheckConsistency(Action<CheckConsistencyReport> callback, CancellationToken cancellationToken = default);
-
-        bool Contains(OmniHash rootHash, OmniHash targetHash);
-        uint GetLength(OmniHash rootHash, OmniHash targetHash);
-
-        bool TryRead(OmniHash rootHash, OmniHash targetHash, [NotNullWhen(true)] out IMemoryOwner<byte>? memoryOwner);
-        bool TryWrite(OmniHash rootHash, OmniHash targetHash, ReadOnlySpan<byte> value);
+        ValueTask<IMemoryOwner<byte>?> ReadAsync(OmniHash rootHash, OmniHash targetHash, CancellationToken cancellationToken = default);
+        ValueTask WriteAsync(OmniHash rootHash, OmniHash targetHash, ReadOnlyMemory<byte> memory, CancellationToken cancellationToken = default);
     }
 }

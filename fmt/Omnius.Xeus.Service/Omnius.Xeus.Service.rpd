@@ -58,7 +58,11 @@ table WantMessageReport {
 }
 
 table PublishFileReport {
+    RootHash: OmniHash = 0,
+    FilePath: string = 1,
 }
 
 table WantFileReport {
+    RootHash: OmniHash = 0,
+    FilePath: string = 1,
 }

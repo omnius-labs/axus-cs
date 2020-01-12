@@ -8,6 +8,7 @@ namespace "Omnius.Xeus.Service.Internal";
 option csharp_access_level = "internal";
 
 table MerkleTreeSection {
-    Length: uint64 = 0,
-    Hashes: vector<OmniHash>(capacity: 1073741824) = 1,
+    Depth: int32 = 0,
+    Length: uint64 = 1,
+    Hashes: vector<OmniHash>(capacity: 1073741824) = 2,
 }
