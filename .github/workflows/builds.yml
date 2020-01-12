@@ -1,0 +1,33 @@
+name: Builds
+
+on: [push]
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 3.1.100
+      - run: sh ./eng/run-test.sh
+      - uses: actions/upload-artifact@v1
+        with:
+          name: artifact
+          path: ./publish
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 3.1.100
+      - run: pwsh ./eng/run-test.ps1
+      - uses: actions/upload-artifact@v1
+        with:
+          name: artifact
+          path: ./publish

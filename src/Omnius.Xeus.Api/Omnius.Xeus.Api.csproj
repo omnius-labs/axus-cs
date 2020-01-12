@@ -1,7 +1,6 @@
-<Project>
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <IsSubmodule>true</IsSubmodule>
   </PropertyGroup>
 
 </Project>
