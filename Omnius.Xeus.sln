@@ -1,0 +1,158 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.352
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B4C96EE7-952C-4C28-8F42-8F886AC61321}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01.Omnius.Core", "01.Omnius.Core", "{E9E2CE69-0578-4847-B246-29E012403BA5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02.Omnius.Xeus", "02.Omnius.Xeus", "{99AB5966-31CD-4D1A-82A5-365BA112ABF4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Core.Configuration", "refs\core\src\Omnius.Core.Configuration\Omnius.Core.Configuration.csproj", "{D6FD6DE2-5DAB-4180-876C-97479EE4B8A6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Core.Io", "refs\core\src\Omnius.Core.Io\Omnius.Core.Io.csproj", "{9E5013F3-D58F-4810-933A-9198A56C0569}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Core.Network", "refs\core\src\Omnius.Core.Network\Omnius.Core.Network.csproj", "{3AFBC905-D12A-4DD3-8577-EF86DC6FC045}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Core.Network.Upnp", "refs\core\src\Omnius.Core.Network.Upnp\Omnius.Core.Network.Upnp.csproj", "{F2117095-6C04-4057-87B1-1CDFDFDD56B9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Core.Serialization", "refs\core\src\Omnius.Core.Serialization\Omnius.Core.Serialization.csproj", "{EE0F9A1A-CAB1-458B-82FD-1AB0B7576E47}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sources", "Sources", "{FC402F19-33B3-4CCA-8CDE-7A1CD9A1CA31}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sources", "Sources", "{E245C597-EAB5-4A50-9E80-B2BCDBC9C839}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{4D0DF5A7-4EBE-44E7-B7D9-F8B699535AE1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Xeus.Gui.Desktop", "src\Omnius.Xeus.Gui.Desktop\Omnius.Xeus.Gui.Desktop.csproj", "{662F449F-B141-435E-91DB-11113A6E75BC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Core.Remoting", "refs\core\src\Omnius.Core.Remoting\Omnius.Core.Remoting.csproj", "{A87E41B4-DE1B-4BC6-90E3-332DD014B494}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Core.Network.Proxies", "refs\core\src\Omnius.Core.Network.Proxies\Omnius.Core.Network.Proxies.csproj", "{C08796DE-DE75-4F9D-A249-7A306C388B74}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Core.Serialization.RocketPack", "refs\core\src\Omnius.Core.Serialization.RocketPack\Omnius.Core.Serialization.RocketPack.csproj", "{A51BBEF2-A745-4A87-9E6E-7861E59F7D6E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Core.Serialization.RocketPack.DefinitionCompiler", "refs\core\src\Omnius.Core.Serialization.RocketPack.DefinitionCompiler\Omnius.Core.Serialization.RocketPack.DefinitionCompiler.csproj", "{92916125-812D-4527-9273-46C542ECD319}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Core.Collections", "refs\core\src\Omnius.Core.Collections\Omnius.Core.Collections.csproj", "{82534F2D-2134-4F23-9F9C-530FD594CE43}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Core.Cryptography", "refs\core\src\Omnius.Core.Cryptography\Omnius.Core.Cryptography.csproj", "{4619C7DF-913A-46E9-8BA1-CFEEA08558C0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Core", "refs\core\src\Omnius.Core\Omnius.Core.csproj", "{05CB1EC8-6A2F-4563-81B7-A310F0F36A42}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Xeus.Service", "src\Omnius.Xeus.Service\Omnius.Xeus.Service.csproj", "{045B87C2-5842-4923-827A-C335ED44472A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Xeus.Service.Tests", "test\Omnius.Xeus.Service.Tests\Omnius.Xeus.Service.Tests.csproj", "{4F5F352B-44E2-42A6-8DBF-5763AB8EBA31}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Xeus.Api", "src\Omnius.Xeus.Api\Omnius.Xeus.Api.csproj", "{606CDB9A-EF95-4D83-83F6-086AB6000CE0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Xeus.Service.Implements", "src\Omnius.Xeus.Service.Implements\Omnius.Xeus.Service.Implements.csproj", "{6BEDBE08-D62B-4D5A-A422-B3C2BFB5C8A8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D6FD6DE2-5DAB-4180-876C-97479EE4B8A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6FD6DE2-5DAB-4180-876C-97479EE4B8A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6FD6DE2-5DAB-4180-876C-97479EE4B8A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6FD6DE2-5DAB-4180-876C-97479EE4B8A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E5013F3-D58F-4810-933A-9198A56C0569}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E5013F3-D58F-4810-933A-9198A56C0569}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E5013F3-D58F-4810-933A-9198A56C0569}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E5013F3-D58F-4810-933A-9198A56C0569}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AFBC905-D12A-4DD3-8577-EF86DC6FC045}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AFBC905-D12A-4DD3-8577-EF86DC6FC045}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AFBC905-D12A-4DD3-8577-EF86DC6FC045}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AFBC905-D12A-4DD3-8577-EF86DC6FC045}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2117095-6C04-4057-87B1-1CDFDFDD56B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2117095-6C04-4057-87B1-1CDFDFDD56B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2117095-6C04-4057-87B1-1CDFDFDD56B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2117095-6C04-4057-87B1-1CDFDFDD56B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE0F9A1A-CAB1-458B-82FD-1AB0B7576E47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE0F9A1A-CAB1-458B-82FD-1AB0B7576E47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE0F9A1A-CAB1-458B-82FD-1AB0B7576E47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE0F9A1A-CAB1-458B-82FD-1AB0B7576E47}.Release|Any CPU.Build.0 = Release|Any CPU
+		{662F449F-B141-435E-91DB-11113A6E75BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{662F449F-B141-435E-91DB-11113A6E75BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{662F449F-B141-435E-91DB-11113A6E75BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{662F449F-B141-435E-91DB-11113A6E75BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A87E41B4-DE1B-4BC6-90E3-332DD014B494}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A87E41B4-DE1B-4BC6-90E3-332DD014B494}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A87E41B4-DE1B-4BC6-90E3-332DD014B494}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A87E41B4-DE1B-4BC6-90E3-332DD014B494}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C08796DE-DE75-4F9D-A249-7A306C388B74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C08796DE-DE75-4F9D-A249-7A306C388B74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C08796DE-DE75-4F9D-A249-7A306C388B74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C08796DE-DE75-4F9D-A249-7A306C388B74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A51BBEF2-A745-4A87-9E6E-7861E59F7D6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A51BBEF2-A745-4A87-9E6E-7861E59F7D6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A51BBEF2-A745-4A87-9E6E-7861E59F7D6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A51BBEF2-A745-4A87-9E6E-7861E59F7D6E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92916125-812D-4527-9273-46C542ECD319}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92916125-812D-4527-9273-46C542ECD319}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92916125-812D-4527-9273-46C542ECD319}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92916125-812D-4527-9273-46C542ECD319}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82534F2D-2134-4F23-9F9C-530FD594CE43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82534F2D-2134-4F23-9F9C-530FD594CE43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82534F2D-2134-4F23-9F9C-530FD594CE43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82534F2D-2134-4F23-9F9C-530FD594CE43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4619C7DF-913A-46E9-8BA1-CFEEA08558C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4619C7DF-913A-46E9-8BA1-CFEEA08558C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4619C7DF-913A-46E9-8BA1-CFEEA08558C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4619C7DF-913A-46E9-8BA1-CFEEA08558C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05CB1EC8-6A2F-4563-81B7-A310F0F36A42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05CB1EC8-6A2F-4563-81B7-A310F0F36A42}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05CB1EC8-6A2F-4563-81B7-A310F0F36A42}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05CB1EC8-6A2F-4563-81B7-A310F0F36A42}.Release|Any CPU.Build.0 = Release|Any CPU
+		{045B87C2-5842-4923-827A-C335ED44472A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{045B87C2-5842-4923-827A-C335ED44472A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{045B87C2-5842-4923-827A-C335ED44472A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{045B87C2-5842-4923-827A-C335ED44472A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F5F352B-44E2-42A6-8DBF-5763AB8EBA31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F5F352B-44E2-42A6-8DBF-5763AB8EBA31}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F5F352B-44E2-42A6-8DBF-5763AB8EBA31}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F5F352B-44E2-42A6-8DBF-5763AB8EBA31}.Release|Any CPU.Build.0 = Release|Any CPU
+		{606CDB9A-EF95-4D83-83F6-086AB6000CE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{606CDB9A-EF95-4D83-83F6-086AB6000CE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{606CDB9A-EF95-4D83-83F6-086AB6000CE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{606CDB9A-EF95-4D83-83F6-086AB6000CE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BEDBE08-D62B-4D5A-A422-B3C2BFB5C8A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BEDBE08-D62B-4D5A-A422-B3C2BFB5C8A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BEDBE08-D62B-4D5A-A422-B3C2BFB5C8A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BEDBE08-D62B-4D5A-A422-B3C2BFB5C8A8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D6FD6DE2-5DAB-4180-876C-97479EE4B8A6} = {FC402F19-33B3-4CCA-8CDE-7A1CD9A1CA31}
+		{9E5013F3-D58F-4810-933A-9198A56C0569} = {FC402F19-33B3-4CCA-8CDE-7A1CD9A1CA31}
+		{3AFBC905-D12A-4DD3-8577-EF86DC6FC045} = {FC402F19-33B3-4CCA-8CDE-7A1CD9A1CA31}
+		{F2117095-6C04-4057-87B1-1CDFDFDD56B9} = {FC402F19-33B3-4CCA-8CDE-7A1CD9A1CA31}
+		{EE0F9A1A-CAB1-458B-82FD-1AB0B7576E47} = {FC402F19-33B3-4CCA-8CDE-7A1CD9A1CA31}
+		{FC402F19-33B3-4CCA-8CDE-7A1CD9A1CA31} = {E9E2CE69-0578-4847-B246-29E012403BA5}
+		{E245C597-EAB5-4A50-9E80-B2BCDBC9C839} = {99AB5966-31CD-4D1A-82A5-365BA112ABF4}
+		{4D0DF5A7-4EBE-44E7-B7D9-F8B699535AE1} = {99AB5966-31CD-4D1A-82A5-365BA112ABF4}
+		{662F449F-B141-435E-91DB-11113A6E75BC} = {E245C597-EAB5-4A50-9E80-B2BCDBC9C839}
+		{A87E41B4-DE1B-4BC6-90E3-332DD014B494} = {FC402F19-33B3-4CCA-8CDE-7A1CD9A1CA31}
+		{C08796DE-DE75-4F9D-A249-7A306C388B74} = {FC402F19-33B3-4CCA-8CDE-7A1CD9A1CA31}
+		{A51BBEF2-A745-4A87-9E6E-7861E59F7D6E} = {FC402F19-33B3-4CCA-8CDE-7A1CD9A1CA31}
+		{92916125-812D-4527-9273-46C542ECD319} = {FC402F19-33B3-4CCA-8CDE-7A1CD9A1CA31}
+		{82534F2D-2134-4F23-9F9C-530FD594CE43} = {FC402F19-33B3-4CCA-8CDE-7A1CD9A1CA31}
+		{4619C7DF-913A-46E9-8BA1-CFEEA08558C0} = {FC402F19-33B3-4CCA-8CDE-7A1CD9A1CA31}
+		{05CB1EC8-6A2F-4563-81B7-A310F0F36A42} = {FC402F19-33B3-4CCA-8CDE-7A1CD9A1CA31}
+		{045B87C2-5842-4923-827A-C335ED44472A} = {E245C597-EAB5-4A50-9E80-B2BCDBC9C839}
+		{4F5F352B-44E2-42A6-8DBF-5763AB8EBA31} = {4D0DF5A7-4EBE-44E7-B7D9-F8B699535AE1}
+		{606CDB9A-EF95-4D83-83F6-086AB6000CE0} = {E245C597-EAB5-4A50-9E80-B2BCDBC9C839}
+		{6BEDBE08-D62B-4D5A-A422-B3C2BFB5C8A8} = {E245C597-EAB5-4A50-9E80-B2BCDBC9C839}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A25DF952-3624-4265-88C1-43E6D20BA69A}
+	EndGlobalSection
+EndGlobal
