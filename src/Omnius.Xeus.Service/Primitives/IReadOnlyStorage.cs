@@ -7,11 +7,10 @@ using Omnius.Core.Cryptography;
 
 namespace Omnius.Xeus.Service.Primitives
 {
-    public interface IPrimitiveStorage
+    public interface IReadOnlyStorage
     {
         ValueTask CheckConsistencyAsync(Action<CheckConsistencyReport> callback, CancellationToken cancellationToken = default);
 
         ValueTask<IMemoryOwner<byte>?> ReadAsync(OmniHash rootHash, OmniHash targetHash, CancellationToken cancellationToken = default);
-        ValueTask WriteAsync(OmniHash rootHash, OmniHash targetHash, ReadOnlyMemory<byte> memory, CancellationToken cancellationToken = default);
     }
 }

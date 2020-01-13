@@ -18,8 +18,4 @@
     <ProjectReference Include="..\Omnius.Xeus.Service\Omnius.Xeus.Service.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Primitives\" />
-  </ItemGroup>
-
 </Project>

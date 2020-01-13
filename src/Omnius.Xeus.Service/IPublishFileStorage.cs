@@ -9,21 +9,17 @@ using Omnius.Xeus.Service.Primitives;
 
 namespace Omnius.Xeus.Service
 {
-    public interface IFileStorageFactory
+    public interface IPublishFileStorageFactory
     {
-        public ValueTask<IFileStorage> Create(string configPath, IBufferPool<byte> bufferPool);
+        public ValueTask<IPublishFileStorage> Create(string configPath, IBufferPool<byte> bufferPool);
     }
 
-    public interface IFileStorage : IPrimitiveStorage, IAsyncDisposable
+    public interface IPublishFileStorage : IReadOnlyStorage, IAsyncDisposable
     {
-        public static IFileStorageFactory Factory { get; }
+        public static IPublishFileStorageFactory Factory { get; }
 
         ValueTask<OmniHash> AddPublishFileAsync(string filePath, CancellationToken cancellationToken = default);
         ValueTask RemovePublishFileAsync(string filePath, CancellationToken cancellationToken = default);
         IAsyncEnumerable<PublishFileReport> GetPublishFileReportsAsync(CancellationToken cancellationToken = default);
-
-        ValueTask AddWantFileAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default);
-        ValueTask RemoveWantFileAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default);
-        IAsyncEnumerable<WantFileReport> GetWantFileReportsAsync(CancellationToken cancellationToken = default);
     }
 }
