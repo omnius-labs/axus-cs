@@ -11,7 +11,7 @@ namespace Omnius.Xeus.Service
 {
     public interface IPublishFileStorageFactory
     {
-        public ValueTask<IPublishFileStorage> Create(string configPath, IBufferPool<byte> bufferPool);
+        ValueTask<IPublishFileStorage> Create(string configPath, IBufferPool<byte> bufferPool);
     }
 
     public interface IPublishFileStorage : IReadOnlyStorage, IAsyncDisposable

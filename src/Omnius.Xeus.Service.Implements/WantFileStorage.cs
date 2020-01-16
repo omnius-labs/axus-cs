@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -132,7 +133,7 @@ namespace Omnius.Xeus.Service
                     return;
                 }
 
-                var status = new WantFileStatus(rootHash, filePath);
+                var status = new WantFileStatus(rootHash);
                 status.CurrentDepth = 0;
                 status.WantBlocks.Add(rootHash);
 
@@ -159,7 +160,7 @@ namespace Omnius.Xeus.Service
             {
                 foreach (var status in _wantFileStatusMap.Values)
                 {
-                    yield return new WantFileReport(status.RootHash, status.FilePath);
+                    yield return new WantFileReport(status.RootHash, status.WantBlocks.ToArray());
                 }
             }
         }
@@ -176,13 +177,11 @@ namespace Omnius.Xeus.Service
 
         class WantFileStatus
         {
-            public WantFileStatus(OmniHash rootHash, string filePath)
+            public WantFileStatus(OmniHash rootHash)
             {
-                this.FilePath = filePath;
                 this.RootHash = rootHash;
             }
 
-            public string FilePath { get; }
             public OmniHash RootHash { get; }
 
             public int CurrentDepth { get; set; }
