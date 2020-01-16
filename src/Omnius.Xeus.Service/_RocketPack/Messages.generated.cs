@@ -1320,32 +1320,35 @@ namespace Omnius.Xeus.Service
         static WantFileReport()
         {
             WantFileReport.Formatter = new ___CustomFormatter();
-            WantFileReport.Empty = new WantFileReport(OmniHash.Empty, string.Empty);
+            WantFileReport.Empty = new WantFileReport(OmniHash.Empty, global::System.Array.Empty<OmniHash>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public static readonly int MaxFilePathLength = 2147483647;
+        public static readonly int MaxWantBlocksCount = 1073741824;
 
-        public WantFileReport(OmniHash rootHash, string filePath)
+        public WantFileReport(OmniHash rootHash, OmniHash[] wantBlocks)
         {
-            if (filePath is null) throw new global::System.ArgumentNullException("filePath");
-            if (filePath.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("filePath");
+            if (wantBlocks is null) throw new global::System.ArgumentNullException("wantBlocks");
+            if (wantBlocks.Length > 1073741824) throw new global::System.ArgumentOutOfRangeException("wantBlocks");
 
             this.RootHash = rootHash;
-            this.FilePath = filePath;
+            this.WantBlocks = new global::Omnius.Core.Collections.ReadOnlyListSlim<OmniHash>(wantBlocks);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
                 if (rootHash != default) ___h.Add(rootHash.GetHashCode());
-                if (filePath != default) ___h.Add(filePath.GetHashCode());
+                foreach (var n in wantBlocks)
+                {
+                    if (n != default) ___h.Add(n.GetHashCode());
+                }
                 return ___h.ToHashCode();
             });
         }
 
         public OmniHash RootHash { get; }
-        public string FilePath { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<OmniHash> WantBlocks { get; }
 
         public static WantFileReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
         {
@@ -1376,7 +1379,7 @@ namespace Omnius.Xeus.Service
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.RootHash != target.RootHash) return false;
-            if (this.FilePath != target.FilePath) return false;
+            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.WantBlocks, target.WantBlocks)) return false;
 
             return true;
         }
@@ -1394,7 +1397,7 @@ namespace Omnius.Xeus.Service
                     {
                         propertyCount++;
                     }
-                    if (value.FilePath != string.Empty)
+                    if (value.WantBlocks.Count != 0)
                     {
                         propertyCount++;
                     }
@@ -1406,10 +1409,14 @@ namespace Omnius.Xeus.Service
                     w.Write((uint)0);
                     OmniHash.Formatter.Serialize(ref w, value.RootHash, rank + 1);
                 }
-                if (value.FilePath != string.Empty)
+                if (value.WantBlocks.Count != 0)
                 {
                     w.Write((uint)1);
-                    w.Write(value.FilePath);
+                    w.Write((uint)value.WantBlocks.Count);
+                    foreach (var n in value.WantBlocks)
+                    {
+                        OmniHash.Formatter.Serialize(ref w, n, rank + 1);
+                    }
                 }
             }
 
@@ -1420,7 +1427,7 @@ namespace Omnius.Xeus.Service
                 uint propertyCount = r.GetUInt32();
 
                 OmniHash p_rootHash = OmniHash.Empty;
-                string p_filePath = string.Empty;
+                OmniHash[] p_wantBlocks = global::System.Array.Empty<OmniHash>();
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -1434,13 +1441,18 @@ namespace Omnius.Xeus.Service
                             }
                         case 1:
                             {
-                                p_filePath = r.GetString(2147483647);
+                                var length = r.GetUInt32();
+                                p_wantBlocks = new OmniHash[length];
+                                for (int i = 0; i < p_wantBlocks.Length; i++)
+                                {
+                                    p_wantBlocks[i] = OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                }
                                 break;
                             }
                     }
                 }
 
-                return new WantFileReport(p_rootHash, p_filePath);
+                return new WantFileReport(p_rootHash, p_wantBlocks);
             }
         }
     }

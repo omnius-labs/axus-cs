@@ -64,5 +64,5 @@ table PublishFileReport {
 
 table WantFileReport {
     RootHash: OmniHash = 0,
-    FilePath: string = 1,
+    WantBlocks: vector<OmniHash>(capacity: 1073741824) = 1,
 }
