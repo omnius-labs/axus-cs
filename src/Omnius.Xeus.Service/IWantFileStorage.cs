@@ -14,13 +14,13 @@ namespace Omnius.Xeus.Service
         ValueTask<IWantFileStorage> Create(string configPath, IBufferPool<byte> bufferPool);
     }
 
-    public interface IWantFileStorage : IStorage, IAsyncDisposable
+    public interface IWantFileStorage : IWritableStorage, IAsyncDisposable
     {
         public static IWantFileStorageFactory Factory { get; }
 
-        ValueTask AddWantFileAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
-        ValueTask RemoveWantFileAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
-        ValueTask ExportAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
-        IAsyncEnumerable<WantFileReport> GetWantFileReportsAsync(CancellationToken cancellationToken = default);
+        ValueTask AddAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
+        ValueTask RemoveAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
+        ValueTask<bool> TryExportAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default);
+        IAsyncEnumerable<WantFileReport> GetReportsAsync(CancellationToken cancellationToken = default);
     }
 }

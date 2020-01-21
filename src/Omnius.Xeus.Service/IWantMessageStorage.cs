@@ -14,17 +14,13 @@ namespace Omnius.Xeus.Service
         ValueTask<IWantMessageStorage> Create(string configPath, IBufferPool<byte> bufferPool);
     }
 
-    public interface IWantMessageStorage : IStorage, IAsyncDisposable
+    public interface IWantMessageStorage : IWritableStorage, IAsyncDisposable
     {
         public static IWantMessageStorageFactory Factory { get; }
 
-        ValueTask<OmniHash> AddPublishMessage(ReadOnlySequence<byte> sequence, CancellationToken cancellationToken = default);
-        void RemovePublishMessage(OmniHash hash);
-        IEnumerable<PublishMessageReport> GetPublishMessageReportes();
-        ValueTask<bool> TryExportPublishMessage(OmniHash hash, IBufferWriter<byte> bufferWriter);
-
-        void AddWantMessage(OmniHash hash);
-        void RemoveWantMessage(OmniHash hash);
-        IEnumerable<WantMessageReport> GetWantMessageReportes();
+        ValueTask AddAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
+        ValueTask RemoveAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
+        ValueTask<bool> TryExportAsync(OmniHash rootHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default);
+        IAsyncEnumerable<WantMessageReport> GetReportsAsync(CancellationToken cancellationToken = default);
     }
 }
