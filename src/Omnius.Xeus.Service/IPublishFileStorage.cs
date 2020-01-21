@@ -18,8 +18,8 @@ namespace Omnius.Xeus.Service
     {
         public static IPublishFileStorageFactory Factory { get; }
 
-        ValueTask<OmniHash> AddPublishFileAsync(string filePath, CancellationToken cancellationToken = default);
-        ValueTask RemovePublishFileAsync(string filePath, CancellationToken cancellationToken = default);
-        IAsyncEnumerable<PublishFileReport> GetPublishFileReportsAsync(CancellationToken cancellationToken = default);
+        ValueTask<OmniHash> AddAsync(string filePath, CancellationToken cancellationToken = default);
+        ValueTask RemoveAsync(string filePath, CancellationToken cancellationToken = default);
+        IAsyncEnumerable<PublishFileReport> GetReportsAsync(CancellationToken cancellationToken = default);
     }
 }

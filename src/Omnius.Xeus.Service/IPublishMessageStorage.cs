@@ -17,13 +17,8 @@ namespace Omnius.Xeus.Service
     {
         public static IPublishMessageStorageFactory Factory { get; }
 
-        ValueTask<OmniHash> AddPublishMessage(ReadOnlySequence<byte> sequence, CancellationToken cancellationToken = default);
-        void RemovePublishMessage(OmniHash hash);
-        IEnumerable<PublishMessageReport> GetPublishMessageReportes();
-        ValueTask<bool> TryExportPublishMessage(OmniHash hash, IBufferWriter<byte> bufferWriter);
-
-        void AddWantMessage(OmniHash hash);
-        void RemoveWantMessage(OmniHash hash);
-        IEnumerable<WantMessageReport> GetWantMessageReportes();
+        ValueTask<OmniHash> AddAsync(ReadOnlySequence<byte> sequence, CancellationToken cancellationToken = default);
+        ValueTask RemoveAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
+        IEnumerable<PublishMessageReport> GetReportsAsync(CancellationToken cancellationToken = default);
     }
 }

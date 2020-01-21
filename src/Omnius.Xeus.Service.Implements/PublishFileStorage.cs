@@ -101,7 +101,7 @@ namespace Omnius.Xeus.Service
             }
         }
 
-        public async ValueTask<OmniHash> AddPublishFileAsync(string filePath, CancellationToken cancellationToken = default)
+        public async ValueTask<OmniHash> AddAsync(string filePath, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
@@ -218,7 +218,7 @@ namespace Omnius.Xeus.Service
             }
         }
 
-        public async ValueTask RemovePublishFileAsync(string filePath, CancellationToken cancellationToken = default)
+        public async ValueTask RemoveAsync(string filePath, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
@@ -237,7 +237,7 @@ namespace Omnius.Xeus.Service
             }
         }
 
-        public async IAsyncEnumerable<PublishFileReport> GetPublishFileReportsAsync([EnumeratorCancellation]CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<PublishFileReport> GetReportsAsync([EnumeratorCancellation]CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {

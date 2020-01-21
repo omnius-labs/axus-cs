@@ -2,7 +2,7 @@ using Omnius.Core;
 
 namespace Omnius.Xeus.Service
 {
-    public interface IBlockExchanger
+    public interface INegotiator
     {
         public int ConnectionCountUpperLimit { get; }
         public int BytesSendLimitPerSecond { get; }

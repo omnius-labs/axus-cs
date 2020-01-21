@@ -124,7 +124,7 @@ namespace Omnius.Xeus.Service
             }
         }
 
-        public async ValueTask AddWantFileAsync(OmniHash rootHash,  CancellationToken cancellationToken = default)
+        public async ValueTask AddAsync(OmniHash rootHash,  CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
@@ -141,7 +141,7 @@ namespace Omnius.Xeus.Service
             }
         }
 
-        public async ValueTask RemoveWantFileAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+        public async ValueTask RemoveAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
@@ -149,12 +149,12 @@ namespace Omnius.Xeus.Service
             }
         }
 
-        public ValueTask ExportAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+        public ValueTask<bool> TryExportAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public async IAsyncEnumerable<WantFileReport> GetWantFileReportsAsync([EnumeratorCancellation]CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<WantFileReport> GetReportsAsync([EnumeratorCancellation]CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
