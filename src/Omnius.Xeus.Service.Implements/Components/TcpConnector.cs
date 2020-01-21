@@ -370,7 +370,7 @@ namespace Omnius.Xeus.Service.Components
                         disposableList.Add(socket);
 
                         var proxy = new Socks5ProxyClient(ipAddress.ToString(), port);
-                        proxy.Create(socket, cancellationToken);
+                        await proxy.ConnectAsync(socket, cancellationToken);
 
                         var cap = new SocketCap(socket, false);
                         disposableList.Add(cap);
@@ -388,7 +388,7 @@ namespace Omnius.Xeus.Service.Components
                         disposableList.Add(socket);
 
                         var proxy = new HttpProxyClient(ipAddress.ToString(), port);
-                        proxy.Create(socket, cancellationToken);
+                        await proxy.ConnectAsync(socket, cancellationToken);
 
                         var cap = new SocketCap(socket, false);
                         disposableList.Add(cap);
