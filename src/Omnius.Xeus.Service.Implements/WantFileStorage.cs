@@ -90,7 +90,7 @@ namespace Omnius.Xeus.Service
 
                 using (var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bufferPool))
                 {
-                    var memoryOwner = _bufferPool.RentMemory((int)fileStream.Length);
+                    var memoryOwner = _bufferPool.Memory.Rent((int)fileStream.Length);
                     await fileStream.ReadAsync(memoryOwner.Memory);
 
                     return memoryOwner;
