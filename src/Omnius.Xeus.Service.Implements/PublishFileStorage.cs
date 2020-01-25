@@ -31,7 +31,7 @@ namespace Omnius.Xeus.Service
         
         internal sealed class PublishFileStorageFactory : IPublishFileStorageFactory
         {
-            public async ValueTask<IPublishFileStorage> Create(string configPath, IBufferPool<byte> bufferPool)
+            public async ValueTask<IPublishFileStorage> CreateAsync(string configPath, IBufferPool<byte> bufferPool)
             {
                 var result = new PublishFileStorage(configPath, bufferPool);
                 await result.InitAsync();

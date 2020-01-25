@@ -7,7 +7,7 @@ namespace Omnius.Xeus.Service
 {
     public interface ITcpConnectorFactory
     {
-        public ValueTask<ITcpConnector> Create(TcpConnectorOptions tcpConnectorOptions, IBufferPool<byte> bufferPool);
+        public ValueTask<ITcpConnector> CreateAsync(TcpConnectorOptions tcpConnectorOptions, IBufferPool<byte> bufferPool);
     }
 
     public interface ITcpConnector : IConnector, IAsyncDisposable

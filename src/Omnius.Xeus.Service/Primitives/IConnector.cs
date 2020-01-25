@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core.Network;
 using Omnius.Core.Network.Caps;
+using System.Collections.Generic;
 
 namespace Omnius.Xeus.Service.Primitives
 {
@@ -28,7 +29,8 @@ namespace Omnius.Xeus.Service.Primitives
 
     public interface IConnector
     {
-        ValueTask<ConnectorResult> AcceptAsync(CancellationToken cancellationToken = default);
         ValueTask<ConnectorResult> ConnectAsync(OmniAddress address, CancellationToken cancellationToken = default);
+        ValueTask<ConnectorResult> AcceptAsync(CancellationToken cancellationToken = default);
+        IAsyncEnumerable<OmniAddress> GetListenEndpointAddressesAsync(CancellationToken cancellationToken = default);
     }
 }

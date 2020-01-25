@@ -11,7 +11,7 @@ namespace Omnius.Xeus.Service
 {
     public interface IWantFileStorageFactory
     {
-        ValueTask<IWantFileStorage> Create(string configPath, IBufferPool<byte> bufferPool);
+        ValueTask<IWantFileStorage> CreateAsync(string configPath, IBufferPool<byte> bufferPool);
     }
 
     public interface IWantFileStorage : IWritableStorage, IAsyncDisposable

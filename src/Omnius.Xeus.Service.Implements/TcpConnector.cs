@@ -38,7 +38,7 @@ namespace Omnius.Xeus.Service
 
         internal sealed class TcpConnectorFactory : ITcpConnectorFactory
         {
-            public async ValueTask<ITcpConnector> Create(TcpConnectorOptions tcpConnectorOptions, IBufferPool<byte> bufferPool)
+            public async ValueTask<ITcpConnector> CreateAsync(TcpConnectorOptions tcpConnectorOptions, IBufferPool<byte> bufferPool)
             {
                 var result = new TcpConnector(tcpConnectorOptions, bufferPool);
                 await result.InitAsync();
@@ -527,6 +527,11 @@ namespace Omnius.Xeus.Service
                     }
                 }
             }
+        }
+
+        public IAsyncEnumerable<OmniAddress> GetListenEndpointAddressesAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
     }
 }
