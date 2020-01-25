@@ -12,10 +12,12 @@
     <NoWarn>CS1591,CS1998,NU5105</NoWarn>
   </PropertyGroup>
 
-  <!-- <PropertyGroup>  
+  <PropertyGroup>  
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-    <RestoreLockedMode Condition=" '$(ContinuousIntegrationBuild)' == 'true' " >true</RestoreLockedMode>
-  </PropertyGroup> -->
+    <RestoreLockedMode>true</RestoreLockedMode>
+    <NoWarn>NU1603</NoWarn>
+    <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
+  </PropertyGroup>
 
   <PropertyGroup>
     <RootNamespace>$(ProjectName)</RootNamespace>
