@@ -31,7 +31,7 @@ namespace Omnius.Xeus.Service
 
         internal sealed class WantFileStorageFactory : IWantFileStorageFactory
         {
-            public async ValueTask<IWantFileStorage> Create(string configPath, IBufferPool<byte> bufferPool)
+            public async ValueTask<IWantFileStorage> CreateAsync(string configPath, IBufferPool<byte> bufferPool)
             {
                 var result = new WantFileStorage(configPath, bufferPool);
                 await result.InitAsync();
