@@ -12,12 +12,14 @@
     <NoWarn>CS1591,CS1998,NU5105</NoWarn>
   </PropertyGroup>
 
+  <!--
   <PropertyGroup>  
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <RestoreLockedMode>true</RestoreLockedMode>
     <NoWarn>NU1603</NoWarn>
     <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
   </PropertyGroup>
+  -->
 
   <PropertyGroup>
     <RootNamespace>$(ProjectName)</RootNamespace>
