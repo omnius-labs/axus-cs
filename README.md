@@ -4,4 +4,4 @@
 
 ## Website
 
-+ <https://docs.omnius-labs.com/projects/xeus/>
++ <https://docs.omnius-labs.com/>
