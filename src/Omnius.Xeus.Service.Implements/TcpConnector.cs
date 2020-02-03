@@ -25,7 +25,7 @@ namespace Omnius.Xeus.Service
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly IBufferPool<byte> _bufferPool;
+        private readonly IBytesPool _bytesPool;
 
         private readonly TcpConnectOptions _tcpConnectOptions;
         private readonly TcpAcceptOptions _tcpAcceptOptions;
@@ -38,9 +38,9 @@ namespace Omnius.Xeus.Service
 
         internal sealed class TcpConnectorFactory : ITcpConnectorFactory
         {
-            public async ValueTask<ITcpConnector> CreateAsync(TcpConnectorOptions tcpConnectorOptions, IBufferPool<byte> bufferPool)
+            public async ValueTask<ITcpConnector> CreateAsync(TcpConnectorOptions tcpConnectorOptions, IBytesPool bytesPool)
             {
-                var result = new TcpConnector(tcpConnectorOptions, bufferPool);
+                var result = new TcpConnector(tcpConnectorOptions, bytesPool);
                 await result.InitAsync();
 
                 return result;
@@ -49,11 +49,11 @@ namespace Omnius.Xeus.Service
 
         public static ITcpConnectorFactory Factory { get; } = new TcpConnectorFactory();
 
-        internal TcpConnector(TcpConnectorOptions tcpConnectorOptions, IBufferPool<byte> bufferPool)
+        internal TcpConnector(TcpConnectorOptions tcpConnectorOptions, IBytesPool bytesPool)
         {
             _tcpConnectOptions = tcpConnectorOptions.TcpConnectOptions;
             _tcpAcceptOptions = tcpConnectorOptions.TcpAcceptOptions;
-            _bufferPool = bufferPool;
+            _bytesPool = bytesPool;
         }
 
         internal async ValueTask InitAsync()
@@ -529,7 +529,7 @@ namespace Omnius.Xeus.Service
             }
         }
 
-        public IAsyncEnumerable<OmniAddress> GetListenEndpointAddressesAsync(CancellationToken cancellationToken = default)
+        public IAsyncEnumerable<OmniAddress> GetListenEndpointsAsync(CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }

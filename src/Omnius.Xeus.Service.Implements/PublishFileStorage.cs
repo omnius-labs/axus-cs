@@ -20,7 +20,7 @@ namespace Omnius.Xeus.Service
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         private readonly string _configPath;
-        private readonly IBufferPool<byte> _bufferPool;
+        private readonly IBytesPool _bytesPool;
 
         const int MaxBlockLength = 1 * 1024 * 1024;
 
@@ -31,9 +31,9 @@ namespace Omnius.Xeus.Service
         
         internal sealed class PublishFileStorageFactory : IPublishFileStorageFactory
         {
-            public async ValueTask<IPublishFileStorage> CreateAsync(string configPath, IBufferPool<byte> bufferPool)
+            public async ValueTask<IPublishFileStorage> CreateAsync(string configPath, IBytesPool bytesPool)
             {
-                var result = new PublishFileStorage(configPath, bufferPool);
+                var result = new PublishFileStorage(configPath, bytesPool);
                 await result.InitAsync();
 
                 return result;
@@ -42,10 +42,10 @@ namespace Omnius.Xeus.Service
 
         public static IPublishFileStorageFactory Factory { get; } = new PublishFileStorageFactory();
 
-        internal PublishFileStorage(string configPath, IBufferPool<byte> bufferPool)
+        internal PublishFileStorage(string configPath, IBytesPool bytesPool)
         {
             _configPath = configPath;
-            _bufferPool = bufferPool;
+            _bytesPool = bytesPool;
         }
 
         public async ValueTask InitAsync()
@@ -62,8 +62,8 @@ namespace Omnius.Xeus.Service
 
         private string OmniHashToString(OmniHash hash)
         {
-            using var hub = new Hub(_bufferPool);
-            hash.Export(hub.Writer, _bufferPool);
+            using var hub = new Hub(_bytesPool);
+            hash.Export(hub.Writer, _bytesPool);
 
             var value = OmniBase.ToBase58BtcString(hub.Reader.GetSequence());
 
@@ -81,9 +81,9 @@ namespace Omnius.Xeus.Service
                     return null;
                 }
 
-                using (var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bufferPool))
+                using (var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bytesPool))
                 {
-                    var memoryOwner = _bufferPool.Memory.Rent((int)fileStream.Length);
+                    var memoryOwner = _bytesPool.Memory.Rent((int)fileStream.Length);
                     await fileStream.ReadAsync(memoryOwner.Memory);
 
                     return memoryOwner;
@@ -95,7 +95,7 @@ namespace Omnius.Xeus.Service
         {
             var filePath = Path.Combine(basePath, this.OmniHashToString(hash));
 
-            using (var fileStream = new UnbufferedFileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bufferPool))
+            using (var fileStream = new UnbufferedFileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool))
             {
                 await fileStream.WriteAsync(memory);
             }
@@ -124,7 +124,7 @@ namespace Omnius.Xeus.Service
                     {
                         var hashList = new List<OmniHash>();
 
-                        using (var memoryOwner = _bufferPool.Memory.Rent(MaxBlockLength))
+                        using (var memoryOwner = _bytesPool.Memory.Rent(MaxBlockLength))
                         {
                             var remain = inStream.Length;
 
@@ -149,16 +149,16 @@ namespace Omnius.Xeus.Service
                     // ハッシュ値からMerkle treeを作成する
                     for (; ; )
                     {
-                        using var hub = new Hub(_bufferPool);
+                        using var hub = new Hub(_bytesPool);
 
                         var lastMerkleTreeSection = merkleTreeSections.Peek();
-                        lastMerkleTreeSection.Export(hub.Writer, _bufferPool);
+                        lastMerkleTreeSection.Export(hub.Writer, _bytesPool);
 
                         if (hub.Writer.WrittenBytes > MaxBlockLength)
                         {
                             var hashList = new List<OmniHash>();
 
-                            using (var memoryOwner = _bufferPool.Memory.Rent(MaxBlockLength))
+                            using (var memoryOwner = _bytesPool.Memory.Rent(MaxBlockLength))
                             {
                                 var sequence = hub.Reader.GetSequence();
                                 var remain = sequence.Length;
@@ -184,7 +184,7 @@ namespace Omnius.Xeus.Service
                         }
                         else
                         {
-                            using (var memoryOwner = _bufferPool.Memory.Rent(MaxBlockLength))
+                            using (var memoryOwner = _bytesPool.Memory.Rent(MaxBlockLength))
                             {
                                 var sequence = hub.Reader.GetSequence();
 

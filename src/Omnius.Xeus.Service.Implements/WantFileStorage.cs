@@ -21,7 +21,7 @@ namespace Omnius.Xeus.Service
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         private readonly string _configPath;
-        private readonly IBufferPool<byte> _bufferPool;
+        private readonly IBytesPool _bytesPool;
 
         private readonly Dictionary<OmniHash, WantFileStatus> _wantFileStatusMap = new Dictionary<OmniHash, WantFileStatus>();
 
@@ -31,9 +31,9 @@ namespace Omnius.Xeus.Service
 
         internal sealed class WantFileStorageFactory : IWantFileStorageFactory
         {
-            public async ValueTask<IWantFileStorage> CreateAsync(string configPath, IBufferPool<byte> bufferPool)
+            public async ValueTask<IWantFileStorage> CreateAsync(string configPath, IBytesPool bytesPool)
             {
-                var result = new WantFileStorage(configPath, bufferPool);
+                var result = new WantFileStorage(configPath, bytesPool);
                 await result.InitAsync();
 
                 return result;
@@ -42,10 +42,10 @@ namespace Omnius.Xeus.Service
 
         public static IWantFileStorageFactory Factory { get; } = new WantFileStorageFactory();
 
-        internal WantFileStorage(string configPath, IBufferPool<byte> bufferPool)
+        internal WantFileStorage(string configPath, IBytesPool bytesPool)
         {
             _configPath = configPath;
-            _bufferPool = bufferPool;
+            _bytesPool = bytesPool;
         }
 
         public async ValueTask InitAsync()
@@ -64,8 +64,8 @@ namespace Omnius.Xeus.Service
 
         private string OmniHashToString(OmniHash hash)
         {
-            using var hub = new Hub(_bufferPool);
-            hash.Export(hub.Writer, _bufferPool);
+            using var hub = new Hub(_bytesPool);
+            hash.Export(hub.Writer, _bytesPool);
 
             var value = OmniBase.ToBase58BtcString(hub.Reader.GetSequence());
 
@@ -88,9 +88,9 @@ namespace Omnius.Xeus.Service
                     return null;
                 }
 
-                using (var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bufferPool))
+                using (var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bytesPool))
                 {
-                    var memoryOwner = _bufferPool.Memory.Rent((int)fileStream.Length);
+                    var memoryOwner = _bytesPool.Memory.Rent((int)fileStream.Length);
                     await fileStream.ReadAsync(memoryOwner.Memory);
 
                     return memoryOwner;
@@ -115,7 +115,7 @@ namespace Omnius.Xeus.Service
                     return;
                 }
 
-                using (var fileStream = new UnbufferedFileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bufferPool))
+                using (var fileStream = new UnbufferedFileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool))
                 {
                     await fileStream.WriteAsync(memory);
                 }
