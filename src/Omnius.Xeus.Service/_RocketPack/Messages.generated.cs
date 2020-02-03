@@ -60,14 +60,14 @@ namespace Omnius.Xeus.Service
         public global::System.ReadOnlyMemory<byte> Id { get; }
         public global::Omnius.Core.Collections.ReadOnlyListSlim<OmniAddress> Addresses { get; }
 
-        public static NodeProfile Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public static NodeProfile Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
+            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -197,14 +197,14 @@ namespace Omnius.Xeus.Service
         public global::Omnius.Core.Serialization.RocketPack.Timestamp CreationTime { get; }
         public ErrorReportType Type { get; }
 
-        public static ErrorReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public static ErrorReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
+            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -327,14 +327,14 @@ namespace Omnius.Xeus.Service
         public TcpProxyType Type { get; }
         public OmniAddress Address { get; }
 
-        public static TcpProxyOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public static TcpProxyOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
+            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -455,14 +455,14 @@ namespace Omnius.Xeus.Service
         public bool Enabled { get; }
         public TcpProxyOptions? ProxyOptions { get; }
 
-        public static TcpConnectOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public static TcpConnectOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
+            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -598,14 +598,14 @@ namespace Omnius.Xeus.Service
         public global::Omnius.Core.Collections.ReadOnlyListSlim<OmniAddress> ListenAddresses { get; }
         public bool UseUpnp { get; }
 
-        public static TcpAcceptOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public static TcpAcceptOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
+            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -754,14 +754,14 @@ namespace Omnius.Xeus.Service
         public TcpConnectOptions TcpConnectOptions { get; }
         public TcpAcceptOptions TcpAcceptOptions { get; }
 
-        public static TcpConnectorOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public static TcpConnectorOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
+            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -885,14 +885,14 @@ namespace Omnius.Xeus.Service
         public uint CheckedBlockCount { get; }
         public uint TotalBlockCount { get; }
 
-        public static CheckConsistencyReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public static CheckConsistencyReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
+            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -1023,14 +1023,14 @@ namespace Omnius.Xeus.Service
         }
 
 
-        public static PublishMessageReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public static PublishMessageReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
+            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -1113,14 +1113,14 @@ namespace Omnius.Xeus.Service
         }
 
 
-        public static WantMessageReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public static WantMessageReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
+            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -1214,14 +1214,14 @@ namespace Omnius.Xeus.Service
         public OmniHash RootHash { get; }
         public string FilePath { get; }
 
-        public static PublishFileReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public static PublishFileReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
+            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -1350,14 +1350,14 @@ namespace Omnius.Xeus.Service
         public OmniHash RootHash { get; }
         public global::Omnius.Core.Collections.ReadOnlyListSlim<OmniHash> WantBlocks { get; }
 
-        public static WantFileReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public static WantFileReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
+            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -1453,6 +1453,153 @@ namespace Omnius.Xeus.Service
                 }
 
                 return new WantFileReport(p_rootHash, p_wantBlocks);
+            }
+        }
+    }
+
+    public sealed partial class NegotiatorOptions : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<NegotiatorOptions>
+    {
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<NegotiatorOptions> Formatter { get; }
+        public static NegotiatorOptions Empty { get; }
+
+        static NegotiatorOptions()
+        {
+            NegotiatorOptions.Formatter = new ___CustomFormatter();
+            NegotiatorOptions.Empty = new NegotiatorOptions(0, 0, 0);
+        }
+
+        private readonly global::System.Lazy<int> ___hashCode;
+
+        public NegotiatorOptions(uint connectionCountUpperLimit, uint bytesSendLimitPerSecond, uint bytesReceiveLimitPerSecond)
+        {
+            this.ConnectionCountUpperLimit = connectionCountUpperLimit;
+            this.BytesSendLimitPerSecond = bytesSendLimitPerSecond;
+            this.BytesReceiveLimitPerSecond = bytesReceiveLimitPerSecond;
+
+            ___hashCode = new global::System.Lazy<int>(() =>
+            {
+                var ___h = new global::System.HashCode();
+                if (connectionCountUpperLimit != default) ___h.Add(connectionCountUpperLimit.GetHashCode());
+                if (bytesSendLimitPerSecond != default) ___h.Add(bytesSendLimitPerSecond.GetHashCode());
+                if (bytesReceiveLimitPerSecond != default) ___h.Add(bytesReceiveLimitPerSecond.GetHashCode());
+                return ___h.ToHashCode();
+            });
+        }
+
+        public uint ConnectionCountUpperLimit { get; }
+        public uint BytesSendLimitPerSecond { get; }
+        public uint BytesReceiveLimitPerSecond { get; }
+
+        public static NegotiatorOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
+            return Formatter.Deserialize(ref reader, 0);
+        }
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bytesPool);
+            Formatter.Serialize(ref writer, this, 0);
+        }
+
+        public static bool operator ==(NegotiatorOptions? left, NegotiatorOptions? right)
+        {
+            return (right is null) ? (left is null) : right.Equals(left);
+        }
+        public static bool operator !=(NegotiatorOptions? left, NegotiatorOptions? right)
+        {
+            return !(left == right);
+        }
+        public override bool Equals(object? other)
+        {
+            if (!(other is NegotiatorOptions)) return false;
+            return this.Equals((NegotiatorOptions)other);
+        }
+        public bool Equals(NegotiatorOptions? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (this.ConnectionCountUpperLimit != target.ConnectionCountUpperLimit) return false;
+            if (this.BytesSendLimitPerSecond != target.BytesSendLimitPerSecond) return false;
+            if (this.BytesReceiveLimitPerSecond != target.BytesReceiveLimitPerSecond) return false;
+
+            return true;
+        }
+        public override int GetHashCode() => ___hashCode.Value;
+
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<NegotiatorOptions>
+        {
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in NegotiatorOptions value, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                {
+                    uint propertyCount = 0;
+                    if (value.ConnectionCountUpperLimit != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.BytesSendLimitPerSecond != 0)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.BytesReceiveLimitPerSecond != 0)
+                    {
+                        propertyCount++;
+                    }
+                    w.Write(propertyCount);
+                }
+
+                if (value.ConnectionCountUpperLimit != 0)
+                {
+                    w.Write((uint)0);
+                    w.Write(value.ConnectionCountUpperLimit);
+                }
+                if (value.BytesSendLimitPerSecond != 0)
+                {
+                    w.Write((uint)1);
+                    w.Write(value.BytesSendLimitPerSecond);
+                }
+                if (value.BytesReceiveLimitPerSecond != 0)
+                {
+                    w.Write((uint)2);
+                    w.Write(value.BytesReceiveLimitPerSecond);
+                }
+            }
+
+            public NegotiatorOptions Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                uint propertyCount = r.GetUInt32();
+
+                uint p_connectionCountUpperLimit = 0;
+                uint p_bytesSendLimitPerSecond = 0;
+                uint p_bytesReceiveLimitPerSecond = 0;
+
+                for (; propertyCount > 0; propertyCount--)
+                {
+                    uint id = r.GetUInt32();
+                    switch (id)
+                    {
+                        case 0:
+                            {
+                                p_connectionCountUpperLimit = r.GetUInt32();
+                                break;
+                            }
+                        case 1:
+                            {
+                                p_bytesSendLimitPerSecond = r.GetUInt32();
+                                break;
+                            }
+                        case 2:
+                            {
+                                p_bytesReceiveLimitPerSecond = r.GetUInt32();
+                                break;
+                            }
+                    }
+                }
+
+                return new NegotiatorOptions(p_connectionCountUpperLimit, p_bytesSendLimitPerSecond, p_bytesReceiveLimitPerSecond);
             }
         }
     }

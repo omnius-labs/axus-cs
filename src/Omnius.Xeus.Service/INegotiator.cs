@@ -7,8 +7,8 @@ namespace Omnius.Xeus.Service
 {
     public interface INegotiatorFactory
     {
-        ValueTask<INegotiator> CreateAsync(string configPath, IEnumerable<IExplorer> explorers, 
-            IEnumerable<IWantStorage> wantStorages, IEnumerable<IPublishStorage> publishStorages, IBufferPool<byte> bufferPool);
+        ValueTask<INegotiator> CreateAsync(string configPath, NegotiatorOptions negotiatorOptions, IEnumerable<IConnector> connectors, 
+            IEnumerable<IWantStorage> wantStorages, IEnumerable<IPublishStorage> publishStorages, IBytesPool bytesPool);
     }
 
     public interface INegotiator

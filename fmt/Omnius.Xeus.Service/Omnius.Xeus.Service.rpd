@@ -66,3 +66,9 @@ table WantFileReport {
     RootHash: OmniHash = 0,
     WantBlocks: vector<OmniHash>(capacity: 1073741824) = 1,
 }
+
+table NegotiatorOptions {
+    ConnectionCountUpperLimit: uint32 = 0,
+    BytesSendLimitPerSecond: uint32 = 1,
+    BytesReceiveLimitPerSecond: uint32 = 2,
+}

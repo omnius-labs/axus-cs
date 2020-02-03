@@ -31,6 +31,6 @@ namespace Omnius.Xeus.Service.Primitives
     {
         ValueTask<ConnectorResult> ConnectAsync(OmniAddress address, CancellationToken cancellationToken = default);
         ValueTask<ConnectorResult> AcceptAsync(CancellationToken cancellationToken = default);
-        IAsyncEnumerable<OmniAddress> GetListenEndpointAddressesAsync(CancellationToken cancellationToken = default);
+        IAsyncEnumerable<OmniAddress> GetListenEndpointsAsync(CancellationToken cancellationToken = default);
     }
 }

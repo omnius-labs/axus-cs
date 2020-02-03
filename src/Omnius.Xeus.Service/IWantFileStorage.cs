@@ -11,10 +11,10 @@ namespace Omnius.Xeus.Service
 {
     public interface IWantFileStorageFactory
     {
-        ValueTask<IWantFileStorage> CreateAsync(string configPath, IBufferPool<byte> bufferPool);
+        ValueTask<IWantFileStorage> CreateAsync(string configPath, IBytesPool bytesPool);
     }
 
-    public interface IWantFileStorage : IWritableStorage, IAsyncDisposable
+    public interface IWantFileStorage : IWantStorage, IAsyncDisposable
     {
         public static IWantFileStorageFactory Factory { get; }
 

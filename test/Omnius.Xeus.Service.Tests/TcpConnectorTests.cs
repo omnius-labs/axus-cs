@@ -18,7 +18,7 @@ namespace Omnius.Xeus.Service
             const string ipAddress = "127.0.0.1";
             var options = new TcpConnectorOptions(new TcpConnectOptions(true, null), new TcpAcceptOptions(false, Array.Empty<OmniAddress>(), false));
 
-            await using (var connector = await TcpConnector.Factory.CreateAsync(options, BufferPool<byte>.Shared))
+            await using (var connector = await TcpConnector.Factory.CreateAsync(options, BytesPool.Shared))
             {
                 var tcpListener = new TcpListener(IPAddress.Parse(ipAddress), port);
 
@@ -51,7 +51,7 @@ namespace Omnius.Xeus.Service
             const string ipAddress = "127.0.0.1";
             var options = new TcpConnectorOptions(new TcpConnectOptions(false, null), new TcpAcceptOptions(true, new[] { new OmniAddress($"tcp(ip4(\"{ipAddress}\"),{port})") }, false));
 
-            await using (var connector = await TcpConnector.Factory.CreateAsync(options, BufferPool<byte>.Shared))
+            await using (var connector = await TcpConnector.Factory.CreateAsync(options, BytesPool.Shared))
             {
                 var acceptTask = connector.AcceptAsync();
 
