@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Omnius.Core;
 
-namespace Omnius.Xeus.Service.Components.Internal
+namespace Omnius.Xeus.Service.Internal
 {
     internal readonly struct RouteTableElement<T>
     {
@@ -67,20 +67,20 @@ namespace Omnius.Xeus.Service.Components.Internal
             if (elements == null) throw new ArgumentNullException(nameof(elements));
             if (count == 0) return Array.Empty<RouteTableElement<T>>();
 
-            var targetList = new List<SortInfo<T>>();
+            var targetList = new List<SortEntry<T>>();
 
             if (baseId != null)
             {
                 var xor = new byte[targetId.Length];
                 BytesOperations.Xor(targetId, baseId, xor);
-                targetList.Add(new SortInfo<T>(null, xor));
+                targetList.Add(new SortEntry<T>(null, xor));
             }
 
             foreach (var node in elements)
             {
                 var xor = new byte[targetId.Length];
                 BytesOperations.Xor(targetId, node.Id, xor);
-                targetList.Add(new SortInfo<T>(node, xor));
+                targetList.Add(new SortEntry<T>(node, xor));
             }
 
             for (int i = 1; i < targetList.Count; i++)
@@ -115,9 +115,9 @@ namespace Omnius.Xeus.Service.Components.Internal
             return targetList.Take(count).TakeWhile(n => n.Node.HasValue).Select(n => n.Node!.Value).ToList();
         }
 
-        private readonly struct SortInfo<T>
+        private readonly struct SortEntry<T>
         {
-            public SortInfo(RouteTableElement<T>? node, byte[] xor)
+            public SortEntry(RouteTableElement<T>? node, byte[] xor)
             {
                 this.Node = node;
                 this.Xor = xor;

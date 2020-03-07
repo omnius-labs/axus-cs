@@ -12,12 +12,14 @@
     <NoWarn>CS1591,CS1998,NU5105</NoWarn>
   </PropertyGroup>
 
-  <PropertyGroup>  
+  <!--
+  <PropertyGroup>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <RestoreLockedMode>true</RestoreLockedMode>
     <NoWarn>NU1603</NoWarn>
     <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
   </PropertyGroup>
+  -->
 
   <PropertyGroup>
     <RootNamespace>$(ProjectName)</RootNamespace>
@@ -45,12 +47,15 @@
   <!-- Autodetect platform -->
   <PropertyGroup Condition=" '$(OS)' != 'Unix' ">
     <NativeDepsPlatform>Windows</NativeDepsPlatform>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(OS)' == 'Unix' And Exists('/Applications') And Exists('/Library') And Exists('/System') ">
     <NativeDepsPlatform>Mac</NativeDepsPlatform>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(OS)' == 'Unix' And '$(NativeDepsPlatform)' == '' ">
     <NativeDepsPlatform>Linux</NativeDepsPlatform>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
     
   <PropertyGroup Condition=" '$(NativeDepsPlatform)' == 'Windows' ">

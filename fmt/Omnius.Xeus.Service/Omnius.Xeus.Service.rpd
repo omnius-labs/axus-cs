@@ -40,6 +40,11 @@ table TcpAcceptOptions {
     UseUpnp: bool = 2,
 }
 
+table TcpConnectorOptions {
+    TcpConnectOptions: TcpConnectOptions = 0,
+    TcpAcceptOptions: TcpAcceptOptions = 1,
+}
+
 table CheckConsistencyReport {
     BadBlockCount: uint32 = 0,
     CheckedBlockCount: uint32 = 1,
@@ -53,7 +58,17 @@ table WantMessageReport {
 }
 
 table PublishFileReport {
+    RootHash: OmniHash = 0,
+    FilePath: string = 1,
 }
 
 table WantFileReport {
+    RootHash: OmniHash = 0,
+    WantBlocks: vector<OmniHash>(capacity: 1073741824) = 1,
+}
+
+table NegotiatorOptions {
+    ConnectionCountUpperLimit: uint32 = 0,
+    BytesSendLimitPerSecond: uint32 = 1,
+    BytesReceiveLimitPerSecond: uint32 = 2,
 }

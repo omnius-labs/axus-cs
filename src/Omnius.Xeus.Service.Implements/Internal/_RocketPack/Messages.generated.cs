@@ -4,7 +4,7 @@ using Omnius.Xeus.Service;
 
 #nullable enable
 
-namespace Omnius.Xeus.Service.Components.Internal
+namespace Omnius.Xeus.Service.Internal
 {
     internal sealed partial class MerkleTreeSection : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<MerkleTreeSection>
     {
@@ -14,24 +14,26 @@ namespace Omnius.Xeus.Service.Components.Internal
         static MerkleTreeSection()
         {
             MerkleTreeSection.Formatter = new ___CustomFormatter();
-            MerkleTreeSection.Empty = new MerkleTreeSection(0, global::System.Array.Empty<OmniHash>());
+            MerkleTreeSection.Empty = new MerkleTreeSection(0, 0, global::System.Array.Empty<OmniHash>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxHashesCount = 1073741824;
 
-        public MerkleTreeSection(ulong length, OmniHash[] hashes)
+        public MerkleTreeSection(int depth, ulong length, OmniHash[] hashes)
         {
             if (hashes is null) throw new global::System.ArgumentNullException("hashes");
             if (hashes.Length > 1073741824) throw new global::System.ArgumentOutOfRangeException("hashes");
 
+            this.Depth = depth;
             this.Length = length;
             this.Hashes = new global::Omnius.Core.Collections.ReadOnlyListSlim<OmniHash>(hashes);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
+                if (depth != default) ___h.Add(depth.GetHashCode());
                 if (length != default) ___h.Add(length.GetHashCode());
                 foreach (var n in hashes)
                 {
@@ -41,17 +43,18 @@ namespace Omnius.Xeus.Service.Components.Internal
             });
         }
 
+        public int Depth { get; }
         public ulong Length { get; }
         public global::Omnius.Core.Collections.ReadOnlyListSlim<OmniHash> Hashes { get; }
 
-        public static MerkleTreeSection Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public static MerkleTreeSection Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
+            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -72,6 +75,7 @@ namespace Omnius.Xeus.Service.Components.Internal
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
+            if (this.Depth != target.Depth) return false;
             if (this.Length != target.Length) return false;
             if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Hashes, target.Hashes)) return false;
 
@@ -87,6 +91,10 @@ namespace Omnius.Xeus.Service.Components.Internal
 
                 {
                     uint propertyCount = 0;
+                    if (value.Depth != 0)
+                    {
+                        propertyCount++;
+                    }
                     if (value.Length != 0)
                     {
                         propertyCount++;
@@ -98,14 +106,19 @@ namespace Omnius.Xeus.Service.Components.Internal
                     w.Write(propertyCount);
                 }
 
-                if (value.Length != 0)
+                if (value.Depth != 0)
                 {
                     w.Write((uint)0);
+                    w.Write(value.Depth);
+                }
+                if (value.Length != 0)
+                {
+                    w.Write((uint)1);
                     w.Write(value.Length);
                 }
                 if (value.Hashes.Count != 0)
                 {
-                    w.Write((uint)1);
+                    w.Write((uint)2);
                     w.Write((uint)value.Hashes.Count);
                     foreach (var n in value.Hashes)
                     {
@@ -120,6 +133,7 @@ namespace Omnius.Xeus.Service.Components.Internal
 
                 uint propertyCount = r.GetUInt32();
 
+                int p_depth = 0;
                 ulong p_length = 0;
                 OmniHash[] p_hashes = global::System.Array.Empty<OmniHash>();
 
@@ -130,10 +144,15 @@ namespace Omnius.Xeus.Service.Components.Internal
                     {
                         case 0:
                             {
-                                p_length = r.GetUInt64();
+                                p_depth = r.GetInt32();
                                 break;
                             }
                         case 1:
+                            {
+                                p_length = r.GetUInt64();
+                                break;
+                            }
+                        case 2:
                             {
                                 var length = r.GetUInt32();
                                 p_hashes = new OmniHash[length];
@@ -146,131 +165,119 @@ namespace Omnius.Xeus.Service.Components.Internal
                     }
                 }
 
-                return new MerkleTreeSection(p_length, p_hashes);
+                return new MerkleTreeSection(p_depth, p_length, p_hashes);
             }
         }
     }
 
-    internal sealed partial class TcpConnectorConfig : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<TcpConnectorConfig>
+    internal sealed partial class KadexNodeExplorerConfig : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<KadexNodeExplorerConfig>
     {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<TcpConnectorConfig> Formatter { get; }
-        public static TcpConnectorConfig Empty { get; }
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<KadexNodeExplorerConfig> Formatter { get; }
+        public static KadexNodeExplorerConfig Empty { get; }
 
-        static TcpConnectorConfig()
+        static KadexNodeExplorerConfig()
         {
-            TcpConnectorConfig.Formatter = new ___CustomFormatter();
-            TcpConnectorConfig.Empty = new TcpConnectorConfig(0, null, null);
+            KadexNodeExplorerConfig.Formatter = new ___CustomFormatter();
+            KadexNodeExplorerConfig.Empty = new KadexNodeExplorerConfig(new global::System.Collections.Generic.Dictionary<NodeProfile, global::Omnius.Core.Serialization.RocketPack.Timestamp>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public TcpConnectorConfig(uint version, TcpConnectOptions? tcpConnectOptions, TcpAcceptOptions? tcpAcceptOptions)
+        public static readonly int MaxNodeProfileMapCount = 1073741824;
+
+        public KadexNodeExplorerConfig(global::System.Collections.Generic.Dictionary<NodeProfile, global::Omnius.Core.Serialization.RocketPack.Timestamp> nodeProfileMap)
         {
-            this.Version = version;
-            this.TcpConnectOptions = tcpConnectOptions;
-            this.TcpAcceptOptions = tcpAcceptOptions;
+            if (nodeProfileMap is null) throw new global::System.ArgumentNullException("nodeProfileMap");
+            if (nodeProfileMap.Count > 1073741824) throw new global::System.ArgumentOutOfRangeException("nodeProfileMap");
+            foreach (var n in nodeProfileMap)
+            {
+                if (n.Key is null) throw new global::System.ArgumentNullException("n.Key");
+            }
+
+            this.NodeProfileMap = new global::Omnius.Core.Collections.ReadOnlyDictionarySlim<NodeProfile, global::Omnius.Core.Serialization.RocketPack.Timestamp>(nodeProfileMap);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (version != default) ___h.Add(version.GetHashCode());
-                if (tcpConnectOptions != default) ___h.Add(tcpConnectOptions.GetHashCode());
-                if (tcpAcceptOptions != default) ___h.Add(tcpAcceptOptions.GetHashCode());
+                foreach (var n in nodeProfileMap)
+                {
+                    if (n.Key != default) ___h.Add(n.Key.GetHashCode());
+                    if (n.Value != default) ___h.Add(n.Value.GetHashCode());
+                }
                 return ___h.ToHashCode();
             });
         }
 
-        public uint Version { get; }
-        public TcpConnectOptions? TcpConnectOptions { get; }
-        public TcpAcceptOptions? TcpAcceptOptions { get; }
+        public global::Omnius.Core.Collections.ReadOnlyDictionarySlim<NodeProfile, global::Omnius.Core.Serialization.RocketPack.Timestamp> NodeProfileMap { get; }
 
-        public static TcpConnectorConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public static KadexNodeExplorerConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bufferPool);
+            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBufferPool<byte> bufferPool)
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bufferPool);
+            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(TcpConnectorConfig? left, TcpConnectorConfig? right)
+        public static bool operator ==(KadexNodeExplorerConfig? left, KadexNodeExplorerConfig? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(TcpConnectorConfig? left, TcpConnectorConfig? right)
+        public static bool operator !=(KadexNodeExplorerConfig? left, KadexNodeExplorerConfig? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is TcpConnectorConfig)) return false;
-            return this.Equals((TcpConnectorConfig)other);
+            if (!(other is KadexNodeExplorerConfig)) return false;
+            return this.Equals((KadexNodeExplorerConfig)other);
         }
-        public bool Equals(TcpConnectorConfig? target)
+        public bool Equals(KadexNodeExplorerConfig? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.Version != target.Version) return false;
-            if ((this.TcpConnectOptions is null) != (target.TcpConnectOptions is null)) return false;
-            if (!(this.TcpConnectOptions is null) && !(target.TcpConnectOptions is null) && this.TcpConnectOptions != target.TcpConnectOptions) return false;
-            if ((this.TcpAcceptOptions is null) != (target.TcpAcceptOptions is null)) return false;
-            if (!(this.TcpAcceptOptions is null) && !(target.TcpAcceptOptions is null) && this.TcpAcceptOptions != target.TcpAcceptOptions) return false;
+            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.NodeProfileMap, target.NodeProfileMap)) return false;
 
             return true;
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<TcpConnectorConfig>
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<KadexNodeExplorerConfig>
         {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in TcpConnectorConfig value, in int rank)
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in KadexNodeExplorerConfig value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
                 {
                     uint propertyCount = 0;
-                    if (value.Version != 0)
-                    {
-                        propertyCount++;
-                    }
-                    if (value.TcpConnectOptions != null)
-                    {
-                        propertyCount++;
-                    }
-                    if (value.TcpAcceptOptions != null)
+                    if (value.NodeProfileMap.Count != 0)
                     {
                         propertyCount++;
                     }
                     w.Write(propertyCount);
                 }
 
-                if (value.Version != 0)
+                if (value.NodeProfileMap.Count != 0)
                 {
                     w.Write((uint)0);
-                    w.Write(value.Version);
-                }
-                if (value.TcpConnectOptions != null)
-                {
-                    w.Write((uint)1);
-                    TcpConnectOptions.Formatter.Serialize(ref w, value.TcpConnectOptions, rank + 1);
-                }
-                if (value.TcpAcceptOptions != null)
-                {
-                    w.Write((uint)2);
-                    TcpAcceptOptions.Formatter.Serialize(ref w, value.TcpAcceptOptions, rank + 1);
+                    w.Write((uint)value.NodeProfileMap.Count);
+                    foreach (var n in value.NodeProfileMap)
+                    {
+                        NodeProfile.Formatter.Serialize(ref w, n.Key, rank + 1);
+                        w.Write(n.Value);
+                    }
                 }
             }
 
-            public TcpConnectorConfig Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public KadexNodeExplorerConfig Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
                 uint propertyCount = r.GetUInt32();
 
-                uint p_version = 0;
-                TcpConnectOptions? p_tcpConnectOptions = null;
-                TcpAcceptOptions? p_tcpAcceptOptions = null;
+                global::System.Collections.Generic.Dictionary<NodeProfile, global::Omnius.Core.Serialization.RocketPack.Timestamp> p_nodeProfileMap = new global::System.Collections.Generic.Dictionary<NodeProfile, global::Omnius.Core.Serialization.RocketPack.Timestamp>();
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -279,23 +286,22 @@ namespace Omnius.Xeus.Service.Components.Internal
                     {
                         case 0:
                             {
-                                p_version = r.GetUInt32();
-                                break;
-                            }
-                        case 1:
-                            {
-                                p_tcpConnectOptions = TcpConnectOptions.Formatter.Deserialize(ref r, rank + 1);
-                                break;
-                            }
-                        case 2:
-                            {
-                                p_tcpAcceptOptions = TcpAcceptOptions.Formatter.Deserialize(ref r, rank + 1);
+                                var length = r.GetUInt32();
+                                p_nodeProfileMap = new global::System.Collections.Generic.Dictionary<NodeProfile, global::Omnius.Core.Serialization.RocketPack.Timestamp>();
+                                NodeProfile t_key = NodeProfile.Empty;
+                                global::Omnius.Core.Serialization.RocketPack.Timestamp t_value = global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero;
+                                for (int i = 0; i < length; i++)
+                                {
+                                    t_key = NodeProfile.Formatter.Deserialize(ref r, rank + 1);
+                                    t_value = r.GetTimestamp();
+                                    p_nodeProfileMap[t_key] = t_value;
+                                }
                                 break;
                             }
                     }
                 }
 
-                return new TcpConnectorConfig(p_version, p_tcpConnectOptions, p_tcpAcceptOptions);
+                return new KadexNodeExplorerConfig(p_nodeProfileMap);
             }
         }
     }
