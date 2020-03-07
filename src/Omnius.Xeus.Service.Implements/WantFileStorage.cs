@@ -58,6 +58,16 @@ namespace Omnius.Xeus.Service
             await this.StopWatchWantBlocks();
         }
 
+        private async ValueTask StartWatchWantBlocks()
+        {
+
+        }
+
+        private async ValueTask StopWatchWantBlocks()
+        {
+
+        }
+
         public async ValueTask CheckConsistencyAsync(Action<CheckConsistencyReport> callback, CancellationToken cancellationToken = default)
         {
         }
@@ -154,25 +164,15 @@ namespace Omnius.Xeus.Service
             throw new NotImplementedException();
         }
 
-        public async IAsyncEnumerable<WantFileReport> GetReportsAsync([EnumeratorCancellation]CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<WantReport> GetReportsAsync([EnumeratorCancellation]CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
                 foreach (var status in _wantFileStatusMap.Values)
                 {
-                    yield return new WantFileReport(status.RootHash, status.WantBlocks.ToArray());
+                    yield return new WantReport(status.RootHash, status.WantBlocks.ToArray());
                 }
             }
-        }
-
-        private async ValueTask StartWatchWantBlocks()
-        {
-
-        }
-
-        private async ValueTask StopWatchWantBlocks()
-        {
-
         }
 
         class WantFileStatus

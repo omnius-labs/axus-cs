@@ -16,10 +16,7 @@ namespace Omnius.Xeus.Service
 
     public interface IPublishFileStorage : IPublishStorage, IAsyncDisposable
     {
-        public static IPublishFileStorageFactory Factory { get; }
-
-        ValueTask<OmniHash> AddAsync(string filePath, CancellationToken cancellationToken = default);
-        ValueTask RemoveAsync(string filePath, CancellationToken cancellationToken = default);
-        IAsyncEnumerable<PublishFileReport> GetReportsAsync(CancellationToken cancellationToken = default);
+        ValueTask<OmniHash> AddPublishFileAsync(string filePath, CancellationToken cancellationToken = default);
+        ValueTask RemovePublishFileAsync(string filePath, CancellationToken cancellationToken = default);
     }
 }

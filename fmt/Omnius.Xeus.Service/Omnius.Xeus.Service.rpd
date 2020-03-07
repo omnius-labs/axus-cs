@@ -51,24 +51,24 @@ table CheckConsistencyReport {
     TotalBlockCount: uint32 = 2,
 }
 
-table PublishMessageReport {
-}
-
-table WantMessageReport {
-}
-
-table PublishFileReport {
+table PublishReport {
     RootHash: OmniHash = 0,
-    FilePath: string = 1,
+    PublishBlocks: vector<OmniHash>(capacity: 1073741824) = 1,
 }
 
-table WantFileReport {
+table WantReport {
     RootHash: OmniHash = 0,
     WantBlocks: vector<OmniHash>(capacity: 1073741824) = 1,
 }
 
+table ExplorerOptions {
+    MaxConnectionCount: uint32 = 0,
+    MaxBytesSendPerSecond: uint32 = 1,
+    MaxBytesReceivePerSecond: uint32 = 2,
+}
+
 table NegotiatorOptions {
-    ConnectionCountUpperLimit: uint32 = 0,
-    BytesSendLimitPerSecond: uint32 = 1,
-    BytesReceiveLimitPerSecond: uint32 = 2,
+    MaxConnectionCount: uint32 = 0,
+    MaxBytesSendPerSecond: uint32 = 1,
+    MaxBytesReceivePerSecond: uint32 = 2,
 }

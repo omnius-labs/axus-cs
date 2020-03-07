@@ -12,6 +12,5 @@ namespace Omnius.Xeus.Service
 
     public interface ITcpConnector : IConnector, IAsyncDisposable
     {
-        public static ITcpConnectorFactory Factory { get; }
     }
 }

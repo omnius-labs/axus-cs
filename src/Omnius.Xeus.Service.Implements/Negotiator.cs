@@ -7,7 +7,7 @@ using Omnius.Xeus.Service.Primitives;
 
 namespace Omnius.Xeus.Service
 {
-    public sealed class Negotiator : AsyncDisposableBase, INegotiator
+    public sealed partial class Negotiator : AsyncDisposableBase, INegotiator
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 

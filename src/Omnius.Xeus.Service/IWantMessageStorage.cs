@@ -16,11 +16,8 @@ namespace Omnius.Xeus.Service
 
     public interface IWantMessageStorage : IWantStorage, IAsyncDisposable
     {
-        public static IWantMessageStorageFactory Factory { get; }
-
-        ValueTask AddAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
-        ValueTask RemoveAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
-        ValueTask<bool> TryExportAsync(OmniHash rootHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default);
-        IAsyncEnumerable<WantMessageReport> GetReportsAsync(CancellationToken cancellationToken = default);
+        ValueTask AddWantMessageAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
+        ValueTask RemoveWantMessageAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
+        ValueTask<bool> TryExportWantMessageAsync(OmniHash rootHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default);
     }
 }

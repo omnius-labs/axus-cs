@@ -16,11 +16,8 @@ namespace Omnius.Xeus.Service
 
     public interface IWantFileStorage : IWantStorage, IAsyncDisposable
     {
-        public static IWantFileStorageFactory Factory { get; }
-
-        ValueTask AddAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
-        ValueTask RemoveAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
-        ValueTask<bool> TryExportAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default);
-        IAsyncEnumerable<WantFileReport> GetReportsAsync(CancellationToken cancellationToken = default);
+        ValueTask AddWantFileAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
+        ValueTask RemoveWantFileAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
+        ValueTask<bool> TryExportWantFileAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default);
     }
 }

@@ -1,4 +1,6 @@
 using Omnius.Core.Cryptography;
+using Omnius.Core.Cryptography;
+using Omnius.Core.Network;
 using Omnius.Core.Network;
 using Omnius.Xeus.Service;
 
@@ -6,15 +8,15 @@ using Omnius.Xeus.Service;
 
 namespace Omnius.Xeus.Service.Internal
 {
-    internal sealed partial class MerkleTreeSection : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<MerkleTreeSection>
+    internal sealed partial class MerkleTreeSection : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<MerkleTreeSection>
     {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<MerkleTreeSection> Formatter { get; }
-        public static MerkleTreeSection Empty { get; }
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<MerkleTreeSection> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<MerkleTreeSection>.Formatter;
+        public static MerkleTreeSection Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<MerkleTreeSection>.Empty;
 
         static MerkleTreeSection()
         {
-            MerkleTreeSection.Formatter = new ___CustomFormatter();
-            MerkleTreeSection.Empty = new MerkleTreeSection(0, 0, global::System.Array.Empty<OmniHash>());
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<MerkleTreeSection>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<MerkleTreeSection>.Empty = new MerkleTreeSection(0, 0, global::System.Array.Empty<OmniHash>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -170,22 +172,22 @@ namespace Omnius.Xeus.Service.Internal
         }
     }
 
-    internal sealed partial class KadexNodeExplorerConfig : global::Omnius.Core.Serialization.RocketPack.IRocketPackMessage<KadexNodeExplorerConfig>
+    internal sealed partial class ExplorerConfig : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<ExplorerConfig>
     {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<KadexNodeExplorerConfig> Formatter { get; }
-        public static KadexNodeExplorerConfig Empty { get; }
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<ExplorerConfig> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<ExplorerConfig>.Formatter;
+        public static ExplorerConfig Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<ExplorerConfig>.Empty;
 
-        static KadexNodeExplorerConfig()
+        static ExplorerConfig()
         {
-            KadexNodeExplorerConfig.Formatter = new ___CustomFormatter();
-            KadexNodeExplorerConfig.Empty = new KadexNodeExplorerConfig(new global::System.Collections.Generic.Dictionary<NodeProfile, global::Omnius.Core.Serialization.RocketPack.Timestamp>());
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<ExplorerConfig>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<ExplorerConfig>.Empty = new ExplorerConfig(new global::System.Collections.Generic.Dictionary<NodeProfile, global::Omnius.Core.Serialization.RocketPack.Timestamp>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxNodeProfileMapCount = 1073741824;
 
-        public KadexNodeExplorerConfig(global::System.Collections.Generic.Dictionary<NodeProfile, global::Omnius.Core.Serialization.RocketPack.Timestamp> nodeProfileMap)
+        public ExplorerConfig(global::System.Collections.Generic.Dictionary<NodeProfile, global::Omnius.Core.Serialization.RocketPack.Timestamp> nodeProfileMap)
         {
             if (nodeProfileMap is null) throw new global::System.ArgumentNullException("nodeProfileMap");
             if (nodeProfileMap.Count > 1073741824) throw new global::System.ArgumentOutOfRangeException("nodeProfileMap");
@@ -210,7 +212,7 @@ namespace Omnius.Xeus.Service.Internal
 
         public global::Omnius.Core.Collections.ReadOnlyDictionarySlim<NodeProfile, global::Omnius.Core.Serialization.RocketPack.Timestamp> NodeProfileMap { get; }
 
-        public static KadexNodeExplorerConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static ExplorerConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -221,20 +223,20 @@ namespace Omnius.Xeus.Service.Internal
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(KadexNodeExplorerConfig? left, KadexNodeExplorerConfig? right)
+        public static bool operator ==(ExplorerConfig? left, ExplorerConfig? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(KadexNodeExplorerConfig? left, KadexNodeExplorerConfig? right)
+        public static bool operator !=(ExplorerConfig? left, ExplorerConfig? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is KadexNodeExplorerConfig)) return false;
-            return this.Equals((KadexNodeExplorerConfig)other);
+            if (!(other is ExplorerConfig)) return false;
+            return this.Equals((ExplorerConfig)other);
         }
-        public bool Equals(KadexNodeExplorerConfig? target)
+        public bool Equals(ExplorerConfig? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -244,9 +246,9 @@ namespace Omnius.Xeus.Service.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<KadexNodeExplorerConfig>
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<ExplorerConfig>
         {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in KadexNodeExplorerConfig value, in int rank)
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in ExplorerConfig value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -271,7 +273,7 @@ namespace Omnius.Xeus.Service.Internal
                 }
             }
 
-            public KadexNodeExplorerConfig Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public ExplorerConfig Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -301,7 +303,7 @@ namespace Omnius.Xeus.Service.Internal
                     }
                 }
 
-                return new KadexNodeExplorerConfig(p_nodeProfileMap);
+                return new ExplorerConfig(p_nodeProfileMap);
             }
         }
     }

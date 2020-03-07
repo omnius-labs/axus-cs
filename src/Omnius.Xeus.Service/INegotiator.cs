@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Xeus.Service.Primitives;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Omnius.Xeus.Service
 {
@@ -13,10 +14,5 @@ namespace Omnius.Xeus.Service
 
     public interface INegotiator
     {
-        public static INegotiatorFactory Factory { get; }
-
-        public int ConnectionCountUpperLimit { get; }
-        public int BytesSendLimitPerSecond { get; }
-        public int BytesReceiveLimitPerSecond { get; }
     }
 }

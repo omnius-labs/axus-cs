@@ -15,10 +15,7 @@ namespace Omnius.Xeus.Service
 
     public interface IPublishMessageStorage : IPublishStorage
     {
-        public static IPublishMessageStorageFactory Factory { get; }
-
-        ValueTask<OmniHash> AddAsync(ReadOnlySequence<byte> sequence, CancellationToken cancellationToken = default);
-        ValueTask RemoveAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
-        IEnumerable<PublishMessageReport> GetReportsAsync(CancellationToken cancellationToken = default);
+        ValueTask<OmniHash> AddPublishMessageAsync(ReadOnlySequence<byte> sequence, CancellationToken cancellationToken = default);
+        ValueTask RemovePublishMessageAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
     }
 }

@@ -12,8 +12,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01.Omnius.Core", "01.Omnius
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02.Omnius.Xeus", "02.Omnius.Xeus", "{99AB5966-31CD-4D1A-82A5-365BA112ABF4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Core.Configuration", "refs\core\src\Omnius.Core.Configuration\Omnius.Core.Configuration.csproj", "{D6FD6DE2-5DAB-4180-876C-97479EE4B8A6}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Core.Io", "refs\core\src\Omnius.Core.Io\Omnius.Core.Io.csproj", "{9E5013F3-D58F-4810-933A-9198A56C0569}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Core.Network", "refs\core\src\Omnius.Core.Network\Omnius.Core.Network.csproj", "{3AFBC905-D12A-4DD3-8577-EF86DC6FC045}"
@@ -58,10 +56,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D6FD6DE2-5DAB-4180-876C-97479EE4B8A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D6FD6DE2-5DAB-4180-876C-97479EE4B8A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D6FD6DE2-5DAB-4180-876C-97479EE4B8A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D6FD6DE2-5DAB-4180-876C-97479EE4B8A6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9E5013F3-D58F-4810-933A-9198A56C0569}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9E5013F3-D58F-4810-933A-9198A56C0569}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E5013F3-D58F-4810-933A-9198A56C0569}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -131,7 +125,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{D6FD6DE2-5DAB-4180-876C-97479EE4B8A6} = {FC402F19-33B3-4CCA-8CDE-7A1CD9A1CA31}
 		{9E5013F3-D58F-4810-933A-9198A56C0569} = {FC402F19-33B3-4CCA-8CDE-7A1CD9A1CA31}
 		{3AFBC905-D12A-4DD3-8577-EF86DC6FC045} = {FC402F19-33B3-4CCA-8CDE-7A1CD9A1CA31}
 		{F2117095-6C04-4057-87B1-1CDFDFDD56B9} = {FC402F19-33B3-4CCA-8CDE-7A1CD9A1CA31}

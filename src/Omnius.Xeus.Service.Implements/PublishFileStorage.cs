@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using Omnius.Core.Cryptography;
 using Omnius.Core.Io;
 using Omnius.Core.Serialization;
 using Omnius.Xeus.Service.Internal;
+using Omnius.Xeus.Service.Primitives;
 
 namespace Omnius.Xeus.Service
 {
@@ -28,7 +30,7 @@ namespace Omnius.Xeus.Service
         private readonly Dictionary<OmniHash, PublishFileStatus> _publishFileStatusMap = new Dictionary<OmniHash, PublishFileStatus>();
 
         private readonly AsyncLock _asyncLock = new AsyncLock();
-        
+
         internal sealed class PublishFileStorageFactory : IPublishFileStorageFactory
         {
             public async ValueTask<IPublishFileStorage> CreateAsync(string configPath, IBytesPool bytesPool)
@@ -101,7 +103,7 @@ namespace Omnius.Xeus.Service
             }
         }
 
-        public async ValueTask<OmniHash> AddAsync(string filePath, CancellationToken cancellationToken = default)
+        public async ValueTask<OmniHash> AddPublishFileAsync(string filePath, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
@@ -218,7 +220,7 @@ namespace Omnius.Xeus.Service
             }
         }
 
-        public async ValueTask RemoveAsync(string filePath, CancellationToken cancellationToken = default)
+        public async ValueTask RemovePublishFileAsync(string filePath, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
@@ -237,13 +239,13 @@ namespace Omnius.Xeus.Service
             }
         }
 
-        public async IAsyncEnumerable<PublishFileReport> GetReportsAsync([EnumeratorCancellation]CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<PublishReport> GetReportsAsync([EnumeratorCancellation]CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
                 foreach (var status in _publishFileStatusMap.Values)
                 {
-                    yield return new PublishFileReport(status.RootHash, status.FilePath);
+                    yield return new PublishReport(status.RootHash, status.MerkleTreeSections.SelectMany(n => n.Hashes).ToArray());
                 }
             }
         }

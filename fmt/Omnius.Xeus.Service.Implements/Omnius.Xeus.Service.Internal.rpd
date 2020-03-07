@@ -13,6 +13,6 @@ table MerkleTreeSection {
     Hashes: vector<OmniHash>(capacity: 1073741824) = 2,
 }
 
-table KadexNodeExplorerConfig {
+table ExplorerConfig {
     NodeProfileMap: map<NodeProfile, timestamp>(capacity: 1073741824) = 0,
 }
