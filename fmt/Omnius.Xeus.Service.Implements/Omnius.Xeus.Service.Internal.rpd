@@ -13,6 +13,19 @@ table MerkleTreeSection {
     Hashes: vector<OmniHash>(capacity: 1073741824) = 2,
 }
 
+table PostNodeProfilesParam {
+    NodeProfiles: vector<NodeProfile>(capacity: 256) = 0,
+}
+
+table GetContentLocationsParam {
+    RootHashes: vector<OmniHash>(capacity: 8192) = 0,
+}
+
+table GetContentLocationsResult {
+    RootHashe: OmniHash = 0,
+    NodeProfiles: vector<NodeProfile>(capacity: 8192) = 1,
+}
+
 table ExplorerConfig {
     NodeProfileMap: map<NodeProfile, timestamp>(capacity: 1073741824) = 0,
 }

@@ -31,7 +31,7 @@ namespace Omnius.Xeus.Service
         }
 
         public static INegotiatorFactory Factory { get; } = new NegotiatorFactory();
-      
+
         internal Negotiator(string configPath, NegotiatorOptions negotiatorOptions,
             IEnumerable<IConnector> connectors, IEnumerable<IWantStorage> wantStorages, IEnumerable<IPublishStorage> publishStorages, IBytesPool bytesPool)
         {
@@ -52,9 +52,5 @@ namespace Omnius.Xeus.Service
         {
 
         }
-
-        public int ConnectionCountUpperLimit { get; }
-        public int BytesSendLimitPerSecond { get; }
-        public int BytesReceiveLimitPerSecond { get; }
     }
 }

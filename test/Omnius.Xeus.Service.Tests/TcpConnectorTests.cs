@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Omnius.Xeus.Service
 {
-    public class TcpConnectorTests : TestsBase
+    public class TcpConnectorTests
     {
         [Fact]
         public async Task ConnectAsyncTest()

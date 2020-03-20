@@ -1,8 +1,8 @@
 using Avalonia;
 using Avalonia.Logging.Serilog;
-using Omnius.Xeus.Gui.Desktop.Windows;
+using Omnius.Xeus.Ui.Desktop.Windows;
 
-namespace Omnius.Xeus.Gui.Desktop
+namespace Omnius.Xeus.Ui.Desktop
 {
     class Program
     {

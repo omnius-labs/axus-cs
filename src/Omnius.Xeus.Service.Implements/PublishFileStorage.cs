@@ -62,21 +62,16 @@ namespace Omnius.Xeus.Service
         {
         }
 
-        private string OmniHashToString(OmniHash hash)
+        private string OmniHashToFilePath(OmniHash hash)
         {
-            using var hub = new Hub(_bytesPool);
-            hash.Export(hub.Writer, _bytesPool);
-
-            var value = OmniBase.ToBase58BtcString(hub.Reader.GetSequence());
-
-            return Path.Combine(_configPath, value);
+            return Path.Combine(_configPath, hash.ToString(ConvertStringType.Base16, ConvertStringCase.Lower));
         }
 
         public async ValueTask<IMemoryOwner<byte>?> ReadAsync(OmniHash rootHash, OmniHash targetHash, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
-                var filePath = Path.Combine(Path.Combine(_configPath, this.OmniHashToString(rootHash)), this.OmniHashToString(targetHash));
+                var filePath = Path.Combine(Path.Combine(_configPath, this.OmniHashToFilePath(rootHash)), this.OmniHashToFilePath(targetHash));
 
                 if (!File.Exists(filePath))
                 {
@@ -95,7 +90,7 @@ namespace Omnius.Xeus.Service
 
         private async ValueTask WriteAsync(string basePath, OmniHash hash, ReadOnlyMemory<byte> memory)
         {
-            var filePath = Path.Combine(basePath, this.OmniHashToString(hash));
+            var filePath = Path.Combine(basePath, this.OmniHashToFilePath(hash));
 
             using (var fileStream = new UnbufferedFileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool))
             {
@@ -151,7 +146,7 @@ namespace Omnius.Xeus.Service
                     // ハッシュ値からMerkle treeを作成する
                     for (; ; )
                     {
-                        using var hub = new Hub(_bytesPool);
+                        using var hub = new BytesHub(_bytesPool);
 
                         var lastMerkleTreeSection = merkleTreeSections.Peek();
                         lastMerkleTreeSection.Export(hub.Writer, _bytesPool);
@@ -206,7 +201,7 @@ namespace Omnius.Xeus.Service
 
                     // 一時フォルダからキャッシュフォルダへ移動させる
                     {
-                        var cachePath = Path.Combine(_configPath, this.OmniHashToString(rootHash));
+                        var cachePath = Path.Combine(_configPath, this.OmniHashToFilePath(rootHash));
                         Directory.Move(tempPath, cachePath);
                     }
 
@@ -234,7 +229,7 @@ namespace Omnius.Xeus.Service
                 _publishFileStatusMap.Remove(rootHash);
 
                 // キャッシュフォルダを削除
-                var cachePath = Path.Combine(_configPath, this.OmniHashToString(rootHash));
+                var cachePath = Path.Combine(_configPath, this.OmniHashToFilePath(rootHash));
                 Directory.Delete(cachePath);
             }
         }

@@ -9,7 +9,7 @@ namespace Omnius.Xeus.Service.Primitives
 {
     public interface IReadOnlyStorage
     {
-        ValueTask CheckConsistencyAsync(Action<CheckConsistencyReport> callback, CancellationToken cancellationToken = default);
+        ValueTask CheckConsistencyAsync(Action<ConsistencyReport> callback, CancellationToken cancellationToken = default);
 
         ValueTask<IMemoryOwner<byte>?> ReadAsync(OmniHash rootHash, OmniHash targetHash, CancellationToken cancellationToken = default);
     }

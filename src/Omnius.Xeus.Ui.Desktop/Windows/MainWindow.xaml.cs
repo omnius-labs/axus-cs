@@ -2,7 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace Omnius.Xeus.Gui.Desktop.Windows
+namespace Omnius.Xeus.Ui.Desktop.Windows
 {
     public class MainWindow : Window
     {
