@@ -1,0 +1,47 @@
+syntax = v1.0;
+
+using "Omnius.Core.Cryptography";
+using "Omnius.Core.Network";
+using "Omnius.Xeus.Service.Engines";
+
+namespace "Omnius.Xeus.Service.Engines.Internal";
+option csharp_access_level = "internal";
+
+/* Structures */
+
+table MerkleTreeSection {
+    Depth: int32 = 0,
+    Length: uint64 = 1,
+    Hashes: vector<OmniHash>(capacity: 1073741824) = 2,
+}
+
+/* Messages */
+
+table NodeExplorerHelloMessage {
+    Id: bytes(capacity: 32) = 0,
+    NodeProfile: NodeProfile = 1,
+}
+
+table PushNodeProfilesMessage {
+    NodeProfiles: vector<NodeProfile>(capacity: 256) = 0,
+}
+
+table PushContentLocationsMessage {
+    RootHash: OmniHash = 0,
+    NodeProfiles: vector<NodeProfile>(capacity: 8192) = 1,
+}
+
+table WantContentLocationsMessage {
+    RootHash: OmniHash = 0,
+}
+
+table GiveContentLocationsMessage {
+    RootHash: OmniHash = 0,
+    NodeProfiles: vector<NodeProfile>(capacity: 8192) = 1,
+}
+
+/* Configs */
+
+table NodeExplorerConfig {
+    NodeProfileMap: map<NodeProfile, timestamp>(capacity: 1073741824) = 0,
+}

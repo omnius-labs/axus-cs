@@ -5,8 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>Omnius.Xeus.Service.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Collections\Omnius.Core.Collections.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Configuration\Omnius.Core.Configuration.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Cryptography\Omnius.Core.Cryptography.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Io\Omnius.Core.Io.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Network.Proxies\Omnius.Core.Network.Proxies.csproj" />

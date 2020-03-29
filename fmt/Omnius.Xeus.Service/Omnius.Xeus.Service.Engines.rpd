@@ -1,0 +1,59 @@
+﻿syntax = v1.0;
+
+using "Omnius.Core.Cryptography";
+using "Omnius.Core.Network";
+using "Omnius.Xeus.Service.Drivers";
+
+namespace "Omnius.Xeus.Service.Engines";
+
+/* Messages */
+
+table NodeProfile {
+    Addresses: vector<OmniAddress>(capacity: 32) = 0,
+}
+
+/* Optinos */
+
+table PublishStorageOptions {
+    MaxConnectionCount: uint32 = 0,
+}
+
+table WantStorageOptions {
+    MaxConnectionCount: uint32 = 0,
+}
+
+table NodeExplorerOptions {
+    MaxConnectionCount: uint32 = 0,
+}
+
+table BlockExchangerOptions {
+    MaxConnectionCount: uint32 = 0,
+}
+
+/* Reports */
+
+table ConsistencyReport {
+    BadBlockCount: uint32 = 0,
+    CheckedBlockCount: uint32 = 1,
+    TotalBlockCount: uint32 = 2,
+}
+
+enum ConnectionType : uint8 {
+    Connected = 0,
+    Accepted = 1,
+}
+
+table ConnectionReport {
+    Type: ConnectionType = 0,
+    Endpoint: OmniAddress = 1,
+}
+
+table PublishReport {
+    RootHash: OmniHash = 0,
+    PublishBlocks: vector<OmniHash>(capacity: 1073741824) = 1,
+}
+
+table WantReport {
+    RootHash: OmniHash = 0,
+    WantBlocks: vector<OmniHash>(capacity: 1073741824) = 1,
+}

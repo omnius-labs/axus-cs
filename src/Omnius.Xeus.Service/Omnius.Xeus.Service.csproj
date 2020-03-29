@@ -5,7 +5,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Collections\Omnius.Core.Collections.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Configuration\Omnius.Core.Configuration.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Cryptography\Omnius.Core.Cryptography.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Network\Omnius.Core.Network.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core\Omnius.Core.csproj" />
