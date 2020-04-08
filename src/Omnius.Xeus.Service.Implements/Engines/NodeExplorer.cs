@@ -58,6 +58,7 @@ namespace Omnius.Xeus.Service.Engines
 
         public static INodeExplorerFactory Factory { get; } = new NodeExplorerFactory();
 
+        // Task系とObjectStoreのメンバ変数が初期化されていない。
         internal NodeExplorer(string configPath, NodeExplorerOptions options,
                 IObjectStoreFactory objectStoreFactory, IConnectionController connectionController,
                 IPublishStorage publishStorage, IWantStorage wantStorage, IBytesPool bytesPool)
@@ -284,6 +285,7 @@ namespace Omnius.Xeus.Service.Engines
 
         private class ConnectionStatus : ISynchronized
         {
+            // NodeProfileが初期化されていない
             public ConnectionStatus(IConnection connection, OmniAddress address, ConnectionHandshakeType handshakeType)
             {
                 this.Connection = connection;

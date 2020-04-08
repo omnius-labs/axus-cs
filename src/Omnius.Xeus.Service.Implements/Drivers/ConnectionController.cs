@@ -42,6 +42,7 @@ namespace Omnius.Xeus.Service.Drivers
 
         public static IConnectionControllerFactory Factory { get; } = new ConnectionControllerFactory();
 
+        // TcpConnecterが未実装。
         internal ConnectionController(ConnectionControllerOptions options, IBytesPool bytesPool)
         {
             _options = options;

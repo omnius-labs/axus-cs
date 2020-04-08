@@ -47,6 +47,7 @@ namespace Omnius.Xeus.Service.Engines
 
         public static IBlockExchangerFactory Factory { get; } = new BlockExchangerFactory();
 
+        // ObjectStoreとTask周りが未実装。
         internal BlockExchanger(string configPath, BlockExchangerOptions options,
                 IObjectStoreFactory objectStoreFactory, IConnectionController connectionController,
                 INodeExplorer nodeExplorer, IPublishStorage publishStorage, IWantStorage wantStorage, IBytesPool bytesPool)

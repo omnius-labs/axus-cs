@@ -527,6 +527,7 @@ namespace Omnius.Xeus.Service.Drivers.Internal
             }
         }
 
+        // EnumeratorCancellationが警告を出している。
         public async ValueTask<OmniAddress[]> GetListenEndpointsAsync([EnumeratorCancellation]CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
