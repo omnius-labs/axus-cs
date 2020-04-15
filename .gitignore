@@ -1,5 +1,6 @@
 # Custom
 tmp/
+pub/
 
 # Visual Studio Code
 .vscode/

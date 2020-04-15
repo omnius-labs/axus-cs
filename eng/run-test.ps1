@@ -12,4 +12,4 @@ ForEach ($folder in (Get-ChildItem -Path "test" -Directory)) {
     }
 }
 
-dotnet tool run reportgenerator "--reports:tmp/test/win/*.opencover.xml" "--targetdir:publish/code-coverage/win"
+dotnet tool run reportgenerator "--reports:tmp/test/win/*.opencover.xml" "--targetdir:pub/code-coverage/win"
