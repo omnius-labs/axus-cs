@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using Omnius.Core;
 
-namespace Omnius.Xeus.Service.Internal
+namespace Omnius.Xeus.Service.Engines.Internal
 {
     internal readonly struct RouteTableElement<T>
     {
-        public RouteTableElement(byte[] id, T value)
+        public RouteTableElement(ReadOnlyMemory<byte> id, T value)
         {
             this.Id = id;
             this.Value = value;
         }
 
-        public byte[] Id { get; }
+        public ReadOnlyMemory<byte> Id { get; }
         public T Value { get; }
     }
 
@@ -37,7 +37,7 @@ namespace Omnius.Xeus.Service.Internal
             for (; i <= 0xff; i++) _distanceHashTable[i] = 8;
         }
 
-        public static int Distance(byte[] x, byte[] y)
+        public static int Distance(ReadOnlySpan<byte> x, ReadOnlySpan<byte> y)
         {
             int result = 0;
 
@@ -79,7 +79,7 @@ namespace Omnius.Xeus.Service.Internal
             foreach (var node in elements)
             {
                 var xor = new byte[targetId.Length];
-                BytesOperations.Xor(targetId, node.Id, xor);
+                BytesOperations.Xor(targetId, node.Id.Span, xor);
                 targetList.Add(new SortEntry<T>(node, xor));
             }
 

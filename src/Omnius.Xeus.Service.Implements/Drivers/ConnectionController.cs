@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -72,14 +74,22 @@ namespace Omnius.Xeus.Service.Drivers
             await _baseConnectionDispatcher.DisposeAsync();
         }
 
-        private Channel<ConnectionControllerAcceptResult> GetAcceptedConnectionChannel(string serviceType)
+        private Channel<ConnectionControllerAcceptResult>? GetAcceptedConnectionChannel(string serviceName, bool createIfNotFound)
         {
-            return _acceptedConnectionChannels.GetOrAdd(serviceType, (_) => Channel.CreateBounded<ConnectionControllerAcceptResult>(new BoundedChannelOptions(3) { FullMode = BoundedChannelFullMode.Wait }));
+            if (createIfNotFound)
+            {
+                return _acceptedConnectionChannels.GetOrAdd(serviceName, (_) => Channel.CreateBounded<ConnectionControllerAcceptResult>(new BoundedChannelOptions(3) { FullMode = BoundedChannelFullMode.Wait }));
+            }
+            else
+            {
+                _acceptedConnectionChannels.TryGetValue(serviceName, out var result);
+                return result;
+            }
         }
 
-        private async ValueTask<IConnection?> InternalConnectAsync(ICap cap, string serviceType, CancellationToken cancellationToken)
+        private async ValueTask<IConnection?> InternalConnectAsync(ICap cap, string serviceName, CancellationToken cancellationToken)
         {
-            using var  linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             linkedTokenSource.CancelAfter(TimeSpan.FromSeconds(20));
 
             var baseConnectionOptions = new BaseConnectionOptions()
@@ -99,7 +109,7 @@ namespace Omnius.Xeus.Service.Drivers
 
             await omniSecureConnection.HandshakeAsync(linkedTokenSource.Token);
 
-            var helloMessage = new ConnectionHelloMessage(serviceType);
+            var helloMessage = new ConnectionHelloMessage(serviceName);
             await omniSecureConnection.EnqueueAsync((bufferWriter) => helloMessage.Export(bufferWriter, _bytesPool), linkedTokenSource.Token);
 
             return omniSecureConnection;
@@ -130,7 +140,7 @@ namespace Omnius.Xeus.Service.Drivers
             ConnectionHelloMessage? helloMessage = null;
             await omniSecureConnection.DequeueAsync((sequence) => helloMessage = ConnectionHelloMessage.Import(sequence, _bytesPool), linkedTokenSource.Token);
 
-            return (omniSecureConnection, helloMessage?.ServiceType);
+            return (omniSecureConnection, helloMessage?.Service);
         }
 
         private async Task AcceptLoopAsync(CancellationToken cancellationToken)
@@ -146,11 +156,19 @@ namespace Omnius.Xeus.Service.Drivers
                     var (cap, address) = await _tcpConnector.AcceptAsync(cancellationToken);
                     if (cap == null || address == null) continue;
 
-                    var (connection, serviceType) = await this.InternalAcceptAsync(cap, cancellationToken);
-                    if (connection == null || serviceType == null) continue;
+                    var (connection, serviceName) = await this.InternalAcceptAsync(cap, cancellationToken);
+                    if (connection == null || serviceName == null) continue;
+
+                    var channel = this.GetAcceptedConnectionChannel(serviceName, false);
+                    if (channel == null)
+                    {
+                        connection.Dispose();
+                        cap.Dispose();
+                        continue;
+                    }
 
                     var result = new ConnectionControllerAcceptResult(connection, address);
-                    await this.GetAcceptedConnectionChannel(serviceType).Writer.WriteAsync(result);
+                    await channel.Writer.WriteAsync(result);
                 }
             }
             catch (OperationCanceledException e)
@@ -163,22 +181,23 @@ namespace Omnius.Xeus.Service.Drivers
             }
         }
 
-        public async ValueTask<IConnection?> ConnectAsync(OmniAddress address, string serviceType, CancellationToken cancellationToken = default)
+        public async ValueTask<IConnection?> ConnectAsync(OmniAddress address, string serviceName, CancellationToken cancellationToken = default)
         {
             var cap = await _tcpConnector.ConnectAsync(address, cancellationToken);
 
             if (cap != null)
             {
-                var connection = await this.InternalConnectAsync(cap, serviceType, cancellationToken);
+                var connection = await this.InternalConnectAsync(cap, serviceName, cancellationToken);
                 return connection;
             }
 
             return null;
         }
 
-        public async ValueTask<ConnectionControllerAcceptResult> AcceptAsync(string serviceType, CancellationToken cancellationToken = default)
+        public async ValueTask<ConnectionControllerAcceptResult> AcceptAsync(string serviceName, CancellationToken cancellationToken = default)
         {
-            return await this.GetAcceptedConnectionChannel(serviceType).Reader.ReadAsync(cancellationToken);
+            var channel = this.GetAcceptedConnectionChannel(serviceName, true);
+            return await channel!.Reader.ReadAsync(cancellationToken);
         }
 
         public async ValueTask<OmniAddress[]> GetListenEndpointsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)

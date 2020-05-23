@@ -234,14 +234,18 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public async IAsyncEnumerable<PublishReport> GetReportsAsync([EnumeratorCancellation]CancellationToken cancellationToken = default)
+        public async ValueTask<PublishReport[]> GetReportsAsync([EnumeratorCancellation]CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
+                var result = new List<PublishReport>();
+
                 foreach (var status in _publishFileStatusMap.Values)
                 {
-                    yield return new PublishReport(status.RootHash, status.MerkleTreeSections.SelectMany(n => n.Hashes).ToArray());
+                    result.Add(new PublishReport(status.RootHash, status.MerkleTreeSections.SelectMany(n => n.Hashes).ToArray()));
                 }
+
+                return result.ToArray();
             }
         }
 

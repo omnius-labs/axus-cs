@@ -6,10 +6,11 @@ using "Omnius.Xeus.Service.Drivers";
 
 namespace "Omnius.Xeus.Service.Engines";
 
-/* Messages */
+/* Models */
 
 table NodeProfile {
     Addresses: vector<OmniAddress>(capacity: 32) = 0,
+    Services: vector<string(capacity: 256)>(capacity: 32) = 1,
 }
 
 /* Optinos */
@@ -49,11 +50,11 @@ table ConnectionReport {
 }
 
 table PublishReport {
-    RootHash: OmniHash = 0,
+    Tag: OmniHash = 0,
     PublishBlocks: vector<OmniHash>(capacity: 1073741824) = 1,
 }
 
 table WantReport {
-    RootHash: OmniHash = 0,
+    Tag: OmniHash = 0,
     WantBlocks: vector<OmniHash>(capacity: 1073741824) = 1,
 }

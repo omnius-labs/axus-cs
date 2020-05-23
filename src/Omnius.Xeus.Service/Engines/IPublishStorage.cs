@@ -19,7 +19,7 @@ namespace Omnius.Xeus.Service.Engines
 
     public interface IPublishStorage : IReadOnlyStorage
     {
-        IAsyncEnumerable<PublishReport> GetReportsAsync(CancellationToken cancellationToken = default);
+        ValueTask<PublishReport[]> GetReportsAsync(CancellationToken cancellationToken = default);
 
         ValueTask<OmniHash> PublishAsync(string filePath, CancellationToken cancellationToken = default);
         ValueTask<OmniHash> PublishAsync(ReadOnlySequence<byte> sequence, CancellationToken cancellationToken = default);

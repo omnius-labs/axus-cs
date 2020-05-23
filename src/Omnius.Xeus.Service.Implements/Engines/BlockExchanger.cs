@@ -32,6 +32,8 @@ namespace Omnius.Xeus.Service.Engines
 
         private const int MaxBucketLength = 20;
 
+        public const string ServiceName = "BlockExchanger`";
+
         internal sealed class BlockExchangerFactory : IBlockExchangerFactory
         {
             public async ValueTask<IBlockExchanger> CreateAsync(string configPath, BlockExchangerOptions options,
