@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Omnius.Core.Collections
+namespace Omnius.Xeus.Service.Engines.Internal
 {
     public partial class VolatileListDictionary<TKey, TValue>
     {

@@ -49,6 +49,8 @@ namespace Omnius.Xeus.Service.Engines
 
         private readonly object _lockObject = new object();
 
+        private const int MaxBucketLength = 20;
+
         public const string ServiceName = "NodeExplorer`";
 
         internal sealed class NodeExplorerFactory : INodeExplorerFactory
@@ -197,12 +199,12 @@ namespace Omnius.Xeus.Service.Engines
             {
                 lock (_lockObject)
                 {
-                    var appendingNodeDistance = RouteTable.Distance(_myId.Span, id);
+                    var appendingNodeDistance = Kademlia.Distance(_myId.Span, id);
 
                     var map = new Dictionary<int, int>();
                     foreach (var connectionStatus in _connectionStatusSet)
                     {
-                        var nodeDistance = RouteTable.Distance(_myId.Span, id);
+                        var nodeDistance = Kademlia.Distance(_myId.Span, id);
                         map.TryGetValue(nodeDistance, out int count);
                         count++;
                         map[nodeDistance] = count;
@@ -210,7 +212,7 @@ namespace Omnius.Xeus.Service.Engines
 
                     {
                         map.TryGetValue(appendingNodeDistance, out int count);
-                        if (count > 20)
+                        if (count > MaxBucketLength)
                         {
                             return false;
                         }
@@ -531,7 +533,7 @@ namespace Omnius.Xeus.Service.Engines
                     var myNodeProfile = await this.GetMyNodeProfile(cancellationToken);
 
                     // ノード情報
-                    var elements = new List<RouteTableElement<ComputingNodeElement>>();
+                    var elements = new List<KademliaElement<ComputingNodeElement>>();
 
                     // 送信するノードプロファイル
                     var sendingPushNodeProfiles = new List<NodeProfile>();
@@ -549,7 +551,7 @@ namespace Omnius.Xeus.Service.Engines
                     {
                         foreach (var connectionStatus in _connectionStatusSet)
                         {
-                            elements.Add(new RouteTableElement<ComputingNodeElement>(connectionStatus.Id, new ComputingNodeElement(connectionStatus)));
+                            elements.Add(new KademliaElement<ComputingNodeElement>(connectionStatus.Id, new ComputingNodeElement(connectionStatus)));
                         }
                     }
 
@@ -610,7 +612,7 @@ namespace Omnius.Xeus.Service.Engines
                     // Compute PushContentLocations
                     foreach (var (tag, nodeProfiles) in sendingPushContentLocationMap)
                     {
-                        foreach (var element in RouteTable.Search(_myId.Span, tag.Value.Span, elements, 1))
+                        foreach (var element in Kademlia.Search(_myId.Span, tag.Value.Span, elements, 1))
                         {
                             element.Value.SendingPushContentLocations[tag] = nodeProfiles.ToList();
                         }
@@ -619,7 +621,7 @@ namespace Omnius.Xeus.Service.Engines
                     // Compute WantContentLocations
                     foreach (var tag in sendingWantContentLocationSet)
                     {
-                        foreach (var element in RouteTable.Search(_myId.Span, tag.Value.Span, elements, 1))
+                        foreach (var element in Kademlia.Search(_myId.Span, tag.Value.Span, elements, 1))
                         {
                             element.Value.SendingWantContentLocations.Add(tag);
                         }

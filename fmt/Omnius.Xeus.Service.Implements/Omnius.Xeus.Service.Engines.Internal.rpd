@@ -20,6 +20,11 @@ table ContentLocation {
     NodeProfiles: vector<NodeProfile>(capacity: 8192) = 1,
 }
 
+table Block {
+    Tag: OmniHash = 0,
+    Value: bytes(capacity: 4194304, recyclable: true),
+}
+
 /* Messages */
 
 enum NodeExplorerVersion : uint8 {
@@ -40,6 +45,26 @@ table NodeExplorerDataMessage {
     PushContentLocations: vector<ContentLocation>(capacity: 256) = 1,
     WantContentLocations: vector<OmniHash>(capacity: 256) = 2,
     GiveContentLocations: vector<ContentLocation>(capacity: 256) = 3,
+}
+
+enum BlockExchangerVersion : uint8 {
+    Version1 = 1,
+}
+
+table BlockExchangerHelloMessage {
+    Versions: vector<BlockExchangerVersion>(capacity: 32) = 0,
+}
+
+table BlockExchangerProfileMessage {
+    Tag: OmniHash = 0,
+    NodeProfile: NodeProfile = 1,
+}
+
+table BlockExchangerDataMessage {
+    PushNodeProfiles: vector<NodeProfile>(capacity: 256) = 0,
+    WantBlocks: vector<OmniHash>(capacity: 256) = 1,
+    CancelBlocks: vector<OmniHash>(capacity: 256) = 2,
+    GiveBlocks: vector<Block>(capacity: 8) = 3,
 }
 
 /* Configs */

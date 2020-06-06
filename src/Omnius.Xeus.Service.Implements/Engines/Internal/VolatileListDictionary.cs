@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Security.Cryptography.X509Certificates;
+using Omnius.Core.Collections;
 
-namespace Omnius.Core.Collections
+namespace Omnius.Xeus.Service.Engines.Internal
 {
     public partial class VolatileListDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, IReadOnlyList<TValue>>>, IEnumerable
         where TKey : notnull

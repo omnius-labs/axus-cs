@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <RootNamespace>Omnius.Xeus.Service</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
