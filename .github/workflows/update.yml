@@ -11,7 +11,7 @@ jobs:
       - name: Checkout develop branch
         uses: actions/checkout@v2
         with:
-          ref: develop
+          submodules: "recursive"
       - name: Install dotnet
         uses: actions/setup-dotnet@v1
         with:

@@ -8,6 +8,8 @@ jobs:
     steps:
       - name: Checkout branch
         uses: actions/checkout@v2
+        with:
+          submodules: "recursive"
       - name: Install dotnet
         uses: actions/setup-dotnet@v1
         with:
@@ -24,6 +26,8 @@ jobs:
     steps:
       - name: Checkout branch
         uses: actions/checkout@v2
+        with:
+          submodules: "recursive"
       - name: Install dotnet
         uses: actions/setup-dotnet@v1
         with:
