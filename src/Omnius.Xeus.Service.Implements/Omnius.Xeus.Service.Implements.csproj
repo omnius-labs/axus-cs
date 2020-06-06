@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <RootNamespace>Omnius.Xeus.Service</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,6 +22,10 @@
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Serialization\Omnius.Core.Serialization.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core\Omnius.Core.csproj" />
     <ProjectReference Include="..\Omnius.Xeus.Service\Omnius.Xeus.Service.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="NLog" Version="4.7.2" />
   </ItemGroup>
 
 </Project>

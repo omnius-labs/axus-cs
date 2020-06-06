@@ -129,7 +129,7 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public async ValueTask AddWantFileAsync(OmniHash rootHash,  CancellationToken cancellationToken = default)
+        public async ValueTask AddWantFileAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
@@ -159,14 +159,18 @@ namespace Omnius.Xeus.Service.Engines
             throw new NotImplementedException();
         }
 
-        public async IAsyncEnumerable<WantReport> GetReportsAsync([EnumeratorCancellation]CancellationToken cancellationToken = default)
+        public async ValueTask<WantReport[]> GetReportsAsync([EnumeratorCancellation]CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
+                var result = new List<WantReport>();
+
                 foreach (var status in _wantFileStatusMap.Values)
                 {
-                    yield return new WantReport(status.RootHash, status.WantBlocks.ToArray());
+                    result.Add(new WantReport(status.RootHash, status.WantBlocks.ToArray()));
                 }
+
+                return result.ToArray();
             }
         }
 

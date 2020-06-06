@@ -20,7 +20,7 @@ namespace Omnius.Xeus.Service.Engines
 
     public interface IWantStorage : IWritableStorage
     {
-        IAsyncEnumerable<WantReport> GetReportsAsync(CancellationToken cancellationToken = default);
+        ValueTask<WantReport[]> GetReportsAsync(CancellationToken cancellationToken = default);
 
         ValueTask WantAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
 

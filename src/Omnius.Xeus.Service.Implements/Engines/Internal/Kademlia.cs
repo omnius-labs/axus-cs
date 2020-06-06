@@ -3,25 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using Omnius.Core;
 
-namespace Omnius.Xeus.Service.Internal
+namespace Omnius.Xeus.Service.Engines.Internal
 {
-    internal readonly struct RouteTableElement<T>
+    internal readonly struct KademliaElement<T>
     {
-        public RouteTableElement(byte[] id, T value)
+        public KademliaElement(ReadOnlyMemory<byte> id, T value)
         {
             this.Id = id;
             this.Value = value;
         }
 
-        public byte[] Id { get; }
+        public ReadOnlyMemory<byte> Id { get; }
         public T Value { get; }
     }
 
-    internal static class RouteTable
+    internal static class Kademlia
     {
         private static readonly byte[] _distanceHashTable = new byte[256];
 
-        static RouteTable()
+        static Kademlia()
         {
             _distanceHashTable[0] = 0;
             _distanceHashTable[1] = 1;
@@ -37,7 +37,7 @@ namespace Omnius.Xeus.Service.Internal
             for (; i <= 0xff; i++) _distanceHashTable[i] = 8;
         }
 
-        public static int Distance(byte[] x, byte[] y)
+        public static int Distance(ReadOnlySpan<byte> x, ReadOnlySpan<byte> y)
         {
             int result = 0;
 
@@ -60,12 +60,12 @@ namespace Omnius.Xeus.Service.Internal
             return result;
         }
 
-        public static IEnumerable<RouteTableElement<T>> Search<T>(ReadOnlySpan<byte> baseId, ReadOnlySpan<byte> targetId, IEnumerable<RouteTableElement<T>> elements, int count)
+        public static IEnumerable<KademliaElement<T>> Search<T>(ReadOnlySpan<byte> baseId, ReadOnlySpan<byte> targetId, IEnumerable<KademliaElement<T>> elements, int count)
             where T : notnull
         {
             if (targetId == null) throw new ArgumentNullException(nameof(targetId));
             if (elements == null) throw new ArgumentNullException(nameof(elements));
-            if (count == 0) return Array.Empty<RouteTableElement<T>>();
+            if (count == 0) return Array.Empty<KademliaElement<T>>();
 
             var targetList = new List<SortEntry<T>>();
 
@@ -79,7 +79,7 @@ namespace Omnius.Xeus.Service.Internal
             foreach (var node in elements)
             {
                 var xor = new byte[targetId.Length];
-                BytesOperations.Xor(targetId, node.Id, xor);
+                BytesOperations.Xor(targetId, node.Id.Span, xor);
                 targetList.Add(new SortEntry<T>(node, xor));
             }
 
@@ -117,13 +117,13 @@ namespace Omnius.Xeus.Service.Internal
 
         private readonly struct SortEntry<T>
         {
-            public SortEntry(RouteTableElement<T>? node, byte[] xor)
+            public SortEntry(KademliaElement<T>? node, byte[] xor)
             {
                 this.Node = node;
                 this.Xor = xor;
             }
 
-            public RouteTableElement<T>? Node { get; }
+            public KademliaElement<T>? Node { get; }
             public byte[] Xor { get; }
         }
     }

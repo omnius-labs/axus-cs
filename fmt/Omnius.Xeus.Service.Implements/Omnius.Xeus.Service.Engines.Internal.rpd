@@ -7,7 +7,7 @@ using "Omnius.Xeus.Service.Engines";
 namespace "Omnius.Xeus.Service.Engines.Internal";
 option csharp_access_level = "internal";
 
-/* Structures */
+/* Models */
 
 table MerkleTreeSection {
     Depth: int32 = 0,
@@ -15,29 +15,56 @@ table MerkleTreeSection {
     Hashes: vector<OmniHash>(capacity: 1073741824) = 2,
 }
 
+table ContentLocation {
+    Tag: OmniHash = 0,
+    NodeProfiles: vector<NodeProfile>(capacity: 8192) = 1,
+}
+
+table Block {
+    Tag: OmniHash = 0,
+    Value: bytes(capacity: 4194304, recyclable: true),
+}
+
 /* Messages */
 
+enum NodeExplorerVersion : uint8 {
+    Version1 = 1,
+}
+
 table NodeExplorerHelloMessage {
+    Versions: vector<NodeExplorerVersion>(capacity: 32) = 0,
+}
+
+table NodeExplorerProfileMessage {
     Id: bytes(capacity: 32) = 0,
     NodeProfile: NodeProfile = 1,
 }
 
-table PushNodeProfilesMessage {
-    NodeProfiles: vector<NodeProfile>(capacity: 256) = 0,
+table NodeExplorerDataMessage {
+    PushNodeProfiles: vector<NodeProfile>(capacity: 256) = 0,
+    PushContentLocations: vector<ContentLocation>(capacity: 256) = 1,
+    WantContentLocations: vector<OmniHash>(capacity: 256) = 2,
+    GiveContentLocations: vector<ContentLocation>(capacity: 256) = 3,
 }
 
-table PushContentLocationsMessage {
-    RootHash: OmniHash = 0,
-    NodeProfiles: vector<NodeProfile>(capacity: 8192) = 1,
+enum BlockExchangerVersion : uint8 {
+    Version1 = 1,
 }
 
-table WantContentLocationsMessage {
-    RootHash: OmniHash = 0,
+table BlockExchangerHelloMessage {
+    Versions: vector<BlockExchangerVersion>(capacity: 32) = 0,
 }
 
-table GiveContentLocationsMessage {
-    RootHash: OmniHash = 0,
-    NodeProfiles: vector<NodeProfile>(capacity: 8192) = 1,
+table BlockExchangerProfileMessage {
+    Tag: OmniHash = 0,
+    NodeProfile: NodeProfile = 1,
+}
+
+table BlockExchangerDataMessage {
+    PushNodeProfiles: vector<NodeProfile>(capacity: 256) = 0,
+    WantBlocks: vector<OmniHash>(capacity: 256) = 1,
+    CancelBlocks: vector<OmniHash>(capacity: 256) = 2,
+    GiveBlocks: vector<Block>(capacity: 8) = 3,
 }
 
 /* Configs */

@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
+using Omnius.Core.Cryptography;
+using Omnius.Core.Network;
+using Omnius.Core.Network.Connections;
 using Omnius.Xeus.Service.Drivers;
+using Omnius.Xeus.Service.Engines.Internal;
 
 namespace Omnius.Xeus.Service.Engines
 {
@@ -22,15 +26,18 @@ namespace Omnius.Xeus.Service.Engines
 
         private IObjectStore _objectStore;
 
+
+
         private Task _connectLoopTask;
         private Task _acceptLoopTask;
         private Task _sendLoopTask;
         private Task _receiveLoopTask;
+
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         private readonly AsyncLock _asyncLock = new AsyncLock();
 
-        private const int MaxBucketLength = 20;
+        public const string ServiceName = "BlockExchanger`";
 
         internal sealed class BlockExchangerFactory : IBlockExchangerFactory
         {
@@ -120,6 +127,41 @@ namespace Omnius.Xeus.Service.Engines
         private Task ReceiveLoopAsync(CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
+        }
+
+        private enum ConnectionHandshakeType
+        {
+            Connected,
+            Accepted,
+        }
+
+        private sealed class ConnectionStatus : ISynchronized
+        {
+            public ConnectionStatus(IConnection connection, OmniAddress address,
+                ConnectionHandshakeType handshakeType, NodeProfile nodeProfile, OmniHash tag)
+            {
+                this.Connection = connection;
+                this.Address = address;
+                this.HandshakeType = handshakeType;
+                this.NodeProfile = nodeProfile;
+                this.Tag = tag;
+            }
+
+            public object LockObject { get; } = new object();
+
+            public IConnection Connection { get; }
+            public OmniAddress Address { get; }
+            public ConnectionHandshakeType HandshakeType { get; }
+
+            public NodeProfile NodeProfile { get; }
+            public OmniHash Tag { get; }
+
+            public VolatileSet<OmniHash> ReceivedWantContentLocations { get; } = new VolatileSet<OmniHash>(TimeSpan.FromMinutes(30));
+
+            public void Refresh()
+            {
+                this.ReceivedWantContentLocations.Refresh();
+            }
         }
     }
 }

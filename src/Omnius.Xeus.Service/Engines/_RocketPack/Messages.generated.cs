@@ -20,14 +20,15 @@ namespace Omnius.Xeus.Service.Engines
         static NodeProfile()
         {
             global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<NodeProfile>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<NodeProfile>.Empty = new NodeProfile(global::System.Array.Empty<OmniAddress>());
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<NodeProfile>.Empty = new NodeProfile(global::System.Array.Empty<OmniAddress>(), global::System.Array.Empty<string>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxAddressesCount = 32;
+        public static readonly int MaxServicesCount = 32;
 
-        public NodeProfile(OmniAddress[] addresses)
+        public NodeProfile(OmniAddress[] addresses, string[] services)
         {
             if (addresses is null) throw new global::System.ArgumentNullException("addresses");
             if (addresses.Length > 32) throw new global::System.ArgumentOutOfRangeException("addresses");
@@ -35,8 +36,16 @@ namespace Omnius.Xeus.Service.Engines
             {
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
+            if (services is null) throw new global::System.ArgumentNullException("services");
+            if (services.Length > 32) throw new global::System.ArgumentOutOfRangeException("services");
+            foreach (var n in services)
+            {
+                if (n is null) throw new global::System.ArgumentNullException("n");
+                if (n.Length > 256) throw new global::System.ArgumentOutOfRangeException("n");
+            }
 
             this.Addresses = new global::Omnius.Core.Collections.ReadOnlyListSlim<OmniAddress>(addresses);
+            this.Services = new global::Omnius.Core.Collections.ReadOnlyListSlim<string>(services);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -45,11 +54,16 @@ namespace Omnius.Xeus.Service.Engines
                 {
                     if (n != default) ___h.Add(n.GetHashCode());
                 }
+                foreach (var n in services)
+                {
+                    if (n != default) ___h.Add(n.GetHashCode());
+                }
                 return ___h.ToHashCode();
             });
         }
 
         public global::Omnius.Core.Collections.ReadOnlyListSlim<OmniAddress> Addresses { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<string> Services { get; }
 
         public static NodeProfile Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -80,6 +94,7 @@ namespace Omnius.Xeus.Service.Engines
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Addresses, target.Addresses)) return false;
+            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Services, target.Services)) return false;
 
             return true;
         }
@@ -97,6 +112,10 @@ namespace Omnius.Xeus.Service.Engines
                     {
                         propertyCount++;
                     }
+                    if (value.Services.Count != 0)
+                    {
+                        propertyCount++;
+                    }
                     w.Write(propertyCount);
                 }
 
@@ -109,6 +128,15 @@ namespace Omnius.Xeus.Service.Engines
                         OmniAddress.Formatter.Serialize(ref w, n, rank + 1);
                     }
                 }
+                if (value.Services.Count != 0)
+                {
+                    w.Write((uint)1);
+                    w.Write((uint)value.Services.Count);
+                    foreach (var n in value.Services)
+                    {
+                        w.Write(n);
+                    }
+                }
             }
 
             public NodeProfile Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
@@ -118,6 +146,7 @@ namespace Omnius.Xeus.Service.Engines
                 uint propertyCount = r.GetUInt32();
 
                 OmniAddress[] p_addresses = global::System.Array.Empty<OmniAddress>();
+                string[] p_services = global::System.Array.Empty<string>();
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -134,10 +163,20 @@ namespace Omnius.Xeus.Service.Engines
                                 }
                                 break;
                             }
+                        case 1:
+                            {
+                                var length = r.GetUInt32();
+                                p_services = new string[length];
+                                for (int i = 0; i < p_services.Length; i++)
+                                {
+                                    p_services[i] = r.GetString(256);
+                                }
+                                break;
+                            }
                     }
                 }
 
-                return new NodeProfile(p_addresses);
+                return new NodeProfile(p_addresses, p_services);
             }
         }
     }
@@ -870,18 +909,18 @@ namespace Omnius.Xeus.Service.Engines
 
         public static readonly int MaxPublishBlocksCount = 1073741824;
 
-        public PublishReport(OmniHash rootHash, OmniHash[] publishBlocks)
+        public PublishReport(OmniHash tag, OmniHash[] publishBlocks)
         {
             if (publishBlocks is null) throw new global::System.ArgumentNullException("publishBlocks");
             if (publishBlocks.Length > 1073741824) throw new global::System.ArgumentOutOfRangeException("publishBlocks");
 
-            this.RootHash = rootHash;
+            this.Tag = tag;
             this.PublishBlocks = new global::Omnius.Core.Collections.ReadOnlyListSlim<OmniHash>(publishBlocks);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (rootHash != default) ___h.Add(rootHash.GetHashCode());
+                if (tag != default) ___h.Add(tag.GetHashCode());
                 foreach (var n in publishBlocks)
                 {
                     if (n != default) ___h.Add(n.GetHashCode());
@@ -890,7 +929,7 @@ namespace Omnius.Xeus.Service.Engines
             });
         }
 
-        public OmniHash RootHash { get; }
+        public OmniHash Tag { get; }
         public global::Omnius.Core.Collections.ReadOnlyListSlim<OmniHash> PublishBlocks { get; }
 
         public static PublishReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -921,7 +960,7 @@ namespace Omnius.Xeus.Service.Engines
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.RootHash != target.RootHash) return false;
+            if (this.Tag != target.Tag) return false;
             if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.PublishBlocks, target.PublishBlocks)) return false;
 
             return true;
@@ -936,7 +975,7 @@ namespace Omnius.Xeus.Service.Engines
 
                 {
                     uint propertyCount = 0;
-                    if (value.RootHash != OmniHash.Empty)
+                    if (value.Tag != OmniHash.Empty)
                     {
                         propertyCount++;
                     }
@@ -947,10 +986,10 @@ namespace Omnius.Xeus.Service.Engines
                     w.Write(propertyCount);
                 }
 
-                if (value.RootHash != OmniHash.Empty)
+                if (value.Tag != OmniHash.Empty)
                 {
                     w.Write((uint)0);
-                    OmniHash.Formatter.Serialize(ref w, value.RootHash, rank + 1);
+                    OmniHash.Formatter.Serialize(ref w, value.Tag, rank + 1);
                 }
                 if (value.PublishBlocks.Count != 0)
                 {
@@ -969,7 +1008,7 @@ namespace Omnius.Xeus.Service.Engines
 
                 uint propertyCount = r.GetUInt32();
 
-                OmniHash p_rootHash = OmniHash.Empty;
+                OmniHash p_tag = OmniHash.Empty;
                 OmniHash[] p_publishBlocks = global::System.Array.Empty<OmniHash>();
 
                 for (; propertyCount > 0; propertyCount--)
@@ -979,7 +1018,7 @@ namespace Omnius.Xeus.Service.Engines
                     {
                         case 0:
                             {
-                                p_rootHash = OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_tag = OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 1:
@@ -995,7 +1034,7 @@ namespace Omnius.Xeus.Service.Engines
                     }
                 }
 
-                return new PublishReport(p_rootHash, p_publishBlocks);
+                return new PublishReport(p_tag, p_publishBlocks);
             }
         }
     }
@@ -1015,18 +1054,18 @@ namespace Omnius.Xeus.Service.Engines
 
         public static readonly int MaxWantBlocksCount = 1073741824;
 
-        public WantReport(OmniHash rootHash, OmniHash[] wantBlocks)
+        public WantReport(OmniHash tag, OmniHash[] wantBlocks)
         {
             if (wantBlocks is null) throw new global::System.ArgumentNullException("wantBlocks");
             if (wantBlocks.Length > 1073741824) throw new global::System.ArgumentOutOfRangeException("wantBlocks");
 
-            this.RootHash = rootHash;
+            this.Tag = tag;
             this.WantBlocks = new global::Omnius.Core.Collections.ReadOnlyListSlim<OmniHash>(wantBlocks);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (rootHash != default) ___h.Add(rootHash.GetHashCode());
+                if (tag != default) ___h.Add(tag.GetHashCode());
                 foreach (var n in wantBlocks)
                 {
                     if (n != default) ___h.Add(n.GetHashCode());
@@ -1035,7 +1074,7 @@ namespace Omnius.Xeus.Service.Engines
             });
         }
 
-        public OmniHash RootHash { get; }
+        public OmniHash Tag { get; }
         public global::Omnius.Core.Collections.ReadOnlyListSlim<OmniHash> WantBlocks { get; }
 
         public static WantReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -1066,7 +1105,7 @@ namespace Omnius.Xeus.Service.Engines
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.RootHash != target.RootHash) return false;
+            if (this.Tag != target.Tag) return false;
             if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.WantBlocks, target.WantBlocks)) return false;
 
             return true;
@@ -1081,7 +1120,7 @@ namespace Omnius.Xeus.Service.Engines
 
                 {
                     uint propertyCount = 0;
-                    if (value.RootHash != OmniHash.Empty)
+                    if (value.Tag != OmniHash.Empty)
                     {
                         propertyCount++;
                     }
@@ -1092,10 +1131,10 @@ namespace Omnius.Xeus.Service.Engines
                     w.Write(propertyCount);
                 }
 
-                if (value.RootHash != OmniHash.Empty)
+                if (value.Tag != OmniHash.Empty)
                 {
                     w.Write((uint)0);
-                    OmniHash.Formatter.Serialize(ref w, value.RootHash, rank + 1);
+                    OmniHash.Formatter.Serialize(ref w, value.Tag, rank + 1);
                 }
                 if (value.WantBlocks.Count != 0)
                 {
@@ -1114,7 +1153,7 @@ namespace Omnius.Xeus.Service.Engines
 
                 uint propertyCount = r.GetUInt32();
 
-                OmniHash p_rootHash = OmniHash.Empty;
+                OmniHash p_tag = OmniHash.Empty;
                 OmniHash[] p_wantBlocks = global::System.Array.Empty<OmniHash>();
 
                 for (; propertyCount > 0; propertyCount--)
@@ -1124,7 +1163,7 @@ namespace Omnius.Xeus.Service.Engines
                     {
                         case 0:
                             {
-                                p_rootHash = OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_tag = OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 1:
@@ -1140,7 +1179,7 @@ namespace Omnius.Xeus.Service.Engines
                     }
                 }
 
-                return new WantReport(p_rootHash, p_wantBlocks);
+                return new WantReport(p_tag, p_wantBlocks);
             }
         }
     }

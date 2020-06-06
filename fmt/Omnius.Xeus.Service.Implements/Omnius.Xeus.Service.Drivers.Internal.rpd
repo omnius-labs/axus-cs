@@ -10,5 +10,5 @@ option csharp_access_level = "internal";
 /* Messages */
 
 table ConnectionHelloMessage {
-    ServiceType: string(capacity: 256) = 0,
+    Service: string(capacity: 256) = 0,
 }
