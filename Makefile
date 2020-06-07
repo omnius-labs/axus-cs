@@ -9,6 +9,7 @@ test:
 
 update:
 	sh ./eng/update-submodule.sh
+	sh ./eng/update-tools.sh
 
 format:
 	dotnet tool restore
