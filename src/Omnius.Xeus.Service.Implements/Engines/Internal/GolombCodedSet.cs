@@ -11,27 +11,29 @@ namespace Omnius.Xeus.Service.Engines.Internal
 {
     internal sealed partial class GolombCodedSet<T>
     {
-        private readonly Func<T, uint> _computeHash;
-        private readonly int _itemCount;
+        private readonly Func<T, uint> _hashFunction;
         private readonly int _falsePositiveRate;
-        private readonly Dictionary<uint, int> _map = new Dictionary<uint, int>();
+        private readonly List<uint> _list = new List<uint>();
 
-        public GolombCodedSet(IEnumerable<T> collection, int falsePositiveRate, Func<T, uint> computeHash)
+        public GolombCodedSet(IEnumerable<T> collection, int falsePositiveRate, Func<T, uint> hashFunction)
         {
-            _computeHash = computeHash;
-            _itemCount = collection.Count();
+            _hashFunction = hashFunction;
             _falsePositiveRate = falsePositiveRate;
+
+            var itemCount = collection.Count();
 
             foreach (var item in collection)
             {
-                var hash = _computeHash(item) % (uint)(_itemCount * _falsePositiveRate);
-                _map.AddOrUpdate(hash, 1, (_, value) => value + 1);
+                var hash = _hashFunction(item) % (uint)(itemCount * _falsePositiveRate);
+                _list.Add(hash);
             }
+
+            _list.Sort();
         }
 
-        private GolombCodedSet(ReadOnlySequence<byte> sequence, int falsePositiveRate, Func<T, uint> computeHash)
+        private GolombCodedSet(ReadOnlySequence<byte> sequence, int falsePositiveRate, Func<T, uint> hashFunction)
         {
-            _computeHash = computeHash;
+            _hashFunction = hashFunction;
             _falsePositiveRate = falsePositiveRate;
 
             var decoder = new GolombDecoder(sequence, _falsePositiveRate);
@@ -40,9 +42,8 @@ namespace Omnius.Xeus.Service.Engines.Internal
 
             while (decoder.TryDecode(out var diff))
             {
-                _itemCount++;
                 current += diff;
-                _map.AddOrUpdate(current, 1, (_, value) => value + 1);
+                _list.Add(current);
             }
         }
 
@@ -53,20 +54,14 @@ namespace Omnius.Xeus.Service.Engines.Internal
 
         public void Export(IBufferWriter<byte> bufferWriter)
         {
-            var pairs = _map.ToList();
-            pairs.Sort((x, y) => x.Key.CompareTo(y.Key));
-
             var encoder = new GolombEncoder(bufferWriter, _falsePositiveRate);
 
             uint previous = 0;
 
-            foreach (var (hash, count) in pairs)
+            foreach (var hash in _list)
             {
-                for (int i = 0; i < count; i++)
-                {
-                    encoder.Encoding(hash - previous);
-                    previous = hash;
-                }
+                encoder.Encoding(hash - previous);
+                previous = hash;
             }
 
             encoder.Flush();
@@ -74,8 +69,8 @@ namespace Omnius.Xeus.Service.Engines.Internal
 
         public bool Contains(T item)
         {
-            var hash = _computeHash(item) % (uint)(_itemCount * _falsePositiveRate);
-            return _map.ContainsKey(hash);
+            var hash = _hashFunction(item) % (uint)(_list.Count * _falsePositiveRate);
+            return _list.BinarySearch(hash) >= 0;
         }
 
         private static uint Bitmask(int n)

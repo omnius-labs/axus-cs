@@ -22,7 +22,12 @@ table ContentLocation {
 
 table Block {
     Tag: OmniHash = 0,
-    Value: bytes(capacity: 4194304, recyclable: true),
+    Value: bytes(capacity: 4194304, recyclable: true) = 1,
+}
+
+table BlocksFilter {
+    FalsePositiveRate: int32 = 0,
+    GolombCodedSet: bytes(capacity: 4194304, recyclable: true) = 1,
 }
 
 /* Messages */
@@ -64,7 +69,8 @@ table BlockExchangerDataMessage {
     PushNodeProfiles: vector<NodeProfile>(capacity: 256) = 0,
     WantBlocks: vector<OmniHash>(capacity: 256) = 1,
     CancelBlocks: vector<OmniHash>(capacity: 256) = 2,
-    GiveBlocks: vector<Block>(capacity: 8) = 3,
+    OwnedBlocksFilter: BlocksFilter = 3,
+    GiveBlocks: vector<Block>(capacity: 8) = 4,
 }
 
 /* Configs */

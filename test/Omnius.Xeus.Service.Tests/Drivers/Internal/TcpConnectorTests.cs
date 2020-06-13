@@ -10,8 +10,11 @@ namespace Omnius.Xeus.Service.Drivers.Internal
 {
     public class TcpConnectorTests
     {
+        /// <summary>
+        /// TcpConnectorのConnectAsyncが成功することを確認する
+        /// </summary>
         [Fact]
-        public async Task ConnectAsyncTest()
+        public async Task ConnectAsyncSuccessTest()
         {
             const int Port = 55555;
             const string IpAddress = "127.0.0.1";
@@ -44,8 +47,11 @@ namespace Omnius.Xeus.Service.Drivers.Internal
             }
         }
 
+        /// <summary>
+        /// TcpConnectorのAcceptAsyncが成功することを確認する
+        /// </summary>
         [Fact]
-        public async Task AcceptAsyncTest()
+        public async Task AcceptAsyncSuccessTest()
         {
             const int port = 55555;
             const string ipAddress = "127.0.0.1";

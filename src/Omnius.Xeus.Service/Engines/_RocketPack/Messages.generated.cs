@@ -8,8 +8,9 @@ namespace Omnius.Xeus.Service.Engines
 {
     public enum ConnectionType : byte
     {
-        Connected = 0,
-        Accepted = 1,
+        Unknown = 0,
+        Connected = 1,
+        Accepted = 2,
     }
 
     public sealed partial class NodeProfile : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<NodeProfile>

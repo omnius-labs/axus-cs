@@ -8,8 +8,9 @@ namespace "Omnius.Xeus.Service.Drivers";
 /* Options */
 
 enum TcpProxyType : uint8 {
-    HttpProxy = 0,
-    Socks5Proxy = 1,
+    Unknown = 0,
+    HttpProxy = 1,
+    Socks5Proxy = 2,
 }
 
 table TcpProxyOptions {
@@ -42,7 +43,8 @@ table ConnectionControllerOptions {
 /* Reports */
 
 enum EventReportType : uint8 {
-    SpaceNotFound = 0,
+    Unknown = 0,
+    SpaceNotFound = 1,
 }
 
 table EventReport {

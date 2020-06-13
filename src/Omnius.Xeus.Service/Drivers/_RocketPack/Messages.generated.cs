@@ -7,13 +7,15 @@ namespace Omnius.Xeus.Service.Drivers
 {
     public enum TcpProxyType : byte
     {
-        HttpProxy = 0,
-        Socks5Proxy = 1,
+        Unknown = 0,
+        HttpProxy = 1,
+        Socks5Proxy = 2,
     }
 
     public enum EventReportType : byte
     {
-        SpaceNotFound = 0,
+        Unknown = 0,
+        SpaceNotFound = 1,
     }
 
     public sealed partial class TcpProxyOptions : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<TcpProxyOptions>

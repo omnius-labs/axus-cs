@@ -12,7 +12,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
     public class GolombCodedSetTests
     {
         /// <summary>
-        ///
+        /// GolombCodedSetの作成とインポートとエクスポートが成功することを確認する
         /// </summary>
         [Fact]
         public void CreateAndExportAndImportSuccessTest()

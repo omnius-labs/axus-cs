@@ -1,5 +1,7 @@
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
@@ -25,8 +27,6 @@ namespace Omnius.Xeus.Service.Engines
         private readonly IBytesPool _bytesPool;
 
         private IObjectStore _objectStore;
-
-
 
         private Task _connectLoopTask;
         private Task _acceptLoopTask;
@@ -135,6 +135,20 @@ namespace Omnius.Xeus.Service.Engines
             Accepted,
         }
 
+        private static uint GolombCodedSetComputeHash(OmniHash omniHash)
+        {
+            uint result = 0;
+            const int unit = sizeof(uint);
+
+            int loopCount = omniHash.Value.Length / unit;
+            for (int i = 0; i < loopCount; i++)
+            {
+                result ^= BinaryPrimitives.ReadUInt32BigEndian(omniHash.Value.Span.Slice(i * unit, unit));
+            }
+
+            return result;
+        }
+
         private sealed class ConnectionStatus : ISynchronized
         {
             public ConnectionStatus(IConnection connection, OmniAddress address,
@@ -156,11 +170,12 @@ namespace Omnius.Xeus.Service.Engines
             public NodeProfile NodeProfile { get; }
             public OmniHash Tag { get; }
 
-            public VolatileSet<OmniHash> ReceivedWantContentLocations { get; } = new VolatileSet<OmniHash>(TimeSpan.FromMinutes(30));
+            public VolatileSet<OmniHash> ReceivedWantBlocks { get; } = new VolatileSet<OmniHash>(TimeSpan.FromMinutes(30));
+            public GolombCodedSet<OmniHash>? OwnedBlocksFilter { get; set; }
 
             public void Refresh()
             {
-                this.ReceivedWantContentLocations.Refresh();
+                this.ReceivedWantBlocks.Refresh();
             }
         }
     }

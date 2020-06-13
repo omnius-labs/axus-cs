@@ -40,8 +40,9 @@ table ConsistencyReport {
 }
 
 enum ConnectionType : uint8 {
-    Connected = 0,
-    Accepted = 1,
+    Unknown = 0,
+    Connected = 1,
+    Accepted = 2,
 }
 
 table ConnectionReport {
