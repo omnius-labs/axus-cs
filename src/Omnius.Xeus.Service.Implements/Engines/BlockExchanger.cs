@@ -32,6 +32,7 @@ namespace Omnius.Xeus.Service.Engines
         private Task _acceptLoopTask;
         private Task _sendLoopTask;
         private Task _receiveLoopTask;
+        private Task _computeLoopTask;
 
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
@@ -78,6 +79,7 @@ namespace Omnius.Xeus.Service.Engines
             _acceptLoopTask = this.AcceptLoopAsync(_cancellationTokenSource.Token);
             _sendLoopTask = this.SendLoopAsync(_cancellationTokenSource.Token);
             _receiveLoopTask = this.ReceiveLoopAsync(_cancellationTokenSource.Token);
+            _computeLoopTask = this.ComputeLoopAsync(_cancellationTokenSource.Token);
         }
 
         protected override async ValueTask OnDisposeAsync()
@@ -129,10 +131,164 @@ namespace Omnius.Xeus.Service.Engines
             throw new NotImplementedException();
         }
 
-        private enum ConnectionHandshakeType
+        private async Task ComputeLoopAsync(CancellationToken cancellationToken)
         {
-            Connected,
-            Accepted,
+            try
+            {
+                for (; ; )
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+
+                    lock (_lockObject)
+                    {
+                        _receivedPushContentLocationMap.Refresh();
+                        _receivedGiveContentLocationMap.Refresh();
+
+                        foreach (var connectionStatus in _connectionStatusSet)
+                        {
+                            connectionStatus.Refresh();
+                        }
+                    }
+
+                    // 自分のノードプロファイル
+                    var myNodeProfile = await this.GetMyNodeProfile(cancellationToken);
+
+                    // ノード情報
+                    var elements = new List<KademliaElement<ComputingNodeElement>>();
+
+                    // 送信するノードプロファイル
+                    var sendingPushNodeProfiles = new List<NodeProfile>();
+
+                    // コンテンツのロケーション情報
+                    var contentLocationMap = new Dictionary<OmniHash, HashSet<NodeProfile>>();
+
+                    // 送信するコンテンツのロケーション情報
+                    var sendingPushContentLocationMap = new Dictionary<OmniHash, HashSet<NodeProfile>>();
+
+                    // 送信するコンテンツのロケーションリクエスト情報
+                    var sendingWantContentLocationSet = new HashSet<OmniHash>();
+
+                    lock (_lockObject)
+                    {
+                        foreach (var connectionStatus in _connectionStatusSet)
+                        {
+                            elements.Add(new KademliaElement<ComputingNodeElement>(connectionStatus.Id, new ComputingNodeElement(connectionStatus)));
+                        }
+                    }
+
+                    lock (_lockObject)
+                    {
+                        sendingPushNodeProfiles.AddRange(_cloudNodeProfiles);
+                    }
+
+                    foreach (var publishReport in await _publishStorage.GetReportsAsync(cancellationToken))
+                    {
+                        contentLocationMap.GetOrAdd(publishReport.Tag, (_) => new HashSet<NodeProfile>())
+                             .Add(myNodeProfile);
+
+                        sendingPushContentLocationMap.GetOrAdd(publishReport.Tag, (_) => new HashSet<NodeProfile>())
+                             .Add(myNodeProfile);
+                    }
+
+                    foreach (var wantReport in await _wantStorage.GetReportsAsync(cancellationToken))
+                    {
+                        sendingWantContentLocationSet.Add(wantReport.Tag);
+                    }
+
+                    lock (_lockObject)
+                    {
+                        foreach (var (tag, nodeProfiles) in _receivedPushContentLocationMap)
+                        {
+                            contentLocationMap.GetOrAdd(tag, (_) => new HashSet<NodeProfile>())
+                                 .UnionWith(nodeProfiles);
+
+                            sendingPushContentLocationMap.GetOrAdd(tag, (_) => new HashSet<NodeProfile>())
+                                 .UnionWith(nodeProfiles);
+                        }
+
+                        foreach (var (tag, nodeProfiles) in _receivedGiveContentLocationMap)
+                        {
+                            contentLocationMap.GetOrAdd(tag, (_) => new HashSet<NodeProfile>())
+                                 .UnionWith(nodeProfiles);
+                        }
+                    }
+
+                    foreach (var element in elements)
+                    {
+                        lock (element.Value.ConnectionStatus.LockObject)
+                        {
+                            foreach (var tag in element.Value.ConnectionStatus.ReceivedWantContentLocations)
+                            {
+                                sendingWantContentLocationSet.Add(tag);
+                            }
+                        }
+                    }
+
+                    // Compute PushNodeProfiles
+                    foreach (var element in elements)
+                    {
+                        element.Value.SendingPushNodeProfiles.AddRange(sendingPushNodeProfiles);
+                    }
+
+                    // Compute PushContentLocations
+                    foreach (var (tag, nodeProfiles) in sendingPushContentLocationMap)
+                    {
+                        foreach (var element in Kademlia.Search(_myId.Span, tag.Value.Span, elements, 1))
+                        {
+                            element.Value.SendingPushContentLocations[tag] = nodeProfiles.ToList();
+                        }
+                    }
+
+                    // Compute WantContentLocations
+                    foreach (var tag in sendingWantContentLocationSet)
+                    {
+                        foreach (var element in Kademlia.Search(_myId.Span, tag.Value.Span, elements, 1))
+                        {
+                            element.Value.SendingWantContentLocations.Add(tag);
+                        }
+                    }
+
+                    // Compute GiveContentLocations
+                    foreach (var element in elements)
+                    {
+                        lock (element.Value.ConnectionStatus.LockObject)
+                        {
+                            foreach (var tag in element.Value.ConnectionStatus.ReceivedWantContentLocations)
+                            {
+                                if (!contentLocationMap.TryGetValue(tag, out var nodeProfiles))
+                                {
+                                    continue;
+                                }
+
+                                element.Value.SendingGiveContentLocations[tag] = nodeProfiles.ToList();
+                            }
+                        }
+                    }
+
+                    foreach (var element in elements)
+                    {
+                        lock (element.Value.ConnectionStatus.LockObject)
+                        {
+                            element.Value.ConnectionStatus.SendingDataMessage =
+                                new NodeExplorerDataMessage(
+                                    element.Value.SendingPushNodeProfiles.Take(NodeExplorerDataMessage.MaxPushNodeProfilesCount).ToArray(),
+                                    element.Value.SendingPushContentLocations.Select(n => new ContentLocation(n.Key, n.Value.Take(ContentLocation.MaxNodeProfilesCount).ToArray())).Take(NodeExplorerDataMessage.MaxPushContentLocationsCount).ToArray(),
+                                    element.Value.SendingWantContentLocations.Take(NodeExplorerDataMessage.MaxWantContentLocationsCount).ToArray(),
+                                    element.Value.SendingGiveContentLocations.Select(n => new ContentLocation(n.Key, n.Value.Take(ContentLocation.MaxNodeProfilesCount).ToArray())).Take(NodeExplorerDataMessage.MaxGiveContentLocationsCount).ToArray());
+                        }
+                    }
+                }
+            }
+            catch (OperationCanceledException e)
+            {
+                _logger.Debug(e);
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e);
+            }
         }
 
         private static uint GolombCodedSetComputeHash(OmniHash omniHash)
@@ -147,6 +303,12 @@ namespace Omnius.Xeus.Service.Engines
             }
 
             return result;
+        }
+
+        private enum ConnectionHandshakeType
+        {
+            Connected,
+            Accepted,
         }
 
         private sealed class ConnectionStatus : ISynchronized
