@@ -33,6 +33,7 @@ table BlocksFilter {
 /* Messages */
 
 enum NodeExplorerVersion : uint8 {
+    Unknown = 0,
     Version1 = 1,
 }
 
@@ -53,6 +54,7 @@ table NodeExplorerDataMessage {
 }
 
 enum BlockExchangerVersion : uint8 {
+    Unknown = 0,
     Version1 = 1,
 }
 
