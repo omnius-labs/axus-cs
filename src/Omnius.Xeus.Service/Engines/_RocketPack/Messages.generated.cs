@@ -21,41 +21,41 @@ namespace Omnius.Xeus.Service.Engines
         static NodeProfile()
         {
             global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<NodeProfile>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<NodeProfile>.Empty = new NodeProfile(global::System.Array.Empty<OmniAddress>(), global::System.Array.Empty<string>());
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<NodeProfile>.Empty = new NodeProfile(global::System.Array.Empty<string>(), global::System.Array.Empty<OmniAddress>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
+        public static readonly int MaxServiceIdsCount = 32;
         public static readonly int MaxAddressesCount = 32;
-        public static readonly int MaxServicesCount = 32;
 
-        public NodeProfile(OmniAddress[] addresses, string[] services)
+        public NodeProfile(string[] serviceIds, OmniAddress[] addresses)
         {
+            if (serviceIds is null) throw new global::System.ArgumentNullException("serviceIds");
+            if (serviceIds.Length > 32) throw new global::System.ArgumentOutOfRangeException("serviceIds");
+            foreach (var n in serviceIds)
+            {
+                if (n is null) throw new global::System.ArgumentNullException("n");
+                if (n.Length > 256) throw new global::System.ArgumentOutOfRangeException("n");
+            }
             if (addresses is null) throw new global::System.ArgumentNullException("addresses");
             if (addresses.Length > 32) throw new global::System.ArgumentOutOfRangeException("addresses");
             foreach (var n in addresses)
             {
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
-            if (services is null) throw new global::System.ArgumentNullException("services");
-            if (services.Length > 32) throw new global::System.ArgumentOutOfRangeException("services");
-            foreach (var n in services)
-            {
-                if (n is null) throw new global::System.ArgumentNullException("n");
-                if (n.Length > 256) throw new global::System.ArgumentOutOfRangeException("n");
-            }
 
+            this.ServiceIds = new global::Omnius.Core.Collections.ReadOnlyListSlim<string>(serviceIds);
             this.Addresses = new global::Omnius.Core.Collections.ReadOnlyListSlim<OmniAddress>(addresses);
-            this.Services = new global::Omnius.Core.Collections.ReadOnlyListSlim<string>(services);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                foreach (var n in addresses)
+                foreach (var n in serviceIds)
                 {
                     if (n != default) ___h.Add(n.GetHashCode());
                 }
-                foreach (var n in services)
+                foreach (var n in addresses)
                 {
                     if (n != default) ___h.Add(n.GetHashCode());
                 }
@@ -64,7 +64,7 @@ namespace Omnius.Xeus.Service.Engines
         }
 
         public global::Omnius.Core.Collections.ReadOnlyListSlim<OmniAddress> Addresses { get; }
-        public global::Omnius.Core.Collections.ReadOnlyListSlim<string> Services { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<string> ServiceIds { get; }
 
         public static NodeProfile Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -94,8 +94,8 @@ namespace Omnius.Xeus.Service.Engines
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
+            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.ServiceIds, target.ServiceIds)) return false;
             if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Addresses, target.Addresses)) return false;
-            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Services, target.Services)) return false;
 
             return true;
         }
@@ -109,17 +109,26 @@ namespace Omnius.Xeus.Service.Engines
 
                 {
                     uint propertyCount = 0;
-                    if (value.Addresses.Count != 0)
+                    if (value.ServiceIds.Count != 0)
                     {
                         propertyCount++;
                     }
-                    if (value.Services.Count != 0)
+                    if (value.Addresses.Count != 0)
                     {
                         propertyCount++;
                     }
                     w.Write(propertyCount);
                 }
 
+                if (value.ServiceIds.Count != 0)
+                {
+                    w.Write((uint)1);
+                    w.Write((uint)value.ServiceIds.Count);
+                    foreach (var n in value.ServiceIds)
+                    {
+                        w.Write(n);
+                    }
+                }
                 if (value.Addresses.Count != 0)
                 {
                     w.Write((uint)0);
@@ -127,15 +136,6 @@ namespace Omnius.Xeus.Service.Engines
                     foreach (var n in value.Addresses)
                     {
                         OmniAddress.Formatter.Serialize(ref w, n, rank + 1);
-                    }
-                }
-                if (value.Services.Count != 0)
-                {
-                    w.Write((uint)1);
-                    w.Write((uint)value.Services.Count);
-                    foreach (var n in value.Services)
-                    {
-                        w.Write(n);
                     }
                 }
             }
@@ -146,14 +146,24 @@ namespace Omnius.Xeus.Service.Engines
 
                 uint propertyCount = r.GetUInt32();
 
+                string[] p_serviceIds = global::System.Array.Empty<string>();
                 OmniAddress[] p_addresses = global::System.Array.Empty<OmniAddress>();
-                string[] p_services = global::System.Array.Empty<string>();
 
                 for (; propertyCount > 0; propertyCount--)
                 {
                     uint id = r.GetUInt32();
                     switch (id)
                     {
+                        case 1:
+                            {
+                                var length = r.GetUInt32();
+                                p_serviceIds = new string[length];
+                                for (int i = 0; i < p_serviceIds.Length; i++)
+                                {
+                                    p_serviceIds[i] = r.GetString(256);
+                                }
+                                break;
+                            }
                         case 0:
                             {
                                 var length = r.GetUInt32();
@@ -164,20 +174,10 @@ namespace Omnius.Xeus.Service.Engines
                                 }
                                 break;
                             }
-                        case 1:
-                            {
-                                var length = r.GetUInt32();
-                                p_services = new string[length];
-                                for (int i = 0; i < p_services.Length; i++)
-                                {
-                                    p_services[i] = r.GetString(256);
-                                }
-                                break;
-                            }
                     }
                 }
 
-                return new NodeProfile(p_addresses, p_services);
+                return new NodeProfile(p_serviceIds, p_addresses);
             }
         }
     }

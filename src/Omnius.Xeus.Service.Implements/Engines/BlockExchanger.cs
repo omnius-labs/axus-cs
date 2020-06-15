@@ -2,10 +2,12 @@ using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
+using Omnius.Core.Extensions;
 using Omnius.Core.Network;
 using Omnius.Core.Network.Connections;
 using Omnius.Xeus.Service.Drivers;
@@ -28,14 +30,18 @@ namespace Omnius.Xeus.Service.Engines
 
         private IObjectStore _objectStore;
 
+        private readonly HashSet<ConnectionStatus> _connectionStatusSet = new HashSet<ConnectionStatus>();
+
         private Task _connectLoopTask;
         private Task _acceptLoopTask;
         private Task _sendLoopTask;
         private Task _receiveLoopTask;
         private Task _computeLoopTask;
 
+        private readonly Random _random = new Random();
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
+        private readonly object _lockObject = new object();
         private readonly AsyncLock _asyncLock = new AsyncLock();
 
         public const string ServiceName = "BlockExchanger`";
@@ -84,7 +90,12 @@ namespace Omnius.Xeus.Service.Engines
 
         protected override async ValueTask OnDisposeAsync()
         {
+            await Task.WhenAll(_connectLoopTask, _acceptLoopTask, _sendLoopTask, _receiveLoopTask, _computeLoopTask);
 
+            await this.SaveAsync();
+
+            _cancellationTokenSource.Dispose();
+            await _objectStore.DisposeAsync();
         }
 
         private async ValueTask LoadAsync()
@@ -97,13 +108,182 @@ namespace Omnius.Xeus.Service.Engines
 
         }
 
+        private async ValueTask<bool> TryAddConnectionAsync(IConnection connection, OmniAddress address, ConnectionHandshakeType handshakeType, OmniHash tag, CancellationToken cancellationToken = default)
+        {
+            // kademliaのk-bucketの距離毎のノード数は最大20とする。(k=20)
+            bool CanAppend(ReadOnlySpan<byte> id)
+            {
+                lock (_lockObject)
+                {
+                    var appendingNodeDistance = Kademlia.Distance(_myId.Span, id);
+
+                    var map = new Dictionary<int, int>();
+                    foreach (var connectionStatus in _connectionStatusSet)
+                    {
+                        var nodeDistance = Kademlia.Distance(_myId.Span, id);
+                        map.TryGetValue(nodeDistance, out int count);
+                        count++;
+                        map[nodeDistance] = count;
+                    }
+
+                    {
+                        map.TryGetValue(appendingNodeDistance, out int count);
+                        if (count > MaxBucketLength)
+                        {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+            }
+
+            try
+            {
+                NodeExplorerVersion? version = 0;
+                {
+                    var myHelloMessage = new NodeExplorerHelloMessage(new[] { NodeExplorerVersion.Version1 });
+                    NodeExplorerHelloMessage? otherHelloMessage = null;
+
+                    var enqueueTask = connection.EnqueueAsync((bufferWriter) => myHelloMessage.Export(bufferWriter, _bytesPool), cancellationToken);
+                    var dequeueTask = connection.DequeueAsync((sequence) => otherHelloMessage = NodeExplorerHelloMessage.Import(sequence, _bytesPool), cancellationToken);
+
+                    await ValueTaskHelper.WhenAll(enqueueTask, dequeueTask);
+                    if (otherHelloMessage == null) throw new Exception();
+
+                    version = EnumHelper.GetOverlappedMaxValue(myHelloMessage.Versions, otherHelloMessage.Versions);
+                }
+
+                if (version == NodeExplorerVersion.Version1)
+                {
+                    ReadOnlyMemory<byte> id;
+                    NodeProfile? nodeProfile = null;
+                    {
+                        var addresses = await _connectionController.GetListenEndpointsAsync(cancellationToken);
+                        var services = new[] { NodeExplorer.ServiceName, BlockExchanger.ServiceName };
+                        var myNodeProflie = new NodeProfile(addresses, services);
+
+                        var myProfileMessage = new NodeExplorerProfileMessage(_myId, myNodeProflie);
+                        NodeExplorerProfileMessage? otherProfileMessage = null;
+
+                        var enqueueTask = connection.EnqueueAsync((bufferWriter) => myProfileMessage.Export(bufferWriter, _bytesPool), cancellationToken);
+                        var dequeueTask = connection.DequeueAsync((sequence) => otherProfileMessage = NodeExplorerProfileMessage.Import(sequence, _bytesPool), cancellationToken);
+
+                        await ValueTaskHelper.WhenAll(enqueueTask, dequeueTask);
+                        if (otherProfileMessage == null) throw new Exception();
+
+                        id = otherProfileMessage.Id;
+                        nodeProfile = otherProfileMessage.NodeProfile;
+                    }
+
+                    if (!CanAppend(id.Span))
+                    {
+                        throw new Exception();
+                    }
+
+                    var status = new ConnectionStatus(connection, address, handshakeType, nodeProfile, id);
+
+                    lock (_lockObject)
+                    {
+                        _connectionStatusSet.Add(status);
+                    }
+
+                    if (status.HandshakeType == ConnectionHandshakeType.Connected)
+                    {
+                        this.RefreshCloudNodeProfile(status.NodeProfile);
+                    }
+
+                    return true;
+                }
+
+                throw new NotSupportedException();
+            }
+            catch (Exception)
+            {
+                connection.Dispose();
+            }
+
+            return false;
+        }
+
         private async Task ConnectLoopAsync(CancellationToken cancellationToken)
         {
             try
             {
-                for (; ; )
+                var random = new Random();
+
+                while (!cancellationToken.IsCancellationRequested)
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
+                    await Task.Delay(1000, cancellationToken);
+
+                    lock (_lockObject)
+                    {
+                        int connectionCount = _connectionStatusSet.Select(n => n.HandshakeType == ConnectionHandshakeType.Connected).Count();
+
+                        if (_connectionStatusSet.Count > (_options.MaxConnectionCount / 2))
+                        {
+                            continue;
+                        }
+                    }
+
+                    NodeProfile? targetNodeProfile = null;
+
+                    var wantReports = await _wantStorage.GetReportsAsync();
+                    _random.Shuffle(wantReports);
+
+                    foreach (var wantReport in wantReports)
+                    {
+                        var nodeProfiles = await _nodeExplorer.FindNodeProfiles(BlockExchanger.ServiceName, wantReport.Tag, cancellationToken);
+                        _random.Shuffle(nodeProfiles);
+
+                        targetNodeProfile = nodeProfiles.FirstOrDefault();
+
+                        if (targetNodeProfile != null)
+                        {
+                            break;
+                        }
+                    }
+
+                    lock (_lockObject)
+                    {
+                        var nodeProfiles = _cloudNodeProfiles.ToArray();
+                        random.Shuffle(nodeProfiles);
+
+                        var ignoreAddressSet = new HashSet<OmniAddress>(_connectionStatusSet.Select(n => n.Address));
+
+                        foreach (var nodeProfile in nodeProfiles)
+                        {
+                            if (nodeProfile.Addresses.Any(n => ignoreAddressSet.Contains(n))) continue;
+                            targetNodeProfile = nodeProfile;
+                            break;
+                        }
+                    }
+
+                    if (targetNodeProfile == null) continue;
+
+                    bool succeeded = false;
+
+                    foreach (var targetAddress in targetNodeProfile.Addresses)
+                    {
+                        var connection = await _connectionController.ConnectAsync(targetAddress, ServiceName, cancellationToken);
+                        if (connection != null)
+                        {
+                            if (await this.TryAddConnectionAsync(connection, targetAddress, ConnectionHandshakeType.Connected, cancellationToken))
+                            {
+                                succeeded = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (succeeded)
+                    {
+                        this.RefreshCloudNodeProfile(targetNodeProfile);
+                    }
+                    else
+                    {
+                        this.RemoveCloudNodeProfile(targetNodeProfile);
+                    }
                 }
             }
             catch (OperationCanceledException e)
@@ -116,20 +296,135 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        private Task AcceptLoopAsync(CancellationToken cancellationToken)
+        private async Task AcceptLoopAsync(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var random = new Random();
+
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    await Task.Delay(1000, cancellationToken);
+
+                    lock (_lockObject)
+                    {
+                        int connectionCount = _connectionStatusSet.Select(n => n.HandshakeType == ConnectionHandshakeType.Accepted).Count();
+
+                        if (_connectionStatusSet.Count > (_options.MaxConnectionCount / 2))
+                        {
+                            continue;
+                        }
+                    }
+
+                    var result = await _connectionController.AcceptAsync(ServiceName, cancellationToken);
+                    if (result.Connection != null && result.Address != null)
+                    {
+                        await this.TryAddConnectionAsync(result.Connection, result.Address, ConnectionHandshakeType.Accepted, cancellationToken);
+                    }
+                }
+            }
+            catch (OperationCanceledException e)
+            {
+                _logger.Debug(e);
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e);
+            }
         }
 
-        private Task SendLoopAsync(CancellationToken cancellationToken)
+        private async Task SendLoopAsync(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                for (; ; )
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+
+                    foreach (var connectionStatus in _connectionStatusSet.ToArray())
+                    {
+                        lock (connectionStatus.LockObject)
+                        {
+                            if (connectionStatus.SendingDataMessage != null)
+                            {
+                                connectionStatus.Connection.TryEnqueue(bufferWriter =>
+                                {
+                                    connectionStatus.SendingDataMessage.Export(bufferWriter, _bytesPool);
+                                    connectionStatus.SendingDataMessage = null;
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (OperationCanceledException e)
+            {
+                _logger.Debug(e);
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e);
+            }
         }
 
-        private Task ReceiveLoopAsync(CancellationToken cancellationToken)
+        private async Task ReceiveLoopAsync(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                for (; ; )
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+
+                    foreach (var connectionStatus in _connectionStatusSet.ToArray())
+                    {
+                        NodeExplorerDataMessage? dataMessage = null;
+
+                        connectionStatus.Connection.TryDequeue((sequence) =>
+                        {
+                            dataMessage = NodeExplorerDataMessage.Import(sequence, _bytesPool);
+                        });
+
+                        if (dataMessage == null)
+                        {
+                            continue;
+                        }
+
+                        await this.AddCloudNodeProfiles(dataMessage.PushNodeProfiles);
+
+                        lock (connectionStatus.LockObject)
+                        {
+                            connectionStatus.ReceivedWantContentLocations.UnionWith(dataMessage.WantContentLocations);
+                        }
+
+                        lock (_lockObject)
+                        {
+                            foreach (var contentLocation in dataMessage.PushContentLocations)
+                            {
+                                _receivedPushContentLocationMap.AddRange(contentLocation.Tag, contentLocation.NodeProfiles);
+                            }
+
+                            foreach (var contentLocation in dataMessage.GiveContentLocations)
+                            {
+                                _receivedGiveContentLocationMap.AddRange(contentLocation.Tag, contentLocation.NodeProfiles);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (OperationCanceledException e)
+            {
+                _logger.Debug(e);
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e);
+            }
         }
+
 
         private async Task ComputeLoopAsync(CancellationToken cancellationToken)
         {

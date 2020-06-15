@@ -7,13 +7,15 @@ using Omnius.Xeus.Service.Engines;
 
 namespace Omnius.Xeus.Service.Engines.Internal
 {
-    internal enum NodeExplorerVersion : byte
+    internal enum NodeExplorerVersion : sbyte
     {
+        Unknown = 0,
         Version1 = 1,
     }
 
     internal enum BlockExchangerVersion : byte
     {
+        Unknown = 0,
         Version1 = 1,
     }
 
@@ -698,7 +700,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                     w.Write((uint)value.Versions.Count);
                     foreach (var n in value.Versions)
                     {
-                        w.Write((ulong)n);
+                        w.Write((long)n);
                     }
                 }
             }
@@ -722,7 +724,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                                 p_versions = new NodeExplorerVersion[length];
                                 for (int i = 0; i < p_versions.Length; i++)
                                 {
-                                    p_versions[i] = (NodeExplorerVersion)r.GetUInt64();
+                                    p_versions[i] = (NodeExplorerVersion)r.GetInt64();
                                 }
                                 break;
                             }

@@ -122,7 +122,7 @@ namespace Omnius.Xeus.Service.Engines
 
         }
 
-        public async ValueTask<NodeProfile[]> FindNodeProfiles(OmniHash tag, CancellationToken cancellationToken = default)
+        public async ValueTask<NodeProfile[]> FindNodeProfiles(string serviceId, OmniHash tag, CancellationToken cancellationToken = default)
         {
             lock (_lockObject)
             {
@@ -142,15 +142,15 @@ namespace Omnius.Xeus.Service.Engines
                     }
                 }
 
-                return result.ToArray();
+                return result.Where(n => n.ServiceIds.Any(m => m == serviceId)).ToArray();
             }
         }
 
         public async ValueTask<NodeProfile> GetMyNodeProfile(CancellationToken cancellationToken = default)
         {
             var addresses = await _connectionController.GetListenEndpointsAsync(cancellationToken);
-            var services = new[] { NodeExplorer.ServiceName, BlockExchanger.ServiceName };
-            var myNodeProflie = new NodeProfile(addresses, services);
+            var serviceIds = new[] { NodeExplorer.ServiceName, BlockExchanger.ServiceName };
+            var myNodeProflie = new NodeProfile(serviceIds, addresses);
             return myNodeProflie;
         }
 
@@ -243,9 +243,7 @@ namespace Omnius.Xeus.Service.Engines
                     ReadOnlyMemory<byte> id;
                     NodeProfile? nodeProfile = null;
                     {
-                        var addresses = await _connectionController.GetListenEndpointsAsync(cancellationToken);
-                        var services = new[] { NodeExplorer.ServiceName, BlockExchanger.ServiceName };
-                        var myNodeProflie = new NodeProfile(addresses, services);
+                        var myNodeProflie = await this.GetMyNodeProfile();
 
                         var myProfileMessage = new NodeExplorerProfileMessage(_myId, myNodeProflie);
                         NodeExplorerProfileMessage? otherProfileMessage = null;

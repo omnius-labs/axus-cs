@@ -32,7 +32,7 @@ table BlocksFilter {
 
 /* Messages */
 
-enum NodeExplorerVersion : uint8 {
+enum NodeExplorerVersion : int8 {
     Unknown = 0,
     Version1 = 1,
 }

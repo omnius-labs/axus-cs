@@ -17,7 +17,7 @@ namespace Omnius.Xeus.Service.Engines
     public interface INodeExplorer
     {
         ValueTask AddCloudNodeProfiles(IEnumerable<NodeProfile> nodeProfiles, CancellationToken cancellationToken = default);
-        ValueTask<NodeProfile[]> FindNodeProfiles(OmniHash tag, CancellationToken cancellationToken = default);
+        ValueTask<NodeProfile[]> FindNodeProfiles(string serviceId, OmniHash tag, CancellationToken cancellationToken = default);
         ValueTask<NodeProfile> GetMyNodeProfile(CancellationToken cancellationToken = default);
     }
 }

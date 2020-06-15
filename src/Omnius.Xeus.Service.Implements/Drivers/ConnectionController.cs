@@ -74,20 +74,20 @@ namespace Omnius.Xeus.Service.Drivers
             await _baseConnectionDispatcher.DisposeAsync();
         }
 
-        private Channel<ConnectionControllerAcceptResult>? GetAcceptedConnectionChannel(string serviceName, bool createIfNotFound)
+        private Channel<ConnectionControllerAcceptResult>? GetAcceptedConnectionChannel(string serviceId, bool createIfNotFound)
         {
             if (createIfNotFound)
             {
-                return _acceptedConnectionChannels.GetOrAdd(serviceName, (_) => Channel.CreateBounded<ConnectionControllerAcceptResult>(new BoundedChannelOptions(3) { FullMode = BoundedChannelFullMode.Wait }));
+                return _acceptedConnectionChannels.GetOrAdd(serviceId, (_) => Channel.CreateBounded<ConnectionControllerAcceptResult>(new BoundedChannelOptions(3) { FullMode = BoundedChannelFullMode.Wait }));
             }
             else
             {
-                _acceptedConnectionChannels.TryGetValue(serviceName, out var result);
+                _acceptedConnectionChannels.TryGetValue(serviceId, out var result);
                 return result;
             }
         }
 
-        private async ValueTask<IConnection?> InternalConnectAsync(ICap cap, string serviceName, CancellationToken cancellationToken)
+        private async ValueTask<IConnection?> InternalConnectAsync(ICap cap, string serviceId, CancellationToken cancellationToken)
         {
             using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             linkedTokenSource.CancelAfter(TimeSpan.FromSeconds(20));
@@ -109,7 +109,7 @@ namespace Omnius.Xeus.Service.Drivers
 
             await omniSecureConnection.HandshakeAsync(linkedTokenSource.Token);
 
-            var helloMessage = new ConnectionHelloMessage(serviceName);
+            var helloMessage = new ConnectionHelloMessage(serviceId);
             await omniSecureConnection.EnqueueAsync((bufferWriter) => helloMessage.Export(bufferWriter, _bytesPool), linkedTokenSource.Token);
 
             return omniSecureConnection;
@@ -156,10 +156,10 @@ namespace Omnius.Xeus.Service.Drivers
                     var (cap, address) = await _tcpConnector.AcceptAsync(cancellationToken);
                     if (cap == null || address == null) continue;
 
-                    var (connection, serviceName) = await this.InternalAcceptAsync(cap, cancellationToken);
-                    if (connection == null || serviceName == null) continue;
+                    var (connection, serviceId) = await this.InternalAcceptAsync(cap, cancellationToken);
+                    if (connection == null || serviceId == null) continue;
 
-                    var channel = this.GetAcceptedConnectionChannel(serviceName, false);
+                    var channel = this.GetAcceptedConnectionChannel(serviceId, false);
                     if (channel == null)
                     {
                         connection.Dispose();
@@ -181,22 +181,22 @@ namespace Omnius.Xeus.Service.Drivers
             }
         }
 
-        public async ValueTask<IConnection?> ConnectAsync(OmniAddress address, string serviceName, CancellationToken cancellationToken = default)
+        public async ValueTask<IConnection?> ConnectAsync(OmniAddress address, string serviceId, CancellationToken cancellationToken = default)
         {
             var cap = await _tcpConnector.ConnectAsync(address, cancellationToken);
 
             if (cap != null)
             {
-                var connection = await this.InternalConnectAsync(cap, serviceName, cancellationToken);
+                var connection = await this.InternalConnectAsync(cap, serviceId, cancellationToken);
                 return connection;
             }
 
             return null;
         }
 
-        public async ValueTask<ConnectionControllerAcceptResult> AcceptAsync(string serviceName, CancellationToken cancellationToken = default)
+        public async ValueTask<ConnectionControllerAcceptResult> AcceptAsync(string serviceId, CancellationToken cancellationToken = default)
         {
-            var channel = this.GetAcceptedConnectionChannel(serviceName, true);
+            var channel = this.GetAcceptedConnectionChannel(serviceId, true);
             return await channel!.Reader.ReadAsync(cancellationToken);
         }
 

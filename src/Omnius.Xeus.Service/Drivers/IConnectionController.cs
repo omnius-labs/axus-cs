@@ -28,8 +28,8 @@ namespace Omnius.Xeus.Service.Drivers
 
     public interface IConnectionController : IAsyncDisposable
     {
-        ValueTask<IConnection?> ConnectAsync(OmniAddress address, string serviceType, CancellationToken cancellationToken = default);
-        ValueTask<ConnectionControllerAcceptResult> AcceptAsync(string serviceType, CancellationToken cancellationToken = default);
+        ValueTask<IConnection?> ConnectAsync(OmniAddress address, string serviceId, CancellationToken cancellationToken = default);
+        ValueTask<ConnectionControllerAcceptResult> AcceptAsync(string serviceId, CancellationToken cancellationToken = default);
         ValueTask<OmniAddress[]> GetListenEndpointsAsync(CancellationToken cancellationToken = default);
     }
 }
