@@ -2,12 +2,14 @@ using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Extensions;
+using Omnius.Core.Helpers;
 using Omnius.Core.Network;
 using Omnius.Core.Network.Connections;
 using Omnius.Xeus.Service.Drivers;
@@ -15,7 +17,7 @@ using Omnius.Xeus.Service.Engines.Internal;
 
 namespace Omnius.Xeus.Service.Engines
 {
-    public sealed partial class BlockExchanger : AsyncDisposableBase, IBlockExchanger
+    public sealed partial class BlockExchanger : AsyncDisposableBase, IContentExchanger
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -24,8 +26,8 @@ namespace Omnius.Xeus.Service.Engines
         private readonly IObjectStoreFactory _objectStoreFactory;
         private readonly IConnectionController _connectionController;
         private readonly INodeExplorer _nodeExplorer;
-        private readonly IPublishStorage _publishStorage;
-        private readonly IWantStorage _wantStorage;
+        private readonly IPublishContentStorage _publishStorage;
+        private readonly IWantContentStorage _wantStorage;
         private readonly IBytesPool _bytesPool;
 
         private IObjectStore _objectStore;
@@ -44,13 +46,13 @@ namespace Omnius.Xeus.Service.Engines
         private readonly object _lockObject = new object();
         private readonly AsyncLock _asyncLock = new AsyncLock();
 
-        public const string ServiceName = "BlockExchanger`";
+        public const string ServiceName = "block-exchanger`";
 
-        internal sealed class BlockExchangerFactory : IBlockExchangerFactory
+        internal sealed class BlockExchangerFactory : IContentExchangerFactory
         {
-            public async ValueTask<IBlockExchanger> CreateAsync(string configPath, BlockExchangerOptions options,
+            public async ValueTask<IContentExchanger> CreateAsync(string configPath, BlockExchangerOptions options,
                 IObjectStoreFactory objectStoreFactory, IConnectionController connectionController,
-                INodeExplorer nodeExplorer, IPublishStorage publishStorage, IWantStorage wantStorage, IBytesPool bytesPool)
+                INodeExplorer nodeExplorer, IPublishContentStorage publishStorage, IWantContentStorage wantStorage, IBytesPool bytesPool)
             {
                 var result = new BlockExchanger(configPath, options, objectStoreFactory, connectionController, nodeExplorer, publishStorage, wantStorage, bytesPool);
                 await result.InitAsync();
@@ -59,11 +61,11 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public static IBlockExchangerFactory Factory { get; } = new BlockExchangerFactory();
+        public static IContentExchangerFactory Factory { get; } = new BlockExchangerFactory();
 
         internal BlockExchanger(string configPath, BlockExchangerOptions options,
                 IObjectStoreFactory objectStoreFactory, IConnectionController connectionController,
-                INodeExplorer nodeExplorer, IPublishStorage publishStorage, IWantStorage wantStorage, IBytesPool bytesPool)
+                INodeExplorer nodeExplorer, IPublishContentStorage publishStorage, IWantContentStorage wantStorage, IBytesPool bytesPool)
         {
             _configPath = configPath;
             _options = options;
@@ -108,45 +110,17 @@ namespace Omnius.Xeus.Service.Engines
 
         }
 
-        private async ValueTask<bool> TryAddConnectionAsync(IConnection connection, OmniAddress address, ConnectionHandshakeType handshakeType, OmniHash tag, CancellationToken cancellationToken = default)
+        private async ValueTask<bool> TryAddConnectedConnectionAsync(IConnection connection, OmniAddress address, ConnectionHandshakeType handshakeType, OmniHash tag, CancellationToken cancellationToken = default)
         {
-            // kademliaのk-bucketの距離毎のノード数は最大20とする。(k=20)
-            bool CanAppend(ReadOnlySpan<byte> id)
-            {
-                lock (_lockObject)
-                {
-                    var appendingNodeDistance = Kademlia.Distance(_myId.Span, id);
-
-                    var map = new Dictionary<int, int>();
-                    foreach (var connectionStatus in _connectionStatusSet)
-                    {
-                        var nodeDistance = Kademlia.Distance(_myId.Span, id);
-                        map.TryGetValue(nodeDistance, out int count);
-                        count++;
-                        map[nodeDistance] = count;
-                    }
-
-                    {
-                        map.TryGetValue(appendingNodeDistance, out int count);
-                        if (count > MaxBucketLength)
-                        {
-                            return false;
-                        }
-                    }
-
-                    return true;
-                }
-            }
-
             try
             {
-                NodeExplorerVersion? version = 0;
+                BlockExchangerVersion? version = 0;
                 {
-                    var myHelloMessage = new NodeExplorerHelloMessage(new[] { NodeExplorerVersion.Version1 });
-                    NodeExplorerHelloMessage? otherHelloMessage = null;
+                    var myHelloMessage = new BlockExchangerHelloMessage(new[] { BlockExchangerVersion.Version1 });
+                    BlockExchangerHelloMessage? otherHelloMessage = null;
 
                     var enqueueTask = connection.EnqueueAsync((bufferWriter) => myHelloMessage.Export(bufferWriter, _bytesPool), cancellationToken);
-                    var dequeueTask = connection.DequeueAsync((sequence) => otherHelloMessage = NodeExplorerHelloMessage.Import(sequence, _bytesPool), cancellationToken);
+                    var dequeueTask = connection.DequeueAsync((sequence) => otherHelloMessage = BlockExchangerHelloMessage.Import(sequence, _bytesPool), cancellationToken);
 
                     await ValueTaskHelper.WhenAll(enqueueTask, dequeueTask);
                     if (otherHelloMessage == null) throw new Exception();
@@ -154,7 +128,7 @@ namespace Omnius.Xeus.Service.Engines
                     version = EnumHelper.GetOverlappedMaxValue(myHelloMessage.Versions, otherHelloMessage.Versions);
                 }
 
-                if (version == NodeExplorerVersion.Version1)
+                if (version == BlockExchangerVersion.Version1)
                 {
                     ReadOnlyMemory<byte> id;
                     NodeProfile? nodeProfile = null;
@@ -236,7 +210,17 @@ namespace Omnius.Xeus.Service.Engines
                         var nodeProfiles = await _nodeExplorer.FindNodeProfiles(BlockExchanger.ServiceName, wantReport.Tag, cancellationToken);
                         _random.Shuffle(nodeProfiles);
 
-                        targetNodeProfile = nodeProfiles.FirstOrDefault();
+                        lock (_lockObject)
+                        {
+                            var ignoreAddressSet = new HashSet<OmniAddress>(_connectionStatusSet.Select(n => n.Address));
+
+                            foreach (var nodeProfile in nodeProfiles)
+                            {
+                                if (nodeProfile.Addresses.Any(n => ignoreAddressSet.Contains(n))) continue;
+                                targetNodeProfile = nodeProfile;
+                                break;
+                            }
+                        }
 
                         if (targetNodeProfile != null)
                         {
@@ -244,24 +228,7 @@ namespace Omnius.Xeus.Service.Engines
                         }
                     }
 
-                    lock (_lockObject)
-                    {
-                        var nodeProfiles = _cloudNodeProfiles.ToArray();
-                        random.Shuffle(nodeProfiles);
-
-                        var ignoreAddressSet = new HashSet<OmniAddress>(_connectionStatusSet.Select(n => n.Address));
-
-                        foreach (var nodeProfile in nodeProfiles)
-                        {
-                            if (nodeProfile.Addresses.Any(n => ignoreAddressSet.Contains(n))) continue;
-                            targetNodeProfile = nodeProfile;
-                            break;
-                        }
-                    }
-
                     if (targetNodeProfile == null) continue;
-
-                    bool succeeded = false;
 
                     foreach (var targetAddress in targetNodeProfile.Addresses)
                     {
@@ -270,19 +237,9 @@ namespace Omnius.Xeus.Service.Engines
                         {
                             if (await this.TryAddConnectionAsync(connection, targetAddress, ConnectionHandshakeType.Connected, cancellationToken))
                             {
-                                succeeded = true;
                                 break;
                             }
                         }
-                    }
-
-                    if (succeeded)
-                    {
-                        this.RefreshCloudNodeProfile(targetNodeProfile);
-                    }
-                    else
-                    {
-                        this.RemoveCloudNodeProfile(targetNodeProfile);
                     }
                 }
             }

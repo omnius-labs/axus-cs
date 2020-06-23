@@ -6,12 +6,11 @@ using System.Threading.Tasks;
 using Omnius.Core.Cryptography;
 using Omnius.Xeus.Service.Engines;
 
-namespace Omnius.Xeus.Service.Engines.Primitives
+namespace Omnius.Xeus.Service.Engines
 {
-    public interface IReadOnlyStorage
+    public interface IReadOnlyContentStorage
     {
         ValueTask CheckConsistencyAsync(Action<ConsistencyReport> callback, CancellationToken cancellationToken = default);
-
         ValueTask<IMemoryOwner<byte>?> ReadAsync(OmniHash rootHash, OmniHash targetHash, CancellationToken cancellationToken = default);
     }
 }

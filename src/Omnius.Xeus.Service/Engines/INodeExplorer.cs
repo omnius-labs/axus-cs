@@ -1,23 +1,25 @@
-using System.Threading.Tasks;
-using Omnius.Core;
+using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
+using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Xeus.Service.Drivers;
 
 namespace Omnius.Xeus.Service.Engines
 {
-    public interface INodeExplorerFactory
+    public interface INodeFinderFactory
     {
-        ValueTask<INodeExplorer> CreateAsync(string configPath, NodeExplorerOptions options,
+        ValueTask<INodeFinder> CreateAsync(NodeFinderOptions options,
             IObjectStoreFactory objectStoreFactory, IConnectionController connectionController,
-            IPublishStorage publishStorage, IWantStorage wantStorage, IBytesPool bytesPool);
+            IEnumerable<IPublishStorage> publishStorages, IEnumerable<IWantStorage> wantStorages,
+            IBytesPool bytesPool);
     }
 
-    public interface INodeExplorer
+    public interface INodeFinder
     {
-        ValueTask AddCloudNodeProfiles(IEnumerable<NodeProfile> nodeProfiles, CancellationToken cancellationToken = default);
-        ValueTask<NodeProfile[]> FindNodeProfiles(string serviceId, OmniHash tag, CancellationToken cancellationToken = default);
         ValueTask<NodeProfile> GetMyNodeProfile(CancellationToken cancellationToken = default);
+        ValueTask AddCloudNodeProfiles(IEnumerable<NodeProfile> nodeProfiles, CancellationToken cancellationToken = default);
+        ValueTask<NodeProfile[]> FindNodeProfiles(OmniHash tag, string serviceId, CancellationToken cancellationToken = default);
     }
 }

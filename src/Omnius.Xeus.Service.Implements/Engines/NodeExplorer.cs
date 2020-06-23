@@ -26,8 +26,8 @@ namespace Omnius.Xeus.Service.Engines
         private readonly NodeExplorerOptions _options;
         private readonly IObjectStoreFactory _objectStoreFactory;
         private readonly IConnectionController _connectionController;
-        private readonly IPublishStorage _publishStorage;
-        private readonly IWantStorage _wantStorage;
+        private readonly IPublishContentStorage _publishStorage;
+        private readonly IWantContentStorage _wantStorage;
         private readonly IBytesPool _bytesPool;
 
         private readonly ReadOnlyMemory<byte> _myId;
@@ -51,13 +51,13 @@ namespace Omnius.Xeus.Service.Engines
 
         private const int MaxBucketLength = 20;
 
-        public const string ServiceName = "NodeExplorer`";
+        public const string ServiceName = "node-explorer`";
 
         internal sealed class NodeExplorerFactory : INodeExplorerFactory
         {
             public async ValueTask<INodeExplorer> CreateAsync(string configPath, NodeExplorerOptions options,
                 IObjectStoreFactory objectStoreFactory, IConnectionController connectionController,
-                IPublishStorage publishStorage, IWantStorage wantStorage, IBytesPool bytesPool)
+                IPublishContentStorage publishStorage, IWantContentStorage wantStorage, IBytesPool bytesPool)
             {
                 var result = new NodeExplorer(configPath, options, objectStoreFactory, connectionController, publishStorage, wantStorage, bytesPool);
                 await result.InitAsync();
@@ -70,7 +70,7 @@ namespace Omnius.Xeus.Service.Engines
 
         internal NodeExplorer(string configPath, NodeExplorerOptions options,
                 IObjectStoreFactory objectStoreFactory, IConnectionController connectionController,
-                IPublishStorage publishStorage, IWantStorage wantStorage, IBytesPool bytesPool)
+                IPublishContentStorage publishStorage, IWantContentStorage wantStorage, IBytesPool bytesPool)
         {
             _configPath = configPath;
             _options = options;

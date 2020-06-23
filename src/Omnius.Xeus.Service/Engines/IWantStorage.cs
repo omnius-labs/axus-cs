@@ -7,26 +7,11 @@ using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Xeus.Service.Drivers;
-using Omnius.Xeus.Service.Engines.Primitives;
 
 namespace Omnius.Xeus.Service.Engines
 {
-
-    public interface IWantStorageFactory
+    public interface IWantStorage
     {
-        ValueTask<IWantStorage> CreateAsync(string configPath, WantStorageOptions options,
-            IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool);
-    }
-
-    public interface IWantStorage : IWritableStorage
-    {
-        ValueTask<WantReport[]> GetReportsAsync(CancellationToken cancellationToken = default);
-
-        ValueTask WantAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
-
-        ValueTask UnwantAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
-
-        ValueTask ExportAsync(OmniHash rootHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default);
-        ValueTask ExportAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default);
+        ValueTask<Tag[]> GetWantTagsAsync(CancellationToken cancellationToken = default);
     }
 }

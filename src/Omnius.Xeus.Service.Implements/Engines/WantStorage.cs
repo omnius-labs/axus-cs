@@ -16,7 +16,7 @@ using Omnius.Xeus.Service.Drivers;
 
 namespace Omnius.Xeus.Service.Engines
 {
-    public sealed class WantStorage : AsyncDisposableBase, IWantStorage
+    public sealed class WantStorage : AsyncDisposableBase, IWantContentStorage
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -29,9 +29,9 @@ namespace Omnius.Xeus.Service.Engines
 
         const int MaxBlockLength = 1 * 1024 * 1024;
 
-        internal sealed class WantStorageFactory : IWantStorageFactory
+        internal sealed class WantStorageFactory : IWantContentStorageFactory
         {
-            public async ValueTask<IWantStorage> CreateAsync(string configPath, WantStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
+            public async ValueTask<IWantContentStorage> CreateAsync(string configPath, WantStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
             {
                 var result = new WantStorage(configPath, options, objectStoreFactory, bytesPool);
                 await result.InitAsync();
@@ -40,7 +40,7 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public static IWantStorageFactory Factory { get; } = new WantStorageFactory();
+        public static IWantContentStorageFactory Factory { get; } = new WantStorageFactory();
 
         internal WantStorage(string configPath, WantStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
         {

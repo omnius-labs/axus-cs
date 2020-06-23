@@ -20,63 +20,68 @@ table ContentLocation {
     NodeProfiles: vector<NodeProfile>(capacity: 8192) = 1,
 }
 
-table Block {
+table ContentBlock {
     Tag: OmniHash = 0,
     Value: bytes(capacity: 4194304, recyclable: true) = 1,
 }
 
-table BlocksFilter {
-    FalsePositiveRate: int32 = 0,
-    GolombCodedSet: bytes(capacity: 4194304, recyclable: true) = 1,
+table ContentBlockFlags {
+    Depth: int32 = 0,
+    Flags: bytes(capacity: 4194304, recyclable: true) = 1,
 }
 
 /* Messages */
 
-enum NodeExplorerVersion : int8 {
+enum NodeFinderVersion : int8 {
     Unknown = 0,
     Version1 = 1,
 }
 
-table NodeExplorerHelloMessage {
-    Versions: vector<NodeExplorerVersion>(capacity: 32) = 0,
+table NodeFinderHelloMessage {
+    Versions: vector<NodeFinderVersion>(capacity: 32) = 0,
 }
 
-table NodeExplorerProfileMessage {
+table NodeFinderProfileMessage {
     Id: bytes(capacity: 32) = 0,
     NodeProfile: NodeProfile = 1,
 }
 
-table NodeExplorerDataMessage {
+table NodeFinderDataMessage {
     PushNodeProfiles: vector<NodeProfile>(capacity: 256) = 0,
     PushContentLocations: vector<ContentLocation>(capacity: 256) = 1,
     WantContentLocations: vector<OmniHash>(capacity: 256) = 2,
     GiveContentLocations: vector<ContentLocation>(capacity: 256) = 3,
 }
 
-enum BlockExchangerVersion : uint8 {
+enum ContentExchangerVersion : uint8 {
     Unknown = 0,
     Version1 = 1,
 }
 
-table BlockExchangerHelloMessage {
-    Versions: vector<BlockExchangerVersion>(capacity: 32) = 0,
+table ContentExchangerHelloMessage {
+    Versions: vector<ContentExchangerVersion>(capacity: 32) = 0,
 }
 
-table BlockExchangerProfileMessage {
+table ContentExchangerRequestMessage {
     Tag: OmniHash = 0,
     NodeProfile: NodeProfile = 1,
 }
 
-table BlockExchangerDataMessage {
+table ContentExchangerResponseMessage {
+    Tag: OmniHash = 0,
+    NodeProfile: NodeProfile = 1,
+}
+
+table ContentExchangerDataMessage {
     PushNodeProfiles: vector<NodeProfile>(capacity: 256) = 0,
-    WantBlocks: vector<OmniHash>(capacity: 256) = 1,
-    CancelBlocks: vector<OmniHash>(capacity: 256) = 2,
-    OwnedBlocksFilter: BlocksFilter = 3,
-    GiveBlocks: vector<Block>(capacity: 8) = 4,
+    ContentBlockFlags: vector<ContentBlockFlags>(capacity: 32) = 1,
+    WantContentBlocks: vector<OmniHash>(capacity: 256) = 2,
+    CancelContentBlocks: vector<OmniHash>(capacity: 256) = 3,
+    GiveContentBlocks: vector<ContentBlock>(capacity: 8) = 4,
 }
 
 /* Configs */
 
-table NodeExplorerConfig {
+table NodeFinderConfig {
     NodeProfileMap: map<NodeProfile, timestamp>(capacity: 1073741824) = 0,
 }

@@ -3,9 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core.Cryptography;
 
-namespace Omnius.Xeus.Service.Engines.Primitives
+namespace Omnius.Xeus.Service.Engines
 {
-    public interface IWritableStorage : IReadOnlyStorage
+    public interface IWritableContentStorage : IReadOnlyContentStorage
     {
         ValueTask WriteAsync(OmniHash rootHash, OmniHash targetHash, ReadOnlyMemory<byte> memory, CancellationToken cancellationToken = default);
     }

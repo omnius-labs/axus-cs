@@ -16,8 +16,7 @@ namespace Omnius.Xeus.Service.Drivers
     public interface IObjectStore : IAsyncDisposable
     {
         IAsyncEnumerable<string> GetKeysAsync(CancellationToken cancellationToken = default);
-        ValueTask DeleteKeyAsync(string key, CancellationToken cancellationToken = default);
-
+        ValueTask DeleteAsync(string key, CancellationToken cancellationToken = default);
         ValueTask<T> ReadAsync<T>(string key, CancellationToken cancellationToken = default) where T : IRocketPackObject<T>;
         ValueTask WriteAsync<T>(string key, T value, CancellationToken cancellationToken = default) where T : IRocketPackObject<T>;
     }

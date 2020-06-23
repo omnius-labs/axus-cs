@@ -17,7 +17,7 @@ using Omnius.Xeus.Service.Engines.Internal;
 
 namespace Omnius.Xeus.Service.Engines
 {
-    public sealed class PublishStorage : AsyncDisposableBase, IPublishStorage
+    public sealed class PublishStorage : AsyncDisposableBase, IPublishContentStorage
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -31,9 +31,9 @@ namespace Omnius.Xeus.Service.Engines
 
         private readonly AsyncLock _asyncLock = new AsyncLock();
 
-        internal sealed class PublishStorageFactory : IPublishStorageFactory
+        internal sealed class PublishStorageFactory : IPublishContentStorageFactory
         {
-            public async ValueTask<IPublishStorage> CreateAsync(string configPath, PublishStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
+            public async ValueTask<IPublishContentStorage> CreateAsync(string configPath, PublishStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
             {
                 var result = new PublishStorage(configPath, options, objectStoreFactory, bytesPool);
                 await result.InitAsync();
@@ -42,7 +42,7 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public static IPublishStorageFactory Factory { get; } = new PublishStorageFactory();
+        public static IPublishContentStorageFactory Factory { get; } = new PublishStorageFactory();
 
         internal PublishStorage(string configPath, PublishStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
         {

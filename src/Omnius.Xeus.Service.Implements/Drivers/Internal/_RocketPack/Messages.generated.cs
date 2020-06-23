@@ -19,24 +19,24 @@ namespace Omnius.Xeus.Service.Drivers.Internal
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public static readonly int MaxServiceIdLength = 256;
+        public static readonly int MaxServiceLength = 256;
 
-        public ConnectionHelloMessage(string serviceId)
+        public ConnectionHelloMessage(string service)
         {
-            if (serviceId is null) throw new global::System.ArgumentNullException("serviceId");
-            if (serviceId.Length > 256) throw new global::System.ArgumentOutOfRangeException("serviceId");
+            if (service is null) throw new global::System.ArgumentNullException("service");
+            if (service.Length > 256) throw new global::System.ArgumentOutOfRangeException("service");
 
-            this.ServiceId = serviceId;
+            this.Service = service;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (serviceId != default) ___h.Add(serviceId.GetHashCode());
+                if (service != default) ___h.Add(service.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public string ServiceId { get; }
+        public string Service { get; }
 
         public static ConnectionHelloMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -66,7 +66,7 @@ namespace Omnius.Xeus.Service.Drivers.Internal
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.ServiceId != target.ServiceId) return false;
+            if (this.Service != target.Service) return false;
 
             return true;
         }
@@ -80,17 +80,17 @@ namespace Omnius.Xeus.Service.Drivers.Internal
 
                 {
                     uint propertyCount = 0;
-                    if (value.ServiceId != string.Empty)
+                    if (value.Service != string.Empty)
                     {
                         propertyCount++;
                     }
                     w.Write(propertyCount);
                 }
 
-                if (value.ServiceId != string.Empty)
+                if (value.Service != string.Empty)
                 {
                     w.Write((uint)0);
-                    w.Write(value.ServiceId);
+                    w.Write(value.Service);
                 }
             }
 
@@ -100,7 +100,7 @@ namespace Omnius.Xeus.Service.Drivers.Internal
 
                 uint propertyCount = r.GetUInt32();
 
-                string p_serviceId = string.Empty;
+                string p_service = string.Empty;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -109,13 +109,13 @@ namespace Omnius.Xeus.Service.Drivers.Internal
                     {
                         case 0:
                             {
-                                p_serviceId = r.GetString(256);
+                                p_service = r.GetString(256);
                                 break;
                             }
                     }
                 }
 
-                return new ConnectionHelloMessage(p_serviceId);
+                return new ConnectionHelloMessage(p_service);
             }
         }
     }
