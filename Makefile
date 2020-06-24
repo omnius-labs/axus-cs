@@ -7,7 +7,7 @@ gen-code:
 test:
 	sh ./eng/test.sh
 
-update:
+update: format
 	sh ./eng/update-submodule.sh
 	sh ./eng/update-tools.sh
 
@@ -20,4 +20,4 @@ clean:
 	rm -rf ./tmp
 	rm -rf ./pub
 
-.PHONY: all test clean
+.PHONY: init-tools gen-code test update format clean

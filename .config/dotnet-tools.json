@@ -3,19 +3,19 @@
   "isRoot": true,
   "tools": {
     "dotnet-format": {
-      "version": "3.3.111304",
+      "version": "4.1.131201",
       "commands": [
         "dotnet-format"
       ]
     },
     "coverlet.console": {
-      "version": "1.7.1",
+      "version": "1.7.2",
       "commands": [
         "coverlet"
       ]
     },
     "dotnet-reportgenerator-globaltool": {
-      "version": "4.5.3",
+      "version": "4.6.1",
       "commands": [
         "reportgenerator"
       ]

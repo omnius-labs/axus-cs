@@ -16,13 +16,13 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 3.1.201
-      - name: Security Update
+      - name: Update
         run: make update
       - name: Create Pull-Request
         uses: peter-evans/create-pull-request@v2
         with:
-          title: Security Update into develop.
-          branch: security-fix
+          title: Update into develop.
+          branch: update
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2.0.0
@@ -30,7 +30,8 @@ jobs:
           SLACK_CHANNEL: general
           SLACK_COLOR: "#3278BD"
           #SLACK_ICON:
-          SLACK_MESSAGE: "Security Update into develop"
+          SLACK_ICON_EMOJI: ":four_leaf_clover:"
+          SLACK_MESSAGE: "Update into develop"
           SLACK_TITLE: GitHub Action
           SLACK_USERNAME: GitHub Action
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
