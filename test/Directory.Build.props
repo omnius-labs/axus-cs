@@ -4,7 +4,7 @@
   <Import Project="..\Directory.Build.props" Condition="Exists('..\Directory.Build.props')" />
 
   <ItemGroup>
-    <PackageReference Include="coverlet.msbuild" Version="2.7.0">
+    <PackageReference Include="coverlet.msbuild" Version="2.9.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
