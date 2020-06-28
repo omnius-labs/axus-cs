@@ -234,7 +234,7 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public async ValueTask<PublishReport[]> GetReportsAsync([EnumeratorCancellation]CancellationToken cancellationToken = default)
+        public async ValueTask<PublishReport[]> GetReportsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
