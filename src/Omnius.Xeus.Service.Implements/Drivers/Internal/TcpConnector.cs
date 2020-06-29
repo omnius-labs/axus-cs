@@ -527,7 +527,7 @@ namespace Omnius.Xeus.Service.Drivers.Internal
             }
         }
 
-        public async ValueTask<OmniAddress[]> GetListenEndpointsAsync([EnumeratorCancellation]CancellationToken cancellationToken = default)
+        public async ValueTask<OmniAddress[]> GetListenEndpointsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {

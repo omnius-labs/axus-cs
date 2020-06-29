@@ -159,7 +159,7 @@ namespace Omnius.Xeus.Service.Engines
             throw new NotImplementedException();
         }
 
-        public async ValueTask<WantReport[]> GetReportsAsync([EnumeratorCancellation]CancellationToken cancellationToken = default)
+        public async ValueTask<WantReport[]> GetReportsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
