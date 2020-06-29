@@ -18,6 +18,15 @@ table Tag {
     Hash: OmniHash = 1,
 }
 
+table DeclaredMessage {
+    Value: bytes(capacity: 4194304) = 0,
+}
+
+table OrientedMessage {
+    Tag: Tag = 0,
+    Value: bytes(capacity: 4194304) = 1,
+}
+
 /* Optinos */
 
 table NodeFinderOptions {
@@ -35,7 +44,7 @@ table WantContentStorageOptions {
 
 table ContentExchangerOptions {
     ConfigPath: string(capacity: 1024) = 0,
-    MaxConnectionCount: uint32 = 0,
+    MaxConnectionCount: uint32 = 1,
 }
 
 table PublishMessageStorageOptions {
@@ -48,7 +57,7 @@ table WantMessageStorageOptions {
 
 table MessageExchangerOptions {
     ConfigPath: string(capacity: 1024) = 0,
-    MaxConnectionCount: uint32 = 0,
+    MaxConnectionCount: uint32 = 1,
 }
 
 /* Reports */
@@ -70,18 +79,18 @@ table ConnectionReport {
     Endpoint: OmniAddress = 1,
 }
 
-table PublishContentReport {
+table PublishContentStorageReport {
     Tag: OmniHash = 0,
 }
 
-table WantContentReport {
+table WantContentStorageReport {
     Tag: OmniHash = 0,
 }
 
-table PublishMessageReport {
+table PublishMessageStorageReport {
     Tag: OmniHash = 0,
 }
 
-table WantMessageReport {
+table WantMessageStorageReport {
     Tag: OmniHash = 0,
 }

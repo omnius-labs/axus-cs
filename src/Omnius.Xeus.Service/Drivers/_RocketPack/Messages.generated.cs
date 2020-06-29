@@ -18,15 +18,15 @@ namespace Omnius.Xeus.Service.Drivers
         SpaceNotFound = 1,
     }
 
-    public sealed partial class TcpProxyOptions : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<TcpProxyOptions>
+    public sealed partial class TcpProxyOptions : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.TcpProxyOptions>
     {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<TcpProxyOptions> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<TcpProxyOptions>.Formatter;
-        public static TcpProxyOptions Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<TcpProxyOptions>.Empty;
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Drivers.TcpProxyOptions> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.TcpProxyOptions>.Formatter;
+        public static global::Omnius.Xeus.Service.Drivers.TcpProxyOptions Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.TcpProxyOptions>.Empty;
 
         static TcpProxyOptions()
         {
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<TcpProxyOptions>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<TcpProxyOptions>.Empty = new TcpProxyOptions((TcpProxyType)0, OmniAddress.Empty);
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.TcpProxyOptions>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.TcpProxyOptions>.Empty = new global::Omnius.Xeus.Service.Drivers.TcpProxyOptions((TcpProxyType)0, OmniAddress.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -50,7 +50,7 @@ namespace Omnius.Xeus.Service.Drivers
         public TcpProxyType Type { get; }
         public OmniAddress Address { get; }
 
-        public static TcpProxyOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Service.Drivers.TcpProxyOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -61,20 +61,20 @@ namespace Omnius.Xeus.Service.Drivers
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(TcpProxyOptions? left, TcpProxyOptions? right)
+        public static bool operator ==(global::Omnius.Xeus.Service.Drivers.TcpProxyOptions? left, global::Omnius.Xeus.Service.Drivers.TcpProxyOptions? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(TcpProxyOptions? left, TcpProxyOptions? right)
+        public static bool operator !=(global::Omnius.Xeus.Service.Drivers.TcpProxyOptions? left, global::Omnius.Xeus.Service.Drivers.TcpProxyOptions? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is TcpProxyOptions)) return false;
-            return this.Equals((TcpProxyOptions)other);
+            if (!(other is global::Omnius.Xeus.Service.Drivers.TcpProxyOptions)) return false;
+            return this.Equals((global::Omnius.Xeus.Service.Drivers.TcpProxyOptions)other);
         }
-        public bool Equals(TcpProxyOptions? target)
+        public bool Equals(global::Omnius.Xeus.Service.Drivers.TcpProxyOptions? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -85,9 +85,9 @@ namespace Omnius.Xeus.Service.Drivers
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<TcpProxyOptions>
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Drivers.TcpProxyOptions>
         {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in TcpProxyOptions value, in int rank)
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in global::Omnius.Xeus.Service.Drivers.TcpProxyOptions value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -112,11 +112,11 @@ namespace Omnius.Xeus.Service.Drivers
                 if (value.Address != OmniAddress.Empty)
                 {
                     w.Write((uint)1);
-                    OmniAddress.Formatter.Serialize(ref w, value.Address, rank + 1);
+                    global::Omnius.Core.Network.OmniAddress.Formatter.Serialize(ref w, value.Address, rank + 1);
                 }
             }
 
-            public TcpProxyOptions Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public global::Omnius.Xeus.Service.Drivers.TcpProxyOptions Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -143,20 +143,20 @@ namespace Omnius.Xeus.Service.Drivers
                     }
                 }
 
-                return new TcpProxyOptions(p_type, p_address);
+                return new global::Omnius.Xeus.Service.Drivers.TcpProxyOptions(p_type, p_address);
             }
         }
     }
 
-    public sealed partial class TcpConnectOptions : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<TcpConnectOptions>
+    public sealed partial class TcpConnectOptions : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.TcpConnectOptions>
     {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<TcpConnectOptions> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<TcpConnectOptions>.Formatter;
-        public static TcpConnectOptions Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<TcpConnectOptions>.Empty;
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Drivers.TcpConnectOptions> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.TcpConnectOptions>.Formatter;
+        public static global::Omnius.Xeus.Service.Drivers.TcpConnectOptions Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.TcpConnectOptions>.Empty;
 
         static TcpConnectOptions()
         {
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<TcpConnectOptions>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<TcpConnectOptions>.Empty = new TcpConnectOptions(false, null);
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.TcpConnectOptions>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.TcpConnectOptions>.Empty = new global::Omnius.Xeus.Service.Drivers.TcpConnectOptions(false, null);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -178,7 +178,7 @@ namespace Omnius.Xeus.Service.Drivers
         public bool Enabled { get; }
         public TcpProxyOptions? ProxyOptions { get; }
 
-        public static TcpConnectOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Service.Drivers.TcpConnectOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -189,20 +189,20 @@ namespace Omnius.Xeus.Service.Drivers
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(TcpConnectOptions? left, TcpConnectOptions? right)
+        public static bool operator ==(global::Omnius.Xeus.Service.Drivers.TcpConnectOptions? left, global::Omnius.Xeus.Service.Drivers.TcpConnectOptions? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(TcpConnectOptions? left, TcpConnectOptions? right)
+        public static bool operator !=(global::Omnius.Xeus.Service.Drivers.TcpConnectOptions? left, global::Omnius.Xeus.Service.Drivers.TcpConnectOptions? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is TcpConnectOptions)) return false;
-            return this.Equals((TcpConnectOptions)other);
+            if (!(other is global::Omnius.Xeus.Service.Drivers.TcpConnectOptions)) return false;
+            return this.Equals((global::Omnius.Xeus.Service.Drivers.TcpConnectOptions)other);
         }
-        public bool Equals(TcpConnectOptions? target)
+        public bool Equals(global::Omnius.Xeus.Service.Drivers.TcpConnectOptions? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -214,9 +214,9 @@ namespace Omnius.Xeus.Service.Drivers
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<TcpConnectOptions>
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Drivers.TcpConnectOptions>
         {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in TcpConnectOptions value, in int rank)
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in global::Omnius.Xeus.Service.Drivers.TcpConnectOptions value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -241,11 +241,11 @@ namespace Omnius.Xeus.Service.Drivers
                 if (value.ProxyOptions != null)
                 {
                     w.Write((uint)1);
-                    TcpProxyOptions.Formatter.Serialize(ref w, value.ProxyOptions, rank + 1);
+                    global::Omnius.Xeus.Service.Drivers.TcpProxyOptions.Formatter.Serialize(ref w, value.ProxyOptions, rank + 1);
                 }
             }
 
-            public TcpConnectOptions Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public global::Omnius.Xeus.Service.Drivers.TcpConnectOptions Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -272,20 +272,20 @@ namespace Omnius.Xeus.Service.Drivers
                     }
                 }
 
-                return new TcpConnectOptions(p_enabled, p_proxyOptions);
+                return new global::Omnius.Xeus.Service.Drivers.TcpConnectOptions(p_enabled, p_proxyOptions);
             }
         }
     }
 
-    public sealed partial class TcpAcceptOptions : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<TcpAcceptOptions>
+    public sealed partial class TcpAcceptOptions : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.TcpAcceptOptions>
     {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<TcpAcceptOptions> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<TcpAcceptOptions>.Formatter;
-        public static TcpAcceptOptions Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<TcpAcceptOptions>.Empty;
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Drivers.TcpAcceptOptions> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.TcpAcceptOptions>.Formatter;
+        public static global::Omnius.Xeus.Service.Drivers.TcpAcceptOptions Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.TcpAcceptOptions>.Empty;
 
         static TcpAcceptOptions()
         {
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<TcpAcceptOptions>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<TcpAcceptOptions>.Empty = new TcpAcceptOptions(false, global::System.Array.Empty<OmniAddress>(), false);
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.TcpAcceptOptions>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.TcpAcceptOptions>.Empty = new global::Omnius.Xeus.Service.Drivers.TcpAcceptOptions(false, global::System.Array.Empty<OmniAddress>(), false);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -321,7 +321,7 @@ namespace Omnius.Xeus.Service.Drivers
         public global::Omnius.Core.Collections.ReadOnlyListSlim<OmniAddress> ListenAddresses { get; }
         public bool UseUpnp { get; }
 
-        public static TcpAcceptOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Service.Drivers.TcpAcceptOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -332,20 +332,20 @@ namespace Omnius.Xeus.Service.Drivers
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(TcpAcceptOptions? left, TcpAcceptOptions? right)
+        public static bool operator ==(global::Omnius.Xeus.Service.Drivers.TcpAcceptOptions? left, global::Omnius.Xeus.Service.Drivers.TcpAcceptOptions? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(TcpAcceptOptions? left, TcpAcceptOptions? right)
+        public static bool operator !=(global::Omnius.Xeus.Service.Drivers.TcpAcceptOptions? left, global::Omnius.Xeus.Service.Drivers.TcpAcceptOptions? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is TcpAcceptOptions)) return false;
-            return this.Equals((TcpAcceptOptions)other);
+            if (!(other is global::Omnius.Xeus.Service.Drivers.TcpAcceptOptions)) return false;
+            return this.Equals((global::Omnius.Xeus.Service.Drivers.TcpAcceptOptions)other);
         }
-        public bool Equals(TcpAcceptOptions? target)
+        public bool Equals(global::Omnius.Xeus.Service.Drivers.TcpAcceptOptions? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -357,9 +357,9 @@ namespace Omnius.Xeus.Service.Drivers
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<TcpAcceptOptions>
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Drivers.TcpAcceptOptions>
         {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in TcpAcceptOptions value, in int rank)
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in global::Omnius.Xeus.Service.Drivers.TcpAcceptOptions value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -391,7 +391,7 @@ namespace Omnius.Xeus.Service.Drivers
                     w.Write((uint)value.ListenAddresses.Count);
                     foreach (var n in value.ListenAddresses)
                     {
-                        OmniAddress.Formatter.Serialize(ref w, n, rank + 1);
+                        global::Omnius.Core.Network.OmniAddress.Formatter.Serialize(ref w, n, rank + 1);
                     }
                 }
                 if (value.UseUpnp != false)
@@ -401,7 +401,7 @@ namespace Omnius.Xeus.Service.Drivers
                 }
             }
 
-            public TcpAcceptOptions Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public global::Omnius.Xeus.Service.Drivers.TcpAcceptOptions Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -439,20 +439,20 @@ namespace Omnius.Xeus.Service.Drivers
                     }
                 }
 
-                return new TcpAcceptOptions(p_enabled, p_listenAddresses, p_useUpnp);
+                return new global::Omnius.Xeus.Service.Drivers.TcpAcceptOptions(p_enabled, p_listenAddresses, p_useUpnp);
             }
         }
     }
 
-    public sealed partial class BandwidthOptions : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<BandwidthOptions>
+    public sealed partial class BandwidthOptions : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.BandwidthOptions>
     {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<BandwidthOptions> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<BandwidthOptions>.Formatter;
-        public static BandwidthOptions Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<BandwidthOptions>.Empty;
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Drivers.BandwidthOptions> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.BandwidthOptions>.Formatter;
+        public static global::Omnius.Xeus.Service.Drivers.BandwidthOptions Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.BandwidthOptions>.Empty;
 
         static BandwidthOptions()
         {
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<BandwidthOptions>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<BandwidthOptions>.Empty = new BandwidthOptions(0, 0);
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.BandwidthOptions>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.BandwidthOptions>.Empty = new global::Omnius.Xeus.Service.Drivers.BandwidthOptions(0, 0);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -474,7 +474,7 @@ namespace Omnius.Xeus.Service.Drivers
         public uint MaxSendBytesPerSeconds { get; }
         public uint MaxReceiveBytesPerSeconds { get; }
 
-        public static BandwidthOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Service.Drivers.BandwidthOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -485,20 +485,20 @@ namespace Omnius.Xeus.Service.Drivers
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(BandwidthOptions? left, BandwidthOptions? right)
+        public static bool operator ==(global::Omnius.Xeus.Service.Drivers.BandwidthOptions? left, global::Omnius.Xeus.Service.Drivers.BandwidthOptions? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(BandwidthOptions? left, BandwidthOptions? right)
+        public static bool operator !=(global::Omnius.Xeus.Service.Drivers.BandwidthOptions? left, global::Omnius.Xeus.Service.Drivers.BandwidthOptions? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is BandwidthOptions)) return false;
-            return this.Equals((BandwidthOptions)other);
+            if (!(other is global::Omnius.Xeus.Service.Drivers.BandwidthOptions)) return false;
+            return this.Equals((global::Omnius.Xeus.Service.Drivers.BandwidthOptions)other);
         }
-        public bool Equals(BandwidthOptions? target)
+        public bool Equals(global::Omnius.Xeus.Service.Drivers.BandwidthOptions? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -509,9 +509,9 @@ namespace Omnius.Xeus.Service.Drivers
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<BandwidthOptions>
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Drivers.BandwidthOptions>
         {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in BandwidthOptions value, in int rank)
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in global::Omnius.Xeus.Service.Drivers.BandwidthOptions value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -540,7 +540,7 @@ namespace Omnius.Xeus.Service.Drivers
                 }
             }
 
-            public BandwidthOptions Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public global::Omnius.Xeus.Service.Drivers.BandwidthOptions Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -567,20 +567,20 @@ namespace Omnius.Xeus.Service.Drivers
                     }
                 }
 
-                return new BandwidthOptions(p_maxSendBytesPerSeconds, p_maxReceiveBytesPerSeconds);
+                return new global::Omnius.Xeus.Service.Drivers.BandwidthOptions(p_maxSendBytesPerSeconds, p_maxReceiveBytesPerSeconds);
             }
         }
     }
 
-    public sealed partial class ConnectionControllerOptions : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<ConnectionControllerOptions>
+    public sealed partial class ConnectionControllerOptions : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.ConnectionControllerOptions>
     {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<ConnectionControllerOptions> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<ConnectionControllerOptions>.Formatter;
-        public static ConnectionControllerOptions Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<ConnectionControllerOptions>.Empty;
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Drivers.ConnectionControllerOptions> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.ConnectionControllerOptions>.Formatter;
+        public static global::Omnius.Xeus.Service.Drivers.ConnectionControllerOptions Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.ConnectionControllerOptions>.Empty;
 
         static ConnectionControllerOptions()
         {
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<ConnectionControllerOptions>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<ConnectionControllerOptions>.Empty = new ConnectionControllerOptions(TcpConnectOptions.Empty, TcpAcceptOptions.Empty, BandwidthOptions.Empty);
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.ConnectionControllerOptions>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.ConnectionControllerOptions>.Empty = new global::Omnius.Xeus.Service.Drivers.ConnectionControllerOptions(TcpConnectOptions.Empty, TcpAcceptOptions.Empty, BandwidthOptions.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -609,7 +609,7 @@ namespace Omnius.Xeus.Service.Drivers
         public TcpAcceptOptions TcpAcceptOptions { get; }
         public BandwidthOptions BandwidthOptions { get; }
 
-        public static ConnectionControllerOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Service.Drivers.ConnectionControllerOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -620,20 +620,20 @@ namespace Omnius.Xeus.Service.Drivers
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(ConnectionControllerOptions? left, ConnectionControllerOptions? right)
+        public static bool operator ==(global::Omnius.Xeus.Service.Drivers.ConnectionControllerOptions? left, global::Omnius.Xeus.Service.Drivers.ConnectionControllerOptions? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(ConnectionControllerOptions? left, ConnectionControllerOptions? right)
+        public static bool operator !=(global::Omnius.Xeus.Service.Drivers.ConnectionControllerOptions? left, global::Omnius.Xeus.Service.Drivers.ConnectionControllerOptions? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is ConnectionControllerOptions)) return false;
-            return this.Equals((ConnectionControllerOptions)other);
+            if (!(other is global::Omnius.Xeus.Service.Drivers.ConnectionControllerOptions)) return false;
+            return this.Equals((global::Omnius.Xeus.Service.Drivers.ConnectionControllerOptions)other);
         }
-        public bool Equals(ConnectionControllerOptions? target)
+        public bool Equals(global::Omnius.Xeus.Service.Drivers.ConnectionControllerOptions? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -645,9 +645,9 @@ namespace Omnius.Xeus.Service.Drivers
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<ConnectionControllerOptions>
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Drivers.ConnectionControllerOptions>
         {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in ConnectionControllerOptions value, in int rank)
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in global::Omnius.Xeus.Service.Drivers.ConnectionControllerOptions value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -671,21 +671,21 @@ namespace Omnius.Xeus.Service.Drivers
                 if (value.TcpConnectOptions != TcpConnectOptions.Empty)
                 {
                     w.Write((uint)0);
-                    TcpConnectOptions.Formatter.Serialize(ref w, value.TcpConnectOptions, rank + 1);
+                    global::Omnius.Xeus.Service.Drivers.TcpConnectOptions.Formatter.Serialize(ref w, value.TcpConnectOptions, rank + 1);
                 }
                 if (value.TcpAcceptOptions != TcpAcceptOptions.Empty)
                 {
                     w.Write((uint)1);
-                    TcpAcceptOptions.Formatter.Serialize(ref w, value.TcpAcceptOptions, rank + 1);
+                    global::Omnius.Xeus.Service.Drivers.TcpAcceptOptions.Formatter.Serialize(ref w, value.TcpAcceptOptions, rank + 1);
                 }
                 if (value.BandwidthOptions != BandwidthOptions.Empty)
                 {
                     w.Write((uint)2);
-                    BandwidthOptions.Formatter.Serialize(ref w, value.BandwidthOptions, rank + 1);
+                    global::Omnius.Xeus.Service.Drivers.BandwidthOptions.Formatter.Serialize(ref w, value.BandwidthOptions, rank + 1);
                 }
             }
 
-            public ConnectionControllerOptions Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public global::Omnius.Xeus.Service.Drivers.ConnectionControllerOptions Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -718,20 +718,20 @@ namespace Omnius.Xeus.Service.Drivers
                     }
                 }
 
-                return new ConnectionControllerOptions(p_tcpConnectOptions, p_tcpAcceptOptions, p_bandwidthOptions);
+                return new global::Omnius.Xeus.Service.Drivers.ConnectionControllerOptions(p_tcpConnectOptions, p_tcpAcceptOptions, p_bandwidthOptions);
             }
         }
     }
 
-    public sealed partial class EventReport : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<EventReport>
+    public sealed partial class EventReport : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.EventReport>
     {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<EventReport> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<EventReport>.Formatter;
-        public static EventReport Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<EventReport>.Empty;
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Drivers.EventReport> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.EventReport>.Formatter;
+        public static global::Omnius.Xeus.Service.Drivers.EventReport Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.EventReport>.Empty;
 
         static EventReport()
         {
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<EventReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<EventReport>.Empty = new EventReport(global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero, (EventReportType)0);
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.EventReport>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Drivers.EventReport>.Empty = new global::Omnius.Xeus.Service.Drivers.EventReport(global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero, (EventReportType)0);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -753,7 +753,7 @@ namespace Omnius.Xeus.Service.Drivers
         public global::Omnius.Core.Serialization.RocketPack.Timestamp CreationTime { get; }
         public EventReportType Type { get; }
 
-        public static EventReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Service.Drivers.EventReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -764,20 +764,20 @@ namespace Omnius.Xeus.Service.Drivers
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(EventReport? left, EventReport? right)
+        public static bool operator ==(global::Omnius.Xeus.Service.Drivers.EventReport? left, global::Omnius.Xeus.Service.Drivers.EventReport? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(EventReport? left, EventReport? right)
+        public static bool operator !=(global::Omnius.Xeus.Service.Drivers.EventReport? left, global::Omnius.Xeus.Service.Drivers.EventReport? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is EventReport)) return false;
-            return this.Equals((EventReport)other);
+            if (!(other is global::Omnius.Xeus.Service.Drivers.EventReport)) return false;
+            return this.Equals((global::Omnius.Xeus.Service.Drivers.EventReport)other);
         }
-        public bool Equals(EventReport? target)
+        public bool Equals(global::Omnius.Xeus.Service.Drivers.EventReport? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -788,9 +788,9 @@ namespace Omnius.Xeus.Service.Drivers
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<EventReport>
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Drivers.EventReport>
         {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in EventReport value, in int rank)
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in global::Omnius.Xeus.Service.Drivers.EventReport value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -819,7 +819,7 @@ namespace Omnius.Xeus.Service.Drivers
                 }
             }
 
-            public EventReport Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public global::Omnius.Xeus.Service.Drivers.EventReport Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -846,7 +846,7 @@ namespace Omnius.Xeus.Service.Drivers
                     }
                 }
 
-                return new EventReport(p_creationTime, p_type);
+                return new global::Omnius.Xeus.Service.Drivers.EventReport(p_creationTime, p_type);
             }
         }
     }
