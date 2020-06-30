@@ -18,9 +18,10 @@ namespace Omnius.Xeus.Service.Engines
 
     public interface IPublishMessageStorage : IPublishStorage
     {
-        ValueTask<PublishMessageStorageReport> GetMessageReportAsync(CancellationToken cancellationToken = default);
-        ValueTask<OmniHash> PublishMessageAsync(DeclaredMessage message, CancellationToken cancellationToken = default);
-        ValueTask<OmniHash> PublishMessageAsync(OrientedMessage message, CancellationToken cancellationToken = default);
-        ValueTask UnpublishMessageAsync(OmniHash hash, CancellationToken cancellationToken = default);
+        ValueTask<PublishMessageStorageReport> GetReportAsync(CancellationToken cancellationToken = default);
+        ValueTask<OmniHash> PublishDeclaredMessageAsync(DeclaredMessage message, CancellationToken cancellationToken = default);
+        ValueTask<OmniHash> PublishOrientedMessageAsync(OrientedMessage message, CancellationToken cancellationToken = default);
+        ValueTask UnpublishDeclaredMessageAsync(OmniHash hash, CancellationToken cancellationToken = default);
+        ValueTask UnpublishOrientedMessageAsync(OmniHash hash, CancellationToken cancellationToken = default);
     }
 }

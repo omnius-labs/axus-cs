@@ -17,11 +17,12 @@ using Omnius.Xeus.Service.Engines.Internal;
 
 namespace Omnius.Xeus.Service.Engines
 {
-    public sealed class PublishStorage : AsyncDisposableBase, IPublishContentStorage
+    public sealed class PublishContentStorage : AsyncDisposableBase, IPublishContentStorage
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly string _configPath;
+        private readonly PublishContentStorageOptions _options;
+        private readonly IObjectStoreFactory _objectStoreFactory;
         private readonly IBytesPool _bytesPool;
 
         const int MaxBlockLength = 1 * 1024 * 1024;
@@ -31,22 +32,22 @@ namespace Omnius.Xeus.Service.Engines
 
         private readonly AsyncLock _asyncLock = new AsyncLock();
 
-        internal sealed class PublishStorageFactory : IPublishContentStorageFactory
+        internal sealed class PublishContentStorageFactory : IPublishContentStorageFactory
         {
-            public async ValueTask<IPublishContentStorage> CreateAsync(string configPath, PublishStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
+            public async ValueTask<IPublishContentStorage> CreateAsync(PublishContentStorageOptions options,
+                IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
             {
-                var result = new PublishStorage(configPath, options, objectStoreFactory, bytesPool);
-                await result.InitAsync();
-
+                var result = new PublishContentStorage(options, objectStoreFactory, bytesPool);
                 return result;
             }
         }
 
-        public static IPublishContentStorageFactory Factory { get; } = new PublishStorageFactory();
+        public static IPublishContentStorageFactory Factory { get; } = new PublishContentStorageFactory();
 
-        internal PublishStorage(string configPath, PublishStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
+        internal PublishContentStorage(PublishContentStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
         {
-            _configPath = configPath;
+            _options = options;
+            _objectStoreFactory = objectStoreFactory;
             _bytesPool = bytesPool;
         }
 
@@ -62,16 +63,16 @@ namespace Omnius.Xeus.Service.Engines
         {
         }
 
-        private string OmniHashToFilePath(OmniHash hash)
+        private string GenFilePath(OmniHash hash)
         {
-            return Path.Combine(_configPath, hash.ToString(ConvertStringType.Base16, ConvertStringCase.Lower));
+            return hash.ToString(ConvertStringType.Base16, ConvertStringCase.Lower);
         }
 
         public async ValueTask<IMemoryOwner<byte>?> ReadAsync(OmniHash rootHash, OmniHash targetHash, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
-                var filePath = Path.Combine(Path.Combine(_configPath, this.OmniHashToFilePath(rootHash)), this.OmniHashToFilePath(targetHash));
+                var filePath = Path.Combine(Path.Combine(_options.ConfigPath, this.GenFilePath(rootHash)), this.GenFilePath(targetHash));
 
                 if (!File.Exists(filePath))
                 {
@@ -90,7 +91,7 @@ namespace Omnius.Xeus.Service.Engines
 
         private async ValueTask WriteAsync(string basePath, OmniHash hash, ReadOnlyMemory<byte> memory)
         {
-            var filePath = Path.Combine(basePath, this.OmniHashToFilePath(hash));
+            var filePath = Path.Combine(basePath, this.GenFilePath(hash));
 
             using (var fileStream = new UnbufferedFileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool))
             {
@@ -98,7 +99,20 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public async ValueTask<OmniHash> AddPublishFileAsync(string filePath, CancellationToken cancellationToken = default)
+        public async ValueTask<PublishContentStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
+        {
+            using (await _asyncLock.LockAsync())
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public ValueTask<Tag[]> GetPublishTagsAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async ValueTask<OmniHash> PublishContentAsync(string filePath, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
@@ -112,7 +126,7 @@ namespace Omnius.Xeus.Service.Engines
 
                 // エンコード処理
                 {
-                    var tempPath = Path.Combine(_configPath, "_temp_");
+                    var tempPath = Path.Combine(_options.ConfigPath, "_temp_");
 
                     var merkleTreeSections = new Stack<MerkleTreeSection>();
 
@@ -201,7 +215,7 @@ namespace Omnius.Xeus.Service.Engines
 
                     // 一時フォルダからキャッシュフォルダへ移動させる
                     {
-                        var cachePath = Path.Combine(_configPath, this.OmniHashToFilePath(rootHash));
+                        var cachePath = Path.Combine(_options.ConfigPath, this.GenFilePath(rootHash));
                         Directory.Move(tempPath, cachePath);
                     }
 
@@ -215,7 +229,7 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public async ValueTask RemovePublishFileAsync(string filePath, CancellationToken cancellationToken = default)
+        public async ValueTask UnpublishContentAsync(string filePath, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
@@ -229,42 +243,17 @@ namespace Omnius.Xeus.Service.Engines
                 _publishFileStatusMap.Remove(rootHash);
 
                 // キャッシュフォルダを削除
-                var cachePath = Path.Combine(_configPath, this.OmniHashToFilePath(rootHash));
+                var cachePath = Path.Combine(_options.ConfigPath, this.GenFilePath(rootHash));
                 Directory.Delete(cachePath);
             }
         }
 
-        public async ValueTask<PublishReport[]> GetReportsAsync([EnumeratorCancellation]CancellationToken cancellationToken = default)
-        {
-            using (await _asyncLock.LockAsync())
-            {
-                var result = new List<PublishReport>();
-
-                foreach (var status in _publishFileStatusMap.Values)
-                {
-                    result.Add(new PublishReport(status.RootHash, status.MerkleTreeSections.SelectMany(n => n.Hashes).ToArray()));
-                }
-
-                return result.ToArray();
-            }
-        }
-
-        public ValueTask<OmniHash> PublishAsync(string filePath, CancellationToken cancellationToken = default)
+        public ValueTask<OmniHash> PublishContentAsync(ReadOnlySequence<byte> sequence, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask<OmniHash> PublishAsync(ReadOnlySequence<byte> sequence, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ValueTask UnpublishAsync(string filePath, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ValueTask UnpublishAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+        public ValueTask UnpublishContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }

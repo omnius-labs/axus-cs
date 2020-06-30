@@ -32,6 +32,7 @@ table OrientedMessage {
 table NodeFinderOptions {
     ConfigPath: string(capacity: 1024) = 0,
     MaxConnectionCount: uint32 = 1,
+    EnabledServices: vector<string(capacity: 256)>(capacity: 32) = 2,
 }
 
 table PublishContentStorageOptions {

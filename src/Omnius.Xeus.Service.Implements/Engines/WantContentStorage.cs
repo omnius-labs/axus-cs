@@ -16,11 +16,12 @@ using Omnius.Xeus.Service.Drivers;
 
 namespace Omnius.Xeus.Service.Engines
 {
-    public sealed class WantStorage : AsyncDisposableBase, IWantContentStorage
+    public sealed class WantContentStorage : AsyncDisposableBase, IWantContentStorage
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly string _configPath;
+        private readonly WantContentStorageOptions _options;
+        private readonly IObjectStoreFactory _objectStoreFactory;
         private readonly IBytesPool _bytesPool;
 
         private readonly Dictionary<OmniHash, WantFileStatus> _wantFileStatusMap = new Dictionary<OmniHash, WantFileStatus>();
@@ -31,9 +32,9 @@ namespace Omnius.Xeus.Service.Engines
 
         internal sealed class WantStorageFactory : IWantContentStorageFactory
         {
-            public async ValueTask<IWantContentStorage> CreateAsync(string configPath, WantStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
+            public async ValueTask<IWantContentStorage> CreateAsync(WantContentStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
             {
-                var result = new WantStorage(configPath, options, objectStoreFactory, bytesPool);
+                var result = new WantContentStorage(options, objectStoreFactory, bytesPool);
                 await result.InitAsync();
 
                 return result;
@@ -42,9 +43,10 @@ namespace Omnius.Xeus.Service.Engines
 
         public static IWantContentStorageFactory Factory { get; } = new WantStorageFactory();
 
-        internal WantStorage(string configPath, WantStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
+        internal WantContentStorage(WantContentStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
         {
-            _configPath = configPath;
+            _options = options;
+            _objectStoreFactory = objectStoreFactory;
             _bytesPool = bytesPool;
         }
 
@@ -72,9 +74,9 @@ namespace Omnius.Xeus.Service.Engines
         {
         }
 
-        private string OmniHashToFilePath(OmniHash hash)
+        private string GenFilePath(OmniHash hash)
         {
-            return Path.Combine(_configPath, hash.ToString(ConvertStringType.Base16, ConvertStringCase.Lower));
+            return hash.ToString(ConvertStringType.Base16, ConvertStringCase.Lower);
         }
 
         public async ValueTask<IMemoryOwner<byte>?> ReadAsync(OmniHash rootHash, OmniHash targetHash, CancellationToken cancellationToken = default)
@@ -86,7 +88,7 @@ namespace Omnius.Xeus.Service.Engines
                     return null;
                 }
 
-                var filePath = Path.Combine(Path.Combine(_configPath, this.OmniHashToFilePath(rootHash)), this.OmniHashToFilePath(targetHash));
+                var filePath = Path.Combine(Path.Combine(_options.ConfigPath, this.GenFilePath(rootHash)), this.GenFilePath(targetHash));
 
                 if (!File.Exists(filePath))
                 {
@@ -113,7 +115,7 @@ namespace Omnius.Xeus.Service.Engines
                     return;
                 }
 
-                var filePath = Path.Combine(Path.Combine(_configPath, this.OmniHashToFilePath(rootHash)), this.OmniHashToFilePath(targetHash));
+                var filePath = Path.Combine(Path.Combine(_options.ConfigPath, this.GenFilePath(rootHash)), this.GenFilePath(targetHash));
 
                 if (File.Exists(filePath))
                 {
@@ -159,21 +161,6 @@ namespace Omnius.Xeus.Service.Engines
             throw new NotImplementedException();
         }
 
-        public async ValueTask<WantReport[]> GetReportsAsync([EnumeratorCancellation]CancellationToken cancellationToken = default)
-        {
-            using (await _asyncLock.LockAsync())
-            {
-                var result = new List<WantReport>();
-
-                foreach (var status in _wantFileStatusMap.Values)
-                {
-                    result.Add(new WantReport(status.RootHash, status.WantBlocks.ToArray()));
-                }
-
-                return result.ToArray();
-            }
-        }
-
         public ValueTask WantAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
@@ -190,6 +177,36 @@ namespace Omnius.Xeus.Service.Engines
         }
 
         public ValueTask ExportAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask<WantContentStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask WantContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask UnwantContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask ExportContentAsync(OmniHash rootHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask ExportContentAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask<Tag[]> GetWantTagsAsync(CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
