@@ -19,9 +19,11 @@ namespace Omnius.Xeus.Service.Engines
     public interface IWantMessageStorage : IWantStorage
     {
         ValueTask<WantMessageStorageReport> GetReportAsync(CancellationToken cancellationToken = default);
-        ValueTask WantMessageAsync(Tag tag, CancellationToken cancellationToken = default);
-        ValueTask UnwantMessageAsync(Tag tag, CancellationToken cancellationToken = default);
-        ValueTask<DeclaredMessage[]> ExportDeclaredMessagesAsync(Tag tag, CancellationToken cancellationToken = default);
-        ValueTask<OrientedMessage[]> ExportOrientedMessagesAsync(Tag tag, CancellationToken cancellationToken = default);
+        ValueTask WantDeclaredMessageAsync(OmniHash hash, CancellationToken cancellationToken = default);
+        ValueTask UnwantDeclaredMessageAsync(OmniHash hash, CancellationToken cancellationToken = default);
+        ValueTask WantOrientedMessageAsync(OmniHash hash, CancellationToken cancellationToken = default);
+        ValueTask UnwantOrientedMessageAsync(OmniHash hash, CancellationToken cancellationToken = default);
+        ValueTask<DeclaredMessage[]> ExportDeclaredMessagesAsync(OmniHash hash, CancellationToken cancellationToken = default);
+        ValueTask<OrientedMessage[]> ExportOrientedMessagesAsync(OmniHash hash, CancellationToken cancellationToken = default);
     }
 }

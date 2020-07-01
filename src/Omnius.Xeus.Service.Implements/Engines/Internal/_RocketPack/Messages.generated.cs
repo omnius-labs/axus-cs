@@ -171,7 +171,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                                 p_hashes = new OmniHash[length];
                                 for (int i = 0; i < p_hashes.Length; i++)
                                 {
-                                    p_hashes[i] = OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                    p_hashes[i] = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
@@ -183,23 +183,24 @@ namespace Omnius.Xeus.Service.Engines.Internal
         }
     }
 
-    internal sealed partial class ContentLocation : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.ContentLocation>
+    internal sealed partial class Location : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.Location>
     {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Engines.Internal.ContentLocation> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.ContentLocation>.Formatter;
-        public static global::Omnius.Xeus.Service.Engines.Internal.ContentLocation Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.ContentLocation>.Empty;
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Engines.Internal.Location> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.Location>.Formatter;
+        public static global::Omnius.Xeus.Service.Engines.Internal.Location Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.Location>.Empty;
 
-        static ContentLocation()
+        static Location()
         {
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.ContentLocation>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.ContentLocation>.Empty = new global::Omnius.Xeus.Service.Engines.Internal.ContentLocation(OmniHash.Empty, global::System.Array.Empty<NodeProfile>());
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.Location>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.Location>.Empty = new global::Omnius.Xeus.Service.Engines.Internal.Location(Tag.Empty, global::System.Array.Empty<NodeProfile>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxNodeProfilesCount = 8192;
 
-        public ContentLocation(OmniHash tag, NodeProfile[] nodeProfiles)
+        public Location(Tag tag, NodeProfile[] nodeProfiles)
         {
+            if (tag is null) throw new global::System.ArgumentNullException("tag");
             if (nodeProfiles is null) throw new global::System.ArgumentNullException("nodeProfiles");
             if (nodeProfiles.Length > 8192) throw new global::System.ArgumentOutOfRangeException("nodeProfiles");
             foreach (var n in nodeProfiles)
@@ -222,10 +223,10 @@ namespace Omnius.Xeus.Service.Engines.Internal
             });
         }
 
-        public OmniHash Tag { get; }
+        public Tag Tag { get; }
         public global::Omnius.Core.Collections.ReadOnlyListSlim<NodeProfile> NodeProfiles { get; }
 
-        public static global::Omnius.Xeus.Service.Engines.Internal.ContentLocation Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Service.Engines.Internal.Location Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -236,20 +237,20 @@ namespace Omnius.Xeus.Service.Engines.Internal
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(global::Omnius.Xeus.Service.Engines.Internal.ContentLocation? left, global::Omnius.Xeus.Service.Engines.Internal.ContentLocation? right)
+        public static bool operator ==(global::Omnius.Xeus.Service.Engines.Internal.Location? left, global::Omnius.Xeus.Service.Engines.Internal.Location? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(global::Omnius.Xeus.Service.Engines.Internal.ContentLocation? left, global::Omnius.Xeus.Service.Engines.Internal.ContentLocation? right)
+        public static bool operator !=(global::Omnius.Xeus.Service.Engines.Internal.Location? left, global::Omnius.Xeus.Service.Engines.Internal.Location? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Service.Engines.Internal.ContentLocation)) return false;
-            return this.Equals((global::Omnius.Xeus.Service.Engines.Internal.ContentLocation)other);
+            if (!(other is global::Omnius.Xeus.Service.Engines.Internal.Location)) return false;
+            return this.Equals((global::Omnius.Xeus.Service.Engines.Internal.Location)other);
         }
-        public bool Equals(global::Omnius.Xeus.Service.Engines.Internal.ContentLocation? target)
+        public bool Equals(global::Omnius.Xeus.Service.Engines.Internal.Location? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -260,15 +261,15 @@ namespace Omnius.Xeus.Service.Engines.Internal
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Engines.Internal.ContentLocation>
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Engines.Internal.Location>
         {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in global::Omnius.Xeus.Service.Engines.Internal.ContentLocation value, in int rank)
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in global::Omnius.Xeus.Service.Engines.Internal.Location value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
                 {
                     uint propertyCount = 0;
-                    if (value.Tag != OmniHash.Empty)
+                    if (value.Tag != Tag.Empty)
                     {
                         propertyCount++;
                     }
@@ -279,10 +280,10 @@ namespace Omnius.Xeus.Service.Engines.Internal
                     w.Write(propertyCount);
                 }
 
-                if (value.Tag != OmniHash.Empty)
+                if (value.Tag != Tag.Empty)
                 {
                     w.Write((uint)0);
-                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.Tag, rank + 1);
+                    global::Omnius.Xeus.Service.Engines.Tag.Formatter.Serialize(ref w, value.Tag, rank + 1);
                 }
                 if (value.NodeProfiles.Count != 0)
                 {
@@ -295,13 +296,13 @@ namespace Omnius.Xeus.Service.Engines.Internal
                 }
             }
 
-            public global::Omnius.Xeus.Service.Engines.Internal.ContentLocation Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public global::Omnius.Xeus.Service.Engines.Internal.Location Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
                 uint propertyCount = r.GetUInt32();
 
-                OmniHash p_tag = OmniHash.Empty;
+                Tag p_tag = Tag.Empty;
                 NodeProfile[] p_nodeProfiles = global::System.Array.Empty<NodeProfile>();
 
                 for (; propertyCount > 0; propertyCount--)
@@ -311,7 +312,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                     {
                         case 0:
                             {
-                                p_tag = OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_tag = global::Omnius.Xeus.Service.Engines.Tag.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 1:
@@ -320,14 +321,14 @@ namespace Omnius.Xeus.Service.Engines.Internal
                                 p_nodeProfiles = new NodeProfile[length];
                                 for (int i = 0; i < p_nodeProfiles.Length; i++)
                                 {
-                                    p_nodeProfiles[i] = NodeProfile.Formatter.Deserialize(ref r, rank + 1);
+                                    p_nodeProfiles[i] = global::Omnius.Xeus.Service.Engines.NodeProfile.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
                     }
                 }
 
-                return new global::Omnius.Xeus.Service.Engines.Internal.ContentLocation(p_tag, p_nodeProfiles);
+                return new global::Omnius.Xeus.Service.Engines.Internal.Location(p_tag, p_nodeProfiles);
             }
         }
     }
@@ -455,7 +456,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                     {
                         case 0:
                             {
-                                p_tag = OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_tag = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 1:
@@ -858,7 +859,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                             }
                         case 1:
                             {
-                                p_nodeProfile = NodeProfile.Formatter.Deserialize(ref r, rank + 1);
+                                p_nodeProfile = global::Omnius.Xeus.Service.Engines.NodeProfile.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
@@ -877,17 +878,17 @@ namespace Omnius.Xeus.Service.Engines.Internal
         static NodeFinderDataMessage()
         {
             global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.NodeFinderDataMessage>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.NodeFinderDataMessage>.Empty = new global::Omnius.Xeus.Service.Engines.Internal.NodeFinderDataMessage(global::System.Array.Empty<NodeProfile>(), global::System.Array.Empty<ContentLocation>(), global::System.Array.Empty<OmniHash>(), global::System.Array.Empty<ContentLocation>());
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.NodeFinderDataMessage>.Empty = new global::Omnius.Xeus.Service.Engines.Internal.NodeFinderDataMessage(global::System.Array.Empty<NodeProfile>(), global::System.Array.Empty<Location>(), global::System.Array.Empty<Tag>(), global::System.Array.Empty<Location>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxPushNodeProfilesCount = 256;
-        public static readonly int MaxPushContentLocationsCount = 256;
-        public static readonly int MaxWantContentLocationsCount = 256;
-        public static readonly int MaxGiveContentLocationsCount = 256;
+        public static readonly int MaxPushLocationsCount = 256;
+        public static readonly int MaxWantLocationsCount = 256;
+        public static readonly int MaxGiveLocationsCount = 256;
 
-        public NodeFinderDataMessage(NodeProfile[] pushNodeProfiles, ContentLocation[] pushContentLocations, OmniHash[] wantContentLocations, ContentLocation[] giveContentLocations)
+        public NodeFinderDataMessage(NodeProfile[] pushNodeProfiles, Location[] pushLocations, Tag[] wantLocations, Location[] giveLocations)
         {
             if (pushNodeProfiles is null) throw new global::System.ArgumentNullException("pushNodeProfiles");
             if (pushNodeProfiles.Length > 256) throw new global::System.ArgumentOutOfRangeException("pushNodeProfiles");
@@ -895,25 +896,29 @@ namespace Omnius.Xeus.Service.Engines.Internal
             {
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
-            if (pushContentLocations is null) throw new global::System.ArgumentNullException("pushContentLocations");
-            if (pushContentLocations.Length > 256) throw new global::System.ArgumentOutOfRangeException("pushContentLocations");
-            foreach (var n in pushContentLocations)
+            if (pushLocations is null) throw new global::System.ArgumentNullException("pushLocations");
+            if (pushLocations.Length > 256) throw new global::System.ArgumentOutOfRangeException("pushLocations");
+            foreach (var n in pushLocations)
             {
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
-            if (wantContentLocations is null) throw new global::System.ArgumentNullException("wantContentLocations");
-            if (wantContentLocations.Length > 256) throw new global::System.ArgumentOutOfRangeException("wantContentLocations");
-            if (giveContentLocations is null) throw new global::System.ArgumentNullException("giveContentLocations");
-            if (giveContentLocations.Length > 256) throw new global::System.ArgumentOutOfRangeException("giveContentLocations");
-            foreach (var n in giveContentLocations)
+            if (wantLocations is null) throw new global::System.ArgumentNullException("wantLocations");
+            if (wantLocations.Length > 256) throw new global::System.ArgumentOutOfRangeException("wantLocations");
+            foreach (var n in wantLocations)
+            {
+                if (n is null) throw new global::System.ArgumentNullException("n");
+            }
+            if (giveLocations is null) throw new global::System.ArgumentNullException("giveLocations");
+            if (giveLocations.Length > 256) throw new global::System.ArgumentOutOfRangeException("giveLocations");
+            foreach (var n in giveLocations)
             {
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
 
             this.PushNodeProfiles = new global::Omnius.Core.Collections.ReadOnlyListSlim<NodeProfile>(pushNodeProfiles);
-            this.PushContentLocations = new global::Omnius.Core.Collections.ReadOnlyListSlim<ContentLocation>(pushContentLocations);
-            this.WantContentLocations = new global::Omnius.Core.Collections.ReadOnlyListSlim<OmniHash>(wantContentLocations);
-            this.GiveContentLocations = new global::Omnius.Core.Collections.ReadOnlyListSlim<ContentLocation>(giveContentLocations);
+            this.PushLocations = new global::Omnius.Core.Collections.ReadOnlyListSlim<Location>(pushLocations);
+            this.WantLocations = new global::Omnius.Core.Collections.ReadOnlyListSlim<Tag>(wantLocations);
+            this.GiveLocations = new global::Omnius.Core.Collections.ReadOnlyListSlim<Location>(giveLocations);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -922,15 +927,15 @@ namespace Omnius.Xeus.Service.Engines.Internal
                 {
                     if (n != default) ___h.Add(n.GetHashCode());
                 }
-                foreach (var n in pushContentLocations)
+                foreach (var n in pushLocations)
                 {
                     if (n != default) ___h.Add(n.GetHashCode());
                 }
-                foreach (var n in wantContentLocations)
+                foreach (var n in wantLocations)
                 {
                     if (n != default) ___h.Add(n.GetHashCode());
                 }
-                foreach (var n in giveContentLocations)
+                foreach (var n in giveLocations)
                 {
                     if (n != default) ___h.Add(n.GetHashCode());
                 }
@@ -939,9 +944,9 @@ namespace Omnius.Xeus.Service.Engines.Internal
         }
 
         public global::Omnius.Core.Collections.ReadOnlyListSlim<NodeProfile> PushNodeProfiles { get; }
-        public global::Omnius.Core.Collections.ReadOnlyListSlim<ContentLocation> PushContentLocations { get; }
-        public global::Omnius.Core.Collections.ReadOnlyListSlim<OmniHash> WantContentLocations { get; }
-        public global::Omnius.Core.Collections.ReadOnlyListSlim<ContentLocation> GiveContentLocations { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<Location> PushLocations { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<Tag> WantLocations { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<Location> GiveLocations { get; }
 
         public static global::Omnius.Xeus.Service.Engines.Internal.NodeFinderDataMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -972,9 +977,9 @@ namespace Omnius.Xeus.Service.Engines.Internal
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.PushNodeProfiles, target.PushNodeProfiles)) return false;
-            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.PushContentLocations, target.PushContentLocations)) return false;
-            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.WantContentLocations, target.WantContentLocations)) return false;
-            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.GiveContentLocations, target.GiveContentLocations)) return false;
+            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.PushLocations, target.PushLocations)) return false;
+            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.WantLocations, target.WantLocations)) return false;
+            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.GiveLocations, target.GiveLocations)) return false;
 
             return true;
         }
@@ -992,15 +997,15 @@ namespace Omnius.Xeus.Service.Engines.Internal
                     {
                         propertyCount++;
                     }
-                    if (value.PushContentLocations.Count != 0)
+                    if (value.PushLocations.Count != 0)
                     {
                         propertyCount++;
                     }
-                    if (value.WantContentLocations.Count != 0)
+                    if (value.WantLocations.Count != 0)
                     {
                         propertyCount++;
                     }
-                    if (value.GiveContentLocations.Count != 0)
+                    if (value.GiveLocations.Count != 0)
                     {
                         propertyCount++;
                     }
@@ -1016,31 +1021,31 @@ namespace Omnius.Xeus.Service.Engines.Internal
                         global::Omnius.Xeus.Service.Engines.NodeProfile.Formatter.Serialize(ref w, n, rank + 1);
                     }
                 }
-                if (value.PushContentLocations.Count != 0)
+                if (value.PushLocations.Count != 0)
                 {
                     w.Write((uint)1);
-                    w.Write((uint)value.PushContentLocations.Count);
-                    foreach (var n in value.PushContentLocations)
+                    w.Write((uint)value.PushLocations.Count);
+                    foreach (var n in value.PushLocations)
                     {
-                        global::Omnius.Xeus.Service.Engines.Internal.ContentLocation.Formatter.Serialize(ref w, n, rank + 1);
+                        global::Omnius.Xeus.Service.Engines.Internal.Location.Formatter.Serialize(ref w, n, rank + 1);
                     }
                 }
-                if (value.WantContentLocations.Count != 0)
+                if (value.WantLocations.Count != 0)
                 {
                     w.Write((uint)2);
-                    w.Write((uint)value.WantContentLocations.Count);
-                    foreach (var n in value.WantContentLocations)
+                    w.Write((uint)value.WantLocations.Count);
+                    foreach (var n in value.WantLocations)
                     {
-                        global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, n, rank + 1);
+                        global::Omnius.Xeus.Service.Engines.Tag.Formatter.Serialize(ref w, n, rank + 1);
                     }
                 }
-                if (value.GiveContentLocations.Count != 0)
+                if (value.GiveLocations.Count != 0)
                 {
                     w.Write((uint)3);
-                    w.Write((uint)value.GiveContentLocations.Count);
-                    foreach (var n in value.GiveContentLocations)
+                    w.Write((uint)value.GiveLocations.Count);
+                    foreach (var n in value.GiveLocations)
                     {
-                        global::Omnius.Xeus.Service.Engines.Internal.ContentLocation.Formatter.Serialize(ref w, n, rank + 1);
+                        global::Omnius.Xeus.Service.Engines.Internal.Location.Formatter.Serialize(ref w, n, rank + 1);
                     }
                 }
             }
@@ -1052,9 +1057,9 @@ namespace Omnius.Xeus.Service.Engines.Internal
                 uint propertyCount = r.GetUInt32();
 
                 NodeProfile[] p_pushNodeProfiles = global::System.Array.Empty<NodeProfile>();
-                ContentLocation[] p_pushContentLocations = global::System.Array.Empty<ContentLocation>();
-                OmniHash[] p_wantContentLocations = global::System.Array.Empty<OmniHash>();
-                ContentLocation[] p_giveContentLocations = global::System.Array.Empty<ContentLocation>();
+                Location[] p_pushLocations = global::System.Array.Empty<Location>();
+                Tag[] p_wantLocations = global::System.Array.Empty<Tag>();
+                Location[] p_giveLocations = global::System.Array.Empty<Location>();
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -1067,44 +1072,44 @@ namespace Omnius.Xeus.Service.Engines.Internal
                                 p_pushNodeProfiles = new NodeProfile[length];
                                 for (int i = 0; i < p_pushNodeProfiles.Length; i++)
                                 {
-                                    p_pushNodeProfiles[i] = NodeProfile.Formatter.Deserialize(ref r, rank + 1);
+                                    p_pushNodeProfiles[i] = global::Omnius.Xeus.Service.Engines.NodeProfile.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
                         case 1:
                             {
                                 var length = r.GetUInt32();
-                                p_pushContentLocations = new ContentLocation[length];
-                                for (int i = 0; i < p_pushContentLocations.Length; i++)
+                                p_pushLocations = new Location[length];
+                                for (int i = 0; i < p_pushLocations.Length; i++)
                                 {
-                                    p_pushContentLocations[i] = ContentLocation.Formatter.Deserialize(ref r, rank + 1);
+                                    p_pushLocations[i] = global::Omnius.Xeus.Service.Engines.Internal.Location.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
                         case 2:
                             {
                                 var length = r.GetUInt32();
-                                p_wantContentLocations = new OmniHash[length];
-                                for (int i = 0; i < p_wantContentLocations.Length; i++)
+                                p_wantLocations = new Tag[length];
+                                for (int i = 0; i < p_wantLocations.Length; i++)
                                 {
-                                    p_wantContentLocations[i] = OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                    p_wantLocations[i] = global::Omnius.Xeus.Service.Engines.Tag.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
                         case 3:
                             {
                                 var length = r.GetUInt32();
-                                p_giveContentLocations = new ContentLocation[length];
-                                for (int i = 0; i < p_giveContentLocations.Length; i++)
+                                p_giveLocations = new Location[length];
+                                for (int i = 0; i < p_giveLocations.Length; i++)
                                 {
-                                    p_giveContentLocations[i] = ContentLocation.Formatter.Deserialize(ref r, rank + 1);
+                                    p_giveLocations[i] = global::Omnius.Xeus.Service.Engines.Internal.Location.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
                     }
                 }
 
-                return new global::Omnius.Xeus.Service.Engines.Internal.NodeFinderDataMessage(p_pushNodeProfiles, p_pushContentLocations, p_wantContentLocations, p_giveContentLocations);
+                return new global::Omnius.Xeus.Service.Engines.Internal.NodeFinderDataMessage(p_pushNodeProfiles, p_pushLocations, p_wantLocations, p_giveLocations);
             }
         }
     }
@@ -1349,12 +1354,12 @@ namespace Omnius.Xeus.Service.Engines.Internal
                     {
                         case 0:
                             {
-                                p_tag = OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_tag = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 1:
                             {
-                                p_nodeProfile = NodeProfile.Formatter.Deserialize(ref r, rank + 1);
+                                p_nodeProfile = global::Omnius.Xeus.Service.Engines.NodeProfile.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
@@ -1479,12 +1484,12 @@ namespace Omnius.Xeus.Service.Engines.Internal
                     {
                         case 0:
                             {
-                                p_tag = OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_tag = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 1:
                             {
-                                p_nodeProfile = NodeProfile.Formatter.Deserialize(ref r, rank + 1);
+                                p_nodeProfile = global::Omnius.Xeus.Service.Engines.NodeProfile.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
@@ -1717,7 +1722,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                                 p_pushNodeProfiles = new NodeProfile[length];
                                 for (int i = 0; i < p_pushNodeProfiles.Length; i++)
                                 {
-                                    p_pushNodeProfiles[i] = NodeProfile.Formatter.Deserialize(ref r, rank + 1);
+                                    p_pushNodeProfiles[i] = global::Omnius.Xeus.Service.Engines.NodeProfile.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
@@ -1727,7 +1732,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                                 p_contentBlockFlags = new ContentBlockFlags[length];
                                 for (int i = 0; i < p_contentBlockFlags.Length; i++)
                                 {
-                                    p_contentBlockFlags[i] = ContentBlockFlags.Formatter.Deserialize(ref r, rank + 1);
+                                    p_contentBlockFlags[i] = global::Omnius.Xeus.Service.Engines.Internal.ContentBlockFlags.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
@@ -1737,7 +1742,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                                 p_wantContentBlocks = new OmniHash[length];
                                 for (int i = 0; i < p_wantContentBlocks.Length; i++)
                                 {
-                                    p_wantContentBlocks[i] = OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                    p_wantContentBlocks[i] = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
@@ -1747,7 +1752,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                                 p_cancelContentBlocks = new OmniHash[length];
                                 for (int i = 0; i < p_cancelContentBlocks.Length; i++)
                                 {
-                                    p_cancelContentBlocks[i] = OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                    p_cancelContentBlocks[i] = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
@@ -1757,7 +1762,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                                 p_giveContentBlocks = new ContentBlock[length];
                                 for (int i = 0; i < p_giveContentBlocks.Length; i++)
                                 {
-                                    p_giveContentBlocks[i] = ContentBlock.Formatter.Deserialize(ref r, rank + 1);
+                                    p_giveContentBlocks[i] = global::Omnius.Xeus.Service.Engines.Internal.ContentBlock.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
@@ -1891,7 +1896,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                                 global::Omnius.Core.Serialization.RocketPack.Timestamp t_value = global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero;
                                 for (int i = 0; i < length; i++)
                                 {
-                                    t_key = NodeProfile.Formatter.Deserialize(ref r, rank + 1);
+                                    t_key = global::Omnius.Xeus.Service.Engines.NodeProfile.Formatter.Deserialize(ref r, rank + 1);
                                     t_value = r.GetTimestamp();
                                     p_nodeProfileMap[t_key] = t_value;
                                 }

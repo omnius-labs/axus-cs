@@ -137,7 +137,7 @@ namespace Omnius.Xeus.Service.Drivers
                             }
                         case 1:
                             {
-                                p_address = OmniAddress.Formatter.Deserialize(ref r, rank + 1);
+                                p_address = global::Omnius.Core.Network.OmniAddress.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
@@ -266,7 +266,7 @@ namespace Omnius.Xeus.Service.Drivers
                             }
                         case 1:
                             {
-                                p_proxyOptions = TcpProxyOptions.Formatter.Deserialize(ref r, rank + 1);
+                                p_proxyOptions = global::Omnius.Xeus.Service.Drivers.TcpProxyOptions.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
@@ -427,7 +427,7 @@ namespace Omnius.Xeus.Service.Drivers
                                 p_listenAddresses = new OmniAddress[length];
                                 for (int i = 0; i < p_listenAddresses.Length; i++)
                                 {
-                                    p_listenAddresses[i] = OmniAddress.Formatter.Deserialize(ref r, rank + 1);
+                                    p_listenAddresses[i] = global::Omnius.Core.Network.OmniAddress.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
@@ -702,17 +702,17 @@ namespace Omnius.Xeus.Service.Drivers
                     {
                         case 0:
                             {
-                                p_tcpConnectOptions = TcpConnectOptions.Formatter.Deserialize(ref r, rank + 1);
+                                p_tcpConnectOptions = global::Omnius.Xeus.Service.Drivers.TcpConnectOptions.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 1:
                             {
-                                p_tcpAcceptOptions = TcpAcceptOptions.Formatter.Deserialize(ref r, rank + 1);
+                                p_tcpAcceptOptions = global::Omnius.Xeus.Service.Drivers.TcpAcceptOptions.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 2:
                             {
-                                p_bandwidthOptions = BandwidthOptions.Formatter.Deserialize(ref r, rank + 1);
+                                p_bandwidthOptions = global::Omnius.Xeus.Service.Drivers.BandwidthOptions.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }

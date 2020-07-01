@@ -170,7 +170,7 @@ namespace Omnius.Xeus.Service.Engines
                                 p_addresses = new OmniAddress[length];
                                 for (int i = 0; i < p_addresses.Length; i++)
                                 {
-                                    p_addresses[i] = OmniAddress.Formatter.Deserialize(ref r, rank + 1);
+                                    p_addresses[i] = global::Omnius.Core.Network.OmniAddress.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
@@ -303,7 +303,7 @@ namespace Omnius.Xeus.Service.Engines
                             }
                         case 1:
                             {
-                                p_hash = OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_hash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
@@ -544,7 +544,7 @@ namespace Omnius.Xeus.Service.Engines
                     {
                         case 0:
                             {
-                                p_tag = Tag.Formatter.Deserialize(ref r, rank + 1);
+                                p_tag = global::Omnius.Xeus.Service.Engines.Tag.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 1:
@@ -568,31 +568,46 @@ namespace Omnius.Xeus.Service.Engines
         static NodeFinderOptions()
         {
             global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.NodeFinderOptions>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.NodeFinderOptions>.Empty = new global::Omnius.Xeus.Service.Engines.NodeFinderOptions(string.Empty, 0);
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.NodeFinderOptions>.Empty = new global::Omnius.Xeus.Service.Engines.NodeFinderOptions(string.Empty, 0, global::System.Array.Empty<string>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxConfigPathLength = 1024;
+        public static readonly int MaxEnabledServicesCount = 32;
 
-        public NodeFinderOptions(string configPath, uint maxConnectionCount)
+        public NodeFinderOptions(string configPath, uint maxConnectionCount, string[] enabledServices)
         {
             if (configPath is null) throw new global::System.ArgumentNullException("configPath");
             if (configPath.Length > 1024) throw new global::System.ArgumentOutOfRangeException("configPath");
+            if (enabledServices is null) throw new global::System.ArgumentNullException("enabledServices");
+            if (enabledServices.Length > 32) throw new global::System.ArgumentOutOfRangeException("enabledServices");
+            foreach (var n in enabledServices)
+            {
+                if (n is null) throw new global::System.ArgumentNullException("n");
+                if (n.Length > 256) throw new global::System.ArgumentOutOfRangeException("n");
+            }
+
             this.ConfigPath = configPath;
             this.MaxConnectionCount = maxConnectionCount;
+            this.EnabledServices = new global::Omnius.Core.Collections.ReadOnlyListSlim<string>(enabledServices);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
                 if (configPath != default) ___h.Add(configPath.GetHashCode());
                 if (maxConnectionCount != default) ___h.Add(maxConnectionCount.GetHashCode());
+                foreach (var n in enabledServices)
+                {
+                    if (n != default) ___h.Add(n.GetHashCode());
+                }
                 return ___h.ToHashCode();
             });
         }
 
         public string ConfigPath { get; }
         public uint MaxConnectionCount { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<string> EnabledServices { get; }
 
         public static global::Omnius.Xeus.Service.Engines.NodeFinderOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -624,6 +639,7 @@ namespace Omnius.Xeus.Service.Engines
             if (object.ReferenceEquals(this, target)) return true;
             if (this.ConfigPath != target.ConfigPath) return false;
             if (this.MaxConnectionCount != target.MaxConnectionCount) return false;
+            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.EnabledServices, target.EnabledServices)) return false;
 
             return true;
         }
@@ -645,6 +661,10 @@ namespace Omnius.Xeus.Service.Engines
                     {
                         propertyCount++;
                     }
+                    if (value.EnabledServices.Count != 0)
+                    {
+                        propertyCount++;
+                    }
                     w.Write(propertyCount);
                 }
 
@@ -658,6 +678,15 @@ namespace Omnius.Xeus.Service.Engines
                     w.Write((uint)1);
                     w.Write(value.MaxConnectionCount);
                 }
+                if (value.EnabledServices.Count != 0)
+                {
+                    w.Write((uint)2);
+                    w.Write((uint)value.EnabledServices.Count);
+                    foreach (var n in value.EnabledServices)
+                    {
+                        w.Write(n);
+                    }
+                }
             }
 
             public global::Omnius.Xeus.Service.Engines.NodeFinderOptions Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
@@ -668,6 +697,7 @@ namespace Omnius.Xeus.Service.Engines
 
                 string p_configPath = string.Empty;
                 uint p_maxConnectionCount = 0;
+                string[] p_enabledServices = global::System.Array.Empty<string>();
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -684,10 +714,20 @@ namespace Omnius.Xeus.Service.Engines
                                 p_maxConnectionCount = r.GetUInt32();
                                 break;
                             }
+                        case 2:
+                            {
+                                var length = r.GetUInt32();
+                                p_enabledServices = new string[length];
+                                for (int i = 0; i < p_enabledServices.Length; i++)
+                                {
+                                    p_enabledServices[i] = r.GetString(256);
+                                }
+                                break;
+                            }
                     }
                 }
 
-                return new global::Omnius.Xeus.Service.Engines.NodeFinderOptions(p_configPath, p_maxConnectionCount);
+                return new global::Omnius.Xeus.Service.Engines.NodeFinderOptions(p_configPath, p_maxConnectionCount, p_enabledServices);
             }
         }
     }
@@ -1678,7 +1718,7 @@ namespace Omnius.Xeus.Service.Engines
                             }
                         case 1:
                             {
-                                p_endpoint = OmniAddress.Formatter.Deserialize(ref r, rank + 1);
+                                p_endpoint = global::Omnius.Core.Network.OmniAddress.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
@@ -1787,7 +1827,7 @@ namespace Omnius.Xeus.Service.Engines
                     {
                         case 0:
                             {
-                                p_tag = OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_tag = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
@@ -1896,7 +1936,7 @@ namespace Omnius.Xeus.Service.Engines
                     {
                         case 0:
                             {
-                                p_tag = OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_tag = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
@@ -2005,7 +2045,7 @@ namespace Omnius.Xeus.Service.Engines
                     {
                         case 0:
                             {
-                                p_tag = OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_tag = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
@@ -2114,7 +2154,7 @@ namespace Omnius.Xeus.Service.Engines
                     {
                         case 0:
                             {
-                                p_tag = OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_tag = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }

@@ -15,8 +15,8 @@ table MerkleTreeSection {
     Hashes: vector<OmniHash>(capacity: 1073741824) = 2,
 }
 
-table ContentLocation {
-    Tag: OmniHash = 0,
+table Location {
+    Tag: Tag = 0,
     NodeProfiles: vector<NodeProfile>(capacity: 8192) = 1,
 }
 
@@ -48,9 +48,9 @@ table NodeFinderProfileMessage {
 
 table NodeFinderDataMessage {
     PushNodeProfiles: vector<NodeProfile>(capacity: 256) = 0,
-    PushContentLocations: vector<ContentLocation>(capacity: 256) = 1,
-    WantContentLocations: vector<OmniHash>(capacity: 256) = 2,
-    GiveContentLocations: vector<ContentLocation>(capacity: 256) = 3,
+    PushLocations: vector<Location>(capacity: 256) = 1,
+    WantLocations: vector<Tag>(capacity: 256) = 2,
+    GiveLocations: vector<Location>(capacity: 256) = 3,
 }
 
 enum ContentExchangerVersion : uint8 {
