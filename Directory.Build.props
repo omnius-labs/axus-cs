@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project>
 
   <PropertyGroup>
     <LangVersion>8.0</LangVersion>
@@ -43,19 +42,19 @@
   </PropertyGroup>
 
   <!-- Autodetect platform -->
-  <PropertyGroup Condition=" '$(OS)' != 'Unix' ">
+  <PropertyGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' ">
     <NativeDepsPlatform>Windows</NativeDepsPlatform>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(OS)' == 'Unix' And Exists('/Applications') And Exists('/Library') And Exists('/System') ">
+  <PropertyGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' ">
     <NativeDepsPlatform>Mac</NativeDepsPlatform>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(OS)' == 'Unix' And '$(NativeDepsPlatform)' == '' ">
+  <PropertyGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">
     <NativeDepsPlatform>Linux</NativeDepsPlatform>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
-    
+
   <PropertyGroup Condition=" '$(NativeDepsPlatform)' == 'Windows' ">
     <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\obj\win\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
     <BaseOutputPath Condition=" '$(BaseOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\bin\win\$(MSBuildProjectName)\</BaseOutputPath>
@@ -74,8 +73,4 @@
     <PathMap>$(RepoRoot)=.</PathMap>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="NLog" Version="4.6.8" />
-  </ItemGroup>
-  
 </Project>
