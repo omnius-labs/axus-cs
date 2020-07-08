@@ -1,11 +1,11 @@
-syntax = v1.0;
+syntax v1.0
 
-using "Omnius.Core.Cryptography";
-using "Omnius.Core.Network";
-using "Omnius.Xeus.Service.Engines";
+using "Omnius.Core.Cryptography"
+using "Omnius.Core.Network"
+using "Omnius.Xeus.Service.Engines"
 
-namespace "Omnius.Xeus.Service.Engines.Internal";
-option csharp_access_level = "internal";
+namespace "Omnius.Xeus.Service.Engines.Internal"
+option csharp_access_level = "internal"
 
 /* Models */
 
@@ -62,22 +62,51 @@ table ContentExchangerHelloMessage {
     Versions: vector<ContentExchangerVersion>(capacity: 32) = 0,
 }
 
+table ContentExchangerProfileMessage {
+    NodeProfile: NodeProfile = 0,
+}
+
 table ContentExchangerRequestMessage {
-    Tag: OmniHash = 0,
-    NodeProfile: NodeProfile = 1,
+    RootHash: OmniHash = 0,
 }
 
 table ContentExchangerResponseMessage {
-    Tag: OmniHash = 0,
-    NodeProfile: NodeProfile = 1,
+    Accepted: bool = 0,
 }
 
 table ContentExchangerDataMessage {
     PushNodeProfiles: vector<NodeProfile>(capacity: 256) = 0,
     ContentBlockFlags: vector<ContentBlockFlags>(capacity: 32) = 1,
     WantContentBlocks: vector<OmniHash>(capacity: 256) = 2,
-    CancelContentBlocks: vector<OmniHash>(capacity: 256) = 3,
     GiveContentBlocks: vector<ContentBlock>(capacity: 8) = 4,
+}
+
+enum MessageExchangerVersion : uint8 {
+    Unknown = 0,
+    Version1 = 1,
+}
+
+table MessageExchangerHelloMessage {
+    Versions: vector<MessageExchangerVersion>(capacity: 32) = 0,
+}
+
+table MessageExchangerProfileMessage {
+    NodeProfile: NodeProfile = 0,
+}
+
+table MessageExchangerRequestMessage {
+    DeclaredMessageKeys: vector<OmniHash>(capacity: 256) = 0,
+    OrientedMessageKeys: vector<OmniHash>(capacity: 256) = 1,
+}
+
+table MessageExchangerResponseMessage {
+    DeclaredMessageKeys: vector<OmniHash>(capacity: 256) = 0,
+    OrientedMessageKeys: vector<OmniHash>(capacity: 256) = 1,
+}
+
+table MessageExchangerDataMessage {
+    WantMessageBlocks: vector<OmniHash>(capacity: 256) = 1,
+    GiveMessageBlocks: vector<MessageBlock>(capacity: 8) = 2,
 }
 
 /* Configs */

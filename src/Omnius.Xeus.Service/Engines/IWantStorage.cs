@@ -12,6 +12,6 @@ namespace Omnius.Xeus.Service.Engines
 {
     public interface IWantStorage
     {
-        ValueTask<Tag[]> GetWantTagsAsync(CancellationToken cancellationToken = default);
+        IEnumerable<Tag> GetWantTags();
     }
 }

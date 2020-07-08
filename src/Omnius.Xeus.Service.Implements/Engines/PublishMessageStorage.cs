@@ -17,11 +17,11 @@ using Omnius.Xeus.Service.Engines.Internal;
 
 namespace Omnius.Xeus.Service.Engines
 {
-    public sealed class PublishContentStorage : AsyncDisposableBase, IPublishContentStorage
+    public sealed class PublishMessageStorage : AsyncDisposableBase, IPublishMessageStorage
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly PublishContentStorageOptions _options;
+        private readonly PublishMessageStorageOptions _options;
         private readonly IObjectStoreFactory _objectStoreFactory;
         private readonly IBytesPool _bytesPool;
 
@@ -32,19 +32,19 @@ namespace Omnius.Xeus.Service.Engines
 
         private readonly AsyncLock _asyncLock = new AsyncLock();
 
-        internal sealed class PublishContentStorageFactory : IPublishContentStorageFactory
+        internal sealed class PublishMessageStorageFactory : IPublishMessageStorageFactory
         {
-            public async ValueTask<IPublishContentStorage> CreateAsync(PublishContentStorageOptions options,
+            public async ValueTask<IPublishMessageStorage> CreateAsync(PublishMessageStorageOptions options,
                 IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
             {
-                var result = new PublishContentStorage(options, objectStoreFactory, bytesPool);
+                var result = new PublishMessageStorage(options, objectStoreFactory, bytesPool);
                 return result;
             }
         }
 
-        public static IPublishContentStorageFactory Factory { get; } = new PublishContentStorageFactory();
+        public static IPublishMessageStorageFactory Factory { get; } = new PublishMessageStorageFactory();
 
-        internal PublishContentStorage(PublishContentStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
+        internal PublishMessageStorage(PublishMessageStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
         {
             _options = options;
             _objectStoreFactory = objectStoreFactory;
@@ -99,7 +99,7 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public async ValueTask<PublishContentStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<PublishMessageStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
@@ -122,7 +122,7 @@ namespace Omnius.Xeus.Service.Engines
             throw new NotImplementedException();
         }
 
-        public async ValueTask<OmniHash> PublishContentAsync(string filePath, CancellationToken cancellationToken = default)
+        public async ValueTask<OmniHash> PublishMessageAsync(string filePath, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
@@ -239,7 +239,7 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public async ValueTask UnpublishContentAsync(string filePath, CancellationToken cancellationToken = default)
+        public async ValueTask UnpublishMessageAsync(string filePath, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
@@ -258,12 +258,42 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public ValueTask<OmniHash> PublishContentAsync(ReadOnlySequence<byte> sequence, CancellationToken cancellationToken = default)
+        public ValueTask<OmniHash> PublishMessageAsync(ReadOnlySequence<byte> sequence, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask UnpublishContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+        public ValueTask UnpublishMessageAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask<OmniHash> PublishDeclaredMessageAsync(DeclaredMessage message, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask<OmniHash> PublishOrientedMessageAsync(OrientedMessage message, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask UnpublishDeclaredMessageAsync(OmniHash hash, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask UnpublishOrientedMessageAsync(OmniHash hash, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask<DeclaredMessage[]> GetDeclaredMessagesAsync(OmniHash key, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask<OrientedMessage[]> GetOrientedMessagesAsync(OmniHash key, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }

@@ -557,7 +557,7 @@ namespace Omnius.Xeus.Service.Engines
 
                     foreach (var publishStorage in _publishStorages)
                     {
-                        foreach (var tag in await publishStorage.GetPublishTagsAsync(cancellationToken))
+                        foreach (var tag in publishStorage.GetPublishTags())
                         {
                             contentLocationMap.GetOrAdd(tag, (_) => new HashSet<NodeProfile>())
                                  .Add(myNodeProfile);
@@ -569,7 +569,7 @@ namespace Omnius.Xeus.Service.Engines
 
                     foreach (var wantStorage in _wantStorages)
                     {
-                        foreach (var tag in await wantStorage.GetWantTagsAsync(cancellationToken))
+                        foreach (var tag in wantStorage.GetWantTags())
                         {
                             sendingWantLocationSet.Add(tag);
                         }

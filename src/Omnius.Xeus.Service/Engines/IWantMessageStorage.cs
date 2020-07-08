@@ -16,14 +16,12 @@ namespace Omnius.Xeus.Service.Engines
             IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool);
     }
 
-    public interface IWantMessageStorage : IWantStorage
+    public interface IWantMessageStorage : IWantStorage, IWritableMessageStorage
     {
         ValueTask<WantMessageStorageReport> GetReportAsync(CancellationToken cancellationToken = default);
         ValueTask WantDeclaredMessageAsync(OmniHash hash, CancellationToken cancellationToken = default);
         ValueTask UnwantDeclaredMessageAsync(OmniHash hash, CancellationToken cancellationToken = default);
         ValueTask WantOrientedMessageAsync(OmniHash hash, CancellationToken cancellationToken = default);
         ValueTask UnwantOrientedMessageAsync(OmniHash hash, CancellationToken cancellationToken = default);
-        ValueTask<DeclaredMessage[]> ExportDeclaredMessagesAsync(OmniHash hash, CancellationToken cancellationToken = default);
-        ValueTask<OrientedMessage[]> ExportOrientedMessagesAsync(OmniHash hash, CancellationToken cancellationToken = default);
     }
 }

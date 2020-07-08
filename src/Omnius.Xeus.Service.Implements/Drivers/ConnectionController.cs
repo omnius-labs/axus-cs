@@ -12,6 +12,8 @@ using Omnius.Core.Network;
 using Omnius.Core.Network.Caps;
 using Omnius.Core.Network.Connections;
 using Omnius.Core.Network.Connections.Secure;
+using Omnius.Core.Network.Proxies;
+using Omnius.Core.Network.Upnp;
 using Omnius.Xeus.Service.Drivers.Internal;
 
 namespace Omnius.Xeus.Service.Drivers
@@ -21,6 +23,9 @@ namespace Omnius.Xeus.Service.Drivers
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         private readonly ConnectionControllerOptions _options;
+        private readonly ISocks5ProxyClientFactory _socks5ProxyClientFactory;
+        private readonly IHttpProxyClientFactory _httpProxyClientFactory;
+        private readonly IUpnpClientFactory _upnpClientFactory;
         private readonly IBytesPool _bytesPool;
 
         private TcpConnector _tcpConnector;
@@ -33,9 +38,9 @@ namespace Omnius.Xeus.Service.Drivers
 
         internal sealed class ConnectionControllerFactory : IConnectionControllerFactory
         {
-            public async ValueTask<IConnectionController> CreateAsync(ConnectionControllerOptions options, IBytesPool bytesPool)
+            public async ValueTask<IConnectionController> CreateAsync(ConnectionControllerOptions options, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool)
             {
-                var result = new ConnectionController(options, bytesPool);
+                var result = new ConnectionController(options, socks5ProxyClientFactory, httpProxyClientFactory, upnpClientFactory, bytesPool);
                 await result.InitAsync();
 
                 return result;
@@ -44,15 +49,18 @@ namespace Omnius.Xeus.Service.Drivers
 
         public static IConnectionControllerFactory Factory { get; } = new ConnectionControllerFactory();
 
-        internal ConnectionController(ConnectionControllerOptions options, IBytesPool bytesPool)
+        internal ConnectionController(ConnectionControllerOptions options, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool)
         {
             _options = options;
+            _socks5ProxyClientFactory = socks5ProxyClientFactory;
+            _httpProxyClientFactory = httpProxyClientFactory;
+            _upnpClientFactory = upnpClientFactory;
             _bytesPool = bytesPool;
         }
 
         public async ValueTask InitAsync()
         {
-            _tcpConnector = await TcpConnector.Factory.CreateAsync(_options.TcpConnectOptions, _options.TcpAcceptOptions, _bytesPool);
+            _tcpConnector = await TcpConnector.Factory.CreateAsync(_options.TcpConnectOptions, _options.TcpAcceptOptions, _socks5ProxyClientFactory, _httpProxyClientFactory, _upnpClientFactory, _bytesPool);
             _baseConnectionDispatcher = new BaseConnectionDispatcher(new BaseConnectionDispatcherOptions()
             {
                 MaxSendBytesPerSeconds = (int)_options.BandwidthOptions.MaxSendBytesPerSeconds,

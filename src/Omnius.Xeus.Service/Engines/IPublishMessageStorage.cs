@@ -16,7 +16,7 @@ namespace Omnius.Xeus.Service.Engines
             IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool);
     }
 
-    public interface IPublishMessageStorage : IPublishStorage
+    public interface IPublishMessageStorage : IPublishStorage, IReadOnlyMessageStorage
     {
         ValueTask<PublishMessageStorageReport> GetReportAsync(CancellationToken cancellationToken = default);
         ValueTask<OmniHash> PublishDeclaredMessageAsync(DeclaredMessage message, CancellationToken cancellationToken = default);

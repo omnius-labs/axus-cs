@@ -6,6 +6,8 @@ using Omnius.Core;
 using Omnius.Core.Network;
 using Omnius.Core.Network.Caps;
 using Omnius.Core.Network.Connections;
+using Omnius.Core.Network.Proxies;
+using Omnius.Core.Network.Upnp;
 
 namespace Omnius.Xeus.Service.Drivers
 {
@@ -23,7 +25,7 @@ namespace Omnius.Xeus.Service.Drivers
 
     public interface IConnectionControllerFactory
     {
-        public ValueTask<IConnectionController> CreateAsync(ConnectionControllerOptions options, IBytesPool bytesPool);
+        public ValueTask<IConnectionController> CreateAsync(ConnectionControllerOptions options, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool);
     }
 
     public interface IConnectionController : IAsyncDisposable

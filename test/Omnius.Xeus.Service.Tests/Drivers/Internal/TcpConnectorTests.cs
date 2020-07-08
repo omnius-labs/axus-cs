@@ -4,6 +4,8 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Network;
+using Omnius.Core.Network.Proxies;
+using Omnius.Core.Network.Upnp;
 using Xunit;
 
 namespace Omnius.Xeus.Service.Drivers.Internal
@@ -22,7 +24,7 @@ namespace Omnius.Xeus.Service.Drivers.Internal
             var tcpConnectOptions = new TcpConnectOptions(true, null);
             var tcpAcceptOptions = new TcpAcceptOptions(false, Array.Empty<OmniAddress>(), false);
 
-            await using (var connector = await TcpConnector.Factory.CreateAsync(tcpConnectOptions, tcpAcceptOptions, BytesPool.Shared))
+            await using (var connector = await TcpConnector.Factory.CreateAsync(tcpConnectOptions, tcpAcceptOptions, Socks5ProxyClient.Factory, HttpProxyClient.Factory, UpnpClient.Factory, BytesPool.Shared))
             {
                 var tcpListener = new TcpListener(IPAddress.Parse(IpAddress), Port);
 
@@ -58,7 +60,7 @@ namespace Omnius.Xeus.Service.Drivers.Internal
             var tcpConnectOptions = new TcpConnectOptions(false, null);
             var tcpAcceptOptions = new TcpAcceptOptions(true, new[] { new OmniAddress($"tcp(ip4(\"{ipAddress}\"),{port})") }, false);
 
-            await using (var connector = await TcpConnector.Factory.CreateAsync(tcpConnectOptions, tcpAcceptOptions, BytesPool.Shared))
+            await using (var connector = await TcpConnector.Factory.CreateAsync(tcpConnectOptions, tcpAcceptOptions, Socks5ProxyClient.Factory, HttpProxyClient.Factory, UpnpClient.Factory, BytesPool.Shared))
             {
                 var acceptTask = connector.AcceptAsync();
 

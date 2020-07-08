@@ -12,6 +12,6 @@ namespace Omnius.Xeus.Service.Engines
 {
     public interface IPublishStorage
     {
-        ValueTask<Tag[]> GetPublishTagsAsync(CancellationToken cancellationToken = default);
+        IEnumerable<Tag> GetPublishTags();
     }
 }

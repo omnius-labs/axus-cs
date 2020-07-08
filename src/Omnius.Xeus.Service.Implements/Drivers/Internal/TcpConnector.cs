@@ -24,6 +24,9 @@ namespace Omnius.Xeus.Service.Drivers.Internal
 
         private readonly TcpConnectOptions _tcpConnectOptions;
         private readonly TcpAcceptOptions _tcpAcceptOptions;
+        private readonly ISocks5ProxyClientFactory _socks5ProxyClientFactory;
+        private readonly IHttpProxyClientFactory _httpProxyClientFactory;
+        private readonly IUpnpClientFactory _upnpClientFactory;
         private readonly IBytesPool _bytesPool;
 
         private readonly List<TcpListener> _tcpListeners = new List<TcpListener>();
@@ -34,9 +37,9 @@ namespace Omnius.Xeus.Service.Drivers.Internal
 
         public sealed class TcpConnectorFactory
         {
-            public async ValueTask<TcpConnector> CreateAsync(TcpConnectOptions tcpConnectOptions, TcpAcceptOptions tcpAcceptOptions, IBytesPool bytesPool)
+            public async ValueTask<TcpConnector> CreateAsync(TcpConnectOptions tcpConnectOptions, TcpAcceptOptions tcpAcceptOptions, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool)
             {
-                var result = new TcpConnector(tcpConnectOptions, tcpAcceptOptions, bytesPool);
+                var result = new TcpConnector(tcpConnectOptions, tcpAcceptOptions, socks5ProxyClientFactory, httpProxyClientFactory, upnpClientFactory, bytesPool);
                 await result.InitAsync();
 
                 return result;
@@ -45,10 +48,14 @@ namespace Omnius.Xeus.Service.Drivers.Internal
 
         public static TcpConnectorFactory Factory { get; } = new TcpConnectorFactory();
 
-        internal TcpConnector(TcpConnectOptions tcpConnectOptions, TcpAcceptOptions tcpAcceptOptions, IBytesPool bytesPool)
+        internal TcpConnector(TcpConnectOptions tcpConnectOptions, TcpAcceptOptions tcpAcceptOptions, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool)
         {
             _tcpConnectOptions = tcpConnectOptions;
             _tcpAcceptOptions = tcpAcceptOptions;
+            _socks5ProxyClientFactory = socks5ProxyClientFactory;
+            _httpProxyClientFactory = httpProxyClientFactory;
+            _upnpClientFactory = upnpClientFactory;
+
             _bytesPool = bytesPool;
         }
 
@@ -69,7 +76,7 @@ namespace Omnius.Xeus.Service.Drivers.Internal
                 var listenAddressSet = new HashSet<OmniAddress>(_tcpAcceptOptions.ListenAddresses.ToArray());
                 var useUpnp = _tcpAcceptOptions.UseUpnp;
 
-                UpnpClient? upnpClient = null;
+                IUpnpClient? upnpClient = null;
 
                 try
                 {
@@ -93,7 +100,7 @@ namespace Omnius.Xeus.Service.Drivers.Internal
                             {
                                 if (upnpClient == null)
                                 {
-                                    upnpClient = new UpnpClient();
+                                    upnpClient = _upnpClientFactory.Create();
                                     await upnpClient.ConnectAsync();
                                 }
 
@@ -124,7 +131,7 @@ namespace Omnius.Xeus.Service.Drivers.Internal
             {
                 var useUpnp = _tcpAcceptOptions.UseUpnp;
 
-                UpnpClient? upnpClient = null;
+                IUpnpClient? upnpClient = null;
 
                 try
                 {
@@ -141,7 +148,7 @@ namespace Omnius.Xeus.Service.Drivers.Internal
                             {
                                 if (upnpClient == null)
                                 {
-                                    upnpClient = new UpnpClient();
+                                    upnpClient = _upnpClientFactory.Create();
                                     await upnpClient.ConnectAsync();
                                 }
 
@@ -412,7 +419,7 @@ namespace Omnius.Xeus.Service.Drivers.Internal
 
                             disposableList.Add(socket);
 
-                            var proxy = new Socks5ProxyClient(ipAddress.ToString(), port);
+                            var proxy = _socks5ProxyClientFactory.Create(ipAddress.ToString(), port);
                             await proxy.ConnectAsync(socket, cancellationToken);
 
                             var cap = new SocketCap(socket);
@@ -430,7 +437,7 @@ namespace Omnius.Xeus.Service.Drivers.Internal
 
                             disposableList.Add(socket);
 
-                            var proxy = new HttpProxyClient(ipAddress.ToString(), port);
+                            var proxy = _httpProxyClientFactory.Create(ipAddress.ToString(), port);
                             await proxy.ConnectAsync(socket, cancellationToken);
 
                             var cap = new SocketCap(socket);
