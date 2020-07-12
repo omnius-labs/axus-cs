@@ -1,11 +1,11 @@
-syntax v1.0
+syntax v1.0;
 
-using "Omnius.Core.Cryptography"
-using "Omnius.Core.Network"
-using "Omnius.Xeus.Service.Engines"
+using "Omnius.Core.Cryptography";
+using "Omnius.Core.Network";
+using "Omnius.Xeus.Service.Engines";
 
-namespace "Omnius.Xeus.Service.Engines.Internal"
-option csharp_access_level = "internal"
+namespace "Omnius.Xeus.Service.Engines.Internal";
+option csharp_access_level "internal";
 
 /* Models */
 
@@ -15,13 +15,13 @@ table MerkleTreeSection {
     Hashes: vector<OmniHash>(capacity: 1073741824) = 2,
 }
 
-table Location {
-    Tag: Tag = 0,
+table ResourceLocation {
+    ResourceTag: ResourceTag = 0,
     NodeProfiles: vector<NodeProfile>(capacity: 8192) = 1,
 }
 
 table ContentBlock {
-    Tag: OmniHash = 0,
+    ResourceTag: OmniHash = 0,
     Value: bytes(capacity: 4194304, recyclable: true) = 1,
 }
 
@@ -48,9 +48,9 @@ table NodeFinderProfileMessage {
 
 table NodeFinderDataMessage {
     PushNodeProfiles: vector<NodeProfile>(capacity: 256) = 0,
-    PushLocations: vector<Location>(capacity: 256) = 1,
-    WantLocations: vector<Tag>(capacity: 256) = 2,
-    GiveLocations: vector<Location>(capacity: 256) = 3,
+    PushResourceLocations: vector<ResourceLocation>(capacity: 256) = 1,
+    WantResourceLocations: vector<ResourceTag>(capacity: 256) = 2,
+    GiveResourceLocations: vector<ResourceLocation>(capacity: 256) = 3,
 }
 
 enum ContentExchangerVersion : uint8 {
@@ -66,47 +66,56 @@ table ContentExchangerProfileMessage {
     NodeProfile: NodeProfile = 0,
 }
 
-table ContentExchangerRequestMessage {
-    RootHash: OmniHash = 0,
+table ContentExchangerRequestExchangeMessage {
+    Hash: OmniHash = 0,
 }
 
-table ContentExchangerResponseMessage {
-    Accepted: bool = 0,
+enum ContentExchangerRequestExchangeResultType : uint8 {
+    Unknown = 0,
+    Rejected = 1,
+    Accepted = 2,
+}
+
+table ContentExchangerRequestExchangeResultMessage {
+    Type: ContentExchangerRequestExchangeResultType = 0,
 }
 
 table ContentExchangerDataMessage {
     PushNodeProfiles: vector<NodeProfile>(capacity: 256) = 0,
     ContentBlockFlags: vector<ContentBlockFlags>(capacity: 32) = 1,
     WantContentBlocks: vector<OmniHash>(capacity: 256) = 2,
-    GiveContentBlocks: vector<ContentBlock>(capacity: 8) = 4,
+    GiveContentBlocks: vector<ContentBlock>(capacity: 8) = 3,
 }
 
-enum MessageExchangerVersion : uint8 {
+enum DeclaredMessageExchangerVersion : uint8 {
     Unknown = 0,
     Version1 = 1,
 }
 
-table MessageExchangerHelloMessage {
-    Versions: vector<MessageExchangerVersion>(capacity: 32) = 0,
+table DeclaredMessageExchangerHelloMessage {
+    Versions: vector<DeclaredMessageExchangerVersion>(capacity: 32) = 0,
 }
 
-table MessageExchangerProfileMessage {
-    NodeProfile: NodeProfile = 0,
+table DeclaredMessageExchangerFetchMessageMessage {
+    Hash: OmniHash = 0,
+    UpdatedTime: timestamp = 1,
 }
 
-table MessageExchangerRequestMessage {
-    DeclaredMessageKeys: vector<OmniHash>(capacity: 256) = 0,
-    OrientedMessageKeys: vector<OmniHash>(capacity: 256) = 1,
+enum DeclaredMessageExchangerFetchMessageResultType : uint8 {
+    Unknown = 0,
+    Rejected = 1,
+    NotFound = 2,
+    SameFound = 3,
+    UpdatedFound = 4,
 }
 
-table MessageExchangerResponseMessage {
-    DeclaredMessageKeys: vector<OmniHash>(capacity: 256) = 0,
-    OrientedMessageKeys: vector<OmniHash>(capacity: 256) = 1,
+table DeclaredMessageExchangerFetchMessageResultMessage {
+    Type: DeclaredMessageExchangerFetchMessageResultType = 0,
+    DeclaredMessage: DeclaredMessage = 1,
 }
 
-table MessageExchangerDataMessage {
-    WantMessageBlocks: vector<OmniHash>(capacity: 256) = 1,
-    GiveMessageBlocks: vector<MessageBlock>(capacity: 8) = 2,
+table DeclaredMessageExchangerPostMessage {
+    DeclaredMessage: DeclaredMessage = 0,
 }
 
 /* Configs */

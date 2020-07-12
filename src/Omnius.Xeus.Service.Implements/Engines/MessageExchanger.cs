@@ -18,11 +18,11 @@ using Omnius.Xeus.Service.Engines.Internal;
 
 namespace Omnius.Xeus.Service.Engines
 {
-    public sealed class MessageExchanger : AsyncDisposableBase, IMessageExchanger
+    public sealed class DeclaredMessageExchanger : AsyncDisposableBase, IDeclaredMessageExchanger
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly MessageExchangerOptions _options;
+        private readonly DeclaredMessageExchangerOptions _options;
         private readonly IObjectStoreFactory _objectStoreFactory;
         private readonly IConnectionController _connectionController;
         private readonly INodeFinder _nodeFinder;
@@ -48,21 +48,21 @@ namespace Omnius.Xeus.Service.Engines
 
         public const string ServiceName = "message-exchanger`";
 
-        internal sealed class MessageExchangerFactory : IMessageExchangerFactory
+        internal sealed class DeclaredMessageExchangerFactory : IDeclaredMessageExchangerFactory
         {
-            public async ValueTask<IMessageExchanger> CreateAsync(MessageExchangerOptions options, IObjectStoreFactory objectStoreFactory, IConnectionController connectionController,
+            public async ValueTask<IDeclaredMessageExchanger> CreateAsync(DeclaredMessageExchangerOptions options, IObjectStoreFactory objectStoreFactory, IConnectionController connectionController,
                 INodeFinder nodeFinder, IPublishMessageStorage publishStorage, IWantMessageStorage wantStorage, IBytesPool bytesPool)
             {
-                var result = new MessageExchanger(options, objectStoreFactory, connectionController, nodeFinder, publishStorage, wantStorage, bytesPool);
+                var result = new DeclaredMessageExchanger(options, objectStoreFactory, connectionController, nodeFinder, publishStorage, wantStorage, bytesPool);
                 await result.InitAsync();
 
                 return result;
             }
         }
 
-        public static IMessageExchangerFactory Factory { get; } = new MessageExchangerFactory();
+        public static IDeclaredMessageExchangerFactory Factory { get; } = new DeclaredMessageExchangerFactory();
 
-        internal MessageExchanger(MessageExchangerOptions options, IObjectStoreFactory objectStoreFactory,
+        internal DeclaredMessageExchanger(DeclaredMessageExchangerOptions options, IObjectStoreFactory objectStoreFactory,
                 IConnectionController connectionController, INodeFinder nodeFinder, IPublishMessageStorage publishStorage, IWantMessageStorage wantStorage,
                 IBytesPool bytesPool)
         {
@@ -120,13 +120,13 @@ namespace Omnius.Xeus.Service.Engines
         {
             try
             {
-                MessageExchangerVersion? version = 0;
+                DeclaredMessageExchangerVersion? version = 0;
                 {
-                    var myHelloMessage = new MessageExchangerHelloMessage(new[] { MessageExchangerVersion.Version1 });
-                    MessageExchangerHelloMessage? otherHelloMessage = null;
+                    var myHelloMessage = new DeclaredMessageExchangerHelloMessage(new[] { DeclaredMessageExchangerVersion.Version1 });
+                    DeclaredMessageExchangerHelloMessage? otherHelloMessage = null;
 
                     var enqueueTask = connection.EnqueueAsync((bufferWriter) => myHelloMessage.Export(bufferWriter, _bytesPool), cancellationToken);
-                    var dequeueTask = connection.DequeueAsync((sequence) => otherHelloMessage = MessageExchangerHelloMessage.Import(sequence, _bytesPool), cancellationToken);
+                    var dequeueTask = connection.DequeueAsync((sequence) => otherHelloMessage = DeclaredMessageExchangerHelloMessage.Import(sequence, _bytesPool), cancellationToken);
 
                     await ValueTaskHelper.WhenAll(enqueueTask, dequeueTask);
                     if (otherHelloMessage == null) throw new Exception();
@@ -134,17 +134,17 @@ namespace Omnius.Xeus.Service.Engines
                     version = EnumHelper.GetOverlappedMaxValue(myHelloMessage.Versions, otherHelloMessage.Versions);
                 }
 
-                if (version == MessageExchangerVersion.Version1)
+                if (version == DeclaredMessageExchangerVersion.Version1)
                 {
                     NodeProfile? nodeProfile = null;
                     {
                         {
                             var myNodeProflie = await _nodeFinder.GetMyNodeProfile();
-                            var myProfileMessage = new MessageExchangerProfileMessage(myNodeProflie);
-                            MessageExchangerProfileMessage? otherProfileMessage = null;
+                            var myProfileMessage = new DeclaredMessageExchangerProfileMessage(myNodeProflie);
+                            DeclaredMessageExchangerProfileMessage? otherProfileMessage = null;
 
                             var enqueueTask = connection.EnqueueAsync((bufferWriter) => myProfileMessage.Export(bufferWriter, _bytesPool), cancellationToken);
-                            var dequeueTask = connection.DequeueAsync((sequence) => otherProfileMessage = MessageExchangerProfileMessage.Import(sequence, _bytesPool), cancellationToken);
+                            var dequeueTask = connection.DequeueAsync((sequence) => otherProfileMessage = DeclaredMessageExchangerProfileMessage.Import(sequence, _bytesPool), cancellationToken);
 
                             await ValueTaskHelper.WhenAll(enqueueTask, dequeueTask);
                             if (otherProfileMessage == null) throw new Exception();
@@ -153,24 +153,24 @@ namespace Omnius.Xeus.Service.Engines
 
                         if (handshakeType == ConnectionHandshakeType.Connected)
                         {
-                            var requestMessage = new MessageExchangerRequestMessage(rootHash.Value);
+                            var requestMessage = new DeclaredMessageExchangerRequestMessage(rootHash.Value);
                             await connection.EnqueueAsync((bufferWriter) => requestMessage.Export(bufferWriter, _bytesPool), cancellationToken);
 
-                            MessageExchangerResponseMessage? responseMessage = null;
-                            await connection.DequeueAsync((sequence) => responseMessage = MessageExchangerResponseMessage.Import(sequence, _bytesPool), cancellationToken);
+                            DeclaredMessageExchangerResponseMessage? responseMessage = null;
+                            await connection.DequeueAsync((sequence) => responseMessage = DeclaredMessageExchangerResponseMessage.Import(sequence, _bytesPool), cancellationToken);
 
                             if (responseMessage == null || !responseMessage.Accepted) throw new Exception();
                         }
                         else if (handshakeType == ConnectionHandshakeType.Accepted)
                         {
-                            MessageExchangerRequestMessage? requestMessage = null;
-                            await connection.DequeueAsync((sequence) => requestMessage = MessageExchangerRequestMessage.Import(sequence, _bytesPool), cancellationToken);
+                            DeclaredMessageExchangerRequestMessage? requestMessage = null;
+                            await connection.DequeueAsync((sequence) => requestMessage = DeclaredMessageExchangerRequestMessage.Import(sequence, _bytesPool), cancellationToken);
                             if (requestMessage == null) throw new Exception();
 
                             rootHash = requestMessage.RootHash;
                             bool accepted = _publishStorage.Contains(requestMessage.RootHash) || _wantStorage.Contains(requestMessage.RootHash);
 
-                            var responseMessage = new MessageExchangerResponseMessage(accepted);
+                            var responseMessage = new DeclaredMessageExchangerResponseMessage(accepted);
                             await connection.EnqueueAsync((bufferWriter) => responseMessage.Export(bufferWriter, _bytesPool), cancellationToken);
 
                             if (!accepted) throw new Exception();
@@ -350,11 +350,11 @@ namespace Omnius.Xeus.Service.Engines
 
                     foreach (var connectionStatus in _connectionStatusSet.ToArray())
                     {
-                        MessageExchangerDataMessage? dataMessage = null;
+                        DeclaredMessageExchangerDataMessage? dataMessage = null;
 
                         connectionStatus.Connection.TryDequeue((sequence) =>
                         {
-                            dataMessage = MessageExchangerDataMessage.Import(sequence, _bytesPool);
+                            dataMessage = DeclaredMessageExchangerDataMessage.Import(sequence, _bytesPool);
                         });
 
                         if (dataMessage == null)
@@ -458,7 +458,7 @@ namespace Omnius.Xeus.Service.Engines
             public NodeProfile NodeProfile { get; }
             public OmniHash RootHash { get; }
 
-            public MessageExchangerDataMessage? SendingDataMessage { get; set; } = null;
+            public DeclaredMessageExchangerDataMessage? SendingDataMessage { get; set; } = null;
             public ContentBlockFlags[]? ReceivedContentBlockFlags { get; set; } = null;
             public List<OmniHash> ReceivedWantContentBlocks { get; } = new List<OmniHash>();
 

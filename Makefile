@@ -8,7 +8,6 @@ test:
 	sh ./eng/test.sh
 
 update: format
-	sh ./eng/update-submodule.sh
 	sh ./eng/update-tools.sh
 
 format:

@@ -1,10 +1,10 @@
-﻿syntax v1.0
+﻿syntax v1.0;
 
-using "Omnius.Core.Cryptography"
-using "Omnius.Core.Network"
-using "Omnius.Xeus.Service.Drivers"
+using "Omnius.Core.Cryptography";
+using "Omnius.Core.Network";
+using "Omnius.Xeus.Service.Drivers";
 
-namespace "Omnius.Xeus.Service.Engines"
+namespace "Omnius.Xeus.Service.Engines";
 
 /* Models */
 
@@ -13,18 +13,13 @@ table NodeProfile {
     Addresses: vector<OmniAddress>(capacity: 32) = 1,
 }
 
-table Tag {
+table ResourceTag {
     Type: string(capacity: 256) = 0,
     Hash: OmniHash = 1,
 }
 
 table DeclaredMessage {
-    Value: bytes(capacity: 4194304) = 0,
-}
-
-table OrientedMessage {
-    Tag: Tag = 0,
-    Value: bytes(capacity: 4194304) = 1,
+    Value: bytes(capacity: 33554432, recyclable: true) = 0,
 }
 
 /* Optinos */
@@ -32,7 +27,7 @@ table OrientedMessage {
 table NodeFinderOptions {
     ConfigPath: string(capacity: 1024) = 0,
     MaxConnectionCount: uint32 = 1,
-    EnabledServices: vector<string(capacity: 256)>(capacity: 32) = 2,
+    Services: vector<string(capacity: 256)>(capacity: 32) = 2,
 }
 
 table PublishContentStorageOptions {
@@ -48,15 +43,15 @@ table ContentExchangerOptions {
     MaxConnectionCount: uint32 = 1,
 }
 
-table PublishMessageStorageOptions {
+table PublishDeclaredMessageStorageOptions {
     ConfigPath: string(capacity: 1024) = 0,
 }
 
-table WantMessageStorageOptions {
+table WantDeclaredMessageStorageOptions {
     ConfigPath: string(capacity: 1024) = 0,
 }
 
-table MessageExchangerOptions {
+table DeclarationExchangerOptions {
     ConfigPath: string(capacity: 1024) = 0,
     MaxConnectionCount: uint32 = 1,
 }
@@ -77,21 +72,17 @@ enum ConnectionType : uint8 {
 
 table ConnectionReport {
     Type: ConnectionType = 0,
-    Endpoint: OmniAddress = 1,
+    EndPoint: OmniAddress = 1,
 }
 
 table PublishContentStorageReport {
-    Tag: OmniHash = 0,
 }
 
 table WantContentStorageReport {
-    Tag: OmniHash = 0,
 }
 
-table PublishMessageStorageReport {
-    Tag: OmniHash = 0,
+table PublishDeclaredMessageStorageReport {
 }
 
-table WantMessageStorageReport {
-    Tag: OmniHash = 0,
+table WantDeclaredMessageStorageReport {
 }

@@ -2,8 +2,8 @@
 
 DOTNET_CLI_TELEMETRY_OPTOUT=1
 
-BIN_DIR=$PWD/bin/tools/linux
-TOOL_PATH=$BIN_DIR/Omnius.Core.Serialization.RocketPack.DefinitionCompiler/Omnius.Core.Serialization.RocketPack.DefinitionCompiler
+BIN_DIR="$PWD/bin/tools/linux"
+TOOL_PATH="$BIN_DIR/Omnius.Core.Serialization.RocketPack.DefinitionCompiler/Omnius.Core.Serialization.RocketPack.DefinitionCompiler"
 INCLUDE_1="$PWD/refs/core/fmt"
 INCLUDE_2="$PWD/fmt"
 
