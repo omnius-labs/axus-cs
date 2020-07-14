@@ -9,9 +9,8 @@ using Omnius.Xeus.Service.Engines;
 
 namespace Omnius.Xeus.Service.Engines
 {
-    public interface IWritableMessageStorage : IReadOnlyMessageStorage
+    public interface IWritableDeclaredMessageStorage : IReadOnlyDeclaredMessageStorage
     {
-        ValueTask SetDeclaredMessagesAsync(DeclaredMessage message, CancellationToken cancellationToken = default);
-        ValueTask SetOrientedMessagesAsync(OrientedMessage message, CancellationToken cancellationToken = default);
+        ValueTask WriteAsync(DeclaredMessage message, CancellationToken cancellationToken = default);
     }
 }

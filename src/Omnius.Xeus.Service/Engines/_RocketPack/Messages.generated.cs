@@ -1194,22 +1194,22 @@ namespace Omnius.Xeus.Service.Engines
         }
     }
 
-    public sealed partial class DeclarationExchangerOptions : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.DeclarationExchangerOptions>
+    public sealed partial class DeclaredMessageExchangerOptions : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.DeclaredMessageExchangerOptions>
     {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Engines.DeclarationExchangerOptions> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.DeclarationExchangerOptions>.Formatter;
-        public static global::Omnius.Xeus.Service.Engines.DeclarationExchangerOptions Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.DeclarationExchangerOptions>.Empty;
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Engines.DeclaredMessageExchangerOptions> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.DeclaredMessageExchangerOptions>.Formatter;
+        public static global::Omnius.Xeus.Service.Engines.DeclaredMessageExchangerOptions Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.DeclaredMessageExchangerOptions>.Empty;
 
-        static DeclarationExchangerOptions()
+        static DeclaredMessageExchangerOptions()
         {
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.DeclarationExchangerOptions>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.DeclarationExchangerOptions>.Empty = new global::Omnius.Xeus.Service.Engines.DeclarationExchangerOptions(string.Empty, 0);
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.DeclaredMessageExchangerOptions>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.DeclaredMessageExchangerOptions>.Empty = new global::Omnius.Xeus.Service.Engines.DeclaredMessageExchangerOptions(string.Empty, 0);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxConfigPathLength = 1024;
 
-        public DeclarationExchangerOptions(string configPath, uint maxConnectionCount)
+        public DeclaredMessageExchangerOptions(string configPath, uint maxConnectionCount)
         {
             if (configPath is null) throw new global::System.ArgumentNullException("configPath");
             if (configPath.Length > 1024) throw new global::System.ArgumentOutOfRangeException("configPath");
@@ -1228,7 +1228,7 @@ namespace Omnius.Xeus.Service.Engines
         public string ConfigPath { get; }
         public uint MaxConnectionCount { get; }
 
-        public static global::Omnius.Xeus.Service.Engines.DeclarationExchangerOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Service.Engines.DeclaredMessageExchangerOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -1239,20 +1239,20 @@ namespace Omnius.Xeus.Service.Engines
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(global::Omnius.Xeus.Service.Engines.DeclarationExchangerOptions? left, global::Omnius.Xeus.Service.Engines.DeclarationExchangerOptions? right)
+        public static bool operator ==(global::Omnius.Xeus.Service.Engines.DeclaredMessageExchangerOptions? left, global::Omnius.Xeus.Service.Engines.DeclaredMessageExchangerOptions? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(global::Omnius.Xeus.Service.Engines.DeclarationExchangerOptions? left, global::Omnius.Xeus.Service.Engines.DeclarationExchangerOptions? right)
+        public static bool operator !=(global::Omnius.Xeus.Service.Engines.DeclaredMessageExchangerOptions? left, global::Omnius.Xeus.Service.Engines.DeclaredMessageExchangerOptions? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Service.Engines.DeclarationExchangerOptions)) return false;
-            return this.Equals((global::Omnius.Xeus.Service.Engines.DeclarationExchangerOptions)other);
+            if (!(other is global::Omnius.Xeus.Service.Engines.DeclaredMessageExchangerOptions)) return false;
+            return this.Equals((global::Omnius.Xeus.Service.Engines.DeclaredMessageExchangerOptions)other);
         }
-        public bool Equals(global::Omnius.Xeus.Service.Engines.DeclarationExchangerOptions? target)
+        public bool Equals(global::Omnius.Xeus.Service.Engines.DeclaredMessageExchangerOptions? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -1263,9 +1263,9 @@ namespace Omnius.Xeus.Service.Engines
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Engines.DeclarationExchangerOptions>
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Engines.DeclaredMessageExchangerOptions>
         {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in global::Omnius.Xeus.Service.Engines.DeclarationExchangerOptions value, in int rank)
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in global::Omnius.Xeus.Service.Engines.DeclaredMessageExchangerOptions value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1294,7 +1294,7 @@ namespace Omnius.Xeus.Service.Engines
                 }
             }
 
-            public global::Omnius.Xeus.Service.Engines.DeclarationExchangerOptions Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public global::Omnius.Xeus.Service.Engines.DeclaredMessageExchangerOptions Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1321,7 +1321,7 @@ namespace Omnius.Xeus.Service.Engines
                     }
                 }
 
-                return new global::Omnius.Xeus.Service.Engines.DeclarationExchangerOptions(p_configPath, p_maxConnectionCount);
+                return new global::Omnius.Xeus.Service.Engines.DeclaredMessageExchangerOptions(p_configPath, p_maxConnectionCount);
             }
         }
     }

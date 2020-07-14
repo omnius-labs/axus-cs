@@ -51,7 +51,7 @@ table WantDeclaredMessageStorageOptions {
     ConfigPath: string(capacity: 1024) = 0,
 }
 
-table DeclarationExchangerOptions {
+table DeclaredMessageExchangerOptions {
     ConfigPath: string(capacity: 1024) = 0,
     MaxConnectionCount: uint32 = 1,
 }

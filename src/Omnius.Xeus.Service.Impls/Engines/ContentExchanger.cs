@@ -151,15 +151,15 @@ namespace Omnius.Xeus.Service.Engines
                             nodeProfile = otherProfileMessage.NodeProfile;
                         }
 
-                        if (handshakeType == ConnectionHandshakeType.Connected)
+                        if (handshakeType == ConnectionHandshakeType.Connected && rootHash != null)
                         {
-                            var requestMessage = new ContentExchangerRequestMessage(rootHash.Value);
+                            var requestMessage = new ContentExchangerRequestExchangeMessage(rootHash.Value);
                             await connection.EnqueueAsync((bufferWriter) => requestMessage.Export(bufferWriter, _bytesPool), cancellationToken);
 
-                            ContentExchangerResponseMessage? responseMessage = null;
-                            await connection.DequeueAsync((sequence) => responseMessage = ContentExchangerResponseMessage.Import(sequence, _bytesPool), cancellationToken);
+                            ContentExchangerRequestExchangeResultMessage? resultMessage = null;
+                            await connection.DequeueAsync((sequence) => resultMessage = ContentExchangerRequestExchangeResultMessage.Import(sequence, _bytesPool), cancellationToken);
 
-                            if (responseMessage == null || !responseMessage.Accepted) throw new Exception();
+                            if (resultMessage == null || !resultMessage.Accepted) throw new Exception();
                         }
                         else if (handshakeType == ConnectionHandshakeType.Accepted)
                         {

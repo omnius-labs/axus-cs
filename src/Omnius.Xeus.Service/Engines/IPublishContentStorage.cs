@@ -19,9 +19,9 @@ namespace Omnius.Xeus.Service.Engines
     public interface IPublishContentStorage : IPublishStorage, IReadOnlyContentStorage
     {
         ValueTask<PublishContentStorageReport> GetReportAsync(CancellationToken cancellationToken = default);
-        ValueTask<OmniHash> PublishContentAsync(string filePath, CancellationToken cancellationToken = default);
-        ValueTask<OmniHash> PublishContentAsync(ReadOnlySequence<byte> sequence, CancellationToken cancellationToken = default);
-        ValueTask UnpublishContentAsync(string filePath, CancellationToken cancellationToken = default);
-        ValueTask UnpublishContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
+        ValueTask<OmniHash> PublishAsync(string filePath, CancellationToken cancellationToken = default);
+        ValueTask<OmniHash> PublishAsync(ReadOnlySequence<byte> sequence, CancellationToken cancellationToken = default);
+        ValueTask UnpublishAsync(string filePath, CancellationToken cancellationToken = default);
+        ValueTask UnpublishAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
     }
 }

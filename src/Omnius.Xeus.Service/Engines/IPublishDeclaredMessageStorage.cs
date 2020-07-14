@@ -10,18 +10,16 @@ using Omnius.Xeus.Service.Drivers;
 
 namespace Omnius.Xeus.Service.Engines
 {
-    public interface IPublishMessageStorageFactory
+    public interface IPublishDeclaredMessageStorageFactory
     {
-        ValueTask<IPublishMessageStorage> CreateAsync(PublishMessageStorageOptions options,
+        ValueTask<IPublishDeclaredMessageStorage> CreateAsync(PublishDeclaredMessageStorageOptions options,
             IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool);
     }
 
-    public interface IPublishMessageStorage : IPublishStorage, IReadOnlyMessageStorage
+    public interface IPublishDeclaredMessageStorage : IPublishStorage, IReadOnlyDeclaredMessageStorage
     {
-        ValueTask<PublishMessageStorageReport> GetReportAsync(CancellationToken cancellationToken = default);
-        ValueTask<OmniHash> PublishDeclaredMessageAsync(DeclaredMessage message, CancellationToken cancellationToken = default);
-        ValueTask<OmniHash> PublishOrientedMessageAsync(OrientedMessage message, CancellationToken cancellationToken = default);
-        ValueTask UnpublishDeclaredMessageAsync(OmniHash hash, CancellationToken cancellationToken = default);
-        ValueTask UnpublishOrientedMessageAsync(OmniHash hash, CancellationToken cancellationToken = default);
+        ValueTask<PublishDeclaredMessageStorageReport> GetReportAsync(CancellationToken cancellationToken = default);
+        ValueTask PublishAsync(DeclaredMessage message, CancellationToken cancellationToken = default);
+        ValueTask UnpublishAsync(OmniSignature signature, CancellationToken cancellationToken = default);
     }
 }

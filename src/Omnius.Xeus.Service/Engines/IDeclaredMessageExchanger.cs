@@ -8,7 +8,7 @@ namespace Omnius.Xeus.Service.Engines
     {
         ValueTask<IDeclaredMessageExchanger> CreateAsync(DeclaredMessageExchangerOptions options,
             IObjectStoreFactory objectStoreFactory, IConnectionController connectionController,
-            INodeFinder nodeFinder, IPublishMessageStorage publishStorage, IWantMessageStorage wantStorage, IBytesPool bytesPool);
+            INodeFinder nodeFinder, IPublishDeclaredMessageStorage publishStorage, IWantDeclaredMessageStorage wantStorage, IBytesPool bytesPool);
     }
 
     public interface IDeclaredMessageExchanger

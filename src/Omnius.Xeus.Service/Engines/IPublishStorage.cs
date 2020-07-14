@@ -12,6 +12,6 @@ namespace Omnius.Xeus.Service.Engines
 {
     public interface IPublishStorage
     {
-        IEnumerable<Tag> GetPublishTags();
+        IEnumerable<ResourceTag> GetPublishTags();
     }
 }

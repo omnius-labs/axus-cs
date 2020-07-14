@@ -12,6 +12,6 @@ namespace Omnius.Xeus.Service.Engines
 {
     public interface IWantStorage
     {
-        IEnumerable<Tag> GetWantTags();
+        IEnumerable<ResourceTag> GetWantTags();
     }
 }

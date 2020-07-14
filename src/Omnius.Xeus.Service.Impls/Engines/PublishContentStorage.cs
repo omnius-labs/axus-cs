@@ -268,6 +268,31 @@ namespace Omnius.Xeus.Service.Engines
             throw new NotImplementedException();
         }
 
+        public ValueTask<OmniHash> PublishAsync(string filePath, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask<OmniHash> PublishAsync(ReadOnlySequence<byte> sequence, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask UnpublishAsync(string filePath, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask UnpublishAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<ResourceTag> IPublishStorage.GetPublishTags()
+        {
+            throw new NotImplementedException();
+        }
+
         class PublishFileStatus
         {
             public PublishFileStatus(OmniHash rootHash, string filePath, MerkleTreeSection[] merkleTreeSections)

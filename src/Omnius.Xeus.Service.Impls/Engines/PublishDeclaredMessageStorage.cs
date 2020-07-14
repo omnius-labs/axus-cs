@@ -17,7 +17,7 @@ using Omnius.Xeus.Service.Engines.Internal;
 
 namespace Omnius.Xeus.Service.Engines
 {
-    public sealed class PublishMessageStorage : AsyncDisposableBase, IPublishMessageStorage
+    public sealed class PublishMessageStorage : AsyncDisposableBase, IPublishDeclaredMessageStorage
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -294,6 +294,36 @@ namespace Omnius.Xeus.Service.Engines
         }
 
         public ValueTask<OrientedMessage[]> GetOrientedMessagesAsync(OmniHash key, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        ValueTask<PublishDeclaredMessageStorageReport> IPublishDeclaredMessageStorage.GetReportAsync(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask PublishAsync(DeclaredMessage message, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask UnpublishAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<ResourceTag> IPublishStorage.GetPublishTags()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Contains(OmniSignature signature, DateTime since = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask<DeclaredMessage?> ReadAsync(OmniSignature signature, DateTime since = default, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }

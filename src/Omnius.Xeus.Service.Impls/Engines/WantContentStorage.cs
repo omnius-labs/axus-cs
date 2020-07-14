@@ -16,11 +16,11 @@ using Omnius.Xeus.Service.Drivers;
 
 namespace Omnius.Xeus.Service.Engines
 {
-    public sealed class WantMessageStorage : AsyncDisposableBase, IWantMessageStorage
+    public sealed class WantContentStorage : AsyncDisposableBase, IWantContentStorage
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly WantMessageStorageOptions _options;
+        private readonly WantContentStorageOptions _options;
         private readonly IObjectStoreFactory _objectStoreFactory;
         private readonly IBytesPool _bytesPool;
 
@@ -30,20 +30,20 @@ namespace Omnius.Xeus.Service.Engines
 
         const int MaxBlockLength = 1 * 1024 * 1024;
 
-        internal sealed class WantMessageStorageFactory : IWantMessageStorageFactory
+        internal sealed class WantContentStorageFactory : IWantContentStorageFactory
         {
-            public async ValueTask<IWantMessageStorage> CreateAsync(WantMessageStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
+            public async ValueTask<IWantContentStorage> CreateAsync(WantContentStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
             {
-                var result = new WantMessageStorage(options, objectStoreFactory, bytesPool);
+                var result = new WantContentStorage(options, objectStoreFactory, bytesPool);
                 await result.InitAsync();
 
                 return result;
             }
         }
 
-        public static IWantMessageStorageFactory Factory { get; } = new WantMessageStorageFactory();
+        public static IWantContentStorageFactory Factory { get; } = new WantContentStorageFactory();
 
-        internal WantMessageStorage(WantMessageStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
+        internal WantContentStorage(WantContentStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
         {
             _options = options;
             _objectStoreFactory = objectStoreFactory;
@@ -119,8 +119,7 @@ namespace Omnius.Xeus.Service.Engines
         {
             using (await _asyncLock.LockAsync())
             {
-                if (!_wantFileStatusMap.TryGetValue(rootHash, out var status)
-                    || !status.WantBlocks.Contains(targetHash))
+                if (!_wantFileStatusMap.TryGetValue(rootHash, out var status) || !status.WantBlocks.Contains(targetHash))
                 {
                     return;
                 }
@@ -191,27 +190,27 @@ namespace Omnius.Xeus.Service.Engines
             throw new NotImplementedException();
         }
 
-        public ValueTask<WantMessageStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
+        public ValueTask<WantContentStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask WantMessageAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+        public ValueTask WantContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask UnwantMessageAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+        public ValueTask UnwantContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask ExportMessageAsync(OmniHash rootHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default)
+        public ValueTask ExportContentAsync(OmniHash rootHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask ExportMessageAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default)
+        public ValueTask ExportContentAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
@@ -226,57 +225,7 @@ namespace Omnius.Xeus.Service.Engines
             throw new NotImplementedException();
         }
 
-        ValueTask<WantMessageStorageReport> IWantMessageStorage.GetReportAsync(CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ValueTask WantDeclaredMessageAsync(OmniHash hash, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ValueTask UnwantDeclaredMessageAsync(OmniHash hash, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ValueTask WantOrientedMessageAsync(OmniHash hash, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ValueTask UnwantOrientedMessageAsync(OmniHash hash, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ValueTask<DeclaredMessage[]> ExportDeclaredMessagesAsync(OmniHash hash, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ValueTask<OrientedMessage[]> ExportOrientedMessagesAsync(OmniHash hash, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ValueTask SetDeclaredMessagesAsync(DeclaredMessage message, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ValueTask SetOrientedMessagesAsync(OrientedMessage message, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ValueTask<DeclaredMessage[]> GetDeclaredMessagesAsync(OmniHash key, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ValueTask<OrientedMessage[]> GetOrientedMessagesAsync(OmniHash key, CancellationToken cancellationToken = default)
+        IEnumerable<ResourceTag> IWantStorage.GetWantTags()
         {
             throw new NotImplementedException();
         }

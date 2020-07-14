@@ -12,7 +12,7 @@ namespace Omnius.Xeus.Service.Engines
     {
         ValueTask<INodeFinder> CreateAsync(NodeFinderOptions options,
             IObjectStoreFactory objectStoreFactory, IConnectionController connectionController,
-            IEnumerable<IPublishContentStorage> publishStorages, IEnumerable<IWantContentStorage> wantStorages,
+            IEnumerable<IPublishStorage> publishStorages, IEnumerable<IWantStorage> wantStorages,
             IBytesPool bytesPool);
     }
 
@@ -20,6 +20,6 @@ namespace Omnius.Xeus.Service.Engines
     {
         ValueTask<NodeProfile> GetMyNodeProfile(CancellationToken cancellationToken = default);
         ValueTask AddCloudNodeProfiles(IEnumerable<NodeProfile> nodeProfiles, CancellationToken cancellationToken = default);
-        ValueTask<NodeProfile[]> FindNodeProfiles(Tag tag, CancellationToken cancellationToken = default);
+        ValueTask<NodeProfile[]> FindNodeProfiles(ResourceTag tag, CancellationToken cancellationToken = default);
     }
 }

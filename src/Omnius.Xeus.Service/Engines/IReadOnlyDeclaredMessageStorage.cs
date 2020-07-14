@@ -9,9 +9,10 @@ using Omnius.Xeus.Service.Engines;
 
 namespace Omnius.Xeus.Service.Engines
 {
-    public interface IReadOnlyMessageStorage
+    public interface IReadOnlyDeclaredMessageStorage
     {
-        ValueTask<DeclaredMessage[]> GetDeclaredMessagesAsync(OmniHash key, CancellationToken cancellationToken = default);
-        ValueTask<OrientedMessage[]> GetOrientedMessagesAsync(OmniHash key, CancellationToken cancellationToken = default);
+        ValueTask CheckConsistencyAsync(Action<ConsistencyReport> callback, CancellationToken cancellationToken = default);
+        bool Contains(OmniSignature signature, DateTime since = default);
+        ValueTask<DeclaredMessage?> ReadAsync(OmniSignature signature, DateTime since = default, CancellationToken cancellationToken = default);
     }
 }

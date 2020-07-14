@@ -1,6 +1,7 @@
 # Custom
 tmp/
 pub/
+patch.txt
 
 # Visual Studio Code
 .vscode/

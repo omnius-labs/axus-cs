@@ -46,7 +46,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Xeus.Service.Tests",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Xeus.Api", "src\Omnius.Xeus.Api\Omnius.Xeus.Api.csproj", "{606CDB9A-EF95-4D83-83F6-086AB6000CE0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Xeus.Service.Implements", "src\Omnius.Xeus.Service.Implements\Omnius.Xeus.Service.Implements.csproj", "{6BEDBE08-D62B-4D5A-A422-B3C2BFB5C8A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Xeus.Service.Impls", "src\Omnius.Xeus.Service.Impls\Omnius.Xeus.Service.Impls.csproj", "{6BEDBE08-D62B-4D5A-A422-B3C2BFB5C8A8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Xeus.Ui.Desktop", "src\Omnius.Xeus.Ui.Desktop\Omnius.Xeus.Ui.Desktop.csproj", "{E2CFAF7B-4753-48B2-84A2-556D08E56E01}"
 EndProject

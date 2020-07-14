@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Omnius.Xeus.Service.Implements\Omnius.Xeus.Service.Implements.csproj" />
+    <ProjectReference Include="..\..\src\Omnius.Xeus.Service.Impls\Omnius.Xeus.Service.Impls.csproj" />
     <ProjectReference Include="..\..\src\Omnius.Xeus.Service\Omnius.Xeus.Service.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Network.Proxies\Omnius.Core.Network.Proxies.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Network.Upnp\Omnius.Core.Network.Upnp.csproj" />

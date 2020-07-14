@@ -669,6 +669,10 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
+        public ValueTask<NodeProfile[]> FindNodeProfiles(ResourceTag tag, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
 
         private enum ConnectionHandshakeType
         {
