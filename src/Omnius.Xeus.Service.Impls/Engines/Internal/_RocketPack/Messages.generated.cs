@@ -363,7 +363,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
         static ContentBlock()
         {
             global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.ContentBlock>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.ContentBlock>.Empty = new global::Omnius.Xeus.Service.Engines.Internal.ContentBlock(OmniHash.Empty, global::Omnius.Core.EmptyMemoryOwner<byte>.Empty);
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.ContentBlock>.Empty = new global::Omnius.Xeus.Service.Engines.Internal.ContentBlock(OmniHash.Empty, global::Omnius.Core.MemoryOwner<byte>.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -469,7 +469,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                 uint propertyCount = r.GetUInt32();
 
                 OmniHash p_resourceTag = OmniHash.Empty;
-                global::System.Buffers.IMemoryOwner<byte> p_value = global::Omnius.Core.EmptyMemoryOwner<byte>.Empty;
+                global::System.Buffers.IMemoryOwner<byte> p_value = global::Omnius.Core.MemoryOwner<byte>.Empty;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -502,7 +502,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
         static ContentBlockFlags()
         {
             global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.ContentBlockFlags>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.ContentBlockFlags>.Empty = new global::Omnius.Xeus.Service.Engines.Internal.ContentBlockFlags(0, global::Omnius.Core.EmptyMemoryOwner<byte>.Empty);
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.ContentBlockFlags>.Empty = new global::Omnius.Xeus.Service.Engines.Internal.ContentBlockFlags(0, global::Omnius.Core.MemoryOwner<byte>.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -608,7 +608,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                 uint propertyCount = r.GetUInt32();
 
                 int p_depth = 0;
-                global::System.Buffers.IMemoryOwner<byte> p_flags = global::Omnius.Core.EmptyMemoryOwner<byte>.Empty;
+                global::System.Buffers.IMemoryOwner<byte> p_flags = global::Omnius.Core.MemoryOwner<byte>.Empty;
 
                 for (; propertyCount > 0; propertyCount--)
                 {

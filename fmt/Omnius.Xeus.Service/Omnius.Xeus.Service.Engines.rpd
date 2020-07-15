@@ -19,7 +19,9 @@ table ResourceTag {
 }
 
 table DeclaredMessage {
-    Value: bytes(capacity: 33554432, recyclable: true) = 0,
+    CreatedTime: timestamp = 0,
+    Value: bytes(capacity: 33554432, recyclable: true) = 1,
+    Certificate: OmniCertificate? = 2,
 }
 
 /* Optinos */

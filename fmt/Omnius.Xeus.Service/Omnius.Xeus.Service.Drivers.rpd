@@ -5,7 +5,17 @@ using "Omnius.Core.Network";
 
 namespace "Omnius.Xeus.Service.Drivers";
 
+/* Models */
+
+table ObjectStoreState {
+    Version: uint32 = 0,
+}
+
 /* Options */
+
+table ObjectStoreOptions {
+    DirectoryPath: string = 0,
+}
 
 enum TcpProxyType : uint8 {
     Unknown = 0,

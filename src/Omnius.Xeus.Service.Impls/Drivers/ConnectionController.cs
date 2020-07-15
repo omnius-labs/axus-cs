@@ -208,7 +208,7 @@ namespace Omnius.Xeus.Service.Drivers
             return await channel!.Reader.ReadAsync(cancellationToken);
         }
 
-        public async ValueTask<OmniAddress[]> GetListenEndpointsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+        public async ValueTask<OmniAddress[]> GetListenEndpointsAsync(CancellationToken cancellationToken = default)
         {
             var results = new List<OmniAddress>();
             results.AddRange(await _tcpConnector.GetListenEndpointsAsync(cancellationToken));

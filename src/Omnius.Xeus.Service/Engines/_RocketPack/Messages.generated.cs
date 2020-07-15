@@ -322,30 +322,35 @@ namespace Omnius.Xeus.Service.Engines
         static DeclaredMessage()
         {
             global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.DeclaredMessage>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.DeclaredMessage>.Empty = new global::Omnius.Xeus.Service.Engines.DeclaredMessage(global::Omnius.Core.EmptyMemoryOwner<byte>.Empty);
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.DeclaredMessage>.Empty = new global::Omnius.Xeus.Service.Engines.DeclaredMessage(global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero, global::Omnius.Core.MemoryOwner<byte>.Empty, null);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxValueLength = 33554432;
 
-        public DeclaredMessage(global::System.Buffers.IMemoryOwner<byte> value)
+        public DeclaredMessage(global::Omnius.Core.Serialization.RocketPack.Timestamp createdTime, global::System.Buffers.IMemoryOwner<byte> value, OmniCertificate? certificate)
         {
             if (value is null) throw new global::System.ArgumentNullException("value");
             if (value.Memory.Length > 33554432) throw new global::System.ArgumentOutOfRangeException("value");
-
+            this.CreatedTime = createdTime;
             _value = value;
+            this.Certificate = certificate;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
+                if (createdTime != default) ___h.Add(createdTime.GetHashCode());
                 if (!value.Memory.IsEmpty) ___h.Add(global::Omnius.Core.Helpers.ObjectHelper.GetHashCode(value.Memory.Span));
+                if (certificate != default) ___h.Add(certificate.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
+        public global::Omnius.Core.Serialization.RocketPack.Timestamp CreatedTime { get; }
         private readonly global::System.Buffers.IMemoryOwner<byte> _value;
         public global::System.ReadOnlyMemory<byte> Value => _value.Memory;
+        public OmniCertificate? Certificate { get; }
 
         public static global::Omnius.Xeus.Service.Engines.DeclaredMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -375,7 +380,10 @@ namespace Omnius.Xeus.Service.Engines
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
+            if (this.CreatedTime != target.CreatedTime) return false;
             if (!global::Omnius.Core.BytesOperations.Equals(this.Value.Span, target.Value.Span)) return false;
+            if ((this.Certificate is null) != (target.Certificate is null)) return false;
+            if (!(this.Certificate is null) && !(target.Certificate is null) && this.Certificate != target.Certificate) return false;
 
             return true;
         }
@@ -394,17 +402,35 @@ namespace Omnius.Xeus.Service.Engines
 
                 {
                     uint propertyCount = 0;
+                    if (value.CreatedTime != global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero)
+                    {
+                        propertyCount++;
+                    }
                     if (!value.Value.IsEmpty)
+                    {
+                        propertyCount++;
+                    }
+                    if (value.Certificate != null)
                     {
                         propertyCount++;
                     }
                     w.Write(propertyCount);
                 }
 
-                if (!value.Value.IsEmpty)
+                if (value.CreatedTime != global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero)
                 {
                     w.Write((uint)0);
+                    w.Write(value.CreatedTime);
+                }
+                if (!value.Value.IsEmpty)
+                {
+                    w.Write((uint)1);
                     w.Write(value.Value.Span);
+                }
+                if (value.Certificate != null)
+                {
+                    w.Write((uint)2);
+                    global::Omnius.Core.Cryptography.OmniCertificate.Formatter.Serialize(ref w, value.Certificate, rank + 1);
                 }
             }
 
@@ -414,7 +440,9 @@ namespace Omnius.Xeus.Service.Engines
 
                 uint propertyCount = r.GetUInt32();
 
-                global::System.Buffers.IMemoryOwner<byte> p_value = global::Omnius.Core.EmptyMemoryOwner<byte>.Empty;
+                global::Omnius.Core.Serialization.RocketPack.Timestamp p_createdTime = global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero;
+                global::System.Buffers.IMemoryOwner<byte> p_value = global::Omnius.Core.MemoryOwner<byte>.Empty;
+                OmniCertificate? p_certificate = null;
 
                 for (; propertyCount > 0; propertyCount--)
                 {
@@ -423,13 +451,23 @@ namespace Omnius.Xeus.Service.Engines
                     {
                         case 0:
                             {
+                                p_createdTime = r.GetTimestamp();
+                                break;
+                            }
+                        case 1:
+                            {
                                 p_value = r.GetRecyclableMemory(33554432);
+                                break;
+                            }
+                        case 2:
+                            {
+                                p_certificate = global::Omnius.Core.Cryptography.OmniCertificate.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
                 }
 
-                return new global::Omnius.Xeus.Service.Engines.DeclaredMessage(p_value);
+                return new global::Omnius.Xeus.Service.Engines.DeclaredMessage(p_createdTime, p_value, p_certificate);
             }
         }
     }
