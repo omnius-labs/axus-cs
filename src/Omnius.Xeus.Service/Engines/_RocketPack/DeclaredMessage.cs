@@ -1,5 +1,5 @@
-using System.Net.Http;
 using System.Buffers;
+using System.Net.Http;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Network;

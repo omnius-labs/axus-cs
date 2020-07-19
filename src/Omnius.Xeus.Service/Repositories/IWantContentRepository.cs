@@ -1,10 +1,11 @@
-public interface IWantContentRepository{
-FetchAllWants();
-FetchWant();
-AddWant();
-RemoveWant();
+public interface IWantContentRepository
+{
+    FetchAllWants();
+    FetchWant();
+    AddWant();
+    RemoveWant();
 
-FetchContentBlock();
-AddContentBlock();
-RemoveContentBlock();
+    FetchContentBlock();
+    AddContentBlock();
+    RemoveContentBlock();
 }
