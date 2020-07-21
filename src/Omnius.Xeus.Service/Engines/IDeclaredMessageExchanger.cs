@@ -1,14 +1,15 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Omnius.Core;
-using Omnius.Xeus.Service.Drivers;
+using Omnius.Xeus.Service.Connectors;
 
 namespace Omnius.Xeus.Service.Engines
 {
     public interface IDeclaredMessageExchangerFactory
     {
-        ValueTask<IDeclaredMessageExchanger> CreateAsync(DeclaredMessageExchangerOptions options,
-            IObjectStoreFactory objectStoreFactory, IConnectionController connectionController,
-            INodeFinder nodeFinder, IPublishDeclaredMessageStorage publishStorage, IWantDeclaredMessageStorage wantStorage, IBytesPool bytesPool);
+        ValueTask<IDeclaredMessageExchanger> CreateAsync(DeclaredMessageExchangerOptions options, IEnumerable<IConnector> connectors,
+            INodeFinder nodeFinder, IPublishDeclaredMessageStorage publishStorage, IWantDeclaredMessageStorage wantStorage,
+            IBytesPool bytesPool);
     }
 
     public interface IDeclaredMessageExchanger

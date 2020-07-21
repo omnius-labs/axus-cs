@@ -1,7 +1,6 @@
 using Omnius.Core.Cryptography;
 using Omnius.Core.Network;
-using Omnius.Xeus.Service.Drivers;
-using Omnius.Xeus.Service.Engines;
+using Omnius.Xeus.Service.Models;
 
 #nullable enable
 
@@ -305,7 +304,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                 if (value.ResourceTag != ResourceTag.Empty)
                 {
                     w.Write((uint)0);
-                    global::Omnius.Xeus.Service.Engines.ResourceTag.Formatter.Serialize(ref w, value.ResourceTag, rank + 1);
+                    global::Omnius.Xeus.Service.Models.ResourceTag.Formatter.Serialize(ref w, value.ResourceTag, rank + 1);
                 }
                 if (value.NodeProfiles.Count != 0)
                 {
@@ -313,7 +312,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                     w.Write((uint)value.NodeProfiles.Count);
                     foreach (var n in value.NodeProfiles)
                     {
-                        global::Omnius.Xeus.Service.Engines.NodeProfile.Formatter.Serialize(ref w, n, rank + 1);
+                        global::Omnius.Xeus.Service.Models.NodeProfile.Formatter.Serialize(ref w, n, rank + 1);
                     }
                 }
             }
@@ -334,7 +333,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                     {
                         case 0:
                             {
-                                p_resourceTag = global::Omnius.Xeus.Service.Engines.ResourceTag.Formatter.Deserialize(ref r, rank + 1);
+                                p_resourceTag = global::Omnius.Xeus.Service.Models.ResourceTag.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 1:
@@ -343,7 +342,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                                 p_nodeProfiles = new NodeProfile[length];
                                 for (int i = 0; i < p_nodeProfiles.Length; i++)
                                 {
-                                    p_nodeProfiles[i] = global::Omnius.Xeus.Service.Engines.NodeProfile.Formatter.Deserialize(ref r, rank + 1);
+                                    p_nodeProfiles[i] = global::Omnius.Xeus.Service.Models.NodeProfile.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
@@ -351,145 +350,6 @@ namespace Omnius.Xeus.Service.Engines.Internal
                 }
 
                 return new global::Omnius.Xeus.Service.Engines.Internal.ResourceLocation(p_resourceTag, p_nodeProfiles);
-            }
-        }
-    }
-
-    internal sealed partial class ContentBlock : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.ContentBlock>, global::System.IDisposable
-    {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Engines.Internal.ContentBlock> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.ContentBlock>.Formatter;
-        public static global::Omnius.Xeus.Service.Engines.Internal.ContentBlock Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.ContentBlock>.Empty;
-
-        static ContentBlock()
-        {
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.ContentBlock>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Engines.Internal.ContentBlock>.Empty = new global::Omnius.Xeus.Service.Engines.Internal.ContentBlock(OmniHash.Empty, global::Omnius.Core.MemoryOwner<byte>.Empty);
-        }
-
-        private readonly global::System.Lazy<int> ___hashCode;
-
-        public static readonly int MaxValueLength = 4194304;
-
-        public ContentBlock(OmniHash resourceTag, global::System.Buffers.IMemoryOwner<byte> value)
-        {
-            if (value is null) throw new global::System.ArgumentNullException("value");
-            if (value.Memory.Length > 4194304) throw new global::System.ArgumentOutOfRangeException("value");
-
-            this.ResourceTag = resourceTag;
-            _value = value;
-
-            ___hashCode = new global::System.Lazy<int>(() =>
-            {
-                var ___h = new global::System.HashCode();
-                if (resourceTag != default) ___h.Add(resourceTag.GetHashCode());
-                if (!value.Memory.IsEmpty) ___h.Add(global::Omnius.Core.Helpers.ObjectHelper.GetHashCode(value.Memory.Span));
-                return ___h.ToHashCode();
-            });
-        }
-
-        public OmniHash ResourceTag { get; }
-        private readonly global::System.Buffers.IMemoryOwner<byte> _value;
-        public global::System.ReadOnlyMemory<byte> Value => _value.Memory;
-
-        public static global::Omnius.Xeus.Service.Engines.Internal.ContentBlock Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
-        {
-            var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
-            return Formatter.Deserialize(ref reader, 0);
-        }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
-        {
-            var writer = new global::Omnius.Core.Serialization.RocketPack.RocketPackWriter(bufferWriter, bytesPool);
-            Formatter.Serialize(ref writer, this, 0);
-        }
-
-        public static bool operator ==(global::Omnius.Xeus.Service.Engines.Internal.ContentBlock? left, global::Omnius.Xeus.Service.Engines.Internal.ContentBlock? right)
-        {
-            return (right is null) ? (left is null) : right.Equals(left);
-        }
-        public static bool operator !=(global::Omnius.Xeus.Service.Engines.Internal.ContentBlock? left, global::Omnius.Xeus.Service.Engines.Internal.ContentBlock? right)
-        {
-            return !(left == right);
-        }
-        public override bool Equals(object? other)
-        {
-            if (!(other is global::Omnius.Xeus.Service.Engines.Internal.ContentBlock)) return false;
-            return this.Equals((global::Omnius.Xeus.Service.Engines.Internal.ContentBlock)other);
-        }
-        public bool Equals(global::Omnius.Xeus.Service.Engines.Internal.ContentBlock? target)
-        {
-            if (target is null) return false;
-            if (object.ReferenceEquals(this, target)) return true;
-            if (this.ResourceTag != target.ResourceTag) return false;
-            if (!global::Omnius.Core.BytesOperations.Equals(this.Value.Span, target.Value.Span)) return false;
-
-            return true;
-        }
-        public override int GetHashCode() => ___hashCode.Value;
-
-        public void Dispose()
-        {
-            _value?.Dispose();
-        }
-
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Engines.Internal.ContentBlock>
-        {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in global::Omnius.Xeus.Service.Engines.Internal.ContentBlock value, in int rank)
-            {
-                if (rank > 256) throw new global::System.FormatException();
-
-                {
-                    uint propertyCount = 0;
-                    if (value.ResourceTag != OmniHash.Empty)
-                    {
-                        propertyCount++;
-                    }
-                    if (!value.Value.IsEmpty)
-                    {
-                        propertyCount++;
-                    }
-                    w.Write(propertyCount);
-                }
-
-                if (value.ResourceTag != OmniHash.Empty)
-                {
-                    w.Write((uint)0);
-                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.ResourceTag, rank + 1);
-                }
-                if (!value.Value.IsEmpty)
-                {
-                    w.Write((uint)1);
-                    w.Write(value.Value.Span);
-                }
-            }
-
-            public global::Omnius.Xeus.Service.Engines.Internal.ContentBlock Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
-            {
-                if (rank > 256) throw new global::System.FormatException();
-
-                uint propertyCount = r.GetUInt32();
-
-                OmniHash p_resourceTag = OmniHash.Empty;
-                global::System.Buffers.IMemoryOwner<byte> p_value = global::Omnius.Core.MemoryOwner<byte>.Empty;
-
-                for (; propertyCount > 0; propertyCount--)
-                {
-                    uint id = r.GetUInt32();
-                    switch (id)
-                    {
-                        case 0:
-                            {
-                                p_resourceTag = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
-                                break;
-                            }
-                        case 1:
-                            {
-                                p_value = r.GetRecyclableMemory(4194304);
-                                break;
-                            }
-                    }
-                }
-
-                return new global::Omnius.Xeus.Service.Engines.Internal.ContentBlock(p_resourceTag, p_value);
             }
         }
     }
@@ -856,7 +716,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                 if (value.NodeProfile != NodeProfile.Empty)
                 {
                     w.Write((uint)1);
-                    global::Omnius.Xeus.Service.Engines.NodeProfile.Formatter.Serialize(ref w, value.NodeProfile, rank + 1);
+                    global::Omnius.Xeus.Service.Models.NodeProfile.Formatter.Serialize(ref w, value.NodeProfile, rank + 1);
                 }
             }
 
@@ -881,7 +741,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                             }
                         case 1:
                             {
-                                p_nodeProfile = global::Omnius.Xeus.Service.Engines.NodeProfile.Formatter.Deserialize(ref r, rank + 1);
+                                p_nodeProfile = global::Omnius.Xeus.Service.Models.NodeProfile.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
@@ -1040,7 +900,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                     w.Write((uint)value.PushNodeProfiles.Count);
                     foreach (var n in value.PushNodeProfiles)
                     {
-                        global::Omnius.Xeus.Service.Engines.NodeProfile.Formatter.Serialize(ref w, n, rank + 1);
+                        global::Omnius.Xeus.Service.Models.NodeProfile.Formatter.Serialize(ref w, n, rank + 1);
                     }
                 }
                 if (value.PushResourceLocations.Count != 0)
@@ -1058,7 +918,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                     w.Write((uint)value.WantResourceLocations.Count);
                     foreach (var n in value.WantResourceLocations)
                     {
-                        global::Omnius.Xeus.Service.Engines.ResourceTag.Formatter.Serialize(ref w, n, rank + 1);
+                        global::Omnius.Xeus.Service.Models.ResourceTag.Formatter.Serialize(ref w, n, rank + 1);
                     }
                 }
                 if (value.GiveResourceLocations.Count != 0)
@@ -1094,7 +954,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                                 p_pushNodeProfiles = new NodeProfile[length];
                                 for (int i = 0; i < p_pushNodeProfiles.Length; i++)
                                 {
-                                    p_pushNodeProfiles[i] = global::Omnius.Xeus.Service.Engines.NodeProfile.Formatter.Deserialize(ref r, rank + 1);
+                                    p_pushNodeProfiles[i] = global::Omnius.Xeus.Service.Models.NodeProfile.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
@@ -1114,7 +974,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                                 p_wantResourceLocations = new ResourceTag[length];
                                 for (int i = 0; i < p_wantResourceLocations.Length; i++)
                                 {
-                                    p_wantResourceLocations[i] = global::Omnius.Xeus.Service.Engines.ResourceTag.Formatter.Deserialize(ref r, rank + 1);
+                                    p_wantResourceLocations[i] = global::Omnius.Xeus.Service.Models.ResourceTag.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
@@ -1343,7 +1203,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                 if (value.NodeProfile != NodeProfile.Empty)
                 {
                     w.Write((uint)0);
-                    global::Omnius.Xeus.Service.Engines.NodeProfile.Formatter.Serialize(ref w, value.NodeProfile, rank + 1);
+                    global::Omnius.Xeus.Service.Models.NodeProfile.Formatter.Serialize(ref w, value.NodeProfile, rank + 1);
                 }
             }
 
@@ -1362,7 +1222,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                     {
                         case 0:
                             {
-                                p_nodeProfile = global::Omnius.Xeus.Service.Engines.NodeProfile.Formatter.Deserialize(ref r, rank + 1);
+                                p_nodeProfile = global::Omnius.Xeus.Service.Models.NodeProfile.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
@@ -1735,7 +1595,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                     w.Write((uint)value.PushNodeProfiles.Count);
                     foreach (var n in value.PushNodeProfiles)
                     {
-                        global::Omnius.Xeus.Service.Engines.NodeProfile.Formatter.Serialize(ref w, n, rank + 1);
+                        global::Omnius.Xeus.Service.Models.NodeProfile.Formatter.Serialize(ref w, n, rank + 1);
                     }
                 }
                 if (value.ContentBlockFlags.Count != 0)
@@ -1762,7 +1622,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                     w.Write((uint)value.GiveContentBlocks.Count);
                     foreach (var n in value.GiveContentBlocks)
                     {
-                        global::Omnius.Xeus.Service.Engines.Internal.ContentBlock.Formatter.Serialize(ref w, n, rank + 1);
+                        global::Omnius.Xeus.Service.Models.ContentBlock.Formatter.Serialize(ref w, n, rank + 1);
                     }
                 }
             }
@@ -1789,7 +1649,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                                 p_pushNodeProfiles = new NodeProfile[length];
                                 for (int i = 0; i < p_pushNodeProfiles.Length; i++)
                                 {
-                                    p_pushNodeProfiles[i] = global::Omnius.Xeus.Service.Engines.NodeProfile.Formatter.Deserialize(ref r, rank + 1);
+                                    p_pushNodeProfiles[i] = global::Omnius.Xeus.Service.Models.NodeProfile.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
@@ -1819,7 +1679,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                                 p_giveContentBlocks = new ContentBlock[length];
                                 for (int i = 0; i < p_giveContentBlocks.Length; i++)
                                 {
-                                    p_giveContentBlocks[i] = global::Omnius.Xeus.Service.Engines.Internal.ContentBlock.Formatter.Deserialize(ref r, rank + 1);
+                                    p_giveContentBlocks[i] = global::Omnius.Xeus.Service.Models.ContentBlock.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
@@ -2179,7 +2039,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                 if (value.DeclaredMessage != DeclaredMessage.Empty)
                 {
                     w.Write((uint)1);
-                    global::Omnius.Xeus.Service.Engines.DeclaredMessage.Formatter.Serialize(ref w, value.DeclaredMessage, rank + 1);
+                    global::Omnius.Xeus.Service.Models.DeclaredMessage.Formatter.Serialize(ref w, value.DeclaredMessage, rank + 1);
                 }
             }
 
@@ -2204,7 +2064,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                             }
                         case 1:
                             {
-                                p_declaredMessage = global::Omnius.Xeus.Service.Engines.DeclaredMessage.Formatter.Deserialize(ref r, rank + 1);
+                                p_declaredMessage = global::Omnius.Xeus.Service.Models.DeclaredMessage.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
@@ -2296,7 +2156,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                 if (value.DeclaredMessage != DeclaredMessage.Empty)
                 {
                     w.Write((uint)0);
-                    global::Omnius.Xeus.Service.Engines.DeclaredMessage.Formatter.Serialize(ref w, value.DeclaredMessage, rank + 1);
+                    global::Omnius.Xeus.Service.Models.DeclaredMessage.Formatter.Serialize(ref w, value.DeclaredMessage, rank + 1);
                 }
             }
 
@@ -2315,7 +2175,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                     {
                         case 0:
                             {
-                                p_declaredMessage = global::Omnius.Xeus.Service.Engines.DeclaredMessage.Formatter.Deserialize(ref r, rank + 1);
+                                p_declaredMessage = global::Omnius.Xeus.Service.Models.DeclaredMessage.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
@@ -2421,7 +2281,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                     w.Write((uint)value.NodeProfileMap.Count);
                     foreach (var n in value.NodeProfileMap)
                     {
-                        global::Omnius.Xeus.Service.Engines.NodeProfile.Formatter.Serialize(ref w, n.Key, rank + 1);
+                        global::Omnius.Xeus.Service.Models.NodeProfile.Formatter.Serialize(ref w, n.Key, rank + 1);
                         w.Write(n.Value);
                     }
                 }
@@ -2448,7 +2308,7 @@ namespace Omnius.Xeus.Service.Engines.Internal
                                 global::Omnius.Core.Serialization.RocketPack.Timestamp t_value = global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero;
                                 for (int i = 0; i < length; i++)
                                 {
-                                    t_key = global::Omnius.Xeus.Service.Engines.NodeProfile.Formatter.Deserialize(ref r, rank + 1);
+                                    t_key = global::Omnius.Xeus.Service.Models.NodeProfile.Formatter.Deserialize(ref r, rank + 1);
                                     t_value = r.GetTimestamp();
                                     p_nodeProfileMap[t_key] = t_value;
                                 }

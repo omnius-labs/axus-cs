@@ -12,7 +12,6 @@ using Omnius.Core.Collections;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Io;
 using Omnius.Core.Serialization;
-using Omnius.Xeus.Service.Drivers;
 
 namespace Omnius.Xeus.Service.Engines
 {
@@ -21,7 +20,6 @@ namespace Omnius.Xeus.Service.Engines
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         private readonly WantContentStorageOptions _options;
-        private readonly IObjectStoreFactory _objectStoreFactory;
         private readonly IBytesPool _bytesPool;
 
         private readonly Dictionary<OmniHash, WantFileStatus> _wantFileStatusMap = new Dictionary<OmniHash, WantFileStatus>();
@@ -32,9 +30,9 @@ namespace Omnius.Xeus.Service.Engines
 
         internal sealed class WantContentStorageFactory : IWantContentStorageFactory
         {
-            public async ValueTask<IWantContentStorage> CreateAsync(WantContentStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
+            public async ValueTask<IWantContentStorage> CreateAsync(WantContentStorageOptions options, IBytesPool bytesPool)
             {
-                var result = new WantContentStorage(options, objectStoreFactory, bytesPool);
+                var result = new WantContentStorage(options, bytesPool);
                 await result.InitAsync();
 
                 return result;
@@ -43,10 +41,9 @@ namespace Omnius.Xeus.Service.Engines
 
         public static IWantContentStorageFactory Factory { get; } = new WantContentStorageFactory();
 
-        internal WantContentStorage(WantContentStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
+        internal WantContentStorage(WantContentStorageOptions options, IBytesPool bytesPool)
         {
             _options = options;
-            _objectStoreFactory = objectStoreFactory;
             _bytesPool = bytesPool;
         }
 
@@ -215,12 +212,12 @@ namespace Omnius.Xeus.Service.Engines
             throw new NotImplementedException();
         }
 
-        public IEnumerable<Tag> GetWantTags()
+        public IEnumerable<ResourceTag> GetWantTags()
         {
             throw new NotImplementedException();
         }
 
-        public bool ContainsWantTag(Tag tag)
+        public bool ContainsWantTag(ResourceTag tag)
         {
             throw new NotImplementedException();
         }

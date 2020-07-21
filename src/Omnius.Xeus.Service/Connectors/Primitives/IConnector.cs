@@ -9,11 +9,11 @@ using Omnius.Core.Network.Connections;
 using Omnius.Core.Network.Proxies;
 using Omnius.Core.Network.Upnp;
 
-namespace Omnius.Xeus.Service.Drivers
+namespace Omnius.Xeus.Service.Connectors
 {
-    public readonly struct ConnectionControllerAcceptResult
+    public readonly struct ConnectorAcceptResult
     {
-        public ConnectionControllerAcceptResult(IConnection connection, OmniAddress address)
+        public ConnectorAcceptResult(IConnection connection, OmniAddress address)
         {
             this.Connection = connection;
             this.Address = address;
@@ -23,15 +23,10 @@ namespace Omnius.Xeus.Service.Drivers
         public OmniAddress Address { get; }
     }
 
-    public interface IConnectionControllerFactory
-    {
-        public ValueTask<IConnectionController> CreateAsync(ConnectionControllerOptions options, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool);
-    }
-
-    public interface IConnectionController : IAsyncDisposable
+    public interface IConnector : IAsyncDisposable
     {
         ValueTask<IConnection?> ConnectAsync(OmniAddress address, string serviceId, CancellationToken cancellationToken = default);
-        ValueTask<ConnectionControllerAcceptResult> AcceptAsync(string serviceId, CancellationToken cancellationToken = default);
+        ValueTask<ConnectorAcceptResult> AcceptAsync(string serviceId, CancellationToken cancellationToken = default);
         ValueTask<OmniAddress[]> GetListenEndpointsAsync(CancellationToken cancellationToken = default);
     }
 }

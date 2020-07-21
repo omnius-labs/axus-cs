@@ -8,12 +8,12 @@ using Omnius.Core.Network.Proxies;
 using Omnius.Core.Network.Upnp;
 using Xunit;
 
-namespace Omnius.Xeus.Service.Drivers.Internal
+namespace Omnius.Xeus.Service.Connectors.Internal
 {
-    public class TcpConnectorTests
+    public class InternalTcpConnectorTest
     {
         /// <summary>
-        /// TcpConnectorのConnectAsyncが成功することを確認する
+        /// InternalTcpConnectorのConnectAsyncが成功することを確認する
         /// </summary>
         [Fact]
         public async Task ConnectAsyncSuccessTest()
@@ -21,10 +21,10 @@ namespace Omnius.Xeus.Service.Drivers.Internal
             const int Port = 55555;
             const string IpAddress = "127.0.0.1";
 
-            var tcpConnectOptions = new TcpConnectOptions(true, null);
-            var tcpAcceptOptions = new TcpAcceptOptions(false, Array.Empty<OmniAddress>(), false);
+            var tcpConnectingOptions = new TcpConnectingOptions(true, null);
+            var tcpAcceptingOptions = new TcpAcceptingOptions(false, Array.Empty<OmniAddress>(), false);
 
-            await using (var connector = await TcpConnector.Factory.CreateAsync(tcpConnectOptions, tcpAcceptOptions, Socks5ProxyClient.Factory, HttpProxyClient.Factory, UpnpClient.Factory, BytesPool.Shared))
+            await using (var connector = await InternalTcpConnector.Factory.CreateAsync(tcpConnectingOptions, tcpAcceptingOptions, Socks5ProxyClient.Factory, HttpProxyClient.Factory, UpnpClient.Factory, BytesPool.Shared))
             {
                 var tcpListener = new TcpListener(IPAddress.Parse(IpAddress), Port);
 
@@ -50,17 +50,17 @@ namespace Omnius.Xeus.Service.Drivers.Internal
         }
 
         /// <summary>
-        /// TcpConnectorのAcceptAsyncが成功することを確認する
+        /// InternalTcpConnectorのAcceptAsyncが成功することを確認する
         /// </summary>
         [Fact]
         public async Task AcceptAsyncSuccessTest()
         {
             const int port = 55555;
             const string ipAddress = "127.0.0.1";
-            var tcpConnectOptions = new TcpConnectOptions(false, null);
-            var tcpAcceptOptions = new TcpAcceptOptions(true, new[] { new OmniAddress($"tcp(ip4(\"{ipAddress}\"),{port})") }, false);
+            var tcpConnectingOptions = new TcpConnectingOptions(false, null);
+            var tcpAcceptingOptions = new TcpAcceptingOptions(true, new[] { new OmniAddress($"tcp(ip4(\"{ipAddress}\"),{port})") }, false);
 
-            await using (var connector = await TcpConnector.Factory.CreateAsync(tcpConnectOptions, tcpAcceptOptions, Socks5ProxyClient.Factory, HttpProxyClient.Factory, UpnpClient.Factory, BytesPool.Shared))
+            await using (var connector = await InternalTcpConnector.Factory.CreateAsync(tcpConnectingOptions, tcpAcceptingOptions, Socks5ProxyClient.Factory, HttpProxyClient.Factory, UpnpClient.Factory, BytesPool.Shared))
             {
                 var acceptTask = connector.AcceptAsync();
 

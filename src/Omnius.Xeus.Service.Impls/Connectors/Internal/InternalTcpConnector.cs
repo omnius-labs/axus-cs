@@ -17,14 +17,14 @@ using Omnius.Core.Network.Caps;
 using Omnius.Core.Network.Proxies;
 using Omnius.Core.Network.Upnp;
 
-namespace Omnius.Xeus.Service.Drivers.Internal
+namespace Omnius.Xeus.Service.Connectors.Internal
 {
-    internal sealed class TcpConnector : AsyncDisposableBase
+    internal sealed class InternalTcpConnector : AsyncDisposableBase
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly TcpConnectOptions _tcpConnectOptions;
-        private readonly TcpAcceptOptions _tcpAcceptOptions;
+        private readonly TcpConnectingOptions _tcpConnectingOptions;
+        private readonly TcpAcceptingOptions _tcpAcceptingOptions;
         private readonly ISocks5ProxyClientFactory _socks5ProxyClientFactory;
         private readonly IHttpProxyClientFactory _httpProxyClientFactory;
         private readonly IUpnpClientFactory _upnpClientFactory;
@@ -36,23 +36,23 @@ namespace Omnius.Xeus.Service.Drivers.Internal
 
         private readonly AsyncLock _asyncLock = new AsyncLock();
 
-        public sealed class TcpConnectorFactory
+        public sealed class InternalTcpConnectorFactory
         {
-            public async ValueTask<TcpConnector> CreateAsync(TcpConnectOptions tcpConnectOptions, TcpAcceptOptions tcpAcceptOptions, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool)
+            public async ValueTask<InternalTcpConnector> CreateAsync(TcpConnectingOptions tcpConnectOptions, TcpAcceptingOptions tcpAcceptOptions, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool)
             {
-                var result = new TcpConnector(tcpConnectOptions, tcpAcceptOptions, socks5ProxyClientFactory, httpProxyClientFactory, upnpClientFactory, bytesPool);
+                var result = new InternalTcpConnector(tcpConnectOptions, tcpAcceptOptions, socks5ProxyClientFactory, httpProxyClientFactory, upnpClientFactory, bytesPool);
                 await result.InitAsync();
 
                 return result;
             }
         }
 
-        public static TcpConnectorFactory Factory { get; } = new TcpConnectorFactory();
+        public static InternalTcpConnectorFactory Factory { get; } = new InternalTcpConnectorFactory();
 
-        internal TcpConnector(TcpConnectOptions tcpConnectOptions, TcpAcceptOptions tcpAcceptOptions, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool)
+        internal InternalTcpConnector(TcpConnectingOptions tcpConnectOptions, TcpAcceptingOptions tcpAcceptOptions, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool)
         {
-            _tcpConnectOptions = tcpConnectOptions;
-            _tcpAcceptOptions = tcpAcceptOptions;
+            _tcpConnectingOptions = tcpConnectOptions;
+            _tcpAcceptingOptions = tcpAcceptOptions;
             _socks5ProxyClientFactory = socks5ProxyClientFactory;
             _httpProxyClientFactory = httpProxyClientFactory;
             _upnpClientFactory = upnpClientFactory;
@@ -74,8 +74,8 @@ namespace Omnius.Xeus.Service.Drivers.Internal
         {
             using (await _asyncLock.LockAsync())
             {
-                var listenAddressSet = new HashSet<OmniAddress>(_tcpAcceptOptions.ListenAddresses.ToArray());
-                var useUpnp = _tcpAcceptOptions.UseUpnp;
+                var listenAddressSet = new HashSet<OmniAddress>(_tcpAcceptingOptions.ListenAddresses.ToArray());
+                var useUpnp = _tcpAcceptingOptions.UseUpnp;
 
                 IUpnpClient? upnpClient = null;
 
@@ -130,7 +130,7 @@ namespace Omnius.Xeus.Service.Drivers.Internal
         {
             using (await _asyncLock.LockAsync())
             {
-                var useUpnp = _tcpAcceptOptions.UseUpnp;
+                var useUpnp = _tcpAcceptingOptions.UseUpnp;
 
                 IUpnpClient? upnpClient = null;
 
@@ -384,7 +384,7 @@ namespace Omnius.Xeus.Service.Drivers.Internal
             {
                 this.ThrowIfDisposingRequested();
 
-                var config = _tcpConnectOptions;
+                var config = _tcpConnectingOptions;
                 if (config == null || !config.Enabled)
                 {
                     return null;
@@ -487,7 +487,7 @@ namespace Omnius.Xeus.Service.Drivers.Internal
 
                 try
                 {
-                    var config = _tcpAcceptOptions;
+                    var config = _tcpAcceptingOptions;
                     if (config == null || !config.Enabled)
                     {
                         return default;
@@ -543,7 +543,7 @@ namespace Omnius.Xeus.Service.Drivers.Internal
 
                 var globalIpAddresses = GetMyGlobalIpAddresses();
 
-                foreach (var listenAddress in _tcpAcceptOptions.ListenAddresses)
+                foreach (var listenAddress in _tcpAcceptingOptions.ListenAddresses)
                 {
                     if (!TryGetEndpoint(listenAddress, out var listenIpAddress, out var port))
                     {

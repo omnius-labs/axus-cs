@@ -12,7 +12,6 @@ using Omnius.Core.Collections;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Io;
 using Omnius.Core.Serialization;
-using Omnius.Xeus.Service.Drivers;
 
 namespace Omnius.Xeus.Service.Engines
 {
@@ -21,16 +20,15 @@ namespace Omnius.Xeus.Service.Engines
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         private readonly WantDeclaredMessageStorageOptions _options;
-        private readonly IObjectStoreFactory _objectStoreFactory;
         private readonly IBytesPool _bytesPool;
 
         private readonly AsyncLock _asyncLock = new AsyncLock();
 
         internal sealed class WantDeclaredMessageStorageFactory : IWantDeclaredMessageStorageFactory
         {
-            public async ValueTask<IWantDeclaredMessageStorage> CreateAsync(WantDeclaredMessageStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
+            public async ValueTask<IWantDeclaredMessageStorage> CreateAsync(WantDeclaredMessageStorageOptions options, IBytesPool bytesPool)
             {
-                var result = new WantDeclaredMessageStorage(options, objectStoreFactory, bytesPool);
+                var result = new WantDeclaredMessageStorage(options, bytesPool);
                 await result.InitAsync();
 
                 return result;
@@ -39,10 +37,9 @@ namespace Omnius.Xeus.Service.Engines
 
         public static IWantDeclaredMessageStorageFactory Factory { get; } = new WantDeclaredMessageStorageFactory();
 
-        internal WantDeclaredMessageStorage(WantDeclaredMessageStorageOptions options, IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool)
+        internal WantDeclaredMessageStorage(WantDeclaredMessageStorageOptions options, IBytesPool bytesPool)
         {
             _options = options;
-            _objectStoreFactory = objectStoreFactory;
             _bytesPool = bytesPool;
         }
 

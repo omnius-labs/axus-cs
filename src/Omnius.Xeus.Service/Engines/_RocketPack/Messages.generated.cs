@@ -1,6 +1,5 @@
 using Omnius.Core.Cryptography;
 using Omnius.Core.Network;
-using Omnius.Xeus.Service.Drivers;
 
 #nullable enable
 
@@ -329,25 +328,25 @@ namespace Omnius.Xeus.Service.Engines
 
         public static readonly int MaxValueLength = 33554432;
 
-        public DeclaredMessage(global::Omnius.Core.Serialization.RocketPack.Timestamp createdTime, global::System.Buffers.IMemoryOwner<byte> value, OmniCertificate? certificate)
+        public DeclaredMessage(global::Omnius.Core.Serialization.RocketPack.Timestamp creationTime, global::System.Buffers.IMemoryOwner<byte> value, OmniCertificate? certificate)
         {
             if (value is null) throw new global::System.ArgumentNullException("value");
             if (value.Memory.Length > 33554432) throw new global::System.ArgumentOutOfRangeException("value");
-            this.CreatedTime = createdTime;
+            this.CreationTime = creationTime;
             _value = value;
             this.Certificate = certificate;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (createdTime != default) ___h.Add(createdTime.GetHashCode());
+                if (creationTime != default) ___h.Add(creationTime.GetHashCode());
                 if (!value.Memory.IsEmpty) ___h.Add(global::Omnius.Core.Helpers.ObjectHelper.GetHashCode(value.Memory.Span));
                 if (certificate != default) ___h.Add(certificate.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public global::Omnius.Core.Serialization.RocketPack.Timestamp CreatedTime { get; }
+        public global::Omnius.Core.Serialization.RocketPack.Timestamp CreationTime { get; }
         private readonly global::System.Buffers.IMemoryOwner<byte> _value;
         public global::System.ReadOnlyMemory<byte> Value => _value.Memory;
         public OmniCertificate? Certificate { get; }
@@ -380,7 +379,7 @@ namespace Omnius.Xeus.Service.Engines
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.CreatedTime != target.CreatedTime) return false;
+            if (this.CreationTime != target.CreationTime) return false;
             if (!global::Omnius.Core.BytesOperations.Equals(this.Value.Span, target.Value.Span)) return false;
             if ((this.Certificate is null) != (target.Certificate is null)) return false;
             if (!(this.Certificate is null) && !(target.Certificate is null) && this.Certificate != target.Certificate) return false;
@@ -402,7 +401,7 @@ namespace Omnius.Xeus.Service.Engines
 
                 {
                     uint propertyCount = 0;
-                    if (value.CreatedTime != global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero)
+                    if (value.CreationTime != global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero)
                     {
                         propertyCount++;
                     }
@@ -417,10 +416,10 @@ namespace Omnius.Xeus.Service.Engines
                     w.Write(propertyCount);
                 }
 
-                if (value.CreatedTime != global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero)
+                if (value.CreationTime != global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero)
                 {
                     w.Write((uint)0);
-                    w.Write(value.CreatedTime);
+                    w.Write(value.CreationTime);
                 }
                 if (!value.Value.IsEmpty)
                 {
@@ -440,7 +439,7 @@ namespace Omnius.Xeus.Service.Engines
 
                 uint propertyCount = r.GetUInt32();
 
-                global::Omnius.Core.Serialization.RocketPack.Timestamp p_createdTime = global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero;
+                global::Omnius.Core.Serialization.RocketPack.Timestamp p_creationTime = global::Omnius.Core.Serialization.RocketPack.Timestamp.Zero;
                 global::System.Buffers.IMemoryOwner<byte> p_value = global::Omnius.Core.MemoryOwner<byte>.Empty;
                 OmniCertificate? p_certificate = null;
 
@@ -451,7 +450,7 @@ namespace Omnius.Xeus.Service.Engines
                     {
                         case 0:
                             {
-                                p_createdTime = r.GetTimestamp();
+                                p_creationTime = r.GetTimestamp();
                                 break;
                             }
                         case 1:
@@ -467,7 +466,7 @@ namespace Omnius.Xeus.Service.Engines
                     }
                 }
 
-                return new global::Omnius.Xeus.Service.Engines.DeclaredMessage(p_createdTime, p_value, p_certificate);
+                return new global::Omnius.Xeus.Service.Engines.DeclaredMessage(p_creationTime, p_value, p_certificate);
             }
         }
     }

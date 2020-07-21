@@ -6,14 +6,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
-using Omnius.Xeus.Service.Drivers;
 
 namespace Omnius.Xeus.Service.Engines
 {
     public interface IWantDeclaredMessageStorageFactory
     {
-        ValueTask<IWantDeclaredMessageStorage> CreateAsync(WantDeclaredMessageStorageOptions options,
-            IObjectStoreFactory objectStoreFactory, IBytesPool bytesPool);
+        ValueTask<IWantDeclaredMessageStorage> CreateAsync(WantDeclaredMessageStorageOptions options, IBytesPool bytesPool);
     }
 
     public interface IWantDeclaredMessageStorage : IWantStorage, IWritableDeclaredMessageStorage

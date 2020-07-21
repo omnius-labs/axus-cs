@@ -4,14 +4,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
-using Omnius.Xeus.Service.Drivers;
+using Omnius.Xeus.Service.Connectors;
 
 namespace Omnius.Xeus.Service.Engines
 {
     public interface INodeFinderFactory
     {
-        ValueTask<INodeFinder> CreateAsync(NodeFinderOptions options,
-            IObjectStoreFactory objectStoreFactory, IConnectionController connectionController,
+        ValueTask<INodeFinder> CreateAsync(NodeFinderOptions options, IEnumerable<IConnector> connectors,
             IEnumerable<IPublishStorage> publishStorages, IEnumerable<IWantStorage> wantStorages,
             IBytesPool bytesPool);
     }

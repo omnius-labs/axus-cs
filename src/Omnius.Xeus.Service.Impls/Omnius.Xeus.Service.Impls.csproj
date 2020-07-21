@@ -28,4 +28,8 @@
     <PackageReference Update="NLog" Version="4.7.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="LiteDB" Version="5.0.8" />
+  </ItemGroup>
+
 </Project>

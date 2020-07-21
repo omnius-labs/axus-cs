@@ -2,7 +2,7 @@ syntax v1.0;
 
 using "Omnius.Core.Cryptography";
 using "Omnius.Core.Network";
-using "Omnius.Xeus.Service.Engines";
+using "Omnius.Xeus.Service.Models";
 
 namespace "Omnius.Xeus.Service.Engines.Internal";
 option csharp_access_level "internal";
@@ -18,11 +18,6 @@ table MerkleTreeSection {
 table ResourceLocation {
     ResourceTag: ResourceTag = 0,
     NodeProfiles: vector<NodeProfile>(capacity: 8192) = 1,
-}
-
-table ContentBlock {
-    ResourceTag: OmniHash = 0,
-    Value: bytes(capacity: 4194304, recyclable: true) = 1,
 }
 
 table ContentBlockFlags {

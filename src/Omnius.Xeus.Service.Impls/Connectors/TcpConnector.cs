@@ -14,42 +14,42 @@ using Omnius.Core.Network.Connections;
 using Omnius.Core.Network.Connections.Secure;
 using Omnius.Core.Network.Proxies;
 using Omnius.Core.Network.Upnp;
-using Omnius.Xeus.Service.Drivers.Internal;
+using Omnius.Xeus.Service.Connectors.Internal;
 
-namespace Omnius.Xeus.Service.Drivers
+namespace Omnius.Xeus.Service.Connectors
 {
-    public sealed class ConnectionController : AsyncDisposableBase, IConnectionController
+    public sealed class TcpConnector : AsyncDisposableBase, ITcpConnector
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly ConnectionControllerOptions _options;
+        private readonly TcpConnectorOptions _options;
         private readonly ISocks5ProxyClientFactory _socks5ProxyClientFactory;
         private readonly IHttpProxyClientFactory _httpProxyClientFactory;
         private readonly IUpnpClientFactory _upnpClientFactory;
         private readonly IBytesPool _bytesPool;
 
-        private TcpConnector _tcpConnector;
+        private InternalTcpConnector _tcpConnector;
         private BaseConnectionDispatcher _baseConnectionDispatcher;
 
-        private readonly ConcurrentDictionary<string, Channel<ConnectionControllerAcceptResult>> _acceptedConnectionChannels = new ConcurrentDictionary<string, Channel<ConnectionControllerAcceptResult>>();
+        private readonly ConcurrentDictionary<string, Channel<ConnectorAcceptResult>> _acceptedConnectionChannels = new ConcurrentDictionary<string, Channel<ConnectorAcceptResult>>();
 
         private Task _acceptLoopTask;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
-        internal sealed class ConnectionControllerFactory : IConnectionControllerFactory
+        internal sealed class ConnectionControllerFactory : ITcpConnectorFactory
         {
-            public async ValueTask<IConnectionController> CreateAsync(ConnectionControllerOptions options, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool)
+            public async ValueTask<ITcpConnector> CreateAsync(TcpConnectorOptions options, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool)
             {
-                var result = new ConnectionController(options, socks5ProxyClientFactory, httpProxyClientFactory, upnpClientFactory, bytesPool);
+                var result = new TcpConnector(options, socks5ProxyClientFactory, httpProxyClientFactory, upnpClientFactory, bytesPool);
                 await result.InitAsync();
 
                 return result;
             }
         }
 
-        public static IConnectionControllerFactory Factory { get; } = new ConnectionControllerFactory();
+        public static ITcpConnectorFactory Factory { get; } = new ConnectionControllerFactory();
 
-        internal ConnectionController(ConnectionControllerOptions options, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool)
+        internal TcpConnector(TcpConnectorOptions options, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool)
         {
             _options = options;
             _socks5ProxyClientFactory = socks5ProxyClientFactory;
@@ -60,7 +60,7 @@ namespace Omnius.Xeus.Service.Drivers
 
         public async ValueTask InitAsync()
         {
-            _tcpConnector = await TcpConnector.Factory.CreateAsync(_options.TcpConnectOptions, _options.TcpAcceptOptions, _socks5ProxyClientFactory, _httpProxyClientFactory, _upnpClientFactory, _bytesPool);
+            _tcpConnector = await InternalTcpConnector.Factory.CreateAsync(_options.TcpConnectingOptions, _options.TcpAcceptingOptions, _socks5ProxyClientFactory, _httpProxyClientFactory, _upnpClientFactory, _bytesPool);
             _baseConnectionDispatcher = new BaseConnectionDispatcher(new BaseConnectionDispatcherOptions()
             {
                 MaxSendBytesPerSeconds = (int)_options.BandwidthOptions.MaxSendBytesPerSeconds,
@@ -82,11 +82,11 @@ namespace Omnius.Xeus.Service.Drivers
             await _baseConnectionDispatcher.DisposeAsync();
         }
 
-        private Channel<ConnectionControllerAcceptResult>? GetAcceptedConnectionChannel(string serviceId, bool createIfNotFound)
+        private Channel<ConnectorAcceptResult>? GetAcceptedConnectionChannel(string serviceId, bool createIfNotFound)
         {
             if (createIfNotFound)
             {
-                return _acceptedConnectionChannels.GetOrAdd(serviceId, (_) => Channel.CreateBounded<ConnectionControllerAcceptResult>(new BoundedChannelOptions(3) { FullMode = BoundedChannelFullMode.Wait }));
+                return _acceptedConnectionChannels.GetOrAdd(serviceId, (_) => Channel.CreateBounded<ConnectorAcceptResult>(new BoundedChannelOptions(3) { FullMode = BoundedChannelFullMode.Wait }));
             }
             else
             {
@@ -175,7 +175,7 @@ namespace Omnius.Xeus.Service.Drivers
                         continue;
                     }
 
-                    var result = new ConnectionControllerAcceptResult(connection, address);
+                    var result = new ConnectorAcceptResult(connection, address);
                     await channel.Writer.WriteAsync(result);
                 }
             }
@@ -202,7 +202,7 @@ namespace Omnius.Xeus.Service.Drivers
             return null;
         }
 
-        public async ValueTask<ConnectionControllerAcceptResult> AcceptAsync(string serviceId, CancellationToken cancellationToken = default)
+        public async ValueTask<ConnectorAcceptResult> AcceptAsync(string serviceId, CancellationToken cancellationToken = default)
         {
             var channel = this.GetAcceptedConnectionChannel(serviceId, true);
             return await channel!.Reader.ReadAsync(cancellationToken);

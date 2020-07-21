@@ -13,19 +13,9 @@ using Omnius.Xeus.Service.Models;
 
 namespace Omnius.Xeus.Service.Repositories
 {
-    public interface IWantContentRepositoryFactory
+    public interface IPublishContentRepository
     {
-        ValueTask<IWantContentRepository> CreateAsync(WantContentRepositoryOptions options, IBytesPool bytesPool);
-    }
-
-    public interface IWantContentRepository
-    {
-        IEnumerable<OmniHash> GetWants();
-        void AddWant(OmniHash rootHash);
-        void RemoveWant(OmniHash rootHash);
-
         ContentBlock GetContentBlock(OmniHash rootHash, OmniHash targetHash);
-        void AddContentBlock(OmniHash rootHash, OmniHash targetHash);
         void RemoveContentBlock(OmniHash rootHash, OmniHash targetHash);
     }
 }
