@@ -1,16 +1,22 @@
-using System.Reflection;
-using System.Buffers;
-using System.IO;
 using System;
+using System.Buffers;
+using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.IO.Compression;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Omnius.Core;
+using Omnius.Core.Cryptography;
+using Omnius.Core.Extensions;
+using Omnius.Core.Io;
 using Omnius.Core.Network;
 using Omnius.Core.Network.Caps;
 using Omnius.Core.Network.Connections;
@@ -19,12 +25,6 @@ using Omnius.Core.Network.Proxies;
 using Omnius.Core.Network.Upnp;
 using Omnius.Core.Serialization.RocketPack;
 using Omnius.Xeus.Service.Drivers.Internal;
-using Omnius.Core.Extensions;
-using System.Diagnostics.CodeAnalysis;
-using Omnius.Core.Io;
-using System.IO.Compression;
-using System.Buffers.Binary;
-using Omnius.Core.Cryptography;
 
 namespace Omnius.Xeus.Service.Drivers
 {

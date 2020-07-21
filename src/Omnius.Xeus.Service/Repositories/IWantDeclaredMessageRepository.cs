@@ -1,11 +1,12 @@
-public interface IWantDeclaredMessageRepository{
-FetchAllWantSignatures();
-FetchWantSignature();
-AddWantSignature();
-RemoveWantSignature();
+public interface IWantDeclaredMessageRepository
+{
+    FetchAllWantSignatures();
+    FetchWantSignature();
+    AddWantSignature();
+    RemoveWantSignature();
 
-FetchDeclaredMessage();
-FetchDeclaredMessageCreationTime();
-AddDeclaredMessage();
-RemoveDeclaredMessage();
+    FetchDeclaredMessage();
+    FetchDeclaredMessageCreationTime();
+    AddDeclaredMessage();
+    RemoveDeclaredMessage();
 }
