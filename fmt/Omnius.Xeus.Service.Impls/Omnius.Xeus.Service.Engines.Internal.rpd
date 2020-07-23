@@ -7,7 +7,7 @@ using "Omnius.Xeus.Service.Models";
 namespace "Omnius.Xeus.Service.Engines.Internal";
 option csharp_access_level "internal";
 
-/* Models */
+// Models
 
 table MerkleTreeSection {
     Depth: int32 = 0,
@@ -25,8 +25,11 @@ table ContentBlockFlags {
     Flags: bytes(capacity: 4194304, recyclable: true) = 1,
 }
 
-/* Messages */
+// NodeFinder
 
+table NodeFinderConfig {
+    NodeProfileMap: map<NodeProfile, timestamp>(capacity: 1073741824) = 0,
+}
 enum NodeFinderVersion : int8 {
     Unknown = 0,
     Version1 = 1,
@@ -47,6 +50,8 @@ table NodeFinderDataMessage {
     WantResourceLocations: vector<ResourceTag>(capacity: 256) = 2,
     GiveResourceLocations: vector<ResourceLocation>(capacity: 256) = 3,
 }
+
+// ContentExchanger
 
 enum ContentExchangerVersion : uint8 {
     Unknown = 0,
@@ -82,6 +87,8 @@ table ContentExchangerDataMessage {
     GiveContentBlocks: vector<ContentBlock>(capacity: 8) = 3,
 }
 
+// DeclaredMessageExchanger
+
 enum DeclaredMessageExchangerVersion : uint8 {
     Unknown = 0,
     Version1 = 1,
@@ -111,10 +118,4 @@ table DeclaredMessageExchangerFetchMessageResultMessage {
 
 table DeclaredMessageExchangerPostMessage {
     DeclaredMessage: DeclaredMessage = 0,
-}
-
-/* Configs */
-
-table NodeFinderConfig {
-    NodeProfileMap: map<NodeProfile, timestamp>(capacity: 1073741824) = 0,
 }

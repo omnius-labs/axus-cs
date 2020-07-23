@@ -1,7 +1,0 @@
-<Application xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Application.Styles>
-      <StyleInclude Source="resm:Avalonia.Themes.Default.DefaultTheme.xaml?assembly=Avalonia.Themes.Default"/>
-      <StyleInclude Source="resm:Omnius.Core.Avalonia.Themes.DarkTheme.xaml?assembly=Omnius.Core.Avalonia"/>
-    </Application.Styles>
-</Application>

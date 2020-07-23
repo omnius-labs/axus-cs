@@ -8,7 +8,7 @@ using Omnius.Core.Serialization.RocketPack;
 
 #nullable enable
 
-namespace Omnius.Xeus.Service.Engines
+namespace Omnius.Xeus.Service.Models
 {
     public sealed partial class DeclaredMessage
     {

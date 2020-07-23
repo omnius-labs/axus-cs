@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core.Cryptography;
 using Omnius.Xeus.Service.Engines;
+using Omnius.Xeus.Service.Models;
 
 namespace Omnius.Xeus.Service.Engines
 {

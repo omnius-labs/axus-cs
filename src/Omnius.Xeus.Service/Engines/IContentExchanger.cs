@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Xeus.Service.Connectors;
+using Omnius.Xeus.Service.Models;
 
 namespace Omnius.Xeus.Service.Engines
 {

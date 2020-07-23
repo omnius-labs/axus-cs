@@ -8,6 +8,7 @@
     <IsPackable>false</IsPackable>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <NoWarn>CS1591,CS1998,NU5105</NoWarn>
+    <GenerateFullPaths>true</GenerateFullPaths>
   </PropertyGroup>
 
   <!--

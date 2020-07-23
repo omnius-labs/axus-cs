@@ -16,6 +16,7 @@ using Omnius.Core.Network;
 using Omnius.Core.Network.Caps;
 using Omnius.Core.Network.Proxies;
 using Omnius.Core.Network.Upnp;
+using Omnius.Xeus.Service.Models;
 
 namespace Omnius.Xeus.Service.Connectors.Internal
 {

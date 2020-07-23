@@ -5,6 +5,48 @@ using "Omnius.Core.Network";
 
 namespace "Omnius.Xeus.Service.Models";
 
+// Models
+
+table NodeProfile {
+    Services: vector<string(capacity: 256)>(capacity: 32) = 0,
+    Addresses: vector<OmniAddress>(capacity: 32) = 1,
+}
+
+table ResourceTag {
+    Type: string(capacity: 256) = 0,
+    Hash: OmniHash = 1,
+}
+
+table ContentBlock {
+    ResourceTag: OmniHash = 0,
+    Value: bytes(capacity: 4194304, recyclable: true) = 1,
+}
+
+table DeclaredMessage {
+    CreationTime: timestamp = 0,
+    Value: bytes(capacity: 33554432, recyclable: true) = 1,
+    Certificate: OmniCertificate? = 2,
+}
+
+table ConsistencyReport {
+    BadBlockCount: uint32 = 0,
+    CheckedBlockCount: uint32 = 1,
+    TotalBlockCount: uint32 = 2,
+}
+
+enum ConnectionType : uint8 {
+    Unknown = 0,
+    Connected = 1,
+    Accepted = 2,
+}
+
+table ConnectionReport {
+    Type: ConnectionType = 0,
+    EndPoint: OmniAddress = 1,
+}
+
+// TcpConneckor
+
 enum TcpProxyType : uint8 {
     Unknown = 0,
     HttpProxy = 1,
@@ -38,30 +80,10 @@ table TcpConnectorOptions {
     BandwidthOptions: BandwidthOptions = 2,
 }
 
-table ContentBlock {
-    ResourceTag: OmniHash = 0,
-    Value: bytes(capacity: 4194304, recyclable: true) = 1,
+table TcpConnectorReport {
 }
 
-/* Models */
-
-table NodeProfile {
-    Services: vector<string(capacity: 256)>(capacity: 32) = 0,
-    Addresses: vector<OmniAddress>(capacity: 32) = 1,
-}
-
-table ResourceTag {
-    Type: string(capacity: 256) = 0,
-    Hash: OmniHash = 1,
-}
-
-table DeclaredMessage {
-    CreationTime: timestamp = 0,
-    Value: bytes(capacity: 33554432, recyclable: true) = 1,
-    Certificate: OmniCertificate? = 2,
-}
-
-/* Optinos */
+// NodeFinder
 
 table NodeFinderOptions {
     ConfigPath: string(capacity: 1024) = 0,
@@ -69,68 +91,61 @@ table NodeFinderOptions {
     Services: vector<string(capacity: 256)>(capacity: 32) = 2,
 }
 
-table PublishContentStorageOptions {
-    ConfigPath: string(capacity: 1024) = 0,
+table NodeFinderReport {
 }
 
-table WantContentStorageOptions {
-    ConfigPath: string(capacity: 1024) = 0,
-}
+// ContentExchanger
 
 table ContentExchangerOptions {
     ConfigPath: string(capacity: 1024) = 0,
     MaxConnectionCount: uint32 = 1,
 }
 
-table PublishDeclaredMessageStorageOptions {
+table ContentExchangerReport {
+}
+
+// PublishContentStorage
+
+table PublishContentStorageOptions {
     ConfigPath: string(capacity: 1024) = 0,
 }
 
-table WantDeclaredMessageStorageOptions {
+table PublishContentStorageReport {
+}
+
+// WantContentStorage
+
+table WantContentStorageOptions {
     ConfigPath: string(capacity: 1024) = 0,
 }
+
+table WantContentStorageReport {
+}
+
+// DeclaredMessageExchanger
 
 table DeclaredMessageExchangerOptions {
     ConfigPath: string(capacity: 1024) = 0,
     MaxConnectionCount: uint32 = 1,
 }
 
-
-/* Reports */
-
-table ConsistencyReport {
-    BadBlockCount: uint32 = 0,
-    CheckedBlockCount: uint32 = 1,
-    TotalBlockCount: uint32 = 2,
+table DeclaredMessageExchangerReport {
 }
 
-enum ConnectionType : uint8 {
-    Unknown = 0,
-    Connected = 1,
-    Accepted = 2,
-}
+// PublishDeclaredMessageStorage
 
-table ConnectionReport {
-    Type: ConnectionType = 0,
-    EndPoint: OmniAddress = 1,
-}
-
-table PublishContentStorageReport {
-}
-
-table WantContentStorageReport {
+table PublishDeclaredMessageStorageOptions {
+    ConfigPath: string(capacity: 1024) = 0,
 }
 
 table PublishDeclaredMessageStorageReport {
 }
 
+// WantDeclaredMessageStorage
+
+table WantDeclaredMessageStorageOptions {
+    ConfigPath: string(capacity: 1024) = 0,
+}
+
 table WantDeclaredMessageStorageReport {
-}
-
-table WantContentRepositoryOptions {
-    ConfigPath: string(capacity: 1024) = 0,
-}
-
-table WantDeclaredMessageRepositoryOptions {
-    ConfigPath: string(capacity: 1024) = 0,
 }

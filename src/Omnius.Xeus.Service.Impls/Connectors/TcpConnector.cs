@@ -15,6 +15,7 @@ using Omnius.Core.Network.Connections.Secure;
 using Omnius.Core.Network.Proxies;
 using Omnius.Core.Network.Upnp;
 using Omnius.Xeus.Service.Connectors.Internal;
+using Omnius.Xeus.Service.Models;
 
 namespace Omnius.Xeus.Service.Connectors
 {
