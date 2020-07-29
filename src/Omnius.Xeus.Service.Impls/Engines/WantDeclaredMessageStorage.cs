@@ -81,7 +81,7 @@ namespace Omnius.Xeus.Service.Engines
             throw new NotImplementedException();
         }
 
-        public async ValueTask<bool> ContainsAsync(OmniSignature signature, DateTime since = default)
+        public async ValueTask<bool> ContainsMessageAsync(OmniSignature signature, DateTime since = default)
         {
             using (await _asyncLock.LockAsync())
             {
@@ -91,7 +91,7 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public async ValueTask AddAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+        public async ValueTask RegisterWantMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
@@ -99,7 +99,7 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public async ValueTask RemoveAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+        public async ValueTask UnregisterWantMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
@@ -107,7 +107,7 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public async ValueTask<DeclaredMessage?> ReadAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+        public async ValueTask<DeclaredMessage?> ReadMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
@@ -126,7 +126,7 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public async ValueTask WriteAsync(DeclaredMessage message, CancellationToken cancellationToken = default)
+        public async ValueTask WriteMessageAsync(DeclaredMessage message, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {

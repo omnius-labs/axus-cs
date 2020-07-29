@@ -113,7 +113,7 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public async ValueTask AddContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+        public async ValueTask RegisterWantContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
@@ -121,7 +121,7 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public async ValueTask RemoveContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+        public async ValueTask UnregisterWantContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {

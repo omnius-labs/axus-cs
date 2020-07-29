@@ -88,7 +88,7 @@ namespace Omnius.Xeus.Service.Engines
             throw new NotImplementedException();
         }
 
-        public async ValueTask<bool> ContainsAsync(OmniSignature signature, DateTime since = default)
+        public async ValueTask<bool> ContainsMessageAsync(OmniSignature signature, DateTime since = default)
         {
             using (await _asyncLock.LockAsync())
             {
@@ -107,7 +107,7 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public async ValueTask AddAsync(DeclaredMessage message, CancellationToken cancellationToken = default)
+        public async ValueTask RegisterPushMessageAsync(DeclaredMessage message, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
@@ -130,7 +130,7 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public async ValueTask RemoveAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+        public async ValueTask UnregisterPushMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
@@ -141,7 +141,7 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public async ValueTask<DeclaredMessage?> ReadAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+        public async ValueTask<DeclaredMessage?> ReadMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {

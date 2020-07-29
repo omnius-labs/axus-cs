@@ -113,7 +113,7 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public async ValueTask<OmniHash> AddContentAsync(string filePath, CancellationToken cancellationToken = default)
+        public async ValueTask<OmniHash> RegisterPushContentAsync(string filePath, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
@@ -236,7 +236,7 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public async ValueTask RemoveContentAsync(string filePath, CancellationToken cancellationToken = default)
+        public async ValueTask UnregisterPushContentAsync(string filePath, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
