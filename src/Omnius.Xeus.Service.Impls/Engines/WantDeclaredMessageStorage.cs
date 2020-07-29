@@ -1,3 +1,5 @@
+using System.Security.Authentication;
+using System.Security.Cryptography;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -76,9 +78,14 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public ValueTask<IEnumerable<OmniSignature>> GetSignaturesAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<IEnumerable<OmniSignature>> GetSignaturesAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            using (await _asyncLock.LockAsync())
+            {
+                var status = _repository.WantStatus.GetAll();
+                if (status == null) return Enumerable.Empty<OmniSignature>();
+                return status.Select(n => n.Signature).ToArray();
+            }
         }
 
         public async ValueTask<bool> ContainsMessageAsync(OmniSignature signature, DateTime since = default)
@@ -95,7 +102,7 @@ namespace Omnius.Xeus.Service.Engines
         {
             using (await _asyncLock.LockAsync())
             {
-                _repository.WantStatus.Add(new WantStatus() { Signature = signature });
+                _repository.WantStatus.Add(new WantStatus(signature, DateTime.MinValue));
             }
         }
 
@@ -133,7 +140,10 @@ namespace Omnius.Xeus.Service.Engines
                 var signature = message.Certificate?.GetOmniSignature();
                 if (signature == null) return;
 
-                _repository.WantStatus.Add(new WantStatus() { Signature = signature });
+                var status = _repository.WantStatus.Get(signature);
+                if (status == null) return;
+
+                _repository.WantStatus.Add(new WantStatus(signature, message.CreationTime.ToDateTime()));
 
                 var filePath = Path.Combine(_options.ConfigPath, "cache", SignatureToString(signature));
 
@@ -154,7 +164,14 @@ namespace Omnius.Xeus.Service.Engines
 
         private sealed class WantStatus
         {
-            public OmniSignature? Signature { get; set; }
+            public WantStatus(OmniSignature signature, DateTime creationTime)
+            {
+                this.Signature = signature;
+                this.CreationTime = creationTime;
+            }
+
+            public OmniSignature Signature { get; }
+            public DateTime CreationTime { get; }
         }
 
         private sealed class Repository
@@ -171,7 +188,7 @@ namespace Omnius.Xeus.Service.Engines
             {
                 if (0 <= _database.UserVersion)
                 {
-                    var wants = _database.GetCollection<WantStatusEntity>("wants-status");
+                    var wants = _database.GetCollection<WantStatusEntity>("wants");
                     wants.EnsureIndex(x => x.Signature, true);
                     _database.UserVersion = 1;
                 }
@@ -190,22 +207,28 @@ namespace Omnius.Xeus.Service.Engines
 
                 public IEnumerable<WantStatus> GetAll()
                 {
-                    throw new NotImplementedException();
+                    var col = _database.GetCollection<WantStatusEntity>("wants");
+                    return col.FindAll().Select(n => n.Export());
                 }
 
                 public WantStatus? Get(OmniSignature signature)
                 {
-                    throw new NotImplementedException();
+                    var col = _database.GetCollection<WantStatusEntity>("wants");
+                    var param = OmniSignatureEntity.Import(signature);
+                    return col.FindOne(n => n.Signature == param).Export();
                 }
 
                 public void Add(WantStatus status)
                 {
-                    throw new NotImplementedException();
+                    var col = _database.GetCollection<WantStatusEntity>("wants");
+                    col.Upsert(WantStatusEntity.Import(status));
                 }
 
                 public void Remove(OmniSignature signature)
                 {
-                    throw new NotImplementedException();
+                    var col = _database.GetCollection<WantStatusEntity>("wants");
+                    var param = OmniSignatureEntity.Import(signature);
+                    col.DeleteMany(n => n.Signature == param);
                 }
             }
 
@@ -213,18 +236,49 @@ namespace Omnius.Xeus.Service.Engines
             {
                 public int Id { get; set; }
                 public OmniSignatureEntity? Signature { get; set; }
+                public DateTime CreationTime { get; set; }
+
+                public static WantStatusEntity Import(WantStatus value)
+                {
+                    return new WantStatusEntity() { Signature = OmniSignatureEntity.Import(value.Signature), CreationTime = value.CreationTime };
+                }
+
+                public WantStatus Export()
+                {
+                    return new WantStatus(this.Signature!.Export(), this.CreationTime);
+                }
             }
 
             private class OmniSignatureEntity
             {
                 public string? Name { get; set; }
                 public OmniHashEntity? Hash { get; set; }
+
+                public static OmniSignatureEntity Import(OmniSignature value)
+                {
+                    return new OmniSignatureEntity() { Name = value.Name, Hash = OmniHashEntity.Import(value.Hash) };
+                }
+
+                public OmniSignature Export()
+                {
+                    return new OmniSignature(this.Name!, this.Hash!.Export());
+                }
             }
 
             private class OmniHashEntity
             {
                 public int AlgorithmType { get; set; }
                 public byte[]? Value { get; set; }
+
+                public static OmniHashEntity Import(OmniHash value)
+                {
+                    return new OmniHashEntity() { AlgorithmType = (int)value.AlgorithmType, Value = value.Value.ToArray() };
+                }
+
+                public OmniHash Export()
+                {
+                    return new OmniHash((OmniHashAlgorithmType)this.AlgorithmType, this.Value);
+                }
             }
         }
     }

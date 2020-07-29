@@ -26,7 +26,7 @@ namespace Omnius.Xeus.Service.Engines
         private readonly PushDeclaredMessageStorageOptions _options;
         private readonly IBytesPool _bytesPool;
 
-        private readonly LiteDatabase _database;
+        private readonly Repository _repository;
 
         private readonly AsyncLock _asyncLock = new AsyncLock();
 
@@ -49,26 +49,17 @@ namespace Omnius.Xeus.Service.Engines
             _options = options;
             _bytesPool = bytesPool;
 
-            _database = new LiteDatabase(Path.Combine(_options.ConfigPath, "lite.db"));
+            _repository = new Repository(Path.Combine(_options.ConfigPath, "lite.db"));
         }
 
         internal async ValueTask InitAsync()
         {
-            await this.MigrateAsync();
-        }
-
-        private async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
-        {
-            if (0 <= _database.UserVersion)
-            {
-                var pushes = _database.GetCollection<PushEntity>("pushes");
-                pushes.EnsureIndex(x => x.Hash, true);
-                _database.UserVersion = 1;
-            }
+            await _repository.MigrateAsync();
         }
 
         protected override async ValueTask OnDisposeAsync()
         {
+
         }
 
         public async ValueTask<PushDeclaredMessageStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
@@ -92,17 +83,8 @@ namespace Omnius.Xeus.Service.Engines
         {
             using (await _asyncLock.LockAsync())
             {
-                var hashString = this.ComputeHash(signature).ToString();
-
-                var pushes = _database.GetCollection<PushEntity>("wants");
-                if (!pushes.Exists(n => n.Hash == hashString)) return false;
-
-                var id = $"$/declared_messages/{hashString}";
-                var filename = hashString;
-
-                var fileInfo = _database.FileStorage.FindById(id);
-                var creationTime = fileInfo.Metadata["creation_time"].AsDateTime;
-                if (since < creationTime) return true;
+                var status = _repository.PushStatus.Get(signature);
+                if (status == null) return false;
                 return true;
             }
         }
@@ -114,17 +96,12 @@ namespace Omnius.Xeus.Service.Engines
                 var signature = message.Certificate?.GetOmniSignature();
                 if (signature == null) return;
 
-                var hashString = this.ComputeHash(signature).ToString();
+                _repository.PushStatus.Add(new PushStatus(signature, message.CreationTime.ToDateTime()));
 
-                var wants = _database.GetCollection<PushEntity>("pushes");
-                if (!wants.Exists(n => n.Hash == hashString)) return;
+                var filePath = Path.Combine(_options.ConfigPath, "cache", SignatureToString(signature));
 
-                var id = $"$/declared_messages/{hashString}";
-                var filename = hashString;
-                var metadata = new BsonDocument(new Dictionary<string, BsonValue>() { { "creation_time", new BsonValue(message.CreationTime) } });
-
-                using var liteStream = _database.FileStorage.OpenWrite(id, filename, metadata);
-                var pipeWriter = PipeWriter.Create(liteStream);
+                using var fileStream = new UnbufferedFileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool);
+                var pipeWriter = PipeWriter.Create(fileStream);
                 message.Export(pipeWriter, _bytesPool);
                 await pipeWriter.CompleteAsync();
             }
@@ -134,10 +111,7 @@ namespace Omnius.Xeus.Service.Engines
         {
             using (await _asyncLock.LockAsync())
             {
-                var hashString = this.ComputeHash(signature).ToString();
-
-                var pushes = _database.GetCollection<PushEntity>("pushes");
-                pushes.DeleteMany(n => n.Hash == hashString);
+                _repository.PushStatus.Remove(signature);
             }
         }
 
@@ -145,16 +119,13 @@ namespace Omnius.Xeus.Service.Engines
         {
             using (await _asyncLock.LockAsync())
             {
-                var hashString = this.ComputeHash(signature).ToString();
+                var status = _repository.PushStatus.Get(signature);
+                if (status == null) return null;
 
-                var pushes = _database.GetCollection<PushEntity>("pushes");
-                if (!pushes.Exists(n => n.Hash == hashString)) return null;
+                var filePath = Path.Combine(_options.ConfigPath, "cache", SignatureToString(signature));
 
-                var id = $"$/declared_messages/{hashString}";
-                var filename = hashString;
-
-                using var liteStream = _database.FileStorage.OpenRead(id);
-                var pipeReader = PipeReader.Create(liteStream);
+                using var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool);
+                var pipeReader = PipeReader.Create(fileStream);
                 var readResult = await pipeReader.ReadAsync(cancellationToken);
                 var message = DeclaredMessage.Import(readResult.Buffer, _bytesPool);
                 await pipeReader.CompleteAsync();
@@ -163,18 +134,132 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        private OmniHash ComputeHash(OmniSignature signature)
+        private static string SignatureToString(OmniSignature signature)
         {
-            var hub = new BytesHub(_bytesPool);
-            signature.Export(hub.Writer, _bytesPool);
+            var hub = new BytesHub(BytesPool.Shared);
+            signature.Export(hub.Writer, BytesPool.Shared);
             var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(hub.Reader.GetSequence()));
-            return hash;
+            return hash.ToString(ConvertStringType.Base16);
         }
 
-        private sealed class PushEntity
+        private sealed class PushStatus
         {
-            public int Id { get; set; }
-            public string? Hash { get; set; }
+            public PushStatus(OmniSignature signature, DateTime creationTime)
+            {
+                this.Signature = signature;
+                this.CreationTime = creationTime;
+            }
+
+            public OmniSignature Signature { get; }
+            public DateTime CreationTime { get; }
+        }
+
+        private sealed class Repository
+        {
+            private readonly LiteDatabase _database;
+
+            public Repository(string path)
+            {
+                _database = new LiteDatabase(path);
+                this.PushStatus = new PushStatusRepository(_database);
+            }
+
+            public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
+            {
+                if (0 <= _database.UserVersion)
+                {
+                    var wants = _database.GetCollection<PushStatusEntity>("pushes");
+                    wants.EnsureIndex(x => x.Signature, true);
+                    _database.UserVersion = 1;
+                }
+            }
+
+            public PushStatusRepository PushStatus { get; set; }
+
+            public sealed class PushStatusRepository
+            {
+                private readonly LiteDatabase _database;
+
+                public PushStatusRepository(LiteDatabase database)
+                {
+                    _database = database;
+                }
+
+                public IEnumerable<PushStatus> GetAll()
+                {
+                    var col = _database.GetCollection<PushStatusEntity>("wants");
+                    return col.FindAll().Select(n => n.Export());
+                }
+
+                public PushStatus? Get(OmniSignature signature)
+                {
+                    var col = _database.GetCollection<PushStatusEntity>("wants");
+                    var param = OmniSignatureEntity.Import(signature);
+                    return col.FindOne(n => n.Signature == param).Export();
+                }
+
+                public void Add(PushStatus status)
+                {
+                    var col = _database.GetCollection<PushStatusEntity>("wants");
+                    col.Upsert(PushStatusEntity.Import(status));
+                }
+
+                public void Remove(OmniSignature signature)
+                {
+                    var col = _database.GetCollection<PushStatusEntity>("wants");
+                    var param = OmniSignatureEntity.Import(signature);
+                    col.DeleteMany(n => n.Signature == param);
+                }
+            }
+
+            private sealed class PushStatusEntity
+            {
+                public int Id { get; set; }
+                public OmniSignatureEntity? Signature { get; set; }
+                public DateTime CreationTime { get; set; }
+
+                public static PushStatusEntity Import(PushStatus value)
+                {
+                    return new PushStatusEntity() { Signature = OmniSignatureEntity.Import(value.Signature), CreationTime = value.CreationTime };
+                }
+
+                public PushStatus Export()
+                {
+                    return new PushStatus(this.Signature!.Export(), this.CreationTime);
+                }
+            }
+
+            private class OmniSignatureEntity
+            {
+                public string? Name { get; set; }
+                public OmniHashEntity? Hash { get; set; }
+
+                public static OmniSignatureEntity Import(OmniSignature value)
+                {
+                    return new OmniSignatureEntity() { Name = value.Name, Hash = OmniHashEntity.Import(value.Hash) };
+                }
+
+                public OmniSignature Export()
+                {
+                    return new OmniSignature(this.Name!, this.Hash!.Export());
+                }
+            }
+
+            private class OmniHashEntity
+            {
+                public int AlgorithmType { get; set; }
+                public byte[]? Value { get; set; }
+
+                public static OmniHashEntity Import(OmniHash value)
+                {
+                    return new OmniHashEntity() { AlgorithmType = (int)value.AlgorithmType, Value = value.Value.ToArray() };
+                }
+
+                public OmniHash Export()
+                {
+                    return new OmniHash((OmniHashAlgorithmType)this.AlgorithmType, this.Value);
+                }
+            }
         }
     }
 }

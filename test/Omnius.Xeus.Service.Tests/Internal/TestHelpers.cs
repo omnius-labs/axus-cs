@@ -1,5 +1,8 @@
 using System;
 using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Omnius.Xeus.Service.Internal
 {
@@ -33,6 +36,35 @@ namespace Omnius.Xeus.Service.Internal
             var result = new byte[length];
             _random.NextBytes(result);
             return result;
+        }
+
+        // https://stackoverflow.com/questions/1344221/how-can-i-generate-random-alphanumeric-strings
+        private static readonly char[] _chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".ToCharArray();
+
+        public static string GetRandomString(int size)
+        {
+            byte[] data = new byte[4 * size];
+            using var crypto = new RNGCryptoServiceProvider();
+            crypto.GetBytes(data);
+
+            var result = new StringBuilder(size);
+            for (int i = 0; i < size; i++)
+            {
+                var rnd = BitConverter.ToUInt32(data, i * 4);
+                var idx = rnd % _chars.Length;
+
+                result.Append(_chars[idx]);
+            }
+
+            return result.ToString();
+        }
+
+        // https://stackoverflow.com/questions/14505932/random-datetime-between-range-not-unified-output/14511053
+        public static DateTime GetRandomDateTimeUtc(DateTime from, DateTime to)
+        {
+            var range = to - from;
+            var randTimeSpan = new TimeSpan((long)(_random.NextDouble() * range.Ticks));
+            return (from + randTimeSpan).ToUniversalTime();
         }
     }
 }

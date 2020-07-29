@@ -18,7 +18,6 @@ using Omnius.Xeus.Service.Models;
 namespace Omnius.Xeus.Service.Engines
 {
     public sealed class WantContentStorage : AsyncDisposableBase, IWantContentStorage
-
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
