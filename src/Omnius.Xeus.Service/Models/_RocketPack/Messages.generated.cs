@@ -2173,22 +2173,22 @@ namespace Omnius.Xeus.Service.Models
         }
     }
 
-    public sealed partial class PublishContentStorageOptions : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PublishContentStorageOptions>
+    public sealed partial class PushContentStorageOptions : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PushContentStorageOptions>
     {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Models.PublishContentStorageOptions> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PublishContentStorageOptions>.Formatter;
-        public static global::Omnius.Xeus.Service.Models.PublishContentStorageOptions Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PublishContentStorageOptions>.Empty;
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Models.PushContentStorageOptions> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PushContentStorageOptions>.Formatter;
+        public static global::Omnius.Xeus.Service.Models.PushContentStorageOptions Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PushContentStorageOptions>.Empty;
 
-        static PublishContentStorageOptions()
+        static PushContentStorageOptions()
         {
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PublishContentStorageOptions>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PublishContentStorageOptions>.Empty = new global::Omnius.Xeus.Service.Models.PublishContentStorageOptions(string.Empty);
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PushContentStorageOptions>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PushContentStorageOptions>.Empty = new global::Omnius.Xeus.Service.Models.PushContentStorageOptions(string.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxConfigPathLength = 1024;
 
-        public PublishContentStorageOptions(string configPath)
+        public PushContentStorageOptions(string configPath)
         {
             if (configPath is null) throw new global::System.ArgumentNullException("configPath");
             if (configPath.Length > 1024) throw new global::System.ArgumentOutOfRangeException("configPath");
@@ -2205,7 +2205,7 @@ namespace Omnius.Xeus.Service.Models
 
         public string ConfigPath { get; }
 
-        public static global::Omnius.Xeus.Service.Models.PublishContentStorageOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Service.Models.PushContentStorageOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -2216,20 +2216,20 @@ namespace Omnius.Xeus.Service.Models
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(global::Omnius.Xeus.Service.Models.PublishContentStorageOptions? left, global::Omnius.Xeus.Service.Models.PublishContentStorageOptions? right)
+        public static bool operator ==(global::Omnius.Xeus.Service.Models.PushContentStorageOptions? left, global::Omnius.Xeus.Service.Models.PushContentStorageOptions? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(global::Omnius.Xeus.Service.Models.PublishContentStorageOptions? left, global::Omnius.Xeus.Service.Models.PublishContentStorageOptions? right)
+        public static bool operator !=(global::Omnius.Xeus.Service.Models.PushContentStorageOptions? left, global::Omnius.Xeus.Service.Models.PushContentStorageOptions? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Service.Models.PublishContentStorageOptions)) return false;
-            return this.Equals((global::Omnius.Xeus.Service.Models.PublishContentStorageOptions)other);
+            if (!(other is global::Omnius.Xeus.Service.Models.PushContentStorageOptions)) return false;
+            return this.Equals((global::Omnius.Xeus.Service.Models.PushContentStorageOptions)other);
         }
-        public bool Equals(global::Omnius.Xeus.Service.Models.PublishContentStorageOptions? target)
+        public bool Equals(global::Omnius.Xeus.Service.Models.PushContentStorageOptions? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -2239,9 +2239,9 @@ namespace Omnius.Xeus.Service.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Models.PublishContentStorageOptions>
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Models.PushContentStorageOptions>
         {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in global::Omnius.Xeus.Service.Models.PublishContentStorageOptions value, in int rank)
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in global::Omnius.Xeus.Service.Models.PushContentStorageOptions value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2261,7 +2261,7 @@ namespace Omnius.Xeus.Service.Models
                 }
             }
 
-            public global::Omnius.Xeus.Service.Models.PublishContentStorageOptions Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public global::Omnius.Xeus.Service.Models.PushContentStorageOptions Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2282,25 +2282,25 @@ namespace Omnius.Xeus.Service.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Service.Models.PublishContentStorageOptions(p_configPath);
+                return new global::Omnius.Xeus.Service.Models.PushContentStorageOptions(p_configPath);
             }
         }
     }
 
-    public sealed partial class PublishContentStorageReport : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PublishContentStorageReport>
+    public sealed partial class PushContentStorageReport : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PushContentStorageReport>
     {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Models.PublishContentStorageReport> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PublishContentStorageReport>.Formatter;
-        public static global::Omnius.Xeus.Service.Models.PublishContentStorageReport Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PublishContentStorageReport>.Empty;
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Models.PushContentStorageReport> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PushContentStorageReport>.Formatter;
+        public static global::Omnius.Xeus.Service.Models.PushContentStorageReport Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PushContentStorageReport>.Empty;
 
-        static PublishContentStorageReport()
+        static PushContentStorageReport()
         {
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PublishContentStorageReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PublishContentStorageReport>.Empty = new global::Omnius.Xeus.Service.Models.PublishContentStorageReport();
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PushContentStorageReport>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PushContentStorageReport>.Empty = new global::Omnius.Xeus.Service.Models.PushContentStorageReport();
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public PublishContentStorageReport()
+        public PushContentStorageReport()
         {
 
             ___hashCode = new global::System.Lazy<int>(() =>
@@ -2311,7 +2311,7 @@ namespace Omnius.Xeus.Service.Models
         }
 
 
-        public static global::Omnius.Xeus.Service.Models.PublishContentStorageReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Service.Models.PushContentStorageReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -2322,20 +2322,20 @@ namespace Omnius.Xeus.Service.Models
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(global::Omnius.Xeus.Service.Models.PublishContentStorageReport? left, global::Omnius.Xeus.Service.Models.PublishContentStorageReport? right)
+        public static bool operator ==(global::Omnius.Xeus.Service.Models.PushContentStorageReport? left, global::Omnius.Xeus.Service.Models.PushContentStorageReport? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(global::Omnius.Xeus.Service.Models.PublishContentStorageReport? left, global::Omnius.Xeus.Service.Models.PublishContentStorageReport? right)
+        public static bool operator !=(global::Omnius.Xeus.Service.Models.PushContentStorageReport? left, global::Omnius.Xeus.Service.Models.PushContentStorageReport? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Service.Models.PublishContentStorageReport)) return false;
-            return this.Equals((global::Omnius.Xeus.Service.Models.PublishContentStorageReport)other);
+            if (!(other is global::Omnius.Xeus.Service.Models.PushContentStorageReport)) return false;
+            return this.Equals((global::Omnius.Xeus.Service.Models.PushContentStorageReport)other);
         }
-        public bool Equals(global::Omnius.Xeus.Service.Models.PublishContentStorageReport? target)
+        public bool Equals(global::Omnius.Xeus.Service.Models.PushContentStorageReport? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -2344,9 +2344,9 @@ namespace Omnius.Xeus.Service.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Models.PublishContentStorageReport>
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Models.PushContentStorageReport>
         {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in global::Omnius.Xeus.Service.Models.PublishContentStorageReport value, in int rank)
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in global::Omnius.Xeus.Service.Models.PushContentStorageReport value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2357,7 +2357,7 @@ namespace Omnius.Xeus.Service.Models
 
             }
 
-            public global::Omnius.Xeus.Service.Models.PublishContentStorageReport Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public global::Omnius.Xeus.Service.Models.PushContentStorageReport Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2372,7 +2372,7 @@ namespace Omnius.Xeus.Service.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Service.Models.PublishContentStorageReport();
+                return new global::Omnius.Xeus.Service.Models.PushContentStorageReport();
             }
         }
     }
@@ -2803,22 +2803,22 @@ namespace Omnius.Xeus.Service.Models
         }
     }
 
-    public sealed partial class PublishDeclaredMessageStorageOptions : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageOptions>
+    public sealed partial class PushDeclaredMessageStorageOptions : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageOptions>
     {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageOptions> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageOptions>.Formatter;
-        public static global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageOptions Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageOptions>.Empty;
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageOptions> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageOptions>.Formatter;
+        public static global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageOptions Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageOptions>.Empty;
 
-        static PublishDeclaredMessageStorageOptions()
+        static PushDeclaredMessageStorageOptions()
         {
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageOptions>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageOptions>.Empty = new global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageOptions(string.Empty);
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageOptions>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageOptions>.Empty = new global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageOptions(string.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxConfigPathLength = 1024;
 
-        public PublishDeclaredMessageStorageOptions(string configPath)
+        public PushDeclaredMessageStorageOptions(string configPath)
         {
             if (configPath is null) throw new global::System.ArgumentNullException("configPath");
             if (configPath.Length > 1024) throw new global::System.ArgumentOutOfRangeException("configPath");
@@ -2835,7 +2835,7 @@ namespace Omnius.Xeus.Service.Models
 
         public string ConfigPath { get; }
 
-        public static global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -2846,20 +2846,20 @@ namespace Omnius.Xeus.Service.Models
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageOptions? left, global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageOptions? right)
+        public static bool operator ==(global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageOptions? left, global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageOptions? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageOptions? left, global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageOptions? right)
+        public static bool operator !=(global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageOptions? left, global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageOptions? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageOptions)) return false;
-            return this.Equals((global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageOptions)other);
+            if (!(other is global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageOptions)) return false;
+            return this.Equals((global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageOptions)other);
         }
-        public bool Equals(global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageOptions? target)
+        public bool Equals(global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageOptions? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -2869,9 +2869,9 @@ namespace Omnius.Xeus.Service.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageOptions>
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageOptions>
         {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageOptions value, in int rank)
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageOptions value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2891,7 +2891,7 @@ namespace Omnius.Xeus.Service.Models
                 }
             }
 
-            public global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageOptions Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageOptions Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2912,25 +2912,25 @@ namespace Omnius.Xeus.Service.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageOptions(p_configPath);
+                return new global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageOptions(p_configPath);
             }
         }
     }
 
-    public sealed partial class PublishDeclaredMessageStorageReport : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageReport>
+    public sealed partial class PushDeclaredMessageStorageReport : global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageReport>
     {
-        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageReport> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageReport>.Formatter;
-        public static global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageReport Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageReport>.Empty;
+        public static global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageReport> Formatter => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageReport>.Formatter;
+        public static global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageReport Empty => global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageReport>.Empty;
 
-        static PublishDeclaredMessageStorageReport()
+        static PushDeclaredMessageStorageReport()
         {
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageReport>.Empty = new global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageReport();
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageReport>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.Serialization.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageReport>.Empty = new global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageReport();
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public PublishDeclaredMessageStorageReport()
+        public PushDeclaredMessageStorageReport()
         {
 
             ___hashCode = new global::System.Lazy<int>(() =>
@@ -2941,7 +2941,7 @@ namespace Omnius.Xeus.Service.Models
         }
 
 
-        public static global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.Serialization.RocketPack.RocketPackReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -2952,20 +2952,20 @@ namespace Omnius.Xeus.Service.Models
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageReport? left, global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageReport? right)
+        public static bool operator ==(global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageReport? left, global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageReport? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageReport? left, global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageReport? right)
+        public static bool operator !=(global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageReport? left, global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageReport? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageReport)) return false;
-            return this.Equals((global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageReport)other);
+            if (!(other is global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageReport)) return false;
+            return this.Equals((global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageReport)other);
         }
-        public bool Equals(global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageReport? target)
+        public bool Equals(global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageReport? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -2974,9 +2974,9 @@ namespace Omnius.Xeus.Service.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageReport>
+        private sealed class ___CustomFormatter : global::Omnius.Core.Serialization.RocketPack.IRocketPackFormatter<global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageReport>
         {
-            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageReport value, in int rank)
+            public void Serialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackWriter w, in global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageReport value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2987,7 +2987,7 @@ namespace Omnius.Xeus.Service.Models
 
             }
 
-            public global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageReport Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
+            public global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageReport Deserialize(ref global::Omnius.Core.Serialization.RocketPack.RocketPackReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -3002,7 +3002,7 @@ namespace Omnius.Xeus.Service.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Service.Models.PublishDeclaredMessageStorageReport();
+                return new global::Omnius.Xeus.Service.Models.PushDeclaredMessageStorageReport();
             }
         }
     }

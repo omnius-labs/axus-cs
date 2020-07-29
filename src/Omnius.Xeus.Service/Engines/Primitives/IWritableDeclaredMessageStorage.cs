@@ -12,6 +12,6 @@ namespace Omnius.Xeus.Service.Engines
 {
     public interface IWritableDeclaredMessageStorage : IReadOnlyDeclaredMessageStorage
     {
-        ValueTask WriteAsync(DeclaredMessage message, CancellationToken cancellationToken = default);
+        ValueTask AddAsync(DeclaredMessage message, CancellationToken cancellationToken = default);
     }
 }

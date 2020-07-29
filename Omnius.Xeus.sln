@@ -48,8 +48,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Xeus.Api", "src\Omni
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Xeus.Service.Impls", "src\Omnius.Xeus.Service.Impls\Omnius.Xeus.Service.Impls.csproj", "{6BEDBE08-D62B-4D5A-A422-B3C2BFB5C8A8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omnius.Xeus.Ui.Desktop", "src\Omnius.Xeus.Ui.Desktop\Omnius.Xeus.Ui.Desktop.csproj", "{E2CFAF7B-4753-48B2-84A2-556D08E56E01}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -116,10 +114,6 @@ Global
 		{6BEDBE08-D62B-4D5A-A422-B3C2BFB5C8A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6BEDBE08-D62B-4D5A-A422-B3C2BFB5C8A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6BEDBE08-D62B-4D5A-A422-B3C2BFB5C8A8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E2CFAF7B-4753-48B2-84A2-556D08E56E01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E2CFAF7B-4753-48B2-84A2-556D08E56E01}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E2CFAF7B-4753-48B2-84A2-556D08E56E01}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E2CFAF7B-4753-48B2-84A2-556D08E56E01}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -143,7 +137,6 @@ Global
 		{4F5F352B-44E2-42A6-8DBF-5763AB8EBA31} = {4D0DF5A7-4EBE-44E7-B7D9-F8B699535AE1}
 		{606CDB9A-EF95-4D83-83F6-086AB6000CE0} = {E245C597-EAB5-4A50-9E80-B2BCDBC9C839}
 		{6BEDBE08-D62B-4D5A-A422-B3C2BFB5C8A8} = {E245C597-EAB5-4A50-9E80-B2BCDBC9C839}
-		{E2CFAF7B-4753-48B2-84A2-556D08E56E01} = {E245C597-EAB5-4A50-9E80-B2BCDBC9C839}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A25DF952-3624-4265-88C1-43E6D20BA69A}

@@ -15,12 +15,12 @@ namespace Omnius.Xeus.Service.Engines
         ValueTask<IWantContentStorage> CreateAsync(WantContentStorageOptions options, IBytesPool bytesPool);
     }
 
-    public interface IWantContentStorage : IWantStorage, IWritableContentStorage
+    public interface IWantContentStorage : IWritableContentStorage
     {
         ValueTask<WantContentStorageReport> GetReportAsync(CancellationToken cancellationToken = default);
-        ValueTask WantAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
-        ValueTask UnwantAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
-        ValueTask ExportAsync(OmniHash rootHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default);
-        ValueTask ExportAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default);
+        ValueTask AddContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
+        ValueTask RemoveContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
+        ValueTask ExportContentAsync(OmniHash rootHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default);
+        ValueTask ExportContentAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default);
     }
 }

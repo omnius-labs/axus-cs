@@ -9,7 +9,7 @@ namespace Omnius.Xeus.Service.Engines
     public interface IDeclaredMessageExchangerFactory
     {
         ValueTask<IDeclaredMessageExchanger> CreateAsync(DeclaredMessageExchangerOptions options, IEnumerable<IConnector> connectors,
-            INodeFinder nodeFinder, IPublishDeclaredMessageStorage publishStorage, IWantDeclaredMessageStorage wantStorage,
+            INodeFinder nodeFinder, IPushDeclaredMessageStorage pushStorage, IWantDeclaredMessageStorage wantStorage,
             IBytesPool bytesPool);
     }
 

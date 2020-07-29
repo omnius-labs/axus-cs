@@ -104,13 +104,13 @@ table ContentExchangerOptions {
 table ContentExchangerReport {
 }
 
-// PublishContentStorage
+// PushContentStorage
 
-table PublishContentStorageOptions {
+table PushContentStorageOptions {
     ConfigPath: string(capacity: 1024) = 0,
 }
 
-table PublishContentStorageReport {
+table PushContentStorageReport {
 }
 
 // WantContentStorage
@@ -132,13 +132,13 @@ table DeclaredMessageExchangerOptions {
 table DeclaredMessageExchangerReport {
 }
 
-// PublishDeclaredMessageStorage
+// PushDeclaredMessageStorage
 
-table PublishDeclaredMessageStorageOptions {
+table PushDeclaredMessageStorageOptions {
     ConfigPath: string(capacity: 1024) = 0,
 }
 
-table PublishDeclaredMessageStorageReport {
+table PushDeclaredMessageStorageReport {
 }
 
 // WantDeclaredMessageStorage

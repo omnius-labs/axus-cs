@@ -12,7 +12,6 @@ namespace Omnius.Xeus.Service.Engines
     public interface INodeFinderFactory
     {
         ValueTask<INodeFinder> CreateAsync(NodeFinderOptions options, IEnumerable<IConnector> connectors,
-            IEnumerable<IPublishStorage> publishStorages, IEnumerable<IWantStorage> wantStorages,
             IBytesPool bytesPool);
     }
 

@@ -9,7 +9,7 @@ namespace Omnius.Xeus.Service.Engines
     public interface IContentExchangerFactory
     {
         ValueTask<IContentExchanger> CreateAsync(ContentExchangerOptions options, IEnumerable<IConnector> connectors,
-            INodeFinder nodeFinder, IPublishContentStorage publishStorage, IWantContentStorage wantStorage, IBytesPool bytesPool);
+            INodeFinder nodeFinder, IPushContentStorage pushStorage, IWantContentStorage wantStorage, IBytesPool bytesPool);
     }
 
     public interface IContentExchanger

@@ -18,13 +18,14 @@ using Omnius.Xeus.Service.Models;
 namespace Omnius.Xeus.Service.Engines
 {
     public sealed class WantContentStorage : AsyncDisposableBase, IWantContentStorage
+
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         private readonly WantContentStorageOptions _options;
         private readonly IBytesPool _bytesPool;
 
-        private readonly LiteDatabase _database;
+        private readonly Repository _repository;
 
         private readonly AsyncLock _asyncLock = new AsyncLock();
 
@@ -48,22 +49,13 @@ namespace Omnius.Xeus.Service.Engines
             _options = options;
             _bytesPool = bytesPool;
 
-            _database = new LiteDatabase(Path.Combine(_options.ConfigPath, "lite.db"));
+            _repository = new Repository(Path.Combine(_options.ConfigPath, "lite.db"));
         }
+
 
         internal async ValueTask InitAsync()
         {
-            await this.MigrateAsync();
-        }
-
-        private async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
-        {
-            if (0 <= _database.UserVersion)
-            {
-                var wants = _database.GetCollection<WantEntity>("wants");
-                wants.EnsureIndex(x => x.Hash, true);
-                _database.UserVersion = 1;
-            }
+            await _repository.MigrateAsync();
         }
 
         protected override async ValueTask OnDisposeAsync()
@@ -80,35 +72,81 @@ namespace Omnius.Xeus.Service.Engines
         {
         }
 
-        public async ValueTask<bool> ContainsAsync(OmniHash rootHash)
-        {
-            using (await _asyncLock.LockAsync())
-            {
-                var rootHashString = rootHash.ToString(ConvertStringType.Base16);
-
-                var wants = _database.GetCollection<WantEntity>("wants");
-                if (!wants.Exists(n => n.Hash == rootHashString)) return false;
-                return true;
-            }
-        }
-
-        public ValueTask<bool> ContainsAsync(OmniHash rootHash, OmniHash targetHash)
+        public async ValueTask<IEnumerable<OmniHash>> GetContentHashesAsync(CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public async ValueTask<IMemoryOwner<byte>?> ReadAsync(OmniHash rootHash, OmniHash targetHash, CancellationToken cancellationToken = default)
+        public async ValueTask<IEnumerable<OmniHash>> GetBlockHashesAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
-                var rootHashString = rootHash.ToString(ConvertStringType.Base16);
-                var targetHashString = rootHash.ToString(ConvertStringType.Base16);
+                var status = _repository.WantStatus.Get(rootHash);
+                if (status == null) return Enumerable.Empty<OmniHash>();
 
-                var wants = _database.GetCollection<WantEntity>("wants");
-                if (!wants.Exists(n => n.Hash == rootHashString)) return null;
+                throw new NotImplementedException();
+            }
+        }
 
-                var filePath = Path.Combine(Path.Combine(_options.ConfigPath, rootHash.ToString(ConvertStringType.Base16), targetHash.ToString(ConvertStringType.Base16)));
+        public async ValueTask<bool> ContainsContentAsync(OmniHash rootHash)
+        {
+            using (await _asyncLock.LockAsync())
+            {
+                var status = _repository.WantStatus.Get(rootHash);
+                if (status == null) return false;
 
+                return true;
+            }
+        }
+
+        public async ValueTask<bool> ContainsBlockAsync(OmniHash rootHash, OmniHash targetHash)
+        {
+            using (await _asyncLock.LockAsync())
+            {
+                var status = _repository.WantStatus.Get(rootHash);
+                if (status == null) return false;
+
+                var filePath = Path.Combine(Path.Combine(_options.ConfigPath, "cache", HashToString(rootHash), HashToString(targetHash)));
+                if (!File.Exists(filePath)) return false;
+
+                return true;
+            }
+        }
+
+        public async ValueTask AddContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+        {
+            using (await _asyncLock.LockAsync())
+            {
+                _repository.WantStatus.Add(new WantStatus() { Hash = rootHash });
+            }
+        }
+
+        public async ValueTask RemoveContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+        {
+            using (await _asyncLock.LockAsync())
+            {
+                _repository.WantStatus.Remove(rootHash);
+            }
+        }
+
+        public ValueTask ExportContentAsync(OmniHash rootHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask ExportContentAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async ValueTask<IMemoryOwner<byte>?> ReadBlockAsync(OmniHash rootHash, OmniHash targetHash, CancellationToken cancellationToken = default)
+        {
+            using (await _asyncLock.LockAsync())
+            {
+                var status = _repository.WantStatus.Get(rootHash);
+                if (status == null) return null;
+
+                var filePath = Path.Combine(Path.Combine(_options.ConfigPath, "cache", HashToString(rootHash), HashToString(targetHash)));
                 if (!File.Exists(filePath)) return null;
 
                 using (var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bytesPool))
@@ -121,17 +159,14 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public async ValueTask WriteAsync(OmniHash rootHash, OmniHash targetHash, ReadOnlyMemory<byte> memory, CancellationToken cancellationToken = default)
+        public async ValueTask WriteBlockAsync(OmniHash rootHash, OmniHash targetHash, ReadOnlyMemory<byte> memory, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
             {
-                var rootHashString = rootHash.ToString(ConvertStringType.Base16);
-                var targetHashString = rootHash.ToString(ConvertStringType.Base16);
+                var status = _repository.WantStatus.Get(rootHash);
+                if (status == null) return;
 
-                var wants = _database.GetCollection<WantEntity>("wants");
-                if (!wants.Exists(n => n.Hash == rootHashString)) return;
-
-                var filePath = Path.Combine(Path.Combine(_options.ConfigPath, rootHash.ToString(ConvertStringType.Base16), targetHash.ToString(ConvertStringType.Base16)));
+                var filePath = Path.Combine(Path.Combine(_options.ConfigPath, "cache", HashToString(rootHash), HashToString(targetHash)));
                 var directoryPath = Path.GetDirectoryName(filePath);
 
                 if (!Directory.Exists(directoryPath))
@@ -146,60 +181,79 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public ValueTask ExportAsync(OmniHash rootHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default)
+        private static string HashToString(OmniHash hash)
         {
-            throw new NotImplementedException();
+            return hash.ToString(ConvertStringType.Base16);
         }
 
-        public ValueTask ExportAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default)
+        private sealed class WantStatus
         {
-            throw new NotImplementedException();
+            public OmniHash? Hash { get; set; }
         }
 
-        public async ValueTask<IEnumerable<ResourceTag>> GetWantTagsAsync()
+        private sealed class Repository
         {
-            using (await _asyncLock.LockAsync())
+            private readonly LiteDatabase _database;
+
+            public Repository(string path)
             {
-                var results = new List<ResourceTag>();
+                _database = new LiteDatabase(path);
+                this.WantStatus = new WantStatusRepository(_database);
+            }
 
-                var wants = _database.GetCollection<WantEntity>("wants");
-
-                foreach (var want in wants.FindAll())
+            public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
+            {
+                if (0 <= _database.UserVersion)
                 {
-                    if (want?.Hash == null || !OmniHash.TryParse(want.Hash, out var hash)) continue;
-                    results.Add(new ResourceTag("declared_message", hash));
+                    var wants = _database.GetCollection<WantStatusEntity>("wants_status");
+                    wants.EnsureIndex(x => x.Hash, true);
+                    _database.UserVersion = 1;
+                }
+            }
+
+            public WantStatusRepository WantStatus { get; set; }
+
+            public sealed class WantStatusRepository
+            {
+                private readonly LiteDatabase _database;
+
+                public WantStatusRepository(LiteDatabase database)
+                {
+                    _database = database;
                 }
 
-                return results;
-            }
-        }
+                public IEnumerable<WantStatus> GetAll()
+                {
+                    throw new NotImplementedException();
+                }
 
-        public async ValueTask WantAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
-        {
-            using (await _asyncLock.LockAsync())
+                public WantStatus? Get(OmniHash rootHash)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public void Add(WantStatus status)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public void Remove(OmniHash rootHash)
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
+            private sealed class WantStatusEntity
             {
-                var rootHashString = rootHash.ToString(ConvertStringType.Base16);
-
-                var wants = _database.GetCollection<WantEntity>("wants");
-                wants.Insert(new WantEntity() { Hash = rootHashString });
+                public int Id { get; set; }
+                public OmniHashEntity? Hash { get; set; }
             }
-        }
 
-        public async ValueTask UnwantAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
-        {
-            using (await _asyncLock.LockAsync())
+            private class OmniHashEntity
             {
-                var rootHashString = rootHash.ToString(ConvertStringType.Base16);
-
-                var wants = _database.GetCollection<WantEntity>("wants");
-                wants.DeleteMany(n => n.Hash == rootHashString);
+                public int AlgorithmType { get; set; }
+                public byte[]? Value { get; set; }
             }
-        }
-
-        private sealed class WantEntity
-        {
-            public int Id { get; set; }
-            public string? Hash { get; set; }
         }
     }
 }

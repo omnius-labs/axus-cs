@@ -25,7 +25,7 @@ namespace Omnius.Xeus.Service.Engines
         private readonly WantDeclaredMessageStorageOptions _options;
         private readonly IBytesPool _bytesPool;
 
-        private readonly LiteDatabase _database;
+        private readonly Repository _repository;
 
         private readonly AsyncLock _asyncLock = new AsyncLock();
 
@@ -47,22 +47,12 @@ namespace Omnius.Xeus.Service.Engines
             _options = options;
             _bytesPool = bytesPool;
 
-            _database = new LiteDatabase(Path.Combine(_options.ConfigPath, "lite.db"));
+            _repository = new Repository(Path.Combine(_options.ConfigPath, "lite.db"));
         }
 
         internal async ValueTask InitAsync()
         {
-            await this.MigrateAsync();
-        }
-
-        private async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
-        {
-            if (0 <= _database.UserVersion)
-            {
-                var wants = _database.GetCollection<WantEntity>("wants");
-                wants.EnsureIndex(x => x.Hash, true);
-                _database.UserVersion = 1;
-            }
+            await _repository.MigrateAsync();
         }
 
         protected override async ValueTask OnDisposeAsync()
@@ -70,31 +60,50 @@ namespace Omnius.Xeus.Service.Engines
 
         }
 
-        public ValueTask<WantDeclaredMessageStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<WantDeclaredMessageStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            using (await _asyncLock.LockAsync())
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public async ValueTask CheckConsistencyAsync(Action<ConsistencyReport> callback, CancellationToken cancellationToken = default)
         {
+            using (await _asyncLock.LockAsync())
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public ValueTask<IEnumerable<OmniSignature>> GetSignaturesAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
 
         public async ValueTask<bool> ContainsAsync(OmniSignature signature, DateTime since = default)
         {
             using (await _asyncLock.LockAsync())
             {
-                var hashString = this.ComputeHash(signature).ToString();
-
-                var wants = _database.GetCollection<WantEntity>("wants");
-                if (!wants.Exists(n => n.Hash == hashString)) return false;
-
-                var id = $"$/declared_messages/{hashString}";
-                var filename = hashString;
-
-                var fileInfo = _database.FileStorage.FindById(id);
-                var creationTime = fileInfo.Metadata["creation_time"].AsDateTime;
-                if (since < creationTime) return true;
+                var status = _repository.WantStatus.Get(signature);
+                if (status == null) return false;
                 return true;
+            }
+        }
+
+        public async ValueTask AddAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+        {
+            using (await _asyncLock.LockAsync())
+            {
+                _repository.WantStatus.Add(new WantStatus() { Signature = signature });
+            }
+        }
+
+        public async ValueTask RemoveAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+        {
+            using (await _asyncLock.LockAsync())
+            {
+                _repository.WantStatus.Remove(signature);
             }
         }
 
@@ -102,16 +111,13 @@ namespace Omnius.Xeus.Service.Engines
         {
             using (await _asyncLock.LockAsync())
             {
-                var hashString = this.ComputeHash(signature).ToString();
+                var status = _repository.WantStatus.Get(signature);
+                if (status == null) return null;
 
-                var wants = _database.GetCollection<WantEntity>("wants");
-                if (!wants.Exists(n => n.Hash == hashString)) return null;
+                var filePath = Path.Combine(_options.ConfigPath, "cache", SignatureToString(signature));
 
-                var id = $"$/declared_messages/{hashString}";
-                var filename = hashString;
-
-                using var liteStream = _database.FileStorage.OpenRead(id);
-                var pipeReader = PipeReader.Create(liteStream);
+                using var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool);
+                var pipeReader = PipeReader.Create(fileStream);
                 var readResult = await pipeReader.ReadAsync(cancellationToken);
                 var message = DeclaredMessage.Import(readResult.Buffer, _bytesPool);
                 await pipeReader.CompleteAsync();
@@ -127,74 +133,99 @@ namespace Omnius.Xeus.Service.Engines
                 var signature = message.Certificate?.GetOmniSignature();
                 if (signature == null) return;
 
-                var hashString = this.ComputeHash(signature).ToString();
+                _repository.WantStatus.Add(new WantStatus() { Signature = signature });
 
-                var wants = _database.GetCollection<WantEntity>("wants");
-                if (!wants.Exists(n => n.Hash == hashString)) return;
+                var filePath = Path.Combine(_options.ConfigPath, "cache", SignatureToString(signature));
 
-                var id = $"$/declared_messages/{hashString}";
-                var filename = hashString;
-                var metadata = new BsonDocument(new Dictionary<string, BsonValue>() { { "creation_time", new BsonValue(message.CreationTime) } });
-
-                using var liteStream = _database.FileStorage.OpenWrite(id, filename, metadata);
-                var pipeWriter = PipeWriter.Create(liteStream);
+                using var fileStream = new UnbufferedFileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool);
+                var pipeWriter = PipeWriter.Create(fileStream);
                 message.Export(pipeWriter, _bytesPool);
                 await pipeWriter.CompleteAsync();
             }
         }
 
-        public async ValueTask<IEnumerable<ResourceTag>> GetWantTagsAsync()
+        private static string SignatureToString(OmniSignature signature)
         {
-            using (await _asyncLock.LockAsync())
+            var hub = new BytesHub(BytesPool.Shared);
+            signature.Export(hub.Writer, BytesPool.Shared);
+            var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(hub.Reader.GetSequence()));
+            return hash.ToString(ConvertStringType.Base16);
+        }
+
+        private sealed class WantStatus
+        {
+            public OmniSignature? Signature { get; set; }
+        }
+
+        private sealed class Repository
+        {
+            private readonly LiteDatabase _database;
+
+            public Repository(string path)
             {
-                var results = new List<ResourceTag>();
+                _database = new LiteDatabase(path);
+                this.WantStatus = new WantStatusRepository(_database);
+            }
 
-                var wants = _database.GetCollection<WantEntity>("wants");
-
-                foreach (var want in wants.FindAll())
+            public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
+            {
+                if (0 <= _database.UserVersion)
                 {
-                    if (want?.Hash == null || !OmniHash.TryParse(want.Hash, out var hash)) continue;
-                    results.Add(new ResourceTag("declared_message", hash));
+                    var wants = _database.GetCollection<WantStatusEntity>("wants-status");
+                    wants.EnsureIndex(x => x.Signature, true);
+                    _database.UserVersion = 1;
+                }
+            }
+
+            public WantStatusRepository WantStatus { get; set; }
+
+            public sealed class WantStatusRepository
+            {
+                private readonly LiteDatabase _database;
+
+                public WantStatusRepository(LiteDatabase database)
+                {
+                    _database = database;
                 }
 
-                return results;
-            }
-        }
+                public IEnumerable<WantStatus> GetAll()
+                {
+                    throw new NotImplementedException();
+                }
 
-        public async ValueTask WantAsync(OmniSignature signature, CancellationToken cancellationToken = default)
-        {
-            using (await _asyncLock.LockAsync())
+                public WantStatus? Get(OmniSignature signature)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public void Add(WantStatus status)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public void Remove(OmniSignature signature)
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
+            private sealed class WantStatusEntity
             {
-                var hashString = this.ComputeHash(signature).ToString();
-
-                var wants = _database.GetCollection<WantEntity>("wants");
-                wants.Insert(new WantEntity() { Hash = hashString });
+                public int Id { get; set; }
+                public OmniSignatureEntity? Signature { get; set; }
             }
-        }
 
-        public async ValueTask UnwantAsync(OmniSignature signature, CancellationToken cancellationToken = default)
-        {
-            using (await _asyncLock.LockAsync())
+            private class OmniSignatureEntity
             {
-                var hashString = this.ComputeHash(signature).ToString();
-
-                var wants = _database.GetCollection<WantEntity>("wants");
-                wants.DeleteMany(n => n.Hash == hashString);
+                public string? Name { get; set; }
+                public OmniHashEntity? Hash { get; set; }
             }
-        }
 
-        private OmniHash ComputeHash(OmniSignature signature)
-        {
-            var hub = new BytesHub(_bytesPool);
-            signature.Export(hub.Writer, _bytesPool);
-            var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(hub.Reader.GetSequence()));
-            return hash;
-        }
-
-        private sealed class WantEntity
-        {
-            public int Id { get; set; }
-            public string? Hash { get; set; }
+            private class OmniHashEntity
+            {
+                public int AlgorithmType { get; set; }
+                public byte[]? Value { get; set; }
+            }
         }
     }
 }

@@ -13,6 +13,7 @@ namespace Omnius.Xeus.Service.Engines
     public interface IReadOnlyDeclaredMessageStorage
     {
         ValueTask CheckConsistencyAsync(Action<ConsistencyReport> callback, CancellationToken cancellationToken = default);
+        ValueTask<IEnumerable<OmniSignature>> GetSignaturesAsync(CancellationToken cancellationToken = default);
         ValueTask<bool> ContainsAsync(OmniSignature signature, DateTime since = default);
         ValueTask<DeclaredMessage?> ReadAsync(OmniSignature signature, CancellationToken cancellationToken = default);
     }
