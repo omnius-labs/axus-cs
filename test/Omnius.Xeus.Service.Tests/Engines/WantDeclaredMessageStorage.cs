@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Test;
-using Omnius.Xeus.Service.Internal;
 using Omnius.Xeus.Service.Models;
 using Xunit;
 using System;
@@ -16,18 +15,18 @@ namespace Omnius.Xeus.Service.Engines
     public class WantDeclaredMessageStorageTests
     {
         [Fact]
-        public async Task RegisterAndUnregisterTestAsync()
+        public async Task RegisterAndUnregisterSuccessTestAsync()
         {
-            using var deleter = TestHelpers.GenTempDirectory(out var tempPath);
+            using var deleter = FixtureFactory.GenTempDirectory(out var tempPath);
             var options = new WantDeclaredMessageStorageOptions(tempPath);
-            await using var storage = new WantDeclaredMessageStorage(options, BytesPool.Shared);
+            await using var storage = await WantDeclaredMessageStorage.Factory.CreateAsync(options, BytesPool.Shared);
 
             var registeredSignatures = new List<OmniSignature>();
 
             // ランダムなサインを登録する
             foreach (var i in Enumerable.Range(0, 10))
             {
-                var signature = new OmniSignature(TestHelpers.GetRandomString(32), new OmniHash(OmniHashAlgorithmType.Sha2_256, TestHelpers.GetRandomBytes(32)));
+                var signature = new OmniSignature(FixtureFactory.GetRandomString(32), new OmniHash(OmniHashAlgorithmType.Sha2_256, FixtureFactory.GetRandomBytes(32)));
                 await storage.RegisterWantMessageAsync(signature);
                 registeredSignatures.Add(signature);
             }
@@ -55,11 +54,11 @@ namespace Omnius.Xeus.Service.Engines
         }
 
         [Fact]
-        public async Task WriteAndReadTestAsync()
+        public async Task WriteAndReadSuccessTestAsync()
         {
-            using var deleter = TestHelpers.GenTempDirectory(out var tempPath);
+            using var deleter = FixtureFactory.GenTempDirectory(out var tempPath);
             var options = new WantDeclaredMessageStorageOptions(tempPath);
-            await using var storage = new WantDeclaredMessageStorage(options, BytesPool.Shared);
+            await using var storage = await WantDeclaredMessageStorage.Factory.CreateAsync(options, BytesPool.Shared);
 
             var registeredDigitalSignatures = new List<OmniDigitalSignature>();
 
@@ -67,7 +66,7 @@ namespace Omnius.Xeus.Service.Engines
             foreach (var i in Enumerable.Range(0, 10))
             {
                 var digitalSignature = OmniDigitalSignature.Create(
-                    TestHelpers.GetRandomString(32),
+                    FixtureFactory.GetRandomString(32),
                     OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256);
                 await storage.RegisterWantMessageAsync(digitalSignature.GetOmniSignature());
                 registeredDigitalSignatures.Add(digitalSignature);
@@ -79,7 +78,7 @@ namespace Omnius.Xeus.Service.Engines
             foreach (var i in Enumerable.Range(0, 10))
             {
                 var digitalSignature = OmniDigitalSignature.Create(
-                    TestHelpers.GetRandomString(32),
+                    FixtureFactory.GetRandomString(32),
                     OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256);
                 notRegisteredDigitalSignatures.Add(digitalSignature);
             }
@@ -90,10 +89,11 @@ namespace Omnius.Xeus.Service.Engines
             foreach (var digitalSignature in registeredDigitalSignatures)
             {
                 var message = DeclaredMessage.Create(
-                    TestHelpers.GetRandomDateTimeUtc(new DateTime(2000, 1, 1), new DateTime(2100, 1, 1)),
-                    new MemoryOwner<byte>(TestHelpers.GetRandomBytes(1024)),
+                    FixtureFactory.GetRandomDateTimeUtc(new DateTime(2000, 1, 1), new DateTime(2100, 1, 1)),
+                    new MemoryOwner<byte>(FixtureFactory.GetRandomBytes(1024)),
                     digitalSignature);
                 await storage.WriteMessageAsync(message);
+                wroteMessages.Add(message);
             }
 
             var notWroteMessages = new List<DeclaredMessage>();
@@ -102,10 +102,11 @@ namespace Omnius.Xeus.Service.Engines
             foreach (var digitalSignature in notRegisteredDigitalSignatures)
             {
                 var message = DeclaredMessage.Create(
-                    TestHelpers.GetRandomDateTimeUtc(new DateTime(2000, 1, 1), new DateTime(2100, 1, 1)),
-                    new MemoryOwner<byte>(TestHelpers.GetRandomBytes(1024)),
+                    FixtureFactory.GetRandomDateTimeUtc(new DateTime(2000, 1, 1), new DateTime(2100, 1, 1)),
+                    new MemoryOwner<byte>(FixtureFactory.GetRandomBytes(1024)),
                     digitalSignature);
                 await storage.WriteMessageAsync(message);
+                notWroteMessages.Add(message);
             }
 
             // 登録されているサインのみ取得できることを確認する

@@ -28,6 +28,7 @@ namespace Omnius.Xeus.Service.Engines
         private readonly IBytesPool _bytesPool;
 
         private readonly Repository _repository;
+        private readonly string _cachePath;
 
         private readonly AsyncLock _asyncLock = new AsyncLock();
 
@@ -44,16 +45,22 @@ namespace Omnius.Xeus.Service.Engines
 
         public static IWantDeclaredMessageStorageFactory Factory { get; } = new WantDeclaredMessageStorageFactory();
 
-        internal WantDeclaredMessageStorage(WantDeclaredMessageStorageOptions options, IBytesPool bytesPool)
+        private WantDeclaredMessageStorage(WantDeclaredMessageStorageOptions options, IBytesPool bytesPool)
         {
             _options = options;
             _bytesPool = bytesPool;
 
             _repository = new Repository(Path.Combine(_options.ConfigPath, "lite.db"));
+            _cachePath = Path.Combine(_options.ConfigPath, "cache");
         }
 
         internal async ValueTask InitAsync()
         {
+            if (!Directory.Exists(_cachePath))
+            {
+                Directory.CreateDirectory(_cachePath);
+            }
+
             await _repository.MigrateAsync();
         }
 
@@ -121,7 +128,7 @@ namespace Omnius.Xeus.Service.Engines
                 var status = _repository.WantStatus.Get(signature);
                 if (status == null) return null;
 
-                var filePath = Path.Combine(_options.ConfigPath, "cache", SignatureToString(signature));
+                var filePath = Path.Combine(_cachePath, SignatureToString(signature));
 
                 using var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool);
                 var pipeReader = PipeReader.Create(fileStream);
@@ -143,9 +150,7 @@ namespace Omnius.Xeus.Service.Engines
                 var status = _repository.WantStatus.Get(signature);
                 if (status == null) return;
 
-                _repository.WantStatus.Add(new WantStatus(signature, message.CreationTime.ToDateTime()));
-
-                var filePath = Path.Combine(_options.ConfigPath, "cache", SignatureToString(signature));
+                var filePath = Path.Combine(_cachePath, SignatureToString(signature));
 
                 using var fileStream = new UnbufferedFileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool);
                 var pipeWriter = PipeWriter.Create(fileStream);
@@ -215,13 +220,15 @@ namespace Omnius.Xeus.Service.Engines
                 {
                     var col = _database.GetCollection<WantStatusEntity>("wants");
                     var param = OmniSignatureEntity.Import(signature);
-                    return col.FindOne(n => n.Signature == param).Export();
+                    return col.FindOne(n => n.Signature == param)?.Export();
                 }
 
                 public void Add(WantStatus status)
                 {
                     var col = _database.GetCollection<WantStatusEntity>("wants");
-                    col.Upsert(WantStatusEntity.Import(status));
+                    var param = WantStatusEntity.Import(status);
+
+                    col.Insert(param);
                 }
 
                 public void Remove(OmniSignature signature)

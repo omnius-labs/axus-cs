@@ -44,7 +44,7 @@ namespace Omnius.Xeus.Service.Engines
 
         public static IPushContentStorageFactory Factory { get; } = new PushContentStorageFactory();
 
-        internal PushContentStorage(PushContentStorageOptions options, IBytesPool bytesPool)
+        private PushContentStorage(PushContentStorageOptions options, IBytesPool bytesPool)
         {
             _options = options;
             _bytesPool = bytesPool;

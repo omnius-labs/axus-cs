@@ -13,15 +13,14 @@ namespace Omnius.Xeus.Service.Models
 {
     public sealed partial class DeclaredMessage
     {
-        public static DeclaredMessage Create(IMemoryOwner<byte> value, OmniDigitalSignature digitalSignature)
+        public static DeclaredMessage Create(DateTime creationTime, IMemoryOwner<byte> value, OmniDigitalSignature digitalSignature)
         {
-            var creationTime = Timestamp.FromDateTime(DateTime.UtcNow);
             using var hub = new BytesHub();
-            var target = new DeclaredMessage(creationTime, value, null);
+            var target = new DeclaredMessage(Timestamp.FromDateTime(creationTime), value, null);
             target.Export(hub.Writer, BytesPool.Shared);
 
             var certificate = OmniDigitalSignature.CreateOmniCertificate(digitalSignature, hub.Reader.GetSequence());
-            return new DeclaredMessage(creationTime, value, certificate);
+            return new DeclaredMessage(Timestamp.FromDateTime(creationTime), value, certificate);
         }
 
         public bool Verify()

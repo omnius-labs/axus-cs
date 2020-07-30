@@ -15,7 +15,7 @@ namespace Omnius.Xeus.Service.Engines
         ValueTask<IWantDeclaredMessageStorage> CreateAsync(WantDeclaredMessageStorageOptions options, IBytesPool bytesPool);
     }
 
-    public interface IWantDeclaredMessageStorage : IWritableDeclaredMessageStorage
+    public interface IWantDeclaredMessageStorage : IWritableDeclaredMessageStorage, IAsyncDisposable
     {
         ValueTask<WantDeclaredMessageStorageReport> GetReportAsync(CancellationToken cancellationToken = default);
         ValueTask RegisterWantMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default);

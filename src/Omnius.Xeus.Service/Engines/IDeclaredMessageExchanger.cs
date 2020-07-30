@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Omnius.Core;
@@ -13,7 +14,7 @@ namespace Omnius.Xeus.Service.Engines
             IBytesPool bytesPool);
     }
 
-    public interface IDeclaredMessageExchanger
+    public interface IDeclaredMessageExchanger : IAsyncDisposable
     {
     }
 }

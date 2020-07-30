@@ -15,7 +15,7 @@ namespace Omnius.Xeus.Service.Engines
         ValueTask<IPushDeclaredMessageStorage> CreateAsync(PushDeclaredMessageStorageOptions options, IBytesPool bytesPool);
     }
 
-    public interface IPushDeclaredMessageStorage : IReadOnlyDeclaredMessageStorage
+    public interface IPushDeclaredMessageStorage : IReadOnlyDeclaredMessageStorage, IAsyncDisposable
     {
         ValueTask<PushDeclaredMessageStorageReport> GetReportAsync(CancellationToken cancellationToken = default);
         ValueTask RegisterPushMessageAsync(DeclaredMessage message, CancellationToken cancellationToken = default);

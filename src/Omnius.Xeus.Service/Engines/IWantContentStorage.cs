@@ -15,7 +15,7 @@ namespace Omnius.Xeus.Service.Engines
         ValueTask<IWantContentStorage> CreateAsync(WantContentStorageOptions options, IBytesPool bytesPool);
     }
 
-    public interface IWantContentStorage : IWritableContentStorage
+    public interface IWantContentStorage : IWritableContentStorage, IAsyncDisposable
     {
         ValueTask<WantContentStorageReport> GetReportAsync(CancellationToken cancellationToken = default);
         ValueTask RegisterWantContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default);

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Omnius.Core;
@@ -12,7 +13,7 @@ namespace Omnius.Xeus.Service.Engines
             INodeFinder nodeFinder, IPushContentStorage pushStorage, IWantContentStorage wantStorage, IBytesPool bytesPool);
     }
 
-    public interface IContentExchanger
+    public interface IContentExchanger : IAsyncDisposable
     {
     }
 }

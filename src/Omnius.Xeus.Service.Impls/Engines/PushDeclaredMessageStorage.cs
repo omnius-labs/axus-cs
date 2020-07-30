@@ -44,7 +44,7 @@ namespace Omnius.Xeus.Service.Engines
 
         public static IPushDeclaredMessageStorageFactory Factory { get; } = new PushDeclaredMessageStorageFactory();
 
-        internal PushDeclaredMessageStorage(PushDeclaredMessageStorageOptions options, IBytesPool bytesPool)
+        private PushDeclaredMessageStorage(PushDeclaredMessageStorageOptions options, IBytesPool bytesPool)
         {
             _options = options;
             _bytesPool = bytesPool;

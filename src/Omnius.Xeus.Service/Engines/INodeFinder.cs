@@ -15,7 +15,7 @@ namespace Omnius.Xeus.Service.Engines
             IBytesPool bytesPool);
     }
 
-    public interface INodeFinder
+    public interface INodeFinder : IAsyncDisposable
     {
         ValueTask<NodeProfile> GetMyNodeProfile(CancellationToken cancellationToken = default);
         ValueTask AddCloudNodeProfiles(IEnumerable<NodeProfile> nodeProfiles, CancellationToken cancellationToken = default);

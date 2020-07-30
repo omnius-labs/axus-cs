@@ -9,6 +9,7 @@
     <ProjectReference Include="..\..\src\Omnius.Xeus.Service\Omnius.Xeus.Service.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Network.Proxies\Omnius.Core.Network.Proxies.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Network.Upnp\Omnius.Core.Network.Upnp.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Test\Omnius.Core.Test.csproj" />
   </ItemGroup>
 
   <ItemGroup>

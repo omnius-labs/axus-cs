@@ -43,14 +43,13 @@ namespace Omnius.Xeus.Service.Engines
 
         public static IWantContentStorageFactory Factory { get; } = new WantContentStorageFactory();
 
-        internal WantContentStorage(WantContentStorageOptions options, IBytesPool bytesPool)
+        private WantContentStorage(WantContentStorageOptions options, IBytesPool bytesPool)
         {
             _options = options;
             _bytesPool = bytesPool;
 
             _repository = new Repository(Path.Combine(_options.ConfigPath, "lite.db"));
         }
-
 
         internal async ValueTask InitAsync()
         {
