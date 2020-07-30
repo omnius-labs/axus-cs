@@ -59,6 +59,7 @@ namespace Omnius.Xeus.Service.Engines
 
         protected override async ValueTask OnDisposeAsync()
         {
+            _repository.Dispose();
         }
 
         public async ValueTask<PushContentStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
@@ -287,7 +288,7 @@ namespace Omnius.Xeus.Service.Engines
             public ReadOnlyListSlim<MerkleTreeSection> MerkleTreeSections { get; }
         }
 
-        private sealed class Repository
+        private sealed class Repository : IDisposable
         {
             private readonly LiteDatabase _database;
 
@@ -295,6 +296,11 @@ namespace Omnius.Xeus.Service.Engines
             {
                 _database = new LiteDatabase(path);
                 this.PushStatus = new PushStatusRepository(_database);
+            }
+
+            public void Dispose()
+            {
+                _database.Dispose();
             }
 
             public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)

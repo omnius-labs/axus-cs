@@ -66,7 +66,7 @@ namespace Omnius.Xeus.Service.Engines
 
         protected override async ValueTask OnDisposeAsync()
         {
-
+            _repository.Dispose();
         }
 
         public async ValueTask<WantDeclaredMessageStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
@@ -179,7 +179,7 @@ namespace Omnius.Xeus.Service.Engines
             public DateTime CreationTime { get; }
         }
 
-        private sealed class Repository
+        private sealed class Repository : IDisposable
         {
             private readonly LiteDatabase _database;
 
@@ -187,6 +187,11 @@ namespace Omnius.Xeus.Service.Engines
             {
                 _database = new LiteDatabase(path);
                 this.WantStatus = new WantStatusRepository(_database);
+            }
+
+            public void Dispose()
+            {
+                _database.Dispose();
             }
 
             public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
