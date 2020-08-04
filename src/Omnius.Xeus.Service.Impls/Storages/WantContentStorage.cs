@@ -14,8 +14,9 @@ using Omnius.Core.Cryptography;
 using Omnius.Core.Io;
 using Omnius.Core.Serialization;
 using Omnius.Xeus.Service.Models;
+using Omnius.Xeus.Service.Storages.Internal;
 
-namespace Omnius.Xeus.Service.Engines
+namespace Omnius.Xeus.Service.Storages
 {
     public sealed class WantContentStorage : AsyncDisposableBase, IWantContentStorage
     {
@@ -115,7 +116,7 @@ namespace Omnius.Xeus.Service.Engines
         {
             using (await _asyncLock.LockAsync())
             {
-                _repository.WantStatus.Add(new WantStatus() { Hash = rootHash });
+                _repository.WantStatus.Add(new WantStatus(rootHash));
             }
         }
 
@@ -147,13 +148,10 @@ namespace Omnius.Xeus.Service.Engines
                 var filePath = Path.Combine(Path.Combine(_options.ConfigPath, "cache", HashToString(rootHash), HashToString(targetHash)));
                 if (!File.Exists(filePath)) return null;
 
-                using (var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bytesPool))
-                {
-                    var memoryOwner = _bytesPool.Memory.Rent((int)fileStream.Length);
-                    await fileStream.ReadAsync(memoryOwner.Memory);
-
-                    return memoryOwner;
-                }
+                using var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bytesPool);
+                var memoryOwner = _bytesPool.Memory.Rent((int)fileStream.Length);
+                await fileStream.ReadAsync(memoryOwner.Memory);
+                return memoryOwner;
             }
         }
 
@@ -172,10 +170,8 @@ namespace Omnius.Xeus.Service.Engines
                     Directory.CreateDirectory(directoryPath);
                 }
 
-                using (var fileStream = new UnbufferedFileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool))
-                {
-                    await fileStream.WriteAsync(memory);
-                }
+                using var fileStream = new UnbufferedFileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool);
+                await fileStream.WriteAsync(memory);
             }
         }
 
@@ -186,7 +182,12 @@ namespace Omnius.Xeus.Service.Engines
 
         private sealed class WantStatus
         {
-            public OmniHash? Hash { get; set; }
+            public WantStatus(OmniHash hash)
+            {
+                this.Hash = hash;
+            }
+
+            public OmniHash Hash { get; }
         }
 
         private sealed class Repository : IDisposable
@@ -208,7 +209,7 @@ namespace Omnius.Xeus.Service.Engines
             {
                 if (0 <= _database.UserVersion)
                 {
-                    var wants = _database.GetCollection<WantStatusEntity>("wants_status");
+                    var wants = _database.GetCollection<WantStatusEntity>("wants");
                     wants.EnsureIndex(x => x.Hash, true);
                     _database.UserVersion = 1;
                 }
@@ -227,22 +228,29 @@ namespace Omnius.Xeus.Service.Engines
 
                 public IEnumerable<WantStatus> GetAll()
                 {
-                    throw new NotImplementedException();
+                    var col = _database.GetCollection<WantStatusEntity>("wants");
+                    return col.FindAll().Select(n => n.Export());
                 }
 
                 public WantStatus? Get(OmniHash rootHash)
                 {
-                    throw new NotImplementedException();
+                    var col = _database.GetCollection<WantStatusEntity>("wants");
+                    var param = OmniHashEntity.Import(rootHash);
+                    return col.FindOne(n => n.Hash == param)?.Export();
                 }
 
                 public void Add(WantStatus status)
                 {
-                    throw new NotImplementedException();
+                    var col = _database.GetCollection<WantStatusEntity>("wants");
+                    var param = WantStatusEntity.Import(status);
+                    col.Insert(param);
                 }
 
                 public void Remove(OmniHash rootHash)
                 {
-                    throw new NotImplementedException();
+                    var col = _database.GetCollection<WantStatusEntity>("wants");
+                    var param = OmniHashEntity.Import(rootHash);
+                    col.DeleteMany(n => n.Hash == param);
                 }
             }
 
@@ -250,12 +258,16 @@ namespace Omnius.Xeus.Service.Engines
             {
                 public int Id { get; set; }
                 public OmniHashEntity? Hash { get; set; }
-            }
 
-            private class OmniHashEntity
-            {
-                public int AlgorithmType { get; set; }
-                public byte[]? Value { get; set; }
+                public static WantStatusEntity Import(WantStatus value)
+                {
+                    return new WantStatusEntity() { Hash = OmniHashEntity.Import(value.Hash) };
+                }
+
+                public WantStatus Export()
+                {
+                    return new WantStatus(this.Hash?.Export() ?? OmniHash.Empty);
+                }
             }
         }
     }

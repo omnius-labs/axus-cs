@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading;
 using Omnius.Core.Cryptography;
 
-namespace Omnius.Xeus.Service.Engines.Internal
+namespace Omnius.Xeus.Service.Storages.Internal
 {
     partial class MerkleTreeSection
     {

@@ -15,8 +15,9 @@ using Omnius.Core.Io;
 using Omnius.Core.Serialization;
 using Omnius.Xeus.Service.Engines.Internal;
 using Omnius.Xeus.Service.Models;
+using Omnius.Xeus.Service.Storages.Internal;
 
-namespace Omnius.Xeus.Service.Engines
+namespace Omnius.Xeus.Service.Storages
 {
     public sealed class PushContentStorage : AsyncDisposableBase, IPushContentStorage
     {
@@ -362,12 +363,6 @@ namespace Omnius.Xeus.Service.Engines
                 public int Depth { get; set; }
                 public long Length { get; set; }
                 public OmniHashEntity[]? Hashes { get; set; }
-            }
-
-            private class OmniHashEntity
-            {
-                public int AlgorithmType { get; set; }
-                public byte[]? Value { get; set; }
             }
         }
     }

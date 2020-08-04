@@ -9,12 +9,6 @@ option csharp_access_level "internal";
 
 // Models
 
-table MerkleTreeSection {
-    Depth: int32 = 0,
-    Length: uint64 = 1,
-    Hashes: vector<OmniHash>(capacity: 1073741824) = 2,
-}
-
 table ResourceLocation {
     ResourceTag: ResourceTag = 0,
     NodeProfiles: vector<NodeProfile>(capacity: 8192) = 1,
@@ -30,6 +24,7 @@ table ContentBlockFlags {
 table NodeFinderConfig {
     NodeProfileMap: map<NodeProfile, timestamp>(capacity: 1073741824) = 0,
 }
+
 enum NodeFinderVersion : int8 {
     Unknown = 0,
     Version1 = 1,

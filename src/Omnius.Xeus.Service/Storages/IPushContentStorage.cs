@@ -8,7 +8,7 @@ using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Xeus.Service.Models;
 
-namespace Omnius.Xeus.Service.Engines
+namespace Omnius.Xeus.Service.Storages
 {
     public interface IPushContentStorageFactory
     {

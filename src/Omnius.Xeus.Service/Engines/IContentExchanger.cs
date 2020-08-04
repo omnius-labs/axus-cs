@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Xeus.Service.Connectors;
 using Omnius.Xeus.Service.Models;
+using Omnius.Xeus.Service.Storages;
 
 namespace Omnius.Xeus.Service.Engines
 {

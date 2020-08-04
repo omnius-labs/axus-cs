@@ -17,10 +17,11 @@ using Omnius.Core.Cryptography;
 using Omnius.Core.Io;
 using Omnius.Core.Serialization;
 using Omnius.Xeus.Service.Models;
+using Omnius.Xeus.Service.Storages.Internal;
 
-namespace Omnius.Xeus.Service.Engines
+namespace Omnius.Xeus.Service.Storages
 {
-    public sealed class WantDeclaredMessageStorage : AsyncDisposableBase, IWantDeclaredMessageStorage
+    public sealed partial class WantDeclaredMessageStorage : AsyncDisposableBase, IWantDeclaredMessageStorage
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -179,7 +180,7 @@ namespace Omnius.Xeus.Service.Engines
             public DateTime CreationTime { get; }
         }
 
-        private sealed class Repository : IDisposable
+        private sealed partial class Repository : IDisposable
         {
             private readonly LiteDatabase _database;
 
@@ -232,7 +233,6 @@ namespace Omnius.Xeus.Service.Engines
                 {
                     var col = _database.GetCollection<WantStatusEntity>("wants");
                     var param = WantStatusEntity.Import(status);
-
                     col.Insert(param);
                 }
 
@@ -258,38 +258,6 @@ namespace Omnius.Xeus.Service.Engines
                 public WantStatus Export()
                 {
                     return new WantStatus(this.Signature!.Export(), this.CreationTime);
-                }
-            }
-
-            private class OmniSignatureEntity
-            {
-                public string? Name { get; set; }
-                public OmniHashEntity? Hash { get; set; }
-
-                public static OmniSignatureEntity Import(OmniSignature value)
-                {
-                    return new OmniSignatureEntity() { Name = value.Name, Hash = OmniHashEntity.Import(value.Hash) };
-                }
-
-                public OmniSignature Export()
-                {
-                    return new OmniSignature(this.Name!, this.Hash!.Export());
-                }
-            }
-
-            private class OmniHashEntity
-            {
-                public int AlgorithmType { get; set; }
-                public byte[]? Value { get; set; }
-
-                public static OmniHashEntity Import(OmniHash value)
-                {
-                    return new OmniHashEntity() { AlgorithmType = (int)value.AlgorithmType, Value = value.Value.ToArray() };
-                }
-
-                public OmniHash Export()
-                {
-                    return new OmniHash((OmniHashAlgorithmType)this.AlgorithmType, this.Value);
                 }
             }
         }

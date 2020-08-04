@@ -16,8 +16,9 @@ using Omnius.Core.Io;
 using Omnius.Core.Serialization;
 using Omnius.Xeus.Service.Engines.Internal;
 using Omnius.Xeus.Service.Models;
+using Omnius.Xeus.Service.Storages.Internal;
 
-namespace Omnius.Xeus.Service.Engines
+namespace Omnius.Xeus.Service.Storages
 {
     public sealed class PushDeclaredMessageStorage : AsyncDisposableBase, IPushDeclaredMessageStorage
     {
@@ -231,38 +232,6 @@ namespace Omnius.Xeus.Service.Engines
                 public PushStatus Export()
                 {
                     return new PushStatus(this.Signature!.Export(), this.CreationTime);
-                }
-            }
-
-            private class OmniSignatureEntity
-            {
-                public string? Name { get; set; }
-                public OmniHashEntity? Hash { get; set; }
-
-                public static OmniSignatureEntity Import(OmniSignature value)
-                {
-                    return new OmniSignatureEntity() { Name = value.Name, Hash = OmniHashEntity.Import(value.Hash) };
-                }
-
-                public OmniSignature Export()
-                {
-                    return new OmniSignature(this.Name!, this.Hash!.Export());
-                }
-            }
-
-            private class OmniHashEntity
-            {
-                public int AlgorithmType { get; set; }
-                public byte[]? Value { get; set; }
-
-                public static OmniHashEntity Import(OmniHash value)
-                {
-                    return new OmniHashEntity() { AlgorithmType = (int)value.AlgorithmType, Value = value.Value.ToArray() };
-                }
-
-                public OmniHash Export()
-                {
-                    return new OmniHash((OmniHashAlgorithmType)this.AlgorithmType, this.Value);
                 }
             }
         }

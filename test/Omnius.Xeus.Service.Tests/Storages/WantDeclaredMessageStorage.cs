@@ -10,7 +10,7 @@ using Omnius.Xeus.Service.Models;
 using Xunit;
 using System;
 
-namespace Omnius.Xeus.Service.Engines
+namespace Omnius.Xeus.Service.Storages
 {
     public class WantDeclaredMessageStorageTests
     {
