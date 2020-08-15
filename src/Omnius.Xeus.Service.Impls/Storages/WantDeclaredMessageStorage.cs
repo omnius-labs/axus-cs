@@ -1,5 +1,3 @@
-using System.Security.Authentication;
-using System.Security.Cryptography;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -8,6 +6,8 @@ using System.IO;
 using System.IO.Pipelines;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.Authentication;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using LiteDB;
