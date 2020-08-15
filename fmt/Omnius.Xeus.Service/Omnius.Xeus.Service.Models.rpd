@@ -7,28 +7,23 @@ namespace "Omnius.Xeus.Service.Models";
 
 // Models
 
-table NodeProfile {
+message NodeProfile {
     Services: vector<string(capacity: 256)>(capacity: 32) = 0,
     Addresses: vector<OmniAddress>(capacity: 32) = 1,
 }
 
-table ResourceTag {
+message ResourceTag {
     Type: string(capacity: 256) = 0,
     Hash: OmniHash = 1,
 }
 
-table ContentBlock {
-    ResourceTag: OmniHash = 0,
-    Value: bytes(capacity: 4194304, recyclable: true) = 1,
-}
-
-table DeclaredMessage {
+message DeclaredMessage {
     CreationTime: timestamp = 0,
     Value: bytes(capacity: 33554432, recyclable: true) = 1,
     Certificate: OmniCertificate? = 2,
 }
 
-table ConsistencyReport {
+message ConsistencyReport {
     BadBlockCount: uint32 = 0,
     CheckedBlockCount: uint32 = 1,
     TotalBlockCount: uint32 = 2,
@@ -40,7 +35,7 @@ enum ConnectionType : uint8 {
     Accepted = 2,
 }
 
-table ConnectionReport {
+message ConnectionReport {
     Type: ConnectionType = 0,
     EndPoint: OmniAddress = 1,
 }
@@ -53,99 +48,99 @@ enum TcpProxyType : uint8 {
     Socks5Proxy = 2,
 }
 
-table TcpProxyOptions {
+message TcpProxyOptions {
     Type: TcpProxyType = 0,
     Address: OmniAddress = 1,
 }
 
-table TcpConnectingOptions {
+message TcpConnectingOptions {
     Enabled: bool = 0,
     ProxyOptions: TcpProxyOptions? = 1,
 }
 
-table TcpAcceptingOptions {
+message TcpAcceptingOptions {
     Enabled: bool = 0,
     ListenAddresses: vector<OmniAddress>(capacity: 32) = 1,
     UseUpnp: bool = 2,
 }
 
-table BandwidthOptions {
+message BandwidthOptions {
     MaxSendBytesPerSeconds: uint32 = 0,
     MaxReceiveBytesPerSeconds: uint32 = 1,
 }
 
-table TcpConnectorOptions {
+message TcpConnectorOptions {
     TcpConnectingOptions: TcpConnectingOptions = 0,
     TcpAcceptingOptions: TcpAcceptingOptions = 1,
     BandwidthOptions: BandwidthOptions = 2,
 }
 
-table TcpConnectorReport {
+message TcpConnectorReport {
 }
 
 // NodeFinder
 
-table NodeFinderOptions {
+message NodeFinderOptions {
     ConfigPath: string(capacity: 1024) = 0,
     MaxConnectionCount: uint32 = 1,
     Services: vector<string(capacity: 256)>(capacity: 32) = 2,
 }
 
-table NodeFinderReport {
+message NodeFinderReport {
 }
 
 // ContentExchanger
 
-table ContentExchangerOptions {
+message ContentExchangerOptions {
     ConfigPath: string(capacity: 1024) = 0,
     MaxConnectionCount: uint32 = 1,
 }
 
-table ContentExchangerReport {
+message ContentExchangerReport {
 }
 
 // PushContentStorage
 
-table PushContentStorageOptions {
+message PushContentStorageOptions {
     ConfigPath: string(capacity: 1024) = 0,
 }
 
-table PushContentStorageReport {
+message PushContentStorageReport {
 }
 
 // WantContentStorage
 
-table WantContentStorageOptions {
+message WantContentStorageOptions {
     ConfigPath: string(capacity: 1024) = 0,
 }
 
-table WantContentStorageReport {
+message WantContentStorageReport {
 }
 
 // DeclaredMessageExchanger
 
-table DeclaredMessageExchangerOptions {
+message DeclaredMessageExchangerOptions {
     ConfigPath: string(capacity: 1024) = 0,
     MaxConnectionCount: uint32 = 1,
 }
 
-table DeclaredMessageExchangerReport {
+message DeclaredMessageExchangerReport {
 }
 
 // PushDeclaredMessageStorage
 
-table PushDeclaredMessageStorageOptions {
+message PushDeclaredMessageStorageOptions {
     ConfigPath: string(capacity: 1024) = 0,
 }
 
-table PushDeclaredMessageStorageReport {
+message PushDeclaredMessageStorageReport {
 }
 
 // WantDeclaredMessageStorage
 
-table WantDeclaredMessageStorageOptions {
+message WantDeclaredMessageStorageOptions {
     ConfigPath: string(capacity: 1024) = 0,
 }
 
-table WantDeclaredMessageStorageReport {
+message WantDeclaredMessageStorageReport {
 }

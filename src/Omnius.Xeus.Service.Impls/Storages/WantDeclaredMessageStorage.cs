@@ -122,6 +122,17 @@ namespace Omnius.Xeus.Service.Storages
             }
         }
 
+        public async ValueTask<DateTime?> ReadMessageCreationTimeAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+        {
+            using (await _asyncLock.LockAsync())
+            {
+                var status = _repository.WantStatus.Get(signature);
+                if (status == null) return null;
+
+                return status.CreationTime;
+            }
+        }
+
         public async ValueTask<DeclaredMessage?> ReadMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
@@ -180,7 +191,7 @@ namespace Omnius.Xeus.Service.Storages
             public DateTime CreationTime { get; }
         }
 
-        private sealed partial class Repository : IDisposable
+        private sealed class Repository : IDisposable
         {
             private readonly LiteDatabase _database;
 

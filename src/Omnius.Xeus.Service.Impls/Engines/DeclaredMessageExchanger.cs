@@ -1,21 +1,25 @@
-/*
+using System.Globalization;
+using System.Data;
+using System.IO.Compression;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mime;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
-using Omnius.Core.Collections;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Extensions;
 using Omnius.Core.Helpers;
 using Omnius.Core.Network;
 using Omnius.Core.Network.Connections;
-using Omnius.Xeus.Service.Drivers;
+using Omnius.Core.Network.Connections.Extensions;
+using Omnius.Core.Serialization.RocketPack;
+using Omnius.Xeus.Service.Connectors;
 using Omnius.Xeus.Service.Engines.Internal;
+using Omnius.Xeus.Service.Models;
+using Omnius.Xeus.Service.Storages;
 
 namespace Omnius.Xeus.Service.Engines
 {
@@ -24,37 +28,29 @@ namespace Omnius.Xeus.Service.Engines
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         private readonly DeclaredMessageExchangerOptions _options;
-        private readonly IObjectStoreFactory _objectStoreFactory;
-        private readonly IConnectionController _connectionController;
+        private readonly List<IConnector> _connectors = new List<IConnector>();
         private readonly INodeFinder _nodeFinder;
-        private readonly IPublishMessageStorage _publishStorage;
-        private readonly IWantMessageStorage _wantStorage;
+        private readonly IPushDeclaredMessageStorage _pushStorage;
+        private readonly IWantDeclaredMessageStorage _wantStorage;
         private readonly IBytesPool _bytesPool;
 
-        private readonly ReadOnlyMemory<byte> _myId;
-        private IObjectStore _objectStore;
+        private readonly HashSet<ConnectionStatus> _connections = new HashSet<ConnectionStatus>();
 
-        private readonly HashSet<ConnectionStatus> _connectionStatusSet = new HashSet<ConnectionStatus>();
-        private readonly LinkedList<NodeProfile> _cloudNodeProfiles = new LinkedList<NodeProfile>();
-
-        private Task _connectLoopTask;
-        private Task _acceptLoopTask;
-        private Task _sendLoopTask;
-        private Task _receiveLoopTask;
-        private Task _computeLoopTask;
+        private Task? _connectLoopTask;
+        private Task? _acceptLoopTask;
 
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         private readonly object _lockObject = new object();
 
-        public const string ServiceName = "message-exchanger`";
+        public const string ServiceName = "declared-message-exchanger`";
 
         internal sealed class DeclaredMessageExchangerFactory : IDeclaredMessageExchangerFactory
         {
-            public async ValueTask<IDeclaredMessageExchanger> CreateAsync(DeclaredMessageExchangerOptions options, IObjectStoreFactory objectStoreFactory, IConnectionController connectionController,
-                INodeFinder nodeFinder, IPublishMessageStorage publishStorage, IWantMessageStorage wantStorage, IBytesPool bytesPool)
+            public async ValueTask<IDeclaredMessageExchanger> CreateAsync(DeclaredMessageExchangerOptions options,
+                IEnumerable<IConnector> connectors, INodeFinder nodeFinder, IPushDeclaredMessageStorage pushStorage, IWantDeclaredMessageStorage wantStorage, IBytesPool bytesPool)
             {
-                var result = new DeclaredMessageExchanger(options, objectStoreFactory, connectionController, nodeFinder, publishStorage, wantStorage, bytesPool);
+                var result = new DeclaredMessageExchanger(options, connectors, nodeFinder, pushStorage, wantStorage, bytesPool);
                 await result.InitAsync();
 
                 return result;
@@ -63,140 +59,32 @@ namespace Omnius.Xeus.Service.Engines
 
         public static IDeclaredMessageExchangerFactory Factory { get; } = new DeclaredMessageExchangerFactory();
 
-        internal DeclaredMessageExchanger(DeclaredMessageExchangerOptions options, IObjectStoreFactory objectStoreFactory,
-                IConnectionController connectionController, INodeFinder nodeFinder, IPublishMessageStorage publishStorage, IWantMessageStorage wantStorage,
-                IBytesPool bytesPool)
+        internal DeclaredMessageExchanger(DeclaredMessageExchangerOptions options,
+                IEnumerable<IConnector> connectors, INodeFinder nodeFinder, IPushDeclaredMessageStorage pushStorage, IWantDeclaredMessageStorage wantStorage, IBytesPool bytesPool)
         {
             _options = options;
-            _objectStoreFactory = objectStoreFactory;
-            _connectionController = connectionController;
+            _connectors.AddRange(connectors);
             _nodeFinder = nodeFinder;
-            _publishStorage = publishStorage;
+            _pushStorage = pushStorage;
             _wantStorage = wantStorage;
             _bytesPool = bytesPool;
-
-            {
-                var id = new byte[32];
-                using var random = RandomNumberGenerator.Create();
-                random.GetBytes(id);
-                _myId = id;
-            }
         }
 
         public async ValueTask InitAsync()
         {
-            _objectStore = await _objectStoreFactory.CreateAsync(_options.ConfigPath, _bytesPool);
-
-            await this.LoadAsync();
-
             _connectLoopTask = this.ConnectLoopAsync(_cancellationTokenSource.Token);
             _acceptLoopTask = this.AcceptLoopAsync(_cancellationTokenSource.Token);
-            _sendLoopTask = this.SendLoopAsync(_cancellationTokenSource.Token);
-            _receiveLoopTask = this.ReceiveLoopAsync(_cancellationTokenSource.Token);
-            _computeLoopTask = this.ComputeLoopAsync(_cancellationTokenSource.Token);
         }
 
         protected override async ValueTask OnDisposeAsync()
         {
             _cancellationTokenSource.Cancel();
-            await Task.WhenAll(_connectLoopTask, _acceptLoopTask, _sendLoopTask, _receiveLoopTask, _computeLoopTask);
-
-            await this.SaveAsync();
+            await Task.WhenAll(_connectLoopTask!, _acceptLoopTask!);
 
             _cancellationTokenSource.Dispose();
-            await _objectStore.DisposeAsync();
         }
 
-        private async ValueTask LoadAsync()
-        {
-
-        }
-
-        private async ValueTask SaveAsync()
-        {
-
-        }
-
-        private async ValueTask<bool> TryAddConnectionAsync(IConnection connection, OmniAddress address, ConnectionHandshakeType handshakeType, OmniHash? rootHash, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                DeclaredMessageExchangerVersion? version = 0;
-                {
-                    var myHelloMessage = new DeclaredMessageExchangerHelloMessage(new[] { DeclaredMessageExchangerVersion.Version1 });
-                    DeclaredMessageExchangerHelloMessage? otherHelloMessage = null;
-
-                    var enqueueTask = connection.EnqueueAsync((bufferWriter) => myHelloMessage.Export(bufferWriter, _bytesPool), cancellationToken);
-                    var dequeueTask = connection.DequeueAsync((sequence) => otherHelloMessage = DeclaredMessageExchangerHelloMessage.Import(sequence, _bytesPool), cancellationToken);
-
-                    await ValueTaskHelper.WhenAll(enqueueTask, dequeueTask);
-                    if (otherHelloMessage == null) throw new Exception();
-
-                    version = EnumHelper.GetOverlappedMaxValue(myHelloMessage.Versions, otherHelloMessage.Versions);
-                }
-
-                if (version == DeclaredMessageExchangerVersion.Version1)
-                {
-                    NodeProfile? nodeProfile = null;
-                    {
-                        {
-                            var myNodeProflie = await _nodeFinder.GetMyNodeProfile();
-                            var myProfileMessage = new DeclaredMessageExchangerProfileMessage(myNodeProflie);
-                            DeclaredMessageExchangerProfileMessage? otherProfileMessage = null;
-
-                            var enqueueTask = connection.EnqueueAsync((bufferWriter) => myProfileMessage.Export(bufferWriter, _bytesPool), cancellationToken);
-                            var dequeueTask = connection.DequeueAsync((sequence) => otherProfileMessage = DeclaredMessageExchangerProfileMessage.Import(sequence, _bytesPool), cancellationToken);
-
-                            await ValueTaskHelper.WhenAll(enqueueTask, dequeueTask);
-                            if (otherProfileMessage == null) throw new Exception();
-                            nodeProfile = otherProfileMessage.NodeProfile;
-                        }
-
-                        if (handshakeType == ConnectionHandshakeType.Connected)
-                        {
-                            var requestMessage = new DeclaredMessageExchangerRequestMessage(rootHash.Value);
-                            await connection.EnqueueAsync((bufferWriter) => requestMessage.Export(bufferWriter, _bytesPool), cancellationToken);
-
-                            DeclaredMessageExchangerResponseMessage? responseMessage = null;
-                            await connection.DequeueAsync((sequence) => responseMessage = DeclaredMessageExchangerResponseMessage.Import(sequence, _bytesPool), cancellationToken);
-
-                            if (responseMessage == null || !responseMessage.Accepted) throw new Exception();
-                        }
-                        else if (handshakeType == ConnectionHandshakeType.Accepted)
-                        {
-                            DeclaredMessageExchangerRequestMessage? requestMessage = null;
-                            await connection.DequeueAsync((sequence) => requestMessage = DeclaredMessageExchangerRequestMessage.Import(sequence, _bytesPool), cancellationToken);
-                            if (requestMessage == null) throw new Exception();
-
-                            rootHash = requestMessage.RootHash;
-                            bool accepted = _publishStorage.Contains(requestMessage.RootHash) || _wantStorage.Contains(requestMessage.RootHash);
-
-                            var responseMessage = new DeclaredMessageExchangerResponseMessage(accepted);
-                            await connection.EnqueueAsync((bufferWriter) => responseMessage.Export(bufferWriter, _bytesPool), cancellationToken);
-
-                            if (!accepted) throw new Exception();
-                        }
-                    }
-
-                    var status = new ConnectionStatus(connection, address, handshakeType, nodeProfile, rootHash.Value);
-
-                    lock (_lockObject)
-                    {
-                        _connectionStatusSet.Add(status);
-                    }
-
-                    return true;
-                }
-
-                throw new NotSupportedException();
-            }
-            catch (Exception)
-            {
-                connection.Dispose();
-            }
-
-            return false;
-        }
+        private readonly VolatileHashSet<OmniAddress> _connectedAddressSet = new VolatileHashSet<OmniAddress>(TimeSpan.FromMinutes(30));
 
         private async Task ConnectLoopAsync(CancellationToken cancellationToken)
         {
@@ -210,16 +98,18 @@ namespace Omnius.Xeus.Service.Engines
 
                     lock (_lockObject)
                     {
-                        int connectionCount = _connectionStatusSet.Select(n => n.HandshakeType == ConnectionHandshakeType.Connected).Count();
+                        int connectionCount = _connections.Select(n => n.HandshakeType == ConnectionHandshakeType.Connected).Count();
 
-                        if (_connectionStatusSet.Count > (_options.MaxConnectionCount / 2))
+                        if (_connections.Count > (_options.MaxConnectionCount / 2))
                         {
                             continue;
                         }
                     }
 
-                    foreach (var tag in _wantStorage.GetWantTags())
+                    foreach (var signature in await _wantStorage.GetSignaturesAsync(cancellationToken))
                     {
+                        var tag = SignatureToResourceTag(signature);
+
                         NodeProfile? targetNodeProfile = null;
                         {
                             var nodeProfiles = await _nodeFinder.FindNodeProfiles(tag, cancellationToken);
@@ -227,7 +117,9 @@ namespace Omnius.Xeus.Service.Engines
 
                             lock (_lockObject)
                             {
-                                var ignoreAddressSet = new HashSet<OmniAddress>(_connectionStatusSet.Select(n => n.Address));
+                                var ignoreAddressSet = new HashSet<OmniAddress>();
+                                ignoreAddressSet.Union(_connections.Select(n => n.Address));
+                                ignoreAddressSet.Union(_connectedAddressSet);
 
                                 foreach (var nodeProfile in nodeProfiles)
                                 {
@@ -242,18 +134,24 @@ namespace Omnius.Xeus.Service.Engines
 
                         foreach (var targetAddress in targetNodeProfile.Addresses)
                         {
-                            var connection = await _connectionController.ConnectAsync(targetAddress, ServiceName, cancellationToken);
-                            if (connection != null)
+                            IConnection? connection = null;
+
+                            foreach (var connector in _connectors)
                             {
-                                if (await this.TryAddConnectionAsync(connection, targetAddress, ConnectionHandshakeType.Connected, tag.Hash, cancellationToken))
-                                {
-                                    goto End;
-                                }
+                                connection = await connector.ConnectAsync(targetAddress, ServiceName, cancellationToken);
+                                if (connection == null) continue;
+                            }
+
+                            if (connection == null) continue;
+
+                            _connectedAddressSet.Add(targetAddress);
+
+                            if (await this.TryAddConnectionAsync(connection, targetAddress, ConnectionHandshakeType.Connected, signature, cancellationToken))
+                            {
+                                break;
                             }
                         }
                     }
-
-                End:;
                 }
             }
             catch (OperationCanceledException e)
@@ -278,18 +176,21 @@ namespace Omnius.Xeus.Service.Engines
 
                     lock (_lockObject)
                     {
-                        int connectionCount = _connectionStatusSet.Select(n => n.HandshakeType == ConnectionHandshakeType.Accepted).Count();
+                        int connectionCount = _connections.Select(n => n.HandshakeType == ConnectionHandshakeType.Accepted).Count();
 
-                        if (_connectionStatusSet.Count > (_options.MaxConnectionCount / 2))
+                        if (_connections.Count > (_options.MaxConnectionCount / 2))
                         {
                             continue;
                         }
                     }
 
-                    var result = await _connectionController.AcceptAsync(ServiceName, cancellationToken);
-                    if (result.Connection != null && result.Address != null)
+                    foreach (var connector in _connectors)
                     {
-                        await this.TryAddConnectionAsync(result.Connection, result.Address, ConnectionHandshakeType.Accepted, null, cancellationToken);
+                        var result = await connector.AcceptAsync(ServiceName, cancellationToken);
+                        if (result.Connection != null && result.Address != null)
+                        {
+                            await this.TryAddConnectionAsync(result.Connection, result.Address, ConnectionHandshakeType.Accepted, null, cancellationToken);
+                        }
                     }
                 }
             }
@@ -303,76 +204,128 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        private async Task SendLoopAsync(CancellationToken cancellationToken)
+        private async ValueTask<bool> TryAddConnectionAsync(IConnection connection, OmniAddress address,
+            ConnectionHandshakeType handshakeType, OmniSignature? signature, CancellationToken cancellationToken = default)
         {
             try
             {
-                for (; ; )
+                DeclaredMessageExchangerVersion? version = 0;
+
+                // バージョン情報の交換
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
+                    var myHelloMessage = new DeclaredMessageExchangerHelloMessage(new[] { DeclaredMessageExchangerVersion.Version1 });
 
-                    await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+                    var enqueueTask = connection.EnqueueAsync(myHelloMessage, cancellationToken).AsTask();
+                    var dequeueTask = connection.DequeueAsync<DeclaredMessageExchangerHelloMessage>(cancellationToken).AsTask();
+                    await Task.WhenAll(enqueueTask, dequeueTask);
 
-                    foreach (var connectionStatus in _connectionStatusSet.ToArray())
-                    {
-                        lock (connectionStatus.LockObject)
-                        {
-                            if (connectionStatus.SendingDataMessage != null)
-                            {
-                                connectionStatus.Connection.TryEnqueue(bufferWriter =>
-                                {
-                                    connectionStatus.SendingDataMessage.Export(bufferWriter, _bytesPool);
-                                    connectionStatus.SendingDataMessage = null;
-                                });
-                            }
-                        }
-                    }
+                    var otherHelloMessage = dequeueTask.Result;
+                    if (otherHelloMessage == null) throw new Exception();
+
+                    version = EnumHelper.GetOverlappedMaxValue(myHelloMessage.Versions, otherHelloMessage.Versions);
+                }
+
+                if (version == DeclaredMessageExchangerVersion.Version1)
+                {
+                    _ = this.ExchangeAsync(connection, address, handshakeType, signature, cancellationToken);
+
+                    return true;
+                }
+                else
+                {
+                    throw new NotSupportedException();
                 }
             }
             catch (OperationCanceledException e)
             {
                 _logger.Debug(e);
+
+                connection.Dispose();
             }
             catch (Exception e)
             {
                 _logger.Error(e);
+
+                connection.Dispose();
             }
+
+            return false;
         }
 
-        private async Task ReceiveLoopAsync(CancellationToken cancellationToken)
+        private async Task ExchangeAsync(IConnection connection, OmniAddress address,
+            ConnectionHandshakeType handshakeType, OmniSignature? signature, CancellationToken cancellationToken = default)
         {
+            var status = new ConnectionStatus(connection, address, handshakeType);
+
+            lock (_lockObject)
+            {
+                _connections.Add(status);
+            }
+
             try
             {
-                for (; ; )
+                if (handshakeType == ConnectionHandshakeType.Connected)
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
+                    if (signature == null) throw new ArgumentNullException(nameof(signature));
 
-                    await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+                    status.Signature = signature;
 
-                    foreach (var connectionStatus in _connectionStatusSet.ToArray())
+                    var messageCreationTime = await this.ReadMessageCreationTimeAsync(signature, cancellationToken);
+                    if (messageCreationTime == null) messageCreationTime = DateTime.MinValue;
+
+                    var fetchMessage = new DeclaredMessageExchangerFetchMessage(signature, Timestamp.FromDateTime(messageCreationTime.Value));
+                    await connection.EnqueueAsync(fetchMessage, cancellationToken);
+
+                    var fetchResultMessage = await connection.DequeueAsync<DeclaredMessageExchangerFetchResultMessage>(cancellationToken);
+                    if (fetchResultMessage == null) throw new Exception();
+
+                    if (fetchResultMessage.Type == DeclaredMessageExchangerFetchResultType.Found)
                     {
-                        DeclaredMessageExchangerDataMessage? dataMessage = null;
-
-                        connectionStatus.Connection.TryDequeue((sequence) =>
+                        if (fetchResultMessage.DeclaredMessage != null)
                         {
-                            dataMessage = DeclaredMessageExchangerDataMessage.Import(sequence, _bytesPool);
-                        });
-
-                        if (dataMessage == null)
-                        {
-                            continue;
+                            await _wantStorage.WriteMessageAsync(fetchResultMessage.DeclaredMessage, cancellationToken);
                         }
+                    }
+                    else if (fetchResultMessage.Type == DeclaredMessageExchangerFetchResultType.NotFound)
+                    {
+                        var message = await this.ReadMessageAsync(signature, cancellationToken);
+                        if (message is null) throw new Exception();
 
-                        lock (connectionStatus.LockObject)
-                        {
-                            connectionStatus.ReceivedContentBlockFlags = dataMessage.ContentBlockFlags.ToArray();
-                            connectionStatus.ReceivedWantContentBlocks.Clear();
-                            connectionStatus.ReceivedWantContentBlocks.AddRange(dataMessage.WantContentBlocks);
-                        }
+                        var postMessage = new DeclaredMessageExchangerPostMessage(message);
+                        await connection.EnqueueAsync(postMessage);
+                    }
+                }
+                else if (handshakeType == ConnectionHandshakeType.Accepted)
+                {
+                    var fetchMessage = await connection.DequeueAsync<DeclaredMessageExchangerFetchMessage>(cancellationToken);
+                    if (fetchMessage == null) throw new Exception();
 
-                        foreach (var comessageock in dataMessage.GiveContentBlocks)
+                    signature = fetchMessage.Signature;
+                    status.Signature = signature;
+
+                    var messageCreationTime = await this.ReadMessageCreationTimeAsync(fetchMessage.Signature, cancellationToken);
+                    if (messageCreationTime == null) messageCreationTime = DateTime.MinValue;
+
+                    if (fetchMessage.CreationTime.ToDateTime() == messageCreationTime.Value)
+                    {
+                        var fetchResultMessage = new DeclaredMessageExchangerFetchResultMessage(DeclaredMessageExchangerFetchResultType.Same, null);
+                        await connection.EnqueueAsync(fetchResultMessage, cancellationToken);
+                    }
+                    else if (fetchMessage.CreationTime.ToDateTime() < messageCreationTime.Value)
+                    {
+                        var message = await this.ReadMessageAsync(fetchMessage.Signature, cancellationToken);
+                        var fetchResultMessage = new DeclaredMessageExchangerFetchResultMessage(DeclaredMessageExchangerFetchResultType.Found, message);
+                        await connection.EnqueueAsync(fetchResultMessage, cancellationToken);
+                    }
+                    else
+                    {
+                        var fetchResultMessage = new DeclaredMessageExchangerFetchResultMessage(DeclaredMessageExchangerFetchResultType.NotFound, null);
+                        await connection.EnqueueAsync(fetchResultMessage, cancellationToken);
+
+                        var postMessage = await connection.DequeueAsync<DeclaredMessageExchangerPostMessage>(cancellationToken);
+                        if (postMessage.DeclaredMessage != null)
                         {
-                            await _wantStorage.WriteAsync(connectionStatus.RootHash, comessageock.Tag, comessageock.Value, cancellationToken);
+                            await _wantStorage.WriteMessageAsync(postMessage.DeclaredMessage);
                         }
                     }
                 }
@@ -385,52 +338,56 @@ namespace Omnius.Xeus.Service.Engines
             {
                 _logger.Error(e);
             }
-        }
-
-        private sealed class ComputingNodeElement
-        {
-            public ComputingNodeElement(ConnectionStatus connectionStatus)
+            finally
             {
-                this.ConnectionStatus = connectionStatus;
-            }
+                connection.Dispose();
 
-            public ConnectionStatus ConnectionStatus { get; }
-
-            public List<NodeProfile> SendingPushNodeProfiles { get; } = new List<NodeProfile>();
-            public Dictionary<Tag, List<NodeProfile>> SendingPushLocations { get; } = new Dictionary<Tag, List<NodeProfile>>();
-            public List<Tag> SendingWantLocations { get; } = new List<Tag>();
-            public Dictionary<Tag, List<NodeProfile>> SendingGiveLocations { get; } = new Dictionary<Tag, List<NodeProfile>>();
-        }
-
-        private async Task ComputeLoopAsync(CancellationToken cancellationToken)
-        {
-            try
-            {
-                for (; ; )
+                lock (_lockObject)
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
-
-                    lock (_lockObject)
-                    {
-                        foreach (var connectionStatus in _connectionStatusSet)
-                        {
-                            connectionStatus.Refresh();
-                        }
-                    }
+                    _connections.Remove(status);
                 }
             }
-            catch (OperationCanceledException e)
+        }
+
+        private async ValueTask<DateTime?> ReadMessageCreationTimeAsync(OmniSignature signature, CancellationToken cancellationToken)
+        {
+            var wantStorageCreationTime = await _wantStorage.ReadMessageCreationTimeAsync(signature, cancellationToken);
+            var pushStorageCreationTime = await _pushStorage.ReadMessageCreationTimeAsync(signature, cancellationToken);
+            if (wantStorageCreationTime is null && pushStorageCreationTime is null) return null;
+
+            if ((wantStorageCreationTime ?? DateTime.MinValue) < (pushStorageCreationTime ?? DateTime.MinValue))
             {
-                _logger.Debug(e);
+                return pushStorageCreationTime;
             }
-            catch (Exception e)
+            else
             {
-                _logger.Error(e);
+                return wantStorageCreationTime;
             }
         }
 
+        public async ValueTask<DeclaredMessage?> ReadMessageAsync(OmniSignature signature, CancellationToken cancellationToken)
+        {
+            var wantStorageCreationTime = await _wantStorage.ReadMessageCreationTimeAsync(signature, cancellationToken);
+            var pushStorageCreationTime = await _pushStorage.ReadMessageCreationTimeAsync(signature, cancellationToken);
+            if (wantStorageCreationTime is null && pushStorageCreationTime is null) return null;
+
+            if ((wantStorageCreationTime ?? DateTime.MinValue) < (pushStorageCreationTime ?? DateTime.MinValue))
+            {
+                return await _pushStorage.ReadMessageAsync(signature, cancellationToken);
+            }
+            else
+            {
+                return await _wantStorage.ReadMessageAsync(signature, cancellationToken);
+            }
+        }
+
+        private static ResourceTag SignatureToResourceTag(OmniSignature signature)
+        {
+            using var hub = new BytesHub();
+            signature.Export(hub.Writer, BytesPool.Shared);
+            var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(hub.Reader.GetSequence()));
+            return new ResourceTag(ServiceName, hash);
+        }
 
         private enum ConnectionHandshakeType
         {
@@ -438,36 +395,20 @@ namespace Omnius.Xeus.Service.Engines
             Accepted,
         }
 
-        private sealed class ConnectionStatus : ISynchronized
+        private sealed class ConnectionStatus
         {
-            public ConnectionStatus(IConnection connection, OmniAddress address,
-                ConnectionHandshakeType handshakeType, NodeProfile nodeProfile, OmniHash rootHash)
+            public ConnectionStatus(IConnection connection, OmniAddress address, ConnectionHandshakeType handshakeType)
             {
                 this.Connection = connection;
                 this.Address = address;
                 this.HandshakeType = handshakeType;
-                this.NodeProfile = nodeProfile;
-                this.RootHash = rootHash;
             }
-
-            public object LockObject { get; } = new object();
 
             public IConnection Connection { get; }
             public OmniAddress Address { get; }
             public ConnectionHandshakeType HandshakeType { get; }
 
-            public NodeProfile NodeProfile { get; }
-            public OmniHash RootHash { get; }
-
-            public DeclaredMessageExchangerDataMessage? SendingDataMessage { get; set; } = null;
-            public ContentBlockFlags[]? ReceivedContentBlockFlags { get; set; } = null;
-            public List<OmniHash> ReceivedWantContentBlocks { get; } = new List<OmniHash>();
-
-            public void Refresh()
-            {
-
-            }
+            public OmniSignature Signature { get; set; }
         }
     }
 }
-`*/

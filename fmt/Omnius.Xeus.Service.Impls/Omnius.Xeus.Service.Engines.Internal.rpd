@@ -9,37 +9,38 @@ option csharp_access_level "internal";
 
 // Models
 
-table ResourceLocation {
+message ResourceLocation {
     ResourceTag: ResourceTag = 0,
     NodeProfiles: vector<NodeProfile>(capacity: 8192) = 1,
 }
 
-table ContentBlockFlags {
+message ContentBlock {
+    Hash: OmniHash = 0,
+    Value: bytes(capacity: 4194304, recyclable: true) = 1,
+}
+
+message ContentBlockFlags {
     Depth: int32 = 0,
     Flags: bytes(capacity: 4194304, recyclable: true) = 1,
 }
 
 // NodeFinder
 
-table NodeFinderConfig {
-    NodeProfileMap: map<NodeProfile, timestamp>(capacity: 1073741824) = 0,
-}
-
 enum NodeFinderVersion : int8 {
     Unknown = 0,
     Version1 = 1,
 }
 
-table NodeFinderHelloMessage {
+message NodeFinderHelloMessage {
     Versions: vector<NodeFinderVersion>(capacity: 32) = 0,
 }
 
-table NodeFinderProfileMessage {
+message NodeFinderProfileMessage {
     Id: bytes(capacity: 32) = 0,
     NodeProfile: NodeProfile = 1,
 }
 
-table NodeFinderDataMessage {
+message NodeFinderDataMessage {
     PushNodeProfiles: vector<NodeProfile>(capacity: 256) = 0,
     PushResourceLocations: vector<ResourceLocation>(capacity: 256) = 1,
     WantResourceLocations: vector<ResourceTag>(capacity: 256) = 2,
@@ -53,15 +54,11 @@ enum ContentExchangerVersion : uint8 {
     Version1 = 1,
 }
 
-table ContentExchangerHelloMessage {
+message ContentExchangerHelloMessage {
     Versions: vector<ContentExchangerVersion>(capacity: 32) = 0,
 }
 
-table ContentExchangerProfileMessage {
-    NodeProfile: NodeProfile = 0,
-}
-
-table ContentExchangerRequestExchangeMessage {
+message ContentExchangerRequestExchangeMessage {
     Hash: OmniHash = 0,
 }
 
@@ -71,14 +68,14 @@ enum ContentExchangerRequestExchangeResultType : uint8 {
     Accepted = 2,
 }
 
-table ContentExchangerRequestExchangeResultMessage {
+message ContentExchangerRequestExchangeResultMessage {
     Type: ContentExchangerRequestExchangeResultType = 0,
 }
 
-table ContentExchangerDataMessage {
+message ContentExchangerDataMessage {
     PushNodeProfiles: vector<NodeProfile>(capacity: 256) = 0,
-    ContentBlockFlags: vector<ContentBlockFlags>(capacity: 32) = 1,
-    WantContentBlocks: vector<OmniHash>(capacity: 256) = 2,
+    OwnedContentBlockFlags: vector<ContentBlockFlags>(capacity: 32) = 1,
+    WantContentBlockHashes: vector<OmniHash>(capacity: 256) = 2,
     GiveContentBlocks: vector<ContentBlock>(capacity: 8) = 3,
 }
 
@@ -89,28 +86,28 @@ enum DeclaredMessageExchangerVersion : uint8 {
     Version1 = 1,
 }
 
-table DeclaredMessageExchangerHelloMessage {
+message DeclaredMessageExchangerHelloMessage {
     Versions: vector<DeclaredMessageExchangerVersion>(capacity: 32) = 0,
 }
 
-table DeclaredMessageExchangerFetchMessageMessage {
-    Hash: OmniHash = 0,
-    UpdatedTime: timestamp = 1,
+message DeclaredMessageExchangerFetchMessage {
+    Signature: OmniSignature = 0,
+    CreationTime: timestamp = 1,
 }
 
-enum DeclaredMessageExchangerFetchMessageResultType : uint8 {
+enum DeclaredMessageExchangerFetchResultType : uint8 {
     Unknown = 0,
     Rejected = 1,
-    NotFound = 2,
-    SameFound = 3,
-    UpdatedFound = 4,
+    Found = 2,
+    NotFound = 3,
+    Same = 4,
 }
 
-table DeclaredMessageExchangerFetchMessageResultMessage {
-    Type: DeclaredMessageExchangerFetchMessageResultType = 0,
-    DeclaredMessage: DeclaredMessage = 1,
+message DeclaredMessageExchangerFetchResultMessage {
+    Type: DeclaredMessageExchangerFetchResultType = 0,
+    DeclaredMessage: DeclaredMessage? = 1,
 }
 
-table DeclaredMessageExchangerPostMessage {
+message DeclaredMessageExchangerPostMessage {
     DeclaredMessage: DeclaredMessage = 0,
 }

@@ -15,8 +15,13 @@ namespace Omnius.Xeus.Service.Engines
             IBytesPool bytesPool);
     }
 
+    public delegate void FetchResourceTag(Action<ResourceTag> append);
+
     public interface INodeFinder : IAsyncDisposable
     {
+        event FetchResourceTag? PushFetchResourceTag;
+        event FetchResourceTag? WantFetchResourceTag;
+
         ValueTask<NodeProfile> GetMyNodeProfile(CancellationToken cancellationToken = default);
         ValueTask AddCloudNodeProfiles(IEnumerable<NodeProfile> nodeProfiles, CancellationToken cancellationToken = default);
         ValueTask<NodeProfile[]> FindNodeProfiles(ResourceTag tag, CancellationToken cancellationToken = default);

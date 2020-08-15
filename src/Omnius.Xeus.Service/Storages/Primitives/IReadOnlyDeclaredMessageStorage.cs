@@ -15,6 +15,7 @@ namespace Omnius.Xeus.Service.Storages
         ValueTask CheckConsistencyAsync(Action<ConsistencyReport> callback, CancellationToken cancellationToken = default);
         ValueTask<IEnumerable<OmniSignature>> GetSignaturesAsync(CancellationToken cancellationToken = default);
         ValueTask<bool> ContainsMessageAsync(OmniSignature signature, DateTime since = default);
+        ValueTask<DateTime?> ReadMessageCreationTimeAsync(OmniSignature signature, CancellationToken cancellationToken = default);
         ValueTask<DeclaredMessage?> ReadMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default);
     }
 }

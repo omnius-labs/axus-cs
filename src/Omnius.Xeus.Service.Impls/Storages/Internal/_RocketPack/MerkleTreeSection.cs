@@ -11,7 +11,7 @@ namespace Omnius.Xeus.Service.Storages.Internal
         private Dictionary<OmniHash, long> _indexMap = null;
         private readonly object _lockObject = new object();
 
-        public bool TryGetIndex(OmniHash targetHash, out long index)
+        private Dictionary<OmniHash, long> GetIndexMap()
         {
             if (_indexMap == null)
             {
@@ -29,7 +29,17 @@ namespace Omnius.Xeus.Service.Storages.Internal
                 }
             }
 
-            return _indexMap.TryGetValue(targetHash, out index);
+            return _indexMap;
+        }
+
+        public bool Contains(OmniHash targetHash)
+        {
+            return this.GetIndexMap().ContainsKey(targetHash);
+        }
+
+        public bool TryGetIndex(OmniHash targetHash, out long index)
+        {
+            return this.GetIndexMap().TryGetValue(targetHash, out index);
         }
     }
 }

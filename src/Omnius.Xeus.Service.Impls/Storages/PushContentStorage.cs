@@ -19,7 +19,7 @@ using Omnius.Xeus.Service.Storages.Internal;
 
 namespace Omnius.Xeus.Service.Storages
 {
-    public sealed class PushContentStorage : AsyncDisposableBase, IPushContentStorage
+    public sealed partial class PushContentStorage : AsyncDisposableBase, IPushContentStorage
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -83,7 +83,7 @@ namespace Omnius.Xeus.Service.Storages
 
                 foreach (var status in _repository.PushStatus.GetAll())
                 {
-                    results.Add(status.RootHash);
+                    results.Add(status.Hash);
                 }
 
                 return results;
@@ -101,17 +101,25 @@ namespace Omnius.Xeus.Service.Storages
             }
         }
 
-        public ValueTask<bool> ContainsContentAsync(OmniHash rootHash)
+        public async ValueTask<bool> ContainsContentAsync(OmniHash rootHash)
         {
-            throw new NotImplementedException();
+            using (await _asyncLock.LockAsync())
+            {
+                var status = _repository.PushStatus.Get(rootHash);
+                if (status == null) return false;
+
+                return true;
+            }
         }
 
         public async ValueTask<bool> ContainsBlockAsync(OmniHash rootHash, OmniHash targetHash)
         {
             using (await _asyncLock.LockAsync())
             {
-                var filePath = Path.Combine(Path.Combine(_options.ConfigPath, "cache", HashToString(rootHash)), HashToString(targetHash));
-                return File.Exists(filePath);
+                var status = _repository.PushStatus.Get(rootHash);
+                if (status == null) return false;
+
+                return status.MerkleTreeSections.Any(n => n.Contains(rootHash));
             }
         }
 
@@ -122,7 +130,7 @@ namespace Omnius.Xeus.Service.Storages
                 // 既にエンコード済みの場合
                 {
                     var status = _repository.PushStatus.Get(filePath);
-                    if (status != null) return status.RootHash;
+                    if (status != null) return status.Hash;
                 }
 
                 // エンコード処理
@@ -230,7 +238,7 @@ namespace Omnius.Xeus.Service.Storages
 
         private async ValueTask WriteBlockAsync(string basePath, OmniHash hash, ReadOnlyMemory<byte> memory)
         {
-            var filePath = Path.Combine(basePath, "cache", HashToString(hash));
+            var filePath = Path.Combine(basePath, HashToString(hash));
 
             using (var fileStream = new UnbufferedFileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool))
             {
@@ -247,7 +255,7 @@ namespace Omnius.Xeus.Service.Storages
                 _repository.PushStatus.Remove(filePath);
 
                 // キャッシュフォルダを削除
-                var cacheDirPath = Path.Combine(_options.ConfigPath, HashToString(status.RootHash));
+                var cacheDirPath = Path.Combine(_options.ConfigPath, HashToString(status.Hash));
 
                 Directory.Delete(cacheDirPath);
             }
@@ -277,15 +285,15 @@ namespace Omnius.Xeus.Service.Storages
 
         private class PushStatus
         {
-            public PushStatus(OmniHash rootHash, string filePath, MerkleTreeSection[] merkleTreeSections)
+            public PushStatus(OmniHash hash, string filePath, MerkleTreeSection[] merkleTreeSections)
             {
                 this.FilePath = filePath;
-                this.RootHash = rootHash;
+                this.Hash = hash;
                 this.MerkleTreeSections = new ReadOnlyListSlim<MerkleTreeSection>(merkleTreeSections);
             }
 
             public string FilePath { get; }
-            public OmniHash RootHash { get; }
+            public OmniHash Hash { get; }
             public ReadOnlyListSlim<MerkleTreeSection> MerkleTreeSections { get; }
         }
 
@@ -308,7 +316,8 @@ namespace Omnius.Xeus.Service.Storages
             {
                 if (0 <= _database.UserVersion)
                 {
-                    var wants = _database.GetCollection<PushStatusEntity>("push_status");
+                    var wants = _database.GetCollection<PushStatusEntity>("pushes");
+                    wants.EnsureIndex(x => x.Hash, false);
                     wants.EnsureIndex(x => x.FilePath, true);
                     _database.UserVersion = 1;
                 }
@@ -327,42 +336,64 @@ namespace Omnius.Xeus.Service.Storages
 
                 public IEnumerable<PushStatus> GetAll()
                 {
-                    throw new NotImplementedException();
+                    var col = _database.GetCollection<PushStatusEntity>("pushes");
+                    return col.FindAll().Select(n => n.Export());
                 }
 
                 public PushStatus? Get(OmniHash rootHash)
                 {
-                    throw new NotImplementedException();
+                    var col = _database.GetCollection<PushStatusEntity>("pushes");
+                    var param = OmniHashEntity.Import(rootHash);
+                    return col.FindOne(n => n.Hash == param)?.Export();
                 }
 
                 public PushStatus? Get(string filePath)
                 {
-                    throw new NotImplementedException();
+                    var col = _database.GetCollection<PushStatusEntity>("pushes");
+                    return col.FindOne(n => n.FilePath == filePath)?.Export();
                 }
 
                 public void Add(PushStatus status)
                 {
-                    throw new NotImplementedException();
+                    var col = _database.GetCollection<PushStatusEntity>("pushes");
+                    var param = PushStatusEntity.Import(status);
+                    col.Insert(param);
+                }
+
+                public void Remove(OmniHash rootHash)
+                {
+                    var col = _database.GetCollection<PushStatusEntity>("pushes");
+                    var param = OmniHashEntity.Import(rootHash);
+                    col.DeleteMany(n => n.Hash == param);
                 }
 
                 public void Remove(string filePath)
                 {
-                    throw new NotImplementedException();
+                    var col = _database.GetCollection<PushStatusEntity>("pushes");
+                    col.DeleteMany(n => n.FilePath == filePath);
                 }
             }
 
             private class PushStatusEntity
             {
                 public string? FilePath { get; set; }
-                public OmniHash RootHash { get; set; }
+                public OmniHashEntity? Hash { get; set; }
                 public MerkleTreeSectionEntity[]? MerkleTreeSections { get; set; }
-            }
 
-            private class MerkleTreeSectionEntity
-            {
-                public int Depth { get; set; }
-                public long Length { get; set; }
-                public OmniHashEntity[]? Hashes { get; set; }
+                public static PushStatusEntity Import(PushStatus value)
+                {
+                    return new PushStatusEntity()
+                    {
+                        Hash = OmniHashEntity.Import(value.Hash),
+                        FilePath = value.FilePath,
+                        MerkleTreeSections = value.MerkleTreeSections.Select(n => MerkleTreeSectionEntity.Import(n)).ToArray()
+                    };
+                }
+
+                public PushStatus Export()
+                {
+                    return new PushStatus(this.Hash?.Export() ?? OmniHash.Empty, this.FilePath ?? string.Empty, this.MerkleTreeSections.Select(n => n.Export()).ToArray());
+                }
             }
         }
     }

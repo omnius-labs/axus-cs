@@ -1,21 +1,20 @@
-/*
+using System.Collections.Concurrent;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mime;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
-using Omnius.Core.Collections;
-using Omnius.Core.Cryptography;
 using Omnius.Core.Extensions;
 using Omnius.Core.Helpers;
 using Omnius.Core.Network;
 using Omnius.Core.Network.Connections;
-using Omnius.Xeus.Service.Drivers;
+using Omnius.Core.Network.Connections.Extensions;
+using Omnius.Xeus.Service.Connectors;
 using Omnius.Xeus.Service.Engines.Internal;
+using Omnius.Xeus.Service.Models;
 
 namespace Omnius.Xeus.Service.Engines
 {
@@ -24,26 +23,22 @@ namespace Omnius.Xeus.Service.Engines
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         private readonly NodeFinderOptions _options;
-        private readonly IObjectStoreFactory _objectStoreFactory;
-        private readonly IConnectionController _connectionController;
-        private readonly List<IPublishStorage> _publishStorages = new List<IPublishStorage>();
-        private readonly List<IWantStorage> _wantStorages = new List<IWantStorage>();
+        private readonly List<IConnector> _connectors = new List<IConnector>();
         private readonly IBytesPool _bytesPool;
 
         private readonly ReadOnlyMemory<byte> _myId;
-        private IObjectStore _objectStore;
 
-        private readonly HashSet<ConnectionStatus> _connectionStatusSet = new HashSet<ConnectionStatus>();
+        private readonly HashSet<ConnectionStatus> _connections = new HashSet<ConnectionStatus>();
         private readonly LinkedList<NodeProfile> _cloudNodeProfiles = new LinkedList<NodeProfile>();
 
-        private readonly VolatileListDictionary<Tag, NodeProfile> _receivedPushLocationMap = new VolatileListDictionary<Tag, NodeProfile>(TimeSpan.FromMinutes(30));
-        private readonly VolatileListDictionary<Tag, NodeProfile> _receivedGiveLocationMap = new VolatileListDictionary<Tag, NodeProfile>(TimeSpan.FromMinutes(30));
+        private readonly VolatileListDictionary<ResourceTag, NodeProfile> _receivedPushLocationMap = new VolatileListDictionary<ResourceTag, NodeProfile>(TimeSpan.FromMinutes(30));
+        private readonly VolatileListDictionary<ResourceTag, NodeProfile> _receivedGiveLocationMap = new VolatileListDictionary<ResourceTag, NodeProfile>(TimeSpan.FromMinutes(30));
 
-        private Task _connectLoopTask;
-        private Task _acceptLoopTask;
-        private Task _sendLoopTask;
-        private Task _receiveLoopTask;
-        private Task _computeLoopTask;
+        private Task? _connectLoopTask;
+        private Task? _acceptLoopTask;
+        private Task? _sendLoopTask;
+        private Task? _receiveLoopTask;
+        private Task? _computeLoopTask;
 
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
@@ -53,12 +48,14 @@ namespace Omnius.Xeus.Service.Engines
 
         public const string ServiceName = "node-explorer`";
 
+        public event FetchResourceTag? PushFetchResourceTag;
+        public event FetchResourceTag? WantFetchResourceTag;
+
         internal sealed class NodeFinderFactory : INodeFinderFactory
         {
-            public async ValueTask<INodeFinder> CreateAsync(NodeFinderOptions options, IObjectStoreFactory objectStoreFactory,
-                IConnectionController connectionController, IEnumerable<IPublishContentStorage> publishStorages, IEnumerable<IWantContentStorage> wantStorages, IBytesPool bytesPool)
+            public async ValueTask<INodeFinder> CreateAsync(NodeFinderOptions options, IEnumerable<IConnector> connectors, IBytesPool bytesPool)
             {
-                var result = new NodeFinder(options, objectStoreFactory, connectionController, publishStorages, wantStorages, bytesPool);
+                var result = new NodeFinder(options, connectors, bytesPool);
                 await result.InitAsync();
 
                 return result;
@@ -67,31 +64,24 @@ namespace Omnius.Xeus.Service.Engines
 
         public static INodeFinderFactory Factory { get; } = new NodeFinderFactory();
 
-        internal NodeFinder(NodeFinderOptions options, IObjectStoreFactory objectStoreFactory,
-                IConnectionController connectionController, IEnumerable<IPublishContentStorage> publishStorages, IEnumerable<IWantContentStorage> wantStorages,
-                IBytesPool bytesPool)
+        internal NodeFinder(NodeFinderOptions options, IEnumerable<IConnector> connectors, IBytesPool bytesPool)
         {
             _options = options;
-            _objectStoreFactory = objectStoreFactory;
-            _connectionController = connectionController;
-            _publishStorages.AddRange(publishStorages);
-            _wantStorages.AddRange(wantStorages);
+            _connectors.AddRange(connectors);
             _bytesPool = bytesPool;
+            _myId = GenId();
+        }
 
-            {
-                var id = new byte[32];
-                using var random = RandomNumberGenerator.Create();
-                random.GetBytes(id);
-                _myId = id;
-            }
+        private static byte[] GenId()
+        {
+            var id = new byte[32];
+            using var random = RandomNumberGenerator.Create();
+            random.GetBytes(id);
+            return id;
         }
 
         public async ValueTask InitAsync()
         {
-            _objectStore = await _objectStoreFactory.CreateAsync(_options.ConfigPath, _bytesPool);
-
-            await this.LoadAsync();
-
             _connectLoopTask = this.ConnectLoopAsync(_cancellationTokenSource.Token);
             _acceptLoopTask = this.AcceptLoopAsync(_cancellationTokenSource.Token);
             _sendLoopTask = this.SendLoopAsync(_cancellationTokenSource.Token);
@@ -102,42 +92,39 @@ namespace Omnius.Xeus.Service.Engines
         protected override async ValueTask OnDisposeAsync()
         {
             _cancellationTokenSource.Cancel();
-            await Task.WhenAll(_connectLoopTask, _acceptLoopTask, _sendLoopTask, _receiveLoopTask, _computeLoopTask);
-
-            await this.SaveAsync();
+            await Task.WhenAll(_connectLoopTask!, _acceptLoopTask!, _sendLoopTask!, _receiveLoopTask!, _computeLoopTask!);
 
             _cancellationTokenSource.Dispose();
-            await _objectStore.DisposeAsync();
         }
 
-        private async ValueTask LoadAsync()
+        private IEnumerable<ResourceTag> OnPushFetchResourceTag()
         {
-
+            var results = new ConcurrentBag<ResourceTag>();
+            this.PushFetchResourceTag?.Invoke((tag) => results.Add(tag));
+            return results;
         }
 
-        private async ValueTask SaveAsync()
+        private IEnumerable<ResourceTag> OnWantFetchResourceTag()
         {
-
+            var results = new ConcurrentBag<ResourceTag>();
+            this.WantFetchResourceTag?.Invoke((tag) => results.Add(tag));
+            return results;
         }
 
-        public async ValueTask<NodeProfile[]> FindNodeProfiles(Tag tag, CancellationToken cancellationToken = default)
+        public async ValueTask<NodeProfile[]> FindNodeProfiles(ResourceTag tag, CancellationToken cancellationToken = default)
         {
             lock (_lockObject)
             {
                 var result = new HashSet<NodeProfile>();
 
+                if (_receivedPushLocationMap.TryGetValue(tag, out var nodeProfiles1))
                 {
-                    if (_receivedPushLocationMap.TryGetValue(tag, out var nodeProfiles))
-                    {
-                        result.UnionWith(nodeProfiles);
-                    }
+                    result.UnionWith(nodeProfiles1);
                 }
 
+                if (_receivedGiveLocationMap.TryGetValue(tag, out var nodeProfiles2))
                 {
-                    if (_receivedGiveLocationMap.TryGetValue(tag, out var nodeProfiles))
-                    {
-                        result.UnionWith(nodeProfiles);
-                    }
+                    result.UnionWith(nodeProfiles2);
                 }
 
                 return result.ToArray();
@@ -146,9 +133,17 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask<NodeProfile> GetMyNodeProfile(CancellationToken cancellationToken = default)
         {
-            var addresses = await _connectionController.GetListenEndpointsAsync(cancellationToken);
-            var services = _options.EnabledServices.ToArray();
-            var myNodeProflie = new NodeProfile(services, addresses);
+            var addresses = new List<OmniAddress>();
+            foreach (var connector in _connectors)
+            {
+                addresses.AddRange(await connector.GetListenEndpointsAsync(cancellationToken));
+            }
+
+            var services = new List<string>();
+            services.Add(NodeFinder.ServiceName);
+            services.AddRange(_options.Services.ToArray());
+
+            var myNodeProflie = new NodeProfile(services.ToArray(), addresses.ToArray());
             return myNodeProflie;
         }
 
@@ -190,101 +185,7 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        private async ValueTask<bool> TryAddConnectionAsync(IConnection connection, OmniAddress address, ConnectionHandshakeType handshakeType, CancellationToken cancellationToken = default)
-        {
-            // kademliaのk-bucketの距離毎のノード数は最大20とする。(k=20)
-            bool CanAppend(ReadOnlySpan<byte> id)
-            {
-                lock (_lockObject)
-                {
-                    var appendingNodeDistance = Kademlia.Distance(_myId.Span, id);
-
-                    var map = new Dictionary<int, int>();
-                    foreach (var connectionStatus in _connectionStatusSet)
-                    {
-                        var nodeDistance = Kademlia.Distance(_myId.Span, id);
-                        map.TryGetValue(nodeDistance, out int count);
-                        count++;
-                        map[nodeDistance] = count;
-                    }
-
-                    {
-                        map.TryGetValue(appendingNodeDistance, out int count);
-                        if (count > MaxBucketLength)
-                        {
-                            return false;
-                        }
-                    }
-
-                    return true;
-                }
-            }
-
-            try
-            {
-                NodeFinderVersion? version = 0;
-                {
-                    var myHelloMessage = new NodeFinderHelloMessage(new[] { NodeFinderVersion.Version1 });
-                    NodeFinderHelloMessage? otherHelloMessage = null;
-
-                    var enqueueTask = connection.EnqueueAsync((bufferWriter) => myHelloMessage.Export(bufferWriter, _bytesPool), cancellationToken);
-                    var dequeueTask = connection.DequeueAsync((sequence) => otherHelloMessage = NodeFinderHelloMessage.Import(sequence, _bytesPool), cancellationToken);
-
-                    await ValueTaskHelper.WhenAll(enqueueTask, dequeueTask);
-                    if (otherHelloMessage == null) throw new Exception();
-
-                    version = EnumHelper.GetOverlappedMaxValue(myHelloMessage.Versions, otherHelloMessage.Versions);
-                }
-
-                if (version == NodeFinderVersion.Version1)
-                {
-                    ReadOnlyMemory<byte> id;
-                    NodeProfile? nodeProfile = null;
-                    {
-                        var myNodeProflie = await this.GetMyNodeProfile();
-
-                        var myProfileMessage = new NodeFinderProfileMessage(_myId, myNodeProflie);
-                        NodeFinderProfileMessage? otherProfileMessage = null;
-
-                        var enqueueTask = connection.EnqueueAsync((bufferWriter) => myProfileMessage.Export(bufferWriter, _bytesPool), cancellationToken);
-                        var dequeueTask = connection.DequeueAsync((sequence) => otherProfileMessage = NodeFinderProfileMessage.Import(sequence, _bytesPool), cancellationToken);
-
-                        await ValueTaskHelper.WhenAll(enqueueTask, dequeueTask);
-                        if (otherProfileMessage == null) throw new Exception();
-
-                        id = otherProfileMessage.Id;
-                        nodeProfile = otherProfileMessage.NodeProfile;
-                    }
-
-                    if (!CanAppend(id.Span))
-                    {
-                        throw new Exception();
-                    }
-
-                    var status = new ConnectionStatus(connection, address, handshakeType, nodeProfile, id);
-
-                    lock (_lockObject)
-                    {
-                        _connectionStatusSet.Add(status);
-                    }
-
-                    if (status.HandshakeType == ConnectionHandshakeType.Connected)
-                    {
-                        this.RefreshCloudNodeProfile(status.NodeProfile);
-                    }
-
-                    return true;
-                }
-
-                throw new NotSupportedException();
-            }
-            catch (Exception)
-            {
-                connection.Dispose();
-            }
-
-            return false;
-        }
+        private readonly VolatileHashSet<OmniAddress> _connectedAddressSet = new VolatileHashSet<OmniAddress>(TimeSpan.FromMinutes(30));
 
         private async Task ConnectLoopAsync(CancellationToken cancellationToken)
         {
@@ -298,9 +199,9 @@ namespace Omnius.Xeus.Service.Engines
 
                     lock (_lockObject)
                     {
-                        int connectionCount = _connectionStatusSet.Select(n => n.HandshakeType == ConnectionHandshakeType.Connected).Count();
+                        int connectionCount = _connections.Select(n => n.HandshakeType == ConnectionHandshakeType.Connected).Count();
 
-                        if (_connectionStatusSet.Count > (_options.MaxConnectionCount / 2))
+                        if (_connections.Count > (_options.MaxConnectionCount / 2))
                         {
                             continue;
                         }
@@ -313,7 +214,9 @@ namespace Omnius.Xeus.Service.Engines
                         var nodeProfiles = _cloudNodeProfiles.ToArray();
                         random.Shuffle(nodeProfiles);
 
-                        var ignoreAddressSet = new HashSet<OmniAddress>(_connectionStatusSet.Select(n => n.Address));
+                        var ignoreAddressSet = new HashSet<OmniAddress>();
+                        ignoreAddressSet.Union(_connections.Select(n => n.Address));
+                        ignoreAddressSet.Union(_connectedAddressSet);
 
                         foreach (var nodeProfile in nodeProfiles)
                         {
@@ -329,14 +232,21 @@ namespace Omnius.Xeus.Service.Engines
 
                     foreach (var targetAddress in targetNodeProfile.Addresses)
                     {
-                        var connection = await _connectionController.ConnectAsync(targetAddress, ServiceName, cancellationToken);
-                        if (connection != null)
+                        IConnection? connection = null;
+
+                        foreach (var connector in _connectors)
                         {
-                            if (await this.TryAddConnectionAsync(connection, targetAddress, ConnectionHandshakeType.Connected, cancellationToken))
-                            {
-                                succeeded = true;
-                                break;
-                            }
+                            connection = await connector.ConnectAsync(targetAddress, ServiceName, cancellationToken);
+                            if (connection == null) continue;
+                        }
+
+                        if (connection == null) continue;
+
+                        _connectedAddressSet.Add(targetAddress);
+
+                        if (await this.TryAddConnectionAsync(connection, targetAddress, ConnectionHandshakeType.Connected, cancellationToken))
+                        {
+                            break;
                         }
                     }
 
@@ -372,18 +282,21 @@ namespace Omnius.Xeus.Service.Engines
 
                     lock (_lockObject)
                     {
-                        int connectionCount = _connectionStatusSet.Select(n => n.HandshakeType == ConnectionHandshakeType.Accepted).Count();
+                        int connectionCount = _connections.Select(n => n.HandshakeType == ConnectionHandshakeType.Accepted).Count();
 
-                        if (_connectionStatusSet.Count > (_options.MaxConnectionCount / 2))
+                        if (_connections.Count > (_options.MaxConnectionCount / 2))
                         {
                             continue;
                         }
                     }
 
-                    var result = await _connectionController.AcceptAsync(ServiceName, cancellationToken);
-                    if (result.Connection != null && result.Address != null)
+                    foreach (var connector in _connectors)
                     {
-                        await this.TryAddConnectionAsync(result.Connection, result.Address, ConnectionHandshakeType.Accepted, cancellationToken);
+                        var result = await connector.AcceptAsync(ServiceName, cancellationToken);
+                        if (result.Connection != null && result.Address != null)
+                        {
+                            await this.TryAddConnectionAsync(result.Connection, result.Address, ConnectionHandshakeType.Accepted, cancellationToken);
+                        }
                     }
                 }
             }
@@ -397,6 +310,93 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
+        private async ValueTask<bool> TryAddConnectionAsync(IConnection connection, OmniAddress address, ConnectionHandshakeType handshakeType, CancellationToken cancellationToken = default)
+        {
+            // kademliaのk-bucketの距離毎のノード数は最大20とする。(k=20)
+            bool CanAppend(ReadOnlySpan<byte> id)
+            {
+                lock (_lockObject)
+                {
+                    var appendingNodeDistance = Kademlia.Distance(_myId.Span, id);
+
+                    var map = new Dictionary<int, int>();
+                    foreach (var connectionStatus in _connections)
+                    {
+                        var nodeDistance = Kademlia.Distance(_myId.Span, id);
+                        map.TryGetValue(nodeDistance, out int count);
+                        count++;
+                        map[nodeDistance] = count;
+                    }
+
+                    {
+                        map.TryGetValue(appendingNodeDistance, out int count);
+                        if (count > MaxBucketLength)
+                        {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+            }
+
+            try
+            {
+                NodeFinderVersion? version = 0;
+                {
+                    var myHelloMessage = new NodeFinderHelloMessage(new[] { NodeFinderVersion.Version1 });
+
+                    var enqueueTask = connection.EnqueueAsync(myHelloMessage, cancellationToken).AsTask();
+                    var dequeueTask = connection.DequeueAsync<NodeFinderHelloMessage>(cancellationToken).AsTask();
+                    await Task.WhenAll(enqueueTask, dequeueTask);
+
+                    var otherHelloMessage = dequeueTask.Result;
+                    if (otherHelloMessage == null) throw new Exception();
+
+                    version = EnumHelper.GetOverlappedMaxValue(myHelloMessage.Versions, otherHelloMessage.Versions);
+                }
+
+                if (version == NodeFinderVersion.Version1)
+                {
+                    ReadOnlyMemory<byte> id;
+                    NodeProfile? nodeProfile = null;
+                    {
+                        var myNodeProflie = await this.GetMyNodeProfile();
+                        var myProfileMessage = new NodeFinderProfileMessage(_myId, myNodeProflie);
+
+                        var enqueueTask = connection.EnqueueAsync(myProfileMessage, cancellationToken).AsTask();
+                        var dequeueTask = connection.DequeueAsync<NodeFinderProfileMessage>(cancellationToken).AsTask();
+                        await Task.WhenAll(enqueueTask, dequeueTask);
+
+                        var otherProfileMessage = dequeueTask.Result;
+                        if (otherProfileMessage == null) throw new Exception();
+
+                        id = otherProfileMessage.Id;
+                        nodeProfile = otherProfileMessage.NodeProfile;
+                    }
+
+                    if (!CanAppend(id.Span)) throw new Exception();
+
+                    var status = new ConnectionStatus(connection, address, handshakeType, nodeProfile, id);
+
+                    lock (_lockObject)
+                    {
+                        _connections.Add(status);
+                    }
+
+                    return true;
+                }
+
+                throw new NotSupportedException();
+            }
+            catch (Exception)
+            {
+                connection.Dispose();
+            }
+
+            return false;
+        }
+
         private async Task SendLoopAsync(CancellationToken cancellationToken)
         {
             try
@@ -407,17 +407,26 @@ namespace Omnius.Xeus.Service.Engines
 
                     await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
 
-                    foreach (var connectionStatus in _connectionStatusSet.ToArray())
+                    foreach (var status in _connections.ToArray())
                     {
-                        lock (connectionStatus.LockObject)
+                        try
                         {
-                            if (connectionStatus.SendingDataMessage != null)
+                            lock (status.LockObject)
                             {
-                                connectionStatus.Connection.TryEnqueue(bufferWriter =>
+                                if (status.SendingDataMessage != null)
                                 {
-                                    connectionStatus.SendingDataMessage.Export(bufferWriter, _bytesPool);
-                                    connectionStatus.SendingDataMessage = null;
-                                });
+                                    if (status.Connection.TryEnqueue(status.SendingDataMessage))
+                                    {
+                                        status.SendingDataMessage = null;
+                                    }
+                                }
+                            }
+                        }
+                        catch (ObjectDisposedException)
+                        {
+                            lock (_lockObject)
+                            {
+                                _connections.Remove(status);
                             }
                         }
                     }
@@ -443,37 +452,38 @@ namespace Omnius.Xeus.Service.Engines
 
                     await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
 
-                    foreach (var connectionStatus in _connectionStatusSet.ToArray())
+                    foreach (var status in _connections.ToArray())
                     {
-                        NodeFinderDataMessage? dataMessage = null;
-
-                        connectionStatus.Connection.TryDequeue((sequence) =>
+                        try
                         {
-                            dataMessage = NodeFinderDataMessage.Import(sequence, _bytesPool);
-                        });
-
-                        if (dataMessage == null)
-                        {
-                            continue;
-                        }
-
-                        await this.AddCloudNodeProfiles(dataMessage.PushNodeProfiles);
-
-                        lock (connectionStatus.LockObject)
-                        {
-                            connectionStatus.ReceivedWantLocations.UnionWith(dataMessage.WantLocations);
-                        }
-
-                        lock (_lockObject)
-                        {
-                            foreach (var contentLocation in dataMessage.PushLocations)
+                            if (status.Connection.TryDequeue<NodeFinderDataMessage>(out var dataMessage))
                             {
-                                _receivedPushLocationMap.AddRange(contentLocation.Tag, contentLocation.NodeProfiles);
+                                await this.AddCloudNodeProfiles(dataMessage.PushNodeProfiles, cancellationToken);
+
+                                lock (status.LockObject)
+                                {
+                                    status.ReceivedWantLocations.UnionWith(dataMessage.WantResourceLocations);
+                                }
+
+                                lock (_lockObject)
+                                {
+                                    foreach (var contentLocation in dataMessage.PushResourceLocations)
+                                    {
+                                        _receivedPushLocationMap.AddRange(contentLocation.ResourceTag, contentLocation.NodeProfiles);
+                                    }
+
+                                    foreach (var contentLocation in dataMessage.GiveResourceLocations)
+                                    {
+                                        _receivedGiveLocationMap.AddRange(contentLocation.ResourceTag, contentLocation.NodeProfiles);
+                                    }
+                                }
                             }
-
-                            foreach (var contentLocation in dataMessage.GiveLocations)
+                        }
+                        catch (ObjectDisposedException)
+                        {
+                            lock (_lockObject)
                             {
-                                _receivedGiveLocationMap.AddRange(contentLocation.Tag, contentLocation.NodeProfiles);
+                                _connections.Remove(status);
                             }
                         }
                     }
@@ -499,9 +509,9 @@ namespace Omnius.Xeus.Service.Engines
             public ConnectionStatus ConnectionStatus { get; }
 
             public List<NodeProfile> SendingPushNodeProfiles { get; } = new List<NodeProfile>();
-            public Dictionary<Tag, List<NodeProfile>> SendingPushLocations { get; } = new Dictionary<Tag, List<NodeProfile>>();
-            public List<Tag> SendingWantLocations { get; } = new List<Tag>();
-            public Dictionary<Tag, List<NodeProfile>> SendingGiveLocations { get; } = new Dictionary<Tag, List<NodeProfile>>();
+            public Dictionary<ResourceTag, List<NodeProfile>> SendingPushLocations { get; } = new Dictionary<ResourceTag, List<NodeProfile>>();
+            public List<ResourceTag> SendingWantLocations { get; } = new List<ResourceTag>();
+            public Dictionary<ResourceTag, List<NodeProfile>> SendingGiveLocations { get; } = new Dictionary<ResourceTag, List<NodeProfile>>();
         }
 
         private async Task ComputeLoopAsync(CancellationToken cancellationToken)
@@ -519,7 +529,7 @@ namespace Omnius.Xeus.Service.Engines
                         _receivedPushLocationMap.Refresh();
                         _receivedGiveLocationMap.Refresh();
 
-                        foreach (var connectionStatus in _connectionStatusSet)
+                        foreach (var connectionStatus in _connections)
                         {
                             connectionStatus.Refresh();
                         }
@@ -535,17 +545,17 @@ namespace Omnius.Xeus.Service.Engines
                     var sendingPushNodeProfiles = new List<NodeProfile>();
 
                     // コンテンツのロケーション情報
-                    var contentLocationMap = new Dictionary<Tag, HashSet<NodeProfile>>();
+                    var contentLocationMap = new Dictionary<ResourceTag, HashSet<NodeProfile>>();
 
                     // 送信するコンテンツのロケーション情報
-                    var sendingPushLocationMap = new Dictionary<Tag, HashSet<NodeProfile>>();
+                    var sendingPushLocationMap = new Dictionary<ResourceTag, HashSet<NodeProfile>>();
 
                     // 送信するコンテンツのロケーションリクエスト情報
-                    var sendingWantLocationSet = new HashSet<Tag>();
+                    var sendingWantLocationSet = new HashSet<ResourceTag>();
 
                     lock (_lockObject)
                     {
-                        foreach (var connectionStatus in _connectionStatusSet)
+                        foreach (var connectionStatus in _connections)
                         {
                             elements.Add(new KademliaElement<ComputingNodeElement>(connectionStatus.Id, new ComputingNodeElement(connectionStatus)));
                         }
@@ -556,24 +566,18 @@ namespace Omnius.Xeus.Service.Engines
                         sendingPushNodeProfiles.AddRange(_cloudNodeProfiles);
                     }
 
-                    foreach (var publishStorage in _publishStorages)
+                    foreach (var tag in this.OnPushFetchResourceTag())
                     {
-                        foreach (var tag in publishStorage.GetPublishTags())
-                        {
-                            contentLocationMap.GetOrAdd(tag, (_) => new HashSet<NodeProfile>())
-                                 .Add(myNodeProfile);
+                        contentLocationMap.GetOrAdd(tag, (_) => new HashSet<NodeProfile>())
+                             .Add(myNodeProfile);
 
-                            sendingPushLocationMap.GetOrAdd(tag, (_) => new HashSet<NodeProfile>())
-                                 .Add(myNodeProfile);
-                        }
+                        sendingPushLocationMap.GetOrAdd(tag, (_) => new HashSet<NodeProfile>())
+                             .Add(myNodeProfile);
                     }
 
-                    foreach (var wantStorage in _wantStorages)
+                    foreach (var tag in this.OnWantFetchResourceTag())
                     {
-                        foreach (var tag in wantStorage.GetWantTags())
-                        {
-                            sendingWantLocationSet.Add(tag);
-                        }
+                        sendingWantLocationSet.Add(tag);
                     }
 
                     lock (_lockObject)
@@ -653,9 +657,9 @@ namespace Omnius.Xeus.Service.Engines
                             element.Value.ConnectionStatus.SendingDataMessage =
                                 new NodeFinderDataMessage(
                                     element.Value.SendingPushNodeProfiles.Take(NodeFinderDataMessage.MaxPushNodeProfilesCount).ToArray(),
-                                    element.Value.SendingPushLocations.Select(n => new Location(n.Key, n.Value.Take(Location.MaxNodeProfilesCount).ToArray())).Take(NodeFinderDataMessage.MaxPushLocationsCount).ToArray(),
-                                    element.Value.SendingWantLocations.Take(NodeFinderDataMessage.MaxWantLocationsCount).ToArray(),
-                                    element.Value.SendingGiveLocations.Select(n => new Location(n.Key, n.Value.Take(Location.MaxNodeProfilesCount).ToArray())).Take(NodeFinderDataMessage.MaxGiveLocationsCount).ToArray());
+                                    element.Value.SendingPushLocations.Select(n => new ResourceLocation(n.Key, n.Value.Take(ResourceLocation.MaxNodeProfilesCount).ToArray())).Take(NodeFinderDataMessage.MaxPushResourceLocationsCount).ToArray(),
+                                    element.Value.SendingWantLocations.Take(NodeFinderDataMessage.MaxWantResourceLocationsCount).ToArray(),
+                                    element.Value.SendingGiveLocations.Select(n => new ResourceLocation(n.Key, n.Value.Take(ResourceLocation.MaxNodeProfilesCount).ToArray())).Take(NodeFinderDataMessage.MaxGiveResourceLocationsCount).ToArray());
                         }
                     }
                 }
@@ -668,11 +672,6 @@ namespace Omnius.Xeus.Service.Engines
             {
                 _logger.Error(e);
             }
-        }
-
-        public ValueTask<NodeProfile[]> FindNodeProfiles(ResourceTag tag, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
         }
 
         private enum ConnectionHandshakeType
@@ -703,7 +702,7 @@ namespace Omnius.Xeus.Service.Engines
             public ReadOnlyMemory<byte> Id { get; }
 
             public NodeFinderDataMessage? SendingDataMessage { get; set; } = null;
-            public VolatileSet<Tag> ReceivedWantLocations { get; } = new VolatileSet<Tag>(TimeSpan.FromMinutes(30));
+            public VolatileHashSet<ResourceTag> ReceivedWantLocations { get; } = new VolatileHashSet<ResourceTag>(TimeSpan.FromMinutes(30));
 
             public void Refresh()
             {
@@ -712,4 +711,3 @@ namespace Omnius.Xeus.Service.Engines
         }
     }
 }
-*/

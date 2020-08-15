@@ -25,10 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="NLog" Version="4.7.2" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="NLog" Version="4.7.3" />
     <PackageReference Include="LiteDB" Version="5.0.8" />
   </ItemGroup>
 

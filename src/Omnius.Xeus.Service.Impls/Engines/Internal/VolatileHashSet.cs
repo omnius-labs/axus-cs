@@ -5,19 +5,19 @@ using System.Linq;
 
 namespace Omnius.Xeus.Service.Engines.Internal
 {
-    public class VolatileSet<T> : ISet<T>, ICollection<T>, IEnumerable<T>
+    public class VolatileHashSet<T> : ISet<T>, ICollection<T>, IEnumerable<T>
         where T : notnull
     {
         private readonly Dictionary<T, DateTime> _map;
         private readonly TimeSpan _survivalTime;
 
-        public VolatileSet(TimeSpan survivalTime)
+        public VolatileHashSet(TimeSpan survivalTime)
         {
             _map = new Dictionary<T, DateTime>();
             _survivalTime = survivalTime;
         }
 
-        public VolatileSet(TimeSpan survivalTime, IEqualityComparer<T> comparer)
+        public VolatileHashSet(TimeSpan survivalTime, IEqualityComparer<T> comparer)
         {
             _map = new Dictionary<T, DateTime>(comparer);
             _survivalTime = survivalTime;

@@ -1,20 +1,15 @@
 using System;
-using System.Buffers;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Pipelines;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using LiteDB;
 using Omnius.Core;
-using Omnius.Core.Collections;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Io;
 using Omnius.Core.Serialization;
-using Omnius.Xeus.Service.Engines.Internal;
 using Omnius.Xeus.Service.Models;
 using Omnius.Xeus.Service.Storages.Internal;
 
@@ -116,6 +111,17 @@ namespace Omnius.Xeus.Service.Storages
             }
         }
 
+        public async ValueTask<DateTime?> ReadMessageCreationTimeAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+        {
+            using (await _asyncLock.LockAsync())
+            {
+                var status = _repository.PushStatus.Get(signature);
+                if (status == null) return null;
+
+                return status.CreationTime;
+            }
+        }
+
         public async ValueTask<DeclaredMessage?> ReadMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync())
@@ -193,26 +199,26 @@ namespace Omnius.Xeus.Service.Storages
 
                 public IEnumerable<PushStatus> GetAll()
                 {
-                    var col = _database.GetCollection<PushStatusEntity>("wants");
+                    var col = _database.GetCollection<PushStatusEntity>("pushes");
                     return col.FindAll().Select(n => n.Export());
                 }
 
                 public PushStatus? Get(OmniSignature signature)
                 {
-                    var col = _database.GetCollection<PushStatusEntity>("wants");
+                    var col = _database.GetCollection<PushStatusEntity>("pushes");
                     var param = OmniSignatureEntity.Import(signature);
                     return col.FindOne(n => n.Signature == param).Export();
                 }
 
                 public void Add(PushStatus status)
                 {
-                    var col = _database.GetCollection<PushStatusEntity>("wants");
+                    var col = _database.GetCollection<PushStatusEntity>("pushes");
                     col.Upsert(PushStatusEntity.Import(status));
                 }
 
                 public void Remove(OmniSignature signature)
                 {
-                    var col = _database.GetCollection<PushStatusEntity>("wants");
+                    var col = _database.GetCollection<PushStatusEntity>("pushes");
                     var param = OmniSignatureEntity.Import(signature);
                     col.DeleteMany(n => n.Signature == param);
                 }
