@@ -9,12 +9,12 @@ using Omnius.Core.Cryptography;
 using Omnius.Core.Extensions;
 using Omnius.Core.Helpers;
 using Omnius.Core.Network;
-using Omnius.Core.Network.Connections.Extensions;
 using Omnius.Core.Network.Connections;
+using Omnius.Core.Network.Connections.Extensions;
 using Omnius.Xeus.Service.Connectors;
+using Omnius.Xeus.Service.Engines.Internal;
 using Omnius.Xeus.Service.Models;
 using Omnius.Xeus.Service.Storages;
-using Omnius.Xeus.Service.Engines.Internal;
 
 namespace Omnius.Xeus.Service.Engines
 {
