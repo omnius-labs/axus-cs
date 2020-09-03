@@ -9,7 +9,6 @@ using Omnius.Core.Cryptography;
 using Omnius.Core.Extensions;
 using Omnius.Core.Helpers;
 using Omnius.Core.Network;
-using Omnius.Core.Network.Connections.Extensions;
 using Omnius.Core.Network.Connections;
 using Omnius.Xeus.Components.Connectors;
 using Omnius.Xeus.Components.Models;
