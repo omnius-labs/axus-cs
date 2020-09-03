@@ -1,0 +1,113 @@
+syntax v1.0;
+
+using "Omnius.Core.Cryptography";
+using "Omnius.Core.Network";
+using "Omnius.Xeus.Components.Models";
+
+namespace "Omnius.Xeus.Components.Engines.Internal";
+option csharp_access_level "internal";
+
+// Models
+
+message ResourceLocation {
+    ResourceTag: ResourceTag,
+    NodeProfiles: vector<NodeProfile>(capacity: 8192),
+}
+
+message ContentBlock {
+    Hash: OmniHash,
+    Value: bytes(capacity: 4194304, recyclable: true),
+}
+
+message ContentBlockFlags {
+    Depth: int32,
+    Flags: bytes(capacity: 4194304, recyclable: true),
+}
+
+// NodeFinder
+
+enum NodeFinderVersion : int8 {
+    Unknown = 0,
+    Version1 = 1,
+}
+
+message NodeFinderHelloMessage {
+    Versions: vector<NodeFinderVersion>(capacity: 32),
+}
+
+message NodeFinderProfileMessage {
+    Id: bytes(capacity: 32),
+    NodeProfile: NodeProfile,
+}
+
+message NodeFinderDataMessage {
+    PushNodeProfiles: vector<NodeProfile>(capacity: 256),
+    PushResourceLocations: vector<ResourceLocation>(capacity: 256),
+    WantResourceLocations: vector<ResourceTag>(capacity: 256),
+    GiveResourceLocations: vector<ResourceLocation>(capacity: 256),
+}
+
+// ContentExchanger
+
+enum ContentExchangerVersion : uint8 {
+    Unknown = 0,
+    Version1 = 1,
+}
+
+message ContentExchangerHelloMessage {
+    Versions: vector<ContentExchangerVersion>(capacity: 32),
+}
+
+message ContentExchangerRequestExchangeMessage {
+    Hash: OmniHash,
+}
+
+enum ContentExchangerRequestExchangeResultType : uint8 {
+    Unknown = 0,
+    Rejected = 1,
+    Accepted = 2,
+}
+
+message ContentExchangerRequestExchangeResultMessage {
+    Type: ContentExchangerRequestExchangeResultType,
+}
+
+message ContentExchangerDataMessage {
+    PushNodeProfiles: vector<NodeProfile>(capacity: 256),
+    OwnedContentBlockFlags: vector<ContentBlockFlags>(capacity: 32),
+    WantContentBlockHashes: vector<OmniHash>(capacity: 256),
+    GiveContentBlocks: vector<ContentBlock>(capacity: 8),
+}
+
+// DeclaredMessageExchanger
+
+enum DeclaredMessageExchangerVersion : uint8 {
+    Unknown = 0,
+    Version1 = 1,
+}
+
+message DeclaredMessageExchangerHelloMessage {
+    Versions: vector<DeclaredMessageExchangerVersion>(capacity: 32),
+}
+
+message DeclaredMessageExchangerFetchMessage {
+    Signature: OmniSignature,
+    CreationTime: timestamp,
+}
+
+enum DeclaredMessageExchangerFetchResultType : uint8 {
+    Unknown = 0,
+    Rejected = 1,
+    Found = 2,
+    NotFound = 3,
+    Same = 4,
+}
+
+message DeclaredMessageExchangerFetchResultMessage {
+    Type: DeclaredMessageExchangerFetchResultType,
+    DeclaredMessage: DeclaredMessage?,
+}
+
+message DeclaredMessageExchangerPostMessage {
+    DeclaredMessage: DeclaredMessage,
+}

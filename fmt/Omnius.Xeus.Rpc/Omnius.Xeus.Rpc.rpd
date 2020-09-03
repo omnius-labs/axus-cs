@@ -1,0 +1,21 @@
+﻿syntax v1.0;
+
+using "Omnius.Core.Cryptography";
+using "Omnius.Core.Network";
+
+namespace "Omnius.Xeus.Rpc";
+
+message RpcParam {
+    P1: int32,
+}
+
+message RpcResult {
+    R1: int32,
+}
+
+service XeusRpc {
+    F1: (RpcParam) -> (RpcResult),
+    F2: (RpcParam) -> (),
+    F3: () -> (RpcResult),
+    F4: () -> (),
+}
