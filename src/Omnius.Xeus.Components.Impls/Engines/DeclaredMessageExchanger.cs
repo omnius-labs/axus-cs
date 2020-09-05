@@ -134,7 +134,7 @@ namespace Omnius.Xeus.Components.Engines
 
                             foreach (var connector in _connectors)
                             {
-                                connection = await connector.ConnectAsync(targetAddress, ServiceName, cancellationToken);
+                                connection = await connector.ConnectAsync(targetAddress, this.EngineName, cancellationToken);
                                 if (connection == null) continue;
                             }
 
@@ -182,7 +182,7 @@ namespace Omnius.Xeus.Components.Engines
 
                     foreach (var connector in _connectors)
                     {
-                        var result = await connector.AcceptAsync(ServiceName, cancellationToken);
+                        var result = await connector.AcceptAsync(this.EngineName, cancellationToken);
                         if (result.Connection != null && result.Address != null)
                         {
                             await this.TryAddConnectionAsync(result.Connection, result.Address, ConnectionHandshakeType.Accepted, null, cancellationToken);
@@ -377,12 +377,12 @@ namespace Omnius.Xeus.Components.Engines
             }
         }
 
-        private static ResourceTag SignatureToResourceTag(OmniSignature signature)
+        private ResourceTag SignatureToResourceTag(OmniSignature signature)
         {
             using var hub = new BytesHub();
             signature.Export(hub.Writer, BytesPool.Shared);
             var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(hub.Reader.GetSequence()));
-            return new ResourceTag(ServiceName, hash);
+            return new ResourceTag(this.EngineName, hash);
         }
 
         private enum ConnectionHandshakeType

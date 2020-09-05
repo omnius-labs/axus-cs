@@ -1,49 +1,61 @@
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Xeus.Rpc;
+using Omnius.Xeus.Components.Connectors;
 using Omnius.Xeus.Components.Engines;
 using Omnius.Xeus.Components.Models;
 using Omnius.Xeus.Deamon.Models;
 using System.IO;
 using Omnius.Core;
+using Omnius.Core.Network.Upnp;
+using Omnius.Core.Network.Proxies;
 
 namespace Omnius.Xeus.Deamon
 {
     public record XeusServiceOptions
     {
-        public XeusConfig Config;
+        public ISocks5ProxyClientFactory? Socks5ProxyClientFactory;
+        public IHttpProxyClientFactory? HttpProxyClientFactory;
+        public IUpnpClientFactory? UpnpClientFactory;
+        public ITcpConnectorFactory? TcpConnectorFactory;
+        public INodeFinderFactory? NodeFinderFactory;
+        public IContentExchangerFactory? ContentExchangerFactory;
+        public IDeclaredMessageExchangerFactory? DeclaredMessageExchangerFactory;
+        public IBytesPool? BytesPool;
+        public XeusConfig? Config;
     }
 
     public class XeusService : IXeusService
     {
-        private readonly INodeFinderFactory _nodeFinderFactory;
-        private readonly IContentExchangerFactory _contentExchangerFactory;
-        private readonly IDeclaredMessageExchangerFactory _declaredMessageExchangerFactory;
-        private readonly IBytesPool _bytesPool;
-        private readonly XeusConfig _xeusConfig;
+        private readonly XeusServiceOptions _options;
 
-        public static async ValueTask<XeusService> CreateAsync(INodeFinderFactory nodeFinderFactory, IContentExchangerFactory contentExchangerFactory, IDeclaredMessageExchangerFactory declaredMessageExchangerFactory, XeusConfig xeusConfig)
+        private INodeFinder _nodeFinder;
+
+        public static async ValueTask<XeusService> CreateAsync(XeusServiceOptions options)
         {
-            var service = new XeusService(nodeFinderFactory, contentExchangerFactory, declaredMessageExchangerFactory, xeusConfig);
+            var service = new XeusService(options);
             await service.InitAsync();
             return service;
         }
 
-        private XeusService(INodeFinderFactory nodeFinderFactory, IContentExchangerFactory contentExchangerFactory, IDeclaredMessageExchangerFactory declaredMessageExchangerFactory, XeusConfig xeusConfig)
+        private XeusService(XeusServiceOptions options)
         {
-            _nodeFinderFactory = nodeFinderFactory;
-            _contentExchangerFactory = contentExchangerFactory;
-            _declaredMessageExchangerFactory = declaredMessageExchangerFactory;
-            _xeusConfig = xeusConfig;
+            _options = options;
         }
 
         private async ValueTask InitAsync(CancellationToken cancellationToken = default)
         {
-            var nodeFinderOptions = new NodeFinderOptions(Path.Combine(_xeusConfig.WorkingDirectory, "node_finder"), 10);
-            await _nodeFinderFactory.CreateAsync(nodeFinderOptions, _bytesPool);
+            var connectors = new List<IConnector>();
+            var tcpConnectingOptions = new TcpConnectingOptions();
+            var tcpAcceptingOptions = new TcpAcceptingOptions();
+            var bandwidthOptions = new BandwidthOptions();
+            var tcpConnectorOptions = new TcpConnectorOptions(tcpConnectingOptions, tcpAcceptingOptions, bandwidthOptions);
+            connectors.Add(await _options.TcpConnectorFactory.CreateAsync(tcpConnectorOptions, _options.Socks5ProxyClientFactory, _options.HttpProxyClientFactory, _options.UpnpClientFactory, _options.BytesPool));
 
-            var
-            }
+            var nodeFinderOptions = new NodeFinderOptions(Path.Combine(_options.Config.WorkingDirectory, "node_finder"), 10);
+            _nodeFinder = await _options.NodeFinderFactory.CreateAsync(nodeFinderOptions, connectors, _options.BytesPool);
+        }
 
         public ValueTask<AddCloudNodeProfilesResult> AddCloudNodeProfilesAsync(CancellationToken cancellationToken)
         {
