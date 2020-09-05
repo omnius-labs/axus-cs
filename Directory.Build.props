@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <LangVersion>preview</LangVersion>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -24,11 +24,12 @@
     <RootNamespace>$(ProjectName)</RootNamespace>
     <Title>$(ProjectName)</Title>
     <Description>$(ProjectName)</Description>
-    <VersionCore>0.0.1</VersionCore>
-    <VersionPreRelease>-alpha.1</VersionPreRelease>
-    <Version>$(VersionCore)$(VersionPreRelease)</Version>
-    <AssemblyVersion>$(VersionCore).$(VersionPreRelease)</AssemblyVersion>
     <FileVersion>$(AssemblyVersion)</FileVersion>
+    <BuildVersion>1</BuildVersion>
+    <VersionPrefix>0.0.1</VersionPrefix>
+    <VersionSuffix>-alpha</VersionSuffix>
+    <Version>$(VersionPrefix)$(VersionSuffix).$(BuildVersion)</Version>
+    <AssemblyVersion>$(VersionPrefix).$(BuildVersion)</AssemblyVersion>
     <Authors>Lyrise</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/omnius-labs/xeus</PackageProjectUrl>
