@@ -13,7 +13,7 @@ jobs:
       - name: Install dotnet
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 5.0
+          dotnet-version: 5.0.100-preview.8.20417.9
       - name: Test
         run: sh ./eng/test.sh
       - name: Upload artifact
@@ -31,7 +31,7 @@ jobs:
       - name: Install dotnet
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 5.0
+          dotnet-version: 5.0.100-preview.8.20417.9
       - name: Test
         run: pwsh ./eng/test.ps1
       - name: Upload artifact
