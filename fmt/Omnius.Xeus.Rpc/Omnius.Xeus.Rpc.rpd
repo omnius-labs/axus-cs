@@ -2,20 +2,27 @@
 
 using "Omnius.Core.Cryptography";
 using "Omnius.Core.Network";
+using "Omnius.Xeus.Components.Models";
 
 namespace "Omnius.Xeus.Rpc";
 
-message RpcParam {
-    P1: int32,
+[csharp_struct]
+struct AddCloudNodeProfilesResult {
+    NodeProfiles: vector<NodeProfile>,
 }
 
-message RpcResult {
-    R1: int32,
+[csharp_struct]
+struct FindNodeProfilesParam {
+    ResourceTag: ResourceTag,
 }
 
-service XeusRpc {
-    F1: (RpcParam) -> (RpcResult),
-    F2: (RpcParam) -> (),
-    F3: () -> (RpcResult),
-    F4: () -> (),
+[csharp_struct]
+struct FindNodeProfilesResult {
+    NodeProfiles: vector<NodeProfile>,
+}
+
+service XeusService {
+    GetMyNodeProfile: () -> (),
+    AddCloudNodeProfiles: () -> (AddCloudNodeProfilesResult),
+    FindNodeProfiles: (FindNodeProfilesParam) -> (FindNodeProfilesResult),
 }

@@ -31,14 +31,14 @@ namespace Omnius.Xeus.Components.Models
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public static readonly int MaxServicesCount = 32;
+        public static readonly int MaxAvailableEngineNamesCount = 32;
         public static readonly int MaxAddressesCount = 32;
 
-        public NodeProfile(string[] services, OmniAddress[] addresses)
+        public NodeProfile(string[] availableEngineNames, OmniAddress[] addresses)
         {
-            if (services is null) throw new global::System.ArgumentNullException("services");
-            if (services.Length > 32) throw new global::System.ArgumentOutOfRangeException("services");
-            foreach (var n in services)
+            if (availableEngineNames is null) throw new global::System.ArgumentNullException("availableEngineNames");
+            if (availableEngineNames.Length > 32) throw new global::System.ArgumentOutOfRangeException("availableEngineNames");
+            foreach (var n in availableEngineNames)
             {
                 if (n is null) throw new global::System.ArgumentNullException("n");
                 if (n.Length > 256) throw new global::System.ArgumentOutOfRangeException("n");
@@ -50,13 +50,13 @@ namespace Omnius.Xeus.Components.Models
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
 
-            this.Services = new global::Omnius.Core.Collections.ReadOnlyListSlim<string>(services);
+            this.AvailableEngineNames = new global::Omnius.Core.Collections.ReadOnlyListSlim<string>(availableEngineNames);
             this.Addresses = new global::Omnius.Core.Collections.ReadOnlyListSlim<OmniAddress>(addresses);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                foreach (var n in services)
+                foreach (var n in availableEngineNames)
                 {
                     if (n != default) ___h.Add(n.GetHashCode());
                 }
@@ -68,7 +68,7 @@ namespace Omnius.Xeus.Components.Models
             });
         }
 
-        public global::Omnius.Core.Collections.ReadOnlyListSlim<string> Services { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<string> AvailableEngineNames { get; }
         public global::Omnius.Core.Collections.ReadOnlyListSlim<OmniAddress> Addresses { get; }
 
         public static global::Omnius.Xeus.Components.Models.NodeProfile Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -99,7 +99,7 @@ namespace Omnius.Xeus.Components.Models
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Services, target.Services)) return false;
+            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.AvailableEngineNames, target.AvailableEngineNames)) return false;
             if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Addresses, target.Addresses)) return false;
 
             return true;
@@ -112,11 +112,11 @@ namespace Omnius.Xeus.Components.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.Services.Count != 0)
+                if (value.AvailableEngineNames.Count != 0)
                 {
                     w.Write((uint)1);
-                    w.Write((uint)value.Services.Count);
-                    foreach (var n in value.Services)
+                    w.Write((uint)value.AvailableEngineNames.Count);
+                    foreach (var n in value.AvailableEngineNames)
                     {
                         w.Write(n);
                     }
@@ -137,7 +137,7 @@ namespace Omnius.Xeus.Components.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                string[] p_services = global::System.Array.Empty<string>();
+                string[] p_availableEngineNames = global::System.Array.Empty<string>();
                 OmniAddress[] p_addresses = global::System.Array.Empty<OmniAddress>();
 
                 for (;;)
@@ -149,10 +149,10 @@ namespace Omnius.Xeus.Components.Models
                         case 1:
                             {
                                 var length = r.GetUInt32();
-                                p_services = new string[length];
-                                for (int i = 0; i < p_services.Length; i++)
+                                p_availableEngineNames = new string[length];
+                                for (int i = 0; i < p_availableEngineNames.Length; i++)
                                 {
-                                    p_services[i] = r.GetString(256);
+                                    p_availableEngineNames[i] = r.GetString(256);
                                 }
                                 break;
                             }
@@ -169,7 +169,7 @@ namespace Omnius.Xeus.Components.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Components.Models.NodeProfile(p_services, p_addresses);
+                return new global::Omnius.Xeus.Components.Models.NodeProfile(p_availableEngineNames, p_addresses);
             }
         }
     }
@@ -1395,46 +1395,31 @@ namespace Omnius.Xeus.Components.Models
         static NodeFinderOptions()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Components.Models.NodeFinderOptions>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Components.Models.NodeFinderOptions>.Empty = new global::Omnius.Xeus.Components.Models.NodeFinderOptions(string.Empty, 0, global::System.Array.Empty<string>());
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Components.Models.NodeFinderOptions>.Empty = new global::Omnius.Xeus.Components.Models.NodeFinderOptions(string.Empty, 0);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxConfigPathLength = 1024;
-        public static readonly int MaxServicesCount = 32;
 
-        public NodeFinderOptions(string configPath, uint maxConnectionCount, string[] services)
+        public NodeFinderOptions(string configPath, uint maxConnectionCount)
         {
             if (configPath is null) throw new global::System.ArgumentNullException("configPath");
             if (configPath.Length > 1024) throw new global::System.ArgumentOutOfRangeException("configPath");
-            if (services is null) throw new global::System.ArgumentNullException("services");
-            if (services.Length > 32) throw new global::System.ArgumentOutOfRangeException("services");
-            foreach (var n in services)
-            {
-                if (n is null) throw new global::System.ArgumentNullException("n");
-                if (n.Length > 256) throw new global::System.ArgumentOutOfRangeException("n");
-            }
-
             this.ConfigPath = configPath;
             this.MaxConnectionCount = maxConnectionCount;
-            this.Services = new global::Omnius.Core.Collections.ReadOnlyListSlim<string>(services);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
                 if (configPath != default) ___h.Add(configPath.GetHashCode());
                 if (maxConnectionCount != default) ___h.Add(maxConnectionCount.GetHashCode());
-                foreach (var n in services)
-                {
-                    if (n != default) ___h.Add(n.GetHashCode());
-                }
                 return ___h.ToHashCode();
             });
         }
 
         public string ConfigPath { get; }
         public uint MaxConnectionCount { get; }
-        public global::Omnius.Core.Collections.ReadOnlyListSlim<string> Services { get; }
 
         public static global::Omnius.Xeus.Components.Models.NodeFinderOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -1466,7 +1451,6 @@ namespace Omnius.Xeus.Components.Models
             if (object.ReferenceEquals(this, target)) return true;
             if (this.ConfigPath != target.ConfigPath) return false;
             if (this.MaxConnectionCount != target.MaxConnectionCount) return false;
-            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Services, target.Services)) return false;
 
             return true;
         }
@@ -1488,15 +1472,6 @@ namespace Omnius.Xeus.Components.Models
                     w.Write((uint)2);
                     w.Write(value.MaxConnectionCount);
                 }
-                if (value.Services.Count != 0)
-                {
-                    w.Write((uint)3);
-                    w.Write((uint)value.Services.Count);
-                    foreach (var n in value.Services)
-                    {
-                        w.Write(n);
-                    }
-                }
                 w.Write((uint)0);
             }
 
@@ -1506,7 +1481,6 @@ namespace Omnius.Xeus.Components.Models
 
                 string p_configPath = string.Empty;
                 uint p_maxConnectionCount = 0;
-                string[] p_services = global::System.Array.Empty<string>();
 
                 for (;;)
                 {
@@ -1524,20 +1498,10 @@ namespace Omnius.Xeus.Components.Models
                                 p_maxConnectionCount = r.GetUInt32();
                                 break;
                             }
-                        case 3:
-                            {
-                                var length = r.GetUInt32();
-                                p_services = new string[length];
-                                for (int i = 0; i < p_services.Length; i++)
-                                {
-                                    p_services[i] = r.GetString(256);
-                                }
-                                break;
-                            }
                     }
                 }
 
-                return new global::Omnius.Xeus.Components.Models.NodeFinderOptions(p_configPath, p_maxConnectionCount, p_services);
+                return new global::Omnius.Xeus.Components.Models.NodeFinderOptions(p_configPath, p_maxConnectionCount);
             }
         }
     }

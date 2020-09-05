@@ -1,14 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <RootNamespace>Omnius.Xeus.Rpc</RootNamespace>
+    <RootNamespace>Omnius.Xeus.Deamon</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Omnius.Xeus.Rpc.Impls\Omnius.Xeus.Rpc.Impls.csproj" />
-    <ProjectReference Include="..\..\src\Omnius.Xeus.Rpc\Omnius.Xeus.Rpc.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Network.Proxies\Omnius.Core.Network.Proxies.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Network.Upnp\Omnius.Core.Network.Upnp.csproj" />
+    <ProjectReference Include="..\..\src\Omnius.Xeus.Deamon\Omnius.Xeus.Deamon.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Test\Omnius.Core.Test.csproj" />
   </ItemGroup>
 

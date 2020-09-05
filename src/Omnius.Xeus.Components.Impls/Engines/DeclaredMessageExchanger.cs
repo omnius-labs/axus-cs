@@ -39,8 +39,6 @@ namespace Omnius.Xeus.Components.Engines
 
         private readonly object _lockObject = new object();
 
-        public const string ServiceName = "declared-message-exchanger`";
-
         internal sealed class DeclaredMessageExchangerFactory : IDeclaredMessageExchangerFactory
         {
             public async ValueTask<IDeclaredMessageExchanger> CreateAsync(DeclaredMessageExchangerOptions options,
@@ -52,6 +50,8 @@ namespace Omnius.Xeus.Components.Engines
                 return result;
             }
         }
+
+        public string EngineName => "declared-message-exchanger";
 
         public static IDeclaredMessageExchangerFactory Factory { get; } = new DeclaredMessageExchangerFactory();
 

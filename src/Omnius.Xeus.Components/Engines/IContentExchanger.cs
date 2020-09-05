@@ -14,7 +14,7 @@ namespace Omnius.Xeus.Components.Engines
             INodeFinder nodeFinder, IPushContentStorage pushStorage, IWantContentStorage wantStorage, IBytesPool bytesPool);
     }
 
-    public interface IContentExchanger : IAsyncDisposable
+    public interface IContentExchanger : IEngine, IAsyncDisposable
     {
     }
 }

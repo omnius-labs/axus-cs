@@ -8,7 +8,7 @@ namespace "Omnius.Xeus.Components.Models";
 // Models
 
 message NodeProfile {
-    Services: vector<string(capacity: 256)>(capacity: 32),
+    AvailableEngineNames : vector<string(capacity: 256)>(capacity: 32),
     Addresses: vector<OmniAddress>(capacity: 32),
 }
 
@@ -83,7 +83,6 @@ message TcpConnectorReport {
 message NodeFinderOptions {
     ConfigPath: string(capacity: 1024),
     MaxConnectionCount: uint32,
-    Services: vector<string(capacity: 256)>(capacity: 32),
 }
 
 message NodeFinderReport {

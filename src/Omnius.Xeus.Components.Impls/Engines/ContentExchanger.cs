@@ -10,6 +10,7 @@ using Omnius.Core.Extensions;
 using Omnius.Core.Helpers;
 using Omnius.Core.Network;
 using Omnius.Core.Network.Connections;
+using Omnius.Core.Network.Connections.Extensions;
 using Omnius.Xeus.Components.Connectors;
 using Omnius.Xeus.Components.Models;
 using Omnius.Xeus.Components.Storages;
@@ -40,8 +41,6 @@ namespace Omnius.Xeus.Components.Engines
 
         private readonly object _lockObject = new object();
 
-        public const string ServiceName = "content-exchanger";
-
         internal sealed class ContentExchangerFactory : IContentExchangerFactory
         {
             public async ValueTask<IContentExchanger> CreateAsync(ContentExchangerOptions options, IEnumerable<IConnector> connectors,
@@ -53,6 +52,8 @@ namespace Omnius.Xeus.Components.Engines
                 return result;
             }
         }
+
+        public string EngineName => "content-exchanger";
 
         public static IContentExchangerFactory Factory { get; } = new ContentExchangerFactory();
 
@@ -75,7 +76,7 @@ namespace Omnius.Xeus.Components.Engines
             _receiveLoopTask = this.ReceiveLoopAsync(_cancellationTokenSource.Token);
             _computeLoopTask = this.ComputeLoopAsync(_cancellationTokenSource.Token);
 
-            _nodeFinder.PushFetchResourceTag += (append) =>
+            _nodeFinder.GetPushFetchResourceTags += (append) =>
             {
                 // TODO
             };
@@ -143,7 +144,7 @@ namespace Omnius.Xeus.Components.Engines
 
                             foreach (var connector in _connectors)
                             {
-                                connection = await connector.ConnectAsync(targetAddress, ServiceName, cancellationToken);
+                                connection = await connector.ConnectAsync(targetAddress, this.EngineName, cancellationToken);
                                 if (connection == null) continue;
                             }
 
@@ -191,7 +192,7 @@ namespace Omnius.Xeus.Components.Engines
 
                     foreach (var connector in _connectors)
                     {
-                        var result = await connector.AcceptAsync(ServiceName, cancellationToken);
+                        var result = await connector.AcceptAsync(this.EngineName, cancellationToken);
                         if (result.Connection != null && result.Address != null)
                         {
                             await this.TryAddConnectionAsync(result.Connection, result.Address, ConnectionHandshakeType.Accepted, null, cancellationToken);
@@ -411,9 +412,9 @@ namespace Omnius.Xeus.Components.Engines
             }
         }
 
-        private static ResourceTag HashToResourceTag(OmniHash hash)
+        private ResourceTag HashToResourceTag(OmniHash hash)
         {
-            return new ResourceTag(ServiceName, hash);
+            return new ResourceTag(this.EngineName, hash);
         }
 
         private enum ConnectionHandshakeType

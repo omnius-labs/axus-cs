@@ -46,10 +46,9 @@ namespace Omnius.Xeus.Components.Engines
 
         private const int MaxBucketLength = 20;
 
-        public const string ServiceName = "node-explorer`";
-
-        public event FetchResourceTag? PushFetchResourceTag;
-        public event FetchResourceTag? WantFetchResourceTag;
+        public event GetAvailableEngineNames? GetAvailableEngineNames;
+        public event GetFetchResourceTags? GetPushFetchResourceTags;
+        public event GetFetchResourceTags? GetWantFetchResourceTags;
 
         internal sealed class NodeFinderFactory : INodeFinderFactory
         {
@@ -61,6 +60,8 @@ namespace Omnius.Xeus.Components.Engines
                 return result;
             }
         }
+
+        public string EngineName => "node-explorer";
 
         public static INodeFinderFactory Factory { get; } = new NodeFinderFactory();
 
@@ -97,17 +98,24 @@ namespace Omnius.Xeus.Components.Engines
             _cancellationTokenSource.Dispose();
         }
 
-        private IEnumerable<ResourceTag> OnPushFetchResourceTag()
+        private IEnumerable<string> OnGetAvailableEngineNames()
         {
-            var results = new ConcurrentBag<ResourceTag>();
-            this.PushFetchResourceTag?.Invoke((tag) => results.Add(tag));
+            var results = new ConcurrentBag<string>();
+            this.GetAvailableEngineNames?.Invoke((name) => results.Add(name));
             return results;
         }
 
-        private IEnumerable<ResourceTag> OnWantFetchResourceTag()
+        private IEnumerable<ResourceTag> OnGetPushFetchResourceTags()
         {
             var results = new ConcurrentBag<ResourceTag>();
-            this.WantFetchResourceTag?.Invoke((tag) => results.Add(tag));
+            this.GetPushFetchResourceTags?.Invoke((tag) => results.Add(tag));
+            return results;
+        }
+
+        private IEnumerable<ResourceTag> OnGetWantFetchResourceTags()
+        {
+            var results = new ConcurrentBag<ResourceTag>();
+            this.GetWantFetchResourceTags?.Invoke((tag) => results.Add(tag));
             return results;
         }
 
@@ -140,8 +148,8 @@ namespace Omnius.Xeus.Components.Engines
             }
 
             var services = new List<string>();
-            services.Add(NodeFinder.ServiceName);
-            services.AddRange(_options.Services.ToArray());
+            services.Add(this.EngineName);
+            services.AddRange(this.OnGetAvailableEngineNames().ToArray());
 
             var myNodeProflie = new NodeProfile(services.ToArray(), addresses.ToArray());
             return myNodeProflie;
@@ -236,7 +244,7 @@ namespace Omnius.Xeus.Components.Engines
 
                         foreach (var connector in _connectors)
                         {
-                            connection = await connector.ConnectAsync(targetAddress, ServiceName, cancellationToken);
+                            connection = await connector.ConnectAsync(targetAddress, this.EngineName, cancellationToken);
                             if (connection == null) continue;
                         }
 
@@ -292,7 +300,7 @@ namespace Omnius.Xeus.Components.Engines
 
                     foreach (var connector in _connectors)
                     {
-                        var result = await connector.AcceptAsync(ServiceName, cancellationToken);
+                        var result = await connector.AcceptAsync(this.EngineName, cancellationToken);
                         if (result.Connection != null && result.Address != null)
                         {
                             await this.TryAddConnectionAsync(result.Connection, result.Address, ConnectionHandshakeType.Accepted, cancellationToken);
@@ -566,7 +574,7 @@ namespace Omnius.Xeus.Components.Engines
                         sendingPushNodeProfiles.AddRange(_cloudNodeProfiles);
                     }
 
-                    foreach (var tag in this.OnPushFetchResourceTag())
+                    foreach (var tag in this.OnGetPushFetchResourceTags())
                     {
                         contentLocationMap.GetOrAdd(tag, (_) => new HashSet<NodeProfile>())
                              .Add(myNodeProfile);
@@ -575,7 +583,7 @@ namespace Omnius.Xeus.Components.Engines
                              .Add(myNodeProfile);
                     }
 
-                    foreach (var tag in this.OnWantFetchResourceTag())
+                    foreach (var tag in this.OnGetWantFetchResourceTags())
                     {
                         sendingWantLocationSet.Add(tag);
                     }

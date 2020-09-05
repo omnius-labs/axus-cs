@@ -15,7 +15,7 @@ namespace Omnius.Xeus.Components.Engines
             IBytesPool bytesPool);
     }
 
-    public interface IDeclaredMessageExchanger : IAsyncDisposable
+    public interface IDeclaredMessageExchanger : IEngine, IAsyncDisposable
     {
     }
 }

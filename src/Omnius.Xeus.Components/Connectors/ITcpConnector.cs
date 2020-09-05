@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Network.Proxies;
@@ -11,7 +12,7 @@ namespace Omnius.Xeus.Components.Connectors
         public ValueTask<ITcpConnector> CreateAsync(TcpConnectorOptions options, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool);
     }
 
-    public interface ITcpConnector : IConnector
+    public interface ITcpConnector : IConnector, IAsyncDisposable
     {
     }
 }

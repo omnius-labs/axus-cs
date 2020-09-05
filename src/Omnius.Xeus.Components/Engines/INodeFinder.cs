@@ -11,16 +11,17 @@ namespace Omnius.Xeus.Components.Engines
 {
     public interface INodeFinderFactory
     {
-        ValueTask<INodeFinder> CreateAsync(NodeFinderOptions options, IEnumerable<IConnector> connectors,
-            IBytesPool bytesPool);
+        ValueTask<INodeFinder> CreateAsync(NodeFinderOptions options, IEnumerable<IConnector> connectors, IBytesPool bytesPool);
     }
 
-    public delegate void FetchResourceTag(Action<ResourceTag> append);
+    public delegate void GetFetchResourceTags(Action<ResourceTag> append);
+    public delegate void GetAvailableEngineNames(Action<string> append);
 
-    public interface INodeFinder : IAsyncDisposable
+    public interface INodeFinder : IEngine, IAsyncDisposable
     {
-        event FetchResourceTag? PushFetchResourceTag;
-        event FetchResourceTag? WantFetchResourceTag;
+        event GetAvailableEngineNames? GetAvailableEngineNames;
+        event GetFetchResourceTags? GetPushFetchResourceTags;
+        event GetFetchResourceTags? GetWantFetchResourceTags;
 
         ValueTask<NodeProfile> GetMyNodeProfile(CancellationToken cancellationToken = default);
         ValueTask AddCloudNodeProfiles(IEnumerable<NodeProfile> nodeProfiles, CancellationToken cancellationToken = default);
