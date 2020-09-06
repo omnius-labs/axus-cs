@@ -144,7 +144,7 @@ namespace Omnius.Xeus.Components.Engines.Internal
                 ResourceTag p_resourceTag = ResourceTag.Empty;
                 NodeProfile[] p_nodeProfiles = global::System.Array.Empty<NodeProfile>();
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -274,7 +274,7 @@ namespace Omnius.Xeus.Components.Engines.Internal
                 OmniHash p_hash = OmniHash.Empty;
                 global::System.Buffers.IMemoryOwner<byte> p_value = global::Omnius.Core.MemoryOwner<byte>.Empty;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -399,7 +399,7 @@ namespace Omnius.Xeus.Components.Engines.Internal
                 int p_depth = 0;
                 global::System.Buffers.IMemoryOwner<byte> p_flags = global::Omnius.Core.MemoryOwner<byte>.Empty;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -515,7 +515,7 @@ namespace Omnius.Xeus.Components.Engines.Internal
 
                 NodeFinderVersion[] p_versions = global::System.Array.Empty<NodeFinderVersion>();
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -634,7 +634,7 @@ namespace Omnius.Xeus.Components.Engines.Internal
                 global::System.ReadOnlyMemory<byte> p_id = global::System.ReadOnlyMemory<byte>.Empty;
                 NodeProfile p_nodeProfile = NodeProfile.Empty;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -826,7 +826,7 @@ namespace Omnius.Xeus.Components.Engines.Internal
                 ResourceTag[] p_wantResourceLocations = global::System.Array.Empty<ResourceTag>();
                 ResourceLocation[] p_giveResourceLocations = global::System.Array.Empty<ResourceLocation>();
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -972,7 +972,7 @@ namespace Omnius.Xeus.Components.Engines.Internal
 
                 ContentExchangerVersion[] p_versions = global::System.Array.Empty<ContentExchangerVersion>();
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -1076,7 +1076,7 @@ namespace Omnius.Xeus.Components.Engines.Internal
 
                 OmniHash p_hash = OmniHash.Empty;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -1175,7 +1175,7 @@ namespace Omnius.Xeus.Components.Engines.Internal
 
                 ContentExchangerRequestExchangeResultType p_type = (ContentExchangerRequestExchangeResultType)0;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -1358,7 +1358,7 @@ namespace Omnius.Xeus.Components.Engines.Internal
                 OmniHash[] p_wantContentBlockHashes = global::System.Array.Empty<OmniHash>();
                 ContentBlock[] p_giveContentBlocks = global::System.Array.Empty<ContentBlock>();
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -1504,7 +1504,7 @@ namespace Omnius.Xeus.Components.Engines.Internal
 
                 DeclaredMessageExchangerVersion[] p_versions = global::System.Array.Empty<DeclaredMessageExchangerVersion>();
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -1619,7 +1619,7 @@ namespace Omnius.Xeus.Components.Engines.Internal
                 OmniSignature p_signature = OmniSignature.Empty;
                 global::Omnius.Core.RocketPack.Timestamp p_creationTime = global::Omnius.Core.RocketPack.Timestamp.Zero;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -1734,7 +1734,7 @@ namespace Omnius.Xeus.Components.Engines.Internal
                 DeclaredMessageExchangerFetchResultType p_type = (DeclaredMessageExchangerFetchResultType)0;
                 DeclaredMessage? p_declaredMessage = null;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -1840,7 +1840,7 @@ namespace Omnius.Xeus.Components.Engines.Internal
 
                 DeclaredMessage p_declaredMessage = DeclaredMessage.Empty;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;

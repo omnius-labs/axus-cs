@@ -12,9 +12,9 @@ using Omnius.Core.Network;
 using Omnius.Core.Network.Connections;
 using Omnius.Core.Network.Connections.Extensions;
 using Omnius.Xeus.Components.Connectors;
+using Omnius.Xeus.Components.Engines.Internal;
 using Omnius.Xeus.Components.Models;
 using Omnius.Xeus.Components.Storages;
-using Omnius.Xeus.Components.Engines.Internal;
 
 namespace Omnius.Xeus.Components.Engines
 {
