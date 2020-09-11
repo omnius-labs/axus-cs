@@ -684,15 +684,13 @@ namespace Omnius.Xeus.Components.Models
         static TcpProxyOptions()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Components.Models.TcpProxyOptions>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Components.Models.TcpProxyOptions>.Empty = new global::Omnius.Xeus.Components.Models.TcpProxyOptions((TcpProxyType)0, OmniAddress.Empty);
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Components.Models.TcpProxyOptions>.Empty = new global::Omnius.Xeus.Components.Models.TcpProxyOptions((TcpProxyType)0, null);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public TcpProxyOptions(TcpProxyType type, OmniAddress address)
+        public TcpProxyOptions(TcpProxyType type, OmniAddress? address)
         {
-            if (address is null) throw new global::System.ArgumentNullException("address");
-
             this.Type = type;
             this.Address = address;
 
@@ -706,7 +704,7 @@ namespace Omnius.Xeus.Components.Models
         }
 
         public TcpProxyType Type { get; }
-        public OmniAddress Address { get; }
+        public OmniAddress? Address { get; }
 
         public static global::Omnius.Xeus.Components.Models.TcpProxyOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -737,7 +735,8 @@ namespace Omnius.Xeus.Components.Models
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.Type != target.Type) return false;
-            if (this.Address != target.Address) return false;
+            if ((this.Address is null) != (target.Address is null)) return false;
+            if (!(this.Address is null) && !(target.Address is null) && this.Address != target.Address) return false;
 
             return true;
         }
@@ -754,7 +753,7 @@ namespace Omnius.Xeus.Components.Models
                     w.Write((uint)1);
                     w.Write((ulong)value.Type);
                 }
-                if (value.Address != OmniAddress.Empty)
+                if (value.Address != null)
                 {
                     w.Write((uint)2);
                     global::Omnius.Core.Network.OmniAddress.Formatter.Serialize(ref w, value.Address, rank + 1);
@@ -767,7 +766,7 @@ namespace Omnius.Xeus.Components.Models
                 if (rank > 256) throw new global::System.FormatException();
 
                 TcpProxyType p_type = (TcpProxyType)0;
-                OmniAddress p_address = OmniAddress.Empty;
+                OmniAddress? p_address = null;
 
                 for (;;)
                 {
@@ -1183,28 +1182,28 @@ namespace Omnius.Xeus.Components.Models
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public TcpConnectorOptions(TcpConnectingOptions tcpConnectingOptions, TcpAcceptingOptions tcpAcceptingOptions, BandwidthOptions bandwidthOptions)
+        public TcpConnectorOptions(TcpConnectingOptions connectingOptions, TcpAcceptingOptions acceptingOptions, BandwidthOptions bandwidthOptions)
         {
-            if (tcpConnectingOptions is null) throw new global::System.ArgumentNullException("tcpConnectingOptions");
-            if (tcpAcceptingOptions is null) throw new global::System.ArgumentNullException("tcpAcceptingOptions");
+            if (connectingOptions is null) throw new global::System.ArgumentNullException("connectingOptions");
+            if (acceptingOptions is null) throw new global::System.ArgumentNullException("acceptingOptions");
             if (bandwidthOptions is null) throw new global::System.ArgumentNullException("bandwidthOptions");
 
-            this.TcpConnectingOptions = tcpConnectingOptions;
-            this.TcpAcceptingOptions = tcpAcceptingOptions;
+            this.ConnectingOptions = connectingOptions;
+            this.AcceptingOptions = acceptingOptions;
             this.BandwidthOptions = bandwidthOptions;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (tcpConnectingOptions != default) ___h.Add(tcpConnectingOptions.GetHashCode());
-                if (tcpAcceptingOptions != default) ___h.Add(tcpAcceptingOptions.GetHashCode());
+                if (connectingOptions != default) ___h.Add(connectingOptions.GetHashCode());
+                if (acceptingOptions != default) ___h.Add(acceptingOptions.GetHashCode());
                 if (bandwidthOptions != default) ___h.Add(bandwidthOptions.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public TcpConnectingOptions TcpConnectingOptions { get; }
-        public TcpAcceptingOptions TcpAcceptingOptions { get; }
+        public TcpConnectingOptions ConnectingOptions { get; }
+        public TcpAcceptingOptions AcceptingOptions { get; }
         public BandwidthOptions BandwidthOptions { get; }
 
         public static global::Omnius.Xeus.Components.Models.TcpConnectorOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -1235,8 +1234,8 @@ namespace Omnius.Xeus.Components.Models
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.TcpConnectingOptions != target.TcpConnectingOptions) return false;
-            if (this.TcpAcceptingOptions != target.TcpAcceptingOptions) return false;
+            if (this.ConnectingOptions != target.ConnectingOptions) return false;
+            if (this.AcceptingOptions != target.AcceptingOptions) return false;
             if (this.BandwidthOptions != target.BandwidthOptions) return false;
 
             return true;
@@ -1249,15 +1248,15 @@ namespace Omnius.Xeus.Components.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.TcpConnectingOptions != TcpConnectingOptions.Empty)
+                if (value.ConnectingOptions != TcpConnectingOptions.Empty)
                 {
                     w.Write((uint)1);
-                    global::Omnius.Xeus.Components.Models.TcpConnectingOptions.Formatter.Serialize(ref w, value.TcpConnectingOptions, rank + 1);
+                    global::Omnius.Xeus.Components.Models.TcpConnectingOptions.Formatter.Serialize(ref w, value.ConnectingOptions, rank + 1);
                 }
-                if (value.TcpAcceptingOptions != TcpAcceptingOptions.Empty)
+                if (value.AcceptingOptions != TcpAcceptingOptions.Empty)
                 {
                     w.Write((uint)2);
-                    global::Omnius.Xeus.Components.Models.TcpAcceptingOptions.Formatter.Serialize(ref w, value.TcpAcceptingOptions, rank + 1);
+                    global::Omnius.Xeus.Components.Models.TcpAcceptingOptions.Formatter.Serialize(ref w, value.AcceptingOptions, rank + 1);
                 }
                 if (value.BandwidthOptions != BandwidthOptions.Empty)
                 {
@@ -1271,8 +1270,8 @@ namespace Omnius.Xeus.Components.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                TcpConnectingOptions p_tcpConnectingOptions = TcpConnectingOptions.Empty;
-                TcpAcceptingOptions p_tcpAcceptingOptions = TcpAcceptingOptions.Empty;
+                TcpConnectingOptions p_connectingOptions = TcpConnectingOptions.Empty;
+                TcpAcceptingOptions p_acceptingOptions = TcpAcceptingOptions.Empty;
                 BandwidthOptions p_bandwidthOptions = BandwidthOptions.Empty;
 
                 for (;;)
@@ -1283,12 +1282,12 @@ namespace Omnius.Xeus.Components.Models
                     {
                         case 1:
                             {
-                                p_tcpConnectingOptions = global::Omnius.Xeus.Components.Models.TcpConnectingOptions.Formatter.Deserialize(ref r, rank + 1);
+                                p_connectingOptions = global::Omnius.Xeus.Components.Models.TcpConnectingOptions.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 2:
                             {
-                                p_tcpAcceptingOptions = global::Omnius.Xeus.Components.Models.TcpAcceptingOptions.Formatter.Deserialize(ref r, rank + 1);
+                                p_acceptingOptions = global::Omnius.Xeus.Components.Models.TcpAcceptingOptions.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 3:
@@ -1299,7 +1298,7 @@ namespace Omnius.Xeus.Components.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Components.Models.TcpConnectorOptions(p_tcpConnectingOptions, p_tcpAcceptingOptions, p_bandwidthOptions);
+                return new global::Omnius.Xeus.Components.Models.TcpConnectorOptions(p_connectingOptions, p_acceptingOptions, p_bandwidthOptions);
             }
         }
     }

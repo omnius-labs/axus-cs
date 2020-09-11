@@ -23,8 +23,8 @@ namespace Omnius.Xeus.Components.Engines
         event GetFetchResourceTags? GetPushFetchResourceTags;
         event GetFetchResourceTags? GetWantFetchResourceTags;
 
-        ValueTask<NodeProfile> GetMyNodeProfile(CancellationToken cancellationToken = default);
-        ValueTask AddCloudNodeProfiles(IEnumerable<NodeProfile> nodeProfiles, CancellationToken cancellationToken = default);
-        ValueTask<NodeProfile[]> FindNodeProfiles(ResourceTag tag, CancellationToken cancellationToken = default);
+        ValueTask<NodeProfile> GetMyNodeProfileAsync(CancellationToken cancellationToken = default);
+        ValueTask AddCloudNodeProfilesAsync(IEnumerable<NodeProfile> nodeProfiles, CancellationToken cancellationToken = default);
+        ValueTask<NodeProfile[]> FindNodeProfilesAsync(ResourceTag tag, CancellationToken cancellationToken = default);
     }
 }

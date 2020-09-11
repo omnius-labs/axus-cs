@@ -7,22 +7,22 @@ using Omnius.Xeus.Components.Models;
 namespace Omnius.Xeus.Rpc
 {
 
-    public readonly partial struct AddCloudNodeProfilesResult : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult>
+    public readonly partial struct AddCloudNodeProfilesParam : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult>.Formatter;
-        public static global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam>.Formatter;
+        public static global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam>.Empty;
 
-        static AddCloudNodeProfilesResult()
+        static AddCloudNodeProfilesParam()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult>.Empty = new global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult(global::System.Array.Empty<NodeProfile>());
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam>.Empty = new global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam(global::System.Array.Empty<NodeProfile>());
         }
 
         private readonly int ___hashCode;
 
         public static readonly int MaxNodeProfilesCount = 2147483647;
 
-        public AddCloudNodeProfilesResult(NodeProfile[] nodeProfiles)
+        public AddCloudNodeProfilesParam(NodeProfile[] nodeProfiles)
         {
             if (nodeProfiles is null) throw new global::System.ArgumentNullException("nodeProfiles");
             if (nodeProfiles.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("nodeProfiles");
@@ -45,7 +45,7 @@ namespace Omnius.Xeus.Rpc
 
         public global::Omnius.Core.Collections.ReadOnlyListSlim<NodeProfile> NodeProfiles { get; }
 
-        public static global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -56,20 +56,20 @@ namespace Omnius.Xeus.Rpc
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult left, global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult right)
+        public static bool operator ==(global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam left, global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam right)
         {
             return right.Equals(left);
         }
-        public static bool operator !=(global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult left, global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult right)
+        public static bool operator !=(global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam left, global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult)) return false;
-            return this.Equals((global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult)other);
+            if (!(other is global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam)) return false;
+            return this.Equals((global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam)other);
         }
-        public bool Equals(global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult target)
+        public bool Equals(global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam target)
         {
             if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.NodeProfiles, target.NodeProfiles)) return false;
 
@@ -77,9 +77,9 @@ namespace Omnius.Xeus.Rpc
         }
         public override int GetHashCode() => ___hashCode;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -90,7 +90,7 @@ namespace Omnius.Xeus.Rpc
                 }
             }
 
-            public global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -104,7 +104,7 @@ namespace Omnius.Xeus.Rpc
                         p_nodeProfiles[i] = global::Omnius.Xeus.Components.Models.NodeProfile.Formatter.Deserialize(ref r, rank + 1);
                     }
                 }
-                return new global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult(p_nodeProfiles);
+                return new global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam(p_nodeProfiles);
             }
         }
     }
@@ -295,7 +295,7 @@ namespace Omnius.Xeus.Rpc
     public interface IXeusService
     {
         global::System.Threading.Tasks.ValueTask GetMyNodeProfileAsync(global::System.Threading.CancellationToken cancellationToken);
-        global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult> AddCloudNodeProfilesAsync(global::System.Threading.CancellationToken cancellationToken);
+        global::System.Threading.Tasks.ValueTask AddCloudNodeProfilesAsync(global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam param, global::System.Threading.CancellationToken cancellationToken);
         global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Rpc.FindNodeProfilesResult> FindNodeProfilesAsync(global::Omnius.Xeus.Rpc.FindNodeProfilesParam param, global::System.Threading.CancellationToken cancellationToken);
     }
     public class XeusServiceSender : global::Omnius.Core.AsyncDisposableBase, global::Omnius.Xeus.Rpc.IXeusService
@@ -320,10 +320,10 @@ namespace Omnius.Xeus.Rpc
             using var stream = await _rpc.ConnectAsync(0, cancellationToken);
             await stream.CallActionAsync(cancellationToken);
         }
-        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult> AddCloudNodeProfilesAsync(global::System.Threading.CancellationToken cancellationToken)
+        public async global::System.Threading.Tasks.ValueTask AddCloudNodeProfilesAsync(global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam param, global::System.Threading.CancellationToken cancellationToken)
         {
             using var stream = await _rpc.ConnectAsync(1, cancellationToken);
-            return await stream.CallFunctionAsync<global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult>(cancellationToken);
+            await stream.CallActionAsync<global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam>(param, cancellationToken);
         }
         public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Rpc.FindNodeProfilesResult> FindNodeProfilesAsync(global::Omnius.Xeus.Rpc.FindNodeProfilesParam param, global::System.Threading.CancellationToken cancellationToken)
         {
@@ -363,7 +363,7 @@ namespace Omnius.Xeus.Rpc
                         break;
                     case 1:
                         {
-                            await stream.ListenFunctionAsync<global::Omnius.Xeus.Rpc.AddCloudNodeProfilesResult>(_impl.AddCloudNodeProfilesAsync, cancellationToken);
+                            await stream.ListenActionAsync<global::Omnius.Xeus.Rpc.AddCloudNodeProfilesParam>(_impl.AddCloudNodeProfilesAsync, cancellationToken);
                         }
                         break;
                     case 2:

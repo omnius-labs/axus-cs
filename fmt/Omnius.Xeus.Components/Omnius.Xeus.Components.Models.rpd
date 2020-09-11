@@ -40,7 +40,7 @@ message ConnectionReport {
     EndPoint: OmniAddress,
 }
 
-// TcpConneckor
+// TcpConnector
 
 enum TcpProxyType : uint8 {
     Unknown = 0,
@@ -50,7 +50,7 @@ enum TcpProxyType : uint8 {
 
 message TcpProxyOptions {
     Type: TcpProxyType,
-    Address: OmniAddress,
+    Address: OmniAddress?,
 }
 
 message TcpConnectingOptions {
@@ -70,8 +70,8 @@ message BandwidthOptions {
 }
 
 message TcpConnectorOptions {
-    TcpConnectingOptions: TcpConnectingOptions,
-    TcpAcceptingOptions: TcpAcceptingOptions,
+    ConnectingOptions: TcpConnectingOptions,
+    AcceptingOptions: TcpAcceptingOptions,
     BandwidthOptions: BandwidthOptions,
 }
 

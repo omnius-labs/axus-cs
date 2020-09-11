@@ -119,7 +119,7 @@ namespace Omnius.Xeus.Components.Engines
             return results;
         }
 
-        public async ValueTask<NodeProfile[]> FindNodeProfiles(ResourceTag tag, CancellationToken cancellationToken = default)
+        public async ValueTask<NodeProfile[]> FindNodeProfilesAsync(ResourceTag tag, CancellationToken cancellationToken = default)
         {
             lock (_lockObject)
             {
@@ -139,7 +139,7 @@ namespace Omnius.Xeus.Components.Engines
             }
         }
 
-        public async ValueTask<NodeProfile> GetMyNodeProfile(CancellationToken cancellationToken = default)
+        public async ValueTask<NodeProfile> GetMyNodeProfileAsync(CancellationToken cancellationToken = default)
         {
             var addresses = new List<OmniAddress>();
             foreach (var connector in _connectors)
@@ -155,7 +155,7 @@ namespace Omnius.Xeus.Components.Engines
             return myNodeProflie;
         }
 
-        public async ValueTask AddCloudNodeProfiles(IEnumerable<NodeProfile> nodeProfiles, CancellationToken cancellationToken = default)
+        public async ValueTask AddCloudNodeProfilesAsync(IEnumerable<NodeProfile> nodeProfiles, CancellationToken cancellationToken = default)
         {
             lock (_lockObject)
             {
@@ -369,7 +369,7 @@ namespace Omnius.Xeus.Components.Engines
                     ReadOnlyMemory<byte> id;
                     NodeProfile? nodeProfile = null;
                     {
-                        var myNodeProflie = await this.GetMyNodeProfile();
+                        var myNodeProflie = await this.GetMyNodeProfileAsync();
                         var myProfileMessage = new NodeFinderProfileMessage(_myId, myNodeProflie);
 
                         var enqueueTask = connection.EnqueueAsync(myProfileMessage, cancellationToken).AsTask();
@@ -466,7 +466,7 @@ namespace Omnius.Xeus.Components.Engines
                         {
                             if (status.Connection.TryDequeue<NodeFinderDataMessage>(out var dataMessage))
                             {
-                                await this.AddCloudNodeProfiles(dataMessage.PushNodeProfiles, cancellationToken);
+                                await this.AddCloudNodeProfilesAsync(dataMessage.PushNodeProfiles, cancellationToken);
 
                                 lock (status.LockObject)
                                 {
@@ -544,7 +544,7 @@ namespace Omnius.Xeus.Components.Engines
                     }
 
                     // 自分のノードプロファイル
-                    var myNodeProfile = await this.GetMyNodeProfile(cancellationToken);
+                    var myNodeProfile = await this.GetMyNodeProfileAsync(cancellationToken);
 
                     // ノード情報
                     var elements = new List<KademliaElement<ComputingNodeElement>>();

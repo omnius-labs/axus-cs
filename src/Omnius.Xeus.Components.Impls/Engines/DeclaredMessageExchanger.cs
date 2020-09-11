@@ -108,7 +108,7 @@ namespace Omnius.Xeus.Components.Engines
 
                         NodeProfile? targetNodeProfile = null;
                         {
-                            var nodeProfiles = await _nodeFinder.FindNodeProfiles(tag, cancellationToken);
+                            var nodeProfiles = await _nodeFinder.FindNodeProfilesAsync(tag, cancellationToken);
                             random.Shuffle(nodeProfiles);
 
                             lock (_lockObject)

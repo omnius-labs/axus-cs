@@ -60,7 +60,7 @@ namespace Omnius.Xeus.Components.Connectors
 
         public async ValueTask InitAsync()
         {
-            _tcpConnector = await InternalTcpConnector.Factory.CreateAsync(_options.TcpConnectingOptions, _options.TcpAcceptingOptions, _socks5ProxyClientFactory, _httpProxyClientFactory, _upnpClientFactory, _bytesPool);
+            _tcpConnector = await InternalTcpConnector.Factory.CreateAsync(_options.ConnectingOptions, _options.AcceptingOptions, _socks5ProxyClientFactory, _httpProxyClientFactory, _upnpClientFactory, _bytesPool);
             _baseConnectionDispatcher = new BaseConnectionDispatcher(new BaseConnectionDispatcherOptions()
             {
                 MaxSendBytesPerSeconds = (int)_options.BandwidthOptions.MaxSendBytesPerSeconds,

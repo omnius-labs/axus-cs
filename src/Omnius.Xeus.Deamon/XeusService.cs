@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using System.IO;
 using Omnius.Core;
 using Omnius.Core.Network.Upnp;
 using Omnius.Core.Network.Proxies;
+using Omnius.Xeus.Deamon.Internal;
 
 namespace Omnius.Xeus.Deamon
 {
@@ -30,7 +32,7 @@ namespace Omnius.Xeus.Deamon
     {
         private readonly XeusServiceOptions _options;
 
-        private INodeFinder _nodeFinder;
+        private INodeFinder? _nodeFinder;
 
         public static async ValueTask<XeusService> CreateAsync(XeusServiceOptions options)
         {
@@ -46,30 +48,37 @@ namespace Omnius.Xeus.Deamon
 
         private async ValueTask InitAsync(CancellationToken cancellationToken = default)
         {
+            var config = _options.Config ?? throw new ArgumentNullException();
+            var tcpConnectorFactory = _options.TcpConnectorFactory ?? throw new ArgumentNullException();
+            var socks5ProxyClientFactory = _options.Socks5ProxyClientFactory ?? throw new ArgumentNullException();
+            var httpProxyClientFactory = _options.HttpProxyClientFactory ?? throw new ArgumentNullException();
+            var upnpClientFactory = _options.UpnpClientFactory ?? throw new ArgumentNullException();
+            var nodeFinderFactory = _options.NodeFinderFactory ?? throw new ArgumentNullException();
+            var bytesPool = _options.BytesPool ?? throw new ArgumentNullException();
+            var workingDirectory = _options.Config.WorkingDirectory ?? throw new ArgumentNullException();
+
             var connectors = new List<IConnector>();
-            var tcpConnectingOptions = new TcpConnectingOptions();
-            var tcpAcceptingOptions = new TcpAcceptingOptions();
-            var bandwidthOptions = new BandwidthOptions();
-            var tcpConnectorOptions = new TcpConnectorOptions(tcpConnectingOptions, tcpAcceptingOptions, bandwidthOptions);
-            connectors.Add(await _options.TcpConnectorFactory.CreateAsync(tcpConnectorOptions, _options.Socks5ProxyClientFactory, _options.HttpProxyClientFactory, _options.UpnpClientFactory, _options.BytesPool));
+            var tcpConnectorOptions = OptionsGenerator.GenTcpConnectorOptions(config);
+            connectors.Add(await tcpConnectorFactory.CreateAsync(tcpConnectorOptions, socks5ProxyClientFactory, httpProxyClientFactory, upnpClientFactory, bytesPool));
 
-            var nodeFinderOptions = new NodeFinderOptions(Path.Combine(_options.Config.WorkingDirectory, "node_finder"), 10);
-            _nodeFinder = await _options.NodeFinderFactory.CreateAsync(nodeFinderOptions, connectors, _options.BytesPool);
+            var nodeFinderOptions = new NodeFinderOptions(Path.Combine(workingDirectory, "node_finder"), 10);
+            _nodeFinder = await nodeFinderFactory.CreateAsync(nodeFinderOptions, connectors, _options.BytesPool);
         }
 
-        public ValueTask<AddCloudNodeProfilesResult> AddCloudNodeProfilesAsync(CancellationToken cancellationToken)
+        public async ValueTask AddCloudNodeProfilesAsync(AddCloudNodeProfilesParam param, CancellationToken cancellationToken)
         {
-
+            await _nodeFinder.AddCloudNodeProfilesAsync(param.NodeProfiles, cancellationToken);
         }
 
-        public ValueTask<FindNodeProfilesResult> FindNodeProfilesAsync(FindNodeProfilesParam param, CancellationToken cancellationToken)
+        public async ValueTask<FindNodeProfilesResult> FindNodeProfilesAsync(FindNodeProfilesParam param, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            var result = await _nodeFinder.FindNodeProfilesAsync(param.ResourceTag, cancellationToken);
+            return new FindNodeProfilesResult(result);
         }
 
-        public ValueTask GetMyNodeProfileAsync(CancellationToken cancellationToken)
+        public async ValueTask GetMyNodeProfileAsync(CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            await _nodeFinder.GetMyNodeProfileAsync(cancellationToken);
         }
     }
 }

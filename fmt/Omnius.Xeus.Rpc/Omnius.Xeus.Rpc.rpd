@@ -7,7 +7,7 @@ using "Omnius.Xeus.Components.Models";
 namespace "Omnius.Xeus.Rpc";
 
 [csharp_struct]
-struct AddCloudNodeProfilesResult {
+struct AddCloudNodeProfilesParam {
     NodeProfiles: vector<NodeProfile>,
 }
 
@@ -23,6 +23,6 @@ struct FindNodeProfilesResult {
 
 service XeusService {
     GetMyNodeProfile: () -> (),
-    AddCloudNodeProfiles: () -> (AddCloudNodeProfilesResult),
+    AddCloudNodeProfiles: (AddCloudNodeProfilesParam) -> (),
     FindNodeProfiles: (FindNodeProfilesParam) -> (FindNodeProfilesResult),
 }
