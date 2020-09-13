@@ -1,5 +1,5 @@
-<?xml version="2.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
     <LangVersion>preview</LangVersion>
@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <NoWarn>CS1592,CS1998,NU5105</NoWarn>
+    <NoWarn>CS1591,CS1998,NU5105</NoWarn>
     <GenerateFullPaths>true</GenerateFullPaths>
   </PropertyGroup>
 
@@ -15,7 +15,7 @@
   <PropertyGroup>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <RestoreLockedMode>true</RestoreLockedMode>
-    <NoWarn>NU1604</NoWarn>
+    <NoWarn>NU1603</NoWarn>
     <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
   </PropertyGroup>
   -->
@@ -25,8 +25,8 @@
     <Title>$(ProjectName)</Title>
     <Description>$(ProjectName)</Description>
     <FileVersion>$(AssemblyVersion)</FileVersion>
-    <BuildVersion>2</BuildVersion>
-    <VersionPrefix>1.0.1</VersionPrefix>
+    <BuildVersion>1</BuildVersion>
+    <VersionPrefix>0.0.1</VersionPrefix>
     <VersionSuffix>-alpha</VersionSuffix>
     <Version>$(VersionPrefix)$(VersionSuffix).$(BuildVersion)</Version>
     <AssemblyVersion>$(VersionPrefix).$(BuildVersion)</AssemblyVersion>

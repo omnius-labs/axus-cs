@@ -36,6 +36,7 @@ namespace Omnius.Xeus.Deamon.Internal
                 return new Models.TcpAcceptingOptions(
                     config.Connectors.TcpConnector.Accepting.Enabled,
                     config.Connectors.TcpConnector.Accepting.ListenAddresses.Select(n => new OmniAddress(n)).ToArray(),
+                    config.Connectors.TcpConnector.Accepting.UseUpnp
                 );
             }
 
