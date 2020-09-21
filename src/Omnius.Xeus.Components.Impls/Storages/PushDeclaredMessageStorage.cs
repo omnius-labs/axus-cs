@@ -22,7 +22,7 @@ namespace Omnius.Xeus.Components.Storages
         private readonly PushDeclaredMessageStorageOptions _options;
         private readonly IBytesPool _bytesPool;
 
-        private readonly Repository _repository;
+        private readonly Database _Database;
 
         private readonly AsyncLock _asyncLock = new AsyncLock();
 
@@ -45,17 +45,17 @@ namespace Omnius.Xeus.Components.Storages
             _options = options;
             _bytesPool = bytesPool;
 
-            _repository = new Repository(Path.Combine(_options.ConfigPath, "lite.db"));
+            _Database = new Database(Path.Combine(_options.ConfigPath, "database"));
         }
 
         internal async ValueTask InitAsync()
         {
-            await _repository.MigrateAsync();
+            await _Database.MigrateAsync();
         }
 
         protected override async ValueTask OnDisposeAsync()
         {
-            _repository.Dispose();
+            _Database.Dispose();
         }
 
         public async ValueTask<PushDeclaredMessageStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
@@ -79,7 +79,7 @@ namespace Omnius.Xeus.Components.Storages
         {
             using (await _asyncLock.LockAsync())
             {
-                var status = _repository.PushStatus.Get(signature);
+                var status = _Database.PushStatus.Get(signature);
                 if (status == null) return false;
                 return true;
             }
@@ -92,7 +92,7 @@ namespace Omnius.Xeus.Components.Storages
                 var signature = message.Certificate?.GetOmniSignature();
                 if (signature == null) return;
 
-                _repository.PushStatus.Add(new PushStatus(signature, message.CreationTime.ToDateTime()));
+                _Database.PushStatus.Add(new PushStatus(signature, message.CreationTime.ToDateTime()));
 
                 var filePath = Path.Combine(_options.ConfigPath, "cache", SignatureToString(signature));
 
@@ -107,7 +107,7 @@ namespace Omnius.Xeus.Components.Storages
         {
             using (await _asyncLock.LockAsync())
             {
-                _repository.PushStatus.Remove(signature);
+                _Database.PushStatus.Remove(signature);
             }
         }
 
@@ -115,7 +115,7 @@ namespace Omnius.Xeus.Components.Storages
         {
             using (await _asyncLock.LockAsync())
             {
-                var status = _repository.PushStatus.Get(signature);
+                var status = _Database.PushStatus.Get(signature);
                 if (status == null) return null;
 
                 return status.CreationTime;
@@ -126,7 +126,7 @@ namespace Omnius.Xeus.Components.Storages
         {
             using (await _asyncLock.LockAsync())
             {
-                var status = _repository.PushStatus.Get(signature);
+                var status = _Database.PushStatus.Get(signature);
                 if (status == null) return null;
 
                 var filePath = Path.Combine(_options.ConfigPath, "cache", SignatureToString(signature));
@@ -161,14 +161,14 @@ namespace Omnius.Xeus.Components.Storages
             public DateTime CreationTime { get; }
         }
 
-        private sealed class Repository : IDisposable
+        private sealed class Database : IDisposable
         {
             private readonly LiteDatabase _database;
 
-            public Repository(string path)
+            public Database(string path)
             {
                 _database = new LiteDatabase(path);
-                this.PushStatus = new PushStatusRepository(_database);
+                this.PushStatus = new PushStatusDatabase(_database);
             }
 
             public void Dispose()
@@ -186,13 +186,13 @@ namespace Omnius.Xeus.Components.Storages
                 }
             }
 
-            public PushStatusRepository PushStatus { get; set; }
+            public PushStatusDatabase PushStatus { get; set; }
 
-            public sealed class PushStatusRepository
+            public sealed class PushStatusDatabase
             {
                 private readonly LiteDatabase _database;
 
-                public PushStatusRepository(LiteDatabase database)
+                public PushStatusDatabase(LiteDatabase database)
                 {
                     _database = database;
                 }

@@ -14,7 +14,7 @@ namespace Omnius.Xeus.Components.Storages
     public class WantDeclaredMessageStorageTests
     {
         [Fact]
-        public async Task RegisterAndUnregisterSuccessTestAsync()
+        public async Task RegisterAndUnregisterSuccessTest()
         {
             using var deleter = FixtureFactory.GenTempDirectory(out var tempPath);
             var options = new WantDeclaredMessageStorageOptions(tempPath);
@@ -53,7 +53,7 @@ namespace Omnius.Xeus.Components.Storages
         }
 
         [Fact]
-        public async Task WriteAndReadSuccessTestAsync()
+        public async Task WriteAndReadSuccessTest()
         {
             using var deleter = FixtureFactory.GenTempDirectory(out var tempPath);
             var options = new WantDeclaredMessageStorageOptions(tempPath);

@@ -38,6 +38,7 @@ namespace Omnius.Xeus.Deamon
         {
             var service = new XeusService(options);
             await service.InitAsync();
+
             return service;
         }
 
@@ -67,17 +68,20 @@ namespace Omnius.Xeus.Deamon
 
         public async ValueTask AddCloudNodeProfilesAsync(AddCloudNodeProfilesParam param, CancellationToken cancellationToken)
         {
+            if (_nodeFinder is null) throw new NullReferenceException(nameof(_nodeFinder));
             await _nodeFinder.AddCloudNodeProfilesAsync(param.NodeProfiles, cancellationToken);
         }
 
         public async ValueTask<FindNodeProfilesResult> FindNodeProfilesAsync(FindNodeProfilesParam param, CancellationToken cancellationToken)
         {
+            if (_nodeFinder is null) throw new NullReferenceException(nameof(_nodeFinder));
             var result = await _nodeFinder.FindNodeProfilesAsync(param.ResourceTag, cancellationToken);
             return new FindNodeProfilesResult(result);
         }
 
         public async ValueTask GetMyNodeProfileAsync(CancellationToken cancellationToken)
         {
+            if (_nodeFinder is null) throw new NullReferenceException(nameof(_nodeFinder));
             await _nodeFinder.GetMyNodeProfileAsync(cancellationToken);
         }
     }

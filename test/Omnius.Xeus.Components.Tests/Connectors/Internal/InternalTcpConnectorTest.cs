@@ -17,7 +17,7 @@ namespace Omnius.Xeus.Components.Connectors.Internal
         /// InternalTcpConnectorのConnectAsyncが成功することを確認する
         /// </summary>
         [Fact]
-        public async Task ConnectAsyncSuccessTestAsync()
+        public async Task ConnectAsyncSuccessTest()
         {
             const int Port = 55555;
             const string IpAddress = "127.0.0.1";
@@ -54,7 +54,7 @@ namespace Omnius.Xeus.Components.Connectors.Internal
         /// InternalTcpConnectorのAcceptAsyncが成功することを確認する
         /// </summary>
         [Fact]
-        public async Task AcceptAsyncSuccessTestAsync()
+        public async Task AcceptAsyncSuccessTest()
         {
             const int port = 55555;
             const string ipAddress = "127.0.0.1";

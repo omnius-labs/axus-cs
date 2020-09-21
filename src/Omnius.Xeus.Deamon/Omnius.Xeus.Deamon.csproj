@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Collections\Omnius.Core.Collections.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Cryptography\Omnius.Core.Cryptography.csproj" />
@@ -20,6 +24,12 @@
     <PackageReference Include="Glob.cs" Version="5.0.224" />
     <PackageReference Include="NLog" Version="4.7.4" />
     <PackageReference Include="NLog.Config" Version="4.7.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="NLog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

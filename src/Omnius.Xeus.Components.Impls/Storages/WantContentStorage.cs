@@ -25,7 +25,7 @@ namespace Omnius.Xeus.Components.Storages
         private readonly WantContentStorageOptions _options;
         private readonly IBytesPool _bytesPool;
 
-        private readonly Repository _repository;
+        private readonly Database _database;
 
         private readonly AsyncLock _asyncLock = new AsyncLock();
 
@@ -49,17 +49,17 @@ namespace Omnius.Xeus.Components.Storages
             _options = options;
             _bytesPool = bytesPool;
 
-            _repository = new Repository(Path.Combine(_options.ConfigPath, "lite.db"));
+            _database = new Database(Path.Combine(_options.ConfigPath, "database"));
         }
 
         internal async ValueTask InitAsync()
         {
-            await _repository.MigrateAsync();
+            await _database.MigrateAsync();
         }
 
         protected override async ValueTask OnDisposeAsync()
         {
-            _repository.Dispose();
+            _database.Dispose();
         }
 
         public ValueTask<WantContentStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
@@ -80,7 +80,7 @@ namespace Omnius.Xeus.Components.Storages
         {
             using (await _asyncLock.LockAsync())
             {
-                var status = _repository.WantStatus.Get(rootHash);
+                var status = _database.WantStatus.Get(rootHash);
                 if (status == null) return Enumerable.Empty<OmniHash>();
 
                 throw new NotImplementedException();
@@ -91,7 +91,7 @@ namespace Omnius.Xeus.Components.Storages
         {
             using (await _asyncLock.LockAsync())
             {
-                var status = _repository.WantStatus.Get(rootHash);
+                var status = _database.WantStatus.Get(rootHash);
                 if (status == null) return false;
 
                 return true;
@@ -102,7 +102,7 @@ namespace Omnius.Xeus.Components.Storages
         {
             using (await _asyncLock.LockAsync())
             {
-                var status = _repository.WantStatus.Get(rootHash);
+                var status = _database.WantStatus.Get(rootHash);
                 if (status == null) return false;
 
                 var filePath = Path.Combine(Path.Combine(_options.ConfigPath, "cache", HashToString(rootHash), HashToString(targetHash)));
@@ -116,7 +116,7 @@ namespace Omnius.Xeus.Components.Storages
         {
             using (await _asyncLock.LockAsync())
             {
-                _repository.WantStatus.Add(new WantStatus(rootHash));
+                _database.WantStatus.Add(new WantStatus(rootHash));
             }
         }
 
@@ -124,7 +124,7 @@ namespace Omnius.Xeus.Components.Storages
         {
             using (await _asyncLock.LockAsync())
             {
-                _repository.WantStatus.Remove(rootHash);
+                _database.WantStatus.Remove(rootHash);
             }
         }
 
@@ -142,7 +142,7 @@ namespace Omnius.Xeus.Components.Storages
         {
             using (await _asyncLock.LockAsync())
             {
-                var status = _repository.WantStatus.Get(rootHash);
+                var status = _database.WantStatus.Get(rootHash);
                 if (status == null) return null;
 
                 var filePath = Path.Combine(Path.Combine(_options.ConfigPath, "cache", HashToString(rootHash), HashToString(targetHash)));
@@ -159,7 +159,7 @@ namespace Omnius.Xeus.Components.Storages
         {
             using (await _asyncLock.LockAsync())
             {
-                var status = _repository.WantStatus.Get(rootHash);
+                var status = _database.WantStatus.Get(rootHash);
                 if (status == null) return;
 
                 var filePath = Path.Combine(Path.Combine(_options.ConfigPath, "cache", HashToString(rootHash), HashToString(targetHash)));
@@ -190,14 +190,14 @@ namespace Omnius.Xeus.Components.Storages
             public OmniHash Hash { get; }
         }
 
-        private sealed class Repository : IDisposable
+        private sealed class Database : IDisposable
         {
             private readonly LiteDatabase _database;
 
-            public Repository(string path)
+            public Database(string path)
             {
                 _database = new LiteDatabase(path);
-                this.WantStatus = new WantStatusRepository(_database);
+                this.WantStatus = new WantStatusDatabase(_database);
             }
 
             public void Dispose()
@@ -215,13 +215,13 @@ namespace Omnius.Xeus.Components.Storages
                 }
             }
 
-            public WantStatusRepository WantStatus { get; set; }
+            public WantStatusDatabase WantStatus { get; set; }
 
-            public sealed class WantStatusRepository
+            public sealed class WantStatusDatabase
             {
                 private readonly LiteDatabase _database;
 
-                public WantStatusRepository(LiteDatabase database)
+                public WantStatusDatabase(LiteDatabase database)
                 {
                     _database = database;
                 }

@@ -26,7 +26,7 @@ namespace Omnius.Xeus.Components.Storages
         private readonly PushContentStorageOptions _options;
         private readonly IBytesPool _bytesPool;
 
-        private readonly Repository _repository;
+        private readonly Database _database;
 
         private readonly AsyncLock _asyncLock = new AsyncLock();
 
@@ -50,17 +50,17 @@ namespace Omnius.Xeus.Components.Storages
             _options = options;
             _bytesPool = bytesPool;
 
-            _repository = new Repository(Path.Combine(_options.ConfigPath, "lite.db"));
+            _database = new Database(Path.Combine(_options.ConfigPath, "database"));
         }
 
         internal async ValueTask InitAsync()
         {
-            await _repository.MigrateAsync();
+            await _database.MigrateAsync();
         }
 
         protected override async ValueTask OnDisposeAsync()
         {
-            _repository.Dispose();
+            _database.Dispose();
         }
 
         public async ValueTask<PushContentStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
@@ -81,7 +81,7 @@ namespace Omnius.Xeus.Components.Storages
             {
                 var results = new List<OmniHash>();
 
-                foreach (var status in _repository.PushStatus.GetAll())
+                foreach (var status in _database.PushStatus.GetAll())
                 {
                     results.Add(status.Hash);
                 }
@@ -94,7 +94,7 @@ namespace Omnius.Xeus.Components.Storages
         {
             using (await _asyncLock.LockAsync())
             {
-                var status = _repository.PushStatus.Get(rootHash);
+                var status = _database.PushStatus.Get(rootHash);
                 if (status == null) return Enumerable.Empty<OmniHash>();
 
                 return status.MerkleTreeSections.SelectMany(n => n.Hashes);
@@ -105,7 +105,7 @@ namespace Omnius.Xeus.Components.Storages
         {
             using (await _asyncLock.LockAsync())
             {
-                var status = _repository.PushStatus.Get(rootHash);
+                var status = _database.PushStatus.Get(rootHash);
                 if (status == null) return false;
 
                 return true;
@@ -116,7 +116,7 @@ namespace Omnius.Xeus.Components.Storages
         {
             using (await _asyncLock.LockAsync())
             {
-                var status = _repository.PushStatus.Get(rootHash);
+                var status = _database.PushStatus.Get(rootHash);
                 if (status == null) return false;
 
                 return status.MerkleTreeSections.Any(n => n.Contains(rootHash));
@@ -129,7 +129,7 @@ namespace Omnius.Xeus.Components.Storages
             {
                 // 既にエンコード済みの場合
                 {
-                    var status = _repository.PushStatus.Get(filePath);
+                    var status = _database.PushStatus.Get(filePath);
                     if (status != null) return status.Hash;
                 }
 
@@ -229,7 +229,7 @@ namespace Omnius.Xeus.Components.Storages
                     }
 
                     var status = new PushStatus(rootHash, filePath, merkleTreeSections.ToArray());
-                    _repository.PushStatus.Add(status);
+                    _database.PushStatus.Add(status);
 
                     return rootHash;
                 }
@@ -250,9 +250,9 @@ namespace Omnius.Xeus.Components.Storages
         {
             using (await _asyncLock.LockAsync())
             {
-                var status = _repository.PushStatus.Get(filePath);
+                var status = _database.PushStatus.Get(filePath);
                 if (status == null) return;
-                _repository.PushStatus.Remove(filePath);
+                _database.PushStatus.Remove(filePath);
 
                 // キャッシュフォルダを削除
                 var cacheDirPath = Path.Combine(_options.ConfigPath, HashToString(status.Hash));
@@ -283,7 +283,7 @@ namespace Omnius.Xeus.Components.Storages
             return hash.ToString(ConvertStringType.Base16);
         }
 
-        private class PushStatus
+        private sealed class PushStatus
         {
             public PushStatus(OmniHash hash, string filePath, MerkleTreeSection[] merkleTreeSections)
             {
@@ -297,14 +297,14 @@ namespace Omnius.Xeus.Components.Storages
             public ReadOnlyListSlim<MerkleTreeSection> MerkleTreeSections { get; }
         }
 
-        private sealed class Repository : IDisposable
+        private sealed class Database : IDisposable
         {
             private readonly LiteDatabase _database;
 
-            public Repository(string path)
+            public Database(string path)
             {
                 _database = new LiteDatabase(path);
-                this.PushStatus = new PushStatusRepository(_database);
+                this.PushStatus = new PushStatusDatabase(_database);
             }
 
             public void Dispose()
@@ -323,13 +323,13 @@ namespace Omnius.Xeus.Components.Storages
                 }
             }
 
-            public PushStatusRepository PushStatus { get; set; }
+            public PushStatusDatabase PushStatus { get; set; }
 
-            public sealed class PushStatusRepository
+            public sealed class PushStatusDatabase
             {
                 private readonly LiteDatabase _database;
 
-                public PushStatusRepository(LiteDatabase database)
+                public PushStatusDatabase(LiteDatabase database)
                 {
                     _database = database;
                 }
@@ -374,7 +374,7 @@ namespace Omnius.Xeus.Components.Storages
                 }
             }
 
-            private class PushStatusEntity
+            private sealed class PushStatusEntity
             {
                 public string? FilePath { get; set; }
                 public OmniHashEntity? Hash { get; set; }
@@ -392,7 +392,7 @@ namespace Omnius.Xeus.Components.Storages
 
                 public PushStatus Export()
                 {
-                    return new PushStatus(this.Hash?.Export() ?? OmniHash.Empty, this.FilePath ?? string.Empty, this.MerkleTreeSections.Select(n => n.Export()).ToArray());
+                    return new PushStatus(this.Hash?.Export() ?? OmniHash.Empty, this.FilePath ?? string.Empty, this.MerkleTreeSections?.Select(n => n.Export())?.ToArray() ?? Array.Empty<MerkleTreeSection>());
                 }
             }
         }

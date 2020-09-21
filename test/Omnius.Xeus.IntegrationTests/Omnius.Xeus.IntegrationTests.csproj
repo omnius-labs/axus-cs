@@ -1,9 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <RootNamespace>Omnius.Xeus.Deamon</RootNamespace>
-  </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\src\Omnius.Xeus.Deamon\Omnius.Xeus.Deamon.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Test\Omnius.Core.Test.csproj" />

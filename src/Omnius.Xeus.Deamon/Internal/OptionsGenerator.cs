@@ -5,7 +5,7 @@ namespace Omnius.Xeus.Deamon.Internal
     using Omnius.Xeus.Deamon.Models;
     using Models = Omnius.Xeus.Components.Models;
 
-    public class OptionsGenerator
+    internal class OptionsGenerator
     {
         private static OmniAddress? CreateAddress(string? value)
         {

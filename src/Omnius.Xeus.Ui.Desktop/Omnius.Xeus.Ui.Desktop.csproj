@@ -3,13 +3,22 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
+
   <ItemGroup>
     <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.9.12" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="0.9.12" />
     <PackageReference Include="Avalonia.Desktop" Version="0.9.12" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.9.12" />
+    <PackageReference Include="ReactiveProperty.Core" Version="7.4.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core\Omnius.Core.csproj" />
+  </ItemGroup>
+
 </Project>

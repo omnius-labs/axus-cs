@@ -1,18 +1,18 @@
 using System;
 using System.Collections.Generic;
-using System.Reactive.Disposables;
 using System.Text;
-using Omnius.Core;
 using Reactive.Bindings;
+using System.Reactive.Disposables;
 using Reactive.Bindings.Extensions;
+using Omnius.Core;
 
 namespace Omnius.Xeus.Ui.Desktop.ViewModels
 {
-    public class MainWindowViewModel : DisposableBase
+    public class SearchControlViewModel : DisposableBase
     {
         private CompositeDisposable _disposables = new();
 
-        public MainWindowViewModel()
+        public SearchControlViewModel()
         {
             this.TreeViewWidth = new ReactivePropertySlim<double>().AddTo(_disposables);
         }

@@ -28,7 +28,7 @@ namespace Omnius.Xeus.Components.Storages
         private readonly WantDeclaredMessageStorageOptions _options;
         private readonly IBytesPool _bytesPool;
 
-        private readonly Repository _repository;
+        private readonly Database _database;
         private readonly string _cachePath;
 
         private readonly AsyncLock _asyncLock = new AsyncLock();
@@ -51,7 +51,7 @@ namespace Omnius.Xeus.Components.Storages
             _options = options;
             _bytesPool = bytesPool;
 
-            _repository = new Repository(Path.Combine(_options.ConfigPath, "lite.db"));
+            _database = new Database(Path.Combine(_options.ConfigPath, "database"));
             _cachePath = Path.Combine(_options.ConfigPath, "cache");
         }
 
@@ -62,12 +62,12 @@ namespace Omnius.Xeus.Components.Storages
                 Directory.CreateDirectory(_cachePath);
             }
 
-            await _repository.MigrateAsync();
+            await _database.MigrateAsync();
         }
 
         protected override async ValueTask OnDisposeAsync()
         {
-            _repository.Dispose();
+            _database.Dispose();
         }
 
         public async ValueTask<WantDeclaredMessageStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
@@ -90,7 +90,7 @@ namespace Omnius.Xeus.Components.Storages
         {
             using (await _asyncLock.LockAsync())
             {
-                var status = _repository.WantStatus.GetAll();
+                var status = _database.WantStatus.GetAll();
                 if (status == null) return Enumerable.Empty<OmniSignature>();
                 return status.Select(n => n.Signature).ToArray();
             }
@@ -100,7 +100,7 @@ namespace Omnius.Xeus.Components.Storages
         {
             using (await _asyncLock.LockAsync())
             {
-                var status = _repository.WantStatus.Get(signature);
+                var status = _database.WantStatus.Get(signature);
                 if (status == null) return false;
                 return true;
             }
@@ -110,7 +110,7 @@ namespace Omnius.Xeus.Components.Storages
         {
             using (await _asyncLock.LockAsync())
             {
-                _repository.WantStatus.Add(new WantStatus(signature, DateTime.MinValue));
+                _database.WantStatus.Add(new WantStatus(signature, DateTime.MinValue));
             }
         }
 
@@ -118,7 +118,7 @@ namespace Omnius.Xeus.Components.Storages
         {
             using (await _asyncLock.LockAsync())
             {
-                _repository.WantStatus.Remove(signature);
+                _database.WantStatus.Remove(signature);
             }
         }
 
@@ -126,7 +126,7 @@ namespace Omnius.Xeus.Components.Storages
         {
             using (await _asyncLock.LockAsync())
             {
-                var status = _repository.WantStatus.Get(signature);
+                var status = _database.WantStatus.Get(signature);
                 if (status == null) return null;
 
                 return status.CreationTime;
@@ -137,7 +137,7 @@ namespace Omnius.Xeus.Components.Storages
         {
             using (await _asyncLock.LockAsync())
             {
-                var status = _repository.WantStatus.Get(signature);
+                var status = _database.WantStatus.Get(signature);
                 if (status == null) return null;
 
                 var filePath = Path.Combine(_cachePath, SignatureToString(signature));
@@ -159,7 +159,7 @@ namespace Omnius.Xeus.Components.Storages
                 var signature = message.Certificate?.GetOmniSignature();
                 if (signature == null) return;
 
-                var status = _repository.WantStatus.Get(signature);
+                var status = _database.WantStatus.Get(signature);
                 if (status == null) return;
 
                 var filePath = Path.Combine(_cachePath, SignatureToString(signature));
@@ -191,14 +191,14 @@ namespace Omnius.Xeus.Components.Storages
             public DateTime CreationTime { get; }
         }
 
-        private sealed class Repository : IDisposable
+        private sealed class Database : IDisposable
         {
             private readonly LiteDatabase _database;
 
-            public Repository(string path)
+            public Database(string path)
             {
                 _database = new LiteDatabase(path);
-                this.WantStatus = new WantStatusRepository(_database);
+                this.WantStatus = new WantStatusDatabase(_database);
             }
 
             public void Dispose()
@@ -216,13 +216,13 @@ namespace Omnius.Xeus.Components.Storages
                 }
             }
 
-            public WantStatusRepository WantStatus { get; set; }
+            public WantStatusDatabase WantStatus { get; set; }
 
-            public sealed class WantStatusRepository
+            public sealed class WantStatusDatabase
             {
                 private readonly LiteDatabase _database;
 
-                public WantStatusRepository(LiteDatabase database)
+                public WantStatusDatabase(LiteDatabase database)
                 {
                     _database = database;
                 }
