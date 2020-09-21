@@ -120,7 +120,7 @@ namespace Omnius.Xeus.Components.Storages.Internal
                 ulong p_length = 0;
                 OmniHash[] p_hashes = global::System.Array.Empty<OmniHash>();
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;

@@ -93,7 +93,7 @@ namespace Omnius.Xeus.Components.Connectors.Internal
 
                 string p_service = string.Empty;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
