@@ -140,7 +140,7 @@ namespace Omnius.Xeus.Components.Models
                 string[] p_availableEngineNames = global::System.Array.Empty<string>();
                 OmniAddress[] p_addresses = global::System.Array.Empty<OmniAddress>();
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -268,7 +268,7 @@ namespace Omnius.Xeus.Components.Models
                 string p_type = string.Empty;
                 OmniHash p_hash = OmniHash.Empty;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -403,7 +403,7 @@ namespace Omnius.Xeus.Components.Models
                 global::System.Buffers.IMemoryOwner<byte> p_value = global::Omnius.Core.MemoryOwner<byte>.Empty;
                 OmniCertificate? p_certificate = null;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -532,7 +532,7 @@ namespace Omnius.Xeus.Components.Models
                 uint p_checkedBlockCount = 0;
                 uint p_totalBlockCount = 0;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -653,7 +653,7 @@ namespace Omnius.Xeus.Components.Models
                 ConnectionType p_type = (ConnectionType)0;
                 OmniAddress p_endPoint = OmniAddress.Empty;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -768,7 +768,7 @@ namespace Omnius.Xeus.Components.Models
                 TcpProxyType p_type = (TcpProxyType)0;
                 OmniAddress? p_address = null;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -883,7 +883,7 @@ namespace Omnius.Xeus.Components.Models
                 bool p_enabled = false;
                 TcpProxyOptions? p_proxyOptions = null;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -1022,7 +1022,7 @@ namespace Omnius.Xeus.Components.Models
                 OmniAddress[] p_listenAddresses = global::System.Array.Empty<OmniAddress>();
                 bool p_useUpnp = false;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -1146,7 +1146,7 @@ namespace Omnius.Xeus.Components.Models
                 uint p_maxSendBytesPerSeconds = 0;
                 uint p_maxReceiveBytesPerSeconds = 0;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -1274,7 +1274,7 @@ namespace Omnius.Xeus.Components.Models
                 TcpAcceptingOptions p_acceptingOptions = TcpAcceptingOptions.Empty;
                 BandwidthOptions p_bandwidthOptions = BandwidthOptions.Empty;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -1373,7 +1373,7 @@ namespace Omnius.Xeus.Components.Models
                 if (rank > 256) throw new global::System.FormatException();
 
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -1481,7 +1481,7 @@ namespace Omnius.Xeus.Components.Models
                 string p_configPath = string.Empty;
                 uint p_maxConnectionCount = 0;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -1575,7 +1575,7 @@ namespace Omnius.Xeus.Components.Models
                 if (rank > 256) throw new global::System.FormatException();
 
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -1683,7 +1683,7 @@ namespace Omnius.Xeus.Components.Models
                 string p_configPath = string.Empty;
                 uint p_maxConnectionCount = 0;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -1777,7 +1777,7 @@ namespace Omnius.Xeus.Components.Models
                 if (rank > 256) throw new global::System.FormatException();
 
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -1876,7 +1876,7 @@ namespace Omnius.Xeus.Components.Models
 
                 string p_configPath = string.Empty;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -1965,7 +1965,7 @@ namespace Omnius.Xeus.Components.Models
                 if (rank > 256) throw new global::System.FormatException();
 
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -2064,7 +2064,7 @@ namespace Omnius.Xeus.Components.Models
 
                 string p_configPath = string.Empty;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -2153,7 +2153,7 @@ namespace Omnius.Xeus.Components.Models
                 if (rank > 256) throw new global::System.FormatException();
 
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -2261,7 +2261,7 @@ namespace Omnius.Xeus.Components.Models
                 string p_configPath = string.Empty;
                 uint p_maxConnectionCount = 0;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -2355,7 +2355,7 @@ namespace Omnius.Xeus.Components.Models
                 if (rank > 256) throw new global::System.FormatException();
 
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -2454,7 +2454,7 @@ namespace Omnius.Xeus.Components.Models
 
                 string p_configPath = string.Empty;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -2543,7 +2543,7 @@ namespace Omnius.Xeus.Components.Models
                 if (rank > 256) throw new global::System.FormatException();
 
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -2642,7 +2642,7 @@ namespace Omnius.Xeus.Components.Models
 
                 string p_configPath = string.Empty;
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
@@ -2731,7 +2731,7 @@ namespace Omnius.Xeus.Components.Models
                 if (rank > 256) throw new global::System.FormatException();
 
 
-                for (;;)
+                for (; ; )
                 {
                     uint id = r.GetUInt32();
                     if (id == 0) break;
