@@ -1,12 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Omnius.Core;
 
 namespace Omnius.Xeus.Ui.Desktop.ViewModels
 {
-    public abstract class ViewModelBase
+    public abstract class ViewModelBase : DisposableBase
     {
     }
 }

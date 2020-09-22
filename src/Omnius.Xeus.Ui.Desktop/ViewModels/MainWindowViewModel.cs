@@ -1,14 +1,10 @@
-using System;
-using System.Collections.Generic;
 using System.Reactive.Disposables;
-using System.Text;
-using Omnius.Core;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 
 namespace Omnius.Xeus.Ui.Desktop.ViewModels
 {
-    public class MainWindowViewModel : DisposableBase
+    public class MainWindowViewModel : ViewModelBase
     {
         private CompositeDisposable _disposables = new();
 

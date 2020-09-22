@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
-using Omnius.Core.Cryptography;
-using Omnius.Xeus.Components.Connectors;
+using Omnius.Xeus.Components.Connectors.Primitives;
 using Omnius.Xeus.Components.Models;
 
 namespace Omnius.Xeus.Components.Engines

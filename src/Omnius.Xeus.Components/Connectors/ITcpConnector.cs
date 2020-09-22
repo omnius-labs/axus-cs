@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Network.Proxies;
 using Omnius.Core.Network.Upnp;
+using Omnius.Xeus.Components.Connectors.Primitives;
 using Omnius.Xeus.Components.Models;
 
 namespace Omnius.Xeus.Components.Connectors

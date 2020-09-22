@@ -1,14 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Reactive.Bindings;
 using System.Reactive.Disposables;
+using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
-using Omnius.Core;
 
 namespace Omnius.Xeus.Ui.Desktop.ViewModels
 {
-    public class SearchControlViewModel : DisposableBase
+    public class SearchControlViewModel : ViewModelBase
     {
         private CompositeDisposable _disposables = new();
 

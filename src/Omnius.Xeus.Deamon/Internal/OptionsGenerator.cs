@@ -1,8 +1,9 @@
+using System.Linq;
+using Omnius.Core.Network;
+using Omnius.Xeus.Deamon.Models;
+
 namespace Omnius.Xeus.Deamon.Internal
 {
-    using System.Linq;
-    using Omnius.Core.Network;
-    using Omnius.Xeus.Deamon.Models;
     using Models = Omnius.Xeus.Components.Models;
 
     internal class OptionsGenerator

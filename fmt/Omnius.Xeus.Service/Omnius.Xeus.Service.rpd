@@ -1,0 +1,14 @@
+﻿syntax v1.0;
+
+using "Omnius.Core.Cryptography";
+using "Omnius.Core.Network";
+using "Omnius.Xeus.Components.Models";
+using "Omnius.Xeus.Service.Models";
+
+namespace "Omnius.Xeus.Service";
+
+service XeusService {
+    GetMyNodeProfile: () -> (),
+    AddCloudNodeProfiles: (AddCloudNodeProfilesParam) -> (),
+    FindNodeProfiles: (FindNodeProfilesParam) -> (FindNodeProfilesResult),
+}

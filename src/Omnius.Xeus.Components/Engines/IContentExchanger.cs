@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Omnius.Core;
-using Omnius.Xeus.Components.Connectors;
+using Omnius.Xeus.Components.Connectors.Primitives;
 using Omnius.Xeus.Components.Models;
 using Omnius.Xeus.Components.Storages;
 

@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core.Cryptography;
 
-namespace Omnius.Xeus.Components.Storages
+namespace Omnius.Xeus.Components.Storages.Primitives
 {
     public interface IWritableContentStorage : IReadOnlyContentStorage
     {

@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
-using System.Linq;
-using System.Text;
 using Cocona;
 
 namespace Omnius.Xeus.Deamon
@@ -26,7 +22,7 @@ namespace Omnius.Xeus.Deamon
         {
             protected override ValidationResult IsValid(object value, ValidationContext validationContext)
             {
-                if (value is string path && (File.Exists(path) || File.Exists(path)))
+                if (value is string path && File.Exists(path))
                 {
                     return ValidationResult.Success;
                 }

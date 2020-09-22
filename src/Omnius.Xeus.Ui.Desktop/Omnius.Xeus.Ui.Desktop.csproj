@@ -5,7 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
 
@@ -19,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core\Omnius.Core.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Deamon\Omnius.Xeus.Deamon.csproj" />
   </ItemGroup>
 
 </Project>
