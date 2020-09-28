@@ -17,7 +17,6 @@ namespace Omnius.Xeus.Components.Models
         HttpProxy = 1,
         Socks5Proxy = 2,
     }
-
     public sealed partial class NodeProfile : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Components.Models.NodeProfile>
     {
         public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Components.Models.NodeProfile> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Components.Models.NodeProfile>.Formatter;
@@ -2744,6 +2743,4 @@ namespace Omnius.Xeus.Components.Models
             }
         }
     }
-
-
 }

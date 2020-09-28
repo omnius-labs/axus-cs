@@ -81,7 +81,7 @@ namespace Omnius.Xeus.Components.Connectors.Internal
                     // TcpListenerの追加処理
                     foreach (var listenAddress in listenAddressSet)
                     {
-                        if (!TryGetEndpoint(listenAddress, out var ipAddress, out ushort port, false))
+                        if (!listenAddress.TryParseTcpEndpoint(out var ipAddress, out ushort port, false))
                         {
                             continue;
                         }
@@ -254,98 +254,6 @@ namespace Omnius.Xeus.Components.Connectors.Internal
             return list;
         }
 
-        private static bool TryGetEndpoint(OmniAddress rootAddress, [NotNullWhen(true)] out IPAddress? ipAddress, out ushort port, bool nameResolving = false)
-        {
-            ipAddress = IPAddress.None;
-            port = 0;
-
-            var rootFunction = rootAddress.Parse();
-
-            if (rootFunction == null)
-            {
-                return false;
-            }
-
-            if (rootFunction.Name == "tcp")
-            {
-                if (!(rootFunction.Arguments.Count == 2
-                    && rootFunction.Arguments[0] is OmniAddress.FunctionElement hostFunction
-                    && rootFunction.Arguments[1] is OmniAddress.ConstantElement portConstant))
-                {
-                    return false;
-                }
-
-                if (hostFunction.Name == "ip4")
-                {
-                    if (!(hostFunction.Arguments.Count == 1
-                        && hostFunction.Arguments[0] is OmniAddress.ConstantElement ipAddressConstant))
-                    {
-                        return false;
-                    }
-
-                    if (!IPAddress.TryParse(ipAddressConstant.Text, out var temp)
-                        || temp.AddressFamily != AddressFamily.InterNetwork)
-                    {
-                        return false;
-                    }
-
-                    ipAddress = temp;
-                }
-                else if (hostFunction.Name == "ip6")
-                {
-                    if (!(hostFunction.Arguments.Count == 1
-                        && hostFunction.Arguments[0] is OmniAddress.ConstantElement ipAddressConstant))
-                    {
-                        return false;
-                    }
-
-                    if (!IPAddress.TryParse(ipAddressConstant.Text, out var temp)
-                        || temp.AddressFamily != AddressFamily.InterNetworkV6)
-                    {
-                        return false;
-                    }
-
-                    ipAddress = temp;
-                }
-                else if (nameResolving && hostFunction.Name == "dns")
-                {
-                    if (!(hostFunction.Arguments.Count == 1
-                        && hostFunction.Arguments[0] is OmniAddress.ConstantElement hostnameConstant))
-                    {
-                        return false;
-                    }
-
-                    try
-                    {
-                        var hostEntry = Dns.GetHostEntry(hostnameConstant.Text);
-
-                        if (hostEntry.AddressList.Length == 0)
-                        {
-                            return false;
-                        }
-
-                        ipAddress = hostEntry.AddressList[0];
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.Error(e);
-                        return false;
-                    }
-                }
-                else
-                {
-                    return false;
-                }
-
-                if (!ushort.TryParse(portConstant.Text, out port))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
         private static async ValueTask<Socket?> ConnectAsync(IPEndPoint remoteEndPoint)
         {
             return await Task.Run(() =>
@@ -387,7 +295,7 @@ namespace Omnius.Xeus.Components.Connectors.Internal
                     return null;
                 }
 
-                if (!TryGetEndpoint(address, out var ipAddress, out ushort port))
+                if (!address.TryParseTcpEndpoint(out var ipAddress, out ushort port))
                 {
                     return null;
                 }
@@ -400,9 +308,9 @@ namespace Omnius.Xeus.Components.Connectors.Internal
                     if (!IsGlobalIpAddress(ipAddress)) return null;
 #endif
 
-                    if (config.ProxyOptions != null)
+                    if (config.ProxyOptions?.Address is not null)
                     {
-                        if (!TryGetEndpoint(config.ProxyOptions.Address, out var proxyAddress, out ushort proxyPort, true))
+                        if (!config.ProxyOptions.Address.TryParseTcpEndpoint(out var proxyAddress, out ushort proxyPort, true))
                         {
                             return null;
                         }
@@ -504,11 +412,11 @@ namespace Omnius.Xeus.Components.Connectors.Internal
 
                         if (endpoint.AddressFamily == AddressFamily.InterNetwork)
                         {
-                            address = new OmniAddress($"tcp(ip4({endpoint.Address},{endpoint.Port}))");
+                            address = OmniAddress.CreateTcpEndpoint(endpoint.Address, (ushort)endpoint.Port);
                         }
                         else if (endpoint.AddressFamily == AddressFamily.InterNetworkV6)
                         {
-                            address = new OmniAddress($"tcp(ip6({endpoint.Address},{endpoint.Port}))");
+                            address = OmniAddress.CreateTcpEndpoint(endpoint.Address, (ushort)endpoint.Port);
                         }
                         else
                         {
@@ -542,7 +450,7 @@ namespace Omnius.Xeus.Components.Connectors.Internal
 
                 foreach (var listenAddress in _tcpAcceptingOptions.ListenAddresses)
                 {
-                    if (!TryGetEndpoint(listenAddress, out var listenIpAddress, out var port))
+                    if (!listenAddress.TryParseTcpEndpoint(out var listenIpAddress, out var port))
                     {
                         continue;
                     }
@@ -551,14 +459,14 @@ namespace Omnius.Xeus.Components.Connectors.Internal
                     {
                         foreach (var globalIpAddress in globalIpAddresses.Select(n => n.AddressFamily == AddressFamily.InterNetwork))
                         {
-                            results.Add(new OmniAddress($"tcp(ip4({listenAddress}),{port})"));
+                            results.Add(OmniAddress.CreateTcpEndpoint(listenIpAddress, port));
                         }
                     }
                     else if (listenIpAddress.AddressFamily == AddressFamily.InterNetworkV6 && listenIpAddress == IPAddress.IPv6Any)
                     {
                         foreach (var globalIpAddress in globalIpAddresses.Select(n => n.AddressFamily == AddressFamily.InterNetworkV6))
                         {
-                            results.Add(new OmniAddress($"tcp(ip6({listenAddress}),{port})"));
+                            results.Add(OmniAddress.CreateTcpEndpoint(listenIpAddress, port));
                         }
                     }
                 }

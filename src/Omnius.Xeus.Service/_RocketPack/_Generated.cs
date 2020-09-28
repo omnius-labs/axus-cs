@@ -1,9 +1,12 @@
+using Omnius.Core.Cryptography;
+using Omnius.Core.Network;
+using Omnius.Xeus.Components.Models;
+using Omnius.Xeus.Service.Models;
+
 #nullable enable
 
 namespace Omnius.Xeus.Service
 {
-
-
     public interface IXeusService
     {
         global::System.Threading.Tasks.ValueTask GetMyNodeProfileAsync(global::System.Threading.CancellationToken cancellationToken);
@@ -12,13 +15,13 @@ namespace Omnius.Xeus.Service
     }
     public class XeusServiceSender : global::Omnius.Core.AsyncDisposableBase, global::Omnius.Xeus.Service.IXeusService
     {
-        private readonly global::Omnius.Xeus.Service.IXeusService _impl;
+        private readonly global::Omnius.Xeus.Service.IXeusService _service;
         private readonly global::Omnius.Core.Network.Connections.IConnection _connection;
         private readonly global::Omnius.Core.IBytesPool _bytesPool;
         private readonly global::Omnius.Core.RocketPack.Remoting.RocketPackRpc _rpc;
-        public XeusServiceSender(global::Omnius.Xeus.Service.IXeusService impl, global::Omnius.Core.Network.Connections.IConnection connection, global::Omnius.Core.IBytesPool bytesPool)
+        public XeusServiceSender(global::Omnius.Xeus.Service.IXeusService service, global::Omnius.Core.Network.Connections.IConnection connection, global::Omnius.Core.IBytesPool bytesPool)
         {
-            _impl = impl;
+            _service = service;
             _connection = connection;
             _bytesPool = bytesPool;
             _rpc = new global::Omnius.Core.RocketPack.Remoting.RocketPackRpc(_connection, _bytesPool);
@@ -45,13 +48,13 @@ namespace Omnius.Xeus.Service
     }
     public class XeusServiceReceiver : global::Omnius.Core.AsyncDisposableBase
     {
-        private readonly global::Omnius.Xeus.Service.IXeusService _impl;
+        private readonly global::Omnius.Xeus.Service.IXeusService _service;
         private readonly global::Omnius.Core.Network.Connections.IConnection _connection;
         private readonly global::Omnius.Core.IBytesPool _bytesPool;
         private readonly global::Omnius.Core.RocketPack.Remoting.RocketPackRpc _rpc;
-        public XeusServiceReceiver(global::Omnius.Xeus.Service.IXeusService impl, global::Omnius.Core.Network.Connections.IConnection connection, global::Omnius.Core.IBytesPool bytesPool)
+        public XeusServiceReceiver(global::Omnius.Xeus.Service.IXeusService service, global::Omnius.Core.Network.Connections.IConnection connection, global::Omnius.Core.IBytesPool bytesPool)
         {
-            _impl = impl;
+            _service = service;
             _connection = connection;
             _bytesPool = bytesPool;
             _rpc = new global::Omnius.Core.RocketPack.Remoting.RocketPackRpc(_connection, _bytesPool);
@@ -70,22 +73,21 @@ namespace Omnius.Xeus.Service
                 {
                     case 0:
                         {
-                            await stream.ListenActionAsync(_impl.GetMyNodeProfileAsync, cancellationToken);
+                            await stream.ListenActionAsync(_service.GetMyNodeProfileAsync, cancellationToken);
                         }
                         break;
                     case 1:
                         {
-                            await stream.ListenActionAsync<global::Omnius.Xeus.Service.Models.AddCloudNodeProfilesParam>(_impl.AddCloudNodeProfilesAsync, cancellationToken);
+                            await stream.ListenActionAsync<global::Omnius.Xeus.Service.Models.AddCloudNodeProfilesParam>(_service.AddCloudNodeProfilesAsync, cancellationToken);
                         }
                         break;
                     case 2:
                         {
-                            await stream.ListenFunctionAsync<global::Omnius.Xeus.Service.Models.FindNodeProfilesParam, global::Omnius.Xeus.Service.Models.FindNodeProfilesResult>(_impl.FindNodeProfilesAsync, cancellationToken);
+                            await stream.ListenFunctionAsync<global::Omnius.Xeus.Service.Models.FindNodeProfilesParam, global::Omnius.Xeus.Service.Models.FindNodeProfilesResult>(_service.FindNodeProfilesAsync, cancellationToken);
                         }
                         break;
                 }
             }
         }
     }
-
 }

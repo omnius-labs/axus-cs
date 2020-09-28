@@ -1,10 +1,11 @@
+using Omnius.Core.Cryptography;
+using Omnius.Core.Network;
 using Omnius.Xeus.Components.Models;
 
 #nullable enable
 
 namespace Omnius.Xeus.Service.Models
 {
-
     public readonly partial struct AddCloudNodeProfilesParam : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.AddCloudNodeProfilesParam>
     {
         public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Service.Models.AddCloudNodeProfilesParam> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.AddCloudNodeProfilesParam>.Formatter;
@@ -289,6 +290,4 @@ namespace Omnius.Xeus.Service.Models
             }
         }
     }
-
-
 }

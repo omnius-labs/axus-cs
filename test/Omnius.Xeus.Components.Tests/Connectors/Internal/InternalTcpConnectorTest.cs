@@ -20,14 +20,14 @@ namespace Omnius.Xeus.Components.Connectors.Internal
         public async Task ConnectAsyncSuccessTest()
         {
             const int Port = 55555;
-            const string IpAddress = "127.0.0.1";
+            var IpAddress = IPAddress.Parse("127.0.0.1");
 
             var tcpConnectingOptions = new TcpConnectingOptions(true, null);
             var tcpAcceptingOptions = new TcpAcceptingOptions(false, Array.Empty<OmniAddress>(), false);
 
             await using (var connector = await InternalTcpConnector.Factory.CreateAsync(tcpConnectingOptions, tcpAcceptingOptions, Socks5ProxyClient.Factory, HttpProxyClient.Factory, UpnpClient.Factory, BytesPool.Shared))
             {
-                var tcpListener = new TcpListener(IPAddress.Parse(IpAddress), Port);
+                var tcpListener = new TcpListener(IpAddress, Port);
 
                 try
                 {
@@ -35,7 +35,7 @@ namespace Omnius.Xeus.Components.Connectors.Internal
 
                     var acceptTask = tcpListener.AcceptTcpClientAsync();
 
-                    using var cap = await connector.ConnectAsync(new OmniAddress($"tcp(ip4(\"{IpAddress}\"),{Port})"));
+                    using var cap = await connector.ConnectAsync(OmniAddress.CreateTcpEndpoint(IpAddress, Port));
 
                     await acceptTask;
 
@@ -57,16 +57,16 @@ namespace Omnius.Xeus.Components.Connectors.Internal
         public async Task AcceptAsyncSuccessTest()
         {
             const int port = 55555;
-            const string ipAddress = "127.0.0.1";
+            var ipAddress = IPAddress.Parse("127.0.0.1");
             var tcpConnectingOptions = new TcpConnectingOptions(false, null);
-            var tcpAcceptingOptions = new TcpAcceptingOptions(true, new[] { new OmniAddress($"tcp(ip4(\"{ipAddress}\"),{port})") }, false);
+            var tcpAcceptingOptions = new TcpAcceptingOptions(true, new[] { OmniAddress.CreateTcpEndpoint(ipAddress, port) }, false);
 
             await using (var connector = await InternalTcpConnector.Factory.CreateAsync(tcpConnectingOptions, tcpAcceptingOptions, Socks5ProxyClient.Factory, HttpProxyClient.Factory, UpnpClient.Factory, BytesPool.Shared))
             {
                 var acceptTask = connector.AcceptAsync();
 
                 var tcpClient = new TcpClient();
-                await tcpClient.ConnectAsync(IPAddress.Parse(ipAddress), port);
+                await tcpClient.ConnectAsync(ipAddress, port);
 
                 await acceptTask;
 

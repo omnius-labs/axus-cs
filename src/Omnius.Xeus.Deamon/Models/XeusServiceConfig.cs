@@ -1,6 +1,6 @@
 namespace Omnius.Xeus.Deamon.Models
 {
-    public record XeusConfig
+    public record XeusServiceConfig
     {
         public string? WorkingDirectory;
 

@@ -1,8 +1,11 @@
+using Omnius.Core.Cryptography;
+using Omnius.Core.Network;
+using Omnius.Xeus.Components.Models;
+
 #nullable enable
 
 namespace Omnius.Xeus.Components.Connectors.Internal.Models
 {
-
     internal sealed partial class ConnectionHelloMessage : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Components.Connectors.Internal.Models.ConnectionHelloMessage>
     {
         public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Components.Connectors.Internal.Models.ConnectionHelloMessage> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Components.Connectors.Internal.Models.ConnectionHelloMessage>.Formatter;
@@ -107,6 +110,4 @@ namespace Omnius.Xeus.Components.Connectors.Internal.Models
             }
         }
     }
-
-
 }

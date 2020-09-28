@@ -1,4 +1,5 @@
 using Omnius.Core.Cryptography;
+using Omnius.Core.Network;
 using Omnius.Xeus.Components.Models;
 
 #nullable enable
@@ -34,7 +35,6 @@ namespace Omnius.Xeus.Components.Engines.Internal.Models
         NotFound = 3,
         Same = 4,
     }
-
     internal sealed partial class ResourceLocation : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Components.Engines.Internal.Models.ResourceLocation>
     {
         public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Components.Engines.Internal.Models.ResourceLocation> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Components.Engines.Internal.Models.ResourceLocation>.Formatter;
@@ -1857,6 +1857,4 @@ namespace Omnius.Xeus.Components.Engines.Internal.Models
             }
         }
     }
-
-
 }

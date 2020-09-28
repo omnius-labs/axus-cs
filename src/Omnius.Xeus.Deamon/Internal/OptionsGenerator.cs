@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Omnius.Core.Network;
 using Omnius.Xeus.Deamon.Models;
@@ -14,17 +15,17 @@ namespace Omnius.Xeus.Deamon.Internal
             return new OmniAddress(value);
         }
 
-        public static Models.TcpConnectorOptions GenTcpConnectorOptions(XeusConfig config)
+        public static Models.TcpConnectorOptions GenTcpConnectorOptions(XeusServiceConfig config)
         {
-            static Models.TcpConnectingOptions GenTcpConnectingOptions(XeusConfig config)
+            static Models.TcpConnectingOptions GenTcpConnectingOptions(XeusServiceConfig config)
             {
                 return new Models.TcpConnectingOptions(
                     config.Connectors?.TcpConnector?.Connecting?.Enabled ?? false,
                     new Models.TcpProxyOptions(
                         config.Connectors?.TcpConnector?.Connecting?.Proxy?.Type switch
                         {
-                            XeusConfig.TcpProxyType.HttpProxy => Models.TcpProxyType.HttpProxy,
-                            XeusConfig.TcpProxyType.Socks5Proxy => Models.TcpProxyType.Socks5Proxy,
+                            XeusServiceConfig.TcpProxyType.HttpProxy => Models.TcpProxyType.HttpProxy,
+                            XeusServiceConfig.TcpProxyType.Socks5Proxy => Models.TcpProxyType.Socks5Proxy,
                             _ => Models.TcpProxyType.Unknown,
                         },
                         CreateAddress(config?.Connectors?.TcpConnector?.Connecting?.Proxy?.Address)
@@ -32,20 +33,20 @@ namespace Omnius.Xeus.Deamon.Internal
                 );
             }
 
-            static Models.TcpAcceptingOptions GenTcpAcceptingOptions(XeusConfig config)
+            static Models.TcpAcceptingOptions GenTcpAcceptingOptions(XeusServiceConfig config)
             {
                 return new Models.TcpAcceptingOptions(
-                    config.Connectors.TcpConnector.Accepting.Enabled,
-                    config.Connectors.TcpConnector.Accepting.ListenAddresses.Select(n => new OmniAddress(n)).ToArray(),
-                    config.Connectors.TcpConnector.Accepting.UseUpnp
+                    config?.Connectors?.TcpConnector?.Accepting?.Enabled ?? false,
+                    config?.Connectors?.TcpConnector?.Accepting?.ListenAddresses?.Select(n => new OmniAddress(n))?.ToArray() ?? Array.Empty<OmniAddress>(),
+                    config?.Connectors?.TcpConnector?.Accepting?.UseUpnp ?? false
                 );
             }
 
-            static Models.BandwidthOptions GenBandwidthOptions(XeusConfig config)
+            static Models.BandwidthOptions GenBandwidthOptions(XeusServiceConfig config)
             {
                 return new Models.BandwidthOptions(
-                    config.Connectors.TcpConnector.Bandwidth.MaxSendBytesPerSeconds,
-                    config.Connectors.TcpConnector.Bandwidth.MaxReceiveBytesPerSeconds
+                    config?.Connectors?.TcpConnector?.Bandwidth?.MaxSendBytesPerSeconds ?? 1024 * 1024 * 32,
+                    config?.Connectors?.TcpConnector?.Bandwidth?.MaxReceiveBytesPerSeconds ?? 1024 * 1024 * 32
                 );
             }
 

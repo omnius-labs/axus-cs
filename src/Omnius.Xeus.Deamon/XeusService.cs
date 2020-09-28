@@ -27,7 +27,7 @@ namespace Omnius.Xeus.Deamon
         public IContentExchangerFactory? ContentExchangerFactory;
         public IDeclaredMessageExchangerFactory? DeclaredMessageExchangerFactory;
         public IBytesPool? BytesPool;
-        public XeusConfig? Config;
+        public XeusServiceConfig? Config;
     }
 
     public class XeusService : IXeusService
