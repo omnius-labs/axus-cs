@@ -102,7 +102,6 @@ namespace Omnius.Xeus.Components.Connectors
 
             var baseConnectionOptions = new BaseConnectionOptions()
             {
-                MaxSendByteCount = 4 * 1024 * 1024,
                 MaxReceiveByteCount = 4 * 1024 * 1024,
                 BytesPool = _bytesPool,
             };
@@ -130,7 +129,6 @@ namespace Omnius.Xeus.Components.Connectors
 
             var baseConnectionOptions = new BaseConnectionOptions()
             {
-                MaxSendByteCount = 4 * 1024 * 1024,
                 MaxReceiveByteCount = 4 * 1024 * 1024,
                 BytesPool = _bytesPool,
             };

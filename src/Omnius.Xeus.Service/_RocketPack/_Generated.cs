@@ -9,7 +9,7 @@ namespace Omnius.Xeus.Service
 {
     public interface IXeusService
     {
-        global::System.Threading.Tasks.ValueTask GetMyNodeProfileAsync(global::System.Threading.CancellationToken cancellationToken);
+        global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult> GetMyNodeProfileAsync(global::System.Threading.CancellationToken cancellationToken);
         global::System.Threading.Tasks.ValueTask AddCloudNodeProfilesAsync(global::Omnius.Xeus.Service.Models.AddCloudNodeProfilesParam param, global::System.Threading.CancellationToken cancellationToken);
         global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Service.Models.FindNodeProfilesResult> FindNodeProfilesAsync(global::Omnius.Xeus.Service.Models.FindNodeProfilesParam param, global::System.Threading.CancellationToken cancellationToken);
     }
@@ -30,10 +30,10 @@ namespace Omnius.Xeus.Service
         {
             await _rpc.DisposeAsync();
         }
-        public async global::System.Threading.Tasks.ValueTask GetMyNodeProfileAsync(global::System.Threading.CancellationToken cancellationToken)
+        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult> GetMyNodeProfileAsync(global::System.Threading.CancellationToken cancellationToken)
         {
             using var stream = await _rpc.ConnectAsync(0, cancellationToken);
-            await stream.CallActionAsync(cancellationToken);
+            return await stream.CallFunctionAsync<global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult>(cancellationToken);
         }
         public async global::System.Threading.Tasks.ValueTask AddCloudNodeProfilesAsync(global::Omnius.Xeus.Service.Models.AddCloudNodeProfilesParam param, global::System.Threading.CancellationToken cancellationToken)
         {
@@ -73,7 +73,7 @@ namespace Omnius.Xeus.Service
                 {
                     case 0:
                         {
-                            await stream.ListenActionAsync(_service.GetMyNodeProfileAsync, cancellationToken);
+                            await stream.ListenFunctionAsync<global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult>(_service.GetMyNodeProfileAsync, cancellationToken);
                         }
                         break;
                     case 1:

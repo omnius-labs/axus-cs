@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
 using Omnius.Core.Network;
-using Omnius.Xeus.Deamon.Models;
+using Omnius.Xeus.Daemon.Models;
 
-namespace Omnius.Xeus.Deamon.Internal
+namespace Omnius.Xeus.Daemon.Internal
 {
     using Models = Omnius.Xeus.Components.Models;
 

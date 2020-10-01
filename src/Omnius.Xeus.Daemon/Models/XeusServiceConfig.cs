@@ -1,4 +1,4 @@
-namespace Omnius.Xeus.Deamon.Models
+namespace Omnius.Xeus.Daemon.Models
 {
     public record XeusServiceConfig
     {

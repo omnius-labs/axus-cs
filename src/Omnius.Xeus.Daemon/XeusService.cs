@@ -10,12 +10,12 @@ using Omnius.Xeus.Components.Connectors;
 using Omnius.Xeus.Components.Connectors.Primitives;
 using Omnius.Xeus.Components.Engines;
 using Omnius.Xeus.Components.Models;
-using Omnius.Xeus.Deamon.Internal;
-using Omnius.Xeus.Deamon.Models;
+using Omnius.Xeus.Daemon.Internal;
+using Omnius.Xeus.Daemon.Models;
 using Omnius.Xeus.Service;
 using Omnius.Xeus.Service.Models;
 
-namespace Omnius.Xeus.Deamon
+namespace Omnius.Xeus.Daemon
 {
     public record XeusServiceOptions
     {

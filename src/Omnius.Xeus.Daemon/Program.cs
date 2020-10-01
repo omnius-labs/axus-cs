@@ -9,8 +9,8 @@ using Omnius.Core.Network.Proxies;
 using Omnius.Core.Network.Upnp;
 using Omnius.Xeus.Components.Connectors;
 using Omnius.Xeus.Components.Engines;
-using Omnius.Xeus.Deamon.Internal;
-using Omnius.Xeus.Deamon.Models;
+using Omnius.Xeus.Daemon.Internal;
+using Omnius.Xeus.Daemon.Models;
 using Omnius.Xeus.Service;
 using Omnius.Core.Network;
 using Omnius.Core.Network.Connections;
@@ -18,7 +18,7 @@ using Omnius.Core.Network.Caps;
 using System.Collections.Generic;
 using System;
 
-namespace Omnius.Xeus.Deamon
+namespace Omnius.Xeus.Daemon
 {
     class Program : CoconaLiteConsoleAppBase
     {
@@ -29,42 +29,34 @@ namespace Omnius.Xeus.Deamon
             CoconaLiteApp.Run<Program>(args);
         }
 
-        public void Init([Option('d')] string? directory = null)
+        [Command("init")]
+        public void Init([Option('c')] string configDirectoryPath, [Option('s')] string stateDirectoryPath)
         {
-            directory ??= Directory.GetCurrentDirectory();
-            if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
-
-            var configDirectoryPath = Path.Combine(directory, ".config");
             if (!Directory.Exists(configDirectoryPath)) Directory.CreateDirectory(configDirectoryPath);
-
-            var statusDirectoryPath = Path.Combine(configDirectoryPath, "status");
-            if (!Directory.Exists(statusDirectoryPath)) Directory.CreateDirectory(statusDirectoryPath);
+            if (!Directory.Exists(stateDirectoryPath)) Directory.CreateDirectory(stateDirectoryPath);
 
             var xeusServiceConfig = new XeusServiceConfig()
             {
-                WorkingDirectory = statusDirectoryPath,
+                WorkingDirectory = stateDirectoryPath,
             };
 
-            var deamonConfig = new DeamonConfig()
+            var daemonConfig = new DaemonConfig()
             {
                 ListenAddress = (string?)OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 32321),
             };
 
             YamlHelper.WriteFile(Path.Combine(configDirectoryPath, "xeus-service.yaml"), xeusServiceConfig);
-            YamlHelper.WriteFile(Path.Combine(configDirectoryPath, "deamon.yaml"), deamonConfig);
+            YamlHelper.WriteFile(Path.Combine(configDirectoryPath, "daemon.yaml"), daemonConfig);
         }
 
         [Command("run")]
-        public async ValueTask RunAsync([Option('d')] string directory)
+        public async ValueTask RunAsync([Option('c')] string configDirectoryPath, [Option('s')] string stateDirectoryPath)
         {
-            var configDirectoryPath = Path.Combine(directory, ".config");
-            if (!Directory.Exists(configDirectoryPath)) Directory.CreateDirectory(configDirectoryPath);
-
             var xeusServiceConfigPath = Path.Combine(configDirectoryPath, "xeus-service.yaml");
-            var deamonConfigPath = Path.Combine(configDirectoryPath, "deamon.yaml");
+            var daemonConfigPath = Path.Combine(configDirectoryPath, "daemon.yaml");
 
             var xeusServiceConfig = YamlHelper.ReadFile<XeusServiceConfig>(xeusServiceConfigPath);
-            var deamonConfig = YamlHelper.ReadFile<DeamonConfig>(deamonConfigPath);
+            var daemonConfig = YamlHelper.ReadFile<DaemonConfig>(daemonConfigPath);
 
             var options = new XeusServiceOptions
             {
@@ -81,10 +73,10 @@ namespace Omnius.Xeus.Deamon
 
             var service = await XeusService.CreateAsync(options);
 
-            var listenAddress = (OmniAddress?)deamonConfig?.ListenAddress;
+            var listenAddress = (OmniAddress?)daemonConfig?.ListenAddress;
             if (listenAddress is null || !listenAddress.TryParseTcpEndpoint(out var ipAddress, out var port))
             {
-                _logger.Error($"(ListenAddress) load is failed. \"{deamonConfigPath}\"");
+                _logger.Error($"load is failed of  ListenAddress. \"{daemonConfigPath}\"");
                 return;
             }
 
@@ -120,8 +112,7 @@ namespace Omnius.Xeus.Deamon
 
                             var connectionOption = new BaseConnectionOptions()
                             {
-                                MaxSendByteCount = 1024 * 64,
-                                MaxReceiveByteCount = 1024 * 64,
+                                MaxReceiveByteCount = 1024 * 1024 * 32,
                                 BytesPool = BytesPool.Shared,
                             };
                             var connection = new BaseConnection(cap, dispatcher, connectionOption);

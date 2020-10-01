@@ -405,7 +405,7 @@ namespace Omnius.Xeus.Components.Engines
             public OmniAddress Address { get; }
             public ConnectionHandshakeType HandshakeType { get; }
 
-            public OmniSignature Signature { get; set; }
+            public OmniSignature? Signature { get; set; }
         }
     }
 }

@@ -4,7 +4,7 @@ using YamlDotNet;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace Omnius.Xeus.Deamon.Internal
+namespace Omnius.Xeus.Daemon.Internal
 {
     public static class YamlHelper
     {

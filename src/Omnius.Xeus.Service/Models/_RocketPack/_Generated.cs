@@ -6,6 +6,88 @@ using Omnius.Xeus.Components.Models;
 
 namespace Omnius.Xeus.Service.Models
 {
+    public readonly partial struct GetMyNodeProfileResult : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult>
+    {
+        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult>.Formatter;
+        public static global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult>.Empty;
+
+        static GetMyNodeProfileResult()
+        {
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult>.Empty = new global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult(NodeProfile.Empty);
+        }
+
+        private readonly int ___hashCode;
+
+        public GetMyNodeProfileResult(NodeProfile nodeProfile)
+        {
+            if (nodeProfile is null) throw new global::System.ArgumentNullException("nodeProfile");
+
+            this.NodeProfile = nodeProfile;
+
+            {
+                var ___h = new global::System.HashCode();
+                if (nodeProfile != default) ___h.Add(nodeProfile.GetHashCode());
+                ___hashCode = ___h.ToHashCode();
+            }
+        }
+
+        public NodeProfile NodeProfile { get; }
+
+        public static global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            return Formatter.Deserialize(ref reader, 0);
+        }
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            Formatter.Serialize(ref writer, this, 0);
+        }
+
+        public static bool operator ==(global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult left, global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult right)
+        {
+            return right.Equals(left);
+        }
+        public static bool operator !=(global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult left, global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult right)
+        {
+            return !(left == right);
+        }
+        public override bool Equals(object? other)
+        {
+            if (!(other is global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult)) return false;
+            return this.Equals((global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult)other);
+        }
+        public bool Equals(global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult target)
+        {
+            if (this.NodeProfile != target.NodeProfile) return false;
+
+            return true;
+        }
+        public override int GetHashCode() => ___hashCode;
+
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult>
+        {
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult value, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                global::Omnius.Xeus.Components.Models.NodeProfile.Formatter.Serialize(ref w, value.NodeProfile, rank + 1);
+            }
+
+            public global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                NodeProfile p_nodeProfile = NodeProfile.Empty;
+
+                {
+                    p_nodeProfile = global::Omnius.Xeus.Components.Models.NodeProfile.Formatter.Deserialize(ref r, rank + 1);
+                }
+                return new global::Omnius.Xeus.Service.Models.GetMyNodeProfileResult(p_nodeProfile);
+            }
+        }
+    }
     public readonly partial struct AddCloudNodeProfilesParam : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.AddCloudNodeProfilesParam>
     {
         public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Service.Models.AddCloudNodeProfilesParam> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.AddCloudNodeProfilesParam>.Formatter;

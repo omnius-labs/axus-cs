@@ -55,7 +55,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{19DD87F5-E8A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Xeus.Components", "src\Omnius.Xeus.Components\Omnius.Xeus.Components.csproj", "{703B9673-5724-4210-9FCE-8C190E525836}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Xeus.Deamon", "src\Omnius.Xeus.Deamon\Omnius.Xeus.Deamon.csproj", "{20DAD47D-07CD-4126-B56B-D87426EDEA31}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Xeus.Daemon", "src\Omnius.Xeus.Daemon\Omnius.Xeus.Daemon.csproj", "{20DAD47D-07CD-4126-B56B-D87426EDEA31}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Xeus.Service", "src\Omnius.Xeus.Service\Omnius.Xeus.Service.csproj", "{671F0742-FD99-4078-ADC8-D50D76BB57C9}"
 EndProject
@@ -65,7 +65,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{B6EB43C5-0
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Xeus.Components.Tests", "test\Omnius.Xeus.Components.Tests\Omnius.Xeus.Components.Tests.csproj", "{3E8E9D70-0AFE-4C7E-9032-ABAAA1A8230B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Xeus.Deamon.Tests", "test\Omnius.Xeus.Deamon.Tests\Omnius.Xeus.Deamon.Tests.csproj", "{89681E5D-AECE-4294-A9FA-356B038906E7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Xeus.Daemon.Tests", "test\Omnius.Xeus.Daemon.Tests\Omnius.Xeus.Daemon.Tests.csproj", "{89681E5D-AECE-4294-A9FA-356B038906E7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Xeus.IntegrationTests", "test\Omnius.Xeus.IntegrationTests\Omnius.Xeus.IntegrationTests.csproj", "{87BB3CA0-A3DC-4DEC-BAC6-4B3917658EC6}"
 EndProject
