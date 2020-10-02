@@ -2,7 +2,7 @@
 
 using "Omnius.Xeus.Components.Models";
 
-namespace "Omnius.Xeus.Service";
+namespace "Omnius.Xeus.Api";
 
 [csharp_struct]
 message GetMyNodeProfileResult {
