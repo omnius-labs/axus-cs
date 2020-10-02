@@ -1,11 +1,11 @@
 namespace Omnius.Xeus.Ui.Desktop.Controllers
 {
-    interface ISearchController
+    interface ISearchInteractor
     {
 
     }
 
-    class SearchController
+    class SearchInteractor
     {
     }
 }
