@@ -14,8 +14,8 @@
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.RocketPack\Omnius.Core.RocketPack.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Serialization\Omnius.Core.Serialization.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core\Omnius.Core.csproj" />
-    <ProjectReference Include="..\Omnius.Xeus.Components\Omnius.Xeus.Components.csproj" />
-    <ProjectReference Include="..\Omnius.Xeus.Service\Omnius.Xeus.Service.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Engines\Omnius.Xeus.Engines.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Api\Omnius.Xeus.Api.csproj" />
   </ItemGroup>
 
   <ItemGroup>

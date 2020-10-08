@@ -1,0 +1,20 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Omnius.Core;
+using Omnius.Xeus.Engines.Connectors.Primitives;
+using Omnius.Xeus.Engines.Models;
+using Omnius.Xeus.Engines.Storages;
+
+namespace Omnius.Xeus.Engines.Engines
+{
+    public interface IContentExchangerFactory
+    {
+        ValueTask<IContentExchanger> CreateAsync(ContentExchangerOptions options, IEnumerable<IConnector> connectors,
+            ICkadMediator nodeFinder, IPushContentStorage pushStorage, IWantContentStorage wantStorage, IBytesPool bytesPool);
+    }
+
+    public interface IContentExchanger : IEngine, IAsyncDisposable
+    {
+    }
+}

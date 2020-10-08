@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Test;
-using Omnius.Xeus.Components.Models;
+using Omnius.Xeus.Engines.Models;
 using Xunit;
 
-namespace Omnius.Xeus.Components.Storages
+namespace Omnius.Xeus.Engines.Storages
 {
     public class WantDeclaredMessageStorageTests
     {

@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Omnius.Xeus.Components.Connectors
+namespace Omnius.Xeus.Engines.Connectors
 {
     public class TcpConnectorTest
     {

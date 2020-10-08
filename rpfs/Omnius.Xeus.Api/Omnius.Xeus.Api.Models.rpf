@@ -1,0 +1,100 @@
+﻿syntax v1.0;
+
+using "Omnius.Xeus.Engines.Models";
+
+namespace "Omnius.Xeus.Api.Models";
+
+[csharp_struct]
+message GetMyNodeProfileResult {
+    NodeProfile: NodeProfile,
+}
+[csharp_struct]
+message AddCloudNodeProfilesParam {
+    NodeProfiles: vector<NodeProfile>,
+}
+
+[csharp_struct]
+message PushContentReport {
+    FilePath: string,
+    RootHash: OmniHash,
+}
+[csharp_struct]
+message GetPushContentsReportResult {
+    PushContents: vector<PushContentReport>,
+}
+[csharp_struct]
+message RegisterPushContentParam {
+    FilePath: string,
+}
+[csharp_struct]
+message RegisterPushContentResult {
+    RootHash: OmniHash,
+}
+[csharp_struct]
+message UnregisterPushContentParam {
+    FilePath: string,
+}
+
+[csharp_struct]
+message WantContentReport {
+    RootHash: OmniHash,
+}
+[csharp_struct]
+message GetWantContentsReportResult {
+    WantContents: vector<WantContentReport>,
+}
+[csharp_struct]
+message RegisterWantContentParam {
+    RootHash: OmniHash,
+}
+[csharp_struct]
+message UnregisterWantContentParam {
+    RootHash: OmniHash,
+}
+[csharp_struct]
+message ExportWantContentParam {
+    RootHash: OmniHash,
+    FilePath: string,
+}
+
+[csharp_struct]
+message PushDeclaredMessageReport {
+    Signature: OmniSignature,
+}
+[csharp_struct]
+message GetPushDeclaredMessagesReportResult {
+    PushDeclaredMessage: vector<PushDeclaredMessageReport>,
+}
+[csharp_struct]
+message RegisterPushDeclaredMessageParam {
+    Message: DeclaredMessage,
+}
+[csharp_struct]
+message UnregisterPushDeclaredMessageParam {
+    Signature: OmniSignature,
+}
+[csharp_struct]
+message ReadWantDeclaredMessageParam {
+    Signature: OmniSignature,
+}
+[csharp_struct]
+message ReadWantDeclaredMessageResult {
+    Signature: DeclaredMessage?,
+}
+
+[csharp_struct]
+message WantDeclaredMessageReport {
+    Signature: OmniSignature,
+}
+[csharp_struct]
+message GetPushDeclaredMessagesReportResult {
+    WantDeclaredMessage: vector<WantDeclaredMessageReport>,
+}
+[csharp_struct]
+message RegisterWantDeclaredMessageParam {
+    Signature: OmniSignature,
+}
+[csharp_struct]
+message UnregisterWantDeclaredMessageParam {
+    Signature: OmniSignature,
+}

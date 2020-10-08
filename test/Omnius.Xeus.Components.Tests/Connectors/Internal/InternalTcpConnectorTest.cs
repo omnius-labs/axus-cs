@@ -6,10 +6,10 @@ using Omnius.Core;
 using Omnius.Core.Network;
 using Omnius.Core.Network.Proxies;
 using Omnius.Core.Network.Upnp;
-using Omnius.Xeus.Components.Models;
+using Omnius.Xeus.Engines.Models;
 using Xunit;
 
-namespace Omnius.Xeus.Components.Connectors.Internal
+namespace Omnius.Xeus.Engines.Connectors.Internal
 {
     public class InternalTcpConnectorTest
     {

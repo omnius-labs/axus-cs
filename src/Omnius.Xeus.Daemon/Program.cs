@@ -7,16 +7,14 @@ using Cocona;
 using Omnius.Core;
 using Omnius.Core.Network.Proxies;
 using Omnius.Core.Network.Upnp;
-using Omnius.Xeus.Components.Connectors;
-using Omnius.Xeus.Components.Engines;
 using Omnius.Xeus.Daemon.Internal;
 using Omnius.Xeus.Daemon.Models;
-using Omnius.Xeus.Service;
 using Omnius.Core.Network;
 using Omnius.Core.Network.Connections;
 using Omnius.Core.Network.Caps;
 using System.Collections.Generic;
 using System;
+using Omnius.Xeus.Api;
 
 namespace Omnius.Xeus.Daemon
 {
@@ -64,7 +62,7 @@ namespace Omnius.Xeus.Daemon
                 HttpProxyClientFactory = HttpProxyClient.Factory,
                 UpnpClientFactory = UpnpClient.Factory,
                 TcpConnectorFactory = TcpConnector.Factory,
-                NodeFinderFactory = NodeFinder.Factory,
+                CkadMediatorFactory = CkadMediator.Factory,
                 ContentExchangerFactory = ContentExchanger.Factory,
                 DeclaredMessageExchangerFactory = DeclaredMessageExchanger.Factory,
                 BytesPool = BytesPool.Shared,
@@ -117,8 +115,8 @@ namespace Omnius.Xeus.Daemon
                             };
                             var connection = new BaseConnection(cap, dispatcher, connectionOption);
 
-                            var receiver = new XeusServiceReceiver(service, connection, BytesPool.Shared);
-                            receiverTasks.Add(receiver.EventLoop().ContinueWith(async (_) => await receiver.DisposeAsync()));
+                            var server = new XeusServiceServer(service, connection, BytesPool.Shared);
+                            receiverTasks.Add(server.EventLoop().ContinueWith(async (_) => await server.DisposeAsync()));
                         }
                         catch (SocketException)
                         {

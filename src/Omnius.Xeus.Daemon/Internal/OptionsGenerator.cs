@@ -1,11 +1,12 @@
 using System;
+using System.IO;
 using System.Linq;
 using Omnius.Core.Network;
 using Omnius.Xeus.Daemon.Models;
 
 namespace Omnius.Xeus.Daemon.Internal
 {
-    using Models = Omnius.Xeus.Components.Models;
+    using Models = Omnius.Xeus.Engines.Models;
 
     internal class OptionsGenerator
     {
@@ -55,6 +56,12 @@ namespace Omnius.Xeus.Daemon.Internal
                 GenTcpAcceptingOptions(config),
                 GenBandwidthOptions(config)
             );
+        }
+
+        public static Models.CkadMediatorOptions GenCkadMediatorOptions(XeusServiceConfig config)
+        {
+            if (config.WorkingDirectory is null) throw new NullReferenceException(nameof(config.WorkingDirectory));
+            return new Models.CkadMediatorOptions(Path.Combine(config.WorkingDirectory, "node_finder"), 10);
         }
     }
 }

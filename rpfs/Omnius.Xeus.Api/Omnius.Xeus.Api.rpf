@@ -1,0 +1,29 @@
+﻿syntax v1.0;
+
+using "Omnius.Xeus.Engines.Models";
+using "Omnius.Xeus.Api.Models";
+
+namespace "Omnius.Xeus.Api";
+
+service XeusService {
+    GetMyNodeProfile: () -> (GetMyNodeProfileResult),
+    AddCloudNodeProfiles: (AddCloudNodeProfilesParam) -> (),
+
+    GetPushContentsReport: () -> (GetPushContentsReportResult),
+    RegisterPushContent: (RegisterPushContentParam) -> (RegisterPushContentResult),
+    UnregisterPushContent: (UnregisterPushContentParam) -> (),
+
+    GetWantContentsReport: () -> (GetWantContentsReportResult),
+    RegisterWantContent: (RegisterWantContentParam) -> (),
+    UnregisterWantContent: (UnregisterWantContentParam) -> (),
+    ExportWantContent: (ExportWantContentParam) -> (),
+
+    GetPushDeclaredMessagesReport: () -> (GetPushDeclaredMessagesReportResult),
+    RegisterPushDeclaredMessage: (RegisterPushDeclaredMessageParam) -> (),
+    UnregisterPushDeclaredMessage: (UnregisterPushDeclaredMessageParam) -> (),
+
+    GetWantDeclaredMessageReport: () -> (GetWantDeclaredMessageReportResult),
+    RegisterWantDeclaredMessage: (RegisterWantDeclaredMessageParam) -> (),
+    UnregisterWantDeclaredMessage: (UnregisterWantDeclaredMessageParam) -> (),
+    ReadWantDeclaredMessage: (ReadWantDeclaredMessageParam) -> (ReadWantDeclaredMessageResult),
+}
