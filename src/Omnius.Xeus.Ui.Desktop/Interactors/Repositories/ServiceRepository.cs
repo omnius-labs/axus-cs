@@ -1,4 +1,4 @@
-﻿namespace Omnius.Xeus.Ui.Desktop.Controllers.Repositories
+namespace Omnius.Xeus.Ui.Desktop.Controllers.Repositories
 {
     class ServiceRepository
     {
