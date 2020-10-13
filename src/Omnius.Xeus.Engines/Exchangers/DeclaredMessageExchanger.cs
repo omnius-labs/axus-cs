@@ -15,10 +15,11 @@ using Omnius.Core.RocketPack;
 using Omnius.Xeus.Engines.Connectors.Primitives;
 using Omnius.Xeus.Engines.Engines.Internal;
 using Omnius.Xeus.Engines.Exchangers.Internal.Models;
+using Omnius.Xeus.Engines.Mediators;
 using Omnius.Xeus.Engines.Models;
 using Omnius.Xeus.Engines.Storages;
 
-namespace Omnius.Xeus.Engines.Engines
+namespace Omnius.Xeus.Engines.Exchangers
 {
     public sealed class DeclaredMessageExchanger : AsyncDisposableBase, IDeclaredMessageExchanger
     {
@@ -52,7 +53,7 @@ namespace Omnius.Xeus.Engines.Engines
             }
         }
 
-        public string EngineName => "declared-message-exchanger";
+        public string ExchangerName => "declared-message-exchanger";
 
         public static IDeclaredMessageExchangerFactory Factory { get; } = new DeclaredMessageExchangerFactory();
 
@@ -135,7 +136,7 @@ namespace Omnius.Xeus.Engines.Engines
 
                             foreach (var connector in _connectors)
                             {
-                                connection = await connector.ConnectAsync(targetAddress, this.EngineName, cancellationToken);
+                                connection = await connector.ConnectAsync(targetAddress, this.ExchangerName, cancellationToken);
                                 if (connection == null) continue;
                             }
 
@@ -183,7 +184,7 @@ namespace Omnius.Xeus.Engines.Engines
 
                     foreach (var connector in _connectors)
                     {
-                        var result = await connector.AcceptAsync(this.EngineName, cancellationToken);
+                        var result = await connector.AcceptAsync(this.ExchangerName, cancellationToken);
                         if (result.Connection != null && result.Address != null)
                         {
                             await this.TryAddConnectionAsync(result.Connection, result.Address, ConnectionHandshakeType.Accepted, null, cancellationToken);
@@ -383,7 +384,7 @@ namespace Omnius.Xeus.Engines.Engines
             using var hub = new BytesHub();
             signature.Export(hub.Writer, BytesPool.Shared);
             var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(hub.Reader.GetSequence()));
-            return new ResourceTag(this.EngineName, hash);
+            return new ResourceTag(this.ExchangerName, hash);
         }
 
         private enum ConnectionHandshakeType

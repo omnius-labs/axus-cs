@@ -1,3 +1,3 @@
 #!/bin/bash
 
-dotnet run --project ./src/Omnius.Xeus.Daemon/ -- init -d ./sandbox/.config/deamon
+dotnet run --project ./src/Omnius.Xeus.Daemon/ -- init -c ./demo/.config/daemon -s ./demo/.state/daemon

@@ -14,10 +14,11 @@ using Omnius.Core.Network.Connections.Extensions;
 using Omnius.Xeus.Engines.Connectors.Primitives;
 using Omnius.Xeus.Engines.Engines.Internal;
 using Omnius.Xeus.Engines.Exchangers.Internal.Models;
+using Omnius.Xeus.Engines.Mediators;
 using Omnius.Xeus.Engines.Models;
 using Omnius.Xeus.Engines.Storages;
 
-namespace Omnius.Xeus.Engines.Engines
+namespace Omnius.Xeus.Engines.Exchangers
 {
     public sealed class ContentExchanger : AsyncDisposableBase, IContentExchanger
     {
@@ -54,7 +55,7 @@ namespace Omnius.Xeus.Engines.Engines
             }
         }
 
-        public string EngineName => "content-exchanger";
+        public string ExchangerName => "content-exchanger";
 
         public static IContentExchangerFactory Factory { get; } = new ContentExchangerFactory();
 
@@ -145,7 +146,7 @@ namespace Omnius.Xeus.Engines.Engines
 
                             foreach (var connector in _connectors)
                             {
-                                connection = await connector.ConnectAsync(targetAddress, this.EngineName, cancellationToken);
+                                connection = await connector.ConnectAsync(targetAddress, this.ExchangerName, cancellationToken);
                                 if (connection == null) continue;
                             }
 
@@ -193,7 +194,7 @@ namespace Omnius.Xeus.Engines.Engines
 
                     foreach (var connector in _connectors)
                     {
-                        var result = await connector.AcceptAsync(this.EngineName, cancellationToken);
+                        var result = await connector.AcceptAsync(this.ExchangerName, cancellationToken);
                         if (result.Connection != null && result.Address != null)
                         {
                             await this.TryAddConnectionAsync(result.Connection, result.Address, ConnectionHandshakeType.Accepted, null, cancellationToken);
@@ -415,7 +416,7 @@ namespace Omnius.Xeus.Engines.Engines
 
         private ResourceTag HashToResourceTag(OmniHash hash)
         {
-            return new ResourceTag(this.EngineName, hash);
+            return new ResourceTag(this.ExchangerName, hash);
         }
 
         private enum ConnectionHandshakeType

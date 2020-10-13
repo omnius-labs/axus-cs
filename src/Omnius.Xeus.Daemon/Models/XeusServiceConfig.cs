@@ -5,6 +5,7 @@ namespace Omnius.Xeus.Daemon.Models
         public string? WorkingDirectory;
 
         public ConnectorsConfig? Connectors;
+        public ExchangersConfig? Exchangers;
 
         public record ConnectorsConfig
         {
@@ -48,6 +49,22 @@ namespace Omnius.Xeus.Daemon.Models
             public bool Enabled;
             public string[]? ListenAddresses;
             public bool UseUpnp;
+        }
+
+        public record ExchangersConfig
+        {
+            public ContentExchangerConfig? ContentExchanger;
+            public DeclaredMessageConfig? DeclaredMessageExchanger;
+        }
+
+        public record ContentExchangerConfig
+        {
+            public uint MaxConnectionCount;
+        }
+
+        public record DeclaredMessageConfig
+        {
+            public uint MaxConnectionCount;
         }
     }
 }

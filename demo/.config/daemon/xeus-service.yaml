@@ -1,0 +1,3 @@
+WorkingDirectory: ./demo/.state/daemon
+Connectors: 
+Exchangers: 

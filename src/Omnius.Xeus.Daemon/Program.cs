@@ -15,6 +15,9 @@ using Omnius.Core.Network.Caps;
 using System.Collections.Generic;
 using System;
 using Omnius.Xeus.Api;
+using Omnius.Xeus.Engines.Connectors;
+using Omnius.Xeus.Engines.Mediators;
+using Omnius.Xeus.Engines.Exchangers;
 
 namespace Omnius.Xeus.Daemon
 {

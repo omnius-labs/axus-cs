@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,13 +6,14 @@ using Omnius.Core;
 using Omnius.Core.Network.Proxies;
 using Omnius.Core.Network.Upnp;
 using Omnius.Xeus.Engines.Connectors;
-using Omnius.Xeus.Engines.Connectors.Primitives;
-using Omnius.Xeus.Engines.Engines;
 using Omnius.Xeus.Engines.Models;
 using Omnius.Xeus.Daemon.Internal;
 using Omnius.Xeus.Daemon.Models;
 using Omnius.Xeus.Api;
 using Omnius.Xeus.Engines.Storages;
+using Omnius.Xeus.Engines.Mediators;
+using Omnius.Xeus.Engines.Exchangers;
+using Omnius.Xeus.Api.Models;
 
 namespace Omnius.Xeus.Daemon
 {
@@ -38,7 +38,7 @@ namespace Omnius.Xeus.Daemon
     {
         private readonly XeusServiceOptions _options;
 
-        private ICkadMediator? _nodeFinder;
+        private ICkadMediator? _ckadMediator;
         public IContentExchanger? _contentExchanger;
         public IDeclaredMessageExchanger? _declaredMessageExchanger;
         public IPushContentStorage? _pushContentStorage;
@@ -66,41 +66,54 @@ namespace Omnius.Xeus.Daemon
             var socks5ProxyClientFactory = _options.Socks5ProxyClientFactory ?? throw new ArgumentNullException();
             var httpProxyClientFactory = _options.HttpProxyClientFactory ?? throw new ArgumentNullException();
             var upnpClientFactory = _options.UpnpClientFactory ?? throw new ArgumentNullException();
-            var nodeFinderFactory = _options.CkadMediatorFactory ?? throw new ArgumentNullException();
+            var ckadMediatorFactory = _options.CkadMediatorFactory ?? throw new ArgumentNullException();
             var pushContentStorageFactory = _options.PushContentStorageFactory ?? throw new ArgumentNullException();
             var wantContentStorageFactory = _options.WantContentStorageFactory ?? throw new ArgumentNullException();
             var pushDeclaredMessageStorageFactory = _options.PushDeclaredMessageStorageFactory ?? throw new ArgumentNullException();
             var wantDeclaredMessageStorageFactory = _options.WantDeclaredMessageStorageFactory ?? throw new ArgumentNullException();
+            var contentExchangerFactory = _options.ContentExchangerFactory ?? throw new ArgumentNullException();
+            var declaredMessageExchangerFactory = _options.DeclaredMessageExchangerFactory ?? throw new ArgumentNullException();
             var bytesPool = _options.BytesPool ?? throw new ArgumentNullException();
-            var workingDirectory = _options.Config.WorkingDirectory ?? throw new ArgumentNullException();
 
-            var connectors = new List<IConnector>();
             var tcpConnectorOptions = OptionsGenerator.GenTcpConnectorOptions(config);
-            connectors.Add(await tcpConnectorFactory.CreateAsync(tcpConnectorOptions, socks5ProxyClientFactory, httpProxyClientFactory, upnpClientFactory, bytesPool));
+            var tcpConnector = await tcpConnectorFactory.CreateAsync(tcpConnectorOptions, socks5ProxyClientFactory, httpProxyClientFactory, upnpClientFactory, bytesPool);
 
-            var nodeFinderOptions = new CkadMediatorOptions(Path.Combine(workingDirectory, "node_finder"), 10);
-            _nodeFinder = await nodeFinderFactory.CreateAsync(nodeFinderOptions, connectors, _options.BytesPool);
+            var ckadMediatorOptions = OptionsGenerator.GenCkadMediatorOptions(config);
+            _ckadMediator = await ckadMediatorFactory.CreateAsync(ckadMediatorOptions, new[] { tcpConnector }, _options.BytesPool);
 
-            var pushContentStorage = _options.PushContentStorageFactory.CreateAsync();
-            var wantContentStorage = _options.WantContentStorageFactory.CreateAsync();
-            var pushDeclaredMessageStorage = _options.PushDeclaredMessageStorageFactory.CreateAsync();
-            var wantDeclaredMessageStorage = _options.WantDeclaredMessageStorageFactory.CreateAsync();
+            var pushContentStorageOptions = OptionsGenerator.GenPushContentStorageOptions(config);
+            _pushContentStorage = await pushContentStorageFactory.CreateAsync(pushContentStorageOptions, bytesPool);
+
+            var wantContentStorageOptions = OptionsGenerator.GenWantContentStorageOptions(config);
+            _wantContentStorage = await wantContentStorageFactory.CreateAsync(wantContentStorageOptions, bytesPool);
+
+            var pushDeclaredMessageStorageOptions = OptionsGenerator.GenPushDeclaredMessageStorageOptions(config);
+            _pushDeclaredMessageStorage = await pushDeclaredMessageStorageFactory.CreateAsync(pushDeclaredMessageStorageOptions, bytesPool);
+
+            var wantDeclaredMessageStorageOptions = OptionsGenerator.GenWantDeclaredMessageStorageOptions(config);
+            _wantDeclaredMessageStorage = await wantDeclaredMessageStorageFactory.CreateAsync(wantDeclaredMessageStorageOptions, bytesPool);
+
+            var contentExchangerOptions = OptionsGenerator.GenContentExchangerOptions(config);
+            _contentExchanger = await contentExchangerFactory.CreateAsync(contentExchangerOptions, new[] { tcpConnector }, _ckadMediator, _pushContentStorage, _wantContentStorage, bytesPool);
+
+            var declaredMessageExchangerOptions = OptionsGenerator.GenDeclaredMessageExchangerOptions(config);
+            _declaredMessageExchanger = await declaredMessageExchangerFactory.CreateAsync(declaredMessageExchangerOptions, new[] { tcpConnector }, _ckadMediator, _pushDeclaredMessageStorage, _wantDeclaredMessageStorage, bytesPool);
         }
 
         public async ValueTask<GetMyNodeProfileResult> GetMyNodeProfileAsync(CancellationToken cancellationToken)
         {
-            if (_nodeFinder is null) throw new NullReferenceException(nameof(_nodeFinder));
-            var result = await _nodeFinder.GetMyNodeProfileAsync(cancellationToken);
+            if (_ckadMediator is null) throw new NullReferenceException(nameof(_ckadMediator));
+            var result = await _ckadMediator.GetMyNodeProfileAsync(cancellationToken);
             return new GetMyNodeProfileResult(result);
         }
 
         public async ValueTask AddCloudNodeProfilesAsync(AddCloudNodeProfilesParam param, CancellationToken cancellationToken)
         {
-            if (_nodeFinder is null) throw new NullReferenceException(nameof(_nodeFinder));
-            await _nodeFinder.AddCloudNodeProfilesAsync(param.NodeProfiles, cancellationToken);
+            if (_ckadMediator is null) throw new NullReferenceException(nameof(_ckadMediator));
+            await _ckadMediator.AddCloudNodeProfilesAsync(param.NodeProfiles, cancellationToken);
         }
 
-        public ValueTask<GetPushContentStorageReportResult> GetPushContentStorageReportAsync(CancellationToken cancellationToken)
+        public ValueTask<GetPushContentsReportResult> GetPushContentsReportAsync(CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
@@ -115,7 +128,7 @@ namespace Omnius.Xeus.Daemon
             throw new NotImplementedException();
         }
 
-        public ValueTask<GetWantContentStorageReportResult> GetWantContentStorageReportAsync(CancellationToken cancellationToken)
+        public ValueTask<GetWantContentsReportResult> GetWantContentsReportAsync(CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
@@ -130,12 +143,12 @@ namespace Omnius.Xeus.Daemon
             throw new NotImplementedException();
         }
 
-        public ValueTask<ExportContentResult> ExportContentAsync(ExportContentParam param, CancellationToken cancellationToken)
+        public ValueTask ExportWantContentAsync(ExportWantContentParam param, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask<GetPushDeclaredMessageStorageReportResult> GetPushDeclaredMessageStorageReportAsync(CancellationToken cancellationToken)
+        public ValueTask<GetPushDeclaredMessagesReportResult> GetPushDeclaredMessagesReportAsync(CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
@@ -150,11 +163,6 @@ namespace Omnius.Xeus.Daemon
             throw new NotImplementedException();
         }
 
-        public ValueTask<GetWantDeclaredMessageStorageReportResult> GetWantDeclaredMessageStorageReportAsync(CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
         public ValueTask RegisterWantDeclaredMessageAsync(RegisterWantDeclaredMessageParam param, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
@@ -165,7 +173,7 @@ namespace Omnius.Xeus.Daemon
             throw new NotImplementedException();
         }
 
-        public ValueTask<ReadDeclaredMessageResult> ReadDeclaredMessageAsync(ReadDeclaredMessageParam param, CancellationToken cancellationToken)
+        public ValueTask<ReadWantDeclaredMessageResult> ReadWantDeclaredMessageAsync(ReadWantDeclaredMessageParam param, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

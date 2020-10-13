@@ -1,5 +1,7 @@
 dotnet tool restore
 
+Remove-Item -Path ./tmp/ -Recurse -Force
+
 ForEach ($folder in (Get-ChildItem -Path "test" -Directory)) {
     $path = $folder.FullName;
     $name = $folder.Name;

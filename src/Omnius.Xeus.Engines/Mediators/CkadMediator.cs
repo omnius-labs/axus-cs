@@ -17,7 +17,7 @@ using Omnius.Xeus.Engines.Engines.Internal;
 using Omnius.Xeus.Engines.Mediators.Internal.Models;
 using Omnius.Xeus.Engines.Models;
 
-namespace Omnius.Xeus.Engines.Engines
+namespace Omnius.Xeus.Engines.Mediators
 {
     public sealed class CkadMediator : AsyncDisposableBase, ICkadMediator
     {

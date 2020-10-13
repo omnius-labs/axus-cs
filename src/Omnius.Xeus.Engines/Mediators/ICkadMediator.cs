@@ -6,7 +6,7 @@ using Omnius.Core;
 using Omnius.Xeus.Engines.Connectors.Primitives;
 using Omnius.Xeus.Engines.Models;
 
-namespace Omnius.Xeus.Engines.Engines
+namespace Omnius.Xeus.Engines.Mediators
 {
     public interface ICkadMediatorFactory
     {
@@ -16,7 +16,7 @@ namespace Omnius.Xeus.Engines.Engines
     public delegate void GetFetchResourceTags(Action<ResourceTag> append);
     public delegate void GetAvailableEngineNames(Action<string> append);
 
-    public interface ICkadMediator : IEngine, IAsyncDisposable
+    public interface ICkadMediator : IAsyncDisposable
     {
         event GetAvailableEngineNames? GetAvailableEngineNames;
         event GetFetchResourceTags? GetPushFetchResourceTags;

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+rm -rf ./tmp/
+
 dotnet tool restore
 
 for path in $(find "test" -maxdepth 2 -type f -name "*.csproj"); do

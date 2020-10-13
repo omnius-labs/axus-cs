@@ -87,7 +87,7 @@ message WantDeclaredMessageReport {
     Signature: OmniSignature,
 }
 [csharp_struct]
-message GetPushDeclaredMessagesReportResult {
+message GetWantDeclaredMessagesReportResult {
     WantDeclaredMessage: vector<WantDeclaredMessageReport>,
 }
 [csharp_struct]

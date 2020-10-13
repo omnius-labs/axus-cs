@@ -1964,22 +1964,22 @@ namespace Omnius.Xeus.Api.Models
             }
         }
     }
-    public readonly partial struct GetPushDeclaredMessagesReportResult : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.GetPushDeclaredMessagesReportResult>
+    public readonly partial struct GetWantDeclaredMessagesReportResult : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.GetWantDeclaredMessagesReportResult>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.Models.GetPushDeclaredMessagesReportResult> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.GetPushDeclaredMessagesReportResult>.Formatter;
-        public static global::Omnius.Xeus.Api.Models.GetPushDeclaredMessagesReportResult Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.GetPushDeclaredMessagesReportResult>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.Models.GetWantDeclaredMessagesReportResult> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.GetWantDeclaredMessagesReportResult>.Formatter;
+        public static global::Omnius.Xeus.Api.Models.GetWantDeclaredMessagesReportResult Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.GetWantDeclaredMessagesReportResult>.Empty;
 
-        static GetPushDeclaredMessagesReportResult()
+        static GetWantDeclaredMessagesReportResult()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.GetPushDeclaredMessagesReportResult>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.GetPushDeclaredMessagesReportResult>.Empty = new global::Omnius.Xeus.Api.Models.GetPushDeclaredMessagesReportResult(global::System.Array.Empty<WantDeclaredMessageReport>());
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.GetWantDeclaredMessagesReportResult>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.GetWantDeclaredMessagesReportResult>.Empty = new global::Omnius.Xeus.Api.Models.GetWantDeclaredMessagesReportResult(global::System.Array.Empty<WantDeclaredMessageReport>());
         }
 
         private readonly int ___hashCode;
 
         public static readonly int MaxWantDeclaredMessageCount = 2147483647;
 
-        public GetPushDeclaredMessagesReportResult(WantDeclaredMessageReport[] wantDeclaredMessage)
+        public GetWantDeclaredMessagesReportResult(WantDeclaredMessageReport[] wantDeclaredMessage)
         {
             if (wantDeclaredMessage is null) throw new global::System.ArgumentNullException("wantDeclaredMessage");
             if (wantDeclaredMessage.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("wantDeclaredMessage");
@@ -1998,7 +1998,7 @@ namespace Omnius.Xeus.Api.Models
 
         public global::Omnius.Core.Collections.ReadOnlyListSlim<WantDeclaredMessageReport> WantDeclaredMessage { get; }
 
-        public static global::Omnius.Xeus.Api.Models.GetPushDeclaredMessagesReportResult Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Api.Models.GetWantDeclaredMessagesReportResult Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -2009,20 +2009,20 @@ namespace Omnius.Xeus.Api.Models
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(global::Omnius.Xeus.Api.Models.GetPushDeclaredMessagesReportResult left, global::Omnius.Xeus.Api.Models.GetPushDeclaredMessagesReportResult right)
+        public static bool operator ==(global::Omnius.Xeus.Api.Models.GetWantDeclaredMessagesReportResult left, global::Omnius.Xeus.Api.Models.GetWantDeclaredMessagesReportResult right)
         {
             return right.Equals(left);
         }
-        public static bool operator !=(global::Omnius.Xeus.Api.Models.GetPushDeclaredMessagesReportResult left, global::Omnius.Xeus.Api.Models.GetPushDeclaredMessagesReportResult right)
+        public static bool operator !=(global::Omnius.Xeus.Api.Models.GetWantDeclaredMessagesReportResult left, global::Omnius.Xeus.Api.Models.GetWantDeclaredMessagesReportResult right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Api.Models.GetPushDeclaredMessagesReportResult)) return false;
-            return this.Equals((global::Omnius.Xeus.Api.Models.GetPushDeclaredMessagesReportResult)other);
+            if (!(other is global::Omnius.Xeus.Api.Models.GetWantDeclaredMessagesReportResult)) return false;
+            return this.Equals((global::Omnius.Xeus.Api.Models.GetWantDeclaredMessagesReportResult)other);
         }
-        public bool Equals(global::Omnius.Xeus.Api.Models.GetPushDeclaredMessagesReportResult target)
+        public bool Equals(global::Omnius.Xeus.Api.Models.GetWantDeclaredMessagesReportResult target)
         {
             if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.WantDeclaredMessage, target.WantDeclaredMessage)) return false;
 
@@ -2030,9 +2030,9 @@ namespace Omnius.Xeus.Api.Models
         }
         public override int GetHashCode() => ___hashCode;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.Models.GetPushDeclaredMessagesReportResult>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.Models.GetWantDeclaredMessagesReportResult>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Api.Models.GetPushDeclaredMessagesReportResult value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Api.Models.GetWantDeclaredMessagesReportResult value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2048,7 +2048,7 @@ namespace Omnius.Xeus.Api.Models
                 w.Write((uint)0);
             }
 
-            public global::Omnius.Xeus.Api.Models.GetPushDeclaredMessagesReportResult Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Api.Models.GetWantDeclaredMessagesReportResult Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2073,7 +2073,7 @@ namespace Omnius.Xeus.Api.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Api.Models.GetPushDeclaredMessagesReportResult(p_wantDeclaredMessage);
+                return new global::Omnius.Xeus.Api.Models.GetWantDeclaredMessagesReportResult(p_wantDeclaredMessage);
             }
         }
     }

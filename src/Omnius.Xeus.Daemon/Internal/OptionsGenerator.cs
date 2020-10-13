@@ -63,5 +63,41 @@ namespace Omnius.Xeus.Daemon.Internal
             if (config.WorkingDirectory is null) throw new NullReferenceException(nameof(config.WorkingDirectory));
             return new Models.CkadMediatorOptions(Path.Combine(config.WorkingDirectory, "node_finder"), 10);
         }
+
+        public static Models.PushContentStorageOptions GenPushContentStorageOptions(XeusServiceConfig config)
+        {
+            if (config.WorkingDirectory is null) throw new NullReferenceException(nameof(config.WorkingDirectory));
+            return new Models.PushContentStorageOptions(Path.Combine(config.WorkingDirectory, "push_content_storage"));
+        }
+
+        public static Models.WantContentStorageOptions GenWantContentStorageOptions(XeusServiceConfig config)
+        {
+            if (config.WorkingDirectory is null) throw new NullReferenceException(nameof(config.WorkingDirectory));
+            return new Models.WantContentStorageOptions(Path.Combine(config.WorkingDirectory, "want_content_storage"));
+        }
+
+        public static Models.PushDeclaredMessageStorageOptions GenPushDeclaredMessageStorageOptions(XeusServiceConfig config)
+        {
+            if (config.WorkingDirectory is null) throw new NullReferenceException(nameof(config.WorkingDirectory));
+            return new Models.PushDeclaredMessageStorageOptions(Path.Combine(config.WorkingDirectory, "push_declared_message_storage"));
+        }
+
+        public static Models.WantDeclaredMessageStorageOptions GenWantDeclaredMessageStorageOptions(XeusServiceConfig config)
+        {
+            if (config.WorkingDirectory is null) throw new NullReferenceException(nameof(config.WorkingDirectory));
+            return new Models.WantDeclaredMessageStorageOptions(Path.Combine(config.WorkingDirectory, "want_declared_message_storage"));
+        }
+
+        public static Models.ContentExchangerOptions GenContentExchangerOptions(XeusServiceConfig config)
+        {
+            if (config.WorkingDirectory is null) throw new NullReferenceException(nameof(config.WorkingDirectory));
+            return new Models.ContentExchangerOptions(Path.Combine(config.WorkingDirectory, "content_exchanger"), config?.Exchangers?.ContentExchanger?.MaxConnectionCount ?? 32);
+        }
+
+        public static Models.DeclaredMessageExchangerOptions GenDeclaredMessageExchangerOptions(XeusServiceConfig config)
+        {
+            if (config.WorkingDirectory is null) throw new NullReferenceException(nameof(config.WorkingDirectory));
+            return new Models.DeclaredMessageExchangerOptions(Path.Combine(config.WorkingDirectory, "declared_message_exchanger"), config?.Exchangers?.DeclaredMessageExchanger?.MaxConnectionCount ?? 32);
+        }
     }
 }
