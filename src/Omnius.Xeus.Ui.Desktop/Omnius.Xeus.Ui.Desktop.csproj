@@ -18,7 +18,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core\Omnius.Core.csproj" />
-    <ProjectReference Include="..\Omnius.Xeus.Daemon\Omnius.Xeus.Daemon.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Engines\Omnius.Xeus.Engines.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Api\Omnius.Xeus.Api.csproj" />
   </ItemGroup>
 
 </Project>

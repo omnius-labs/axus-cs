@@ -1,23 +1,22 @@
-using System.Net.Sockets;
-using System.Net;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading.Tasks;
 using Cocona;
 using Omnius.Core;
+using Omnius.Core.Network;
+using Omnius.Core.Network.Caps;
+using Omnius.Core.Network.Connections;
 using Omnius.Core.Network.Proxies;
 using Omnius.Core.Network.Upnp;
-using Omnius.Xeus.Daemon.Internal;
-using Omnius.Xeus.Daemon.Models;
-using Omnius.Core.Network;
-using Omnius.Core.Network.Connections;
-using Omnius.Core.Network.Caps;
-using System.Collections.Generic;
-using System;
 using Omnius.Xeus.Api;
+using Omnius.Xeus.Daemon.Configs;
+using Omnius.Xeus.Daemon.Internal;
 using Omnius.Xeus.Engines.Connectors;
-using Omnius.Xeus.Engines.Mediators;
 using Omnius.Xeus.Engines.Exchangers;
+using Omnius.Xeus.Engines.Mediators;
 
 namespace Omnius.Xeus.Daemon
 {
@@ -36,27 +35,22 @@ namespace Omnius.Xeus.Daemon
             if (!Directory.Exists(configDirectoryPath)) Directory.CreateDirectory(configDirectoryPath);
             if (!Directory.Exists(stateDirectoryPath)) Directory.CreateDirectory(stateDirectoryPath);
 
-            var xeusServiceConfig = new XeusServiceConfig()
-            {
-                WorkingDirectory = stateDirectoryPath,
-            };
-
             var daemonConfig = new DaemonConfig()
             {
                 ListenAddress = (string?)OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 32321),
+                Engines = new EnginesConfig()
+                {
+                    WorkingDirectory = stateDirectoryPath,
+                }
             };
 
-            YamlHelper.WriteFile(Path.Combine(configDirectoryPath, "xeus-service.yaml"), xeusServiceConfig);
             YamlHelper.WriteFile(Path.Combine(configDirectoryPath, "daemon.yaml"), daemonConfig);
         }
 
         [Command("run")]
-        public async ValueTask RunAsync([Option('c')] string configDirectoryPath, [Option('s')] string stateDirectoryPath)
+        public async ValueTask RunAsync([Option('c')] string configDirectoryPath)
         {
-            var xeusServiceConfigPath = Path.Combine(configDirectoryPath, "xeus-service.yaml");
             var daemonConfigPath = Path.Combine(configDirectoryPath, "daemon.yaml");
-
-            var xeusServiceConfig = YamlHelper.ReadFile<XeusServiceConfig>(xeusServiceConfigPath);
             var daemonConfig = YamlHelper.ReadFile<DaemonConfig>(daemonConfigPath);
 
             var options = new XeusServiceOptions
@@ -69,7 +63,7 @@ namespace Omnius.Xeus.Daemon
                 ContentExchangerFactory = ContentExchanger.Factory,
                 DeclaredMessageExchangerFactory = DeclaredMessageExchanger.Factory,
                 BytesPool = BytesPool.Shared,
-                Config = xeusServiceConfig,
+                Config = daemonConfig.Engines,
             };
 
             var service = await XeusService.CreateAsync(options);
@@ -77,7 +71,7 @@ namespace Omnius.Xeus.Daemon
             var listenAddress = (OmniAddress?)daemonConfig?.ListenAddress;
             if (listenAddress is null || !listenAddress.TryParseTcpEndpoint(out var ipAddress, out var port))
             {
-                _logger.Error($"load is failed of  ListenAddress. \"{daemonConfigPath}\"");
+                _logger.Error($"load is failed of ListenAddress. \"{daemonConfigPath}\"");
                 return;
             }
 

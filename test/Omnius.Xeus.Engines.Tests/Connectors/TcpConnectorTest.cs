@@ -1,13 +1,13 @@
+using System;
 using System.Threading.Tasks;
-using Omnius.Xeus.Engines.Models;
-using Xunit;
 using Moq;
+using Omnius.Core;
+using Omnius.Core.Network;
+using Omnius.Core.Network.Connections;
 using Omnius.Core.Network.Proxies;
 using Omnius.Core.Network.Upnp;
-using System.Net;
-using System;
-using Omnius.Core.Network;
-using Omnius.Core;
+using Omnius.Xeus.Engines.Models;
+using Xunit;
 
 namespace Omnius.Xeus.Engines.Connectors
 {
@@ -16,26 +16,36 @@ namespace Omnius.Xeus.Engines.Connectors
         [Fact]
         public async Task ConnectAsyncSuccessTest()
         {
-            int Port = 55555;
-            var IpAddress = IPAddress.Parse("127.0.0.1");
+            TcpConnectorOptions tcpConnectorOptions;
+            {
+                var tcpConnectingOptions = new TcpConnectingOptions(true, null);
+                var tcpAcceptingOptions = new TcpAcceptingOptions(false, Array.Empty<OmniAddress>(), false);
+                var bandwidthOptions = new BandwidthOptions(1024, 1024);
+                tcpConnectorOptions = new TcpConnectorOptions(tcpConnectingOptions, tcpAcceptingOptions, bandwidthOptions);
+            }
 
-            var tcpConnectingOptions = new TcpConnectingOptions(true, null);
-            var tcpAcceptingOptions = new TcpAcceptingOptions(false, Array.Empty<OmniAddress>(), false);
-            var bandwidthOptions = new BandwidthOptions(1024, 1024);
-            var TcpConnectorOptions = new TcpConnectorOptions(tcpConnectingOptions, tcpAcceptingOptions, bandwidthOptions);
-
-            var socks5ProxyClient = new Mock<ISocks5ProxyClient>();
             var socks5ProxyClientFactoryMock = new Mock<ISocks5ProxyClientFactory>();
+            {
+                var socks5ProxyClientMock = new Mock<ISocks5ProxyClient>();
+                socks5ProxyClientFactoryMock.Setup(n => n.Create(It.IsAny<string>(), It.IsAny<int>())).Returns(socks5ProxyClientMock.Object);
+            }
+
             var httpProxyClientFactoryMock = new Mock<IHttpProxyClientFactory>();
             var upnpClientFactoryMock = new Mock<IUpnpClientFactory>();
             var bytesPool = BytesPool.Shared;
 
-            var t = TcpConnector.Factory.CreateAsync(TcpConnectorOptions, socks5ProxyClientFactory, httpProxyClientFactory, upnpClientFactory, bytesPool);
+            var tcpConnector = await TcpConnector.Factory.CreateAsync(tcpConnectorOptions, socks5ProxyClientFactoryMock.Object, httpProxyClientFactoryMock.Object, upnpClientFactoryMock.Object, bytesPool);
+            var connectedConnection = await tcpConnector.ConnectAsync(OmniAddress.CreateTcpEndpoint("127.0.0.1", 55555), "test");
         }
 
         [Fact]
         public async Task AcceptAsyncSuccessTest()
         {
+        }
+
+        private async Task CommunicationTest(IConnection connection1, IConnection connection2)
+        {
+
         }
     }
 }

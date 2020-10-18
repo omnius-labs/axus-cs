@@ -1,1 +1,5 @@
 ListenAddress: tcp(ip4(127.0.0.1),32321)
+Engines:
+  WorkingDirectory: ./demo/.state/daemon
+  Connectors: 
+  Exchangers: 
