@@ -12,7 +12,6 @@ using Omnius.Xeus.Daemon.Configs;
 using Omnius.Xeus.Engines.Connectors;
 using Omnius.Xeus.Engines.Exchangers;
 using Omnius.Xeus.Engines.Mediators;
-using Omnius.Xeus.Engines.Models;
 using Omnius.Xeus.Engines.Storages;
 
 namespace Omnius.Xeus.Daemon
@@ -34,7 +33,7 @@ namespace Omnius.Xeus.Daemon
         public EnginesConfig? Config;
     }
 
-    public class XeusService : IXeusService
+    public class XeusServiceImpl : IXeusService
     {
         private readonly XeusServiceOptions _options;
 
@@ -46,15 +45,15 @@ namespace Omnius.Xeus.Daemon
         public IPushDeclaredMessageStorage? _pushDeclaredMessageStorage;
         public IWantDeclaredMessageStorage? _wantDeclaredMessageStorage;
 
-        public static async ValueTask<XeusService> CreateAsync(XeusServiceOptions options)
+        public static async ValueTask<XeusServiceImpl> CreateAsync(XeusServiceOptions options)
         {
-            var service = new XeusService(options);
+            var service = new XeusServiceImpl(options);
             await service.InitAsync();
 
             return service;
         }
 
-        private XeusService(XeusServiceOptions options)
+        private XeusServiceImpl(XeusServiceOptions options)
         {
             _options = options;
         }
@@ -100,80 +99,80 @@ namespace Omnius.Xeus.Daemon
             _declaredMessageExchanger = await declaredMessageExchangerFactory.CreateAsync(declaredMessageExchangerOptions, new[] { tcpConnector }, _ckadMediator, _pushDeclaredMessageStorage, _wantDeclaredMessageStorage, bytesPool);
         }
 
-        public async ValueTask<GetMyNodeProfileResult> GetMyNodeProfileAsync(CancellationToken cancellationToken)
+        public async ValueTask<GetMyNodeProfileResult> GetMyNodeProfileAsync(CancellationToken cancellationToken = default)
         {
             if (_ckadMediator is null) throw new NullReferenceException(nameof(_ckadMediator));
             var result = await _ckadMediator.GetMyNodeProfileAsync(cancellationToken);
             return new GetMyNodeProfileResult(result);
         }
 
-        public async ValueTask AddCloudNodeProfilesAsync(AddCloudNodeProfilesParam param, CancellationToken cancellationToken)
+        public async ValueTask AddCloudNodeProfilesAsync(AddCloudNodeProfilesParam param, CancellationToken cancellationToken = default)
         {
             if (_ckadMediator is null) throw new NullReferenceException(nameof(_ckadMediator));
             await _ckadMediator.AddCloudNodeProfilesAsync(param.NodeProfiles, cancellationToken);
         }
 
-        public ValueTask<GetPushContentsReportResult> GetPushContentsReportAsync(CancellationToken cancellationToken)
+        public ValueTask<GetPushContentsReportResult> GetPushContentsReportAsync(CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask<RegisterPushContentResult> RegisterPushContentAsync(RegisterPushContentParam param, CancellationToken cancellationToken)
+        public ValueTask<RegisterPushContentResult> RegisterPushContentAsync(RegisterPushContentParam param, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask UnregisterPushContentAsync(UnregisterPushContentParam param, CancellationToken cancellationToken)
+        public ValueTask UnregisterPushContentAsync(UnregisterPushContentParam param, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask<GetWantContentsReportResult> GetWantContentsReportAsync(CancellationToken cancellationToken)
+        public ValueTask<GetWantContentsReportResult> GetWantContentsReportAsync(CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask RegisterWantContentAsync(RegisterWantContentParam param, CancellationToken cancellationToken)
+        public ValueTask RegisterWantContentAsync(RegisterWantContentParam param, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask UnregisterWantContentAsync(UnregisterWantContentParam param, CancellationToken cancellationToken)
+        public ValueTask UnregisterWantContentAsync(UnregisterWantContentParam param, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask ExportWantContentAsync(ExportWantContentParam param, CancellationToken cancellationToken)
+        public ValueTask ExportWantContentAsync(ExportWantContentParam param, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask<GetPushDeclaredMessagesReportResult> GetPushDeclaredMessagesReportAsync(CancellationToken cancellationToken)
+        public ValueTask<GetPushDeclaredMessagesReportResult> GetPushDeclaredMessagesReportAsync(CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask RegisterPushDeclaredMessageAsync(RegisterPushDeclaredMessageParam param, CancellationToken cancellationToken)
+        public ValueTask RegisterPushDeclaredMessageAsync(RegisterPushDeclaredMessageParam param, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask UnregisterPushDeclaredMessageAsync(UnregisterPushDeclaredMessageParam param, CancellationToken cancellationToken)
+        public ValueTask UnregisterPushDeclaredMessageAsync(UnregisterPushDeclaredMessageParam param, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask RegisterWantDeclaredMessageAsync(RegisterWantDeclaredMessageParam param, CancellationToken cancellationToken)
+        public ValueTask RegisterWantDeclaredMessageAsync(RegisterWantDeclaredMessageParam param, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask UnregisterWantDeclaredMessageAsync(UnregisterWantDeclaredMessageParam param, CancellationToken cancellationToken)
+        public ValueTask UnregisterWantDeclaredMessageAsync(UnregisterWantDeclaredMessageParam param, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask<ReadWantDeclaredMessageResult> ReadWantDeclaredMessageAsync(ReadWantDeclaredMessageParam param, CancellationToken cancellationToken)
+        public ValueTask<ExportWantDeclaredMessageResult> ExportWantDeclaredMessageAsync(ExportWantDeclaredMessageParam param, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }

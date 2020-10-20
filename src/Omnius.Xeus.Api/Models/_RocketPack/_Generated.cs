@@ -1671,201 +1671,6 @@ namespace Omnius.Xeus.Api.Models
             }
         }
     }
-    public readonly partial struct ReadWantDeclaredMessageParam : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageParam>
-    {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageParam> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageParam>.Formatter;
-        public static global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageParam Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageParam>.Empty;
-
-        static ReadWantDeclaredMessageParam()
-        {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageParam>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageParam>.Empty = new global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageParam(OmniSignature.Empty);
-        }
-
-        private readonly int ___hashCode;
-
-        public ReadWantDeclaredMessageParam(OmniSignature signature)
-        {
-            if (signature is null) throw new global::System.ArgumentNullException("signature");
-
-            this.Signature = signature;
-
-            {
-                var ___h = new global::System.HashCode();
-                if (signature != default) ___h.Add(signature.GetHashCode());
-                ___hashCode = ___h.ToHashCode();
-            }
-        }
-
-        public OmniSignature Signature { get; }
-
-        public static global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
-        {
-            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
-            return Formatter.Deserialize(ref reader, 0);
-        }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
-        {
-            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
-            Formatter.Serialize(ref writer, this, 0);
-        }
-
-        public static bool operator ==(global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageParam left, global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageParam right)
-        {
-            return right.Equals(left);
-        }
-        public static bool operator !=(global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageParam left, global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageParam right)
-        {
-            return !(left == right);
-        }
-        public override bool Equals(object? other)
-        {
-            if (!(other is global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageParam)) return false;
-            return this.Equals((global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageParam)other);
-        }
-        public bool Equals(global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageParam target)
-        {
-            if (this.Signature != target.Signature) return false;
-
-            return true;
-        }
-        public override int GetHashCode() => ___hashCode;
-
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageParam>
-        {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageParam value, in int rank)
-            {
-                if (rank > 256) throw new global::System.FormatException();
-
-                if (value.Signature != OmniSignature.Empty)
-                {
-                    w.Write((uint)1);
-                    global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
-                }
-                w.Write((uint)0);
-            }
-
-            public global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageParam Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
-            {
-                if (rank > 256) throw new global::System.FormatException();
-
-                OmniSignature p_signature = OmniSignature.Empty;
-
-                for (; ; )
-                {
-                    uint id = r.GetUInt32();
-                    if (id == 0) break;
-                    switch (id)
-                    {
-                        case 1:
-                            {
-                                p_signature = global::Omnius.Core.Cryptography.OmniSignature.Formatter.Deserialize(ref r, rank + 1);
-                                break;
-                            }
-                    }
-                }
-
-                return new global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageParam(p_signature);
-            }
-        }
-    }
-    public readonly partial struct ReadWantDeclaredMessageResult : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageResult>
-    {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageResult> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageResult>.Formatter;
-        public static global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageResult Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageResult>.Empty;
-
-        static ReadWantDeclaredMessageResult()
-        {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageResult>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageResult>.Empty = new global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageResult(null);
-        }
-
-        private readonly int ___hashCode;
-
-        public ReadWantDeclaredMessageResult(DeclaredMessage? signature)
-        {
-            this.Signature = signature;
-
-            {
-                var ___h = new global::System.HashCode();
-                if (signature != default) ___h.Add(signature.GetHashCode());
-                ___hashCode = ___h.ToHashCode();
-            }
-        }
-
-        public DeclaredMessage? Signature { get; }
-
-        public static global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageResult Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
-        {
-            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
-            return Formatter.Deserialize(ref reader, 0);
-        }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
-        {
-            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
-            Formatter.Serialize(ref writer, this, 0);
-        }
-
-        public static bool operator ==(global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageResult left, global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageResult right)
-        {
-            return right.Equals(left);
-        }
-        public static bool operator !=(global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageResult left, global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageResult right)
-        {
-            return !(left == right);
-        }
-        public override bool Equals(object? other)
-        {
-            if (!(other is global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageResult)) return false;
-            return this.Equals((global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageResult)other);
-        }
-        public bool Equals(global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageResult target)
-        {
-            if ((this.Signature is null) != (target.Signature is null)) return false;
-            if (!(this.Signature is null) && !(target.Signature is null) && this.Signature != target.Signature) return false;
-
-            return true;
-        }
-        public override int GetHashCode() => ___hashCode;
-
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageResult>
-        {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageResult value, in int rank)
-            {
-                if (rank > 256) throw new global::System.FormatException();
-
-                if (value.Signature != null)
-                {
-                    w.Write((uint)1);
-                    global::Omnius.Xeus.Engines.Models.DeclaredMessage.Formatter.Serialize(ref w, value.Signature, rank + 1);
-                }
-                w.Write((uint)0);
-            }
-
-            public global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageResult Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
-            {
-                if (rank > 256) throw new global::System.FormatException();
-
-                DeclaredMessage? p_signature = null;
-
-                for (; ; )
-                {
-                    uint id = r.GetUInt32();
-                    if (id == 0) break;
-                    switch (id)
-                    {
-                        case 1:
-                            {
-                                p_signature = global::Omnius.Xeus.Engines.Models.DeclaredMessage.Formatter.Deserialize(ref r, rank + 1);
-                                break;
-                            }
-                    }
-                }
-
-                return new global::Omnius.Xeus.Api.Models.ReadWantDeclaredMessageResult(p_signature);
-            }
-        }
-    }
     public readonly partial struct WantDeclaredMessageReport : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.WantDeclaredMessageReport>
     {
         public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.Models.WantDeclaredMessageReport> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.WantDeclaredMessageReport>.Formatter;
@@ -2270,6 +2075,201 @@ namespace Omnius.Xeus.Api.Models
                 }
 
                 return new global::Omnius.Xeus.Api.Models.UnregisterWantDeclaredMessageParam(p_signature);
+            }
+        }
+    }
+    public readonly partial struct ExportWantDeclaredMessageParam : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageParam>
+    {
+        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageParam> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageParam>.Formatter;
+        public static global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageParam Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageParam>.Empty;
+
+        static ExportWantDeclaredMessageParam()
+        {
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageParam>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageParam>.Empty = new global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageParam(OmniSignature.Empty);
+        }
+
+        private readonly int ___hashCode;
+
+        public ExportWantDeclaredMessageParam(OmniSignature signature)
+        {
+            if (signature is null) throw new global::System.ArgumentNullException("signature");
+
+            this.Signature = signature;
+
+            {
+                var ___h = new global::System.HashCode();
+                if (signature != default) ___h.Add(signature.GetHashCode());
+                ___hashCode = ___h.ToHashCode();
+            }
+        }
+
+        public OmniSignature Signature { get; }
+
+        public static global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            return Formatter.Deserialize(ref reader, 0);
+        }
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            Formatter.Serialize(ref writer, this, 0);
+        }
+
+        public static bool operator ==(global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageParam left, global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageParam right)
+        {
+            return right.Equals(left);
+        }
+        public static bool operator !=(global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageParam left, global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageParam right)
+        {
+            return !(left == right);
+        }
+        public override bool Equals(object? other)
+        {
+            if (!(other is global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageParam)) return false;
+            return this.Equals((global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageParam)other);
+        }
+        public bool Equals(global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageParam target)
+        {
+            if (this.Signature != target.Signature) return false;
+
+            return true;
+        }
+        public override int GetHashCode() => ___hashCode;
+
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageParam>
+        {
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageParam value, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                if (value.Signature != OmniSignature.Empty)
+                {
+                    w.Write((uint)1);
+                    global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
+                }
+                w.Write((uint)0);
+            }
+
+            public global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageParam Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                OmniSignature p_signature = OmniSignature.Empty;
+
+                for (; ; )
+                {
+                    uint id = r.GetUInt32();
+                    if (id == 0) break;
+                    switch (id)
+                    {
+                        case 1:
+                            {
+                                p_signature = global::Omnius.Core.Cryptography.OmniSignature.Formatter.Deserialize(ref r, rank + 1);
+                                break;
+                            }
+                    }
+                }
+
+                return new global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageParam(p_signature);
+            }
+        }
+    }
+    public readonly partial struct ExportWantDeclaredMessageResult : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageResult>
+    {
+        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageResult> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageResult>.Formatter;
+        public static global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageResult Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageResult>.Empty;
+
+        static ExportWantDeclaredMessageResult()
+        {
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageResult>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageResult>.Empty = new global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageResult(null);
+        }
+
+        private readonly int ___hashCode;
+
+        public ExportWantDeclaredMessageResult(DeclaredMessage? signature)
+        {
+            this.Signature = signature;
+
+            {
+                var ___h = new global::System.HashCode();
+                if (signature != default) ___h.Add(signature.GetHashCode());
+                ___hashCode = ___h.ToHashCode();
+            }
+        }
+
+        public DeclaredMessage? Signature { get; }
+
+        public static global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageResult Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            return Formatter.Deserialize(ref reader, 0);
+        }
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            Formatter.Serialize(ref writer, this, 0);
+        }
+
+        public static bool operator ==(global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageResult left, global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageResult right)
+        {
+            return right.Equals(left);
+        }
+        public static bool operator !=(global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageResult left, global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageResult right)
+        {
+            return !(left == right);
+        }
+        public override bool Equals(object? other)
+        {
+            if (!(other is global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageResult)) return false;
+            return this.Equals((global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageResult)other);
+        }
+        public bool Equals(global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageResult target)
+        {
+            if ((this.Signature is null) != (target.Signature is null)) return false;
+            if (!(this.Signature is null) && !(target.Signature is null) && this.Signature != target.Signature) return false;
+
+            return true;
+        }
+        public override int GetHashCode() => ___hashCode;
+
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageResult>
+        {
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageResult value, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                if (value.Signature != null)
+                {
+                    w.Write((uint)1);
+                    global::Omnius.Xeus.Engines.Models.DeclaredMessage.Formatter.Serialize(ref w, value.Signature, rank + 1);
+                }
+                w.Write((uint)0);
+            }
+
+            public global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageResult Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                DeclaredMessage? p_signature = null;
+
+                for (; ; )
+                {
+                    uint id = r.GetUInt32();
+                    if (id == 0) break;
+                    switch (id)
+                    {
+                        case 1:
+                            {
+                                p_signature = global::Omnius.Xeus.Engines.Models.DeclaredMessage.Formatter.Deserialize(ref r, rank + 1);
+                                break;
+                            }
+                    }
+                }
+
+                return new global::Omnius.Xeus.Api.Models.ExportWantDeclaredMessageResult(p_signature);
             }
         }
     }

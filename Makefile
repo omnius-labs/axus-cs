@@ -1,18 +1,18 @@
 init-tools:
-	sh ./eng/init-tools.sh
+	docker-compose run --rm devenv sh ./eng/init-tools.sh
 
 gen-code:
-	sh ./eng/gen-code.sh
+	docker-compose run --rm devenv sh ./eng/gen-code.sh
 
 test:
-	sh ./eng/test.sh
+	docker-compose run --rm devenv sh ./eng/test.sh
 
 update: format
-	sh ./eng/update-tools.sh
+	docker-compose run --rm devenv sh ./eng/update-tools.sh
 
 format:
-	dotnet tool restore
-	dotnet tool run dotnet-format
+	docker-compose run --rm devenv dotnet tool restore
+	docker-compose run --rm devenv dotnet tool run dotnet-format
 
 clean:
 	rm -rf ./bin

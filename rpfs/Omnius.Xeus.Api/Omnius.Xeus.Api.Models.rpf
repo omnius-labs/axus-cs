@@ -73,14 +73,6 @@ message RegisterPushDeclaredMessageParam {
 message UnregisterPushDeclaredMessageParam {
     Signature: OmniSignature,
 }
-[csharp_struct]
-message ReadWantDeclaredMessageParam {
-    Signature: OmniSignature,
-}
-[csharp_struct]
-message ReadWantDeclaredMessageResult {
-    Signature: DeclaredMessage?,
-}
 
 [csharp_struct]
 message WantDeclaredMessageReport {
@@ -97,4 +89,12 @@ message RegisterWantDeclaredMessageParam {
 [csharp_struct]
 message UnregisterWantDeclaredMessageParam {
     Signature: OmniSignature,
+}
+[csharp_struct]
+message ExportWantDeclaredMessageParam {
+    Signature: OmniSignature,
+}
+[csharp_struct]
+message ExportWantDeclaredMessageResult {
+    Signature: DeclaredMessage?,
 }

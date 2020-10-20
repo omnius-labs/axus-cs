@@ -66,7 +66,7 @@ namespace Omnius.Xeus.Daemon
                 Config = daemonConfig.Engines,
             };
 
-            var service = await XeusService.CreateAsync(options);
+            var service = await XeusServiceImpl.CreateAsync(options);
 
             var listenAddress = (OmniAddress?)daemonConfig?.ListenAddress;
             if (listenAddress is null || !listenAddress.TryParseTcpEndpoint(out var ipAddress, out var port))
@@ -78,7 +78,7 @@ namespace Omnius.Xeus.Daemon
             await this.ListenAsync(service, ipAddress, port);
         }
 
-        private async ValueTask ListenAsync(XeusService service, IPAddress ipAddress, ushort port)
+        private async ValueTask ListenAsync(XeusServiceImpl service, IPAddress ipAddress, ushort port)
         {
             TcpListener? tcpListener = null;
 
@@ -112,7 +112,7 @@ namespace Omnius.Xeus.Daemon
                             };
                             var connection = new BaseConnection(cap, dispatcher, connectionOption);
 
-                            var server = new XeusServiceServer(service, connection, BytesPool.Shared);
+                            var server = new XeusService.Server(service, connection, BytesPool.Shared);
                             receiverTasks.Add(server.EventLoop().ContinueWith(async (_) => await server.DisposeAsync()));
                         }
                         catch (SocketException)

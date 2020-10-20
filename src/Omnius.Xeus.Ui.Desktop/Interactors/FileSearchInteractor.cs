@@ -1,4 +1,6 @@
+using System.Threading.Tasks;
 using Omnius.Xeus.Api;
+using Omnius.Xeus.Api.Models;
 
 namespace Omnius.Xeus.Ui.Desktop.Interactors
 {
@@ -11,8 +13,10 @@ namespace Omnius.Xeus.Ui.Desktop.Interactors
             _xeusService = xeusService;
         }
 
-        public void Run() { 
-            _xeusService.
+        public async Task Run()
+        {
+            var param = new ExportWantDeclaredMessageParam();
+            await _xeusService.ExportWantDeclaredMessageAsync(param);
         }
     }
 }

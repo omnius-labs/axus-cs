@@ -1,0 +1,35 @@
+@startuml
+
+package Ominus.Xeus.Engines <<Rectangle>> {
+    package Connectors <<Rectangle>> {
+        class TcpConnector
+    }
+    package Exchangers <<Rectangle>> {
+        class ContentExchanger
+        class DeclaredMessageExchanger
+    }
+    package Mediators <<Rectangle>> {
+        class CkadMediator
+    }
+    package Storages <<Rectangle>> {
+        class PushContentStorage
+        class PushDeclaredMessageStorage
+        class WantContentStorage
+        class WantDeclaredMessageStorage
+    }
+
+    ContentExchanger -- TcpConnector
+    DeclaredMessageExchanger -- TcpConnector
+    CkadMediator -- TcpConnector
+
+    ContentExchanger -- CkadMediator
+    DeclaredMessageExchanger -- CkadMediator
+
+    ContentExchanger -- PushContentStorage
+    ContentExchanger -- WantContentStorage
+
+    DeclaredMessageExchanger -- PushDeclaredMessageStorage
+    DeclaredMessageExchanger -- WantDeclaredMessageStorage
+}
+
+@enduml

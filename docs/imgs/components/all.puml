@@ -1,0 +1,30 @@
+@startuml
+
+package "Omnius.Xeus.Ui.Desktop" {
+    [MainWindow]
+    [FileSearchControl]
+    [FileDownloadControl]
+    [FileUploadControl]
+}
+
+package "Omnius.Xeus.Interactors" {
+    [FileStorageService]
+}
+
+package "Omnius.Xeus.Daemon" {
+    [XeusService]
+}
+
+[MainWindow] --> [FileSearchControl]
+[MainWindow] --> [FileDownloadControl]
+[MainWindow] --> [FileUploadControl]
+
+[FileSearchControl] --> [FileStorageService]
+[FileDownloadControl] --> [FileStorageService]
+[FileUploadControl] --> [FileStorageService]
+
+[FileStorageService] ..> TCP : connect
+
+TCP ..> [XeusService] : accept
+
+@enduml
