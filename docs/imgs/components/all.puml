@@ -1,30 +1,72 @@
 @startuml
+skinparam rectangle<<behavior>> {
+	roundCorner 25
+}
+sprite $component jar:archimate/component
 
-package "Omnius.Xeus.Ui.Desktop" {
-    [MainWindow]
-    [FileSearchControl]
-    [FileDownloadControl]
-    [FileUploadControl]
+package Omnius.Xeus.Interactors {
+    rectangle FileStorageService <<$component>><<behavior>>
 }
 
-package "Omnius.Xeus.Interactors" {
-    [FileStorageService]
+package Omnius.Xeus.Ui.Desktop {
+    rectangle MainWindow <<$component>><<behavior>>
+    rectangle FileSearchControl <<$component>><<behavior>>
+    rectangle FileDownloadControl <<$component>><<behavior>>
+    rectangle FileUploadControl <<$component>><<behavior>>
 }
 
-package "Omnius.Xeus.Daemon" {
-    [XeusService]
+package Omnius.Xeus.Daemon {
+    rectangle XeusServiceImpl <<$component>><<behavior>>
 }
 
-[MainWindow] --> [FileSearchControl]
-[MainWindow] --> [FileDownloadControl]
-[MainWindow] --> [FileUploadControl]
+package Ominus.Xeus.Engines {
+    package Exchanger {
+        rectangle ContentExchanger <<$component>><<behavior>>
+        rectangle DeclaredMessageExchanger <<$component>><<behavior>>
+    }
+    package Mediators {
+        rectangle CkadMediator <<$component>><<behavior>>
+    }
+    package Storages {
+        rectangle PushContentStorage <<$component>><<behavior>>
+        rectangle WantContentStorage <<$component>><<behavior>>
+        rectangle PushDeclaredMessageStorage <<$component>><<behavior>>
+        rectangle WantDeclaredMessageStorage <<$component>><<behavior>>
+    }
+    package Connector {
+        rectangle TcpConnector <<$component>><<behavior>>
+    }
+}
 
-[FileSearchControl] --> [FileStorageService]
-[FileDownloadControl] --> [FileStorageService]
-[FileUploadControl] --> [FileStorageService]
+TCP ..> XeusServiceImpl : accept
+FileStorageService ..> TCP : connect
 
-[FileStorageService] ..> TCP : connect
+MainWindow -down-> FileSearchControl
+MainWindow -down-> FileDownloadControl
+MainWindow -down-> FileUploadControl
 
-TCP ..> [XeusService] : accept
+FileSearchControl -down-> FileStorageService
+FileDownloadControl -down-> FileStorageService
+FileUploadControl -down-> FileStorageService
+
+XeusServiceImpl -down-> ContentExchanger
+XeusServiceImpl -down-> DeclaredMessageExchanger
+XeusServiceImpl -down-> CkadMediator
+XeusServiceImpl -down-> PushContentStorage
+XeusServiceImpl -down-> PushDeclaredMessageStorage
+XeusServiceImpl -down-> WantContentStorage
+XeusServiceImpl -down-> WantDeclaredMessageStorage
+
+ContentExchanger -down-> CkadMediator
+ContentExchanger -down-> TcpConnector
+ContentExchanger -down-> PushContentStorage
+ContentExchanger -down-> WantContentStorage
+
+DeclaredMessageExchanger -down-> CkadMediator
+DeclaredMessageExchanger -down-> TcpConnector
+DeclaredMessageExchanger -down-> PushDeclaredMessageStorage
+DeclaredMessageExchanger -down-> WantDeclaredMessageStorage
+
+CkadMediator -down-> TcpConnector
 
 @enduml
