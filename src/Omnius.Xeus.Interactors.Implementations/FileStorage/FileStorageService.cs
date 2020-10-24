@@ -26,6 +26,7 @@ namespace Omnius.Xeus.Interactors.FileStorage
 
         public FileStorageService()
         {
+
         }
 
         protected override ValueTask OnDisposeAsync()
