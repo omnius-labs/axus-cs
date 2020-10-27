@@ -11,25 +11,16 @@
     <GenerateFullPaths>true</GenerateFullPaths>
   </PropertyGroup>
 
-  <!--
-  <PropertyGroup>
-    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-    <RestoreLockedMode>true</RestoreLockedMode>
-    <NoWarn>NU1603</NoWarn>
-    <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
-  </PropertyGroup>
-  -->
-
   <PropertyGroup>
     <RootNamespace>$(ProjectName)</RootNamespace>
     <Title>$(ProjectName)</Title>
     <Description>$(ProjectName)</Description>
-    <FileVersion>$(AssemblyVersion)</FileVersion>
     <BuildVersion>1</BuildVersion>
     <VersionPrefix>0.0.1</VersionPrefix>
     <VersionSuffix>-alpha</VersionSuffix>
     <Version>$(VersionPrefix)$(VersionSuffix).$(BuildVersion)</Version>
     <AssemblyVersion>$(VersionPrefix).$(BuildVersion)</AssemblyVersion>
+    <FileVersion>$(AssemblyVersion)</FileVersion>
     <Authors>Lyrise</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/omnius-labs/xeus</PackageProjectUrl>
@@ -68,6 +59,20 @@
   <PropertyGroup Condition=" '$(NativeDepsPlatform)' == 'Linux' ">
     <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\obj\linux\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
     <BaseOutputPath Condition=" '$(BaseOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\bin\linux\$(MSBuildProjectName)\</BaseOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreLockedMode>true</RestoreLockedMode>
+    <NoWarn>NU1603</NoWarn>
+    <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(RuntimeIdentifier)' == '' ">
+    <NuGetLockFilePath>packages.lock.any.json</NuGetLockFilePath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(RuntimeIdentifier)' != '' ">
+    <NuGetLockFilePath>packages.lock.$(RuntimeIdentifier).json</NuGetLockFilePath>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
