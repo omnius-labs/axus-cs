@@ -64,6 +64,12 @@
         "resolved": "7.4.1",
         "contentHash": "qcFgN9wY51cneXSLG4pYpzFeocXer/6m2a1QFms1QVAFOawWUZx8PZ9+HPrUCbJ+sVD3vfbg3EwXsjeJV8Nt6g=="
       },
+      "StyleCop.Analyzers": {
+        "type": "Direct",
+        "requested": "[1.1.118, )",
+        "resolved": "1.1.118",
+        "contentHash": "Onx6ovGSqXSK07n/0eM3ZusiNdB6cIlJdabQhWGgJp3Vooy9AaLS/tigeybOJAobqbtggTamoWndz72JscZBvw=="
+      },
       "Avalonia.Direct2D1": {
         "type": "Transitive",
         "resolved": "0.9.12",
