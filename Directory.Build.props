@@ -61,17 +61,11 @@
     <BaseOutputPath Condition=" '$(BaseOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\bin\linux\$(MSBuildProjectName)\</BaseOutputPath>
   </PropertyGroup>
 
-  <PropertyGroup>
+  <PropertyGroup Condition=" '$(RuntimeIdentifier)' == '' ">
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <RestoreLockedMode>true</RestoreLockedMode>
     <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(RuntimeIdentifier)' == '' ">
-    <NuGetLockFilePath>packages.lock.any.json</NuGetLockFilePath>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(RuntimeIdentifier)' != '' ">
-    <NuGetLockFilePath>packages.lock.$(RuntimeIdentifier).json</NuGetLockFilePath>
+    <NuGetLockFilePath>packages.lock.json</NuGetLockFilePath>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">

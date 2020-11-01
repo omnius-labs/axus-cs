@@ -7,17 +7,13 @@
     </AssemblyAttribute>
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition=" '$(Configuration)' != 'Release' ">
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
   </ItemGroup>
-
-  <PropertyGroup>
-    <CodeAnalysisRuleSet>$(SolutionDir)\src\stylecop.ruleset</CodeAnalysisRuleSet>
+  <PropertyGroup Condition=" '$(Configuration)' != 'Release' ">
+    <CodeAnalysisRuleSet>$(SolutionDir)style.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <ItemGroup>
-    <AdditionalFiles Include="$(SolutionDir)\src\stylecop.json" Link="stylecop.json" />
-  </ItemGroup>
 </Project>

@@ -213,7 +213,7 @@ namespace Omnius.Xeus.Engines.Exchangers
         }
 
         private async ValueTask<bool> TryAddConnectionAsync(IConnection connection, OmniAddress address,
-            ConnectionHandshakeType handshakeType, OmniHash? rootHash, CancellationToken cancellationToken = default)
+                                                            ConnectionHandshakeType handshakeType, OmniHash? rootHash, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -228,7 +228,10 @@ namespace Omnius.Xeus.Engines.Exchangers
                     await Task.WhenAll(enqueueTask, dequeueTask);
 
                     var otherHelloMessage = dequeueTask.Result;
-                    if (otherHelloMessage == null) throw new Exception();
+                    if (otherHelloMessage == null)
+                    {
+                        throw new Exception();
+                    }
 
                     version = EnumHelper.GetOverlappedMaxValue(myHelloMessage.Versions, otherHelloMessage.Versions);
                 }
