@@ -1,5 +1,3 @@
-#!/bin/bash
-
 Remove-Item -Path xeus.sln -Force
 dotnet new sln
 dotnet sln xeus.sln add (ls -r ./refs/core/src/**/*.csproj)
