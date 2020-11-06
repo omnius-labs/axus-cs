@@ -1,3 +1,4 @@
 [submodule "refs/core"]
 	path = refs/core
 	url = https://github.com/omnius-labs/core.git
+    branch = develop
