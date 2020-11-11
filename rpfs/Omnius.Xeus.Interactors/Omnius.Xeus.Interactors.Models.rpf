@@ -1,0 +1,12 @@
+syntax v1.0;
+
+using "Omnius.Core.Cryptography";
+using "Omnius.Core.Network";
+using "Omnius.Xeus.Engines.Models";
+
+namespace "Omnius.Xeus.Interactors.Models";
+
+// Models
+
+message FileStorageServiceOptions {
+}

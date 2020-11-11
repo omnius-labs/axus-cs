@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
+using Omnius.Core.Cryptography.Functions;
 using Omnius.Core.Io;
 using Omnius.Core.Serialization;
 using Omnius.Xeus.Engines.Models;

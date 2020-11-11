@@ -9,7 +9,7 @@
     <ProjectReference Include="..\..\src\Omnius.Xeus.Engines\Omnius.Xeus.Engines.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Network.Proxies\Omnius.Core.Network.Proxies.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Network.Upnp\Omnius.Core.Network.Upnp.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Test\Omnius.Core.Test.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.UnitTestToolkit\Omnius.Core.UnitTestToolkit.csproj" />
   </ItemGroup>
 
   <ItemGroup>

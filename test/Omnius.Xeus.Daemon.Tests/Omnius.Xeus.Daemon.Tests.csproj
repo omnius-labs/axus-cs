@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Omnius.Xeus.Daemon\Omnius.Xeus.Daemon.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Test\Omnius.Core.Test.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.UnitTestToolkit\Omnius.Core.UnitTestToolkit.csproj" />
   </ItemGroup>
 
   <ItemGroup>

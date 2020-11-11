@@ -1296,7 +1296,7 @@
           "Omnius.Core": "0.0.1-alpha.1"
         }
       },
-      "omnius.core.test": {
+      "omnius.core.unittesttoolkit": {
         "type": "Project",
         "dependencies": {
           "DiffPlex": "1.6.3",

@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Xeus.Api;
+using Omnius.Xeus.Interactors.Models;
 
 namespace Omnius.Xeus.Interactors.FileStorage
 {
@@ -10,7 +11,7 @@ namespace Omnius.Xeus.Interactors.FileStorage
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        // private readonly FileStorageServiceOptions _options;
+        private readonly FileStorageServiceOptions _options;
         private readonly IXeusService _xeusService;
         private readonly IBytesPool _bytesPool;
 
@@ -18,15 +19,24 @@ namespace Omnius.Xeus.Interactors.FileStorage
 
         internal sealed class FileStorageServiceFactory : IFileStorageServiceFactory
         {
-            public async ValueTask<IFileStorageService> CreateAsync(IXeusService xeusService)
+            public async ValueTask<IFileStorageService> CreateAsync(FileStorageServiceOptions options, IXeusService xeusService, IBytesPool bytesPool)
             {
-                throw new NotImplementedException();
+                var result = new FileStorageService(options, xeusService, bytesPool);
+                await result.InitAsync();
+
+                return result;
             }
         }
 
-        public FileStorageService()
+        public FileStorageService(FileStorageServiceOptions options, IXeusService xeusService, IBytesPool bytesPool)
         {
+            _options = options;
+            _xeusService = xeusService;
+            _bytesPool = bytesPool;
+        }
 
+        public async ValueTask InitAsync()
+        {
         }
 
         protected override ValueTask OnDisposeAsync()

@@ -16,7 +16,7 @@ namespace Omnius.Xeus.Interactors.FileStorage.Internal.Repositories
         public FileStorageServiceRepository(string path)
         {
             _database = new LiteDatabase(path);
-            this.PushStatus = new PushStatusRepository(_database);
+            this.SubscribedSignatures = new SubscribedSignaturesRepository(_database);
         }
 
         public void Dispose()
@@ -26,7 +26,7 @@ namespace Omnius.Xeus.Interactors.FileStorage.Internal.Repositories
 
         public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
         {
-            if (0 <= _database.UserVersion)
+            if (_database.UserVersion >= 0)
             {
                 var wants = _database.GetCollection<OmniSignatureEntity>();
                 wants.EnsureIndex(x => x, true);

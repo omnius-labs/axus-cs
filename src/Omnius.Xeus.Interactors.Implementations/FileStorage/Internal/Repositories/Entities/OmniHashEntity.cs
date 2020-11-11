@@ -5,6 +5,7 @@ namespace Omnius.Xeus.Interactors.FileStorage.Internal.Repositories.Entities
     internal sealed class OmniHashEntity
     {
         public int AlgorithmType { get; set; }
+
         public byte[]? Value { get; set; }
 
         public static OmniHashEntity Import(OmniHash value)

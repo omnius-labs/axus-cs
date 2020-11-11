@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
-using Omnius.Core.Test;
+using Omnius.Core.UnitTestToolkit;
 using Omnius.Xeus.Engines.Models;
 using Xunit;
 
