@@ -8,5 +8,10 @@ namespace "Omnius.Xeus.Interactors.Models";
 
 // Models
 
-message FileStorageServiceOptions {
+message FileStorageOptions {
+    ConfigDirectoryPath: string,
+}
+
+message UserProfileStorageOptions {
+    ConfigDirectoryPath: string,
 }

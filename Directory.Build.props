@@ -9,6 +9,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <NoWarn>CS1591,CS1998,NU5105,NU1603</NoWarn>
     <GenerateFullPaths>true</GenerateFullPaths>
+    <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))</RepoRoot>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -69,7 +70,6 @@
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))</RepoRoot>
     <PathMap>$(RepoRoot)=.</PathMap>
   </PropertyGroup>
 

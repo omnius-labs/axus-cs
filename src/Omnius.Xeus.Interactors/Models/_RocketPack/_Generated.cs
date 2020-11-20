@@ -3,31 +3,39 @@
 
 namespace Omnius.Xeus.Interactors.Models
 {
-    public sealed partial class FileStorageServiceOptions : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.FileStorageServiceOptions>
+    public sealed partial class FileStorageOptions : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.FileStorageOptions>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Interactors.Models.FileStorageServiceOptions> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.FileStorageServiceOptions>.Formatter;
-        public static global::Omnius.Xeus.Interactors.Models.FileStorageServiceOptions Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.FileStorageServiceOptions>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Interactors.Models.FileStorageOptions> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.FileStorageOptions>.Formatter;
+        public static global::Omnius.Xeus.Interactors.Models.FileStorageOptions Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.FileStorageOptions>.Empty;
 
-        static FileStorageServiceOptions()
+        static FileStorageOptions()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.FileStorageServiceOptions>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.FileStorageServiceOptions>.Empty = new global::Omnius.Xeus.Interactors.Models.FileStorageServiceOptions();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.FileStorageOptions>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.FileStorageOptions>.Empty = new global::Omnius.Xeus.Interactors.Models.FileStorageOptions(string.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public FileStorageServiceOptions()
+        public static readonly int MaxConfigDirectoryPathLength = 2147483647;
+
+        public FileStorageOptions(string configDirectoryPath)
         {
+            if (configDirectoryPath is null) throw new global::System.ArgumentNullException("configDirectoryPath");
+            if (configDirectoryPath.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("configDirectoryPath");
+
+            this.ConfigDirectoryPath = configDirectoryPath;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
+                if (configDirectoryPath != default) ___h.Add(configDirectoryPath.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
+        public string ConfigDirectoryPath { get; }
 
-        public static global::Omnius.Xeus.Interactors.Models.FileStorageServiceOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Interactors.Models.FileStorageOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -38,40 +46,47 @@ namespace Omnius.Xeus.Interactors.Models
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(global::Omnius.Xeus.Interactors.Models.FileStorageServiceOptions? left, global::Omnius.Xeus.Interactors.Models.FileStorageServiceOptions? right)
+        public static bool operator ==(global::Omnius.Xeus.Interactors.Models.FileStorageOptions? left, global::Omnius.Xeus.Interactors.Models.FileStorageOptions? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(global::Omnius.Xeus.Interactors.Models.FileStorageServiceOptions? left, global::Omnius.Xeus.Interactors.Models.FileStorageServiceOptions? right)
+        public static bool operator !=(global::Omnius.Xeus.Interactors.Models.FileStorageOptions? left, global::Omnius.Xeus.Interactors.Models.FileStorageOptions? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Interactors.Models.FileStorageServiceOptions)) return false;
-            return this.Equals((global::Omnius.Xeus.Interactors.Models.FileStorageServiceOptions)other);
+            if (!(other is global::Omnius.Xeus.Interactors.Models.FileStorageOptions)) return false;
+            return this.Equals((global::Omnius.Xeus.Interactors.Models.FileStorageOptions)other);
         }
-        public bool Equals(global::Omnius.Xeus.Interactors.Models.FileStorageServiceOptions? target)
+        public bool Equals(global::Omnius.Xeus.Interactors.Models.FileStorageOptions? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
+            if (this.ConfigDirectoryPath != target.ConfigDirectoryPath) return false;
 
             return true;
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Interactors.Models.FileStorageServiceOptions>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Interactors.Models.FileStorageOptions>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Interactors.Models.FileStorageServiceOptions value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Interactors.Models.FileStorageOptions value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
+                if (value.ConfigDirectoryPath != string.Empty)
+                {
+                    w.Write((uint)1);
+                    w.Write(value.ConfigDirectoryPath);
+                }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Interactors.Models.FileStorageServiceOptions Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Interactors.Models.FileStorageOptions Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
+                string p_configDirectoryPath = string.Empty;
 
                 for (; ; )
                 {
@@ -79,10 +94,118 @@ namespace Omnius.Xeus.Interactors.Models
                     if (id == 0) break;
                     switch (id)
                     {
+                        case 1:
+                            {
+                                p_configDirectoryPath = r.GetString(2147483647);
+                                break;
+                            }
                     }
                 }
 
-                return new global::Omnius.Xeus.Interactors.Models.FileStorageServiceOptions();
+                return new global::Omnius.Xeus.Interactors.Models.FileStorageOptions(p_configDirectoryPath);
+            }
+        }
+    }
+    public sealed partial class UserProfileStorageOptions : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.UserProfileStorageOptions>
+    {
+        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Interactors.Models.UserProfileStorageOptions> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.UserProfileStorageOptions>.Formatter;
+        public static global::Omnius.Xeus.Interactors.Models.UserProfileStorageOptions Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.UserProfileStorageOptions>.Empty;
+
+        static UserProfileStorageOptions()
+        {
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.UserProfileStorageOptions>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.UserProfileStorageOptions>.Empty = new global::Omnius.Xeus.Interactors.Models.UserProfileStorageOptions(string.Empty);
+        }
+
+        private readonly global::System.Lazy<int> ___hashCode;
+
+        public static readonly int MaxConfigDirectoryPathLength = 2147483647;
+
+        public UserProfileStorageOptions(string configDirectoryPath)
+        {
+            if (configDirectoryPath is null) throw new global::System.ArgumentNullException("configDirectoryPath");
+            if (configDirectoryPath.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("configDirectoryPath");
+
+            this.ConfigDirectoryPath = configDirectoryPath;
+
+            ___hashCode = new global::System.Lazy<int>(() =>
+            {
+                var ___h = new global::System.HashCode();
+                if (configDirectoryPath != default) ___h.Add(configDirectoryPath.GetHashCode());
+                return ___h.ToHashCode();
+            });
+        }
+
+        public string ConfigDirectoryPath { get; }
+
+        public static global::Omnius.Xeus.Interactors.Models.UserProfileStorageOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            return Formatter.Deserialize(ref reader, 0);
+        }
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            Formatter.Serialize(ref writer, this, 0);
+        }
+
+        public static bool operator ==(global::Omnius.Xeus.Interactors.Models.UserProfileStorageOptions? left, global::Omnius.Xeus.Interactors.Models.UserProfileStorageOptions? right)
+        {
+            return (right is null) ? (left is null) : right.Equals(left);
+        }
+        public static bool operator !=(global::Omnius.Xeus.Interactors.Models.UserProfileStorageOptions? left, global::Omnius.Xeus.Interactors.Models.UserProfileStorageOptions? right)
+        {
+            return !(left == right);
+        }
+        public override bool Equals(object? other)
+        {
+            if (!(other is global::Omnius.Xeus.Interactors.Models.UserProfileStorageOptions)) return false;
+            return this.Equals((global::Omnius.Xeus.Interactors.Models.UserProfileStorageOptions)other);
+        }
+        public bool Equals(global::Omnius.Xeus.Interactors.Models.UserProfileStorageOptions? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (this.ConfigDirectoryPath != target.ConfigDirectoryPath) return false;
+
+            return true;
+        }
+        public override int GetHashCode() => ___hashCode.Value;
+
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Interactors.Models.UserProfileStorageOptions>
+        {
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Interactors.Models.UserProfileStorageOptions value, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                if (value.ConfigDirectoryPath != string.Empty)
+                {
+                    w.Write((uint)1);
+                    w.Write(value.ConfigDirectoryPath);
+                }
+                w.Write((uint)0);
+            }
+            public global::Omnius.Xeus.Interactors.Models.UserProfileStorageOptions Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                string p_configDirectoryPath = string.Empty;
+
+                for (; ; )
+                {
+                    uint id = r.GetUInt32();
+                    if (id == 0) break;
+                    switch (id)
+                    {
+                        case 1:
+                            {
+                                p_configDirectoryPath = r.GetString(2147483647);
+                                break;
+                            }
+                    }
+                }
+
+                return new global::Omnius.Xeus.Interactors.Models.UserProfileStorageOptions(p_configDirectoryPath);
             }
         }
     }

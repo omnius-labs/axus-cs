@@ -1,6 +1,6 @@
 using Omnius.Core.Cryptography;
 
-namespace Omnius.Xeus.Interactors.FileStorage.Internal.Repositories.Entities
+namespace Omnius.Xeus.Interactors.Storages.Internal.Repositories.Entities
 {
     internal sealed class OmniHashEntity
     {

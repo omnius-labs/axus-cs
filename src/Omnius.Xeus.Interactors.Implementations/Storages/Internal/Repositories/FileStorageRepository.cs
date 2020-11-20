@@ -5,15 +5,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using LiteDB;
 using Omnius.Core.Cryptography;
-using Omnius.Xeus.Interactors.FileStorage.Internal.Repositories.Entities;
+using Omnius.Xeus.Interactors.Storages.Internal.Repositories.Entities;
 
-namespace Omnius.Xeus.Interactors.FileStorage.Internal.Repositories
+namespace Omnius.Xeus.Interactors.Storages.Internal.Repositories
 {
-    internal sealed partial class FileStorageServiceRepository : IDisposable
+    internal sealed partial class FileStorageRepository : IDisposable
     {
         private readonly LiteDatabase _database;
 
-        public FileStorageServiceRepository(string path)
+        public FileStorageRepository(string path)
         {
             _database = new LiteDatabase(path);
             this.SubscribedSignatures = new SubscribedSignaturesRepository(_database);
