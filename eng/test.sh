@@ -2,6 +2,8 @@
 
 dotnet tool restore
 
+export ContinuousIntegrationBuild=true
+
 for path in $(find "test" -maxdepth 2 -type f -name "*.csproj"); do
     name=$(basename ${path%.*})
     output="../../tmp/test/linux/${name}.opencover.xml"

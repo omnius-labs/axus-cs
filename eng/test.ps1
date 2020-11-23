@@ -1,5 +1,7 @@
 dotnet tool restore
 
+$Env:ContinuousIntegrationBuild = "true"
+
 ForEach ($folder in (Get-ChildItem -Path "test" -Directory)) {
     $path = $folder.FullName;
     $name = $folder.Name;
