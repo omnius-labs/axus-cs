@@ -661,8 +661,8 @@
       },
       "System.IO.Pipelines": {
         "type": "Transitive",
-        "resolved": "4.7.2",
-        "contentHash": "rGIIhoY3lUdn9rWeuGdgeZZ0P+SpJ1wZI5g8TnXqgvuhFgUP7iP9Nt5FZebYInQZQxqnwjPxdYYBE5l/8PJmqQ=="
+        "resolved": "5.0.0",
+        "contentHash": "irMYm3vhVgRsYvHTU5b2gsT2CwT/SMM6LZFzuJjpIvT5Z4CshxNsaoBC1X/LltwuR3Opp8d6jOS/60WwOb7Q2Q=="
       },
       "System.Linq": {
         "type": "Transitive",
@@ -1108,8 +1108,8 @@
       },
       "System.Text.Json": {
         "type": "Transitive",
-        "resolved": "4.7.2",
-        "contentHash": "TcMd95wcrubm9nHvJEQs70rC0H/8omiSGGpU4FQ/ZA1URIqD4pjmFJh2Mfv1yH1eHgJDWTi2hMDXwTET+zOOyg=="
+        "resolved": "5.0.0",
+        "contentHash": "+luxMQNZ2WqeffBU7Ml6njIvxc8169NW2oU+ygNudXQGZiarjE7DOtN7bILiQjTZjkmwwRZGTtLzmdrSI/Ustw=="
       },
       "System.Text.RegularExpressions": {
         "type": "Transitive",
@@ -1260,7 +1260,7 @@
         "type": "Project",
         "dependencies": {
           "NLog": "4.7.5",
-          "System.IO.Pipelines": "4.7.2"
+          "System.IO.Pipelines": "5.0.0"
         }
       },
       "omnius.core.collections": {
@@ -1268,7 +1268,7 @@
         "dependencies": {
           "NLog": "4.7.5",
           "Omnius.Core": "0.0.1-alpha.1",
-          "System.IO.Pipelines": "4.7.2"
+          "System.IO.Pipelines": "5.0.0"
         }
       },
       "omnius.core.cryptography": {
@@ -1347,7 +1347,7 @@
         "dependencies": {
           "DiffPlex": "1.6.3",
           "NLog": "4.7.4",
-          "System.Text.Json": "4.7.2"
+          "System.Text.Json": "5.0.0"
         }
       },
       "omnius.xeus.engines": {
