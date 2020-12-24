@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using LiteDB;
 using Omnius.Core.Cryptography;
+using Omnius.Xeus.Interactors.Internal.Helpers;
 using Omnius.Xeus.Interactors.Storages.Internal.Repositories.Entities;
 
 namespace Omnius.Xeus.Interactors.Storages.Internal.Repositories
@@ -15,6 +17,8 @@ namespace Omnius.Xeus.Interactors.Storages.Internal.Repositories
 
         public UserProfileStorageRepository(string path)
         {
+            DirectoryHelper.CreateDirectory(Path.GetDirectoryName(path));
+
             _database = new LiteDatabase(path);
             this.SubscribedSignatures = new SubscribedSignaturesRepository(_database);
         }

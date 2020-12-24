@@ -1,20 +1,15 @@
-﻿<UserControl x:Class="Omnius.Xeus.Ui.Desktop.Views.SearchControl"
+<UserControl x:Class="Omnius.Xeus.Ui.Desktop.Views.FileSearchControl"
         xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:dataGrid="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
+        xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
         xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
         xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
         xmlns:vm="clr-namespace:Omnius.Xeus.Ui.Desktop.ViewModels;assembly=Omnius.Xeus.Ui.Desktop"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         Width="800"
-        Height="450"
-        mc:Ignorable="d"
-        d:DesignWidth="800"
-        d:DesignHeight="450">
+        Height="500" >
 
     <Design.DataContext>
-        <vm:MainWindowViewModel/>
+        <vm:FileSearchControlViewModel/>
     </Design.DataContext>
 
     <Grid>
@@ -41,7 +36,11 @@
             </TreeView.ItemTemplate>
         </TreeView>
         <GridSplitter Grid.Column="1" />
-        <dataGrid:DataGrid Grid.Column="2">
-        </dataGrid:DataGrid>
+        <dg:DataGrid Grid.Column="2" Items="{Binding CurrentItems}" AutoGenerateColumns="False"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
+            <dg:DataGrid.Columns>
+                <dg:DataGridTextColumn Header="Name" Binding="{Binding Name.Value}" Width="200" />
+            </dg:DataGrid.Columns>
+        </dg:DataGrid>
     </Grid>
 </UserControl>

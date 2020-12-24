@@ -17,10 +17,9 @@ namespace Omnius.Xeus.Ui.Desktop
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                desktop.MainWindow = new MainWindow
-                {
-                    DataContext = new MainWindowViewModel(),
-                };
+                var mainWindowViewModel = new MainWindowViewModel();
+
+                desktop.MainWindow = new MainWindow() { ViewModel = mainWindowViewModel };
             }
 
             base.OnFrameworkInitializationCompleted();

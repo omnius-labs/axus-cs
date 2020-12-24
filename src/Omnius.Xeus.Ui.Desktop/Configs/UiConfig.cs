@@ -1,7 +1,7 @@
 namespace Omnius.Xeus.Ui.Desktop.Configs
 {
-    public record UiConfig
+    public class UiConfig
     {
-        public string? DaemonAddress;
+        public string? DaemonAddress { get; init; }
     }
 }

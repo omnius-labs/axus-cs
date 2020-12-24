@@ -25,13 +25,11 @@ namespace Omnius.Xeus.Api
     {
         public class Client : global::Omnius.Core.AsyncDisposableBase, global::Omnius.Xeus.Api.IXeusService
         {
-            private readonly global::Omnius.Xeus.Api.IXeusService _service;
             private readonly global::Omnius.Core.Network.Connections.IConnection _connection;
             private readonly global::Omnius.Core.IBytesPool _bytesPool;
             private readonly global::Omnius.Core.RocketPack.Remoting.RocketPackRpc _rpc;
-            public Client(global::Omnius.Xeus.Api.IXeusService service, global::Omnius.Core.Network.Connections.IConnection connection, global::Omnius.Core.IBytesPool bytesPool)
+            public Client(global::Omnius.Core.Network.Connections.IConnection connection, global::Omnius.Core.IBytesPool bytesPool)
             {
-                _service = service;
                 _connection = connection;
                 _bytesPool = bytesPool;
                 _rpc = new global::Omnius.Core.RocketPack.Remoting.RocketPackRpc(_connection, _bytesPool);

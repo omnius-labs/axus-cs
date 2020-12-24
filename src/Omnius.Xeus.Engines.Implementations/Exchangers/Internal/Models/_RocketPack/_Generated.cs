@@ -379,7 +379,7 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
                                 p_versions = new global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerVersion[length];
                                 for (int i = 0; i < p_versions.Length; i++)
                                 {
-                                    p_versions[i] = (ContentExchangerVersion)r.GetUInt64();
+                                    p_versions[i] = (global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerVersion)r.GetUInt64();
                                 }
                                 break;
                             }
@@ -576,7 +576,7 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
                     {
                         case 1:
                             {
-                                p_type = (ContentExchangerRequestExchangeResultType)r.GetUInt64();
+                                p_type = (global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultType)r.GetUInt64();
                                 break;
                             }
                     }
@@ -907,7 +907,7 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
                                 p_versions = new global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerVersion[length];
                                 for (int i = 0; i < p_versions.Length; i++)
                                 {
-                                    p_versions[i] = (DeclaredMessageExchangerVersion)r.GetUInt64();
+                                    p_versions[i] = (global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerVersion)r.GetUInt64();
                                 }
                                 break;
                             }
@@ -1131,7 +1131,7 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
                     {
                         case 1:
                             {
-                                p_type = (DeclaredMessageExchangerFetchResultType)r.GetUInt64();
+                                p_type = (global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchResultType)r.GetUInt64();
                                 break;
                             }
                         case 2:

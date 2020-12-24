@@ -33,7 +33,7 @@
             <ListBoxItem />
         </ListBox>
         <Grid Grid.Column="1">
-            <v:SearchControl Height="NaN" Width="NaN" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+            <v:FileSearchControl x:Name="FileSearchControl" Height="NaN" Width="NaN" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
         </Grid>
     </Grid>
 </Window>

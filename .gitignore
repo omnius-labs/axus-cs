@@ -2,9 +2,12 @@
 tmp/
 pub/
 patch.txt
+demo/.state/*
 
 # Visual Studio Code
-.vscode/
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
 
 # Tool Runtime Dir
 /[Tt]ools/

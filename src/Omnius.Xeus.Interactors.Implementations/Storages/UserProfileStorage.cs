@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
@@ -39,16 +40,16 @@ namespace Omnius.Xeus.Interactors.Storages
             _xeusService = xeusService;
             _bytesPool = bytesPool;
 
-            _repository = new UserProfileStorageRepository(options.ConfigDirectoryPath);
+            _repository = new UserProfileStorageRepository(Path.Combine(options.ConfigDirectoryPath, "database"));
         }
 
         public async ValueTask InitAsync()
         {
         }
 
-        protected override ValueTask OnDisposeAsync()
+        protected override async ValueTask OnDisposeAsync()
         {
-            throw new NotImplementedException();
+            _repository.Dispose();
         }
 
         public void RegisterSearchSignatures(IEnumerable<OmniSignature> signatures)

@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
@@ -7,8 +6,8 @@ using Omnius.Core.Network.Proxies;
 using Omnius.Core.Network.Upnp;
 using Omnius.Xeus.Api;
 using Omnius.Xeus.Api.Models;
-using Omnius.Xeus.Daemon.Internal;
 using Omnius.Xeus.Daemon.Configs;
+using Omnius.Xeus.Daemon.Internal;
 using Omnius.Xeus.Engines.Connectors;
 using Omnius.Xeus.Engines.Exchangers;
 using Omnius.Xeus.Engines.Mediators;
@@ -16,21 +15,33 @@ using Omnius.Xeus.Engines.Storages;
 
 namespace Omnius.Xeus.Daemon
 {
-    public record XeusServiceOptions
+    public class XeusServiceOptions
     {
-        public ISocks5ProxyClientFactory? Socks5ProxyClientFactory;
-        public IHttpProxyClientFactory? HttpProxyClientFactory;
-        public IUpnpClientFactory? UpnpClientFactory;
-        public ITcpConnectorFactory? TcpConnectorFactory;
-        public ICkadMediatorFactory? CkadMediatorFactory;
-        public IContentExchangerFactory? ContentExchangerFactory;
-        public IDeclaredMessageExchangerFactory? DeclaredMessageExchangerFactory;
-        public IPushContentStorageFactory? PushContentStorageFactory;
-        public IWantContentStorageFactory? WantContentStorageFactory;
-        public IPushDeclaredMessageStorageFactory? PushDeclaredMessageStorageFactory;
-        public IWantDeclaredMessageStorageFactory? WantDeclaredMessageStorageFactory;
-        public IBytesPool? BytesPool;
-        public EnginesConfig? Config;
+        public ISocks5ProxyClientFactory? Socks5ProxyClientFactory { get; init; }
+
+        public IHttpProxyClientFactory? HttpProxyClientFactory { get; init; }
+
+        public IUpnpClientFactory? UpnpClientFactory { get; init; }
+
+        public ITcpConnectorFactory? TcpConnectorFactory { get; init; }
+
+        public ICkadMediatorFactory? CkadMediatorFactory { get; init; }
+
+        public IContentExchangerFactory? ContentExchangerFactory { get; init; }
+
+        public IDeclaredMessageExchangerFactory? DeclaredMessageExchangerFactory { get; init; }
+
+        public IPushContentStorageFactory? PushContentStorageFactory { get; init; }
+
+        public IWantContentStorageFactory? WantContentStorageFactory { get; init; }
+
+        public IPushDeclaredMessageStorageFactory? PushDeclaredMessageStorageFactory { get; init; }
+
+        public IWantDeclaredMessageStorageFactory? WantDeclaredMessageStorageFactory { get; init; }
+
+        public IBytesPool? BytesPool { get; init; }
+
+        public EnginesConfig? Config { get; init; }
     }
 
     public class XeusServiceImpl : IXeusService

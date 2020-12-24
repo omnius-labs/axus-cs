@@ -653,7 +653,7 @@ namespace Omnius.Xeus.Engines.Models
                     {
                         case 1:
                             {
-                                p_type = (ConnectionType)r.GetUInt64();
+                                p_type = (global::Omnius.Xeus.Engines.Models.ConnectionType)r.GetUInt64();
                                 break;
                             }
                         case 2:
@@ -767,7 +767,7 @@ namespace Omnius.Xeus.Engines.Models
                     {
                         case 1:
                             {
-                                p_type = (TcpProxyType)r.GetUInt64();
+                                p_type = (global::Omnius.Xeus.Engines.Models.TcpProxyType)r.GetUInt64();
                                 break;
                             }
                         case 2:

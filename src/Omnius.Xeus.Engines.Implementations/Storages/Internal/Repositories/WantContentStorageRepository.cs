@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using LiteDB;
 using Omnius.Core.Cryptography;
+using Omnius.Xeus.Engines.Internal.Helpers;
 using Omnius.Xeus.Engines.Storages.Internal.Models;
 using Omnius.Xeus.Engines.Storages.Internal.Repositories.Entities;
 
@@ -16,6 +18,8 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
 
         public WantContentStorageRepository(string path)
         {
+            DirectoryHelper.CreateDirectory(Path.GetDirectoryName(path));
+
             _database = new LiteDatabase(path);
             this.WantStatus = new WantStatusRepository(_database);
         }
@@ -27,7 +31,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
 
         public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
         {
-            if (0 <= _database.UserVersion)
+            if (_database.UserVersion <= 0)
             {
                 var wants = _database.GetCollection<WantContentStatusEntity>("wants");
                 wants.EnsureIndex(x => x.Hash, true);

@@ -1,47 +1,54 @@
-
 namespace Omnius.Xeus.Daemon.Configs
 {
-    public record DaemonConfig
+    public class DaemonConfig
     {
-        public string? ListenAddress;
-        public EnginesConfig? Engines;
+        public string? ListenAddress { get; init; }
+
+        public EnginesConfig? Engines { get; init; }
     }
 
-    public record EnginesConfig
+    public class EnginesConfig
     {
-        public string? WorkingDirectory;
-        public ConnectorsConfig? Connectors;
-        public ExchangersConfig? Exchangers;
+        public string? WorkingDirectory { get; init; }
+
+        public ConnectorsConfig? Connectors { get; init; }
+
+        public ExchangersConfig? Exchangers { get; init; }
     }
 
-    public record ConnectorsConfig
+    public class ConnectorsConfig
     {
-        public TcpConnectorConfig? TcpConnector;
+        public TcpConnectorConfig? TcpConnector { get; init; }
     }
 
-    public record TcpConnectorConfig
+    public class TcpConnectorConfig
     {
-        public BandwidthConfig? Bandwidth;
-        public TcpConnectingConfig? Connecting;
-        public TcpAcceptingConfig? Accepting;
+        public BandwidthConfig? Bandwidth { get; init; }
+
+        public TcpConnectingConfig? Connecting { get; init; }
+
+        public TcpAcceptingConfig? Accepting { get; init; }
     }
 
-    public record BandwidthConfig
+    public class BandwidthConfig
     {
-        public uint MaxSendBytesPerSeconds;
-        public uint MaxReceiveBytesPerSeconds;
+        public uint MaxSendBytesPerSeconds { get; init; }
+
+        public uint MaxReceiveBytesPerSeconds { get; init; }
     }
 
-    public record TcpConnectingConfig
+    public class TcpConnectingConfig
     {
-        public bool Enabled;
-        public TcpProxyConfig? Proxy;
+        public bool Enabled { get; init; }
+
+        public TcpProxyConfig? Proxy { get; init; }
     }
 
-    public record TcpProxyConfig
+    public class TcpProxyConfig
     {
-        public TcpProxyType Type;
-        public string? Address;
+        public TcpProxyType Type { get; init; }
+
+        public string? Address { get; init; }
     }
 
     public enum TcpProxyType : byte
@@ -51,26 +58,29 @@ namespace Omnius.Xeus.Daemon.Configs
         Socks5Proxy = 2,
     }
 
-    public record TcpAcceptingConfig
+    public class TcpAcceptingConfig
     {
-        public bool Enabled;
-        public string[]? ListenAddresses;
-        public bool UseUpnp;
+        public bool Enabled { get; init; }
+
+        public string[]? ListenAddresses { get; init; }
+
+        public bool UseUpnp { get; init; }
     }
 
-    public record ExchangersConfig
+    public class ExchangersConfig
     {
-        public ContentExchangerConfig? ContentExchanger;
-        public DeclaredMessageConfig? DeclaredMessageExchanger;
+        public ContentExchangerConfig? ContentExchanger { get; init; }
+
+        public DeclaredMessageConfig? DeclaredMessageExchanger { get; init; }
     }
 
-    public record ContentExchangerConfig
+    public class ContentExchangerConfig
     {
-        public uint MaxConnectionCount;
+        public uint MaxConnectionCount { get; init; }
     }
 
-    public record DeclaredMessageConfig
+    public class DeclaredMessageConfig
     {
-        public uint MaxConnectionCount;
+        public uint MaxConnectionCount { get; init; }
     }
 }

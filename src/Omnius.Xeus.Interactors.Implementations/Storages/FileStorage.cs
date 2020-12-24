@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
@@ -39,7 +40,7 @@ namespace Omnius.Xeus.Interactors.Storages
             _xeusService = xeusService;
             _bytesPool = bytesPool;
 
-            _repository = new FileStorageRepository(_options.ConfigDirectoryPath);
+            _repository = new FileStorageRepository(Path.Combine(options.ConfigDirectoryPath, "database"));
         }
 
         public async ValueTask InitAsync()

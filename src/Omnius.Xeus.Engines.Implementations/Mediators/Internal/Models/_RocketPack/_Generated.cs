@@ -247,7 +247,7 @@ namespace Omnius.Xeus.Engines.Mediators.Internal.Models
                                 p_versions = new global::Omnius.Xeus.Engines.Mediators.Internal.Models.CkadMediatorVersion[length];
                                 for (int i = 0; i < p_versions.Length; i++)
                                 {
-                                    p_versions[i] = (CkadMediatorVersion)r.GetInt64();
+                                    p_versions[i] = (global::Omnius.Xeus.Engines.Mediators.Internal.Models.CkadMediatorVersion)r.GetInt64();
                                 }
                                 break;
                             }
