@@ -24,32 +24,35 @@ namespace Omnius.Xeus.Engines.Mediators
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         private readonly CkadMediatorOptions _options;
-        private readonly List<IConnector> _connectors = new List<IConnector>();
+        private readonly List<IConnector> _connectors = new();
         private readonly IBytesPool _bytesPool;
 
         private readonly ReadOnlyMemory<byte> _myId;
 
-        private readonly HashSet<ConnectionStatus> _connections = new HashSet<ConnectionStatus>();
-        private readonly LinkedList<NodeProfile> _cloudNodeProfiles = new LinkedList<NodeProfile>();
+        private readonly HashSet<ConnectionStatus> _connections = new();
+        private readonly LinkedList<NodeProfile> _cloudNodeProfiles = new();
 
-        private readonly VolatileListDictionary<ResourceTag, NodeProfile> _receivedPushLocationMap = new VolatileListDictionary<ResourceTag, NodeProfile>(TimeSpan.FromMinutes(30));
-        private readonly VolatileListDictionary<ResourceTag, NodeProfile> _receivedGiveLocationMap = new VolatileListDictionary<ResourceTag, NodeProfile>(TimeSpan.FromMinutes(30));
+        private readonly HashSet<string> _availableEngineNameSet = new();
+        private readonly object _availableEngineNameSetLockObject = new();
 
-        private Task? _connectLoopTask;
-        private Task? _acceptLoopTask;
-        private Task? _sendLoopTask;
-        private Task? _receiveLoopTask;
-        private Task? _computeLoopTask;
+        private readonly VolatileListDictionary<ResourceTag, NodeProfile> _receivedPushLocationMap = new(TimeSpan.FromMinutes(30));
+        private readonly VolatileListDictionary<ResourceTag, NodeProfile> _receivedGiveLocationMap = new(TimeSpan.FromMinutes(30));
 
-        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private Task _connectLoopTask = null!;
+        private Task _acceptLoopTask = null!;
+        private Task _sendLoopTask = null!;
+        private Task _receiveLoopTask = null!;
+        private Task _computeLoopTask = null!;
 
-        private readonly object _lockObject = new object();
+        private readonly CancellationTokenSource _cancellationTokenSource = new();
+
+        private readonly object _lockObject = new();
 
         private const int MaxBucketLength = 20;
 
-        public event GetAvailableEngineNames? GetAvailableEngineNames;
-        public event GetFetchResourceTags? GetPushFetchResourceTags;
-        public event GetFetchResourceTags? GetWantFetchResourceTags;
+        public event GetResourceTags? GetPushResourceTags;
+
+        public event GetResourceTags? GetWantResourceTags;
 
         internal sealed class CkadMediatorFactory : ICkadMediatorFactory
         {
@@ -94,29 +97,21 @@ namespace Omnius.Xeus.Engines.Mediators
         protected override async ValueTask OnDisposeAsync()
         {
             _cancellationTokenSource.Cancel();
-            await Task.WhenAll(_connectLoopTask!, _acceptLoopTask!, _sendLoopTask!, _receiveLoopTask!, _computeLoopTask!);
-
+            await Task.WhenAll(_connectLoopTask, _acceptLoopTask, _sendLoopTask, _receiveLoopTask, _computeLoopTask);
             _cancellationTokenSource.Dispose();
-        }
-
-        private IEnumerable<string> OnGetAvailableEngineNames()
-        {
-            var results = new ConcurrentBag<string>();
-            this.GetAvailableEngineNames?.Invoke((name) => results.Add(name));
-            return results;
         }
 
         private IEnumerable<ResourceTag> OnGetPushFetchResourceTags()
         {
             var results = new ConcurrentBag<ResourceTag>();
-            this.GetPushFetchResourceTags?.Invoke((tag) => results.Add(tag));
+            this.GetPushResourceTags?.Invoke((tag) => results.Add(tag));
             return results;
         }
 
         private IEnumerable<ResourceTag> OnGetWantFetchResourceTags()
         {
             var results = new ConcurrentBag<ResourceTag>();
-            this.GetWantFetchResourceTags?.Invoke((tag) => results.Add(tag));
+            this.GetWantResourceTags?.Invoke((tag) => results.Add(tag));
             return results;
         }
 
@@ -150,9 +145,13 @@ namespace Omnius.Xeus.Engines.Mediators
 
             var services = new List<string>();
             services.Add(this.EngineName);
-            services.AddRange(this.OnGetAvailableEngineNames().ToArray());
 
-            var myNodeProflie = new NodeProfile(services.ToArray(), addresses.ToArray());
+            lock (_availableEngineNameSetLockObject)
+            {
+                services.AddRange(_availableEngineNameSet);
+            }
+
+            var myNodeProflie = new NodeProfile(addresses.ToArray(), services.ToArray());
             return myNodeProflie;
         }
 
@@ -194,7 +193,7 @@ namespace Omnius.Xeus.Engines.Mediators
             }
         }
 
-        private readonly VolatileHashSet<OmniAddress> _connectedAddressSet = new VolatileHashSet<OmniAddress>(TimeSpan.FromMinutes(30));
+        private readonly VolatileHashSet<OmniAddress> _connectedAddressSet = new(TimeSpan.FromMinutes(30));
 
         private async Task ConnectLoopAsync(CancellationToken cancellationToken)
         {
@@ -224,40 +223,42 @@ namespace Omnius.Xeus.Engines.Mediators
                         random.Shuffle(nodeProfiles);
 
                         var ignoreAddressSet = new HashSet<OmniAddress>();
-                        ignoreAddressSet.Union(_connections.Select(n => n.Address));
-                        ignoreAddressSet.Union(_connectedAddressSet);
+                        ignoreAddressSet.UnionWith(_connections.Select(n => n.Address));
+                        ignoreAddressSet.UnionWith(_connectedAddressSet);
 
-                        foreach (var nodeProfile in nodeProfiles)
-                        {
-                            if (nodeProfile.Addresses.Any(n => ignoreAddressSet.Contains(n))) continue;
-                            targetNodeProfile = nodeProfile;
-                            break;
-                        }
+                        targetNodeProfile = nodeProfiles
+                            .Where(n => !n.Addresses.Any(n => ignoreAddressSet.Contains(n)))
+                            .FirstOrDefault();
                     }
 
-                    if (targetNodeProfile == null) continue;
+                    if (targetNodeProfile == null)
+                    {
+                        continue;
+                    }
 
                     bool succeeded = false;
 
                     foreach (var targetAddress in targetNodeProfile.Addresses)
                     {
-                        IConnection? connection = null;
-
                         foreach (var connector in _connectors)
                         {
-                            connection = await connector.ConnectAsync(targetAddress, this.EngineName, cancellationToken);
-                            if (connection == null) continue;
-                        }
+                            var connection = await connector.ConnectAsync(targetAddress, this.EngineName, cancellationToken);
+                            if (connection is null)
+                            {
+                                continue;
+                            }
 
-                        if (connection == null) continue;
+                            _connectedAddressSet.Add(targetAddress);
 
-                        _connectedAddressSet.Add(targetAddress);
-
-                        if (await this.TryAddConnectionAsync(connection, targetAddress, ConnectionHandshakeType.Connected, cancellationToken))
-                        {
-                            break;
+                            if (await this.TryAddConnectionAsync(connection, targetAddress, ConnectionHandshakeType.Connected, cancellationToken))
+                            {
+                                succeeded = true;
+                                goto End;
+                            }
                         }
                     }
+
+                End:
 
                     if (succeeded)
                     {
@@ -302,10 +303,12 @@ namespace Omnius.Xeus.Engines.Mediators
                     foreach (var connector in _connectors)
                     {
                         var result = await connector.AcceptAsync(this.EngineName, cancellationToken);
-                        if (result.Connection != null && result.Address != null)
+                        if (result.Connection is null || result.Address is null)
                         {
-                            await this.TryAddConnectionAsync(result.Connection, result.Address, ConnectionHandshakeType.Accepted, cancellationToken);
+                            continue;
                         }
+
+                        await this.TryAddConnectionAsync(result.Connection, result.Address, ConnectionHandshakeType.Accepted, cancellationToken);
                     }
                 }
             }
@@ -321,34 +324,6 @@ namespace Omnius.Xeus.Engines.Mediators
 
         private async ValueTask<bool> TryAddConnectionAsync(IConnection connection, OmniAddress address, ConnectionHandshakeType handshakeType, CancellationToken cancellationToken = default)
         {
-            // kademliaのk-bucketの距離毎のノード数は最大20とする。(k=20)
-            bool CanAppend(ReadOnlySpan<byte> id)
-            {
-                lock (_lockObject)
-                {
-                    var appendingNodeDistance = Kademlia.Distance(_myId.Span, id);
-
-                    var map = new Dictionary<int, int>();
-                    foreach (var connectionStatus in _connections)
-                    {
-                        var nodeDistance = Kademlia.Distance(_myId.Span, id);
-                        map.TryGetValue(nodeDistance, out int count);
-                        count++;
-                        map[nodeDistance] = count;
-                    }
-
-                    {
-                        map.TryGetValue(appendingNodeDistance, out int count);
-                        if (count > MaxBucketLength)
-                        {
-                            return false;
-                        }
-                    }
-
-                    return true;
-                }
-            }
-
             try
             {
                 CkadMediatorVersion? version = 0;
@@ -360,7 +335,10 @@ namespace Omnius.Xeus.Engines.Mediators
                     await Task.WhenAll(enqueueTask, dequeueTask);
 
                     var otherHelloMessage = dequeueTask.Result;
-                    if (otherHelloMessage == null) throw new Exception();
+                    if (otherHelloMessage == null)
+                    {
+                        throw new CkadMediatorException();
+                    }
 
                     version = EnumHelper.GetOverlappedMaxValue(myHelloMessage.Versions, otherHelloMessage.Versions);
                 }
@@ -378,13 +356,19 @@ namespace Omnius.Xeus.Engines.Mediators
                         await Task.WhenAll(enqueueTask, dequeueTask);
 
                         var otherProfileMessage = dequeueTask.Result;
-                        if (otherProfileMessage == null) throw new Exception();
+                        if (otherProfileMessage == null)
+                        {
+                            throw new CkadMediatorException();
+                        }
 
                         id = otherProfileMessage.Id;
                         nodeProfile = otherProfileMessage.NodeProfile;
                     }
 
-                    if (!CanAppend(id.Span)) throw new Exception();
+                    if (!this.CanAppend(id.Span))
+                    {
+                        throw new CkadMediatorException();
+                    }
 
                     var status = new ConnectionStatus(connection, address, handshakeType, nodeProfile, id);
 
@@ -398,12 +382,48 @@ namespace Omnius.Xeus.Engines.Mediators
 
                 throw new NotSupportedException();
             }
-            catch (Exception)
+            catch (OperationCanceledException e)
             {
+                _logger.Debug(e);
+
+                connection.Dispose();
+            }
+            catch (Exception e)
+            {
+                _logger.Warn(e);
+
                 connection.Dispose();
             }
 
             return false;
+        }
+
+        // kademliaのk-bucketの距離毎のノード数は最大20とする。(k=20)
+        private bool CanAppend(ReadOnlySpan<byte> id)
+        {
+            lock (_lockObject)
+            {
+                var appendingNodeDistance = Kademlia.Distance(_myId.Span, id);
+
+                var map = new Dictionary<int, int>();
+                foreach (var connectionStatus in _connections)
+                {
+                    var nodeDistance = Kademlia.Distance(_myId.Span, id);
+                    map.TryGetValue(nodeDistance, out int count);
+                    count++;
+                    map[nodeDistance] = count;
+                }
+
+                {
+                    map.TryGetValue(appendingNodeDistance, out int count);
+                    if (count > MaxBucketLength)
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }
+            }
         }
 
         private async Task SendLoopAsync(CancellationToken cancellationToken)
@@ -448,6 +468,8 @@ namespace Omnius.Xeus.Engines.Mediators
             catch (Exception e)
             {
                 _logger.Error(e);
+
+                throw;
             }
         }
 
@@ -505,6 +527,8 @@ namespace Omnius.Xeus.Engines.Mediators
             catch (Exception e)
             {
                 _logger.Error(e);
+
+                throw;
             }
         }
 
@@ -518,8 +542,11 @@ namespace Omnius.Xeus.Engines.Mediators
             public ConnectionStatus ConnectionStatus { get; }
 
             public List<NodeProfile> SendingPushNodeProfiles { get; } = new List<NodeProfile>();
+
             public Dictionary<ResourceTag, List<NodeProfile>> SendingPushLocations { get; } = new Dictionary<ResourceTag, List<NodeProfile>>();
+
             public List<ResourceTag> SendingWantLocations { get; } = new List<ResourceTag>();
+
             public Dictionary<ResourceTag, List<NodeProfile>> SendingGiveLocations { get; } = new Dictionary<ResourceTag, List<NodeProfile>>();
         }
 
@@ -543,6 +570,9 @@ namespace Omnius.Xeus.Engines.Mediators
                             connectionStatus.Refresh();
                         }
                     }
+
+                    // 有効なエンジン名のセット
+                    var availableEngineNameSet = new HashSet<string>();
 
                     // 自分のノードプロファイル
                     var myNodeProfile = await this.GetMyNodeProfileAsync(cancellationToken);
@@ -577,6 +607,8 @@ namespace Omnius.Xeus.Engines.Mediators
 
                     foreach (var tag in this.OnGetPushFetchResourceTags())
                     {
+                        availableEngineNameSet.Add(tag.EngineName);
+
                         contentLocationMap.GetOrAdd(tag, (_) => new HashSet<NodeProfile>())
                              .Add(myNodeProfile);
 
@@ -586,7 +618,15 @@ namespace Omnius.Xeus.Engines.Mediators
 
                     foreach (var tag in this.OnGetWantFetchResourceTags())
                     {
+                        availableEngineNameSet.Add(tag.EngineName);
+
                         sendingWantLocationSet.Add(tag);
+                    }
+
+                    lock (_availableEngineNameSetLockObject)
+                    {
+                        _availableEngineNameSet.Clear();
+                        _availableEngineNameSet.UnionWith(availableEngineNameSet);
                     }
 
                     lock (_lockObject)
@@ -680,6 +720,8 @@ namespace Omnius.Xeus.Engines.Mediators
             catch (Exception e)
             {
                 _logger.Error(e);
+
+                throw;
             }
         }
 
@@ -704,13 +746,17 @@ namespace Omnius.Xeus.Engines.Mediators
             public object LockObject { get; } = new object();
 
             public IConnection Connection { get; }
+
             public OmniAddress Address { get; }
+
             public ConnectionHandshakeType HandshakeType { get; }
 
             public NodeProfile NodeProfile { get; }
+
             public ReadOnlyMemory<byte> Id { get; }
 
             public CkadMediatorDataMessage? SendingDataMessage { get; set; } = null;
+
             public VolatileHashSet<ResourceTag> ReceivedWantLocations { get; } = new VolatileHashSet<ResourceTag>(TimeSpan.FromMinutes(30));
 
             public void Refresh()
@@ -718,5 +764,23 @@ namespace Omnius.Xeus.Engines.Mediators
                 this.ReceivedWantLocations.Refresh();
             }
         }
+    }
+}
+
+public sealed class CkadMediatorException : Exception
+{
+    public CkadMediatorException()
+        : base()
+    {
+    }
+
+    public CkadMediatorException(string message)
+        : base(message)
+    {
+    }
+
+    public CkadMediatorException(string message, Exception innerException)
+        : base(message, innerException)
+    {
     }
 }

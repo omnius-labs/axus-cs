@@ -5,6 +5,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories.Entities
     internal sealed class OmniSignatureEntity
     {
         public string? Name { get; set; }
+
         public OmniHashEntity? Hash { get; set; }
 
         public static OmniSignatureEntity Import(OmniSignature value)

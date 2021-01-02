@@ -11,19 +11,20 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Models
         static MerkleTreeSection()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Storages.Internal.Models.MerkleTreeSection>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Storages.Internal.Models.MerkleTreeSection>.Empty = new global::Omnius.Xeus.Engines.Storages.Internal.Models.MerkleTreeSection(0, 0, global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniHash>());
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Storages.Internal.Models.MerkleTreeSection>.Empty = new global::Omnius.Xeus.Engines.Storages.Internal.Models.MerkleTreeSection(0, 0, 0, global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniHash>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxHashesCount = 1073741824;
 
-        public MerkleTreeSection(int depth, ulong length, global::Omnius.Core.Cryptography.OmniHash[] hashes)
+        public MerkleTreeSection(int depth, uint blockLength, ulong length, global::Omnius.Core.Cryptography.OmniHash[] hashes)
         {
             if (hashes is null) throw new global::System.ArgumentNullException("hashes");
             if (hashes.Length > 1073741824) throw new global::System.ArgumentOutOfRangeException("hashes");
 
             this.Depth = depth;
+            this.BlockLength = blockLength;
             this.Length = length;
             this.Hashes = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Cryptography.OmniHash>(hashes);
 
@@ -31,6 +32,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Models
             {
                 var ___h = new global::System.HashCode();
                 if (depth != default) ___h.Add(depth.GetHashCode());
+                if (blockLength != default) ___h.Add(blockLength.GetHashCode());
                 if (length != default) ___h.Add(length.GetHashCode());
                 foreach (var n in hashes)
                 {
@@ -41,6 +43,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Models
         }
 
         public int Depth { get; }
+        public uint BlockLength { get; }
         public ulong Length { get; }
         public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Cryptography.OmniHash> Hashes { get; }
 
@@ -65,7 +68,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Storages.Internal.Models.MerkleTreeSection)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Storages.Internal.Models.MerkleTreeSection) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Storages.Internal.Models.MerkleTreeSection)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Storages.Internal.Models.MerkleTreeSection? target)
@@ -73,6 +76,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Models
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.Depth != target.Depth) return false;
+            if (this.BlockLength != target.BlockLength) return false;
             if (this.Length != target.Length) return false;
             if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Hashes, target.Hashes)) return false;
 
@@ -91,14 +95,19 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Models
                     w.Write((uint)1);
                     w.Write(value.Depth);
                 }
-                if (value.Length != 0)
+                if (value.BlockLength != 0)
                 {
                     w.Write((uint)2);
+                    w.Write(value.BlockLength);
+                }
+                if (value.Length != 0)
+                {
+                    w.Write((uint)3);
                     w.Write(value.Length);
                 }
                 if (value.Hashes.Count != 0)
                 {
-                    w.Write((uint)3);
+                    w.Write((uint)4);
                     w.Write((uint)value.Hashes.Count);
                     foreach (var n in value.Hashes)
                     {
@@ -112,6 +121,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Models
                 if (rank > 256) throw new global::System.FormatException();
 
                 int p_depth = 0;
+                uint p_blockLength = 0;
                 ulong p_length = 0;
                 global::Omnius.Core.Cryptography.OmniHash[] p_hashes = global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniHash>();
 
@@ -128,10 +138,15 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Models
                             }
                         case 2:
                             {
-                                p_length = r.GetUInt64();
+                                p_blockLength = r.GetUInt32();
                                 break;
                             }
                         case 3:
+                            {
+                                p_length = r.GetUInt64();
+                                break;
+                            }
+                        case 4:
                             {
                                 var length = r.GetUInt32();
                                 p_hashes = new global::Omnius.Core.Cryptography.OmniHash[length];
@@ -144,7 +159,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Storages.Internal.Models.MerkleTreeSection(p_depth, p_length, p_hashes);
+                return new global::Omnius.Xeus.Engines.Storages.Internal.Models.MerkleTreeSection(p_depth, p_blockLength, p_length, p_hashes);
             }
         }
     }

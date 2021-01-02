@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using Cocona;
 using Omnius.Core;
+using Omnius.Core.Helpers;
 using Omnius.Core.Network;
 using Omnius.Core.Network.Caps;
 using Omnius.Core.Network.Connections;
@@ -36,22 +37,25 @@ namespace Omnius.Xeus.Daemon
         {
             _logger.Info("init start");
 
-            if (!Directory.Exists(configDirectoryPath))
-            {
-                Directory.CreateDirectory(configDirectoryPath);
-            }
+            DirectoryHelper.CreateDirectory(configDirectoryPath);
+            DirectoryHelper.CreateDirectory(stateDirectoryPath);
 
-            if (!Directory.Exists(stateDirectoryPath))
-            {
-                Directory.CreateDirectory(stateDirectoryPath);
-            }
+            var config = this.CreateInitConfig(stateDirectoryPath);
+            var configPath = Path.Combine(configDirectoryPath, "daemon.yaml");
 
+            YamlHelper.WriteFile(configPath, config);
+
+            _logger.Info("init end");
+        }
+
+        private DaemonConfig CreateInitConfig(string workingDirectory)
+        {
             var config = new DaemonConfig()
             {
                 ListenAddress = (string?)OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 32321),
                 Engines = new EnginesConfig()
                 {
-                    WorkingDirectory = stateDirectoryPath,
+                    WorkingDirectory = workingDirectory,
                     Connectors = new ConnectorsConfig()
                     {
                         TcpConnector = new TcpConnectorConfig()
@@ -88,9 +92,7 @@ namespace Omnius.Xeus.Daemon
                 },
             };
 
-            YamlHelper.WriteFile(Path.Combine(configDirectoryPath, "daemon.yaml"), config);
-
-            _logger.Info("init end");
+            return config;
         }
 
         [Command("run")]
@@ -200,7 +202,7 @@ namespace Omnius.Xeus.Daemon
             _logger.Info("event loop start");
 
             await using var server = new XeusService.Server(service, connection, BytesPool.Shared);
-            await server.EventLoop(this.Context.CancellationToken);
+            await server.EventLoopAsync(this.Context.CancellationToken);
 
             _logger.Info("event loop end");
         }

@@ -14,6 +14,7 @@ namespace Omnius.Xeus.Engines.Engines.Internal
         }
 
         public ReadOnlyMemory<byte> Id { get; }
+
         public T Value { get; }
     }
 
@@ -28,13 +29,40 @@ namespace Omnius.Xeus.Engines.Engines.Internal
 
             int i = 2;
 
-            for (; i < 0x4; i++) _distanceHashTable[i] = 2;
-            for (; i < 0x8; i++) _distanceHashTable[i] = 3;
-            for (; i < 0x10; i++) _distanceHashTable[i] = 4;
-            for (; i < 0x20; i++) _distanceHashTable[i] = 5;
-            for (; i < 0x40; i++) _distanceHashTable[i] = 6;
-            for (; i < 0x80; i++) _distanceHashTable[i] = 7;
-            for (; i <= 0xff; i++) _distanceHashTable[i] = 8;
+            for (; i < 0x4; i++)
+            {
+                _distanceHashTable[i] = 2;
+            }
+
+            for (; i < 0x8; i++)
+            {
+                _distanceHashTable[i] = 3;
+            }
+
+            for (; i < 0x10; i++)
+            {
+                _distanceHashTable[i] = 4;
+            }
+
+            for (; i < 0x20; i++)
+            {
+                _distanceHashTable[i] = 5;
+            }
+
+            for (; i < 0x40; i++)
+            {
+                _distanceHashTable[i] = 6;
+            }
+
+            for (; i < 0x80; i++)
+            {
+                _distanceHashTable[i] = 7;
+            }
+
+            for (; i <= 0xff; i++)
+            {
+                _distanceHashTable[i] = 8;
+            }
         }
 
         public static int Distance(ReadOnlySpan<byte> x, ReadOnlySpan<byte> y)
@@ -63,9 +91,15 @@ namespace Omnius.Xeus.Engines.Engines.Internal
         public static IEnumerable<KademliaElement<T>> Search<T>(ReadOnlySpan<byte> baseId, ReadOnlySpan<byte> targetId, IEnumerable<KademliaElement<T>> elements, int count)
             where T : notnull
         {
-            if (targetId == null) throw new ArgumentNullException(nameof(targetId));
-            if (elements == null) throw new ArgumentNullException(nameof(elements));
-            if (count == 0) return Array.Empty<KademliaElement<T>>();
+            if (elements is null)
+            {
+                throw new ArgumentNullException(nameof(elements));
+            }
+
+            if (count == 0)
+            {
+                return Array.Empty<KademliaElement<T>>();
+            }
 
             var targetList = new List<SortEntry<T>>();
 
@@ -124,6 +158,7 @@ namespace Omnius.Xeus.Engines.Engines.Internal
             }
 
             public KademliaElement<T>? Node { get; }
+
             public byte[] Xor { get; }
         }
     }

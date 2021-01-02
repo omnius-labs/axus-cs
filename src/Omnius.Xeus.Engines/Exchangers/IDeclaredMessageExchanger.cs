@@ -11,12 +11,10 @@ namespace Omnius.Xeus.Engines.Exchangers
 {
     public interface IDeclaredMessageExchangerFactory
     {
-        ValueTask<IDeclaredMessageExchanger> CreateAsync(DeclaredMessageExchangerOptions options, IEnumerable<IConnector> connectors,
-            ICkadMediator nodeFinder, IPushDeclaredMessageStorage pushStorage, IWantDeclaredMessageStorage wantStorage,
-            IBytesPool bytesPool);
+        ValueTask<IDeclaredMessageExchanger> CreateAsync(DeclaredMessageExchangerOptions options, IEnumerable<IConnector> connectors, ICkadMediator nodeFinder, IPushDeclaredMessageStorage pushStorage, IWantDeclaredMessageStorage wantStorage, IBytesPool bytesPool);
     }
 
-    public interface IDeclaredMessageExchanger : IExchanger, IAsyncDisposable
+    public interface IDeclaredMessageExchanger : IAsyncDisposable
     {
     }
 }

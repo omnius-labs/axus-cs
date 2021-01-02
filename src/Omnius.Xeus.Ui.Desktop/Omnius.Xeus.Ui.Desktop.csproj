@@ -9,17 +9,26 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core\Omnius.Core.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Engines\Omnius.Xeus.Engines.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Api\Omnius.Xeus.Api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.9.12" />
     <PackageReference Include="Avalonia.Controls.DataGrid" Version="0.9.12" />
     <PackageReference Include="Avalonia.Desktop" Version="0.9.12" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.9.12" />
     <PackageReference Include="ReactiveProperty" Version="7.4.1" />
+    <PackageReference Include="NLog" Version="4.7.5" />
+    <PackageReference Include="NLog.Config" Version="4.7.5" />
+    <PackageReference Include="YamlDotNet" Version="8.1.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core\Omnius.Core.csproj" />
-    <ProjectReference Include="..\Omnius.Xeus.Engines\Omnius.Xeus.Engines.csproj" />
-    <ProjectReference Include="..\Omnius.Xeus.Api\Omnius.Xeus.Api.csproj" />
+    <None Update="NLog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

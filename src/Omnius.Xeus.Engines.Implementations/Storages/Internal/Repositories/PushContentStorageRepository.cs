@@ -1,30 +1,30 @@
-using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using LiteDB;
+using Omnius.Core;
 using Omnius.Core.Cryptography;
-using Omnius.Xeus.Engines.Internal.Helpers;
+using Omnius.Core.Helpers;
 using Omnius.Xeus.Engines.Storages.Internal.Models;
 using Omnius.Xeus.Engines.Storages.Internal.Repositories.Entities;
 
 namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
 {
-    internal sealed class PushContentStorageRepository : IDisposable
+    internal sealed class PushContentStorageRepository : DisposableBase
     {
         private readonly LiteDatabase _database;
 
-        public PushContentStorageRepository(string path)
+        public PushContentStorageRepository(string workingDirectory)
         {
-            DirectoryHelper.CreateDirectory(Path.GetDirectoryName(path));
+            DirectoryHelper.CreateDirectory(Path.GetDirectoryName(workingDirectory)!);
 
-            _database = new LiteDatabase(path);
-            this.PushStatus = new PushStatusRepository(_database);
+            _database = new LiteDatabase(workingDirectory);
+            this.PushContentStatus = new PushContentStatusRepository(_database);
         }
 
-        public void Dispose()
+        protected override void OnDispose(bool disposing)
         {
             _database.Dispose();
         }
@@ -40,13 +40,13 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
             }
         }
 
-        public PushStatusRepository PushStatus { get; set; }
+        public PushContentStatusRepository PushContentStatus { get; set; }
 
-        public sealed class PushStatusRepository
+        public sealed class PushContentStatusRepository
         {
             private readonly LiteDatabase _database;
 
-            public PushStatusRepository(LiteDatabase database)
+            public PushContentStatusRepository(LiteDatabase database)
             {
                 _database = database;
             }

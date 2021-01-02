@@ -23,41 +23,41 @@ namespace Omnius.Xeus.Engines.Models
         static NodeProfile()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.NodeProfile>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.NodeProfile>.Empty = new global::Omnius.Xeus.Engines.Models.NodeProfile(global::System.Array.Empty<string>(), global::System.Array.Empty<global::Omnius.Core.Network.OmniAddress>());
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.NodeProfile>.Empty = new global::Omnius.Xeus.Engines.Models.NodeProfile(global::System.Array.Empty<global::Omnius.Core.Network.OmniAddress>(), global::System.Array.Empty<string>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public static readonly int MaxExchangersCount = 32;
         public static readonly int MaxAddressesCount = 32;
+        public static readonly int MaxEngineNamesCount = 32;
 
-        public NodeProfile(string[] exchangers, global::Omnius.Core.Network.OmniAddress[] addresses)
+        public NodeProfile(global::Omnius.Core.Network.OmniAddress[] addresses, string[] engineNames)
         {
-            if (exchangers is null) throw new global::System.ArgumentNullException("exchangers");
-            if (exchangers.Length > 32) throw new global::System.ArgumentOutOfRangeException("exchangers");
-            foreach (var n in exchangers)
-            {
-                if (n is null) throw new global::System.ArgumentNullException("n");
-                if (n.Length > 256) throw new global::System.ArgumentOutOfRangeException("n");
-            }
             if (addresses is null) throw new global::System.ArgumentNullException("addresses");
             if (addresses.Length > 32) throw new global::System.ArgumentOutOfRangeException("addresses");
             foreach (var n in addresses)
             {
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
+            if (engineNames is null) throw new global::System.ArgumentNullException("engineNames");
+            if (engineNames.Length > 32) throw new global::System.ArgumentOutOfRangeException("engineNames");
+            foreach (var n in engineNames)
+            {
+                if (n is null) throw new global::System.ArgumentNullException("n");
+                if (n.Length > 256) throw new global::System.ArgumentOutOfRangeException("n");
+            }
 
-            this.Exchangers = new global::Omnius.Core.Collections.ReadOnlyListSlim<string>(exchangers);
             this.Addresses = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Network.OmniAddress>(addresses);
+            this.EngineNames = new global::Omnius.Core.Collections.ReadOnlyListSlim<string>(engineNames);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                foreach (var n in exchangers)
+                foreach (var n in addresses)
                 {
                     if (n != default) ___h.Add(n.GetHashCode());
                 }
-                foreach (var n in addresses)
+                foreach (var n in engineNames)
                 {
                     if (n != default) ___h.Add(n.GetHashCode());
                 }
@@ -65,8 +65,8 @@ namespace Omnius.Xeus.Engines.Models
             });
         }
 
-        public global::Omnius.Core.Collections.ReadOnlyListSlim<string> Exchangers { get; }
         public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Network.OmniAddress> Addresses { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<string> EngineNames { get; }
 
         public static global::Omnius.Xeus.Engines.Models.NodeProfile Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -89,15 +89,15 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.NodeProfile)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.NodeProfile) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.NodeProfile)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.NodeProfile? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Exchangers, target.Exchangers)) return false;
             if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Addresses, target.Addresses)) return false;
+            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.EngineNames, target.EngineNames)) return false;
 
             return true;
         }
@@ -109,22 +109,22 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.Exchangers.Count != 0)
-                {
-                    w.Write((uint)1);
-                    w.Write((uint)value.Exchangers.Count);
-                    foreach (var n in value.Exchangers)
-                    {
-                        w.Write(n);
-                    }
-                }
                 if (value.Addresses.Count != 0)
                 {
-                    w.Write((uint)2);
+                    w.Write((uint)1);
                     w.Write((uint)value.Addresses.Count);
                     foreach (var n in value.Addresses)
                     {
                         global::Omnius.Core.Network.OmniAddress.Formatter.Serialize(ref w, n, rank + 1);
+                    }
+                }
+                if (value.EngineNames.Count != 0)
+                {
+                    w.Write((uint)2);
+                    w.Write((uint)value.EngineNames.Count);
+                    foreach (var n in value.EngineNames)
+                    {
+                        w.Write(n);
                     }
                 }
                 w.Write((uint)0);
@@ -133,8 +133,8 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                string[] p_exchangers = global::System.Array.Empty<string>();
                 global::Omnius.Core.Network.OmniAddress[] p_addresses = global::System.Array.Empty<global::Omnius.Core.Network.OmniAddress>();
+                string[] p_engineNames = global::System.Array.Empty<string>();
 
                 for (; ; )
                 {
@@ -145,16 +145,6 @@ namespace Omnius.Xeus.Engines.Models
                         case 1:
                             {
                                 var length = r.GetUInt32();
-                                p_exchangers = new string[length];
-                                for (int i = 0; i < p_exchangers.Length; i++)
-                                {
-                                    p_exchangers[i] = r.GetString(256);
-                                }
-                                break;
-                            }
-                        case 2:
-                            {
-                                var length = r.GetUInt32();
                                 p_addresses = new global::Omnius.Core.Network.OmniAddress[length];
                                 for (int i = 0; i < p_addresses.Length; i++)
                                 {
@@ -162,10 +152,20 @@ namespace Omnius.Xeus.Engines.Models
                                 }
                                 break;
                             }
+                        case 2:
+                            {
+                                var length = r.GetUInt32();
+                                p_engineNames = new string[length];
+                                for (int i = 0; i < p_engineNames.Length; i++)
+                                {
+                                    p_engineNames[i] = r.GetString(256);
+                                }
+                                break;
+                            }
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Models.NodeProfile(p_exchangers, p_addresses);
+                return new global::Omnius.Xeus.Engines.Models.NodeProfile(p_addresses, p_engineNames);
             }
         }
     }
@@ -177,31 +177,32 @@ namespace Omnius.Xeus.Engines.Models
         static ResourceTag()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.ResourceTag>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.ResourceTag>.Empty = new global::Omnius.Xeus.Engines.Models.ResourceTag(string.Empty, global::Omnius.Core.Cryptography.OmniHash.Empty);
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.ResourceTag>.Empty = new global::Omnius.Xeus.Engines.Models.ResourceTag(global::Omnius.Core.Cryptography.OmniHash.Empty, string.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public static readonly int MaxTypeLength = 256;
+        public static readonly int MaxEngineNameLength = 256;
 
-        public ResourceTag(string type, global::Omnius.Core.Cryptography.OmniHash hash)
+        public ResourceTag(global::Omnius.Core.Cryptography.OmniHash hash, string engineName)
         {
-            if (type is null) throw new global::System.ArgumentNullException("type");
-            if (type.Length > 256) throw new global::System.ArgumentOutOfRangeException("type");
-            this.Type = type;
+            if (engineName is null) throw new global::System.ArgumentNullException("engineName");
+            if (engineName.Length > 256) throw new global::System.ArgumentOutOfRangeException("engineName");
+
             this.Hash = hash;
+            this.EngineName = engineName;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (type != default) ___h.Add(type.GetHashCode());
                 if (hash != default) ___h.Add(hash.GetHashCode());
+                if (engineName != default) ___h.Add(engineName.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public string Type { get; }
         public global::Omnius.Core.Cryptography.OmniHash Hash { get; }
+        public string EngineName { get; }
 
         public static global::Omnius.Xeus.Engines.Models.ResourceTag Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -224,15 +225,15 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.ResourceTag)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.ResourceTag) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.ResourceTag)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.ResourceTag? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.Type != target.Type) return false;
             if (this.Hash != target.Hash) return false;
+            if (this.EngineName != target.EngineName) return false;
 
             return true;
         }
@@ -244,15 +245,15 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.Type != string.Empty)
-                {
-                    w.Write((uint)1);
-                    w.Write(value.Type);
-                }
                 if (value.Hash != global::Omnius.Core.Cryptography.OmniHash.Empty)
                 {
-                    w.Write((uint)2);
+                    w.Write((uint)1);
                     global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.Hash, rank + 1);
+                }
+                if (value.EngineName != string.Empty)
+                {
+                    w.Write((uint)2);
+                    w.Write(value.EngineName);
                 }
                 w.Write((uint)0);
             }
@@ -260,8 +261,8 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                string p_type = string.Empty;
                 global::Omnius.Core.Cryptography.OmniHash p_hash = global::Omnius.Core.Cryptography.OmniHash.Empty;
+                string p_engineName = string.Empty;
 
                 for (; ; )
                 {
@@ -271,18 +272,18 @@ namespace Omnius.Xeus.Engines.Models
                     {
                         case 1:
                             {
-                                p_type = r.GetString(256);
+                                p_hash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 2:
                             {
-                                p_hash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_engineName = r.GetString(256);
                                 break;
                             }
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Models.ResourceTag(p_type, p_hash);
+                return new global::Omnius.Xeus.Engines.Models.ResourceTag(p_hash, p_engineName);
             }
         }
     }
@@ -345,7 +346,7 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.DeclaredMessage)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.DeclaredMessage) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.DeclaredMessage)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.DeclaredMessage? target)
@@ -355,7 +356,7 @@ namespace Omnius.Xeus.Engines.Models
             if (this.CreationTime != target.CreationTime) return false;
             if (!global::Omnius.Core.BytesOperations.Equals(this.Value.Span, target.Value.Span)) return false;
             if ((this.Certificate is null) != (target.Certificate is null)) return false;
-            if (!(this.Certificate is null) && !(target.Certificate is null) && this.Certificate != target.Certificate) return false;
+            if ((this.Certificate is not null) && (target.Certificate is not null) && this.Certificate != target.Certificate) return false;
 
             return true;
         }
@@ -479,7 +480,7 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.ConsistencyReport)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.ConsistencyReport) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.ConsistencyReport)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.ConsistencyReport? target)
@@ -606,7 +607,7 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.ConnectionReport)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.ConnectionReport) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.ConnectionReport)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.ConnectionReport? target)
@@ -719,7 +720,7 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.TcpProxyOptions)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.TcpProxyOptions) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.TcpProxyOptions)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.TcpProxyOptions? target)
@@ -728,7 +729,7 @@ namespace Omnius.Xeus.Engines.Models
             if (object.ReferenceEquals(this, target)) return true;
             if (this.Type != target.Type) return false;
             if ((this.Address is null) != (target.Address is null)) return false;
-            if (!(this.Address is null) && !(target.Address is null) && this.Address != target.Address) return false;
+            if ((this.Address is not null) && (target.Address is not null) && this.Address != target.Address) return false;
 
             return true;
         }
@@ -833,7 +834,7 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.TcpConnectingOptions)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.TcpConnectingOptions) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.TcpConnectingOptions)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.TcpConnectingOptions? target)
@@ -842,7 +843,7 @@ namespace Omnius.Xeus.Engines.Models
             if (object.ReferenceEquals(this, target)) return true;
             if (this.Enabled != target.Enabled) return false;
             if ((this.ProxyOptions is null) != (target.ProxyOptions is null)) return false;
-            if (!(this.ProxyOptions is null) && !(target.ProxyOptions is null) && this.ProxyOptions != target.ProxyOptions) return false;
+            if ((this.ProxyOptions is not null) && (target.ProxyOptions is not null) && this.ProxyOptions != target.ProxyOptions) return false;
 
             return true;
         }
@@ -961,7 +962,7 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.TcpAcceptingOptions)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.TcpAcceptingOptions) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.TcpAcceptingOptions)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.TcpAcceptingOptions? target)
@@ -1095,7 +1096,7 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.BandwidthOptions)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.BandwidthOptions) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.BandwidthOptions)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.BandwidthOptions? target)
@@ -1215,7 +1216,7 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.TcpConnectorOptions)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.TcpConnectorOptions) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.TcpConnectorOptions)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.TcpConnectorOptions? target)
@@ -1297,21 +1298,27 @@ namespace Omnius.Xeus.Engines.Models
         static TcpConnectorReport()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.TcpConnectorReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.TcpConnectorReport>.Empty = new global::Omnius.Xeus.Engines.Models.TcpConnectorReport();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.TcpConnectorReport>.Empty = new global::Omnius.Xeus.Engines.Models.TcpConnectorReport(0, 0);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public TcpConnectorReport()
+        public TcpConnectorReport(uint connectedCount, uint acceptedCount)
         {
+            this.ConnectedCount = connectedCount;
+            this.AcceptedCount = acceptedCount;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
+                if (connectedCount != default) ___h.Add(connectedCount.GetHashCode());
+                if (acceptedCount != default) ___h.Add(acceptedCount.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
+        public uint ConnectedCount { get; }
+        public uint AcceptedCount { get; }
 
         public static global::Omnius.Xeus.Engines.Models.TcpConnectorReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -1334,13 +1341,15 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.TcpConnectorReport)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.TcpConnectorReport) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.TcpConnectorReport)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.TcpConnectorReport? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
+            if (this.ConnectedCount != target.ConnectedCount) return false;
+            if (this.AcceptedCount != target.AcceptedCount) return false;
 
             return true;
         }
@@ -1352,12 +1361,24 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
+                if (value.ConnectedCount != 0)
+                {
+                    w.Write((uint)1);
+                    w.Write(value.ConnectedCount);
+                }
+                if (value.AcceptedCount != 0)
+                {
+                    w.Write((uint)2);
+                    w.Write(value.AcceptedCount);
+                }
                 w.Write((uint)0);
             }
             public global::Omnius.Xeus.Engines.Models.TcpConnectorReport Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
+                uint p_connectedCount = 0;
+                uint p_acceptedCount = 0;
 
                 for (; ; )
                 {
@@ -1365,10 +1386,20 @@ namespace Omnius.Xeus.Engines.Models
                     if (id == 0) break;
                     switch (id)
                     {
+                        case 1:
+                            {
+                                p_connectedCount = r.GetUInt32();
+                                break;
+                            }
+                        case 2:
+                            {
+                                p_acceptedCount = r.GetUInt32();
+                                break;
+                            }
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Models.TcpConnectorReport();
+                return new global::Omnius.Xeus.Engines.Models.TcpConnectorReport(p_connectedCount, p_acceptedCount);
             }
         }
     }
@@ -1385,25 +1416,25 @@ namespace Omnius.Xeus.Engines.Models
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public static readonly int MaxConfigPathLength = 1024;
+        public static readonly int MaxConfigDirectoryPathLength = 1024;
 
-        public CkadMediatorOptions(string configPath, uint maxConnectionCount)
+        public CkadMediatorOptions(string configDirectoryPath, uint maxConnectionCount)
         {
-            if (configPath is null) throw new global::System.ArgumentNullException("configPath");
-            if (configPath.Length > 1024) throw new global::System.ArgumentOutOfRangeException("configPath");
-            this.ConfigPath = configPath;
+            if (configDirectoryPath is null) throw new global::System.ArgumentNullException("configDirectoryPath");
+            if (configDirectoryPath.Length > 1024) throw new global::System.ArgumentOutOfRangeException("configDirectoryPath");
+            this.ConfigDirectoryPath = configDirectoryPath;
             this.MaxConnectionCount = maxConnectionCount;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (configPath != default) ___h.Add(configPath.GetHashCode());
+                if (configDirectoryPath != default) ___h.Add(configDirectoryPath.GetHashCode());
                 if (maxConnectionCount != default) ___h.Add(maxConnectionCount.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public string ConfigPath { get; }
+        public string ConfigDirectoryPath { get; }
         public uint MaxConnectionCount { get; }
 
         public static global::Omnius.Xeus.Engines.Models.CkadMediatorOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -1427,14 +1458,14 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.CkadMediatorOptions)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.CkadMediatorOptions) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.CkadMediatorOptions)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.CkadMediatorOptions? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.ConfigPath != target.ConfigPath) return false;
+            if (this.ConfigDirectoryPath != target.ConfigDirectoryPath) return false;
             if (this.MaxConnectionCount != target.MaxConnectionCount) return false;
 
             return true;
@@ -1447,10 +1478,10 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.ConfigPath != string.Empty)
+                if (value.ConfigDirectoryPath != string.Empty)
                 {
                     w.Write((uint)1);
-                    w.Write(value.ConfigPath);
+                    w.Write(value.ConfigDirectoryPath);
                 }
                 if (value.MaxConnectionCount != 0)
                 {
@@ -1463,7 +1494,7 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                string p_configPath = string.Empty;
+                string p_configDirectoryPath = string.Empty;
                 uint p_maxConnectionCount = 0;
 
                 for (; ; )
@@ -1474,7 +1505,7 @@ namespace Omnius.Xeus.Engines.Models
                     {
                         case 1:
                             {
-                                p_configPath = r.GetString(1024);
+                                p_configDirectoryPath = r.GetString(1024);
                                 break;
                             }
                         case 2:
@@ -1485,7 +1516,7 @@ namespace Omnius.Xeus.Engines.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Models.CkadMediatorOptions(p_configPath, p_maxConnectionCount);
+                return new global::Omnius.Xeus.Engines.Models.CkadMediatorOptions(p_configDirectoryPath, p_maxConnectionCount);
             }
         }
     }
@@ -1497,21 +1528,27 @@ namespace Omnius.Xeus.Engines.Models
         static CkadMediatorReport()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.CkadMediatorReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.CkadMediatorReport>.Empty = new global::Omnius.Xeus.Engines.Models.CkadMediatorReport();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.CkadMediatorReport>.Empty = new global::Omnius.Xeus.Engines.Models.CkadMediatorReport(0, 0);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public CkadMediatorReport()
+        public CkadMediatorReport(uint connectingConnectionCount, uint acceptingConnectionCount)
         {
+            this.ConnectingConnectionCount = connectingConnectionCount;
+            this.AcceptingConnectionCount = acceptingConnectionCount;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
+                if (connectingConnectionCount != default) ___h.Add(connectingConnectionCount.GetHashCode());
+                if (acceptingConnectionCount != default) ___h.Add(acceptingConnectionCount.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
+        public uint ConnectingConnectionCount { get; }
+        public uint AcceptingConnectionCount { get; }
 
         public static global::Omnius.Xeus.Engines.Models.CkadMediatorReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -1534,13 +1571,15 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.CkadMediatorReport)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.CkadMediatorReport) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.CkadMediatorReport)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.CkadMediatorReport? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
+            if (this.ConnectingConnectionCount != target.ConnectingConnectionCount) return false;
+            if (this.AcceptingConnectionCount != target.AcceptingConnectionCount) return false;
 
             return true;
         }
@@ -1552,12 +1591,24 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
+                if (value.ConnectingConnectionCount != 0)
+                {
+                    w.Write((uint)1);
+                    w.Write(value.ConnectingConnectionCount);
+                }
+                if (value.AcceptingConnectionCount != 0)
+                {
+                    w.Write((uint)2);
+                    w.Write(value.AcceptingConnectionCount);
+                }
                 w.Write((uint)0);
             }
             public global::Omnius.Xeus.Engines.Models.CkadMediatorReport Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
+                uint p_connectingConnectionCount = 0;
+                uint p_acceptingConnectionCount = 0;
 
                 for (; ; )
                 {
@@ -1565,10 +1616,20 @@ namespace Omnius.Xeus.Engines.Models
                     if (id == 0) break;
                     switch (id)
                     {
+                        case 1:
+                            {
+                                p_connectingConnectionCount = r.GetUInt32();
+                                break;
+                            }
+                        case 2:
+                            {
+                                p_acceptingConnectionCount = r.GetUInt32();
+                                break;
+                            }
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Models.CkadMediatorReport();
+                return new global::Omnius.Xeus.Engines.Models.CkadMediatorReport(p_connectingConnectionCount, p_acceptingConnectionCount);
             }
         }
     }
@@ -1585,25 +1646,25 @@ namespace Omnius.Xeus.Engines.Models
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public static readonly int MaxConfigPathLength = 1024;
+        public static readonly int MaxConfigDirectoryPathLength = 1024;
 
-        public ContentExchangerOptions(string configPath, uint maxConnectionCount)
+        public ContentExchangerOptions(string configDirectoryPath, uint maxConnectionCount)
         {
-            if (configPath is null) throw new global::System.ArgumentNullException("configPath");
-            if (configPath.Length > 1024) throw new global::System.ArgumentOutOfRangeException("configPath");
-            this.ConfigPath = configPath;
+            if (configDirectoryPath is null) throw new global::System.ArgumentNullException("configDirectoryPath");
+            if (configDirectoryPath.Length > 1024) throw new global::System.ArgumentOutOfRangeException("configDirectoryPath");
+            this.ConfigDirectoryPath = configDirectoryPath;
             this.MaxConnectionCount = maxConnectionCount;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (configPath != default) ___h.Add(configPath.GetHashCode());
+                if (configDirectoryPath != default) ___h.Add(configDirectoryPath.GetHashCode());
                 if (maxConnectionCount != default) ___h.Add(maxConnectionCount.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public string ConfigPath { get; }
+        public string ConfigDirectoryPath { get; }
         public uint MaxConnectionCount { get; }
 
         public static global::Omnius.Xeus.Engines.Models.ContentExchangerOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -1627,14 +1688,14 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.ContentExchangerOptions)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.ContentExchangerOptions) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.ContentExchangerOptions)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.ContentExchangerOptions? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.ConfigPath != target.ConfigPath) return false;
+            if (this.ConfigDirectoryPath != target.ConfigDirectoryPath) return false;
             if (this.MaxConnectionCount != target.MaxConnectionCount) return false;
 
             return true;
@@ -1647,10 +1708,10 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.ConfigPath != string.Empty)
+                if (value.ConfigDirectoryPath != string.Empty)
                 {
                     w.Write((uint)1);
-                    w.Write(value.ConfigPath);
+                    w.Write(value.ConfigDirectoryPath);
                 }
                 if (value.MaxConnectionCount != 0)
                 {
@@ -1663,7 +1724,7 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                string p_configPath = string.Empty;
+                string p_configDirectoryPath = string.Empty;
                 uint p_maxConnectionCount = 0;
 
                 for (; ; )
@@ -1674,7 +1735,7 @@ namespace Omnius.Xeus.Engines.Models
                     {
                         case 1:
                             {
-                                p_configPath = r.GetString(1024);
+                                p_configDirectoryPath = r.GetString(1024);
                                 break;
                             }
                         case 2:
@@ -1685,7 +1746,7 @@ namespace Omnius.Xeus.Engines.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Models.ContentExchangerOptions(p_configPath, p_maxConnectionCount);
+                return new global::Omnius.Xeus.Engines.Models.ContentExchangerOptions(p_configDirectoryPath, p_maxConnectionCount);
             }
         }
     }
@@ -1697,21 +1758,27 @@ namespace Omnius.Xeus.Engines.Models
         static ContentExchangerReport()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.ContentExchangerReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.ContentExchangerReport>.Empty = new global::Omnius.Xeus.Engines.Models.ContentExchangerReport();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.ContentExchangerReport>.Empty = new global::Omnius.Xeus.Engines.Models.ContentExchangerReport(0, 0);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public ContentExchangerReport()
+        public ContentExchangerReport(uint connectingConnectionCount, uint acceptingConnectionCount)
         {
+            this.ConnectingConnectionCount = connectingConnectionCount;
+            this.AcceptingConnectionCount = acceptingConnectionCount;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
+                if (connectingConnectionCount != default) ___h.Add(connectingConnectionCount.GetHashCode());
+                if (acceptingConnectionCount != default) ___h.Add(acceptingConnectionCount.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
+        public uint ConnectingConnectionCount { get; }
+        public uint AcceptingConnectionCount { get; }
 
         public static global::Omnius.Xeus.Engines.Models.ContentExchangerReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -1734,13 +1801,15 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.ContentExchangerReport)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.ContentExchangerReport) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.ContentExchangerReport)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.ContentExchangerReport? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
+            if (this.ConnectingConnectionCount != target.ConnectingConnectionCount) return false;
+            if (this.AcceptingConnectionCount != target.AcceptingConnectionCount) return false;
 
             return true;
         }
@@ -1752,12 +1821,24 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
+                if (value.ConnectingConnectionCount != 0)
+                {
+                    w.Write((uint)1);
+                    w.Write(value.ConnectingConnectionCount);
+                }
+                if (value.AcceptingConnectionCount != 0)
+                {
+                    w.Write((uint)2);
+                    w.Write(value.AcceptingConnectionCount);
+                }
                 w.Write((uint)0);
             }
             public global::Omnius.Xeus.Engines.Models.ContentExchangerReport Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
+                uint p_connectingConnectionCount = 0;
+                uint p_acceptingConnectionCount = 0;
 
                 for (; ; )
                 {
@@ -1765,10 +1846,20 @@ namespace Omnius.Xeus.Engines.Models
                     if (id == 0) break;
                     switch (id)
                     {
+                        case 1:
+                            {
+                                p_connectingConnectionCount = r.GetUInt32();
+                                break;
+                            }
+                        case 2:
+                            {
+                                p_acceptingConnectionCount = r.GetUInt32();
+                                break;
+                            }
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Models.ContentExchangerReport();
+                return new global::Omnius.Xeus.Engines.Models.ContentExchangerReport(p_connectingConnectionCount, p_acceptingConnectionCount);
             }
         }
     }
@@ -1785,24 +1876,24 @@ namespace Omnius.Xeus.Engines.Models
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public static readonly int MaxConfigPathLength = 1024;
+        public static readonly int MaxConfigDirectoryPathLength = 1024;
 
-        public PushContentStorageOptions(string configPath)
+        public PushContentStorageOptions(string configDirectoryPath)
         {
-            if (configPath is null) throw new global::System.ArgumentNullException("configPath");
-            if (configPath.Length > 1024) throw new global::System.ArgumentOutOfRangeException("configPath");
+            if (configDirectoryPath is null) throw new global::System.ArgumentNullException("configDirectoryPath");
+            if (configDirectoryPath.Length > 1024) throw new global::System.ArgumentOutOfRangeException("configDirectoryPath");
 
-            this.ConfigPath = configPath;
+            this.ConfigDirectoryPath = configDirectoryPath;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (configPath != default) ___h.Add(configPath.GetHashCode());
+                if (configDirectoryPath != default) ___h.Add(configDirectoryPath.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public string ConfigPath { get; }
+        public string ConfigDirectoryPath { get; }
 
         public static global::Omnius.Xeus.Engines.Models.PushContentStorageOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -1825,14 +1916,14 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.PushContentStorageOptions)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.PushContentStorageOptions) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.PushContentStorageOptions)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.PushContentStorageOptions? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.ConfigPath != target.ConfigPath) return false;
+            if (this.ConfigDirectoryPath != target.ConfigDirectoryPath) return false;
 
             return true;
         }
@@ -1844,10 +1935,10 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.ConfigPath != string.Empty)
+                if (value.ConfigDirectoryPath != string.Empty)
                 {
                     w.Write((uint)1);
-                    w.Write(value.ConfigPath);
+                    w.Write(value.ConfigDirectoryPath);
                 }
                 w.Write((uint)0);
             }
@@ -1855,7 +1946,7 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                string p_configPath = string.Empty;
+                string p_configDirectoryPath = string.Empty;
 
                 for (; ; )
                 {
@@ -1865,13 +1956,13 @@ namespace Omnius.Xeus.Engines.Models
                     {
                         case 1:
                             {
-                                p_configPath = r.GetString(1024);
+                                p_configDirectoryPath = r.GetString(1024);
                                 break;
                             }
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Models.PushContentStorageOptions(p_configPath);
+                return new global::Omnius.Xeus.Engines.Models.PushContentStorageOptions(p_configDirectoryPath);
             }
         }
     }
@@ -1883,29 +1974,31 @@ namespace Omnius.Xeus.Engines.Models
         static PushContentReport()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.PushContentReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.PushContentReport>.Empty = new global::Omnius.Xeus.Engines.Models.PushContentReport(string.Empty);
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.PushContentReport>.Empty = new global::Omnius.Xeus.Engines.Models.PushContentReport(string.Empty, global::Omnius.Core.Cryptography.OmniHash.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxFilePathLength = 2147483647;
 
-        public PushContentReport(string filePath)
+        public PushContentReport(string filePath, global::Omnius.Core.Cryptography.OmniHash rootHash)
         {
             if (filePath is null) throw new global::System.ArgumentNullException("filePath");
             if (filePath.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("filePath");
-
             this.FilePath = filePath;
+            this.RootHash = rootHash;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
                 if (filePath != default) ___h.Add(filePath.GetHashCode());
+                if (rootHash != default) ___h.Add(rootHash.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
         public string FilePath { get; }
+        public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
 
         public static global::Omnius.Xeus.Engines.Models.PushContentReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -1928,7 +2021,7 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.PushContentReport)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.PushContentReport) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.PushContentReport)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.PushContentReport? target)
@@ -1936,6 +2029,7 @@ namespace Omnius.Xeus.Engines.Models
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.FilePath != target.FilePath) return false;
+            if (this.RootHash != target.RootHash) return false;
 
             return true;
         }
@@ -1952,6 +2046,11 @@ namespace Omnius.Xeus.Engines.Models
                     w.Write((uint)1);
                     w.Write(value.FilePath);
                 }
+                if (value.RootHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
+                {
+                    w.Write((uint)2);
+                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.RootHash, rank + 1);
+                }
                 w.Write((uint)0);
             }
             public global::Omnius.Xeus.Engines.Models.PushContentReport Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
@@ -1959,6 +2058,7 @@ namespace Omnius.Xeus.Engines.Models
                 if (rank > 256) throw new global::System.FormatException();
 
                 string p_filePath = string.Empty;
+                global::Omnius.Core.Cryptography.OmniHash p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
 
                 for (; ; )
                 {
@@ -1971,10 +2071,15 @@ namespace Omnius.Xeus.Engines.Models
                                 p_filePath = r.GetString(2147483647);
                                 break;
                             }
+                        case 2:
+                            {
+                                p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                break;
+                            }
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Models.PushContentReport(p_filePath);
+                return new global::Omnius.Xeus.Engines.Models.PushContentReport(p_filePath, p_rootHash);
             }
         }
     }
@@ -2038,7 +2143,7 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.PushContentStorageReport)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.PushContentStorageReport) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.PushContentStorageReport)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.PushContentStorageReport? target)
@@ -2110,24 +2215,24 @@ namespace Omnius.Xeus.Engines.Models
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public static readonly int MaxConfigPathLength = 1024;
+        public static readonly int MaxConfigDirectoryPathLength = 1024;
 
-        public WantContentStorageOptions(string configPath)
+        public WantContentStorageOptions(string configDirectoryPath)
         {
-            if (configPath is null) throw new global::System.ArgumentNullException("configPath");
-            if (configPath.Length > 1024) throw new global::System.ArgumentOutOfRangeException("configPath");
+            if (configDirectoryPath is null) throw new global::System.ArgumentNullException("configDirectoryPath");
+            if (configDirectoryPath.Length > 1024) throw new global::System.ArgumentOutOfRangeException("configDirectoryPath");
 
-            this.ConfigPath = configPath;
+            this.ConfigDirectoryPath = configDirectoryPath;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (configPath != default) ___h.Add(configPath.GetHashCode());
+                if (configDirectoryPath != default) ___h.Add(configDirectoryPath.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public string ConfigPath { get; }
+        public string ConfigDirectoryPath { get; }
 
         public static global::Omnius.Xeus.Engines.Models.WantContentStorageOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -2150,14 +2255,14 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.WantContentStorageOptions)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.WantContentStorageOptions) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.WantContentStorageOptions)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.WantContentStorageOptions? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.ConfigPath != target.ConfigPath) return false;
+            if (this.ConfigDirectoryPath != target.ConfigDirectoryPath) return false;
 
             return true;
         }
@@ -2169,10 +2274,10 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.ConfigPath != string.Empty)
+                if (value.ConfigDirectoryPath != string.Empty)
                 {
                     w.Write((uint)1);
-                    w.Write(value.ConfigPath);
+                    w.Write(value.ConfigDirectoryPath);
                 }
                 w.Write((uint)0);
             }
@@ -2180,7 +2285,7 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                string p_configPath = string.Empty;
+                string p_configDirectoryPath = string.Empty;
 
                 for (; ; )
                 {
@@ -2190,13 +2295,13 @@ namespace Omnius.Xeus.Engines.Models
                     {
                         case 1:
                             {
-                                p_configPath = r.GetString(1024);
+                                p_configDirectoryPath = r.GetString(1024);
                                 break;
                             }
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Models.WantContentStorageOptions(p_configPath);
+                return new global::Omnius.Xeus.Engines.Models.WantContentStorageOptions(p_configDirectoryPath);
             }
         }
     }
@@ -2208,29 +2313,24 @@ namespace Omnius.Xeus.Engines.Models
         static WantContentReport()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.WantContentReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.WantContentReport>.Empty = new global::Omnius.Xeus.Engines.Models.WantContentReport(string.Empty);
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.WantContentReport>.Empty = new global::Omnius.Xeus.Engines.Models.WantContentReport(global::Omnius.Core.Cryptography.OmniHash.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public static readonly int MaxFilePathLength = 2147483647;
-
-        public WantContentReport(string filePath)
+        public WantContentReport(global::Omnius.Core.Cryptography.OmniHash rootHash)
         {
-            if (filePath is null) throw new global::System.ArgumentNullException("filePath");
-            if (filePath.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("filePath");
-
-            this.FilePath = filePath;
+            this.RootHash = rootHash;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (filePath != default) ___h.Add(filePath.GetHashCode());
+                if (rootHash != default) ___h.Add(rootHash.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public string FilePath { get; }
+        public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
 
         public static global::Omnius.Xeus.Engines.Models.WantContentReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -2253,14 +2353,14 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.WantContentReport)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.WantContentReport) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.WantContentReport)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.WantContentReport? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.FilePath != target.FilePath) return false;
+            if (this.RootHash != target.RootHash) return false;
 
             return true;
         }
@@ -2272,10 +2372,10 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.FilePath != string.Empty)
+                if (value.RootHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
                 {
                     w.Write((uint)1);
-                    w.Write(value.FilePath);
+                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.RootHash, rank + 1);
                 }
                 w.Write((uint)0);
             }
@@ -2283,7 +2383,7 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                string p_filePath = string.Empty;
+                global::Omnius.Core.Cryptography.OmniHash p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
 
                 for (; ; )
                 {
@@ -2293,13 +2393,13 @@ namespace Omnius.Xeus.Engines.Models
                     {
                         case 1:
                             {
-                                p_filePath = r.GetString(2147483647);
+                                p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Models.WantContentReport(p_filePath);
+                return new global::Omnius.Xeus.Engines.Models.WantContentReport(p_rootHash);
             }
         }
     }
@@ -2363,7 +2463,7 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.WantContentStorageReport)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.WantContentStorageReport) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.WantContentStorageReport)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.WantContentStorageReport? target)
@@ -2435,25 +2535,25 @@ namespace Omnius.Xeus.Engines.Models
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public static readonly int MaxConfigPathLength = 1024;
+        public static readonly int MaxConfigDirectoryPathLength = 1024;
 
-        public DeclaredMessageExchangerOptions(string configPath, uint maxConnectionCount)
+        public DeclaredMessageExchangerOptions(string configDirectoryPath, uint maxConnectionCount)
         {
-            if (configPath is null) throw new global::System.ArgumentNullException("configPath");
-            if (configPath.Length > 1024) throw new global::System.ArgumentOutOfRangeException("configPath");
-            this.ConfigPath = configPath;
+            if (configDirectoryPath is null) throw new global::System.ArgumentNullException("configDirectoryPath");
+            if (configDirectoryPath.Length > 1024) throw new global::System.ArgumentOutOfRangeException("configDirectoryPath");
+            this.ConfigDirectoryPath = configDirectoryPath;
             this.MaxConnectionCount = maxConnectionCount;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (configPath != default) ___h.Add(configPath.GetHashCode());
+                if (configDirectoryPath != default) ___h.Add(configDirectoryPath.GetHashCode());
                 if (maxConnectionCount != default) ___h.Add(maxConnectionCount.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public string ConfigPath { get; }
+        public string ConfigDirectoryPath { get; }
         public uint MaxConnectionCount { get; }
 
         public static global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -2477,14 +2577,14 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerOptions)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerOptions) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerOptions)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerOptions? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.ConfigPath != target.ConfigPath) return false;
+            if (this.ConfigDirectoryPath != target.ConfigDirectoryPath) return false;
             if (this.MaxConnectionCount != target.MaxConnectionCount) return false;
 
             return true;
@@ -2497,10 +2597,10 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.ConfigPath != string.Empty)
+                if (value.ConfigDirectoryPath != string.Empty)
                 {
                     w.Write((uint)1);
-                    w.Write(value.ConfigPath);
+                    w.Write(value.ConfigDirectoryPath);
                 }
                 if (value.MaxConnectionCount != 0)
                 {
@@ -2513,7 +2613,7 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                string p_configPath = string.Empty;
+                string p_configDirectoryPath = string.Empty;
                 uint p_maxConnectionCount = 0;
 
                 for (; ; )
@@ -2524,7 +2624,7 @@ namespace Omnius.Xeus.Engines.Models
                     {
                         case 1:
                             {
-                                p_configPath = r.GetString(1024);
+                                p_configDirectoryPath = r.GetString(1024);
                                 break;
                             }
                         case 2:
@@ -2535,7 +2635,7 @@ namespace Omnius.Xeus.Engines.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerOptions(p_configPath, p_maxConnectionCount);
+                return new global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerOptions(p_configDirectoryPath, p_maxConnectionCount);
             }
         }
     }
@@ -2547,21 +2647,27 @@ namespace Omnius.Xeus.Engines.Models
         static DeclaredMessageExchangerReport()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport>.Empty = new global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport>.Empty = new global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport(0, 0);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public DeclaredMessageExchangerReport()
+        public DeclaredMessageExchangerReport(uint connectingConnectionCount, uint acceptingConnectionCount)
         {
+            this.ConnectingConnectionCount = connectingConnectionCount;
+            this.AcceptingConnectionCount = acceptingConnectionCount;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
+                if (connectingConnectionCount != default) ___h.Add(connectingConnectionCount.GetHashCode());
+                if (acceptingConnectionCount != default) ___h.Add(acceptingConnectionCount.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
+        public uint ConnectingConnectionCount { get; }
+        public uint AcceptingConnectionCount { get; }
 
         public static global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -2584,13 +2690,15 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
+            if (this.ConnectingConnectionCount != target.ConnectingConnectionCount) return false;
+            if (this.AcceptingConnectionCount != target.AcceptingConnectionCount) return false;
 
             return true;
         }
@@ -2602,12 +2710,24 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
+                if (value.ConnectingConnectionCount != 0)
+                {
+                    w.Write((uint)1);
+                    w.Write(value.ConnectingConnectionCount);
+                }
+                if (value.AcceptingConnectionCount != 0)
+                {
+                    w.Write((uint)2);
+                    w.Write(value.AcceptingConnectionCount);
+                }
                 w.Write((uint)0);
             }
             public global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
+                uint p_connectingConnectionCount = 0;
+                uint p_acceptingConnectionCount = 0;
 
                 for (; ; )
                 {
@@ -2615,10 +2735,20 @@ namespace Omnius.Xeus.Engines.Models
                     if (id == 0) break;
                     switch (id)
                     {
+                        case 1:
+                            {
+                                p_connectingConnectionCount = r.GetUInt32();
+                                break;
+                            }
+                        case 2:
+                            {
+                                p_acceptingConnectionCount = r.GetUInt32();
+                                break;
+                            }
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport();
+                return new global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport(p_connectingConnectionCount, p_acceptingConnectionCount);
             }
         }
     }
@@ -2635,24 +2765,24 @@ namespace Omnius.Xeus.Engines.Models
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public static readonly int MaxConfigPathLength = 1024;
+        public static readonly int MaxConfigDirectoryPathLength = 1024;
 
-        public PushDeclaredMessageStorageOptions(string configPath)
+        public PushDeclaredMessageStorageOptions(string configDirectoryPath)
         {
-            if (configPath is null) throw new global::System.ArgumentNullException("configPath");
-            if (configPath.Length > 1024) throw new global::System.ArgumentOutOfRangeException("configPath");
+            if (configDirectoryPath is null) throw new global::System.ArgumentNullException("configDirectoryPath");
+            if (configDirectoryPath.Length > 1024) throw new global::System.ArgumentOutOfRangeException("configDirectoryPath");
 
-            this.ConfigPath = configPath;
+            this.ConfigDirectoryPath = configDirectoryPath;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (configPath != default) ___h.Add(configPath.GetHashCode());
+                if (configDirectoryPath != default) ___h.Add(configDirectoryPath.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public string ConfigPath { get; }
+        public string ConfigDirectoryPath { get; }
 
         public static global::Omnius.Xeus.Engines.Models.PushDeclaredMessageStorageOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -2675,14 +2805,14 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.PushDeclaredMessageStorageOptions)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.PushDeclaredMessageStorageOptions) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.PushDeclaredMessageStorageOptions)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.PushDeclaredMessageStorageOptions? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.ConfigPath != target.ConfigPath) return false;
+            if (this.ConfigDirectoryPath != target.ConfigDirectoryPath) return false;
 
             return true;
         }
@@ -2694,10 +2824,10 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.ConfigPath != string.Empty)
+                if (value.ConfigDirectoryPath != string.Empty)
                 {
                     w.Write((uint)1);
-                    w.Write(value.ConfigPath);
+                    w.Write(value.ConfigDirectoryPath);
                 }
                 w.Write((uint)0);
             }
@@ -2705,7 +2835,7 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                string p_configPath = string.Empty;
+                string p_configDirectoryPath = string.Empty;
 
                 for (; ; )
                 {
@@ -2715,13 +2845,13 @@ namespace Omnius.Xeus.Engines.Models
                     {
                         case 1:
                             {
-                                p_configPath = r.GetString(1024);
+                                p_configDirectoryPath = r.GetString(1024);
                                 break;
                             }
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Models.PushDeclaredMessageStorageOptions(p_configPath);
+                return new global::Omnius.Xeus.Engines.Models.PushDeclaredMessageStorageOptions(p_configDirectoryPath);
             }
         }
     }
@@ -2775,7 +2905,7 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.PushDeclaredMessageReport)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.PushDeclaredMessageReport) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.PushDeclaredMessageReport)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.PushDeclaredMessageReport? target)
@@ -2885,7 +3015,7 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.PushDeclaredMessageStorageReport)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.PushDeclaredMessageStorageReport) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.PushDeclaredMessageStorageReport)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.PushDeclaredMessageStorageReport? target)
@@ -2957,24 +3087,24 @@ namespace Omnius.Xeus.Engines.Models
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public static readonly int MaxConfigPathLength = 1024;
+        public static readonly int MaxConfigDirectoryPathLength = 1024;
 
-        public WantDeclaredMessageStorageOptions(string configPath)
+        public WantDeclaredMessageStorageOptions(string configDirectoryPath)
         {
-            if (configPath is null) throw new global::System.ArgumentNullException("configPath");
-            if (configPath.Length > 1024) throw new global::System.ArgumentOutOfRangeException("configPath");
+            if (configDirectoryPath is null) throw new global::System.ArgumentNullException("configDirectoryPath");
+            if (configDirectoryPath.Length > 1024) throw new global::System.ArgumentOutOfRangeException("configDirectoryPath");
 
-            this.ConfigPath = configPath;
+            this.ConfigDirectoryPath = configDirectoryPath;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (configPath != default) ___h.Add(configPath.GetHashCode());
+                if (configDirectoryPath != default) ___h.Add(configDirectoryPath.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public string ConfigPath { get; }
+        public string ConfigDirectoryPath { get; }
 
         public static global::Omnius.Xeus.Engines.Models.WantDeclaredMessageStorageOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -2997,14 +3127,14 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.WantDeclaredMessageStorageOptions)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.WantDeclaredMessageStorageOptions) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.WantDeclaredMessageStorageOptions)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.WantDeclaredMessageStorageOptions? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.ConfigPath != target.ConfigPath) return false;
+            if (this.ConfigDirectoryPath != target.ConfigDirectoryPath) return false;
 
             return true;
         }
@@ -3016,10 +3146,10 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.ConfigPath != string.Empty)
+                if (value.ConfigDirectoryPath != string.Empty)
                 {
                     w.Write((uint)1);
-                    w.Write(value.ConfigPath);
+                    w.Write(value.ConfigDirectoryPath);
                 }
                 w.Write((uint)0);
             }
@@ -3027,7 +3157,7 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                string p_configPath = string.Empty;
+                string p_configDirectoryPath = string.Empty;
 
                 for (; ; )
                 {
@@ -3037,13 +3167,13 @@ namespace Omnius.Xeus.Engines.Models
                     {
                         case 1:
                             {
-                                p_configPath = r.GetString(1024);
+                                p_configDirectoryPath = r.GetString(1024);
                                 break;
                             }
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Models.WantDeclaredMessageStorageOptions(p_configPath);
+                return new global::Omnius.Xeus.Engines.Models.WantDeclaredMessageStorageOptions(p_configDirectoryPath);
             }
         }
     }
@@ -3097,7 +3227,7 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.WantDeclaredMessageReport)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.WantDeclaredMessageReport) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.WantDeclaredMessageReport)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.WantDeclaredMessageReport? target)
@@ -3207,7 +3337,7 @@ namespace Omnius.Xeus.Engines.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Models.WantDeclaredMessageStorageReport)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Models.WantDeclaredMessageStorageReport) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Models.WantDeclaredMessageStorageReport)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Models.WantDeclaredMessageStorageReport? target)

@@ -14,11 +14,6 @@ message AddCloudNodeProfilesParam {
 }
 
 [csharp_struct]
-message PushContentReport {
-    FilePath: string,
-    RootHash: OmniHash,
-}
-[csharp_struct]
 message GetPushContentsReportResult {
     PushContents: vector<PushContentReport>,
 }
@@ -35,10 +30,6 @@ message UnregisterPushContentParam {
     FilePath: string,
 }
 
-[csharp_struct]
-message WantContentReport {
-    RootHash: OmniHash,
-}
 [csharp_struct]
 message GetWantContentsReportResult {
     WantContents: vector<WantContentReport>,
@@ -58,16 +49,12 @@ message ExportWantContentParam {
 }
 
 [csharp_struct]
-message PushDeclaredMessageReport {
-    Signature: OmniSignature,
-}
-[csharp_struct]
 message GetPushDeclaredMessagesReportResult {
-    PushDeclaredMessage: vector<PushDeclaredMessageReport>,
+    PushDeclaredMessages: vector<PushDeclaredMessageReport>,
 }
 [csharp_struct]
 message RegisterPushDeclaredMessageParam {
-    Message: DeclaredMessage,
+    DeclaredMessage: DeclaredMessage,
 }
 [csharp_struct]
 message UnregisterPushDeclaredMessageParam {
@@ -75,12 +62,8 @@ message UnregisterPushDeclaredMessageParam {
 }
 
 [csharp_struct]
-message WantDeclaredMessageReport {
-    Signature: OmniSignature,
-}
-[csharp_struct]
 message GetWantDeclaredMessagesReportResult {
-    WantDeclaredMessage: vector<WantDeclaredMessageReport>,
+    WantDeclaredMessages: vector<WantDeclaredMessageReport>,
 }
 [csharp_struct]
 message RegisterWantDeclaredMessageParam {
@@ -96,5 +79,5 @@ message ExportWantDeclaredMessageParam {
 }
 [csharp_struct]
 message ExportWantDeclaredMessageResult {
-    Signature: DeclaredMessage?,
+    DeclaredMessage: DeclaredMessage,
 }

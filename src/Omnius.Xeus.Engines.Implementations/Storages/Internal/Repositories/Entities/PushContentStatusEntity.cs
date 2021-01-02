@@ -10,7 +10,9 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories.Entities
     internal sealed class PushContentStatusEntity
     {
         public string? FilePath { get; set; }
+
         public OmniHashEntity? Hash { get; set; }
+
         public MerkleTreeSectionEntity[]? MerkleTreeSections { get; set; }
 
         public static PushContentStatusEntity Import(PushContentStatus value)
@@ -19,7 +21,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories.Entities
             {
                 Hash = OmniHashEntity.Import(value.Hash),
                 FilePath = value.FilePath,
-                MerkleTreeSections = value.MerkleTreeSections.Select(n => MerkleTreeSectionEntity.Import(n)).ToArray()
+                MerkleTreeSections = value.MerkleTreeSections?.Select(n => MerkleTreeSectionEntity.Import(n))?.ToArray() ?? Array.Empty<MerkleTreeSectionEntity>(),
             };
         }
 

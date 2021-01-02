@@ -1207,8 +1207,8 @@
       },
       "YamlDotNet": {
         "type": "Transitive",
-        "resolved": "8.1.2",
-        "contentHash": "GlPKbb4l+91dyYVKV7UnJlr2CWooNNM1ayZWC90QAmlFPgbwSkfhgId7dGjTAHqkB84BZqjMSy5PlAYf1iejVA=="
+        "resolved": "9.1.0",
+        "contentHash": "fuvGXU4Ec5HrsmEc+BiFTNPCRf1cGBI2kh/3RzMWgddM2M4ALhbSPoI3X3mhXZUD1qqQd9oSkFAtWjpz8z9eRg=="
       },
       "omnius.core": {
         "type": "Project",
@@ -1333,7 +1333,7 @@
           "Omnius.Xeus.Api": "0.0.1-alpha.1",
           "Omnius.Xeus.Engines": "0.0.1-alpha.1",
           "Omnius.Xeus.Engines.Implementations": "0.0.1-alpha.1",
-          "YamlDotNet": "8.1.2"
+          "YamlDotNet": "9.1.0"
         }
       },
       "omnius.xeus.engines": {

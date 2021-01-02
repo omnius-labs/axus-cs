@@ -56,7 +56,7 @@ namespace Omnius.Xeus.Engines.Connectors.Internal.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Connectors.Internal.Models.TcpConnectorHelloMessage)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Connectors.Internal.Models.TcpConnectorHelloMessage) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Connectors.Internal.Models.TcpConnectorHelloMessage)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Connectors.Internal.Models.TcpConnectorHelloMessage? target)

@@ -13,7 +13,9 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Models
         }
 
         public string FilePath { get; }
+
         public OmniHash Hash { get; }
+
         public ReadOnlyListSlim<MerkleTreeSection> MerkleTreeSections { get; }
     }
 }

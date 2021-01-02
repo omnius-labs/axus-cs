@@ -12,6 +12,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Models
         }
 
         public OmniSignature Signature { get; }
+
         public DateTime CreationTime { get; }
     }
 }

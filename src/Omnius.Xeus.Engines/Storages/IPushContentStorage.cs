@@ -16,7 +16,9 @@ namespace Omnius.Xeus.Engines.Storages
     public interface IPushContentStorage : IReadOnlyContentStorage, IAsyncDisposable
     {
         ValueTask<PushContentStorageReport> GetReportAsync(CancellationToken cancellationToken = default);
+
         ValueTask<OmniHash> RegisterPushContentAsync(string filePath, CancellationToken cancellationToken = default);
+
         ValueTask UnregisterPushContentAsync(string filePath, CancellationToken cancellationToken = default);
     }
 }

@@ -7,21 +7,18 @@ using "Omnius.Xeus.Engines.Models";
 namespace "Omnius.Xeus.Interactors.Models";
 
 // Models
-message XeusDeclaredMessage {
-    Files: XeusFile,
+
+message XeusProfile {
+    Files: OmniHash,
+}
+
+message XeusFileCollection {
+    Values: vector<XeusFile>(capacity: 32 * 1024),
 }
 
 message XeusFile {
-    RootHash: OmniHash,
+    Clue: OmniHash,
     Name: string(capacity: 256),
     Size: uint64,
     Tags: vector<string(capacity: 256)>(capacity: 8),
-}
-
-message XeusFileStorageOptions {
-    ConfigDirectoryPath: string,
-}
-
-message XeusUserProfileStorageOptions {
-    ConfigDirectoryPath: string,
 }

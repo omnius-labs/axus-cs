@@ -21,7 +21,7 @@ service XeusService {
     RegisterPushDeclaredMessage: (RegisterPushDeclaredMessageParam) -> (),
     UnregisterPushDeclaredMessage: (UnregisterPushDeclaredMessageParam) -> (),
 
-    GetWantDeclaredMessageReport: () -> (GetWantDeclaredMessageReportResult),
+    GetWantDeclaredMessagesReport: () -> (GetWantDeclaredMessagesReportResult),
     RegisterWantDeclaredMessage: (RegisterWantDeclaredMessageParam) -> (),
     UnregisterWantDeclaredMessage: (UnregisterWantDeclaredMessageParam) -> (),
     ExportWantDeclaredMessage: (ExportWantDeclaredMessageParam) -> (ExportWantDeclaredMessageResult),

@@ -49,12 +49,12 @@ namespace Omnius.Xeus.Daemon
         private readonly XeusServiceOptions _options;
 
         private ICkadMediator? _ckadMediator;
-        public IContentExchanger? _contentExchanger;
-        public IDeclaredMessageExchanger? _declaredMessageExchanger;
-        public IPushContentStorage? _pushContentStorage;
-        public IWantContentStorage? _wantContentStorage;
-        public IPushDeclaredMessageStorage? _pushDeclaredMessageStorage;
-        public IWantDeclaredMessageStorage? _wantDeclaredMessageStorage;
+        private IContentExchanger? _contentExchanger;
+        private IDeclaredMessageExchanger? _declaredMessageExchanger;
+        private IPushContentStorage? _pushContentStorage;
+        private IWantContentStorage? _wantContentStorage;
+        private IPushDeclaredMessageStorage? _pushDeclaredMessageStorage;
+        private IWantDeclaredMessageStorage? _wantDeclaredMessageStorage;
 
         public static async ValueTask<XeusServiceImpl> CreateAsync(XeusServiceOptions options)
         {
@@ -112,14 +112,22 @@ namespace Omnius.Xeus.Daemon
 
         public async ValueTask<GetMyNodeProfileResult> GetMyNodeProfileAsync(CancellationToken cancellationToken = default)
         {
-            if (_ckadMediator is null) throw new NullReferenceException(nameof(_ckadMediator));
+            if (_ckadMediator is null)
+            {
+                throw new NullReferenceException(nameof(_ckadMediator));
+            }
+
             var result = await _ckadMediator.GetMyNodeProfileAsync(cancellationToken);
             return new GetMyNodeProfileResult(result);
         }
 
         public async ValueTask AddCloudNodeProfilesAsync(AddCloudNodeProfilesParam param, CancellationToken cancellationToken = default)
         {
-            if (_ckadMediator is null) throw new NullReferenceException(nameof(_ckadMediator));
+            if (_ckadMediator is null)
+            {
+                throw new NullReferenceException(nameof(_ckadMediator));
+            }
+
             await _ckadMediator.AddCloudNodeProfilesAsync(param.NodeProfiles, cancellationToken);
         }
 
@@ -169,6 +177,11 @@ namespace Omnius.Xeus.Daemon
         }
 
         public ValueTask UnregisterPushDeclaredMessageAsync(UnregisterPushDeclaredMessageParam param, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask<GetWantDeclaredMessagesReportResult> GetWantDeclaredMessagesReportAsync(CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }

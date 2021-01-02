@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Cryptography.Functions;
+using Omnius.Core.Extensions;
 using Omnius.Core.Io;
-using Omnius.Core.Serialization;
 using Omnius.Xeus.Engines.Models;
 using Omnius.Xeus.Engines.Storages.Internal.Models;
 using Omnius.Xeus.Engines.Storages.Internal.Repositories;
@@ -25,9 +25,7 @@ namespace Omnius.Xeus.Engines.Storages
 
         private readonly PushContentStorageRepository _repository;
 
-        private readonly AsyncLock _asyncLock = new AsyncLock();
-
-        const int MaxBlockLength = 1 * 1024 * 1024;
+        private const int MaxBlockLength = 32 * 1024 * 1024;
 
         internal sealed class PushContentStorageFactory : IPushContentStorageFactory
         {
@@ -47,7 +45,7 @@ namespace Omnius.Xeus.Engines.Storages
             _options = options;
             _bytesPool = bytesPool;
 
-            _repository = new PushContentStorageRepository(Path.Combine(_options.ConfigPath, "database"));
+            _repository = new PushContentStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "push-content-storage.db"));
         }
 
         internal async ValueTask InitAsync()
@@ -62,10 +60,14 @@ namespace Omnius.Xeus.Engines.Storages
 
         public async ValueTask<PushContentStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.LockAsync())
+            var pushContentReports = new List<PushContentReport>();
+
+            foreach (var status in _repository.PushContentStatus.GetAll())
             {
-                throw new NotImplementedException();
+                pushContentReports.Add(new PushContentReport(status.FilePath, status.Hash));
             }
+
+            return new PushContentStorageReport(pushContentReports.ToArray());
         }
 
         public async ValueTask CheckConsistencyAsync(Action<ConsistencyReport> callback, CancellationToken cancellationToken = default)
@@ -74,76 +76,114 @@ namespace Omnius.Xeus.Engines.Storages
 
         public async ValueTask<IEnumerable<OmniHash>> GetContentHashesAsync(CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.LockAsync())
+            var results = new List<OmniHash>();
+
+            foreach (var status in _repository.PushContentStatus.GetAll())
             {
-                var results = new List<OmniHash>();
-
-                foreach (var status in _repository.PushStatus.GetAll())
-                {
-                    results.Add(status.Hash);
-                }
-
-                return results;
+                results.Add(status.Hash);
             }
+
+            return results;
         }
 
-        public async ValueTask<IEnumerable<OmniHash>> GetBlockHashesAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+        public async ValueTask<IEnumerable<OmniHash>> GetBlockHashesAsync(OmniHash contentHash, bool? exists = null, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.LockAsync())
+            if (exists.HasValue && !exists.Value)
             {
-                var status = _repository.PushStatus.Get(rootHash);
-                if (status == null) return Enumerable.Empty<OmniHash>();
-
-                return status.MerkleTreeSections.SelectMany(n => n.Hashes);
+                return Enumerable.Empty<OmniHash>();
             }
+
+            var status = _repository.PushContentStatus.Get(contentHash);
+            if (status == null)
+            {
+                return Enumerable.Empty<OmniHash>();
+            }
+
+            return status.MerkleTreeSections.SelectMany(n => n.Hashes);
         }
 
-        public async ValueTask<bool> ContainsContentAsync(OmniHash rootHash)
+        public async ValueTask<bool> ContainsContentAsync(OmniHash contentHash)
         {
-            using (await _asyncLock.LockAsync())
+            var status = _repository.PushContentStatus.Get(contentHash);
+            if (status == null)
             {
-                var status = _repository.PushStatus.Get(rootHash);
-                if (status == null) return false;
-
-                return true;
+                return false;
             }
+
+            return true;
         }
 
-        public async ValueTask<bool> ContainsBlockAsync(OmniHash rootHash, OmniHash targetHash)
+        public async ValueTask<bool> ContainsBlockAsync(OmniHash contentHash, OmniHash blockHash)
         {
-            using (await _asyncLock.LockAsync())
+            var status = _repository.PushContentStatus.Get(contentHash);
+            if (status == null)
             {
-                var status = _repository.PushStatus.Get(rootHash);
-                if (status == null) return false;
-
-                return status.MerkleTreeSections.Any(n => n.Contains(rootHash));
+                return false;
             }
+
+            return status.MerkleTreeSections.Any(n => n.Contains(contentHash));
         }
 
         public async ValueTask<OmniHash> RegisterPushContentAsync(string filePath, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.LockAsync())
+            // 既にエンコード済みの場合
             {
-                // 既にエンコード済みの場合
+                var status = _repository.PushContentStatus.Get(filePath);
+                if (status != null)
                 {
-                    var status = _repository.PushStatus.Get(filePath);
-                    if (status != null) return status.Hash;
+                    return status.Hash;
+                }
+            }
+
+            // エンコード処理
+            {
+                var tempDirPath = Path.Combine(_options.ConfigDirectoryPath, "cache", "_temp_");
+
+                var merkleTreeSections = new Stack<MerkleTreeSection>();
+
+                // ファイルからハッシュ値を算出する
+                using (var inStream = new FileStream(filePath, FileMode.Open))
+                {
+                    var hashList = new List<OmniHash>();
+
+                    using (var memoryOwner = _bytesPool.Memory.Rent(MaxBlockLength))
+                    {
+                        var remain = inStream.Length;
+
+                        while (remain > 0)
+                        {
+                            var blockLength = (int)Math.Min(remain, MaxBlockLength);
+                            remain -= blockLength;
+
+                            var memory = memoryOwner.Memory.Slice(0, blockLength);
+                            inStream.Read(memory.Span);
+
+                            var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(memory.Span));
+                            hashList.Add(hash);
+                        }
+                    }
+
+                    merkleTreeSections.Push(new MerkleTreeSection(0, MaxBlockLength, (ulong)inStream.Length, hashList.ToArray()));
                 }
 
-                // エンコード処理
+                OmniHash contentHash;
+
+                // ハッシュ値からMerkle treeを作成する
+                for (; ; )
                 {
-                    var tempPath = Path.Combine(_options.ConfigPath, "cache", "_temp_");
+                    using var hub = new BytesHub(_bytesPool);
 
-                    var merkleTreeSections = new Stack<MerkleTreeSection>();
+                    var lastMerkleTreeSection = merkleTreeSections.Peek();
+                    lastMerkleTreeSection.Export(hub.Writer, _bytesPool);
 
-                    // ファイルからハッシュ値を算出する
-                    using (var inStream = new FileStream(filePath, FileMode.Open))
+                    if (hub.Writer.WrittenBytes > MaxBlockLength)
                     {
                         var hashList = new List<OmniHash>();
 
                         using (var memoryOwner = _bytesPool.Memory.Rent(MaxBlockLength))
                         {
-                            var remain = inStream.Length;
+                            var sequence = hub.Reader.GetSequence();
+                            var remain = sequence.Length;
 
                             while (remain > 0)
                             {
@@ -151,133 +191,126 @@ namespace Omnius.Xeus.Engines.Storages
                                 remain -= blockLength;
 
                                 var memory = memoryOwner.Memory.Slice(0, blockLength);
-                                inStream.Read(memory.Span);
-
-                                var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(memory.Span));
-                                hashList.Add(hash);
-                            }
-                        }
-
-                        merkleTreeSections.Push(new MerkleTreeSection(0, (ulong)inStream.Length, hashList.ToArray()));
-                    }
-
-                    OmniHash rootHash;
-
-                    // ハッシュ値からMerkle treeを作成する
-                    for (; ; )
-                    {
-                        using var hub = new BytesHub(_bytesPool);
-
-                        var lastMerkleTreeSection = merkleTreeSections.Peek();
-                        lastMerkleTreeSection.Export(hub.Writer, _bytesPool);
-
-                        if (hub.Writer.WrittenBytes > MaxBlockLength)
-                        {
-                            var hashList = new List<OmniHash>();
-
-                            using (var memoryOwner = _bytesPool.Memory.Rent(MaxBlockLength))
-                            {
-                                var sequence = hub.Reader.GetSequence();
-                                var remain = sequence.Length;
-
-                                while (remain > 0)
-                                {
-                                    var blockLength = (int)Math.Min(remain, MaxBlockLength);
-                                    remain -= blockLength;
-
-                                    var memory = memoryOwner.Memory.Slice(0, blockLength);
-                                    sequence.CopyTo(memory.Span);
-
-                                    var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(memory.Span));
-                                    hashList.Add(hash);
-
-                                    await this.WriteBlockAsync(tempPath, hash, memory);
-
-                                    sequence = sequence.Slice(blockLength);
-                                }
-                            }
-
-                            merkleTreeSections.Push(new MerkleTreeSection(merkleTreeSections.Count, (ulong)hub.Writer.WrittenBytes, hashList.ToArray()));
-                        }
-                        else
-                        {
-                            using (var memoryOwner = _bytesPool.Memory.Rent(MaxBlockLength))
-                            {
-                                var sequence = hub.Reader.GetSequence();
-
-                                var memory = memoryOwner.Memory.Slice(0, (int)sequence.Length);
                                 sequence.CopyTo(memory.Span);
 
                                 var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(memory.Span));
+                                hashList.Add(hash);
 
-                                await this.WriteBlockAsync(tempPath, hash, memory);
+                                await this.WriteBlockAsync(tempDirPath, hash, memory);
 
-                                rootHash = hash;
+                                sequence = sequence.Slice(blockLength);
                             }
-
-                            break;
                         }
-                    }
 
-                    // 一時フォルダからキャッシュフォルダへ移動させる
+                        merkleTreeSections.Push(new MerkleTreeSection(merkleTreeSections.Count, MaxBlockLength, (ulong)hub.Writer.WrittenBytes, hashList.ToArray()));
+                    }
+                    else
                     {
-                        var cachePath = Path.Combine(_options.ConfigPath, "cache", HashToString(rootHash));
-                        Directory.Move(tempPath, cachePath);
+                        using var memoryOwner = _bytesPool.Memory.Rent(MaxBlockLength);
+                        var sequence = hub.Reader.GetSequence();
+
+                        var memory = memoryOwner.Memory.Slice(0, (int)sequence.Length);
+                        sequence.CopyTo(memory.Span);
+
+                        var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(memory.Span));
+
+                        await this.WriteBlockAsync(tempDirPath, hash, memory);
+
+                        contentHash = hash;
+
+                        break;
                     }
-
-                    var status = new PushContentStatus(rootHash, filePath, merkleTreeSections.ToArray());
-                    _repository.PushStatus.Add(status);
-
-                    return rootHash;
                 }
+
+                // 一時フォルダからキャッシュフォルダへ移動させる
+                {
+                    var cacheDirPath = this.ComputeCacheDirectoryPath(contentHash);
+                    Directory.Move(tempDirPath, cacheDirPath);
+                }
+
+                var status = new PushContentStatus(contentHash, filePath, merkleTreeSections.ToArray());
+                _repository.PushContentStatus.Add(status);
+
+                return contentHash;
             }
         }
 
         private async ValueTask WriteBlockAsync(string basePath, OmniHash hash, ReadOnlyMemory<byte> memory)
         {
-            var filePath = Path.Combine(basePath, HashToString(hash));
-
-            using (var fileStream = new UnbufferedFileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool))
-            {
-                await fileStream.WriteAsync(memory);
-            }
+            var filePath = Path.Combine(basePath, StringConverter.HashToString(hash));
+            using var fileStream = new UnbufferedFileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool);
+            await fileStream.WriteAsync(memory);
         }
 
         public async ValueTask UnregisterPushContentAsync(string filePath, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.LockAsync())
+            var status = _repository.PushContentStatus.Get(filePath);
+            if (status == null)
             {
-                var status = _repository.PushStatus.Get(filePath);
-                if (status == null) return;
-                _repository.PushStatus.Remove(filePath);
-
-                // キャッシュフォルダを削除
-                var cacheDirPath = Path.Combine(_options.ConfigPath, HashToString(status.Hash));
-
-                Directory.Delete(cacheDirPath);
+                return;
             }
+
+            _repository.PushContentStatus.Remove(filePath);
+
+            // キャッシュフォルダを削除
+            var cacheDirPath = this.ComputeCacheDirectoryPath(status.Hash);
+            Directory.Delete(cacheDirPath);
         }
 
-        public async ValueTask<IMemoryOwner<byte>?> ReadBlockAsync(OmniHash rootHash, OmniHash targetHash, CancellationToken cancellationToken = default)
+        public async ValueTask<IMemoryOwner<byte>?> ReadBlockAsync(OmniHash contentHash, OmniHash blockHash, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.LockAsync())
+            var status = _repository.PushContentStatus.Get(contentHash);
+            if (status == null)
             {
-                var filePath = Path.Combine(Path.Combine(_options.ConfigPath, "cache", HashToString(rootHash)), HashToString(targetHash));
-                if (!File.Exists(filePath)) return null;
+                return null;
+            }
 
-                using (var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bytesPool))
+            var lastMerkleTreeSections = status.MerkleTreeSections[^1];
+            var middleMerkleTreeSections = status.MerkleTreeSections.ToArray()[..^1];
+
+            if (lastMerkleTreeSections.TryGetIndex(blockHash, out var index))
+            {
+                if (!File.Exists(status.FilePath))
                 {
-                    var memoryOwner = _bytesPool.Memory.Rent((int)fileStream.Length);
-                    await fileStream.ReadAsync(memoryOwner.Memory);
-
-                    return memoryOwner;
+                    return null;
                 }
+
+                var position = lastMerkleTreeSections.BlockLength * index;
+                var blockSize = (int)(lastMerkleTreeSections.Length - (ulong)position);
+
+                using var fileStream = new UnbufferedFileStream(status.FilePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bytesPool);
+                fileStream.Seek(position, SeekOrigin.Begin);
+                var memoryOwner = _bytesPool.Memory.Rent(blockSize).Shrink(blockSize);
+                await fileStream.ReadAsync(memoryOwner.Memory, cancellationToken);
+
+                return memoryOwner;
             }
+            else if (middleMerkleTreeSections.Any(n => n.Contains(blockHash)))
+            {
+                string filePath = this.ComputeCacheFilePath(contentHash, blockHash);
+                if (!File.Exists(filePath))
+                {
+                    return null;
+                }
+
+                using var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bytesPool);
+                var memoryOwner = _bytesPool.Memory.Rent((int)fileStream.Length);
+                await fileStream.ReadAsync(memoryOwner.Memory, cancellationToken);
+
+                return memoryOwner;
+            }
+
+            return null;
         }
 
-        private static string HashToString(OmniHash hash)
+        private string ComputeCacheDirectoryPath(OmniHash contentHash)
         {
-            return hash.ToString(ConvertStringType.Base16);
+            return Path.Combine(_options.ConfigDirectoryPath, "cache", StringConverter.HashToString(contentHash));
+        }
+
+        private string ComputeCacheFilePath(OmniHash contentHash, OmniHash blockHash)
+        {
+            return Path.Combine(this.ComputeCacheDirectoryPath(contentHash), StringConverter.HashToString(blockHash));
         }
     }
 }

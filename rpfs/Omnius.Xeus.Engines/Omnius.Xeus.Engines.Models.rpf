@@ -8,18 +8,18 @@ namespace "Omnius.Xeus.Engines.Models";
 // Models
 
 message NodeProfile {
-    Exchangers : vector<string(capacity: 256)>(capacity: 32),
     Addresses: vector<OmniAddress>(capacity: 32),
+    EngineNames : vector<string(capacity: 256)>(capacity: 32),
 }
 
 message ResourceTag {
-    Type: string(capacity: 256),
     Hash: OmniHash,
+    EngineName: string(capacity: 256),
 }
 
 message DeclaredMessage {
     CreationTime: timestamp,
-    Value: bytes(capacity: 33554432, recyclable: true),
+    Value: bytes(capacity: 32 * 1024 * 1024, recyclable: true),
     Certificate: OmniCertificate?,
 }
 
@@ -76,36 +76,43 @@ message TcpConnectorOptions {
 }
 
 message TcpConnectorReport {
+    ConnectedCount: uint32,
+    AcceptedCount: uint32,
 }
 
 // CkadMediator
 
 message CkadMediatorOptions {
-    ConfigPath: string(capacity: 1024),
+    ConfigDirectoryPath: string(capacity: 1024),
     MaxConnectionCount: uint32,
 }
 
 message CkadMediatorReport {
+    ConnectingConnectionCount: uint32,
+    AcceptingConnectionCount: uint32,
 }
 
 // ContentExchanger
 
 message ContentExchangerOptions {
-    ConfigPath: string(capacity: 1024),
+    ConfigDirectoryPath: string(capacity: 1024),
     MaxConnectionCount: uint32,
 }
 
 message ContentExchangerReport {
+    ConnectingConnectionCount: uint32,
+    AcceptingConnectionCount: uint32,
 }
 
 // PushContentStorage
 
 message PushContentStorageOptions {
-    ConfigPath: string(capacity: 1024),
+    ConfigDirectoryPath: string(capacity: 1024),
 }
 
 message PushContentReport {
     FilePath: string,
+    RootHash: OmniHash,
 }
 
 message PushContentStorageReport {
@@ -115,11 +122,11 @@ message PushContentStorageReport {
 // WantContentStorage
 
 message WantContentStorageOptions {
-    ConfigPath: string(capacity: 1024),
+    ConfigDirectoryPath: string(capacity: 1024),
 }
 
 message WantContentReport {
-    FilePath: string,
+    RootHash: OmniHash,
 }
 
 message WantContentStorageReport {
@@ -129,17 +136,19 @@ message WantContentStorageReport {
 // DeclaredMessageExchanger
 
 message DeclaredMessageExchangerOptions {
-    ConfigPath: string(capacity: 1024),
+    ConfigDirectoryPath: string(capacity: 1024),
     MaxConnectionCount: uint32,
 }
 
 message DeclaredMessageExchangerReport {
+    ConnectingConnectionCount: uint32,
+    AcceptingConnectionCount: uint32,
 }
 
 // PushDeclaredMessageStorage
 
 message PushDeclaredMessageStorageOptions {
-    ConfigPath: string(capacity: 1024),
+    ConfigDirectoryPath: string(capacity: 1024),
 }
 
 message PushDeclaredMessageReport {
@@ -153,7 +162,7 @@ message PushDeclaredMessageStorageReport {
 // WantDeclaredMessageStorage
 
 message WantDeclaredMessageStorageOptions {
-    ConfigPath: string(capacity: 1024),
+    ConfigDirectoryPath: string(capacity: 1024),
 }
 
 message WantDeclaredMessageReport {

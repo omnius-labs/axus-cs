@@ -27,6 +27,6 @@ namespace Omnius.Xeus.Ui.Desktop.Interactors.Models
 
         public FileSearchResultModel Model { get; }
 
-        public ReadOnlyReactivePropertySlim<string> Name { get; }
+        public ReadOnlyReactivePropertySlim<string?> Name { get; }
     }
 }

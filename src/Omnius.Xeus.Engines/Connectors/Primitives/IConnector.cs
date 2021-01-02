@@ -14,13 +14,16 @@ namespace Omnius.Xeus.Engines.Connectors.Primitives
         }
 
         public IConnection Connection { get; }
+
         public OmniAddress Address { get; }
     }
 
     public interface IConnector
     {
         ValueTask<IConnection?> ConnectAsync(OmniAddress address, string serviceId, CancellationToken cancellationToken = default);
+
         ValueTask<ConnectorAcceptResult> AcceptAsync(string serviceId, CancellationToken cancellationToken = default);
+
         ValueTask<OmniAddress[]> GetListenEndpointsAsync(CancellationToken cancellationToken = default);
     }
 }

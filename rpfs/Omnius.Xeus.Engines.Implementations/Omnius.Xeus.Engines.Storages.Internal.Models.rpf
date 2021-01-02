@@ -11,6 +11,7 @@ option csharp_access_level "internal";
 
 message MerkleTreeSection {
     Depth: int32,
+    BlockLength: uint32,
     Length: uint64,
-    Hashes: vector<OmniHash>(capacity: 1073741824),
+    Hashes: vector<OmniHash>(capacity: 1024 * 1024 * 1024),
 }

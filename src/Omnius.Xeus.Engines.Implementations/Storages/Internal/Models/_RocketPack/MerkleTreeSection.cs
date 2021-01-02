@@ -3,16 +3,16 @@ using Omnius.Core.Cryptography;
 
 namespace Omnius.Xeus.Engines.Storages.Internal.Models
 {
-    partial class MerkleTreeSection
+    internal partial class MerkleTreeSection
     {
-        private Dictionary<OmniHash, long> _indexMap = null;
-        private readonly object _lockObject = new object();
+        private Dictionary<OmniHash, long>? _indexMap = null;
+        private readonly object _indexMapLockObject = new();
 
         private Dictionary<OmniHash, long> GetIndexMap()
         {
             if (_indexMap == null)
             {
-                lock (_lockObject)
+                lock (_indexMapLockObject)
                 {
                     if (_indexMap == null)
                     {

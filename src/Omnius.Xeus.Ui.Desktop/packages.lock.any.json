@@ -58,6 +58,22 @@
           "System.Reactive": "4.1.6"
         }
       },
+      "NLog": {
+        "type": "Direct",
+        "requested": "[4.7.5, )",
+        "resolved": "4.7.5",
+        "contentHash": "1Udzim+UwoAGk0vW6T2rEBXJq1COvqTuE+4NFj2zHytuX1WOu+1Yes1qABG1IJOA5V3OMilIufUU1Ha9T0rrzQ=="
+      },
+      "NLog.Config": {
+        "type": "Direct",
+        "requested": "[4.7.5, )",
+        "resolved": "4.7.5",
+        "contentHash": "rUW2e2X0q5PDDlxVa/ooH8jdA9ubL89dNW+Z8HPdR6qvWAPgLIpQvIeRSJC/yicuI/fSX+xZy9EzNZZAlTVgwA==",
+        "dependencies": {
+          "NLog": "4.7.5",
+          "NLog.Schema": "4.7.5"
+        }
+      },
       "ReactiveProperty": {
         "type": "Direct",
         "requested": "[7.4.1, )",
@@ -74,6 +90,12 @@
         "requested": "[1.1.118, )",
         "resolved": "1.1.118",
         "contentHash": "Onx6ovGSqXSK07n/0eM3ZusiNdB6cIlJdabQhWGgJp3Vooy9AaLS/tigeybOJAobqbtggTamoWndz72JscZBvw=="
+      },
+      "YamlDotNet": {
+        "type": "Direct",
+        "requested": "[8.1.2, )",
+        "resolved": "8.1.2",
+        "contentHash": "GlPKbb4l+91dyYVKV7UnJlr2CWooNNM1ayZWC90QAmlFPgbwSkfhgId7dGjTAHqkB84BZqjMSy5PlAYf1iejVA=="
       },
       "Avalonia.Direct2D1": {
         "type": "Transitive",
@@ -478,10 +500,10 @@
           "System.Xml.XDocument": "4.3.0"
         }
       },
-      "NLog": {
+      "NLog.Schema": {
         "type": "Transitive",
         "resolved": "4.7.5",
-        "contentHash": "1Udzim+UwoAGk0vW6T2rEBXJq1COvqTuE+4NFj2zHytuX1WOu+1Yes1qABG1IJOA5V3OMilIufUU1Ha9T0rrzQ=="
+        "contentHash": "UgzboQ9sJyonVd8XXqQ3Zzea4IPz5k7nNv6qdU73HpJ43fHIkveWPmIMtZWKS8YJrMxlGso2Sk/oE6r/ZyiOXg=="
       },
       "ReactiveProperty.Core": {
         "type": "Transitive",

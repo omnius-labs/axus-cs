@@ -2,13 +2,14 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Pipelines;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
+using Omnius.Core.Helpers;
 using Omnius.Core.Io;
-using Omnius.Core.Serialization;
 using Omnius.Xeus.Engines.Models;
 using Omnius.Xeus.Engines.Storages.Internal.Models;
 using Omnius.Xeus.Engines.Storages.Internal.Repositories;
@@ -22,11 +23,14 @@ namespace Omnius.Xeus.Engines.Storages
         private readonly WantContentStorageOptions _options;
         private readonly IBytesPool _bytesPool;
 
-        private readonly WantContentStorageRepository _database;
+        private readonly WantContentStorageRepository _repository;
 
-        private readonly AsyncLock _asyncLock = new AsyncLock();
+        private readonly Dictionary<OmniHash, OwnedContentStatus> _ownedContentStatusMap = new();
+        private readonly object _ownedContentStatusMapLockObject = new();
 
-        const int MaxBlockLength = 1 * 1024 * 1024;
+        private Task _computeLoopTask = null!;
+
+        private readonly CancellationTokenSource _cancellationTokenSource = new();
 
         internal sealed class WantContentStorageFactory : IWantContentStorageFactory
         {
@@ -46,22 +50,130 @@ namespace Omnius.Xeus.Engines.Storages
             _options = options;
             _bytesPool = bytesPool;
 
-            _database = new WantContentStorageRepository(Path.Combine(_options.ConfigPath, "database"));
+            _repository = new WantContentStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "want-content-storage.db"));
         }
 
         internal async ValueTask InitAsync()
         {
-            await _database.MigrateAsync();
+            await _repository.MigrateAsync();
+
+            _computeLoopTask = this.ComputeLoopAsync(_cancellationTokenSource.Token);
         }
 
         protected override async ValueTask OnDisposeAsync()
         {
-            _database.Dispose();
+            _cancellationTokenSource.Cancel();
+            await _computeLoopTask;
+            _cancellationTokenSource.Dispose();
+
+            _repository.Dispose();
         }
 
-        public ValueTask<WantContentStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
+        private async Task ComputeLoopAsync(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                for (; ; )
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+
+                    await this.UpdateOwnedContentStatusMapAsync(_cancellationTokenSource.Token);
+                }
+            }
+            catch (OperationCanceledException e)
+            {
+                _logger.Debug(e);
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e);
+
+                throw;
+            }
+        }
+
+        private async ValueTask UpdateOwnedContentStatusMapAsync(CancellationToken cancellationToken = default)
+        {
+            var ownedContentStatuses = new List<OwnedContentStatus>();
+            lock (_ownedContentStatusMapLockObject)
+            {
+                ownedContentStatuses.AddRange(_ownedContentStatusMap.Values);
+            }
+
+            foreach (var ownedContentStatus in ownedContentStatuses)
+            {
+                var lastMerkleTreeSection = ownedContentStatus.MerkleTreeSections[^1];
+                if (lastMerkleTreeSection.Depth == 0)
+                {
+                    continue;
+                }
+
+                var completed = await this.ValidateDownloadCompletedAsync(ownedContentStatus.ContentHash, lastMerkleTreeSection.Hashes, cancellationToken);
+                if (!completed)
+                {
+                    continue;
+                }
+
+                var newMerkleTreeSection = await this.DecodeMerkleTreeSectionAsync(ownedContentStatus.ContentHash, lastMerkleTreeSection.Hashes, cancellationToken);
+                if (newMerkleTreeSection is null)
+                {
+                    continue;
+                }
+
+                lock (_ownedContentStatusMapLockObject)
+                {
+                    ownedContentStatus.MerkleTreeSections.Add(newMerkleTreeSection);
+                }
+            }
+        }
+
+        private async ValueTask<bool> ValidateDownloadCompletedAsync(OmniHash contentHash, IEnumerable<OmniHash> blockHashes, CancellationToken cancellationToken = default)
+        {
+            foreach (var blockHash in blockHashes)
+            {
+                var filePath = this.ComputeCacheFilePath(contentHash, blockHash);
+                if (!File.Exists(filePath))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private async ValueTask<MerkleTreeSection?> DecodeMerkleTreeSectionAsync(OmniHash contentHash, IEnumerable<OmniHash> blockHashes, CancellationToken cancellationToken = default)
+        {
+            var hub = new BytesHub();
+
+            foreach (var blockHash in blockHashes)
+            {
+                var filePath = this.ComputeCacheFilePath(contentHash, blockHash);
+                if (!File.Exists(filePath))
+                {
+                    return null;
+                }
+
+                using var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bytesPool);
+                int length = (int)fileStream.Length;
+                await fileStream.ReadAsync(hub.Writer.GetMemory(length), cancellationToken);
+                hub.Writer.Advance(length);
+            }
+
+            return MerkleTreeSection.Import(hub.Reader.GetSequence(), _bytesPool);
+        }
+
+        public async ValueTask<WantContentStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
+        {
+            var wantContentReports = new List<WantContentReport>();
+
+            foreach (var status in _repository.WantContentStatus.GetAll())
+            {
+                wantContentReports.Add(new WantContentReport(status.Hash));
+            }
+
+            return new WantContentStorageReport(wantContentReports.ToArray());
         }
 
         public async ValueTask CheckConsistencyAsync(Action<ConsistencyReport> callback, CancellationToken cancellationToken = default)
@@ -70,111 +182,239 @@ namespace Omnius.Xeus.Engines.Storages
 
         public async ValueTask<IEnumerable<OmniHash>> GetContentHashesAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
-        }
+            var results = new List<OmniHash>();
 
-        public async ValueTask<IEnumerable<OmniHash>> GetBlockHashesAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
-        {
-            using (await _asyncLock.LockAsync())
+            foreach (var status in _repository.WantContentStatus.GetAll())
             {
-                var status = _database.WantStatus.Get(rootHash);
-                if (status == null) return Enumerable.Empty<OmniHash>();
-
-                throw new NotImplementedException();
+                results.Add(status.Hash);
             }
+
+            return results;
         }
 
-        public async ValueTask<bool> ContainsContentAsync(OmniHash rootHash)
+        public async ValueTask<IEnumerable<OmniHash>> GetBlockHashesAsync(OmniHash contentHash, bool? exists = null, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.LockAsync())
+            if (exists.HasValue && !exists.Value)
             {
-                var status = _database.WantStatus.Get(rootHash);
-                if (status == null) return false;
-
-                return true;
+                return Enumerable.Empty<OmniHash>();
             }
-        }
 
-        public async ValueTask<bool> ContainsBlockAsync(OmniHash rootHash, OmniHash targetHash)
-        {
-            using (await _asyncLock.LockAsync())
+            var status = _repository.WantContentStatus.Get(contentHash);
+            if (status == null)
             {
-                var status = _database.WantStatus.Get(rootHash);
-                if (status == null) return false;
-
-                var filePath = Path.Combine(Path.Combine(_options.ConfigPath, "cache", HashToString(rootHash), HashToString(targetHash)));
-                if (!File.Exists(filePath)) return false;
-
-                return true;
+                return Enumerable.Empty<OmniHash>();
             }
-        }
 
-        public async ValueTask RegisterWantContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
-        {
-            using (await _asyncLock.LockAsync())
+            lock (_ownedContentStatusMapLockObject)
             {
-                _database.WantStatus.Add(new WantContentStatus(rootHash));
-            }
-        }
-
-        public async ValueTask UnregisterWantContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
-        {
-            using (await _asyncLock.LockAsync())
-            {
-                _database.WantStatus.Remove(rootHash);
-            }
-        }
-
-        public ValueTask ExportContentAsync(OmniHash rootHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ValueTask ExportContentAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async ValueTask<IMemoryOwner<byte>?> ReadBlockAsync(OmniHash rootHash, OmniHash targetHash, CancellationToken cancellationToken = default)
-        {
-            using (await _asyncLock.LockAsync())
-            {
-                var status = _database.WantStatus.Get(rootHash);
-                if (status == null) return null;
-
-                var filePath = Path.Combine(Path.Combine(_options.ConfigPath, "cache", HashToString(rootHash), HashToString(targetHash)));
-                if (!File.Exists(filePath)) return null;
-
-                using var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bytesPool);
-                var memoryOwner = _bytesPool.Memory.Rent((int)fileStream.Length);
-                await fileStream.ReadAsync(memoryOwner.Memory);
-                return memoryOwner;
-            }
-        }
-
-        public async ValueTask WriteBlockAsync(OmniHash rootHash, OmniHash targetHash, ReadOnlyMemory<byte> memory, CancellationToken cancellationToken = default)
-        {
-            using (await _asyncLock.LockAsync())
-            {
-                var status = _database.WantStatus.Get(rootHash);
-                if (status == null) return;
-
-                var filePath = Path.Combine(Path.Combine(_options.ConfigPath, "cache", HashToString(rootHash), HashToString(targetHash)));
-                var directoryPath = Path.GetDirectoryName(filePath);
-
-                if (!Directory.Exists(directoryPath))
+                if (!_ownedContentStatusMap.TryGetValue(contentHash, out var ownedContentStatus))
                 {
-                    Directory.CreateDirectory(directoryPath);
+                    return Enumerable.Empty<OmniHash>();
                 }
 
-                using var fileStream = new UnbufferedFileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool);
-                await fileStream.WriteAsync(memory);
+                var blockHashes = ownedContentStatus.MerkleTreeSections.SelectMany(n => n.Hashes).ToArray();
+
+                if (exists is null)
+                {
+                    return blockHashes;
+                }
+                else
+                {
+                    var filteredHashes = new List<OmniHash>();
+
+                    foreach (var blockHash in blockHashes)
+                    {
+                        var filePath = this.ComputeCacheFilePath(contentHash, blockHash);
+                        if (File.Exists(filePath) != exists.Value)
+                        {
+                            continue;
+                        }
+
+                        filteredHashes.Add(blockHash);
+                    }
+
+                    return filteredHashes;
+                }
             }
         }
 
-        private static string HashToString(OmniHash hash)
+        public async ValueTask<bool> ContainsContentAsync(OmniHash contentHash)
         {
-            return hash.ToString(ConvertStringType.Base16);
+            var status = _repository.WantContentStatus.Get(contentHash);
+            if (status == null)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public async ValueTask<bool> ContainsBlockAsync(OmniHash contentHash, OmniHash blockHash)
+        {
+            var status = _repository.WantContentStatus.Get(contentHash);
+            if (status == null)
+            {
+                return false;
+            }
+
+            var filePath = this.ComputeCacheFilePath(contentHash, blockHash);
+            if (!File.Exists(filePath))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public async ValueTask RegisterWantContentAsync(OmniHash contentHash, CancellationToken cancellationToken = default)
+        {
+            _repository.WantContentStatus.Add(new WantContentStatus(contentHash));
+        }
+
+        public async ValueTask UnregisterWantContentAsync(OmniHash contentHash, CancellationToken cancellationToken = default)
+        {
+            var status = _repository.WantContentStatus.Get(contentHash);
+            if (status == null)
+            {
+                return;
+            }
+
+            _repository.WantContentStatus.Remove(contentHash);
+
+            // キャッシュフォルダを削除
+            var cacheDirPath = this.ComputeCacheDirectoryPath(contentHash);
+            Directory.Delete(cacheDirPath);
+
+            // 所有しているコンテンツの情報を削除
+            lock (_ownedContentStatusMapLockObject)
+            {
+                _ownedContentStatusMap.Remove(contentHash);
+            }
+        }
+
+        public async ValueTask ExportContentAsync(OmniHash contentHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default)
+        {
+            var status = _repository.WantContentStatus.Get(contentHash);
+            if (status == null)
+            {
+                return;
+            }
+
+            OwnedContentStatus? ownedContentStatus;
+
+            lock (_ownedContentStatusMapLockObject)
+            {
+                if (!_ownedContentStatusMap.TryGetValue(contentHash, out ownedContentStatus))
+                {
+                    return;
+                }
+            }
+
+            var lastMerkleTreeSection = ownedContentStatus.MerkleTreeSections[^1];
+            if (lastMerkleTreeSection.Depth != 0)
+            {
+                return;
+            }
+
+            foreach (var blockHash in lastMerkleTreeSection.Hashes)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var filePath = this.ComputeCacheFilePath(contentHash, blockHash);
+                if (!File.Exists(filePath))
+                {
+                    return;
+                }
+
+                using var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bytesPool);
+                int length = (int)fileStream.Length;
+                await fileStream.ReadAsync(bufferWriter.GetMemory(length), cancellationToken);
+                bufferWriter.Advance(length);
+            }
+        }
+
+        public async ValueTask ExportContentAsync(OmniHash contentHash, string filePath, CancellationToken cancellationToken = default)
+        {
+            using var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bytesPool);
+            var writer = PipeWriter.Create(fileStream);
+            await this.ExportContentAsync(contentHash, writer, cancellationToken);
+            await writer.CompleteAsync();
+        }
+
+        public async ValueTask<IMemoryOwner<byte>?> ReadBlockAsync(OmniHash contentHash, OmniHash blockHash, CancellationToken cancellationToken = default)
+        {
+            var status = _repository.WantContentStatus.Get(contentHash);
+            if (status == null)
+            {
+                return null;
+            }
+
+            var filePath = this.ComputeCacheFilePath(contentHash, blockHash);
+            if (!File.Exists(filePath))
+            {
+                return null;
+            }
+
+            using var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bytesPool);
+            var memoryOwner = _bytesPool.Memory.Rent((int)fileStream.Length);
+            await fileStream.ReadAsync(memoryOwner.Memory, cancellationToken);
+
+            return memoryOwner;
+        }
+
+        public async ValueTask WriteBlockAsync(OmniHash contentHash, OmniHash blockHash, ReadOnlyMemory<byte> memory, CancellationToken cancellationToken = default)
+        {
+            var status = _repository.WantContentStatus.Get(contentHash);
+            if (status == null)
+            {
+                return;
+            }
+
+            lock (_ownedContentStatusMapLockObject)
+            {
+                if (!_ownedContentStatusMap.TryGetValue(contentHash, out var ownedContentStatus))
+                {
+                    return;
+                }
+
+                if (!ownedContentStatus.MerkleTreeSections.Any(n => n.Contains(blockHash)))
+                {
+                    return;
+                }
+            }
+
+            var filePath = this.ComputeCacheFilePath(contentHash, blockHash);
+            var directoryPath = Path.GetDirectoryName(filePath);
+
+            if (directoryPath is not null)
+            {
+                DirectoryHelper.CreateDirectory(directoryPath);
+            }
+
+            using var fileStream = new UnbufferedFileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool);
+            await fileStream.WriteAsync(memory, cancellationToken);
+        }
+
+        private string ComputeCacheDirectoryPath(OmniHash contentHash)
+        {
+            return Path.Combine(_options.ConfigDirectoryPath, "cache", StringConverter.HashToString(contentHash));
+        }
+
+        private string ComputeCacheFilePath(OmniHash contentHash, OmniHash blockHash)
+        {
+            return Path.Combine(this.ComputeCacheDirectoryPath(contentHash), StringConverter.HashToString(blockHash));
+        }
+
+        private sealed class OwnedContentStatus
+        {
+            public OwnedContentStatus(OmniHash contentHash)
+            {
+                this.ContentHash = contentHash;
+            }
+
+            public OmniHash ContentHash { get; }
+
+            public List<MerkleTreeSection> MerkleTreeSections { get; } = new List<MerkleTreeSection>();
         }
     }
 }

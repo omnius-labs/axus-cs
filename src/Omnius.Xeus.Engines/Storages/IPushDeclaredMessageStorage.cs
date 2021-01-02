@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
@@ -16,7 +17,9 @@ namespace Omnius.Xeus.Engines.Storages
     public interface IPushDeclaredMessageStorage : IReadOnlyDeclaredMessageStorage, IAsyncDisposable
     {
         ValueTask<PushDeclaredMessageStorageReport> GetReportAsync(CancellationToken cancellationToken = default);
+
         ValueTask RegisterPushMessageAsync(DeclaredMessage message, CancellationToken cancellationToken = default);
+
         ValueTask UnregisterPushMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default);
     }
 }

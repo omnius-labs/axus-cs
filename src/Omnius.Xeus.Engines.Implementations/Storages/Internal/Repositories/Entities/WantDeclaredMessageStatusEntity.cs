@@ -6,7 +6,9 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories.Entities
     internal sealed class WantDeclaredMessageStatusEntity
     {
         public int Id { get; set; }
+
         public OmniSignatureEntity? Signature { get; set; }
+
         public DateTime CreationTime { get; set; }
 
         public static WantDeclaredMessageStatusEntity Import(WantDeclaredMessageStatus value)

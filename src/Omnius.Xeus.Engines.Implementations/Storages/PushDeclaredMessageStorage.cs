@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipelines;
@@ -7,7 +8,9 @@ using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Cryptography.Functions;
+using Omnius.Core.Extensions;
 using Omnius.Core.Io;
+using Omnius.Core.RocketPack;
 using Omnius.Core.Serialization;
 using Omnius.Xeus.Engines.Models;
 using Omnius.Xeus.Engines.Storages.Internal.Models;
@@ -24,12 +27,9 @@ namespace Omnius.Xeus.Engines.Storages
 
         private readonly PushDeclaredMessageStorageRepository _repository;
 
-        private readonly AsyncLock _asyncLock = new AsyncLock();
-
         internal sealed class PushDeclaredMessageStorageFactory : IPushDeclaredMessageStorageFactory
         {
-            public async ValueTask<IPushDeclaredMessageStorage> CreateAsync(PushDeclaredMessageStorageOptions options,
-                IBytesPool bytesPool)
+            public async ValueTask<IPushDeclaredMessageStorage> CreateAsync(PushDeclaredMessageStorageOptions options, IBytesPool bytesPool)
             {
                 var result = new PushDeclaredMessageStorage(options, bytesPool);
                 await result.InitAsync();
@@ -45,7 +45,7 @@ namespace Omnius.Xeus.Engines.Storages
             _options = options;
             _bytesPool = bytesPool;
 
-            _repository = new PushDeclaredMessageStorageRepository(Path.Combine(_options.ConfigPath, "database"));
+            _repository = new PushDeclaredMessageStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "push-declared-message-storage.db"));
         }
 
         internal async ValueTask InitAsync()
@@ -60,93 +60,98 @@ namespace Omnius.Xeus.Engines.Storages
 
         public async ValueTask<PushDeclaredMessageStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.LockAsync())
+            var pushDeclaredMessageReports = new List<PushDeclaredMessageReport>();
+
+            foreach (var status in _repository.PushDeclaredMessageStatus.GetAll())
             {
-                throw new NotImplementedException();
+                pushDeclaredMessageReports.Add(new PushDeclaredMessageReport(status.Signature));
             }
+
+            return new PushDeclaredMessageStorageReport(pushDeclaredMessageReports.ToArray());
         }
 
         public async ValueTask CheckConsistencyAsync(Action<ConsistencyReport> callback, CancellationToken cancellationToken = default)
         {
         }
 
-        public ValueTask<IEnumerable<OmniSignature>> GetSignaturesAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<IEnumerable<OmniSignature>> GetSignaturesAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var results = new List<OmniSignature>();
+
+            foreach (var status in _repository.PushDeclaredMessageStatus.GetAll())
+            {
+                results.Add(status.Signature);
+            }
+
+            return results;
         }
 
         public async ValueTask<bool> ContainsMessageAsync(OmniSignature signature, DateTime since = default)
         {
-            using (await _asyncLock.LockAsync())
+            var status = _repository.PushDeclaredMessageStatus.Get(signature);
+            if (status == null)
             {
-                var status = _repository.PushStatus.Get(signature);
-                if (status == null) return false;
-                return true;
+                return false;
             }
+
+            return true;
         }
 
         public async ValueTask RegisterPushMessageAsync(DeclaredMessage message, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.LockAsync())
+            if (message.Certificate is null)
             {
-                var signature = message.Certificate?.GetOmniSignature();
-                if (signature == null) return;
-
-                _repository.PushStatus.Add(new PushDeclaredMessageStatus(signature, message.CreationTime.ToDateTime()));
-
-                var filePath = Path.Combine(_options.ConfigPath, "cache", SignatureToString(signature));
-
-                using var fileStream = new UnbufferedFileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool);
-                var pipeWriter = PipeWriter.Create(fileStream);
-                message.Export(pipeWriter, _bytesPool);
-                await pipeWriter.CompleteAsync();
+                throw new ArgumentNullException(nameof(message.Certificate));
             }
+
+            _repository.PushDeclaredMessageStatus.Add(new PushDeclaredMessageStatus(message.Certificate.GetOmniSignature(), message.CreationTime.ToDateTime()));
+
+            var filePath = this.ComputeCacheFilePath(message.Certificate.GetOmniSignature());
+
+            using var fileStream = new UnbufferedFileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool);
+            var pipeWriter = PipeWriter.Create(fileStream);
+            message.Export(pipeWriter, _bytesPool);
+            await pipeWriter.CompleteAsync();
         }
 
         public async ValueTask UnregisterPushMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.LockAsync())
-            {
-                _repository.PushStatus.Remove(signature);
-            }
+            _repository.PushDeclaredMessageStatus.Remove(signature);
         }
 
         public async ValueTask<DateTime?> ReadMessageCreationTimeAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.LockAsync())
+            var status = _repository.PushDeclaredMessageStatus.Get(signature);
+            if (status == null)
             {
-                var status = _repository.PushStatus.Get(signature);
-                if (status == null) return null;
-
-                return status.CreationTime;
+                return null;
             }
+
+            return status.CreationTime;
         }
 
         public async ValueTask<DeclaredMessage?> ReadMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.LockAsync())
+            var status = _repository.PushDeclaredMessageStatus.Get(signature);
+            if (status == null)
             {
-                var status = _repository.PushStatus.Get(signature);
-                if (status == null) return null;
-
-                var filePath = Path.Combine(_options.ConfigPath, "cache", SignatureToString(signature));
-
-                using var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool);
-                var pipeReader = PipeReader.Create(fileStream);
-                var readResult = await pipeReader.ReadAsync(cancellationToken);
-                var message = DeclaredMessage.Import(readResult.Buffer, _bytesPool);
-                await pipeReader.CompleteAsync();
-
-                return message;
+                return null;
             }
+
+            string filePath = this.ComputeCacheFilePath(signature);
+
+            using var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool);
+            var pipeReader = PipeReader.Create(fileStream);
+            var readResult = await pipeReader.ReadAsync(cancellationToken);
+            var message = DeclaredMessage.Import(readResult.Buffer, _bytesPool);
+            await pipeReader.CompleteAsync();
+
+            return message;
         }
 
-        private static string SignatureToString(OmniSignature signature)
+        private string ComputeCacheFilePath(OmniSignature signature)
         {
-            var hub = new BytesHub(BytesPool.Shared);
-            signature.Export(hub.Writer, BytesPool.Shared);
-            var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(hub.Reader.GetSequence()));
-            return hash.ToString(ConvertStringType.Base16);
+            return Path.Combine(_options.ConfigDirectoryPath, "cache", StringConverter.SignatureToString(signature));
         }
     }
 }

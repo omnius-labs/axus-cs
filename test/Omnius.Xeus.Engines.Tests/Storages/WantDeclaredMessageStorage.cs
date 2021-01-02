@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
+using Omnius.Core.RocketPack;
 using Omnius.Core.UnitTestToolkit;
 using Omnius.Xeus.Engines.Models;
 using Xunit;
@@ -87,7 +88,7 @@ namespace Omnius.Xeus.Engines.Storages
             foreach (var digitalSignature in registeredDigitalSignatures)
             {
                 var message = DeclaredMessage.Create(
-                    FixtureFactory.GetRandomDateTimeUtc(new DateTime(2000, 1, 1), new DateTime(2100, 1, 1)),
+                    Timestamp.FromDateTime(FixtureFactory.GetRandomDateTimeUtc(new DateTime(2000, 1, 1), new DateTime(2100, 1, 1))),
                     new MemoryOwner<byte>(FixtureFactory.GetRandomBytes(1024)),
                     digitalSignature);
                 await storage.WriteMessageAsync(message);
@@ -100,7 +101,7 @@ namespace Omnius.Xeus.Engines.Storages
             foreach (var digitalSignature in notRegisteredDigitalSignatures)
             {
                 var message = DeclaredMessage.Create(
-                    FixtureFactory.GetRandomDateTimeUtc(new DateTime(2000, 1, 1), new DateTime(2100, 1, 1)),
+                    Timestamp.FromDateTime(FixtureFactory.GetRandomDateTimeUtc(new DateTime(2000, 1, 1), new DateTime(2100, 1, 1))),
                     new MemoryOwner<byte>(FixtureFactory.GetRandomBytes(1024)),
                     digitalSignature);
                 await storage.WriteMessageAsync(message);

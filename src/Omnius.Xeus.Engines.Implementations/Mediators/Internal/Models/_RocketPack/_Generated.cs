@@ -72,7 +72,7 @@ namespace Omnius.Xeus.Engines.Mediators.Internal.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Mediators.Internal.Models.ResourceLocation)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Mediators.Internal.Models.ResourceLocation) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Mediators.Internal.Models.ResourceLocation)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Mediators.Internal.Models.ResourceLocation? target)
@@ -199,7 +199,7 @@ namespace Omnius.Xeus.Engines.Mediators.Internal.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Mediators.Internal.Models.CkadMediatorHelloMessage)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Mediators.Internal.Models.CkadMediatorHelloMessage) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Mediators.Internal.Models.CkadMediatorHelloMessage)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Mediators.Internal.Models.CkadMediatorHelloMessage? target)
@@ -314,7 +314,7 @@ namespace Omnius.Xeus.Engines.Mediators.Internal.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Mediators.Internal.Models.CkadMediatorProfileMessage)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Mediators.Internal.Models.CkadMediatorProfileMessage) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Mediators.Internal.Models.CkadMediatorProfileMessage)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Mediators.Internal.Models.CkadMediatorProfileMessage? target)
@@ -475,7 +475,7 @@ namespace Omnius.Xeus.Engines.Mediators.Internal.Models
         }
         public override bool Equals(object? other)
         {
-            if (!(other is global::Omnius.Xeus.Engines.Mediators.Internal.Models.CkadMediatorDataMessage)) return false;
+            if (other is not global::Omnius.Xeus.Engines.Mediators.Internal.Models.CkadMediatorDataMessage) return false;
             return this.Equals((global::Omnius.Xeus.Engines.Mediators.Internal.Models.CkadMediatorDataMessage)other);
         }
         public bool Equals(global::Omnius.Xeus.Engines.Mediators.Internal.Models.CkadMediatorDataMessage? target)

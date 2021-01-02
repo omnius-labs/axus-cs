@@ -28,13 +28,13 @@ namespace Omnius.Xeus.Engines.Connectors
         private readonly IUpnpClientFactory _upnpClientFactory;
         private readonly IBytesPool _bytesPool;
 
-        private InternalTcpConnector _tcpConnector;
-        private BaseConnectionDispatcher _baseConnectionDispatcher;
+        private InternalTcpConnector _internalTcpConnector = null!;
+        private BaseConnectionDispatcher _baseConnectionDispatcher = null!;
 
-        private readonly ConcurrentDictionary<string, Channel<ConnectorAcceptResult>> _acceptedConnectionChannels = new ConcurrentDictionary<string, Channel<ConnectorAcceptResult>>();
+        private readonly ConcurrentDictionary<string, Channel<ConnectorAcceptResult>> _acceptedConnectionChannels = new();
+        private Task _acceptLoopTask = null!;
 
-        private Task _acceptLoopTask;
-        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private readonly CancellationTokenSource _cancellationTokenSource = new();
 
         internal sealed class ConnectionControllerFactory : ITcpConnectorFactory
         {
@@ -60,7 +60,7 @@ namespace Omnius.Xeus.Engines.Connectors
 
         public async ValueTask InitAsync()
         {
-            _tcpConnector = await InternalTcpConnector.Factory.CreateAsync(_options.ConnectingOptions, _options.AcceptingOptions, _socks5ProxyClientFactory, _httpProxyClientFactory, _upnpClientFactory, _bytesPool);
+            _internalTcpConnector = await InternalTcpConnector.Factory.CreateAsync(_options.ConnectingOptions, _options.AcceptingOptions, _socks5ProxyClientFactory, _httpProxyClientFactory, _upnpClientFactory, _bytesPool);
             _baseConnectionDispatcher = new BaseConnectionDispatcher(new BaseConnectionDispatcherOptions()
             {
                 MaxSendBytesPerSeconds = (int)_options.BandwidthOptions.MaxSendBytesPerSeconds,
@@ -78,21 +78,25 @@ namespace Omnius.Xeus.Engines.Connectors
 
             _cancellationTokenSource.Dispose();
 
-            await _tcpConnector.DisposeAsync();
+            await _internalTcpConnector.DisposeAsync();
             await _baseConnectionDispatcher.DisposeAsync();
         }
 
-        private Channel<ConnectorAcceptResult>? GetAcceptedConnectionChannel(string serviceId, bool createIfNotFound)
+        public async ValueTask<IConnection?> ConnectAsync(OmniAddress address, string serviceId, CancellationToken cancellationToken = default)
         {
-            if (createIfNotFound)
+            var cap = await _internalTcpConnector.ConnectAsync(address, cancellationToken);
+            if (cap is null)
             {
-                return _acceptedConnectionChannels.GetOrAdd(serviceId, (_) => Channel.CreateBounded<ConnectorAcceptResult>(new BoundedChannelOptions(3) { FullMode = BoundedChannelFullMode.Wait }));
+                return null;
             }
-            else
+
+            var connection = await this.InternalConnectAsync(cap, serviceId, cancellationToken);
+            if (connection is null)
             {
-                _acceptedConnectionChannels.TryGetValue(serviceId, out var result);
-                return result;
+                return null;
             }
+
+            return connection;
         }
 
         private async ValueTask<IConnection?> InternalConnectAsync(ICap cap, string serviceId, CancellationToken cancellationToken)
@@ -122,6 +126,71 @@ namespace Omnius.Xeus.Engines.Connectors
             return omniSecureConnection;
         }
 
+        public async ValueTask<ConnectorAcceptResult> AcceptAsync(string serviceId, CancellationToken cancellationToken = default)
+        {
+            var channel = this.GetAcceptedConnectionChannel(serviceId, true);
+            return await channel!.Reader.ReadAsync(cancellationToken);
+        }
+
+        private Channel<ConnectorAcceptResult>? GetAcceptedConnectionChannel(string serviceId, bool createIfNotFound)
+        {
+            if (createIfNotFound)
+            {
+                return _acceptedConnectionChannels.GetOrAdd(serviceId, (_) => Channel.CreateBounded<ConnectorAcceptResult>(new BoundedChannelOptions(3) { FullMode = BoundedChannelFullMode.Wait }));
+            }
+            else
+            {
+                _acceptedConnectionChannels.TryGetValue(serviceId, out var result);
+                return result;
+            }
+        }
+
+        private async Task AcceptLoopAsync(CancellationToken cancellationToken)
+        {
+            try
+            {
+                var random = new Random();
+
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    await Task.Delay(1000, cancellationToken);
+
+                    var (cap, address) = await _internalTcpConnector.AcceptAsync(cancellationToken);
+                    if (cap == null || address == null)
+                    {
+                        continue;
+                    }
+
+                    var (connection, serviceId) = await this.InternalAcceptAsync(cap, cancellationToken);
+                    if (connection == null || serviceId == null)
+                    {
+                        continue;
+                    }
+
+                    var channel = this.GetAcceptedConnectionChannel(serviceId, false);
+                    if (channel == null)
+                    {
+                        connection.Dispose();
+                        cap.Dispose();
+                        continue;
+                    }
+
+                    var result = new ConnectorAcceptResult(connection, address);
+                    await channel.Writer.WriteAsync(result, cancellationToken);
+                }
+            }
+            catch (OperationCanceledException e)
+            {
+                _logger.Debug(e);
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e);
+
+                throw;
+            }
+        }
+
         private async ValueTask<(IConnection?, string?)> InternalAcceptAsync(ICap cap, CancellationToken cancellationToken)
         {
             using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -149,67 +218,10 @@ namespace Omnius.Xeus.Engines.Connectors
             return (omniSecureConnection, helloMessage?.Service);
         }
 
-        private async Task AcceptLoopAsync(CancellationToken cancellationToken)
-        {
-            try
-            {
-                var random = new Random();
-
-                while (!cancellationToken.IsCancellationRequested)
-                {
-                    await Task.Delay(1000, cancellationToken);
-
-                    var (cap, address) = await _tcpConnector.AcceptAsync(cancellationToken);
-                    if (cap == null || address == null) continue;
-
-                    var (connection, serviceId) = await this.InternalAcceptAsync(cap, cancellationToken);
-                    if (connection == null || serviceId == null) continue;
-
-                    var channel = this.GetAcceptedConnectionChannel(serviceId, false);
-                    if (channel == null)
-                    {
-                        connection.Dispose();
-                        cap.Dispose();
-                        continue;
-                    }
-
-                    var result = new ConnectorAcceptResult(connection, address);
-                    await channel.Writer.WriteAsync(result);
-                }
-            }
-            catch (OperationCanceledException e)
-            {
-                _logger.Debug(e);
-            }
-            catch (Exception e)
-            {
-                _logger.Error(e);
-            }
-        }
-
-        public async ValueTask<IConnection?> ConnectAsync(OmniAddress address, string serviceId, CancellationToken cancellationToken = default)
-        {
-            var cap = await _tcpConnector.ConnectAsync(address, cancellationToken);
-
-            if (cap != null)
-            {
-                var connection = await this.InternalConnectAsync(cap, serviceId, cancellationToken);
-                return connection;
-            }
-
-            return null;
-        }
-
-        public async ValueTask<ConnectorAcceptResult> AcceptAsync(string serviceId, CancellationToken cancellationToken = default)
-        {
-            var channel = this.GetAcceptedConnectionChannel(serviceId, true);
-            return await channel!.Reader.ReadAsync(cancellationToken);
-        }
-
         public async ValueTask<OmniAddress[]> GetListenEndpointsAsync(CancellationToken cancellationToken = default)
         {
             var results = new List<OmniAddress>();
-            results.AddRange(await _tcpConnector.GetListenEndpointsAsync(cancellationToken));
+            results.AddRange(await _internalTcpConnector.GetListenEndpointsAsync(cancellationToken));
 
             return results.ToArray();
         }

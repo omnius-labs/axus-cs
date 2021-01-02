@@ -6,6 +6,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories.Entities
     internal sealed class WantContentStatusEntity
     {
         public int Id { get; set; }
+
         public OmniHashEntity? Hash { get; set; }
 
         public static WantContentStatusEntity Import(WantContentStatus value)

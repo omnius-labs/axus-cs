@@ -7,7 +7,7 @@ ForEach ($folder in (Get-ChildItem -Path "test" -Directory)) {
     $name = $folder.Name;
     $output = "../../tmp/test/win/${name}.opencover.xml";
 
-    dotnet test "$path" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput="$output" /p:Exclude="[xunit*]*%2c[*.Tests]*";
+    dotnet test "$path" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput="$output" /p:Exclude="[xunit*]*%2c[*.Tests]*%2c[Omnius.Core*]*";
 
 	if (!$?) {
         exit 1

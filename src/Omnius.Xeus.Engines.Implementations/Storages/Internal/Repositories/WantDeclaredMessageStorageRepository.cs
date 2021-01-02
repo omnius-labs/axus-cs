@@ -1,30 +1,30 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using LiteDB;
+using Omnius.Core;
 using Omnius.Core.Cryptography;
-using Omnius.Xeus.Engines.Internal.Helpers;
+using Omnius.Core.Helpers;
 using Omnius.Xeus.Engines.Storages.Internal.Models;
 using Omnius.Xeus.Engines.Storages.Internal.Repositories.Entities;
 
 namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
 {
-    internal sealed partial class WantDeclaredMessageStorageRepository : IDisposable
+    internal sealed partial class WantDeclaredMessageStorageRepository : DisposableBase
     {
         private readonly LiteDatabase _database;
 
-        public WantDeclaredMessageStorageRepository(string path)
+        public WantDeclaredMessageStorageRepository(string workingDirectory)
         {
-            DirectoryHelper.CreateDirectory(Path.GetDirectoryName(path));
+            DirectoryHelper.CreateDirectory(Path.GetDirectoryName(workingDirectory)!);
 
-            _database = new LiteDatabase(path);
-            this.WantStatus = new WantStatusRepository(_database);
+            _database = new LiteDatabase(workingDirectory);
+            this.WantDeclaredMessageStatus = new WantDeclaredMessageStatusRepository(_database);
         }
 
-        public void Dispose()
+        protected override void OnDispose(bool disposing)
         {
             _database.Dispose();
         }
@@ -39,13 +39,13 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
             }
         }
 
-        public WantStatusRepository WantStatus { get; set; }
+        public WantDeclaredMessageStatusRepository WantDeclaredMessageStatus { get; set; }
 
-        public sealed class WantStatusRepository
+        public sealed class WantDeclaredMessageStatusRepository
         {
             private readonly LiteDatabase _database;
 
-            public WantStatusRepository(LiteDatabase database)
+            public WantDeclaredMessageStatusRepository(LiteDatabase database)
             {
                 _database = database;
             }
