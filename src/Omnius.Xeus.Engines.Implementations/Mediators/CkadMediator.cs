@@ -50,7 +50,7 @@ namespace Omnius.Xeus.Engines.Mediators
 
         private const int MaxBucketLength = 20;
 
-        public event GetResourceTags? GetPushResourceTags;
+        public event GetResourceTags? GetPublishResourceTags;
 
         public event GetResourceTags? GetWantResourceTags;
 
@@ -104,7 +104,7 @@ namespace Omnius.Xeus.Engines.Mediators
         private IEnumerable<ResourceTag> OnGetPushFetchResourceTags()
         {
             var results = new ConcurrentBag<ResourceTag>();
-            this.GetPushResourceTags?.Invoke((tag) => results.Add(tag));
+            this.GetPublishResourceTags?.Invoke((tag) => results.Add(tag));
             return results;
         }
 

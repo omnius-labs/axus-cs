@@ -7,7 +7,7 @@ using Omnius.Xeus.Engines.Models;
 
 namespace Omnius.Xeus.Engines.Storages.Primitives
 {
-    public interface IReadOnlyDeclaredMessageStorage
+    public interface IReadOnlyDeclaredMessages
     {
         ValueTask CheckConsistencyAsync(Action<ConsistencyReport> callback, CancellationToken cancellationToken = default);
 

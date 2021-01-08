@@ -104,33 +104,35 @@ message ContentExchangerReport {
     AcceptingConnectionCount: uint32,
 }
 
-// PushContentStorage
+// ContentPublisher
 
-message PushContentStorageOptions {
+message ContentPublisherOptions {
     ConfigDirectoryPath: string(capacity: 1024),
 }
 
-message PushContentReport {
-    FilePath: string,
+message ContentPublisherItemReport {
+    FilePath: string?,
     RootHash: OmniHash,
+    Registrant: string,
 }
 
-message PushContentStorageReport {
-    PushContents: vector<PushContentReport>,
+message ContentPublisherReport {
+    ContentPublisherItems: vector<ContentPublisherItemReport>,
 }
 
-// WantContentStorage
+// ContentSubscriber
 
-message WantContentStorageOptions {
+message ContentSubscriberOptions {
     ConfigDirectoryPath: string(capacity: 1024),
 }
 
-message WantContentReport {
+message ContentSubscriberItemReport {
     RootHash: OmniHash,
+    Registrant: string,
 }
 
-message WantContentStorageReport {
-    WantContents: vector<WantContentReport>,
+message ContentSubscriberReport {
+    ContentSubscriberItems: vector<ContentSubscriberItemReport>,
 }
 
 // DeclaredMessageExchanger
@@ -145,30 +147,32 @@ message DeclaredMessageExchangerReport {
     AcceptingConnectionCount: uint32,
 }
 
-// PushDeclaredMessageStorage
+// DeclaredMessagePublisher
 
-message PushDeclaredMessageStorageOptions {
+message DeclaredMessagePublisherOptions {
     ConfigDirectoryPath: string(capacity: 1024),
 }
 
-message PushDeclaredMessageReport {
+message DeclaredMessagePublisherItemReport {
     Signature: OmniSignature,
+    Registrant: string,
 }
 
-message PushDeclaredMessageStorageReport {
-    PushDeclaredMessages: vector<PushDeclaredMessageReport>,
+message DeclaredMessagePublisherReport {
+    DeclaredMessagePublisherItems: vector<DeclaredMessagePublisherItemReport>,
 }
 
-// WantDeclaredMessageStorage
+// DeclaredMessageSubscriber
 
-message WantDeclaredMessageStorageOptions {
+message DeclaredMessageSubscriberOptions {
     ConfigDirectoryPath: string(capacity: 1024),
 }
 
-message WantDeclaredMessageReport {
+message DeclaredMessageSubscriberItemReport {
     Signature: OmniSignature,
+    Registrant: string,
 }
 
-message WantDeclaredMessageStorageReport {
-    WantDeclaredMessages: vector<WantDeclaredMessageReport>,
+message DeclaredMessageSubscriberReport {
+    DeclaredMessageSubscriberItems: vector<DeclaredMessageSubscriberItemReport>,
 }

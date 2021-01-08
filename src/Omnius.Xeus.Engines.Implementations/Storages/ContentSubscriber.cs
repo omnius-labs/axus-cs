@@ -16,14 +16,14 @@ using Omnius.Xeus.Engines.Storages.Internal.Repositories;
 
 namespace Omnius.Xeus.Engines.Storages
 {
-    public sealed partial class WantContentStorage : AsyncDisposableBase, IWantContentStorage
+    public sealed partial class ContentSubscriber : AsyncDisposableBase, IContentSubscriber
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly WantContentStorageOptions _options;
+        private readonly ContentSubscriberOptions _options;
         private readonly IBytesPool _bytesPool;
 
-        private readonly WantContentStorageRepository _repository;
+        private readonly ContentSubscriberRepository _repository;
 
         private readonly Dictionary<OmniHash, OwnedContentStatus> _ownedContentStatusMap = new();
         private readonly object _ownedContentStatusMapLockObject = new();
@@ -32,25 +32,25 @@ namespace Omnius.Xeus.Engines.Storages
 
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-        internal sealed class WantContentStorageFactory : IWantContentStorageFactory
+        internal sealed class ContentSubscriberFactory : IContentSubscriberFactory
         {
-            public async ValueTask<IWantContentStorage> CreateAsync(WantContentStorageOptions options, IBytesPool bytesPool)
+            public async ValueTask<IContentSubscriber> CreateAsync(ContentSubscriberOptions options, IBytesPool bytesPool)
             {
-                var result = new WantContentStorage(options, bytesPool);
+                var result = new ContentSubscriber(options, bytesPool);
                 await result.InitAsync();
 
                 return result;
             }
         }
 
-        public static IWantContentStorageFactory Factory { get; } = new WantContentStorageFactory();
+        public static IContentSubscriberFactory Factory { get; } = new ContentSubscriberFactory();
 
-        private WantContentStorage(WantContentStorageOptions options, IBytesPool bytesPool)
+        private ContentSubscriber(ContentSubscriberOptions options, IBytesPool bytesPool)
         {
             _options = options;
             _bytesPool = bytesPool;
 
-            _repository = new WantContentStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "want-content-storage.db"));
+            _repository = new ContentSubscriberRepository(Path.Combine(_options.ConfigDirectoryPath, "want-content-storage.db"));
         }
 
         internal async ValueTask InitAsync()
@@ -164,16 +164,16 @@ namespace Omnius.Xeus.Engines.Storages
             return MerkleTreeSection.Import(hub.Reader.GetSequence(), _bytesPool);
         }
 
-        public async ValueTask<WantContentStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<ContentSubscriberReport> GetReportAsync(CancellationToken cancellationToken = default)
         {
-            var wantContentReports = new List<WantContentReport>();
+            var wantContentReports = new List<ContentSubscriberItemReport>();
 
-            foreach (var status in _repository.WantContentStatus.GetAll())
+            foreach (var item in _repository.Items.FindAll())
             {
-                wantContentReports.Add(new WantContentReport(status.Hash));
+                wantContentReports.Add(new ContentSubscriberItemReport(item.ContentHash, item.Registrant));
             }
 
-            return new WantContentStorageReport(wantContentReports.ToArray());
+            return new ContentSubscriberReport(wantContentReports.ToArray());
         }
 
         public async ValueTask CheckConsistencyAsync(Action<ConsistencyReport> callback, CancellationToken cancellationToken = default)
@@ -184,9 +184,9 @@ namespace Omnius.Xeus.Engines.Storages
         {
             var results = new List<OmniHash>();
 
-            foreach (var status in _repository.WantContentStatus.GetAll())
+            foreach (var status in _repository.Items.FindAll())
             {
-                results.Add(status.Hash);
+                results.Add(status.ContentHash);
             }
 
             return results;
@@ -199,8 +199,8 @@ namespace Omnius.Xeus.Engines.Storages
                 return Enumerable.Empty<OmniHash>();
             }
 
-            var status = _repository.WantContentStatus.Get(contentHash);
-            if (status == null)
+            var items = _repository.Items.Find(contentHash);
+            if (!items.Any())
             {
                 return Enumerable.Empty<OmniHash>();
             }
@@ -240,8 +240,8 @@ namespace Omnius.Xeus.Engines.Storages
 
         public async ValueTask<bool> ContainsContentAsync(OmniHash contentHash)
         {
-            var status = _repository.WantContentStatus.Get(contentHash);
-            if (status == null)
+            var items = _repository.Items.Find(contentHash);
+            if (!items.Any())
             {
                 return false;
             }
@@ -251,8 +251,8 @@ namespace Omnius.Xeus.Engines.Storages
 
         public async ValueTask<bool> ContainsBlockAsync(OmniHash contentHash, OmniHash blockHash)
         {
-            var status = _repository.WantContentStatus.Get(contentHash);
-            if (status == null)
+            var items = _repository.Items.Find(contentHash);
+            if (!items.Any())
             {
                 return false;
             }
@@ -266,20 +266,20 @@ namespace Omnius.Xeus.Engines.Storages
             return true;
         }
 
-        public async ValueTask RegisterWantContentAsync(OmniHash contentHash, CancellationToken cancellationToken = default)
+        public async ValueTask SubscribeContentAsync(OmniHash contentHash, string registrant, CancellationToken cancellationToken = default)
         {
-            _repository.WantContentStatus.Add(new WantContentStatus(contentHash));
+            _repository.Items.Insert(new ContentSubscriberItem(contentHash, registrant));
         }
 
-        public async ValueTask UnregisterWantContentAsync(OmniHash contentHash, CancellationToken cancellationToken = default)
+        public async ValueTask UnsubscribeContentAsync(OmniHash contentHash, string registrant, CancellationToken cancellationToken = default)
         {
-            var status = _repository.WantContentStatus.Get(contentHash);
-            if (status == null)
+            var item = _repository.Items.FindOne(contentHash, registrant);
+            if (item == null)
             {
                 return;
             }
 
-            _repository.WantContentStatus.Remove(contentHash);
+            _repository.Items.Delete(contentHash);
 
             // キャッシュフォルダを削除
             var cacheDirPath = this.ComputeCacheDirectoryPath(contentHash);
@@ -294,8 +294,8 @@ namespace Omnius.Xeus.Engines.Storages
 
         public async ValueTask ExportContentAsync(OmniHash contentHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default)
         {
-            var status = _repository.WantContentStatus.Get(contentHash);
-            if (status == null)
+            var items = _repository.Items.Find(contentHash);
+            if (!items.Any())
             {
                 return;
             }
@@ -343,7 +343,7 @@ namespace Omnius.Xeus.Engines.Storages
 
         public async ValueTask<IMemoryOwner<byte>?> ReadBlockAsync(OmniHash contentHash, OmniHash blockHash, CancellationToken cancellationToken = default)
         {
-            var status = _repository.WantContentStatus.Get(contentHash);
+            var status = _repository.Items.Get(contentHash);
             if (status == null)
             {
                 return null;
@@ -364,7 +364,7 @@ namespace Omnius.Xeus.Engines.Storages
 
         public async ValueTask WriteBlockAsync(OmniHash contentHash, OmniHash blockHash, ReadOnlyMemory<byte> memory, CancellationToken cancellationToken = default)
         {
-            var status = _repository.WantContentStatus.Get(contentHash);
+            var status = _repository.Items.Get(contentHash);
             if (status == null)
             {
                 return;

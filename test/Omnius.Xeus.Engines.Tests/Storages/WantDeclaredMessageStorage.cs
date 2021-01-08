@@ -18,7 +18,7 @@ namespace Omnius.Xeus.Engines.Storages
         {
             using var deleter = FixtureFactory.GenTempDirectory(out var tempPath);
             var options = new WantDeclaredMessageStorageOptions(tempPath);
-            await using var storage = await WantDeclaredMessageStorage.Factory.CreateAsync(options, BytesPool.Shared);
+            await using var storage = await DeclaredMessageSubscriber.Factory.CreateAsync(options, BytesPool.Shared);
 
             var registeredSignatures = new List<OmniSignature>();
 
@@ -26,7 +26,7 @@ namespace Omnius.Xeus.Engines.Storages
             foreach (var i in Enumerable.Range(0, 10))
             {
                 var signature = new OmniSignature(FixtureFactory.GetRandomString(32), new OmniHash(OmniHashAlgorithmType.Sha2_256, FixtureFactory.GetRandomBytes(32)));
-                await storage.RegisterWantMessageAsync(signature);
+                await storage.SubscribeMessageAsync(signature);
                 registeredSignatures.Add(signature);
             }
 
@@ -42,7 +42,7 @@ namespace Omnius.Xeus.Engines.Storages
             // 登録されたサインの登録を解除する
             foreach (var signature in registeredSignatures)
             {
-                await storage.UnregisterWantMessageAsync(signature);
+                await storage.UnsubscribeMessageAsync(signature);
             }
 
             // 登録されたサインが0であることを確認する
@@ -57,7 +57,7 @@ namespace Omnius.Xeus.Engines.Storages
         {
             using var deleter = FixtureFactory.GenTempDirectory(out var tempPath);
             var options = new WantDeclaredMessageStorageOptions(tempPath);
-            await using var storage = await WantDeclaredMessageStorage.Factory.CreateAsync(options, BytesPool.Shared);
+            await using var storage = await DeclaredMessageSubscriber.Factory.CreateAsync(options, BytesPool.Shared);
 
             var registeredDigitalSignatures = new List<OmniDigitalSignature>();
 
@@ -67,7 +67,7 @@ namespace Omnius.Xeus.Engines.Storages
                 var digitalSignature = OmniDigitalSignature.Create(
                     FixtureFactory.GetRandomString(32),
                     OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256);
-                await storage.RegisterWantMessageAsync(digitalSignature.GetOmniSignature());
+                await storage.SubscribeMessageAsync(digitalSignature.GetOmniSignature());
                 registeredDigitalSignatures.Add(digitalSignature);
             }
 

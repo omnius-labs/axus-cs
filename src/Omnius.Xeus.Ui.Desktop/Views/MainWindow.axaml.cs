@@ -20,7 +20,7 @@ namespace Omnius.Xeus.Ui.Desktop.Views
     public class MainWindow : Window
     {
         private readonly Task _initTask;
-        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private readonly CancellationTokenSource _cancellationTokenSource = new();
 
         public MainWindow()
         {
@@ -39,8 +39,10 @@ namespace Omnius.Xeus.Ui.Desktop.Views
 
         private async Task InitAsync()
         {
-            var xeusService = this.ConnectAsync();
-            this.FileSearchControl.ViewModel = new FileSearchControlViewModel();
+            var xeusService = await this.ConnectAsync();
+
+            this.ViewModel = new MainWindowViewModel();
+            this.FileSearchControl.ViewModel = new FileSearchControlViewModel(xeusService);
         }
 
         private async ValueTask<IXeusService> ConnectAsync()
@@ -92,6 +94,7 @@ namespace Omnius.Xeus.Ui.Desktop.Views
         {
             await _initTask;
             await this.FileSearchControl.ViewModel!.DisposeAsync();
+            await this.ViewModel!.DisposeAsync();
         }
     }
 }

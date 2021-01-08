@@ -4,7 +4,7 @@ using Omnius.Xeus.Engines.Models;
 
 namespace Omnius.Xeus.Engines.Storages.Primitives
 {
-    public interface IWritableDeclaredMessageStorage : IReadOnlyDeclaredMessageStorage
+    public interface IWritableDeclaredMessages : IReadOnlyDeclaredMessages
     {
         ValueTask WriteMessageAsync(DeclaredMessage message, CancellationToken cancellationToken = default);
     }

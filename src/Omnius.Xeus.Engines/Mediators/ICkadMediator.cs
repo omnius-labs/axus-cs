@@ -15,11 +15,9 @@ namespace Omnius.Xeus.Engines.Mediators
 
     public delegate void GetResourceTags(Action<ResourceTag> append);
 
-    public delegate void GetAvailableEngineNames(Action<string> append);
-
     public interface ICkadMediator : IAsyncDisposable
     {
-        event GetResourceTags? GetPushResourceTags;
+        event GetResourceTags? GetPublishResourceTags;
 
         event GetResourceTags? GetWantResourceTags;
 

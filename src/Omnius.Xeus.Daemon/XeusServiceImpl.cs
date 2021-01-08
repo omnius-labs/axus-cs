@@ -31,13 +31,13 @@ namespace Omnius.Xeus.Daemon
 
         public IDeclaredMessageExchangerFactory? DeclaredMessageExchangerFactory { get; init; }
 
-        public IPushContentStorageFactory? PushContentStorageFactory { get; init; }
+        public IContentPublisherFactory? PushContentStorageFactory { get; init; }
 
-        public IWantContentStorageFactory? WantContentStorageFactory { get; init; }
+        public IContentSubscriberFactory? WantContentStorageFactory { get; init; }
 
-        public IPushDeclaredMessageStorageFactory? PushDeclaredMessageStorageFactory { get; init; }
+        public IDeclaredMessagePublisherFactory? PushDeclaredMessageStorageFactory { get; init; }
 
-        public IWantDeclaredMessageStorageFactory? WantDeclaredMessageStorageFactory { get; init; }
+        public IDeclaredMessageSubscriberFactory? WantDeclaredMessageStorageFactory { get; init; }
 
         public IBytesPool? BytesPool { get; init; }
 
@@ -51,10 +51,10 @@ namespace Omnius.Xeus.Daemon
         private ICkadMediator? _ckadMediator;
         private IContentExchanger? _contentExchanger;
         private IDeclaredMessageExchanger? _declaredMessageExchanger;
-        private IPushContentStorage? _pushContentStorage;
-        private IWantContentStorage? _wantContentStorage;
-        private IPushDeclaredMessageStorage? _pushDeclaredMessageStorage;
-        private IWantDeclaredMessageStorage? _wantDeclaredMessageStorage;
+        private IContentPublisher? _pushContentStorage;
+        private IContentSubscriber? _wantContentStorage;
+        private IDeclaredMessagePublisher? _pushDeclaredMessageStorage;
+        private IDeclaredMessageSubscriber? _wantDeclaredMessageStorage;
 
         public static async ValueTask<XeusServiceImpl> CreateAsync(XeusServiceOptions options)
         {

@@ -28,8 +28,8 @@ namespace Omnius.Xeus.Engines.Exchangers
         private readonly ContentExchangerOptions _options;
         private readonly List<IConnector> _connectors = new();
         private readonly ICkadMediator _nodeFinder;
-        private readonly IPushContentStorage _pushStorage;
-        private readonly IWantContentStorage _wantStorage;
+        private readonly IContentPublisher _pushStorage;
+        private readonly IContentSubscriber _wantStorage;
         private readonly IBytesPool _bytesPool;
 
         private readonly HashSet<ConnectionStatus> _connectionStatusSet = new();
@@ -52,7 +52,7 @@ namespace Omnius.Xeus.Engines.Exchangers
         internal sealed class ContentExchangerFactory : IContentExchangerFactory
         {
             public async ValueTask<IContentExchanger> CreateAsync(ContentExchangerOptions options, IEnumerable<IConnector> connectors,
-                ICkadMediator nodeFinder, IPushContentStorage pushStorage, IWantContentStorage wantStorage, IBytesPool bytesPool)
+                ICkadMediator nodeFinder, IContentPublisher pushStorage, IContentSubscriber wantStorage, IBytesPool bytesPool)
             {
                 var result = new ContentExchanger(options, connectors, nodeFinder, pushStorage, wantStorage, bytesPool);
                 await result.InitAsync();
@@ -64,7 +64,7 @@ namespace Omnius.Xeus.Engines.Exchangers
         public static IContentExchangerFactory Factory { get; } = new ContentExchangerFactory();
 
         internal ContentExchanger(ContentExchangerOptions options, IEnumerable<IConnector> connectors,
-            ICkadMediator nodeFinder, IPushContentStorage pushStorage, IWantContentStorage wantStorage, IBytesPool bytesPool)
+            ICkadMediator nodeFinder, IContentPublisher pushStorage, IContentSubscriber wantStorage, IBytesPool bytesPool)
         {
             _options = options;
             _connectors.AddRange(connectors);
@@ -82,7 +82,7 @@ namespace Omnius.Xeus.Engines.Exchangers
             _receiveLoopTask = this.ReceiveLoopAsync(_cancellationTokenSource.Token);
             _computeLoopTask = this.ComputeLoopAsync(_cancellationTokenSource.Token);
 
-            _nodeFinder.GetPushResourceTags += (append) =>
+            _nodeFinder.GetPublishResourceTags += (append) =>
             {
                 ResourceTag[] resourceTags;
 
@@ -470,7 +470,7 @@ namespace Omnius.Xeus.Engines.Exchangers
                                 receivedWantBlockHashSet.UnionWith(connectionStatus.ReceivedWantBlockHashes ?? Array.Empty<OmniHash>());
                             }
 
-                            foreach (var contentStorage in new IReadOnlyContentStorage[] { _wantStorage, _pushStorage })
+                            foreach (var contentStorage in new IReadOnlyContents[] { _wantStorage, _pushStorage })
                             {
                                 foreach (var hash in (await contentStorage.GetBlockHashesAsync(connectionStatus.ContentHash, true, cancellationToken)).Randomize())
                                 {

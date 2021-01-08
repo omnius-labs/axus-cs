@@ -16,35 +16,35 @@ using Omnius.Xeus.Engines.Storages.Internal.Repositories;
 
 namespace Omnius.Xeus.Engines.Storages
 {
-    public sealed partial class WantDeclaredMessageStorage : AsyncDisposableBase, IWantDeclaredMessageStorage
+    public sealed partial class DeclaredMessageSubscriber : AsyncDisposableBase, IDeclaredMessageSubscriber
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly WantDeclaredMessageStorageOptions _options;
+        private readonly DeclaredMessageSubscriberOptions _options;
         private readonly IBytesPool _bytesPool;
 
-        private readonly WantDeclaredMessageStorageRepository _repository;
+        private readonly DeclaredMessageSubscriberRepository _repository;
         private readonly string _cachePath;
 
-        internal sealed class WantDeclaredMessageStorageFactory : IWantDeclaredMessageStorageFactory
+        internal sealed class DeclaredMessageSubscriberFactory : IDeclaredMessageSubscriberFactory
         {
-            public async ValueTask<IWantDeclaredMessageStorage> CreateAsync(WantDeclaredMessageStorageOptions options, IBytesPool bytesPool)
+            public async ValueTask<IDeclaredMessageSubscriber> CreateAsync(DeclaredMessageSubscriberOptions options, IBytesPool bytesPool)
             {
-                var result = new WantDeclaredMessageStorage(options, bytesPool);
+                var result = new DeclaredMessageSubscriber(options, bytesPool);
                 await result.InitAsync();
 
                 return result;
             }
         }
 
-        public static IWantDeclaredMessageStorageFactory Factory { get; } = new WantDeclaredMessageStorageFactory();
+        public static IDeclaredMessageSubscriberFactory Factory { get; } = new DeclaredMessageSubscriberFactory();
 
-        private WantDeclaredMessageStorage(WantDeclaredMessageStorageOptions options, IBytesPool bytesPool)
+        private DeclaredMessageSubscriber(DeclaredMessageSubscriberOptions options, IBytesPool bytesPool)
         {
             _options = options;
             _bytesPool = bytesPool;
 
-            _repository = new WantDeclaredMessageStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "want-declared-message-storage.db"));
+            _repository = new DeclaredMessageSubscriberRepository(Path.Combine(_options.ConfigDirectoryPath, "want-declared-message-storage.db"));
             _cachePath = Path.Combine(_options.ConfigDirectoryPath, "cache");
         }
 
@@ -63,7 +63,7 @@ namespace Omnius.Xeus.Engines.Storages
             _repository.Dispose();
         }
 
-        public async ValueTask<WantDeclaredMessageStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<DeclaredMessageSubscriberReport> GetReportAsync(CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
@@ -76,7 +76,7 @@ namespace Omnius.Xeus.Engines.Storages
         {
             var results = new List<OmniSignature>();
 
-            foreach (var status in _repository.WantDeclaredMessageStatus.GetAll())
+            foreach (var status in _repository.Items.GetAll())
             {
                 results.Add(status.Signature);
             }
@@ -86,7 +86,7 @@ namespace Omnius.Xeus.Engines.Storages
 
         public async ValueTask<bool> ContainsMessageAsync(OmniSignature signature, DateTime since = default)
         {
-            var status = _repository.WantDeclaredMessageStatus.Get(signature);
+            var status = _repository.Items.Get(signature);
             if (status == null)
             {
                 return false;
@@ -95,19 +95,19 @@ namespace Omnius.Xeus.Engines.Storages
             return true;
         }
 
-        public async ValueTask RegisterWantMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+        public async ValueTask SubscribeMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
-            _repository.WantDeclaredMessageStatus.Add(new WantDeclaredMessageStatus(signature, DateTime.MinValue));
+            _repository.Items.Add(new DeclaredMessageSubscriberItem(signature, DateTime.MinValue));
         }
 
-        public async ValueTask UnregisterWantMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+        public async ValueTask UnsubscribeMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
-            _repository.WantDeclaredMessageStatus.Remove(signature);
+            _repository.Items.Remove(signature);
         }
 
         public async ValueTask<DateTime?> ReadMessageCreationTimeAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
-            var status = _repository.WantDeclaredMessageStatus.Get(signature);
+            var status = _repository.Items.Get(signature);
             if (status == null)
             {
                 return null;
@@ -118,7 +118,7 @@ namespace Omnius.Xeus.Engines.Storages
 
         public async ValueTask<DeclaredMessage?> ReadMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
-            var status = _repository.WantDeclaredMessageStatus.Get(signature);
+            var status = _repository.Items.Get(signature);
             if (status == null)
             {
                 return null;
@@ -143,7 +143,7 @@ namespace Omnius.Xeus.Engines.Storages
                 return;
             }
 
-            var status = _repository.WantDeclaredMessageStatus.Get(signature);
+            var status = _repository.Items.Get(signature);
             if (status == null)
             {
                 return;

@@ -29,8 +29,8 @@ namespace Omnius.Xeus.Engines.Exchangers
         private readonly DeclaredMessageExchangerOptions _options;
         private readonly List<IConnector> _connectors = new();
         private readonly ICkadMediator _nodeFinder;
-        private readonly IPushDeclaredMessageStorage _pushStorage;
-        private readonly IWantDeclaredMessageStorage _wantStorage;
+        private readonly IDeclaredMessagePublisher _pushStorage;
+        private readonly IDeclaredMessageSubscriber _wantStorage;
         private readonly IBytesPool _bytesPool;
 
         private readonly HashSet<ConnectionStatus> _connectionStatusSet = new();
@@ -48,7 +48,7 @@ namespace Omnius.Xeus.Engines.Exchangers
 
         internal sealed class DeclaredMessageExchangerFactory : IDeclaredMessageExchangerFactory
         {
-            public async ValueTask<IDeclaredMessageExchanger> CreateAsync(DeclaredMessageExchangerOptions options, IEnumerable<IConnector> connectors, ICkadMediator nodeFinder, IPushDeclaredMessageStorage pushStorage, IWantDeclaredMessageStorage wantStorage, IBytesPool bytesPool)
+            public async ValueTask<IDeclaredMessageExchanger> CreateAsync(DeclaredMessageExchangerOptions options, IEnumerable<IConnector> connectors, ICkadMediator nodeFinder, IDeclaredMessagePublisher pushStorage, IDeclaredMessageSubscriber wantStorage, IBytesPool bytesPool)
             {
                 var result = new DeclaredMessageExchanger(options, connectors, nodeFinder, pushStorage, wantStorage, bytesPool);
                 await result.InitAsync();
@@ -61,7 +61,7 @@ namespace Omnius.Xeus.Engines.Exchangers
 
         public static IDeclaredMessageExchangerFactory Factory { get; } = new DeclaredMessageExchangerFactory();
 
-        internal DeclaredMessageExchanger(DeclaredMessageExchangerOptions options, IEnumerable<IConnector> connectors, ICkadMediator nodeFinder, IPushDeclaredMessageStorage pushStorage, IWantDeclaredMessageStorage wantStorage, IBytesPool bytesPool)
+        internal DeclaredMessageExchanger(DeclaredMessageExchangerOptions options, IEnumerable<IConnector> connectors, ICkadMediator nodeFinder, IDeclaredMessagePublisher pushStorage, IDeclaredMessageSubscriber wantStorage, IBytesPool bytesPool)
         {
             _options = options;
             _connectors.AddRange(connectors);
@@ -77,7 +77,7 @@ namespace Omnius.Xeus.Engines.Exchangers
             _acceptLoopTask = this.AcceptLoopAsync(_cancellationTokenSource.Token);
             _computeLoopTask = this.ComputeLoopAsync(_cancellationTokenSource.Token);
 
-            _nodeFinder.GetPushResourceTags += (append) =>
+            _nodeFinder.GetPublishResourceTags += (append) =>
             {
                 ResourceTag[] resourceTags;
 

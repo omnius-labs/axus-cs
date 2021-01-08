@@ -11,7 +11,7 @@ namespace Omnius.Xeus.Engines.Exchangers
 {
     public interface IContentExchangerFactory
     {
-        ValueTask<IContentExchanger> CreateAsync(ContentExchangerOptions options, IEnumerable<IConnector> connectors, ICkadMediator nodeFinder, IPushContentStorage pushStorage, IWantContentStorage wantStorage, IBytesPool bytesPool);
+        ValueTask<IContentExchanger> CreateAsync(ContentExchangerOptions options, IEnumerable<IConnector> connectors, ICkadMediator nodeFinder, IContentPublisher pushStorage, IContentSubscriber wantStorage, IBytesPool bytesPool);
     }
 
     public interface IContentExchanger : IAsyncDisposable
