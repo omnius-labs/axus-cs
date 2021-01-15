@@ -1,28 +1,123 @@
 syntax v1.0;
 
-using "Omnius.Xeus.Api.Models";
+using "Omnius.Xeus.Engines.Models";
 
 namespace "Omnius.Xeus.Api";
 
 service XeusService {
-    GetMyNodeProfile: () -> (GetMyNodeProfileResult),
-    AddCloudNodeProfiles: (AddCloudNodeProfilesParam) -> (),
+    CkadMediator_GetMyNodeProfile: () -> (CkadMediator_GetMyNodeProfile_Output),
+    CkadMediator_AddCloudNodeProfiles: (CkadMediator_AddCloudNodeProfiles_Input) -> (),
 
-    GetPushContentsReport: () -> (GetPushContentsReportResult),
-    RegisterPushContent: (RegisterPushContentParam) -> (RegisterPushContentResult),
-    UnregisterPushContent: (UnregisterPushContentParam) -> (),
+    ContentPublisher_GetReport: () -> (ContentPublisher_GetReport_Output),
+    ContentPublisher_PublishContent: (ContentPublisher_PublishContent_File_Input) -> (ContentPublisher_PublishContent_File_Output),
+    ContentPublisher_PublishContent: (ContentPublisher_PublishContent_Memory_Input) -> (ContentPublisher_PublishContent_Memory_Output),
+    ContentPublisher_UnpublishContent: (ContentPublisher_UnpublishContent_File_Input) -> (),
+    ContentPublisher_UnpublishContent: (ContentPublisher_UnpublishContent_Memory_Input) -> (),
 
-    GetWantContentsReport: () -> (GetWantContentsReportResult),
-    RegisterWantContent: (RegisterWantContentParam) -> (),
-    UnregisterWantContent: (UnregisterWantContentParam) -> (),
-    ExportWantContent: (ExportWantContentParam) -> (),
+    ContentSubscriber_GetReport: () -> (ContentSubscriber_GetReport_Output),
+    ContentSubscriber_SubscribeContent: (ContentSubscriber_SubscribeContent_Input) -> (),
+    ContentSubscriber_UnsubscribeContent: (ContentSubscriber_UnsubscribeContent_Input) -> (),
+    ContentSubscriber_ExportContent: (ContentSubscriber_ExportContent_File_Input) -> (),
+    ContentSubscriber_ExportContent: (ContentSubscriber_ExportContent_Memory_Input) -> (ContentSubscriber_ExportContent_Memory_Output),
 
-    GetPushDeclaredMessagesReport: () -> (GetPushDeclaredMessagesReportResult),
-    RegisterPushDeclaredMessage: (RegisterPushDeclaredMessageParam) -> (),
-    UnregisterPushDeclaredMessage: (UnregisterPushDeclaredMessageParam) -> (),
+    DeclaredMessagePublisher_GetReport: () -> (DeclaredMessagePublisher_GetReport_Output),
+    DeclaredMessagePublisher_PublishMessage: (DeclaredMessagePublisher_PublishMessage_Input) -> (),
+    DeclaredMessagePublisher_UnpublishMessage: (DeclaredMessagePublisher_UnpublishMessage_Input) -> (),
 
-    GetWantDeclaredMessagesReport: () -> (GetWantDeclaredMessagesReportResult),
-    RegisterWantDeclaredMessage: (RegisterWantDeclaredMessageParam) -> (),
-    UnregisterWantDeclaredMessage: (UnregisterWantDeclaredMessageParam) -> (),
-    ExportWantDeclaredMessage: (ExportWantDeclaredMessageParam) -> (ExportWantDeclaredMessageResult),
+    DeclaredMessageSubscriber_GetReport: () -> (DeclaredMessageSubscriber_GetReport_Output),
+    DeclaredMessageSubscriber_SubscribeMessage: (DeclaredMessageSubscriber_SubscribeMessage_Input) -> (),
+    DeclaredMessageSubscriber_UnsubscribeMessage: (DeclaredMessageSubscriber_UnsubscribeMessage_Input) -> (),
+}
+
+message CkadMediator_GetMyNodeProfile_Output {
+    NodeProfile: NodeProfile,
+}
+
+message CkadMediator_AddCloudNodeProfiles_Input {
+    NodeProfiles: vector<NodeProfile>(capacity: 32),
+}
+
+message ContentPublisher_GetReport_Output {
+    Report: ContentPublisherReport,
+}
+
+message ContentPublisher_PublishContent_File_Input {
+    FilePath: string,
+    Registrant: string,
+}
+message ContentPublisher_PublishContent_File_Output {
+    Hash: OmniHash,
+}
+
+message ContentPublisher_PublishContent_Memory_Input {
+    Memory: bytes(capacity: 32 * 1024 * 1024),
+    Registrant: string,
+}
+message ContentPublisher_PublishContent_Memory_Output {
+    Hash: OmniHash,
+}
+
+message ContentPublisher_UnpublishContent_File_Input {
+    FilePath: string,
+    Registrant: string,
+}
+
+message ContentPublisher_UnpublishContent_Memory_Input {
+    ContentHash: OmniHash,
+    Registrant: string,
+}
+
+message ContentSubscriber_GetReport_Output {
+    Report: ContentSubscriberReport,
+}
+
+message ContentSubscriber_SubscribeContent_Input {
+    ContentHash: OmniHash,
+    Registrant: string,
+}
+
+message ContentSubscriber_UnsubscribeContent_Input {
+    ContentHash: OmniHash,
+    Registrant: string,
+}
+
+message ContentSubscriber_ExportContent_File_Input {
+    ContentHash: OmniHash,
+    FilePath: string,
+}
+
+message ContentSubscriber_ExportContent_Memory_Input {
+    ContentHash: OmniHash,
+}
+
+message ContentSubscriber_ExportContent_Memory_Output {
+    ContentHash: OmniHash,
+}
+
+message DeclaredMessagePublisher_GetReport_Output {
+    Report: DeclaredMessagePublisherReport,
+}
+
+message DeclaredMessagePublisher_PublishMessage_Input {
+    Message: DeclaredMessage,
+    Registrant: string,
+}
+
+message DeclaredMessagePublisher_UnpublishMessage_Input {
+    Signature: OmniSignature,
+    Registrant: string,
+}
+
+message DeclaredMessageSubscriber_GetReport_Output {
+    Report: ContentPublisherReport,
+}
+
+message DeclaredMessageSubscriber_SubscribeMessage_Input {
+    Signature: OmniSignature,
+    Registrant: string,
+}
+
+message DeclaredMessageSubscriber_UnsubscribeMessage_Input {
+    Signature: OmniSignature,
+    Registrant: string,
 }

@@ -87,44 +87,44 @@ namespace Omnius.Xeus.Daemon.Internal
             return new Models.DeclaredMessageExchangerOptions(Path.Combine(config.WorkingDirectory, "declared_message_exchanger"), config?.Exchangers?.DeclaredMessageExchanger?.MaxConnectionCount ?? 32);
         }
 
-        public static Models.PushContentStorageOptions GenPushContentStorageOptions(Configs.EnginesConfig config)
+        public static Models.ContentPublisherOptions GenContentPublisherOptions(Configs.EnginesConfig config)
         {
             if (config.WorkingDirectory is null)
             {
                 throw new NullReferenceException(nameof(config.WorkingDirectory));
             }
 
-            return new Models.PushContentStorageOptions(Path.Combine(config.WorkingDirectory, "push_content_storage"));
+            return new Models.ContentPublisherOptions(Path.Combine(config.WorkingDirectory, "content_publisher"));
         }
 
-        public static Models.WantContentStorageOptions GenWantContentStorageOptions(Configs.EnginesConfig config)
+        public static Models.ContentSubscriberOptions GenContentSubscriberOptions(Configs.EnginesConfig config)
         {
             if (config.WorkingDirectory is null)
             {
                 throw new NullReferenceException(nameof(config.WorkingDirectory));
             }
 
-            return new Models.WantContentStorageOptions(Path.Combine(config.WorkingDirectory, "want_content_storage"));
+            return new Models.ContentSubscriberOptions(Path.Combine(config.WorkingDirectory, "content_subscriber"));
         }
 
-        public static Models.PushDeclaredMessageStorageOptions GenPushDeclaredMessageStorageOptions(Configs.EnginesConfig config)
+        public static Models.DeclaredMessagePublisherOptions GenDeclaredMessagePublisherOptions(Configs.EnginesConfig config)
         {
             if (config.WorkingDirectory is null)
             {
                 throw new NullReferenceException(nameof(config.WorkingDirectory));
             }
 
-            return new Models.PushDeclaredMessageStorageOptions(Path.Combine(config.WorkingDirectory, "push_declared_message_storage"));
+            return new Models.DeclaredMessagePublisherOptions(Path.Combine(config.WorkingDirectory, "declared_message_publisher"));
         }
 
-        public static Models.WantDeclaredMessageStorageOptions GenWantDeclaredMessageStorageOptions(Configs.EnginesConfig config)
+        public static Models.DeclaredMessageSubscriberOptions GenDeclaredMessageSubscriberOptions(Configs.EnginesConfig config)
         {
             if (config.WorkingDirectory is null)
             {
                 throw new NullReferenceException(nameof(config.WorkingDirectory));
             }
 
-            return new Models.WantDeclaredMessageStorageOptions(Path.Combine(config.WorkingDirectory, "want_declared_message_storage"));
+            return new Models.DeclaredMessageSubscriberOptions(Path.Combine(config.WorkingDirectory, "declared_message_subscriber"));
         }
     }
 }

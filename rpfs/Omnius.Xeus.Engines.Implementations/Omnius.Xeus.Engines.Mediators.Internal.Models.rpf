@@ -16,13 +16,13 @@ message ResourceLocation {
 
 // CkadMediator
 
+message CkadMediatorHelloMessage {
+    Versions: vector<CkadMediatorVersion>(capacity: 32),
+}
+
 enum CkadMediatorVersion : int8 {
     Unknown = 0,
     Version1 = 1,
-}
-
-message CkadMediatorHelloMessage {
-    Versions: vector<CkadMediatorVersion>(capacity: 32),
 }
 
 message CkadMediatorProfileMessage {

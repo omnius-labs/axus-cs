@@ -8,7 +8,7 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
         Unknown = 0,
         Version1 = 1,
     }
-    internal enum ContentExchangerRequestExchangeResultType : byte
+    internal enum ContentExchangerHandshakeResultType : byte
     {
         Unknown = 0,
         Rejected = 1,
@@ -266,20 +266,20 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
             }
         }
     }
-    internal sealed partial class ContentExchangerRequestExchangeMessage : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeMessage>
+    internal sealed partial class ContentExchangerHandshakeRequestMessage : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeMessage> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeMessage>.Formatter;
-        public static global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeMessage Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeMessage>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage>.Formatter;
+        public static global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage>.Empty;
 
-        static ContentExchangerRequestExchangeMessage()
+        static ContentExchangerHandshakeRequestMessage()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeMessage>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeMessage>.Empty = new global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeMessage(global::Omnius.Core.Cryptography.OmniHash.Empty);
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage>.Empty = new global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage(global::Omnius.Core.Cryptography.OmniHash.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public ContentExchangerRequestExchangeMessage(global::Omnius.Core.Cryptography.OmniHash contentHash)
+        public ContentExchangerHandshakeRequestMessage(global::Omnius.Core.Cryptography.OmniHash contentHash)
         {
             this.ContentHash = contentHash;
 
@@ -293,7 +293,7 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
 
         public global::Omnius.Core.Cryptography.OmniHash ContentHash { get; }
 
-        public static global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -304,20 +304,20 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeMessage? left, global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeMessage? right)
+        public static bool operator ==(global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage? left, global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeMessage? left, global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeMessage? right)
+        public static bool operator !=(global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage? left, global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (other is not global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeMessage) return false;
-            return this.Equals((global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeMessage)other);
+            if (other is not global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage) return false;
+            return this.Equals((global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage)other);
         }
-        public bool Equals(global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeMessage? target)
+        public bool Equals(global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -327,9 +327,9 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeMessage>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeMessage value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -340,7 +340,7 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -360,24 +360,24 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeMessage(p_contentHash);
+                return new global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage(p_contentHash);
             }
         }
     }
-    internal sealed partial class ContentExchangerRequestExchangeResultMessage : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultMessage>
+    internal sealed partial class ContentExchangerHandshakeResultMessage : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultMessage>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultMessage> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultMessage>.Formatter;
-        public static global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultMessage Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultMessage>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultMessage> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultMessage>.Formatter;
+        public static global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultMessage Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultMessage>.Empty;
 
-        static ContentExchangerRequestExchangeResultMessage()
+        static ContentExchangerHandshakeResultMessage()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultMessage>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultMessage>.Empty = new global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultMessage((global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultType)0);
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultMessage>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultMessage>.Empty = new global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultMessage((global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultType)0);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public ContentExchangerRequestExchangeResultMessage(global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultType type)
+        public ContentExchangerHandshakeResultMessage(global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultType type)
         {
             this.Type = type;
 
@@ -389,9 +389,9 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
             });
         }
 
-        public global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultType Type { get; }
+        public global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultType Type { get; }
 
-        public static global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -402,20 +402,20 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultMessage? left, global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultMessage? right)
+        public static bool operator ==(global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultMessage? left, global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultMessage? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultMessage? left, global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultMessage? right)
+        public static bool operator !=(global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultMessage? left, global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultMessage? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (other is not global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultMessage) return false;
-            return this.Equals((global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultMessage)other);
+            if (other is not global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultMessage) return false;
+            return this.Equals((global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultMessage)other);
         }
-        public bool Equals(global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultMessage? target)
+        public bool Equals(global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultMessage? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -425,24 +425,24 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultMessage>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultMessage>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultMessage value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultMessage value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.Type != (global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultType)0)
+                if (value.Type != (global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultType)0)
                 {
                     w.Write((uint)1);
                     w.Write((ulong)value.Type);
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultType p_type = (global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultType)0;
+                global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultType p_type = (global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultType)0;
 
                 for (; ; )
                 {
@@ -452,13 +452,13 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
                     {
                         case 1:
                             {
-                                p_type = (global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultType)r.GetUInt64();
+                                p_type = (global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultType)r.GetUInt64();
                                 break;
                             }
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerRequestExchangeResultMessage(p_type);
+                return new global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeResultMessage(p_type);
             }
         }
     }
@@ -726,20 +726,20 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
             }
         }
     }
-    internal sealed partial class DeclaredMessageExchangerFetchMessage : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchMessage>
+    internal sealed partial class DeclaredMessageExchangerFetchRequestMessage : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchRequestMessage>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchMessage> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchMessage>.Formatter;
-        public static global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchMessage Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchMessage>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchRequestMessage> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchRequestMessage>.Formatter;
+        public static global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchRequestMessage Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchRequestMessage>.Empty;
 
-        static DeclaredMessageExchangerFetchMessage()
+        static DeclaredMessageExchangerFetchRequestMessage()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchMessage>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchMessage>.Empty = new global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchMessage(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Timestamp.Zero);
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchRequestMessage>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchRequestMessage>.Empty = new global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchRequestMessage(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Timestamp.Zero);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public DeclaredMessageExchangerFetchMessage(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Timestamp creationTime)
+        public DeclaredMessageExchangerFetchRequestMessage(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Timestamp creationTime)
         {
             if (signature is null) throw new global::System.ArgumentNullException("signature");
             this.Signature = signature;
@@ -757,7 +757,7 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
         public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
         public global::Omnius.Core.RocketPack.Timestamp CreationTime { get; }
 
-        public static global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchRequestMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -768,20 +768,20 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchMessage? left, global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchMessage? right)
+        public static bool operator ==(global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchRequestMessage? left, global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchRequestMessage? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchMessage? left, global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchMessage? right)
+        public static bool operator !=(global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchRequestMessage? left, global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchRequestMessage? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (other is not global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchMessage) return false;
-            return this.Equals((global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchMessage)other);
+            if (other is not global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchRequestMessage) return false;
+            return this.Equals((global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchRequestMessage)other);
         }
-        public bool Equals(global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchMessage? target)
+        public bool Equals(global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchRequestMessage? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -792,9 +792,9 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchMessage>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchRequestMessage>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchMessage value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchRequestMessage value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -810,7 +810,7 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchRequestMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -836,7 +836,7 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchMessage(p_signature, p_creationTime);
+                return new global::Omnius.Xeus.Engines.Exchangers.Internal.Models.DeclaredMessageExchangerFetchRequestMessage(p_signature, p_creationTime);
             }
         }
     }

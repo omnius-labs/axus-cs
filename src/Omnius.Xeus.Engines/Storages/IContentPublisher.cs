@@ -18,12 +18,12 @@ namespace Omnius.Xeus.Engines.Storages
     {
         ValueTask<ContentPublisherReport> GetReportAsync(CancellationToken cancellationToken = default);
 
-        ValueTask<OmniHash> PublishContentAsync(ReadOnlySequence<byte> sequence, string registrant, CancellationToken cancellationToken = default);
-
         ValueTask<OmniHash> PublishContentAsync(string filePath, string registrant, CancellationToken cancellationToken = default);
 
-        ValueTask UnpublishContentAsync(OmniHash contentHash, string registrant, CancellationToken cancellationToken = default);
+        ValueTask<OmniHash> PublishContentAsync(ReadOnlySequence<byte> sequence, string registrant, CancellationToken cancellationToken = default);
 
         ValueTask UnpublishContentAsync(string filePath, string registrant, CancellationToken cancellationToken = default);
+
+        ValueTask UnpublishContentAsync(OmniHash contentHash, string registrant, CancellationToken cancellationToken = default);
     }
 }

@@ -6,11 +6,12 @@ using System.IO.Pipelines;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using LiteDB;
+using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Io;
 using Omnius.Xeus.Engines.Models;
+using Omnius.Xeus.Engines.Storages.Internal;
 using Omnius.Xeus.Engines.Storages.Internal.Models;
 using Omnius.Xeus.Engines.Storages.Internal.Repositories;
 
@@ -23,8 +24,10 @@ namespace Omnius.Xeus.Engines.Storages
         private readonly DeclaredMessageSubscriberOptions _options;
         private readonly IBytesPool _bytesPool;
 
-        private readonly DeclaredMessageSubscriberRepository _repository;
-        private readonly string _cachePath;
+        private readonly DeclaredMessageSubscriberRepository _subscriberRepo;
+        private readonly BlockStogage _blockStorage;
+
+        private readonly AsyncReaderWriterLock _asyncLock = new();
 
         internal sealed class DeclaredMessageSubscriberFactory : IDeclaredMessageSubscriberFactory
         {
@@ -44,28 +47,35 @@ namespace Omnius.Xeus.Engines.Storages
             _options = options;
             _bytesPool = bytesPool;
 
-            _repository = new DeclaredMessageSubscriberRepository(Path.Combine(_options.ConfigDirectoryPath, "want-declared-message-storage.db"));
-            _cachePath = Path.Combine(_options.ConfigDirectoryPath, "cache");
+            _subscriberRepo = new DeclaredMessageSubscriberRepository(Path.Combine(_options.ConfigDirectoryPath, "declared_message_subscriber.db"));
+            _blockStorage = new BlockStogage(Path.Combine(_options.ConfigDirectoryPath, "blocks.db"), _bytesPool);
         }
 
         internal async ValueTask InitAsync()
         {
-            if (!Directory.Exists(_cachePath))
-            {
-                Directory.CreateDirectory(_cachePath);
-            }
-
-            await _repository.MigrateAsync();
+            await _subscriberRepo.MigrateAsync();
+            await _blockStorage.MigrateAsync();
         }
 
         protected override async ValueTask OnDisposeAsync()
         {
-            _repository.Dispose();
+            _subscriberRepo.Dispose();
+            _blockStorage.Dispose();
         }
 
         public async ValueTask<DeclaredMessageSubscriberReport> GetReportAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            {
+                var itemReports = new List<DeclaredMessageSubscribedItemReport>();
+
+                foreach (var item in _subscriberRepo.Items.FindAll())
+                {
+                    itemReports.Add(new DeclaredMessageSubscribedItemReport(item.Signature, item.Registrant));
+                }
+
+                return new DeclaredMessageSubscriberReport(itemReports.ToArray());
+            }
         }
 
         public async ValueTask CheckConsistencyAsync(Action<ConsistencyReport> callback, CancellationToken cancellationToken = default)
@@ -74,64 +84,84 @@ namespace Omnius.Xeus.Engines.Storages
 
         public async ValueTask<IEnumerable<OmniSignature>> GetSignaturesAsync(CancellationToken cancellationToken = default)
         {
-            var results = new List<OmniSignature>();
-
-            foreach (var status in _repository.Items.GetAll())
+            using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                results.Add(status.Signature);
-            }
+                var results = new List<OmniSignature>();
 
-            return results;
+                foreach (var item in _subscriberRepo.Items.FindAll())
+                {
+                    results.Add(item.Signature);
+                }
+
+                return results;
+            }
         }
 
-        public async ValueTask<bool> ContainsMessageAsync(OmniSignature signature, DateTime since = default)
+        public async ValueTask<bool> ContainsMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
-            var status = _repository.Items.Get(signature);
-            if (status == null)
+            using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                return false;
+                if (_subscriberRepo.Items.Exists(signature))
+                {
+                    return false;
+                }
+
+                return true;
             }
-
-            return true;
         }
 
-        public async ValueTask SubscribeMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+        public async ValueTask SubscribeMessageAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default)
         {
-            _repository.Items.Add(new DeclaredMessageSubscriberItem(signature, DateTime.MinValue));
+            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            {
+                _subscriberRepo.Items.Insert(new SubscribedDeclaredMessageItem(signature, registrant));
+            }
         }
 
-        public async ValueTask UnsubscribeMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+        public async ValueTask UnsubscribeMessageAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default)
         {
-            _repository.Items.Remove(signature);
+            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            {
+                _subscriberRepo.Items.Delete(signature, registrant);
+            }
         }
 
         public async ValueTask<DateTime?> ReadMessageCreationTimeAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
-            var status = _repository.Items.Get(signature);
-            if (status == null)
+            using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                return null;
-            }
+                var writtenItem = _subscriberRepo.WrittenItems.FindOne(signature);
+                if (writtenItem == null)
+                {
+                    return null;
+                }
 
-            return status.CreationTime;
+                return writtenItem.CreationTime;
+            }
         }
 
         public async ValueTask<DeclaredMessage?> ReadMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
-            var status = _repository.Items.Get(signature);
-            if (status == null)
+            var item = _subscriberRepo.Items.Find(signature).FirstOrDefault();
+            if (item is null)
             {
                 return null;
             }
 
-            var filePath = Path.Combine(_cachePath, StringConverter.SignatureToString(signature));
+            var writtenItem = _subscriberRepo.WrittenItems.FindOne(signature);
+            if (writtenItem is null)
+            {
+                return null;
+            }
 
-            using var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool);
-            var pipeReader = PipeReader.Create(fileStream);
-            var readResult = await pipeReader.ReadAsync(cancellationToken);
-            var message = DeclaredMessage.Import(readResult.Buffer, _bytesPool);
-            await pipeReader.CompleteAsync();
+            var blockName = ComputeBlockName(signature);
+            using var memoryOwner = await _blockStorage.ReadAsync(blockName, cancellationToken);
+            if (memoryOwner is null)
+            {
+                return null;
+            }
 
+            var message = DeclaredMessage.Import(new ReadOnlySequence<byte>(memoryOwner.Memory), _bytesPool);
             return message;
         }
 
@@ -143,18 +173,34 @@ namespace Omnius.Xeus.Engines.Storages
                 return;
             }
 
-            var status = _repository.Items.Get(signature);
-            if (status == null)
+            if (!message.Verify())
             {
                 return;
             }
 
-            var filePath = Path.Combine(_cachePath, StringConverter.SignatureToString(signature));
+            if (!_subscriberRepo.Items.Exists(signature))
+            {
+                return;
+            }
 
-            using var fileStream = new UnbufferedFileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool);
-            var pipeWriter = PipeWriter.Create(fileStream);
-            message.Export(pipeWriter, _bytesPool);
-            await pipeWriter.CompleteAsync();
+            var writtenItem = _subscriberRepo.WrittenItems.FindOne(signature);
+            if (writtenItem is not null && writtenItem.CreationTime >= message.CreationTime.ToDateTime())
+            {
+                return;
+            }
+
+            using var hub = new BytesHub(_bytesPool);
+            message.Export(hub.Writer, _bytesPool);
+
+            _subscriberRepo.WrittenItems.Insert(new WrittenDeclaredMessageItem(signature, message.CreationTime.ToDateTime()));
+
+            var blockName = ComputeBlockName(signature);
+            await _blockStorage.WriteAsync(blockName, hub.Reader.GetSequence(), cancellationToken);
+        }
+
+        private static string ComputeBlockName(OmniSignature signature)
+        {
+            return StringConverter.SignatureToString(signature);
         }
     }
 }

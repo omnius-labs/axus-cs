@@ -3,9 +3,9 @@ using Omnius.Core.Cryptography;
 
 namespace Omnius.Xeus.Engines.Storages.Internal.Models
 {
-    internal sealed class DeclaredMessageSubscriberItem
+    internal sealed class SubscribedDeclaredMessageItem
     {
-        public DeclaredMessageSubscriberItem(OmniSignature signature, string registrant)
+        public SubscribedDeclaredMessageItem(OmniSignature signature, string registrant)
         {
             this.Signature = signature;
             this.Registrant = registrant;

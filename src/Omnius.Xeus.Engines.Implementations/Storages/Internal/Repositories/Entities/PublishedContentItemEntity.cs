@@ -7,19 +7,19 @@ using Omnius.Xeus.Engines.Storages.Internal.Models;
 
 namespace Omnius.Xeus.Engines.Storages.Internal.Repositories.Entities
 {
-    internal sealed class ContentPublisherItemEntity
+    internal sealed class PublishedContentItemEntity
     {
-        public string? FilePath { get; set; }
-
         public OmniHashEntity? ContentHash { get; set; }
+
+        public string? FilePath { get; set; }
 
         public string? Registrant { get; set; }
 
         public MerkleTreeSectionEntity[]? MerkleTreeSections { get; set; }
 
-        public static ContentPublisherItemEntity Import(ContentPublisherItem value)
+        public static PublishedContentItemEntity Import(PublishedContentItem value)
         {
-            return new ContentPublisherItemEntity()
+            return new PublishedContentItemEntity()
             {
                 ContentHash = OmniHashEntity.Import(value.ContentHash),
                 FilePath = value.FilePath,
@@ -28,9 +28,9 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories.Entities
             };
         }
 
-        public ContentPublisherItem Export()
+        public PublishedContentItem Export()
         {
-            return new ContentPublisherItem(this.ContentHash?.Export() ?? OmniHash.Empty, this.Registrant ?? string.Empty, this.FilePath ?? string.Empty, this.MerkleTreeSections?.Select(n => n.Export())?.ToArray() ?? Array.Empty<MerkleTreeSection>());
+            return new PublishedContentItem(this.ContentHash?.Export() ?? OmniHash.Empty, this.Registrant ?? string.Empty, this.FilePath ?? string.Empty, this.MerkleTreeSections?.Select(n => n.Export())?.ToArray() ?? Array.Empty<MerkleTreeSection>());
         }
     }
 }

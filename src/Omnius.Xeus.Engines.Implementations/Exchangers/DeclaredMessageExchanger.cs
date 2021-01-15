@@ -28,9 +28,9 @@ namespace Omnius.Xeus.Engines.Exchangers
 
         private readonly DeclaredMessageExchangerOptions _options;
         private readonly List<IConnector> _connectors = new();
-        private readonly ICkadMediator _nodeFinder;
-        private readonly IDeclaredMessagePublisher _pushStorage;
-        private readonly IDeclaredMessageSubscriber _wantStorage;
+        private readonly ICkadMediator _ckadMediator;
+        private readonly IDeclaredMessagePublisher _publisher;
+        private readonly IDeclaredMessageSubscriber _subscriber;
         private readonly IBytesPool _bytesPool;
 
         private readonly HashSet<ConnectionStatus> _connectionStatusSet = new();
@@ -65,9 +65,9 @@ namespace Omnius.Xeus.Engines.Exchangers
         {
             _options = options;
             _connectors.AddRange(connectors);
-            _nodeFinder = nodeFinder;
-            _pushStorage = pushStorage;
-            _wantStorage = wantStorage;
+            _ckadMediator = nodeFinder;
+            _publisher = pushStorage;
+            _subscriber = wantStorage;
             _bytesPool = bytesPool;
         }
 
@@ -77,7 +77,7 @@ namespace Omnius.Xeus.Engines.Exchangers
             _acceptLoopTask = this.AcceptLoopAsync(_cancellationTokenSource.Token);
             _computeLoopTask = this.ComputeLoopAsync(_cancellationTokenSource.Token);
 
-            _nodeFinder.GetPublishResourceTags += (append) =>
+            _ckadMediator.GetPublishResourceTags += (append) =>
             {
                 ResourceTag[] resourceTags;
 
@@ -122,13 +122,13 @@ namespace Omnius.Xeus.Engines.Exchangers
                         }
                     }
 
-                    foreach (var signature in await _wantStorage.GetSignaturesAsync(cancellationToken))
+                    foreach (var signature in await _subscriber.GetSignaturesAsync(cancellationToken))
                     {
                         var tag = SignatureToResourceTag(signature);
 
                         NodeProfile? targetNodeProfile = null;
                         {
-                            var nodeProfiles = await _nodeFinder.FindNodeProfilesAsync(tag, cancellationToken);
+                            var nodeProfiles = await _ckadMediator.FindNodeProfilesAsync(tag, cancellationToken);
                             random.Shuffle(nodeProfiles);
 
                             var ignoreAddressSet = new HashSet<OmniAddress>();
@@ -253,7 +253,7 @@ namespace Omnius.Xeus.Engines.Exchangers
         private async ValueTask UpdateResourceTagsAsync(CancellationToken cancellationToken = default)
         {
             var resourceTags = new List<ResourceTag>();
-            foreach (var signature in await _wantStorage.GetSignaturesAsync(cancellationToken))
+            foreach (var signature in await _subscriber.GetSignaturesAsync(cancellationToken))
             {
                 var tag = SignatureToResourceTag(signature);
                 resourceTags.Add(tag);
@@ -344,7 +344,7 @@ namespace Omnius.Xeus.Engines.Exchangers
                         messageCreationTime = DateTime.MinValue;
                     }
 
-                    var fetchMessage = new DeclaredMessageExchangerFetchMessage(signature, Timestamp.FromDateTime(messageCreationTime.Value));
+                    var fetchMessage = new DeclaredMessageExchangerFetchRequestMessage(signature, Timestamp.FromDateTime(messageCreationTime.Value));
                     await connection.EnqueueAsync(fetchMessage, cancellationToken);
 
                     var fetchResultMessage = await connection.DequeueAsync<DeclaredMessageExchangerFetchResultMessage>(cancellationToken);
@@ -357,7 +357,7 @@ namespace Omnius.Xeus.Engines.Exchangers
                     {
                         if (fetchResultMessage.DeclaredMessage != null)
                         {
-                            await _wantStorage.WriteMessageAsync(fetchResultMessage.DeclaredMessage, cancellationToken);
+                            await _subscriber.WriteMessageAsync(fetchResultMessage.DeclaredMessage, cancellationToken);
                         }
                     }
                     else if (fetchResultMessage.Type == DeclaredMessageExchangerFetchResultType.NotFound)
@@ -374,7 +374,7 @@ namespace Omnius.Xeus.Engines.Exchangers
                 }
                 else if (handshakeType == ConnectionHandshakeType.Accepted)
                 {
-                    var fetchMessage = await connection.DequeueAsync<DeclaredMessageExchangerFetchMessage>(cancellationToken);
+                    var fetchMessage = await connection.DequeueAsync<DeclaredMessageExchangerFetchRequestMessage>(cancellationToken);
                     if (fetchMessage == null)
                     {
                         throw new DeclaredMessageExchangerException();
@@ -408,7 +408,7 @@ namespace Omnius.Xeus.Engines.Exchangers
                         var postMessage = await connection.DequeueAsync<DeclaredMessageExchangerPostMessage>(cancellationToken);
                         if (postMessage.DeclaredMessage != null)
                         {
-                            await _wantStorage.WriteMessageAsync(postMessage.DeclaredMessage, cancellationToken);
+                            await _subscriber.WriteMessageAsync(postMessage.DeclaredMessage, cancellationToken);
                         }
                     }
                 }
@@ -436,8 +436,8 @@ namespace Omnius.Xeus.Engines.Exchangers
 
         private async ValueTask<DateTime?> ReadMessageCreationTimeAsync(OmniSignature signature, CancellationToken cancellationToken)
         {
-            var wantStorageCreationTime = await _wantStorage.ReadMessageCreationTimeAsync(signature, cancellationToken);
-            var pushStorageCreationTime = await _pushStorage.ReadMessageCreationTimeAsync(signature, cancellationToken);
+            var wantStorageCreationTime = await _subscriber.ReadMessageCreationTimeAsync(signature, cancellationToken);
+            var pushStorageCreationTime = await _publisher.ReadMessageCreationTimeAsync(signature, cancellationToken);
             if (wantStorageCreationTime is null && pushStorageCreationTime is null)
             {
                 return null;
@@ -455,8 +455,8 @@ namespace Omnius.Xeus.Engines.Exchangers
 
         public async ValueTask<DeclaredMessage?> ReadMessageAsync(OmniSignature signature, CancellationToken cancellationToken)
         {
-            var wantStorageCreationTime = await _wantStorage.ReadMessageCreationTimeAsync(signature, cancellationToken);
-            var pushStorageCreationTime = await _pushStorage.ReadMessageCreationTimeAsync(signature, cancellationToken);
+            var wantStorageCreationTime = await _subscriber.ReadMessageCreationTimeAsync(signature, cancellationToken);
+            var pushStorageCreationTime = await _publisher.ReadMessageCreationTimeAsync(signature, cancellationToken);
             if (wantStorageCreationTime is null && pushStorageCreationTime is null)
             {
                 return null;
@@ -464,11 +464,11 @@ namespace Omnius.Xeus.Engines.Exchangers
 
             if ((wantStorageCreationTime ?? DateTime.MinValue) < (pushStorageCreationTime ?? DateTime.MinValue))
             {
-                return await _pushStorage.ReadMessageAsync(signature, cancellationToken);
+                return await _publisher.ReadMessageAsync(signature, cancellationToken);
             }
             else
             {
-                return await _wantStorage.ReadMessageAsync(signature, cancellationToken);
+                return await _subscriber.ReadMessageAsync(signature, cancellationToken);
             }
         }
 

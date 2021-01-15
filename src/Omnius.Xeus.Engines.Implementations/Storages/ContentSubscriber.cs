@@ -6,11 +6,13 @@ using System.IO.Pipelines;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Helpers;
 using Omnius.Core.Io;
 using Omnius.Xeus.Engines.Models;
+using Omnius.Xeus.Engines.Storages.Internal;
 using Omnius.Xeus.Engines.Storages.Internal.Models;
 using Omnius.Xeus.Engines.Storages.Internal.Repositories;
 
@@ -23,12 +25,12 @@ namespace Omnius.Xeus.Engines.Storages
         private readonly ContentSubscriberOptions _options;
         private readonly IBytesPool _bytesPool;
 
-        private readonly ContentSubscriberRepository _repository;
-
-        private readonly Dictionary<OmniHash, OwnedContentStatus> _ownedContentStatusMap = new();
-        private readonly object _ownedContentStatusMapLockObject = new();
+        private readonly ContentSubscriberRepository _subscriberRepo;
+        private readonly BlockStogage _blockStorage;
 
         private Task _computeLoopTask = null!;
+
+        private readonly AsyncReaderWriterLock _asyncLock = new();
 
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
@@ -50,12 +52,14 @@ namespace Omnius.Xeus.Engines.Storages
             _options = options;
             _bytesPool = bytesPool;
 
-            _repository = new ContentSubscriberRepository(Path.Combine(_options.ConfigDirectoryPath, "want-content-storage.db"));
+            _subscriberRepo = new ContentSubscriberRepository(Path.Combine(_options.ConfigDirectoryPath, "content_subscriber.db"));
+            _blockStorage = new BlockStogage(Path.Combine(_options.ConfigDirectoryPath, "blocks.db"), _bytesPool);
         }
 
         internal async ValueTask InitAsync()
         {
-            await _repository.MigrateAsync();
+            await _subscriberRepo.MigrateAsync();
+            await _blockStorage.MigrateAsync();
 
             _computeLoopTask = this.ComputeLoopAsync(_cancellationTokenSource.Token);
         }
@@ -66,7 +70,8 @@ namespace Omnius.Xeus.Engines.Storages
             await _computeLoopTask;
             _cancellationTokenSource.Dispose();
 
-            _repository.Dispose();
+            _subscriberRepo.Dispose();
+            _blockStorage.Dispose();
         }
 
         private async Task ComputeLoopAsync(CancellationToken cancellationToken)
@@ -79,7 +84,7 @@ namespace Omnius.Xeus.Engines.Storages
 
                     await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
 
-                    await this.UpdateOwnedContentStatusMapAsync(_cancellationTokenSource.Token);
+                    await this.UpdateDecodedContentItemAsync(_cancellationTokenSource.Token);
                 }
             }
             catch (OperationCanceledException e)
@@ -94,47 +99,45 @@ namespace Omnius.Xeus.Engines.Storages
             }
         }
 
-        private async ValueTask UpdateOwnedContentStatusMapAsync(CancellationToken cancellationToken = default)
+        private async ValueTask UpdateDecodedContentItemAsync(CancellationToken cancellationToken = default)
         {
-            var ownedContentStatuses = new List<OwnedContentStatus>();
-            lock (_ownedContentStatusMapLockObject)
-            {
-                ownedContentStatuses.AddRange(_ownedContentStatusMap.Values);
-            }
+            var decodedItems = _subscriberRepo.DecodedItems.FindAll();
 
-            foreach (var ownedContentStatus in ownedContentStatuses)
+            foreach (var decodedItem in decodedItems)
             {
-                var lastMerkleTreeSection = ownedContentStatus.MerkleTreeSections[^1];
+                var lastMerkleTreeSection = decodedItem.MerkleTreeSections[^1];
                 if (lastMerkleTreeSection.Depth == 0)
                 {
                     continue;
                 }
 
-                var completed = await this.ValidateDownloadCompletedAsync(ownedContentStatus.ContentHash, lastMerkleTreeSection.Hashes, cancellationToken);
+                var completed = await this.ValidateDecodingCompletedAsync(decodedItem.ContentHash, lastMerkleTreeSection.Hashes, cancellationToken);
                 if (!completed)
                 {
                     continue;
                 }
 
-                var newMerkleTreeSection = await this.DecodeMerkleTreeSectionAsync(ownedContentStatus.ContentHash, lastMerkleTreeSection.Hashes, cancellationToken);
-                if (newMerkleTreeSection is null)
+                var nextMerkleTreeSection = await this.DecodeMerkleTreeSectionAsync(decodedItem.ContentHash, lastMerkleTreeSection.Hashes, cancellationToken);
+                if (nextMerkleTreeSection is null)
                 {
                     continue;
                 }
 
-                lock (_ownedContentStatusMapLockObject)
+                lock (await _asyncLock.WriterLockAsync(cancellationToken))
                 {
-                    ownedContentStatus.MerkleTreeSections.Add(newMerkleTreeSection);
+                    _subscriberRepo.DecodedItems.Insert(new DecodedContentItem(decodedItem.ContentHash, decodedItem.MerkleTreeSections.Append(nextMerkleTreeSection).ToArray()));
                 }
             }
         }
 
-        private async ValueTask<bool> ValidateDownloadCompletedAsync(OmniHash contentHash, IEnumerable<OmniHash> blockHashes, CancellationToken cancellationToken = default)
+        private async ValueTask<bool> ValidateDecodingCompletedAsync(OmniHash contentHash, IEnumerable<OmniHash> blockHashes, CancellationToken cancellationToken = default)
         {
             foreach (var blockHash in blockHashes)
             {
-                var filePath = this.ComputeCacheFilePath(contentHash, blockHash);
-                if (!File.Exists(filePath))
+                var blockName = ComputeBlockName(StringConverter.HashToString(contentHash), blockHash);
+                var exists = await _blockStorage.ExistsAsync(blockName, cancellationToken);
+
+                if (!exists)
                 {
                     return false;
                 }
@@ -145,20 +148,18 @@ namespace Omnius.Xeus.Engines.Storages
 
         private async ValueTask<MerkleTreeSection?> DecodeMerkleTreeSectionAsync(OmniHash contentHash, IEnumerable<OmniHash> blockHashes, CancellationToken cancellationToken = default)
         {
-            var hub = new BytesHub();
+            using var hub = new BytesHub();
 
             foreach (var blockHash in blockHashes)
             {
-                var filePath = this.ComputeCacheFilePath(contentHash, blockHash);
-                if (!File.Exists(filePath))
+                var blockName = ComputeBlockName(StringConverter.HashToString(contentHash), blockHash);
+                using var memoryOwner = await _blockStorage.ReadAsync(blockName, cancellationToken);
+                if (memoryOwner is null)
                 {
                     return null;
                 }
 
-                using var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bytesPool);
-                int length = (int)fileStream.Length;
-                await fileStream.ReadAsync(hub.Writer.GetMemory(length), cancellationToken);
-                hub.Writer.Advance(length);
+                hub.Writer.Write(memoryOwner.Memory.Span);
             }
 
             return MerkleTreeSection.Import(hub.Reader.GetSequence(), _bytesPool);
@@ -166,14 +167,17 @@ namespace Omnius.Xeus.Engines.Storages
 
         public async ValueTask<ContentSubscriberReport> GetReportAsync(CancellationToken cancellationToken = default)
         {
-            var wantContentReports = new List<ContentSubscriberItemReport>();
-
-            foreach (var item in _repository.Items.FindAll())
+            using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                wantContentReports.Add(new ContentSubscriberItemReport(item.ContentHash, item.Registrant));
-            }
+                var itemReports = new List<ContentSubscribedItemReport>();
 
-            return new ContentSubscriberReport(wantContentReports.ToArray());
+                foreach (var item in _subscriberRepo.Items.FindAll())
+                {
+                    itemReports.Add(new ContentSubscribedItemReport(item.ContentHash, item.Registrant));
+                }
+
+                return new ContentSubscriberReport(itemReports.ToArray());
+            }
         }
 
         public async ValueTask CheckConsistencyAsync(Action<ConsistencyReport> callback, CancellationToken cancellationToken = default)
@@ -182,37 +186,40 @@ namespace Omnius.Xeus.Engines.Storages
 
         public async ValueTask<IEnumerable<OmniHash>> GetContentHashesAsync(CancellationToken cancellationToken = default)
         {
-            var results = new List<OmniHash>();
-
-            foreach (var status in _repository.Items.FindAll())
+            using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                results.Add(status.ContentHash);
-            }
+                var results = new List<OmniHash>();
 
-            return results;
+                foreach (var status in _subscriberRepo.Items.FindAll())
+                {
+                    results.Add(status.ContentHash);
+                }
+
+                return results;
+            }
         }
 
         public async ValueTask<IEnumerable<OmniHash>> GetBlockHashesAsync(OmniHash contentHash, bool? exists = null, CancellationToken cancellationToken = default)
         {
-            if (exists.HasValue && !exists.Value)
+            using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                return Enumerable.Empty<OmniHash>();
-            }
-
-            var items = _repository.Items.Find(contentHash);
-            if (!items.Any())
-            {
-                return Enumerable.Empty<OmniHash>();
-            }
-
-            lock (_ownedContentStatusMapLockObject)
-            {
-                if (!_ownedContentStatusMap.TryGetValue(contentHash, out var ownedContentStatus))
+                if (exists.HasValue && !exists.Value)
                 {
                     return Enumerable.Empty<OmniHash>();
                 }
 
-                var blockHashes = ownedContentStatus.MerkleTreeSections.SelectMany(n => n.Hashes).ToArray();
+                if (!_subscriberRepo.Items.Exists(contentHash))
+                {
+                    return Enumerable.Empty<OmniHash>();
+                }
+
+                var decodedItem = _subscriberRepo.DecodedItems.FindOne(contentHash);
+                if (decodedItem is null)
+                {
+                    return Enumerable.Empty<OmniHash>();
+                }
+
+                var blockHashes = decodedItem.MerkleTreeSections.SelectMany(n => n.Hashes).ToArray();
 
                 if (exists is null)
                 {
@@ -224,8 +231,8 @@ namespace Omnius.Xeus.Engines.Storages
 
                     foreach (var blockHash in blockHashes)
                     {
-                        var filePath = this.ComputeCacheFilePath(contentHash, blockHash);
-                        if (File.Exists(filePath) != exists.Value)
+                        var blockName = ComputeBlockName(StringConverter.HashToString(contentHash), blockHash);
+                        if (await _blockStorage.ExistsAsync(blockName, cancellationToken) != exists.Value)
                         {
                             continue;
                         }
@@ -238,98 +245,65 @@ namespace Omnius.Xeus.Engines.Storages
             }
         }
 
-        public async ValueTask<bool> ContainsContentAsync(OmniHash contentHash)
+        public async ValueTask<bool> ContainsContentAsync(OmniHash contentHash, CancellationToken cancellationToken = default)
         {
-            var items = _repository.Items.Find(contentHash);
-            if (!items.Any())
+            using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                return false;
-            }
+                if (!_subscriberRepo.Items.Exists(contentHash))
+                {
+                    return false;
+                }
 
-            return true;
+                return true;
+            }
         }
 
-        public async ValueTask<bool> ContainsBlockAsync(OmniHash contentHash, OmniHash blockHash)
+        public async ValueTask<bool> ContainsBlockAsync(OmniHash contentHash, OmniHash blockHash, CancellationToken cancellationToken = default)
         {
-            var items = _repository.Items.Find(contentHash);
-            if (!items.Any())
+            using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                return false;
-            }
+                var decodedItem = _subscriberRepo.DecodedItems.FindOne(contentHash);
+                if (decodedItem is null)
+                {
+                    return false;
+                }
 
-            var filePath = this.ComputeCacheFilePath(contentHash, blockHash);
-            if (!File.Exists(filePath))
-            {
-                return false;
+                return decodedItem.MerkleTreeSections.Any(n => n.Hashes.Contains(blockHash));
             }
-
-            return true;
         }
 
         public async ValueTask SubscribeContentAsync(OmniHash contentHash, string registrant, CancellationToken cancellationToken = default)
         {
-            _repository.Items.Insert(new ContentSubscriberItem(contentHash, registrant));
+            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            {
+                _subscriberRepo.Items.Insert(new SubscribedContentItem(contentHash, registrant));
+            }
         }
 
         public async ValueTask UnsubscribeContentAsync(OmniHash contentHash, string registrant, CancellationToken cancellationToken = default)
         {
-            var item = _repository.Items.FindOne(contentHash, registrant);
-            if (item == null)
+            using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
-                return;
-            }
+                _subscriberRepo.Items.Delete(contentHash, registrant);
 
-            _repository.Items.Delete(contentHash);
-
-            // キャッシュフォルダを削除
-            var cacheDirPath = this.ComputeCacheDirectoryPath(contentHash);
-            Directory.Delete(cacheDirPath);
-
-            // 所有しているコンテンツの情報を削除
-            lock (_ownedContentStatusMapLockObject)
-            {
-                _ownedContentStatusMap.Remove(contentHash);
-            }
-        }
-
-        public async ValueTask ExportContentAsync(OmniHash contentHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default)
-        {
-            var items = _repository.Items.Find(contentHash);
-            if (!items.Any())
-            {
-                return;
-            }
-
-            OwnedContentStatus? ownedContentStatus;
-
-            lock (_ownedContentStatusMapLockObject)
-            {
-                if (!_ownedContentStatusMap.TryGetValue(contentHash, out ownedContentStatus))
-                {
-                    return;
-                }
-            }
-
-            var lastMerkleTreeSection = ownedContentStatus.MerkleTreeSections[^1];
-            if (lastMerkleTreeSection.Depth != 0)
-            {
-                return;
-            }
-
-            foreach (var blockHash in lastMerkleTreeSection.Hashes)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                var filePath = this.ComputeCacheFilePath(contentHash, blockHash);
-                if (!File.Exists(filePath))
+                if (_subscriberRepo.Items.Exists(contentHash))
                 {
                     return;
                 }
 
-                using var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bytesPool);
-                int length = (int)fileStream.Length;
-                await fileStream.ReadAsync(bufferWriter.GetMemory(length), cancellationToken);
-                bufferWriter.Advance(length);
+                var decodedItem = _subscriberRepo.DecodedItems.FindOne(contentHash);
+                if (decodedItem is null)
+                {
+                    return;
+                }
+
+                foreach (var blockHash in decodedItem.MerkleTreeSections.SelectMany(n => n.Hashes))
+                {
+                    var blockName = ComputeBlockName(StringConverter.HashToString(contentHash), blockHash);
+                    await _blockStorage.DeleteAsync(blockName, cancellationToken);
+                }
+
+                _subscriberRepo.DecodedItems.Delete(contentHash);
             }
         }
 
@@ -341,80 +315,88 @@ namespace Omnius.Xeus.Engines.Storages
             await writer.CompleteAsync();
         }
 
+        public async ValueTask ExportContentAsync(OmniHash contentHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default)
+        {
+            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            {
+                var decodedItem = _subscriberRepo.DecodedItems.FindOne(contentHash);
+                if (decodedItem is null)
+                {
+                    // FIXME
+                    throw new KeyNotFoundException();
+                }
+
+                var lastMerkleTreeSection = decodedItem.MerkleTreeSections[^1];
+                if (lastMerkleTreeSection.Depth != 0)
+                {
+                    // FIXME
+                    throw new KeyNotFoundException();
+                }
+
+                foreach (var blockHash in lastMerkleTreeSection.Hashes)
+                {
+                    var blockName = ComputeBlockName(StringConverter.HashToString(contentHash), blockHash);
+                    var exists = await _blockStorage.ExistsAsync(blockName, cancellationToken);
+
+                    if (!exists)
+                    {
+                        // FIXME
+                        throw new KeyNotFoundException();
+                    }
+                }
+
+                foreach (var blockHash in lastMerkleTreeSection.Hashes)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    var blockName = ComputeBlockName(StringConverter.HashToString(contentHash), blockHash);
+                    using var memoryOwner = await _blockStorage.ReadAsync(blockName, cancellationToken);
+
+                    if (memoryOwner is null)
+                    {
+                        // FIXME
+                        throw new KeyNotFoundException();
+                    }
+
+                    bufferWriter.Write(memoryOwner.Memory.Span);
+                    bufferWriter.Advance(memoryOwner.Memory.Length);
+                }
+            }
+        }
+
         public async ValueTask<IMemoryOwner<byte>?> ReadBlockAsync(OmniHash contentHash, OmniHash blockHash, CancellationToken cancellationToken = default)
         {
-            var status = _repository.Items.Get(contentHash);
-            if (status == null)
+            using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                return null;
+                var decodedItem = _subscriberRepo.DecodedItems.FindOne(contentHash);
+                if (decodedItem is null || decodedItem.MerkleTreeSections.Any(n => !n.Contains(blockHash)))
+                {
+                    return null;
+                }
+
+                var blockName = ComputeBlockName(StringConverter.HashToString(contentHash), blockHash);
+                return await _blockStorage.ReadAsync(blockName, cancellationToken);
             }
-
-            var filePath = this.ComputeCacheFilePath(contentHash, blockHash);
-            if (!File.Exists(filePath))
-            {
-                return null;
-            }
-
-            using var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bytesPool);
-            var memoryOwner = _bytesPool.Memory.Rent((int)fileStream.Length);
-            await fileStream.ReadAsync(memoryOwner.Memory, cancellationToken);
-
-            return memoryOwner;
         }
 
         public async ValueTask WriteBlockAsync(OmniHash contentHash, OmniHash blockHash, ReadOnlyMemory<byte> memory, CancellationToken cancellationToken = default)
         {
-            var status = _repository.Items.Get(contentHash);
-            if (status == null)
+            using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
-                return;
-            }
-
-            lock (_ownedContentStatusMapLockObject)
-            {
-                if (!_ownedContentStatusMap.TryGetValue(contentHash, out var ownedContentStatus))
+                var decodedItem = _subscriberRepo.DecodedItems.FindOne(contentHash);
+                if (decodedItem is null || decodedItem.MerkleTreeSections.Any(n => !n.Contains(blockHash)))
                 {
                     return;
                 }
 
-                if (!ownedContentStatus.MerkleTreeSections.Any(n => n.Contains(blockHash)))
-                {
-                    return;
-                }
+                var blockName = ComputeBlockName(StringConverter.HashToString(contentHash), blockHash);
+                await _blockStorage.WriteAsync(blockName, memory, cancellationToken);
             }
-
-            var filePath = this.ComputeCacheFilePath(contentHash, blockHash);
-            var directoryPath = Path.GetDirectoryName(filePath);
-
-            if (directoryPath is not null)
-            {
-                DirectoryHelper.CreateDirectory(directoryPath);
-            }
-
-            using var fileStream = new UnbufferedFileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, FileOptions.None, _bytesPool);
-            await fileStream.WriteAsync(memory, cancellationToken);
         }
 
-        private string ComputeCacheDirectoryPath(OmniHash contentHash)
+        private static string ComputeBlockName(string prefix, OmniHash blockHash)
         {
-            return Path.Combine(_options.ConfigDirectoryPath, "cache", StringConverter.HashToString(contentHash));
-        }
-
-        private string ComputeCacheFilePath(OmniHash contentHash, OmniHash blockHash)
-        {
-            return Path.Combine(this.ComputeCacheDirectoryPath(contentHash), StringConverter.HashToString(blockHash));
-        }
-
-        private sealed class OwnedContentStatus
-        {
-            public OwnedContentStatus(OmniHash contentHash)
-            {
-                this.ContentHash = contentHash;
-            }
-
-            public OmniHash ContentHash { get; }
-
-            public List<MerkleTreeSection> MerkleTreeSections { get; } = new List<MerkleTreeSection>();
+            return prefix + "/" + StringConverter.HashToString(blockHash);
         }
     }
 }

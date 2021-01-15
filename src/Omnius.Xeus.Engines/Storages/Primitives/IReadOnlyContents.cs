@@ -16,9 +16,9 @@ namespace Omnius.Xeus.Engines.Storages.Primitives
 
         ValueTask<IEnumerable<OmniHash>> GetBlockHashesAsync(OmniHash contentHash, bool? exists = null, CancellationToken cancellationToken = default);
 
-        ValueTask<bool> ContainsContentAsync(OmniHash contentHash);
+        ValueTask<bool> ContainsContentAsync(OmniHash contentHash, CancellationToken cancellationToken = default);
 
-        ValueTask<bool> ContainsBlockAsync(OmniHash contentHash, OmniHash blockHash);
+        ValueTask<bool> ContainsBlockAsync(OmniHash contentHash, OmniHash blockHash, CancellationToken cancellationToken = default);
 
         ValueTask<IMemoryOwner<byte>?> ReadBlockAsync(OmniHash contentHash, OmniHash blockHash, CancellationToken cancellationToken = default);
     }

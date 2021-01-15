@@ -27,9 +27,9 @@ namespace Omnius.Xeus.Engines.Exchangers
 
         private readonly ContentExchangerOptions _options;
         private readonly List<IConnector> _connectors = new();
-        private readonly ICkadMediator _nodeFinder;
-        private readonly IContentPublisher _pushStorage;
-        private readonly IContentSubscriber _wantStorage;
+        private readonly ICkadMediator _ckadMediator;
+        private readonly IContentPublisher _publisher;
+        private readonly IContentSubscriber _subscriber;
         private readonly IBytesPool _bytesPool;
 
         private readonly HashSet<ConnectionStatus> _connectionStatusSet = new();
@@ -68,9 +68,9 @@ namespace Omnius.Xeus.Engines.Exchangers
         {
             _options = options;
             _connectors.AddRange(connectors);
-            _nodeFinder = nodeFinder;
-            _pushStorage = pushStorage;
-            _wantStorage = wantStorage;
+            _ckadMediator = nodeFinder;
+            _publisher = pushStorage;
+            _subscriber = wantStorage;
             _bytesPool = bytesPool;
         }
 
@@ -82,7 +82,7 @@ namespace Omnius.Xeus.Engines.Exchangers
             _receiveLoopTask = this.ReceiveLoopAsync(_cancellationTokenSource.Token);
             _computeLoopTask = this.ComputeLoopAsync(_cancellationTokenSource.Token);
 
-            _nodeFinder.GetPublishResourceTags += (append) =>
+            _ckadMediator.GetPublishResourceTags += (append) =>
             {
                 ResourceTag[] resourceTags;
 
@@ -129,13 +129,13 @@ namespace Omnius.Xeus.Engines.Exchangers
                         }
                     }
 
-                    foreach (var hash in await _wantStorage.GetContentHashesAsync(cancellationToken))
+                    foreach (var hash in await _subscriber.GetContentHashesAsync(cancellationToken))
                     {
                         var tag = HashToResourceTag(hash);
 
                         NodeProfile? targetNodeProfile = null;
                         {
-                            var nodeProfiles = await _nodeFinder.FindNodeProfilesAsync(tag, cancellationToken);
+                            var nodeProfiles = await _ckadMediator.FindNodeProfilesAsync(tag, cancellationToken);
                             random.Shuffle(nodeProfiles);
 
                             var ignoreAddressSet = new HashSet<OmniAddress>();
@@ -267,19 +267,19 @@ namespace Omnius.Xeus.Engines.Exchangers
                             throw new ArgumentNullException(nameof(contentHash));
                         }
 
-                        var requestExchangeMessage = new ContentExchangerRequestExchangeMessage(contentHash.Value);
+                        var requestExchangeMessage = new ContentExchangerHandshakeRequestMessage(contentHash.Value);
 
                         await connection.EnqueueAsync(requestExchangeMessage, cancellationToken);
-                        var requestExchangeResultMessage = await connection.DequeueAsync<ContentExchangerRequestExchangeResultMessage>(cancellationToken);
+                        var requestExchangeResultMessage = await connection.DequeueAsync<ContentExchangerHandshakeResultMessage>(cancellationToken);
 
-                        if (requestExchangeResultMessage == null || requestExchangeResultMessage.Type != ContentExchangerRequestExchangeResultType.Accepted)
+                        if (requestExchangeResultMessage == null || requestExchangeResultMessage.Type != ContentExchangerHandshakeResultType.Accepted)
                         {
                             throw new ContentExchangerException();
                         }
                     }
                     else if (handshakeType == ConnectionHandshakeType.Accepted)
                     {
-                        var requestExchangeMessage = await connection.DequeueAsync<ContentExchangerRequestExchangeMessage>(cancellationToken);
+                        var requestExchangeMessage = await connection.DequeueAsync<ContentExchangerHandshakeRequestMessage>(cancellationToken);
                         if (requestExchangeMessage == null)
                         {
                             throw new ContentExchangerException();
@@ -287,8 +287,8 @@ namespace Omnius.Xeus.Engines.Exchangers
 
                         contentHash = requestExchangeMessage.ContentHash;
 
-                        bool accepted = await _pushStorage.ContainsContentAsync(contentHash.Value) || await _wantStorage.ContainsContentAsync(contentHash.Value);
-                        var requestExchangeResultMessage = new ContentExchangerRequestExchangeResultMessage(accepted ? ContentExchangerRequestExchangeResultType.Accepted : ContentExchangerRequestExchangeResultType.Rejected);
+                        bool accepted = await _publisher.ContainsContentAsync(contentHash.Value, cancellationToken) || await _subscriber.ContainsContentAsync(contentHash.Value, cancellationToken);
+                        var requestExchangeResultMessage = new ContentExchangerHandshakeResultMessage(accepted ? ContentExchangerHandshakeResultType.Accepted : ContentExchangerHandshakeResultType.Rejected);
                         await connection.EnqueueAsync(requestExchangeResultMessage, cancellationToken);
 
                         if (!accepted)
@@ -408,7 +408,7 @@ namespace Omnius.Xeus.Engines.Exchangers
 
                                 foreach (var block in dataMessage.GiveBlocks)
                                 {
-                                    await _wantStorage.WriteBlockAsync(connectionStatus.ContentHash, block.Hash, block.Value, cancellationToken);
+                                    await _subscriber.WriteBlockAsync(connectionStatus.ContentHash, block.Hash, block.Value, cancellationToken);
                                 }
                             }
                         }
@@ -456,7 +456,7 @@ namespace Omnius.Xeus.Engines.Exchangers
                     {
                         OmniHash[] wantBlockHashes;
                         {
-                            wantBlockHashes = (await _wantStorage.GetBlockHashesAsync(connectionStatus.ContentHash, false, cancellationToken))
+                            wantBlockHashes = (await _subscriber.GetBlockHashesAsync(connectionStatus.ContentHash, false, cancellationToken))
                                 .Randomize()
                                 .Take(ContentExchangerDataMessage.MaxWantBlockHashesCount)
                                 .ToArray();
@@ -470,7 +470,7 @@ namespace Omnius.Xeus.Engines.Exchangers
                                 receivedWantBlockHashSet.UnionWith(connectionStatus.ReceivedWantBlockHashes ?? Array.Empty<OmniHash>());
                             }
 
-                            foreach (var contentStorage in new IReadOnlyContents[] { _wantStorage, _pushStorage })
+                            foreach (var contentStorage in new IReadOnlyContents[] { _subscriber, _publisher })
                             {
                                 foreach (var hash in (await contentStorage.GetBlockHashesAsync(connectionStatus.ContentHash, true, cancellationToken)).Randomize())
                                 {
@@ -513,7 +513,7 @@ namespace Omnius.Xeus.Engines.Exchangers
         private async ValueTask UpdateResourceTagsAsync(CancellationToken cancellationToken = default)
         {
             var resourceTags = new List<ResourceTag>();
-            foreach (var hash in await _wantStorage.GetContentHashesAsync(cancellationToken))
+            foreach (var hash in await _subscriber.GetContentHashesAsync(cancellationToken))
             {
                 var tag = HashToResourceTag(hash);
                 resourceTags.Add(tag);

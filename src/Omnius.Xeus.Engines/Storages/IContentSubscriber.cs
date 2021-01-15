@@ -22,8 +22,8 @@ namespace Omnius.Xeus.Engines.Storages
 
         ValueTask UnsubscribeContentAsync(OmniHash contentHash, string registrant, CancellationToken cancellationToken = default);
 
-        ValueTask ExportContentAsync(OmniHash contentHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default);
-
         ValueTask ExportContentAsync(OmniHash contentHash, string filePath, CancellationToken cancellationToken = default);
+
+        ValueTask ExportContentAsync(OmniHash contentHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default);
     }
 }

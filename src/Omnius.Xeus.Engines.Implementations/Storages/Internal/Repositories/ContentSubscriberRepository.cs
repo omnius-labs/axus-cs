@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using LiteDB;
+using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Helpers;
@@ -16,12 +17,13 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
     {
         private readonly LiteDatabase _database;
 
-        public ContentSubscriberRepository(string workingDirectory)
+        public ContentSubscriberRepository(string filePath)
         {
-            DirectoryHelper.CreateDirectory(Path.GetDirectoryName(workingDirectory)!);
+            DirectoryHelper.CreateDirectory(Path.GetDirectoryName(filePath)!);
 
-            _database = new LiteDatabase(workingDirectory);
-            this.Items = new ContentSubscriberItemRepository(_database);
+            _database = new LiteDatabase(filePath);
+            this.Items = new SubscribedContentItemRepository(_database);
+            this.DecodedItems = new DecodedContentItemRepository(_database);
         }
 
         protected override void OnDispose(bool disposing)
@@ -31,81 +33,218 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
 
         public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
         {
-            if (_database.UserVersion <= 0)
-            {
-                var col = this.Items.GetCollection();
-                col.EnsureIndex(x => x.ContentHash, false);
-                _database.UserVersion = 1;
-            }
+            await this.Items.MigrateAsync(cancellationToken);
+            await this.DecodedItems.MigrateAsync(cancellationToken);
         }
 
-        public ContentSubscriberItemRepository Items { get; set; }
+        public SubscribedContentItemRepository Items { get; }
 
-        public sealed class ContentSubscriberItemRepository
+        public DecodedContentItemRepository DecodedItems { get; }
+
+        public sealed class SubscribedContentItemRepository
         {
+            private const string CollectionName = "items";
+
             private readonly LiteDatabase _database;
 
-            public ContentSubscriberItemRepository(LiteDatabase database)
+            private readonly AsyncReaderWriterLock _asyncLock = new();
+
+            public SubscribedContentItemRepository(LiteDatabase database)
             {
                 _database = database;
             }
 
-            public ILiteCollection<ContentSubscriberItemEntity> GetCollection()
+            private ILiteCollection<SubscribedContentItemEntity> GetCollection()
             {
-                var col = _database.GetCollection<ContentSubscriberItemEntity>("items");
+                var col = _database.GetCollection<SubscribedContentItemEntity>(CollectionName);
                 return col;
+            }
+
+            internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
+            {
+                using (await _asyncLock.WriterLockAsync(cancellationToken))
+                {
+                    if (this.Version <= 0)
+                    {
+                        var col = this.GetCollection();
+                        col.EnsureIndex(x => x.ContentHash, false);
+                        this.Version = 1;
+                    }
+                }
+            }
+
+            private int Version
+            {
+                get => _database.Pragma(CollectionName);
+                set => _database.Pragma(CollectionName, new BsonValue(value));
             }
 
             public bool Exists(OmniHash contentHash)
             {
-                var contentHashEntity = OmniHashEntity.Import(contentHash);
-
-                var col = this.GetCollection();
-                return col.Exists(n => n.ContentHash == contentHashEntity);
-            }
-
-            public IEnumerable<ContentSubscriberItem> FindAll()
-            {
-                var col = this.GetCollection();
-                return col.FindAll().Select(n => n.Export());
-            }
-
-            public IEnumerable<ContentSubscriberItem> Find(OmniHash contentHash)
-            {
-                var contentHashEntity = OmniHashEntity.Import(contentHash);
-
-                var col = this.GetCollection();
-                return col.Find(n => n.ContentHash == contentHashEntity).Select(n => n.Export());
-            }
-
-            public ContentSubscriberItem? FindOne(OmniHash contentHash, string registrant)
-            {
-                var contentHashEntity = OmniHashEntity.Import(contentHash);
-
-                var col = this.GetCollection();
-                return col.FindOne(n => n.ContentHash == contentHashEntity && n.Registrant == registrant)?.Export();
-            }
-
-            public void Insert(ContentSubscriberItem item)
-            {
-                var itemEntity = ContentSubscriberItemEntity.Import(item);
-
-                var col = this.GetCollection();
-
-                if (col.Exists(n => n.ContentHash == itemEntity.ContentHash && n.Registrant == itemEntity.Registrant))
+                using (_asyncLock.ReaderLock())
                 {
-                    return;
-                }
+                    var contentHashEntity = OmniHashEntity.Import(contentHash);
 
-                col.Insert(itemEntity);
+                    var col = this.GetCollection();
+                    return col.Exists(n => n.ContentHash == contentHashEntity);
+                }
+            }
+
+            public IEnumerable<SubscribedContentItem> FindAll()
+            {
+                using (_asyncLock.ReaderLock())
+                {
+                    var col = this.GetCollection();
+                    return col.FindAll().Select(n => n.Export());
+                }
+            }
+
+            public IEnumerable<SubscribedContentItem> Find(OmniHash contentHash)
+            {
+                using (_asyncLock.ReaderLock())
+                {
+                    var contentHashEntity = OmniHashEntity.Import(contentHash);
+
+                    var col = this.GetCollection();
+                    return col.Find(n => n.ContentHash == contentHashEntity).Select(n => n.Export());
+                }
+            }
+
+            public SubscribedContentItem? FindOne(OmniHash contentHash, string registrant)
+            {
+                using (_asyncLock.ReaderLock())
+                {
+                    var contentHashEntity = OmniHashEntity.Import(contentHash);
+
+                    var col = this.GetCollection();
+                    return col.FindOne(n => n.ContentHash == contentHashEntity && n.Registrant == registrant)?.Export();
+                }
+            }
+
+            public void Insert(SubscribedContentItem item)
+            {
+                using (_asyncLock.WriterLock())
+                {
+                    var itemEntity = SubscribedContentItemEntity.Import(item);
+
+                    var col = this.GetCollection();
+
+                    if (col.Exists(n => n.ContentHash == itemEntity.ContentHash && n.Registrant == itemEntity.Registrant))
+                    {
+                        return;
+                    }
+
+                    col.Insert(itemEntity);
+                }
             }
 
             public void Delete(OmniHash contentHash, string registrant)
             {
-                var contentHashEntity = OmniHashEntity.Import(contentHash);
+                using (_asyncLock.WriterLock())
+                {
+                    var contentHashEntity = OmniHashEntity.Import(contentHash);
 
-                var col = this.GetCollection();
-                col.DeleteMany(n => n.ContentHash == contentHashEntity && n.Registrant == registrant);
+                    var col = this.GetCollection();
+                    col.DeleteMany(n => n.ContentHash == contentHashEntity && n.Registrant == registrant);
+                }
+            }
+        }
+
+        public sealed class DecodedContentItemRepository
+        {
+            private const string CollectionName = "decoded_items";
+
+            private readonly LiteDatabase _database;
+
+            private readonly AsyncReaderWriterLock _asyncLock = new();
+
+            public DecodedContentItemRepository(LiteDatabase database)
+            {
+                _database = database;
+            }
+
+            private ILiteCollection<DecodedContentItemEntity> GetCollection()
+            {
+                var col = _database.GetCollection<DecodedContentItemEntity>(CollectionName);
+                return col;
+            }
+
+            internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
+            {
+                using (await _asyncLock.WriterLockAsync(cancellationToken))
+                {
+                    if (this.Version <= 0)
+                    {
+                        var col = this.GetCollection();
+                        col.EnsureIndex(x => x.ContentHash, true);
+                        this.Version = 1;
+                    }
+                }
+            }
+
+            private int Version
+            {
+                get => _database.Pragma(CollectionName);
+                set => _database.Pragma(CollectionName, new BsonValue(value));
+            }
+
+            public bool Exists(OmniHash contentHash)
+            {
+                using (_asyncLock.ReaderLock())
+                {
+                    var contentHashEntity = OmniHashEntity.Import(contentHash);
+
+                    var col = this.GetCollection();
+                    return col.Exists(n => n.ContentHash == contentHashEntity);
+                }
+            }
+
+            public IEnumerable<DecodedContentItem> FindAll()
+            {
+                using (_asyncLock.ReaderLock())
+                {
+                    var col = this.GetCollection();
+                    return col.FindAll().Select(n => n.Export());
+                }
+            }
+
+            public DecodedContentItem? FindOne(OmniHash contentHash)
+            {
+                using (_asyncLock.ReaderLock())
+                {
+                    var contentHashEntity = OmniHashEntity.Import(contentHash);
+
+                    var col = this.GetCollection();
+                    return col.FindOne(n => n.ContentHash == contentHashEntity)?.Export();
+                }
+            }
+
+            public void Insert(DecodedContentItem item)
+            {
+                using (_asyncLock.WriterLock())
+                {
+                    var itemEntity = DecodedContentItemEntity.Import(item);
+
+                    var col = this.GetCollection();
+
+                    if (col.Exists(n => n.ContentHash == itemEntity.ContentHash))
+                    {
+                        return;
+                    }
+
+                    col.Insert(itemEntity);
+                }
+            }
+
+            public void Delete(OmniHash contentHash)
+            {
+                using (_asyncLock.WriterLock())
+                {
+                    var contentHashEntity = OmniHashEntity.Import(contentHash);
+
+                    var col = this.GetCollection();
+                    col.DeleteMany(n => n.ContentHash == contentHashEntity);
+                }
             }
         }
     }

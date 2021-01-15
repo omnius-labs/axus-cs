@@ -13,7 +13,7 @@ namespace Omnius.Xeus.Engines.Storages.Primitives
 
         ValueTask<IEnumerable<OmniSignature>> GetSignaturesAsync(CancellationToken cancellationToken = default);
 
-        ValueTask<bool> ContainsMessageAsync(OmniSignature signature, DateTime since = default);
+        ValueTask<bool> ContainsMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default);
 
         ValueTask<DateTime?> ReadMessageCreationTimeAsync(OmniSignature signature, CancellationToken cancellationToken = default);
 

@@ -2,9 +2,9 @@ using Omnius.Core.Cryptography;
 
 namespace Omnius.Xeus.Engines.Storages.Internal.Models
 {
-    internal sealed class ContentSubscriberItem
+    internal sealed class SubscribedContentItem
     {
-        public ContentSubscriberItem(OmniHash contentHash, string registrant)
+        public SubscribedContentItem(OmniHash contentHash, string registrant)
         {
             this.ContentHash = contentHash;
             this.Registrant = registrant;

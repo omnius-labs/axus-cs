@@ -15,7 +15,7 @@ namespace Omnius.Xeus.Engines.Storages
 
     public interface IDeclaredMessageSubscriber : IWritableDeclaredMessages, IAsyncDisposable
     {
-        ValueTask<DeclaredMessageSubscriberItemReport> GetReportAsync(CancellationToken cancellationToken = default);
+        ValueTask<DeclaredMessageSubscriberReport> GetReportAsync(CancellationToken cancellationToken = default);
 
         ValueTask SubscribeMessageAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default);
 

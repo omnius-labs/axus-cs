@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using LiteDB;
+using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Helpers;
@@ -16,12 +17,12 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
     {
         private readonly LiteDatabase _database;
 
-        public DeclaredMessagePublisherRepository(string workingDirectory)
+        public DeclaredMessagePublisherRepository(string filePath)
         {
-            DirectoryHelper.CreateDirectory(Path.GetDirectoryName(workingDirectory)!);
+            DirectoryHelper.CreateDirectory(Path.GetDirectoryName(filePath)!);
 
-            _database = new LiteDatabase(workingDirectory);
-            this.Items = new DeclaredMessagePublisherItemRepository(_database);
+            _database = new LiteDatabase(filePath);
+            this.Items = new PublishedDeclaredMessageItemRepository(_database);
         }
 
         protected override void OnDispose(bool disposing)
@@ -31,65 +32,117 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
 
         public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
         {
-            if (_database.UserVersion <= 0)
-            {
-                var col = this.Items.GetCollection();
-                col.EnsureIndex(x => x.Signature, false);
-                _database.UserVersion = 1;
-            }
+            await this.Items.MigrateAsync(cancellationToken);
         }
 
-        public DeclaredMessagePublisherItemRepository Items { get; set; }
+        public PublishedDeclaredMessageItemRepository Items { get; }
 
-        public sealed class DeclaredMessagePublisherItemRepository
+        public sealed class PublishedDeclaredMessageItemRepository
         {
+            private const string CollectionName = "items";
+
             private readonly LiteDatabase _database;
 
-            public DeclaredMessagePublisherItemRepository(LiteDatabase database)
+            private readonly AsyncReaderWriterLock _asyncLock = new();
+
+            public PublishedDeclaredMessageItemRepository(LiteDatabase database)
             {
                 _database = database;
             }
 
-            public ILiteCollection<DeclaredMessagePublisherItemEntity> GetCollection()
+            internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
             {
-                var col = _database.GetCollection<DeclaredMessagePublisherItemEntity>("items");
+                using (await _asyncLock.WriterLockAsync(cancellationToken))
+                {
+                    if (this.Version <= 0)
+                    {
+                        var col = this.GetCollection();
+                        col.EnsureIndex(x => x.Signature, false);
+                        this.Version = 1;
+                    }
+                }
+            }
+
+            private int Version
+            {
+                get => _database.Pragma(CollectionName);
+                set => _database.Pragma(CollectionName, new BsonValue(value));
+            }
+
+            public ILiteCollection<PublishedDeclaredMessageItemEntity> GetCollection()
+            {
+                var col = _database.GetCollection<PublishedDeclaredMessageItemEntity>(CollectionName);
                 return col;
             }
 
-            public IEnumerable<DeclaredMessagePublisherItem> FindAll()
+            public bool Exists(OmniSignature signature)
             {
-                var col = this.GetCollection();
-                return col.FindAll().Select(n => n.Export());
-            }
-
-            public DeclaredMessagePublisherItem? Get(OmniSignature signature, string registrant)
-            {
-                var signatureEntity = OmniSignatureEntity.Import(signature);
-
-                var col = this.GetCollection();
-                return col.FindOne(n => n.Signature == signatureEntity && n.Registrant == registrant).Export();
-            }
-
-            public void Add(DeclaredMessagePublisherItem item)
-            {
-                var itemEntity = DeclaredMessagePublisherItemEntity.Import(item);
-
-                var col = this.GetCollection();
-
-                if (col.Exists(n => n.Signature == itemEntity.Signature && n.Registrant == itemEntity.Registrant))
+                using (_asyncLock.ReaderLock())
                 {
-                    return;
-                }
+                    var signatureEntity = OmniSignatureEntity.Import(signature);
 
-                col.Insert(itemEntity);
+                    var col = this.GetCollection();
+                    return col.Exists(n => n.Signature == signatureEntity);
+                }
             }
 
-            public void Remove(OmniSignature signature, string registrant)
+            public IEnumerable<PublishedDeclaredMessageItem> FindAll()
             {
-                var signatureEntity = OmniSignatureEntity.Import(signature);
+                using (_asyncLock.ReaderLock())
+                {
+                    var col = this.GetCollection();
+                    return col.FindAll().Select(n => n.Export());
+                }
+            }
 
-                var col = this.GetCollection();
-                col.DeleteMany(n => n.Signature == signatureEntity && n.Registrant == registrant);
+            public IEnumerable<PublishedDeclaredMessageItem> Find(OmniSignature signature)
+            {
+                using (_asyncLock.ReaderLock())
+                {
+                    var signatureEntity = OmniSignatureEntity.Import(signature);
+
+                    var col = this.GetCollection();
+                    return col.Find(n => n.Signature == signatureEntity).Select(n => n.Export());
+                }
+            }
+
+            public PublishedDeclaredMessageItem? FindOne(OmniSignature signature, string registrant)
+            {
+                using (_asyncLock.ReaderLock())
+                {
+                    var signatureEntity = OmniSignatureEntity.Import(signature);
+
+                    var col = this.GetCollection();
+                    return col.FindOne(n => n.Signature == signatureEntity && n.Registrant == registrant).Export();
+                }
+            }
+
+            public void Insert(PublishedDeclaredMessageItem item)
+            {
+                using (_asyncLock.WriterLock())
+                {
+                    var itemEntity = PublishedDeclaredMessageItemEntity.Import(item);
+
+                    var col = this.GetCollection();
+
+                    if (col.Exists(n => n.Signature == itemEntity.Signature && n.Registrant == itemEntity.Registrant))
+                    {
+                        return;
+                    }
+
+                    col.Insert(itemEntity);
+                }
+            }
+
+            public void Delete(OmniSignature signature, string registrant)
+            {
+                using (_asyncLock.WriterLock())
+                {
+                    var signatureEntity = OmniSignatureEntity.Import(signature);
+
+                    var col = this.GetCollection();
+                    col.DeleteMany(n => n.Signature == signatureEntity && n.Registrant == registrant);
+                }
             }
         }
     }

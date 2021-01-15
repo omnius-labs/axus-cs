@@ -29,23 +29,28 @@ message ConsistencyReport {
     TotalBlockCount: uint32,
 }
 
+message ConnectionReport {
+    Type: ConnectionType,
+    Address: OmniAddress,
+}
+
 enum ConnectionType : uint8 {
     Unknown = 0,
     Connected = 1,
     Accepted = 2,
 }
 
-message ConnectionReport {
-    Type: ConnectionType,
-    EndPoint: OmniAddress,
-}
-
 // TcpConnector
 
-enum TcpProxyType : uint8 {
-    Unknown = 0,
-    HttpProxy = 1,
-    Socks5Proxy = 2,
+message TcpConnectorOptions {
+    ConnectingOptions: TcpConnectingOptions,
+    AcceptingOptions: TcpAcceptingOptions,
+    BandwidthOptions: BandwidthOptions,
+}
+
+message TcpConnectingOptions {
+    Enabled: bool,
+    ProxyOptions: TcpProxyOptions?,
 }
 
 message TcpProxyOptions {
@@ -53,9 +58,10 @@ message TcpProxyOptions {
     Address: OmniAddress?,
 }
 
-message TcpConnectingOptions {
-    Enabled: bool,
-    ProxyOptions: TcpProxyOptions?,
+enum TcpProxyType : uint8 {
+    Unknown = 0,
+    HttpProxy = 1,
+    Socks5Proxy = 2,
 }
 
 message TcpAcceptingOptions {
@@ -67,12 +73,6 @@ message TcpAcceptingOptions {
 message BandwidthOptions {
     MaxSendBytesPerSeconds: uint32,
     MaxReceiveBytesPerSeconds: uint32,
-}
-
-message TcpConnectorOptions {
-    ConnectingOptions: TcpConnectingOptions,
-    AcceptingOptions: TcpAcceptingOptions,
-    BandwidthOptions: BandwidthOptions,
 }
 
 message TcpConnectorReport {
@@ -110,14 +110,14 @@ message ContentPublisherOptions {
     ConfigDirectoryPath: string(capacity: 1024),
 }
 
-message ContentPublisherItemReport {
-    FilePath: string?,
-    RootHash: OmniHash,
-    Registrant: string,
+message ContentPublisherReport {
+    ContentPublishedItems: vector<ContentPublishedItemReport>,
 }
 
-message ContentPublisherReport {
-    ContentPublisherItems: vector<ContentPublisherItemReport>,
+message ContentPublishedItemReport {
+    FilePath: string?,
+    ContentHash: OmniHash?,
+    Registrant: string,
 }
 
 // ContentSubscriber
@@ -126,13 +126,13 @@ message ContentSubscriberOptions {
     ConfigDirectoryPath: string(capacity: 1024),
 }
 
-message ContentSubscriberItemReport {
-    RootHash: OmniHash,
-    Registrant: string,
+message ContentSubscriberReport {
+    ContentSubscribedItems: vector<ContentSubscribedItemReport>,
 }
 
-message ContentSubscriberReport {
-    ContentSubscriberItems: vector<ContentSubscriberItemReport>,
+message ContentSubscribedItemReport {
+    RootHash: OmniHash,
+    Registrant: string,
 }
 
 // DeclaredMessageExchanger
@@ -153,13 +153,13 @@ message DeclaredMessagePublisherOptions {
     ConfigDirectoryPath: string(capacity: 1024),
 }
 
-message DeclaredMessagePublisherItemReport {
-    Signature: OmniSignature,
-    Registrant: string,
+message DeclaredMessagePublisherReport {
+    DeclaredMessagePublishedItems: vector<DeclaredMessagePublishedItemReport>,
 }
 
-message DeclaredMessagePublisherReport {
-    DeclaredMessagePublisherItems: vector<DeclaredMessagePublisherItemReport>,
+message DeclaredMessagePublishedItemReport {
+    Signature: OmniSignature,
+    Registrant: string,
 }
 
 // DeclaredMessageSubscriber
@@ -168,11 +168,11 @@ message DeclaredMessageSubscriberOptions {
     ConfigDirectoryPath: string(capacity: 1024),
 }
 
-message DeclaredMessageSubscriberItemReport {
-    Signature: OmniSignature,
-    Registrant: string,
+message DeclaredMessageSubscriberReport {
+    DeclaredMessageSubscribedItems: vector<DeclaredMessageSubscribedItemReport>,
 }
 
-message DeclaredMessageSubscriberReport {
-    DeclaredMessageSubscriberItems: vector<DeclaredMessageSubscriberItemReport>,
+message DeclaredMessageSubscribedItemReport {
+    Signature: OmniSignature,
+    Registrant: string,
 }
