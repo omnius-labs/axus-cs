@@ -20,7 +20,7 @@
     <PackageReference Include="Avalonia.Desktop" Version="0.9.12" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.9.12" />
     <PackageReference Include="ReactiveProperty" Version="7.4.1" />
-    <PackageReference Include="NLog" Version="4.7.5" />
+    <PackageReference Include="NLog" Version="4.7.6" />
     <PackageReference Include="NLog.Config" Version="4.7.5" />
     <PackageReference Include="YamlDotNet" Version="8.1.2" />
   </ItemGroup>
