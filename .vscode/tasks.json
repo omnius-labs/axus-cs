@@ -14,18 +14,6 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "build (Omnius.Xeus.Ui.Console)",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "build",
-                "${workspaceFolder}/src/Omnius.Xeus.Ui.Console/Omnius.Xeus.Ui.Console.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
             "label": "build (Omnius.Xeus.Ui.Desktop)",
             "command": "dotnet",
             "type": "process",

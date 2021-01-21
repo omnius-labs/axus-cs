@@ -1,3 +1,8 @@
+using System.IO;
+using System.Net;
+using Omnius.Core.Network;
+using Omnius.Xeus.Daemon.Internal;
+
 namespace Omnius.Xeus.Daemon.Configs
 {
     public class DaemonConfig
@@ -5,6 +10,76 @@ namespace Omnius.Xeus.Daemon.Configs
         public string? ListenAddress { get; init; }
 
         public EnginesConfig? Engines { get; init; }
+
+        private const string ConfigFileName = "daemon.yaml";
+
+        public static DaemonConfig LoadConfig(string configDirectoryPath, string stateDirectoryPath)
+        {
+            InitConfig(configDirectoryPath, stateDirectoryPath);
+
+            var configPath = Path.Combine(configDirectoryPath, ConfigFileName);
+            var config = YamlHelper.ReadFile<DaemonConfig>(configPath);
+            return config;
+        }
+
+        private static void InitConfig(string configDirectoryPath, string stateDirectoryPath)
+        {
+            if (!Directory.Exists(configDirectoryPath))
+            {
+                Directory.CreateDirectory(configDirectoryPath);
+            }
+
+            var config = CreateInitConfig(stateDirectoryPath);
+
+            YamlHelper.WriteFile(Path.Combine(configDirectoryPath, ConfigFileName), config);
+        }
+
+        private static DaemonConfig CreateInitConfig(string workingDirectory)
+        {
+            var config = new DaemonConfig()
+            {
+                ListenAddress = (string?)OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 32321),
+                Engines = new EnginesConfig()
+                {
+                    WorkingDirectory = workingDirectory,
+                    Connectors = new ConnectorsConfig()
+                    {
+                        TcpConnector = new TcpConnectorConfig()
+                        {
+                            Bandwidth = new BandwidthConfig()
+                            {
+                                MaxSendBytesPerSeconds = 1024 * 1024 * 32,
+                                MaxReceiveBytesPerSeconds = 1024 * 1024 * 32,
+                            },
+                            Connecting = new TcpConnectingConfig()
+                            {
+                                Enabled = true,
+                                Proxy = null,
+                            },
+                            Accepting = new TcpAcceptingConfig()
+                            {
+                                Enabled = true,
+                                ListenAddresses = new string[] { OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 32320).ToString() },
+                                UseUpnp = true,
+                            },
+                        },
+                    },
+                    Exchangers = new ExchangersConfig()
+                    {
+                        ContentExchanger = new ContentExchangerConfig()
+                        {
+                            MaxConnectionCount = 32,
+                        },
+                        DeclaredMessageExchanger = new DeclaredMessageConfig()
+                        {
+                            MaxConnectionCount = 32,
+                        },
+                    },
+                },
+            };
+
+            return config;
+        }
     }
 
     public class EnginesConfig

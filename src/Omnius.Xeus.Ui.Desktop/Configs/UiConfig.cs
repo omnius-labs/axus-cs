@@ -1,7 +1,7 @@
 using System.IO;
 using System.Net;
 using Omnius.Core.Network;
-using Omnius.Xeus.Ui.Console.Internal;
+using Omnius.Xeus.Ui.Console.Helpers;
 
 namespace Omnius.Xeus.Ui.Desktop.Configs
 {
@@ -27,12 +27,17 @@ namespace Omnius.Xeus.Ui.Desktop.Configs
                 Directory.CreateDirectory(configDirectoryPath);
             }
 
-            var config = new UiConfig()
+            var config = CreateInitConfig();
+
+            YamlHelper.WriteFile(Path.Combine(configDirectoryPath, ConfigFileName), config);
+        }
+
+        private static UiConfig CreateInitConfig()
+        {
+            return new UiConfig()
             {
                 DaemonAddress = (string?)OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 32321),
             };
-
-            YamlHelper.WriteFile(Path.Combine(configDirectoryPath, ConfigFileName), config);
         }
     }
 }

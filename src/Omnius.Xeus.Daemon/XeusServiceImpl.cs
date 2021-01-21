@@ -199,5 +199,10 @@ namespace Omnius.Xeus.Daemon
         {
             throw new NotImplementedException();
         }
+
+        public ValueTask<DeclaredMessageSubscriber_ExportContent_Output> DeclaredMessageSubscriber_ExportContentAsync(DeclaredMessageSubscriber_ExportContent_Input param, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

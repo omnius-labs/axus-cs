@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Omnius.Xeus.Ui.Desktop.ViewModels;
 using Omnius.Xeus.Ui.Desktop.Views;
 
 namespace Omnius.Xeus.Ui.Desktop
@@ -15,7 +14,7 @@ namespace Omnius.Xeus.Ui.Desktop
 
         public override void OnFrameworkInitializationCompleted()
         {
-            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 desktop.MainWindow = new MainWindow();
             }

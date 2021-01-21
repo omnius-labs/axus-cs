@@ -5,15 +5,22 @@ skinparam rectangle<<behavior>> {
 }
 sprite $component jar:archimate/component
 
-package Omnius.Xeus.Interactors {
-    rectangle FileStorageService <<$component>><<behavior>>
+package Omnius.Xeus.Ui.Desktop {
+    package Omnius.Xeus.Ui.Desktop.Interactors {
+        rectangle FileSearcher <<$component>><<behavior>>
+    }
 }
 
-package Omnius.Xeus.Ui.Desktop {
-    rectangle MainWindow <<$component>><<behavior>>
-    rectangle FileSearchControl <<$component>><<behavior>>
-    rectangle FileDownloadControl <<$component>><<behavior>>
-    rectangle FileUploadControl <<$component>><<behavior>>
+package Omnius.Xeus.Service {
+    rectangle ProfilePublisher <<$component>><<behavior>>
+    rectangle ProfileSubscriber <<$component>><<behavior>>
+    rectangle FileDowndoader <<$component>><<behavior>>
+    rectangle FileUploader <<$component>><<behavior>>
+}
+
+package Omnius.Xeus.Api {
+    rectangle XeusService.Client <<$component>><<behavior>>
+    rectangle XeusService.Server <<$component>><<behavior>>
 }
 
 package Omnius.Xeus.Daemon {
@@ -21,53 +28,47 @@ package Omnius.Xeus.Daemon {
 }
 
 package Ominus.Xeus.Engines {
-    package Exchanger {
+    package Ominus.Xeus.Engines.Connectors {
+        rectangle TcpConnector <<$component>><<behavior>>
+    }
+    package Ominus.Xeus.Engines.Exchangers {
         rectangle ContentExchanger <<$component>><<behavior>>
         rectangle DeclaredMessageExchanger <<$component>><<behavior>>
     }
-    package Mediators {
+    package Ominus.Xeus.Engines.Mediators {
         rectangle CkadMediator <<$component>><<behavior>>
     }
-    package Storages {
-        rectangle PushContentStorage <<$component>><<behavior>>
-        rectangle WantContentStorage <<$component>><<behavior>>
-        rectangle PushDeclaredMessageStorage <<$component>><<behavior>>
-        rectangle WantDeclaredMessageStorage <<$component>><<behavior>>
-    }
-    package Connector {
-        rectangle TcpConnector <<$component>><<behavior>>
+    package Ominus.Xeus.Engines.Storages {
+        rectangle ContentPublisher <<$component>><<behavior>>
+        rectangle ContentSubscriber <<$component>><<behavior>>
+        rectangle DeclaredMessagePublisher <<$component>><<behavior>>
+        rectangle DeclaredMessageSubscriber <<$component>><<behavior>>
     }
 }
 
-TCP ..> XeusServiceImpl : accept
-FileStorageService ..> TCP : connect
+FileSearcher -down-> Omnius.Xeus.Service
 
-MainWindow -down-> FileSearchControl
-MainWindow -down-> FileDownloadControl
-MainWindow -down-> FileUploadControl
+ProfilePublisher -down-> XeusService.Client
+ProfileSubscriber -down-> XeusService.Client
+FileDowndoader -down-> XeusService.Client
+FileUploader -down-> XeusService.Client
 
-FileSearchControl -down-> FileStorageService
-FileDownloadControl -down-> FileStorageService
-FileUploadControl -down-> FileStorageService
+XeusService.Client .down.> XeusService.Server : TCP
 
-XeusServiceImpl -down-> ContentExchanger
-XeusServiceImpl -down-> DeclaredMessageExchanger
-XeusServiceImpl -down-> CkadMediator
-XeusServiceImpl -down-> PushContentStorage
-XeusServiceImpl -down-> PushDeclaredMessageStorage
-XeusServiceImpl -down-> WantContentStorage
-XeusServiceImpl -down-> WantDeclaredMessageStorage
+XeusService.Server -down-> XeusServiceImpl
 
-ContentExchanger -down-> CkadMediator
-ContentExchanger -down-> TcpConnector
-ContentExchanger -down-> PushContentStorage
-ContentExchanger -down-> WantContentStorage
+XeusServiceImpl -down-> Ominus.Xeus.Engines
 
-DeclaredMessageExchanger -down-> CkadMediator
-DeclaredMessageExchanger -down-> TcpConnector
-DeclaredMessageExchanger -down-> PushDeclaredMessageStorage
-DeclaredMessageExchanger -down-> WantDeclaredMessageStorage
+CkadMediator -left-> TcpConnector
 
-CkadMediator -down-> TcpConnector
+ContentExchanger -up-> TcpConnector
+ContentExchanger -up-> CkadMediator
+ContentExchanger -down-> ContentPublisher
+ContentExchanger -down-> ContentSubscriber
+
+DeclaredMessageExchanger -up-> TcpConnector
+DeclaredMessageExchanger -up-> CkadMediator
+DeclaredMessageExchanger -down-> DeclaredMessagePublisher
+DeclaredMessageExchanger -down-> DeclaredMessageSubscriber
 
 @enduml

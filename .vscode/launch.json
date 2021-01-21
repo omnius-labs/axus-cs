@@ -13,17 +13,6 @@
             "stopAtEntry": false
         },
         {
-            "name": "Omnius.Xeus.Ui.Console",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build (Omnius.Xeus.Ui.Console)",
-            "program": "${workspaceFolder}/tmp/bin/win/Omnius.Xeus.Ui.Console/Debug/net5.0/Omnius.Xeus.Ui.Console.dll",
-            "args": ["run", "-c", "./demo/.config/ui-console"],
-            "cwd": "${workspaceFolder}",
-            "console": "internalConsole",
-            "stopAtEntry": false
-        },
-        {
             "name": "Omnius.Xeus.Ui.Desktop",
             "type": "coreclr",
             "request": "launch",

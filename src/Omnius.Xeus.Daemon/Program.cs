@@ -7,7 +7,6 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using Cocona;
 using Omnius.Core;
-using Omnius.Core.Helpers;
 using Omnius.Core.Network;
 using Omnius.Core.Network.Caps;
 using Omnius.Core.Network.Connections;
@@ -15,7 +14,6 @@ using Omnius.Core.Network.Proxies;
 using Omnius.Core.Network.Upnp;
 using Omnius.Xeus.Api;
 using Omnius.Xeus.Daemon.Configs;
-using Omnius.Xeus.Daemon.Internal;
 using Omnius.Xeus.Engines.Connectors;
 using Omnius.Xeus.Engines.Exchangers;
 using Omnius.Xeus.Engines.Mediators;
@@ -32,75 +30,12 @@ namespace Omnius.Xeus.Daemon
             CoconaLiteApp.Run<Program>(args);
         }
 
-        [Command("init")]
-        public void Init([Option('c')] string configDirectoryPath = "../config", [Option('s')] string stateDirectoryPath = "../state")
-        {
-            _logger.Info("init start");
-
-            DirectoryHelper.CreateDirectory(configDirectoryPath);
-            DirectoryHelper.CreateDirectory(stateDirectoryPath);
-
-            var config = this.CreateInitConfig(stateDirectoryPath);
-            var configPath = Path.Combine(configDirectoryPath, "daemon.yaml");
-
-            YamlHelper.WriteFile(configPath, config);
-
-            _logger.Info("init end");
-        }
-
-        private DaemonConfig CreateInitConfig(string workingDirectory)
-        {
-            var config = new DaemonConfig()
-            {
-                ListenAddress = (string?)OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 32321),
-                Engines = new EnginesConfig()
-                {
-                    WorkingDirectory = workingDirectory,
-                    Connectors = new ConnectorsConfig()
-                    {
-                        TcpConnector = new TcpConnectorConfig()
-                        {
-                            Bandwidth = new BandwidthConfig()
-                            {
-                                MaxSendBytesPerSeconds = 1024 * 1024 * 32,
-                                MaxReceiveBytesPerSeconds = 1024 * 1024 * 32,
-                            },
-                            Connecting = new TcpConnectingConfig()
-                            {
-                                Enabled = true,
-                                Proxy = null,
-                            },
-                            Accepting = new TcpAcceptingConfig()
-                            {
-                                Enabled = true,
-                                ListenAddresses = new string[] { OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 32320).ToString() },
-                                UseUpnp = true,
-                            },
-                        },
-                    },
-                    Exchangers = new ExchangersConfig()
-                    {
-                        ContentExchanger = new ContentExchangerConfig()
-                        {
-                            MaxConnectionCount = 32,
-                        },
-                        DeclaredMessageExchanger = new DeclaredMessageConfig()
-                        {
-                            MaxConnectionCount = 32,
-                        },
-                    },
-                },
-            };
-
-            return config;
-        }
-
         [Command("run")]
-        public async ValueTask RunAsync([Option('c')] string configDirectoryPath = "../config")
+        public async ValueTask RunAsync([Option('c')] string configDirectoryPath = "../config", [Option('s')] string stateDirectoryPath = "../state")
         {
             _logger.Info("run start");
 
-            var config = this.LoadConfig(configDirectoryPath);
+            var config = DaemonConfig.LoadConfig(configDirectoryPath, stateDirectoryPath);
             if (config.ListenAddress is null)
             {
                 throw new Exception("ListenAddress is not found.");
@@ -134,13 +69,6 @@ namespace Omnius.Xeus.Daemon
             await this.ListenLoopAsync(service, ipAddress, port);
 
             _logger.Info("run end");
-        }
-
-        private DaemonConfig LoadConfig(string configDirectoryPath)
-        {
-            var configPath = Path.Combine(configDirectoryPath, "daemon.yaml");
-            var config = YamlHelper.ReadFile<DaemonConfig>(configPath);
-            return config;
         }
 
         private async ValueTask ListenLoopAsync(XeusServiceImpl service, IPAddress ipAddress, ushort port)

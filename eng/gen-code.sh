@@ -16,4 +16,5 @@ INCLUDE_2="$PWD/rpfs/**/*.rpf"
 
 "$TOOL_PATH" compile -s "$PWD/rpfs/Omnius.Xeus.Api/Omnius.Xeus.Api.rpf" -i "$INCLUDE_1" -i "$INCLUDE_2" -o "$PWD/src/Omnius.Xeus.Api/_RocketPack/_Generated.cs"
 
-"$TOOL_PATH" compile -s "$PWD/rpfs/Omnius.Xeus.Interactors/Omnius.Xeus.Interactors.Models.rpf" -i "$INCLUDE_1" -i "$INCLUDE_2" -o "$PWD/src/Omnius.Xeus.Interactors/Models/_RocketPack/_Generated.cs"
+"$TOOL_PATH" compile -s "$PWD/rpfs/Omnius.Xeus.Service/Omnius.Xeus.Service.Models.rpf" -i "$INCLUDE_1" -i "$INCLUDE_2" -o "$PWD/src/Omnius.Xeus.Service/Models/_RocketPack/_Generated.cs"
+"$TOOL_PATH" compile -s "$PWD/rpfs/Omnius.Xeus.Service.Implementations/Omnius.Xeus.Service.Internal.Models.rpf" -i "$INCLUDE_1" -i "$INCLUDE_2" -o "$PWD/src/Omnius.Xeus.Service.Implementations/Internal/Models/_RocketPack/_Generated.cs"
