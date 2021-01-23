@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="Moq" Version="4.15.1" />
-    <PackageReference Include="NLog" Version="4.7.5" />
+    <PackageReference Include="NLog" Version="4.7.7" />
   </ItemGroup>
 
 </Project>
