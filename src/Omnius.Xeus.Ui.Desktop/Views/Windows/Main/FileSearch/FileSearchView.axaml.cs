@@ -9,12 +9,8 @@ namespace Omnius.Xeus.Ui.Desktop.Views
 {
     public class FileSearchControl : UserControl, IAsyncDisposable
     {
-        private readonly IXeusService _xeusService;
-
-        public FileSearchControl(IXeusService xeusService)
+        public FileSearchControl()
         {
-            _xeusService = xeusService;
-
             this.InitializeComponent();
         }
 

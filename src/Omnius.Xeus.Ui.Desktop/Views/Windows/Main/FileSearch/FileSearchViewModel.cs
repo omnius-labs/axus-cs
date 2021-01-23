@@ -3,8 +3,8 @@ using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Omnius.Core;
-using Omnius.Xeus.Ui.Desktop.Service.Models;
 using Omnius.Xeus.Ui.Desktop.Models;
+using Omnius.Xeus.Ui.Desktop.Service.Models;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 
@@ -23,10 +23,10 @@ namespace Omnius.Xeus.Ui.Desktop.ViewModels
         public FileSearchControlViewModel(FileSearchControlViewModelOptions options)
         {
             this.TreeViewWidth = new ReactivePropertySlim<GridLength>().AddTo(_disposable);
-            this.CurrentItems = _currentFileSearchResultModels.ToReadOnlyReactiveCollection(n => new FileSearchResultViewModel(n)).AddTo(_disposable);
+            this.CurrentItems = _currentFileSearchResultModels.ToReadOnlyReactiveCollection(n => n).AddTo(_disposable);
 
             this.TreeViewWidth.Value = new GridLength(200);
-            _currentFileSearchResultModels.Add(new FileSearchResultModel() { Name = "test" });
+            _currentFileSearchResultModels.Add(new FileSearchResultModel("test"));
             _options = options;
         }
 
@@ -37,6 +37,6 @@ namespace Omnius.Xeus.Ui.Desktop.ViewModels
 
         public ReactivePropertySlim<GridLength> TreeViewWidth { get; }
 
-        public ReadOnlyReactiveCollection<FileSearchResultViewModel> CurrentItems { get; }
+        public ReadOnlyReactiveCollection<FileSearchResultModel> CurrentItems { get; }
     }
 }

@@ -57,7 +57,7 @@ namespace Omnius.Xeus.Ui.Desktop.Views
             _xeusService = await this.ConnectAsync(_cancellationTokenSource.Token);
 
             this.ViewModel = new MainWindowViewModel();
-            this.FileSearchControl = new FileSearchControl(_xeusService);
+            this.FileSearchControl = new FileSearchControl();
         }
 
         protected override async void OnClosed(EventArgs e)

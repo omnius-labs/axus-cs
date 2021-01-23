@@ -290,7 +290,7 @@
       "omnius.xeus.engines": {
         "type": "Project",
         "dependencies": {
-          "LiteDB": "5.0.9",
+          "LiteDB": "5.0.10",
           "NLog": "4.7.5",
           "Omnius.Core": "0.0.1-alpha.1",
           "Omnius.Core.Collections": "0.0.1-alpha.1",

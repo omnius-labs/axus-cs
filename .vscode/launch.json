@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Omnius.Xeus.Daemon",
+            "name": "Omnius.Xeus.Daemon (Win)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Daemon)",
@@ -13,12 +13,56 @@
             "stopAtEntry": false
         },
         {
-            "name": "Omnius.Xeus.Ui.Desktop",
+            "name": "Omnius.Xeus.Ui.Desktop (Win)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Ui.Desktop)",
             "program": "${workspaceFolder}/tmp/bin/win/Omnius.Xeus.Ui.Desktop/Debug/net5.0/Omnius.Xeus.Ui.Desktop.dll",
-            "args": ["run", "-c", "./demo/.config/ui-console"],
+            "args": ["run", "-c", "./demo/.config/ui-desktop"],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Omnius.Xeus.Daemon (Linux)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build (Omnius.Xeus.Daemon)",
+            "program": "${workspaceFolder}/tmp/bin/linux/Omnius.Xeus.Daemon/Debug/net5.0/Omnius.Xeus.Daemon.dll",
+            "args": ["run", "-c", "./demo/.config/daemon"],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Omnius.Xeus.Ui.Desktop (Linux)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build (Omnius.Xeus.Ui.Desktop)",
+            "program": "${workspaceFolder}/tmp/bin/linux/Omnius.Xeus.Ui.Desktop/Debug/net5.0/Omnius.Xeus.Ui.Desktop.dll",
+            "args": ["run", "-c", "./demo/.config/ui-desktop"],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Omnius.Xeus.Daemon (Mac)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build (Omnius.Xeus.Daemon)",
+            "program": "${workspaceFolder}/tmp/bin/mac/Omnius.Xeus.Daemon/Debug/net5.0/Omnius.Xeus.Daemon.dll",
+            "args": ["run", "-c", "./demo/.config/daemon"],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Omnius.Xeus.Ui.Desktop (Mac)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build (Omnius.Xeus.Ui.Desktop)",
+            "program": "${workspaceFolder}/tmp/bin/mac/Omnius.Xeus.Ui.Desktop/Debug/net5.0/Omnius.Xeus.Ui.Desktop.dll",
+            "args": ["run", "-c", "./demo/.config/ui-desktop"],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "stopAtEntry": false

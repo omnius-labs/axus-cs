@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  devenv:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - USER_ID=${UID}
+        - GROUP_ID=${GID}
+    container_name: devenv
+    volumes:
+      - ../../:/work
+    working_dir: /work

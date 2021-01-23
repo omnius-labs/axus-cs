@@ -1,8 +1,0 @@
-version: "3.8"
-services:
-  devenv:
-    image: mcr.microsoft.com/dotnet/sdk:5.0
-    container_name: devenv
-    volumes:
-      - ./:/work
-    working_dir: /work
