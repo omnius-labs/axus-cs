@@ -18,23 +18,30 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <TreeView Name="TreeView" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto"
-                Items="{Binding RootDirectories}" SelectedItem="{Binding SelectedDirectory.Value}">
-            <TreeView.Styles>
-                <Style Selector="TreeViewItem">
-                    <Setter Property="IsExpanded" Value="{Binding IsExpanded.Value, Mode=TwoWay}"/>
-                </Style>
-            </TreeView.Styles>
-            <TreeView.ItemTemplate>
-                <TreeDataTemplate ItemsSource="{Binding Children}">
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="{Binding Icon}" />
-                        <TextBlock Text="{Binding Name.Value}" HorizontalAlignment="Center"/>
-                    </StackPanel>
-                </TreeDataTemplate>
-            </TreeView.ItemTemplate>
-        </TreeView>
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <TextBox Grid.Row="0" />
+            <TreeView Name="TreeView" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    Items="{Binding RootDirectories}" SelectedItem="{Binding SelectedDirectory.Value}">
+                <TreeView.Styles>
+                    <Style Selector="TreeViewItem">
+                        <Setter Property="IsExpanded" Value="{Binding IsExpanded.Value, Mode=TwoWay}"/>
+                    </Style>
+                </TreeView.Styles>
+                <TreeView.ItemTemplate>
+                    <TreeDataTemplate ItemsSource="{Binding Children}">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{Binding Icon}" />
+                            <TextBlock Text="{Binding Name.Value}" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </TreeDataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+        </Grid>
         <GridSplitter Grid.Column="1" />
         <dg:DataGrid Grid.Column="2" Items="{Binding CurrentItems}" AutoGenerateColumns="False"
                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >

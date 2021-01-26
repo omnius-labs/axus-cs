@@ -3,6 +3,13 @@
 
 namespace Omnius.Xeus.Service.Models
 {
+    public enum XeusFileFoundResultState : sbyte
+    {
+        Found = 1,
+        Downloading = 2,
+        Downloaded = 4,
+        Uploaded = 8,
+    }
     public sealed partial class XeusUserProfile : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.XeusUserProfile>
     {
         public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Service.Models.XeusUserProfile> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.XeusUserProfile>.Formatter;
@@ -486,6 +493,121 @@ namespace Omnius.Xeus.Service.Models
                 }
 
                 return new global::Omnius.Xeus.Service.Models.XeusFileMeta(p_contentHash, p_name, p_size, p_tags);
+            }
+        }
+    }
+    public sealed partial class XeusFileFoundResult : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.XeusFileFoundResult>
+    {
+        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Service.Models.XeusFileFoundResult> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.XeusFileFoundResult>.Formatter;
+        public static global::Omnius.Xeus.Service.Models.XeusFileFoundResult Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.XeusFileFoundResult>.Empty;
+
+        static XeusFileFoundResult()
+        {
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.XeusFileFoundResult>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Service.Models.XeusFileFoundResult>.Empty = new global::Omnius.Xeus.Service.Models.XeusFileFoundResult((global::Omnius.Xeus.Service.Models.XeusFileFoundResultState)0, global::Omnius.Xeus.Service.Models.XeusFileMeta.Empty);
+        }
+
+        private readonly global::System.Lazy<int> ___hashCode;
+
+        public XeusFileFoundResult(global::Omnius.Xeus.Service.Models.XeusFileFoundResultState state, global::Omnius.Xeus.Service.Models.XeusFileMeta fileMeta)
+        {
+            if (fileMeta is null) throw new global::System.ArgumentNullException("fileMeta");
+
+            this.State = state;
+            this.FileMeta = fileMeta;
+
+            ___hashCode = new global::System.Lazy<int>(() =>
+            {
+                var ___h = new global::System.HashCode();
+                if (state != default) ___h.Add(state.GetHashCode());
+                if (fileMeta != default) ___h.Add(fileMeta.GetHashCode());
+                return ___h.ToHashCode();
+            });
+        }
+
+        public global::Omnius.Xeus.Service.Models.XeusFileFoundResultState State { get; }
+        public global::Omnius.Xeus.Service.Models.XeusFileMeta FileMeta { get; }
+
+        public static global::Omnius.Xeus.Service.Models.XeusFileFoundResult Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            return Formatter.Deserialize(ref reader, 0);
+        }
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            Formatter.Serialize(ref writer, this, 0);
+        }
+
+        public static bool operator ==(global::Omnius.Xeus.Service.Models.XeusFileFoundResult? left, global::Omnius.Xeus.Service.Models.XeusFileFoundResult? right)
+        {
+            return (right is null) ? (left is null) : right.Equals(left);
+        }
+        public static bool operator !=(global::Omnius.Xeus.Service.Models.XeusFileFoundResult? left, global::Omnius.Xeus.Service.Models.XeusFileFoundResult? right)
+        {
+            return !(left == right);
+        }
+        public override bool Equals(object? other)
+        {
+            if (other is not global::Omnius.Xeus.Service.Models.XeusFileFoundResult) return false;
+            return this.Equals((global::Omnius.Xeus.Service.Models.XeusFileFoundResult)other);
+        }
+        public bool Equals(global::Omnius.Xeus.Service.Models.XeusFileFoundResult? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (this.State != target.State) return false;
+            if (this.FileMeta != target.FileMeta) return false;
+
+            return true;
+        }
+        public override int GetHashCode() => ___hashCode.Value;
+
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Service.Models.XeusFileFoundResult>
+        {
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Service.Models.XeusFileFoundResult value, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                if (value.State != (global::Omnius.Xeus.Service.Models.XeusFileFoundResultState)0)
+                {
+                    w.Write((uint)1);
+                    w.Write((long)value.State);
+                }
+                if (value.FileMeta != global::Omnius.Xeus.Service.Models.XeusFileMeta.Empty)
+                {
+                    w.Write((uint)2);
+                    global::Omnius.Xeus.Service.Models.XeusFileMeta.Formatter.Serialize(ref w, value.FileMeta, rank + 1);
+                }
+                w.Write((uint)0);
+            }
+            public global::Omnius.Xeus.Service.Models.XeusFileFoundResult Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                global::Omnius.Xeus.Service.Models.XeusFileFoundResultState p_state = (global::Omnius.Xeus.Service.Models.XeusFileFoundResultState)0;
+                global::Omnius.Xeus.Service.Models.XeusFileMeta p_fileMeta = global::Omnius.Xeus.Service.Models.XeusFileMeta.Empty;
+
+                for (; ; )
+                {
+                    uint id = r.GetUInt32();
+                    if (id == 0) break;
+                    switch (id)
+                    {
+                        case 1:
+                            {
+                                p_state = (global::Omnius.Xeus.Service.Models.XeusFileFoundResultState)r.GetInt64();
+                                break;
+                            }
+                        case 2:
+                            {
+                                p_fileMeta = global::Omnius.Xeus.Service.Models.XeusFileMeta.Formatter.Deserialize(ref r, rank + 1);
+                                break;
+                            }
+                    }
+                }
+
+                return new global::Omnius.Xeus.Service.Models.XeusFileFoundResult(p_state, p_fileMeta);
             }
         }
     }

@@ -24,9 +24,9 @@
       },
       "NLog": {
         "type": "Direct",
-        "requested": "[4.7.5, )",
-        "resolved": "4.7.5",
-        "contentHash": "1Udzim+UwoAGk0vW6T2rEBXJq1COvqTuE+4NFj2zHytuX1WOu+1Yes1qABG1IJOA5V3OMilIufUU1Ha9T0rrzQ=="
+        "requested": "[4.7.7, )",
+        "resolved": "4.7.7",
+        "contentHash": "lCfAaKel4trne8Suf4/0aR9YPKDFLWKgqBupnHKNYx+cIjutF2BsVxfF2fAb+ObaYN3m5hDjx/ToVS15ouB+SA=="
       },
       "StyleCop.Analyzers": {
         "type": "Direct",
@@ -322,14 +322,14 @@
       "omnius.core.network.proxies": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.6",
+          "NLog": "4.7.7",
           "Omnius.Core": "0.0.1-alpha.1"
         }
       },
       "omnius.core.network.upnp": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.6",
+          "NLog": "4.7.7",
           "Omnius.Core": "0.0.1-alpha.1"
         }
       },
@@ -362,7 +362,7 @@
         "type": "Project",
         "dependencies": {
           "LiteDB": "5.0.10",
-          "NLog": "4.7.5",
+          "NLog": "4.7.7",
           "Omnius.Core": "0.0.1-alpha.1",
           "Omnius.Core.Collections": "0.0.1-alpha.1",
           "Omnius.Core.Cryptography": "0.0.1-alpha.1",

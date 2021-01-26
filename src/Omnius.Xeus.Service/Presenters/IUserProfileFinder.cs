@@ -32,7 +32,7 @@ namespace Omnius.Xeus.Service.Presenters
 
         ValueTask<XeusUserProfile?> GetUserProfileAsync(OmniSignature signature, CancellationToken cancellationToken = default);
 
-        ValueTask<IEnumerable<XeusUserProfile>?> GetUserProfilesAsync(CancellationToken cancellationToken = default);
+        ValueTask<IEnumerable<XeusUserProfile>> GetUserProfilesAsync(CancellationToken cancellationToken = default);
     }
 
     public class UserProfileFinderConfig

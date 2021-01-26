@@ -1,10 +1,7 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
-using Omnius.Core.Collections;
-using Omnius.Core.Cryptography;
 using Omnius.Xeus.Service.Models;
 
 namespace Omnius.Xeus.Service.Presenters
@@ -25,17 +22,6 @@ namespace Omnius.Xeus.Service.Presenters
 
     public interface IFileFinder
     {
-        FileFinderConfig Config { get; }
-
-        ValueTask SetConfigAsync(FileFinderConfig config, CancellationToken cancellationToken = default);
-
-        ValueTask<IEnumerable<XeusFileMeta>> FindAll(CancellationToken cancellationToken = default);
-    }
-
-    public class FileFinderConfig
-    {
-        public FileFinderConfig()
-        {
-        }
+        ValueTask<IEnumerable<XeusFileFoundResult>> FindAll(CancellationToken cancellationToken = default);
     }
 }

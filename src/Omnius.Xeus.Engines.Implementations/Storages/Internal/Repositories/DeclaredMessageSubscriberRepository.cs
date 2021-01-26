@@ -10,6 +10,7 @@ using Omnius.Core.Cryptography;
 using Omnius.Core.Helpers;
 using Omnius.Xeus.Engines.Storages.Internal.Models;
 using Omnius.Xeus.Engines.Storages.Internal.Repositories.Entities;
+using Omnius.Xeus.Engines.Storages.Internal.Repositories.Helpers;
 
 namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
 {
@@ -23,6 +24,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
 
             _database = new LiteDatabase(filePath);
             this.Items = new SubscribedDeclaredMessageItemRepository(_database);
+            this.WrittenItems = new WrittenDeclaredMessageItemRepository(_database);
         }
 
         protected override void OnDispose(bool disposing)
@@ -63,19 +65,14 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
             {
                 using (await _asyncLock.WriterLockAsync(cancellationToken))
                 {
-                    if (this.Version <= 0)
+                    if (VersionHelper.GetVersion(_database, CollectionName) <= 0)
                     {
                         var col = this.GetCollection();
                         col.EnsureIndex(x => x.Signature, false);
-                        this.Version = 1;
                     }
-                }
-            }
 
-            private int Version
-            {
-                get => _database.Pragma(CollectionName);
-                set => _database.Pragma(CollectionName, new BsonValue(value));
+                    VersionHelper.SetVersion(_database, CollectionName, 1);
+                }
             }
 
             public bool Exists(OmniSignature signature)
@@ -172,19 +169,14 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
             {
                 using (await _asyncLock.WriterLockAsync(cancellationToken))
                 {
-                    if (this.Version <= 0)
+                    if (VersionHelper.GetVersion(_database, CollectionName) <= 0)
                     {
                         var col = this.GetCollection();
                         col.EnsureIndex(x => x.Signature, true);
-                        this.Version = 1;
                     }
-                }
-            }
 
-            private int Version
-            {
-                get => _database.Pragma(CollectionName);
-                set => _database.Pragma(CollectionName, new BsonValue(value));
+                    VersionHelper.SetVersion(_database, CollectionName, 1);
+                }
             }
 
             public bool Exists(OmniSignature signature)

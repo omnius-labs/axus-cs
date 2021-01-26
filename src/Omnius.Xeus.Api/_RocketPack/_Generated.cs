@@ -1550,7 +1550,7 @@ namespace Omnius.Xeus.Api
             }
         }
     }
-    public sealed partial class ContentSubscriber_ExportContent_Memory_Output : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output>
+    public sealed partial class ContentSubscriber_ExportContent_Memory_Output : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output>, global::System.IDisposable
     {
         public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output>.Formatter;
         public static global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output>.Empty;
@@ -1558,28 +1558,30 @@ namespace Omnius.Xeus.Api
         static ContentSubscriber_ExportContent_Memory_Output()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output>.Empty = new global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output(global::System.ReadOnlyMemory<byte>.Empty);
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output>.Empty = new global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output(global::Omnius.Core.MemoryOwner<byte>.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxMemoryLength = 33554432;
 
-        public ContentSubscriber_ExportContent_Memory_Output(global::System.ReadOnlyMemory<byte> memory)
+        public ContentSubscriber_ExportContent_Memory_Output(global::System.Buffers.IMemoryOwner<byte> memory)
         {
-            if (memory.Length > 33554432) throw new global::System.ArgumentOutOfRangeException("memory");
+            if (memory is null) throw new global::System.ArgumentNullException("memory");
+            if (memory.Memory.Length > 33554432) throw new global::System.ArgumentOutOfRangeException("memory");
 
-            this.Memory = memory;
+            _memory = memory;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (!memory.IsEmpty) ___h.Add(global::Omnius.Core.Helpers.ObjectHelper.GetHashCode(memory.Span));
+                if (!memory.Memory.IsEmpty) ___h.Add(global::Omnius.Core.Helpers.ObjectHelper.GetHashCode(memory.Memory.Span));
                 return ___h.ToHashCode();
             });
         }
 
-        public global::System.ReadOnlyMemory<byte> Memory { get; }
+        private readonly global::System.Buffers.IMemoryOwner<byte> _memory;
+        public global::System.ReadOnlyMemory<byte> Memory => _memory.Memory;
 
         public static global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -1615,6 +1617,11 @@ namespace Omnius.Xeus.Api
         }
         public override int GetHashCode() => ___hashCode.Value;
 
+        public void Dispose()
+        {
+            _memory?.Dispose();
+        }
+
         private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output>
         {
             public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output value, in int rank)
@@ -1632,7 +1639,7 @@ namespace Omnius.Xeus.Api
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                global::System.ReadOnlyMemory<byte> p_memory = global::System.ReadOnlyMemory<byte>.Empty;
+                global::System.Buffers.IMemoryOwner<byte> p_memory = global::Omnius.Core.MemoryOwner<byte>.Empty;
 
                 for (; ; )
                 {
@@ -1642,7 +1649,7 @@ namespace Omnius.Xeus.Api
                     {
                         case 1:
                             {
-                                p_memory = r.GetMemory(33554432);
+                                p_memory = r.GetRecyclableMemory(33554432);
                                 break;
                             }
                     }
@@ -2328,20 +2335,20 @@ namespace Omnius.Xeus.Api
             }
         }
     }
-    public sealed partial class DeclaredMessageSubscriber_ExportContent_Input : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input>
+    public sealed partial class DeclaredMessageSubscriber_ExportMessage_Input : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input>.Formatter;
-        public static global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input>.Formatter;
+        public static global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input>.Empty;
 
-        static DeclaredMessageSubscriber_ExportContent_Input()
+        static DeclaredMessageSubscriber_ExportMessage_Input()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input>.Empty = new global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input(global::Omnius.Core.Cryptography.OmniSignature.Empty);
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input>.Empty = new global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input(global::Omnius.Core.Cryptography.OmniSignature.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public DeclaredMessageSubscriber_ExportContent_Input(global::Omnius.Core.Cryptography.OmniSignature signature)
+        public DeclaredMessageSubscriber_ExportMessage_Input(global::Omnius.Core.Cryptography.OmniSignature signature)
         {
             if (signature is null) throw new global::System.ArgumentNullException("signature");
 
@@ -2357,7 +2364,7 @@ namespace Omnius.Xeus.Api
 
         public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
 
-        public static global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -2368,20 +2375,20 @@ namespace Omnius.Xeus.Api
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input? left, global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input? right)
+        public static bool operator ==(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input? left, global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input? left, global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input? right)
+        public static bool operator !=(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input? left, global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (other is not global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input) return false;
-            return this.Equals((global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input)other);
+            if (other is not global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input) return false;
+            return this.Equals((global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input)other);
         }
-        public bool Equals(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input? target)
+        public bool Equals(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -2391,9 +2398,9 @@ namespace Omnius.Xeus.Api
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2404,7 +2411,7 @@ namespace Omnius.Xeus.Api
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2424,24 +2431,24 @@ namespace Omnius.Xeus.Api
                     }
                 }
 
-                return new global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input(p_signature);
+                return new global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input(p_signature);
             }
         }
     }
-    public sealed partial class DeclaredMessageSubscriber_ExportContent_Output : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output>
+    public sealed partial class DeclaredMessageSubscriber_ExportMessage_Output : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output>.Formatter;
-        public static global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output>.Formatter;
+        public static global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output>.Empty;
 
-        static DeclaredMessageSubscriber_ExportContent_Output()
+        static DeclaredMessageSubscriber_ExportMessage_Output()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output>.Empty = new global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output(null);
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output>.Empty = new global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output(null);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public DeclaredMessageSubscriber_ExportContent_Output(global::Omnius.Xeus.Engines.Models.DeclaredMessage? declaredMessage)
+        public DeclaredMessageSubscriber_ExportMessage_Output(global::Omnius.Xeus.Engines.Models.DeclaredMessage? declaredMessage)
         {
             this.DeclaredMessage = declaredMessage;
 
@@ -2455,7 +2462,7 @@ namespace Omnius.Xeus.Api
 
         public global::Omnius.Xeus.Engines.Models.DeclaredMessage? DeclaredMessage { get; }
 
-        public static global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -2466,20 +2473,20 @@ namespace Omnius.Xeus.Api
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output? left, global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output? right)
+        public static bool operator ==(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output? left, global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output? left, global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output? right)
+        public static bool operator !=(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output? left, global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (other is not global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output) return false;
-            return this.Equals((global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output)other);
+            if (other is not global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output) return false;
+            return this.Equals((global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output)other);
         }
-        public bool Equals(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output? target)
+        public bool Equals(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -2490,9 +2497,9 @@ namespace Omnius.Xeus.Api
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2503,7 +2510,7 @@ namespace Omnius.Xeus.Api
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2523,7 +2530,7 @@ namespace Omnius.Xeus.Api
                     }
                 }
 
-                return new global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output(p_declaredMessage);
+                return new global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output(p_declaredMessage);
             }
         }
     }
@@ -2547,7 +2554,7 @@ namespace Omnius.Xeus.Api
         global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_GetReport_Output> DeclaredMessageSubscriber_GetReportAsync(global::System.Threading.CancellationToken cancellationToken = default);
         global::System.Threading.Tasks.ValueTask DeclaredMessageSubscriber_SubscribeMessageAsync(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_SubscribeMessage_Input param, global::System.Threading.CancellationToken cancellationToken = default);
         global::System.Threading.Tasks.ValueTask DeclaredMessageSubscriber_UnsubscribeMessageAsync(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_UnsubscribeMessage_Input param, global::System.Threading.CancellationToken cancellationToken = default);
-        global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output> DeclaredMessageSubscriber_ExportContentAsync(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input param, global::System.Threading.CancellationToken cancellationToken = default);
+        global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output> DeclaredMessageSubscriber_ExportMessageAsync(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input param, global::System.Threading.CancellationToken cancellationToken = default);
     }
     public class XeusService
     {
@@ -2656,10 +2663,10 @@ namespace Omnius.Xeus.Api
                 using var function = await _remoting.ConnectAsync(18, cancellationToken);
                 await function.CallActionAsync<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_UnsubscribeMessage_Input>(param, cancellationToken);
             }
-            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output> DeclaredMessageSubscriber_ExportContentAsync(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input param, global::System.Threading.CancellationToken cancellationToken)
+            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output> DeclaredMessageSubscriber_ExportMessageAsync(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input param, global::System.Threading.CancellationToken cancellationToken)
             {
                 using var function = await _remoting.ConnectAsync(19, cancellationToken);
-                return await function.CallFunctionAsync<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input, global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output>(param, cancellationToken);
+                return await function.CallFunctionAsync<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input, global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output>(param, cancellationToken);
             }
         }
         public class Server : global::Omnius.Core.AsyncDisposableBase
@@ -2779,7 +2786,7 @@ namespace Omnius.Xeus.Api
                             break;
                         case 19:
                             {
-                                await function.ListenFunctionAsync<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Input, global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportContent_Output>(_service.DeclaredMessageSubscriber_ExportContentAsync, cancellationToken);
+                                await function.ListenFunctionAsync<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input, global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output>(_service.DeclaredMessageSubscriber_ExportMessageAsync, cancellationToken);
                             }
                             break;
                     }

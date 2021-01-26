@@ -5,7 +5,7 @@ using Omnius.Xeus.Ui.Console.Helpers;
 
 namespace Omnius.Xeus.Ui.Desktop.Configs
 {
-    public class UiConfig
+    public sealed class UiConfig
     {
         public string? DaemonAddress { get; init; }
 

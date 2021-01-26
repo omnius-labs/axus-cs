@@ -87,8 +87,8 @@ namespace Omnius.Xeus.Service.Interactors
 
         private async ValueTask<DeclaredMessage?> ExportDeclaredMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
-            var input = new DeclaredMessageSubscriber_ExportContent_Input(signature);
-            var output = await _xeusService.DeclaredMessageSubscriber_ExportContentAsync(input, cancellationToken);
+            var input = new DeclaredMessageSubscriber_ExportMessage_Input(signature);
+            var output = await _xeusService.DeclaredMessageSubscriber_ExportMessageAsync(input, cancellationToken);
             return output.DeclaredMessage;
         }
 

@@ -3,7 +3,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Omnius.Core;
@@ -28,9 +27,6 @@ namespace Omnius.Xeus.Ui.Desktop.Views
         public MainWindow()
         {
             this.InitializeComponent();
-#if DEBUG
-            this.AttachDevTools();
-#endif
 
             _initTask = this.InitAsync();
         }

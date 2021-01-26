@@ -26,3 +26,15 @@ message XeusFileMeta {
     Size: uint64,
     Tags: vector<string(capacity: 256)>(capacity: 8),
 }
+
+enum XeusFileFoundResultState : int8 {
+    Found = 1,
+    Downloading = 2,
+    Downloaded = 4,
+    Uploaded = 8,
+}
+
+message XeusFileFoundResult {
+    State: XeusFileFoundResultState,
+    FileMeta: XeusFileMeta,
+}

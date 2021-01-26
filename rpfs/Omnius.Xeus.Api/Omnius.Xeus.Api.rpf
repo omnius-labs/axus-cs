@@ -27,7 +27,7 @@ service XeusService {
     DeclaredMessageSubscriber_GetReport: () -> (DeclaredMessageSubscriber_GetReport_Output),
     DeclaredMessageSubscriber_SubscribeMessage: (DeclaredMessageSubscriber_SubscribeMessage_Input) -> (),
     DeclaredMessageSubscriber_UnsubscribeMessage: (DeclaredMessageSubscriber_UnsubscribeMessage_Input) -> (),
-    DeclaredMessageSubscriber_ExportContent: (DeclaredMessageSubscriber_ExportContent_Input) -> (DeclaredMessageSubscriber_ExportContent_Output),
+    DeclaredMessageSubscriber_ExportMessage: (DeclaredMessageSubscriber_ExportMessage_Input) -> (DeclaredMessageSubscriber_ExportMessage_Output),
 }
 
 message CkadMediator_GetMyNodeProfile_Output {
@@ -92,7 +92,7 @@ message ContentSubscriber_ExportContent_Memory_Input {
 }
 
 message ContentSubscriber_ExportContent_Memory_Output {
-    Memory: bytes(capacity: 32 * 1024 * 1024),
+    Memory: bytes(capacity: 32 * 1024 * 1024, recyclable: true),
 }
 
 message DeclaredMessagePublisher_GetReport_Output {
@@ -123,10 +123,10 @@ message DeclaredMessageSubscriber_UnsubscribeMessage_Input {
     Registrant: string,
 }
 
-message DeclaredMessageSubscriber_ExportContent_Input {
+message DeclaredMessageSubscriber_ExportMessage_Input {
     Signature: OmniSignature,
 }
 
-message DeclaredMessageSubscriber_ExportContent_Output {
+message DeclaredMessageSubscriber_ExportMessage_Output {
     DeclaredMessage: DeclaredMessage?,
 }

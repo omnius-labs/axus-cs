@@ -1,10 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
 using Omnius.Core.Cryptography;
-using Omnius.Core.Network;
-using Omnius.Xeus.Ui.Console.Helpers;
 
 namespace Omnius.Xeus.Ui.Desktop.Resources
 {

@@ -22,18 +22,18 @@
       },
       "NLog": {
         "type": "Direct",
-        "requested": "[4.7.5, )",
-        "resolved": "4.7.5",
-        "contentHash": "1Udzim+UwoAGk0vW6T2rEBXJq1COvqTuE+4NFj2zHytuX1WOu+1Yes1qABG1IJOA5V3OMilIufUU1Ha9T0rrzQ=="
+        "requested": "[4.7.7, )",
+        "resolved": "4.7.7",
+        "contentHash": "lCfAaKel4trne8Suf4/0aR9YPKDFLWKgqBupnHKNYx+cIjutF2BsVxfF2fAb+ObaYN3m5hDjx/ToVS15ouB+SA=="
       },
       "NLog.Config": {
         "type": "Direct",
-        "requested": "[4.7.5, )",
-        "resolved": "4.7.5",
-        "contentHash": "rUW2e2X0q5PDDlxVa/ooH8jdA9ubL89dNW+Z8HPdR6qvWAPgLIpQvIeRSJC/yicuI/fSX+xZy9EzNZZAlTVgwA==",
+        "requested": "[4.7.7, )",
+        "resolved": "4.7.7",
+        "contentHash": "SvcBYLm7ZDKiJTh0VE+ys3wTKLuYCABQ4fmLQrIBnM0zql/k0QCD3AF8evA5OKy6/l3vDxFnC02bdxT2LJGAPw==",
         "dependencies": {
-          "NLog": "4.7.5",
-          "NLog.Schema": "4.7.5"
+          "NLog": "4.7.7",
+          "NLog.Schema": "4.7.7"
         }
       },
       "StyleCop.Analyzers": {
@@ -149,8 +149,8 @@
       },
       "NLog.Schema": {
         "type": "Transitive",
-        "resolved": "4.7.5",
-        "contentHash": "UgzboQ9sJyonVd8XXqQ3Zzea4IPz5k7nNv6qdU73HpJ43fHIkveWPmIMtZWKS8YJrMxlGso2Sk/oE6r/ZyiOXg=="
+        "resolved": "4.7.7",
+        "contentHash": "qaRZ1CS8Dqq1B4HsnXt3+6K2mPjiTDb/SkDkNGbivSwXSk1ioUcmg5YgD7dO8zKJTvjWKTQcXNjHGiKpUoI8Ow=="
       },
       "Sprache": {
         "type": "Transitive",
@@ -409,14 +409,14 @@
       "omnius.core.network.proxies": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.6",
+          "NLog": "4.7.7",
           "Omnius.Core": "0.0.1-alpha.1"
         }
       },
       "omnius.core.network.upnp": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.6",
+          "NLog": "4.7.7",
           "Omnius.Core": "0.0.1-alpha.1"
         }
       },
@@ -448,7 +448,7 @@
       "omnius.xeus.api": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.5",
+          "NLog": "4.7.7",
           "Omnius.Core.Collections": "0.0.1-alpha.1",
           "Omnius.Core.Cryptography": "0.0.1-alpha.1",
           "Omnius.Core.Network": "0.0.1-alpha.1",
@@ -459,7 +459,7 @@
         "type": "Project",
         "dependencies": {
           "LiteDB": "5.0.10",
-          "NLog": "4.7.5",
+          "NLog": "4.7.7",
           "Omnius.Core": "0.0.1-alpha.1",
           "Omnius.Core.Collections": "0.0.1-alpha.1",
           "Omnius.Core.Cryptography": "0.0.1-alpha.1",
@@ -474,7 +474,7 @@
         "type": "Project",
         "dependencies": {
           "LiteDB": "5.0.10",
-          "NLog": "4.7.5",
+          "NLog": "4.7.7",
           "Nito.AsyncEx": "5.1.0",
           "Omnius.Core": "0.0.1-alpha.1",
           "Omnius.Core.Collections": "0.0.1-alpha.1",
