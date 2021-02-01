@@ -21,7 +21,7 @@
     <PackageReference Include="Avalonia.Controls.DataGrid" Version="0.10.0" />
     <PackageReference Include="Avalonia.Desktop" Version="0.10.0" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.0" />
-    <PackageReference Include="ReactiveProperty" Version="7.6.1" />
+    <PackageReference Include="ReactiveProperty" Version="7.7.0" />
     <PackageReference Include="NLog" Version="4.7.7" />
     <PackageReference Include="NLog.Config" Version="4.7.7" />
     <PackageReference Include="YamlDotNet" Version="9.1.4" />
