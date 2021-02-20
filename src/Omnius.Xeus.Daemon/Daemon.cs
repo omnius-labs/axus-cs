@@ -102,7 +102,7 @@ namespace Omnius.Xeus.Daemon
 
             try
             {
-                _logger.Info("Tcp listen start");
+                _logger.Info("listen start");
 
                 tcpListener = new TcpListener(ipAddress, port);
                 tcpListener.Start();
@@ -112,7 +112,6 @@ namespace Omnius.Xeus.Daemon
                 using var register = linkedTokenSource.Token.Register(() => tcpListener.Stop());
 
                 var socket = await tcpListener.AcceptSocketAsync();
-                _logger.Info("Tcp accepted");
 
                 var cap = new SocketCap(socket);
 
@@ -132,17 +131,22 @@ namespace Omnius.Xeus.Daemon
 
                 _logger.Info("event loop start");
 
-                await using var server = new XeusService.Server(service, connection, BytesPool.Shared);
-                await server.EventLoopAsync(cancellationToken);
+                try
+                {
+                    await using var server = new XeusService.Server(service, connection, BytesPool.Shared);
+                    await server.EventLoopAsync(cancellationToken);
+                }
+                catch (Exception e)
+                {
+                    _logger.Debug(e);
+                }
 
                 _logger.Info("event loop end");
             }
-            catch (Exception e)
-            {
-                _logger.Debug(e);
-            }
             finally
             {
+                _logger.Info("listen end");
+
                 if (tcpListener is not null)
                 {
                     tcpListener.Server.Dispose();
