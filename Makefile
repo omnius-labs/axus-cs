@@ -1,6 +1,3 @@
-init-tools:
-	docker-compose -f ./docker/dev/docker-compose.yml run --rm devenv sh ./eng/init-tools.sh
-
 gen-code:
 	docker-compose -f ./docker/dev/docker-compose.yml run --rm devenv sh ./eng/gen-code.sh
 

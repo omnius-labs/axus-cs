@@ -52,10 +52,7 @@ namespace Omnius.Xeus.Engines.Engines.Internal
 
         public TimeSpan GetElapsedTime(T item)
         {
-            if (!_map.TryGetValue(item, out var updateTime))
-            {
-                return _survivalTime;
-            }
+            if (!_map.TryGetValue(item, out var updateTime)) return _survivalTime;
 
             var now = DateTime.UtcNow;
             return (now - updateTime);
@@ -149,10 +146,7 @@ namespace Omnius.Xeus.Engines.Engines.Internal
 
             foreach (var value in other)
             {
-                if (_map.ContainsKey(value))
-                {
-                    continue;
-                }
+                if (_map.ContainsKey(value)) continue;
 
                 tempList.Add(value);
             }

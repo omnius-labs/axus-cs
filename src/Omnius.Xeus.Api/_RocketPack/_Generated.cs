@@ -2573,97 +2573,97 @@ namespace Omnius.Xeus.Api
             {
                 await _remoting.DisposeAsync();
             }
-            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.CkadMediator_GetMyNodeProfile_Output> CkadMediator_GetMyNodeProfileAsync(global::System.Threading.CancellationToken cancellationToken)
+            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.CkadMediator_GetMyNodeProfile_Output> CkadMediator_GetMyNodeProfileAsync(global::System.Threading.CancellationToken cancellationToken = default)
             {
                 using var function = await _remoting.ConnectAsync(1, cancellationToken);
                 return await function.CallFunctionAsync<global::Omnius.Xeus.Api.CkadMediator_GetMyNodeProfile_Output>(cancellationToken);
             }
-            public async global::System.Threading.Tasks.ValueTask CkadMediator_AddCloudNodeProfilesAsync(global::Omnius.Xeus.Api.CkadMediator_AddCloudNodeProfiles_Input param, global::System.Threading.CancellationToken cancellationToken)
+            public async global::System.Threading.Tasks.ValueTask CkadMediator_AddCloudNodeProfilesAsync(global::Omnius.Xeus.Api.CkadMediator_AddCloudNodeProfiles_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
                 using var function = await _remoting.ConnectAsync(2, cancellationToken);
                 await function.CallActionAsync<global::Omnius.Xeus.Api.CkadMediator_AddCloudNodeProfiles_Input>(param, cancellationToken);
             }
-            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.ContentPublisher_GetReport_Output> ContentPublisher_GetReportAsync(global::System.Threading.CancellationToken cancellationToken)
+            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.ContentPublisher_GetReport_Output> ContentPublisher_GetReportAsync(global::System.Threading.CancellationToken cancellationToken = default)
             {
                 using var function = await _remoting.ConnectAsync(3, cancellationToken);
                 return await function.CallFunctionAsync<global::Omnius.Xeus.Api.ContentPublisher_GetReport_Output>(cancellationToken);
             }
-            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.ContentPublisher_PublishContent_File_Output> ContentPublisher_PublishContentAsync(global::Omnius.Xeus.Api.ContentPublisher_PublishContent_File_Input param, global::System.Threading.CancellationToken cancellationToken)
+            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.ContentPublisher_PublishContent_File_Output> ContentPublisher_PublishContentAsync(global::Omnius.Xeus.Api.ContentPublisher_PublishContent_File_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
                 using var function = await _remoting.ConnectAsync(4, cancellationToken);
                 return await function.CallFunctionAsync<global::Omnius.Xeus.Api.ContentPublisher_PublishContent_File_Input, global::Omnius.Xeus.Api.ContentPublisher_PublishContent_File_Output>(param, cancellationToken);
             }
-            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.ContentPublisher_PublishContent_Memory_Output> ContentPublisher_PublishContentAsync(global::Omnius.Xeus.Api.ContentPublisher_PublishContent_Memory_Input param, global::System.Threading.CancellationToken cancellationToken)
+            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.ContentPublisher_PublishContent_Memory_Output> ContentPublisher_PublishContentAsync(global::Omnius.Xeus.Api.ContentPublisher_PublishContent_Memory_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
                 using var function = await _remoting.ConnectAsync(5, cancellationToken);
                 return await function.CallFunctionAsync<global::Omnius.Xeus.Api.ContentPublisher_PublishContent_Memory_Input, global::Omnius.Xeus.Api.ContentPublisher_PublishContent_Memory_Output>(param, cancellationToken);
             }
-            public async global::System.Threading.Tasks.ValueTask ContentPublisher_UnpublishContentAsync(global::Omnius.Xeus.Api.ContentPublisher_UnpublishContent_File_Input param, global::System.Threading.CancellationToken cancellationToken)
+            public async global::System.Threading.Tasks.ValueTask ContentPublisher_UnpublishContentAsync(global::Omnius.Xeus.Api.ContentPublisher_UnpublishContent_File_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
                 using var function = await _remoting.ConnectAsync(6, cancellationToken);
                 await function.CallActionAsync<global::Omnius.Xeus.Api.ContentPublisher_UnpublishContent_File_Input>(param, cancellationToken);
             }
-            public async global::System.Threading.Tasks.ValueTask ContentPublisher_UnpublishContentAsync(global::Omnius.Xeus.Api.ContentPublisher_UnpublishContent_Memory_Input param, global::System.Threading.CancellationToken cancellationToken)
+            public async global::System.Threading.Tasks.ValueTask ContentPublisher_UnpublishContentAsync(global::Omnius.Xeus.Api.ContentPublisher_UnpublishContent_Memory_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
                 using var function = await _remoting.ConnectAsync(7, cancellationToken);
                 await function.CallActionAsync<global::Omnius.Xeus.Api.ContentPublisher_UnpublishContent_Memory_Input>(param, cancellationToken);
             }
-            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.ContentSubscriber_GetReport_Output> ContentSubscriber_GetReportAsync(global::System.Threading.CancellationToken cancellationToken)
+            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.ContentSubscriber_GetReport_Output> ContentSubscriber_GetReportAsync(global::System.Threading.CancellationToken cancellationToken = default)
             {
                 using var function = await _remoting.ConnectAsync(8, cancellationToken);
                 return await function.CallFunctionAsync<global::Omnius.Xeus.Api.ContentSubscriber_GetReport_Output>(cancellationToken);
             }
-            public async global::System.Threading.Tasks.ValueTask ContentSubscriber_SubscribeContentAsync(global::Omnius.Xeus.Api.ContentSubscriber_SubscribeContent_Input param, global::System.Threading.CancellationToken cancellationToken)
+            public async global::System.Threading.Tasks.ValueTask ContentSubscriber_SubscribeContentAsync(global::Omnius.Xeus.Api.ContentSubscriber_SubscribeContent_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
                 using var function = await _remoting.ConnectAsync(9, cancellationToken);
                 await function.CallActionAsync<global::Omnius.Xeus.Api.ContentSubscriber_SubscribeContent_Input>(param, cancellationToken);
             }
-            public async global::System.Threading.Tasks.ValueTask ContentSubscriber_UnsubscribeContentAsync(global::Omnius.Xeus.Api.ContentSubscriber_UnsubscribeContent_Input param, global::System.Threading.CancellationToken cancellationToken)
+            public async global::System.Threading.Tasks.ValueTask ContentSubscriber_UnsubscribeContentAsync(global::Omnius.Xeus.Api.ContentSubscriber_UnsubscribeContent_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
                 using var function = await _remoting.ConnectAsync(10, cancellationToken);
                 await function.CallActionAsync<global::Omnius.Xeus.Api.ContentSubscriber_UnsubscribeContent_Input>(param, cancellationToken);
             }
-            public async global::System.Threading.Tasks.ValueTask ContentSubscriber_ExportContentAsync(global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_File_Input param, global::System.Threading.CancellationToken cancellationToken)
+            public async global::System.Threading.Tasks.ValueTask ContentSubscriber_ExportContentAsync(global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_File_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
                 using var function = await _remoting.ConnectAsync(11, cancellationToken);
                 await function.CallActionAsync<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_File_Input>(param, cancellationToken);
             }
-            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output> ContentSubscriber_ExportContentAsync(global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Input param, global::System.Threading.CancellationToken cancellationToken)
+            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output> ContentSubscriber_ExportContentAsync(global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
                 using var function = await _remoting.ConnectAsync(12, cancellationToken);
                 return await function.CallFunctionAsync<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Input, global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output>(param, cancellationToken);
             }
-            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.DeclaredMessagePublisher_GetReport_Output> DeclaredMessagePublisher_GetReportAsync(global::System.Threading.CancellationToken cancellationToken)
+            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.DeclaredMessagePublisher_GetReport_Output> DeclaredMessagePublisher_GetReportAsync(global::System.Threading.CancellationToken cancellationToken = default)
             {
                 using var function = await _remoting.ConnectAsync(13, cancellationToken);
                 return await function.CallFunctionAsync<global::Omnius.Xeus.Api.DeclaredMessagePublisher_GetReport_Output>(cancellationToken);
             }
-            public async global::System.Threading.Tasks.ValueTask DeclaredMessagePublisher_PublishMessageAsync(global::Omnius.Xeus.Api.DeclaredMessagePublisher_PublishMessage_Input param, global::System.Threading.CancellationToken cancellationToken)
+            public async global::System.Threading.Tasks.ValueTask DeclaredMessagePublisher_PublishMessageAsync(global::Omnius.Xeus.Api.DeclaredMessagePublisher_PublishMessage_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
                 using var function = await _remoting.ConnectAsync(14, cancellationToken);
                 await function.CallActionAsync<global::Omnius.Xeus.Api.DeclaredMessagePublisher_PublishMessage_Input>(param, cancellationToken);
             }
-            public async global::System.Threading.Tasks.ValueTask DeclaredMessagePublisher_UnpublishMessageAsync(global::Omnius.Xeus.Api.DeclaredMessagePublisher_UnpublishMessage_Input param, global::System.Threading.CancellationToken cancellationToken)
+            public async global::System.Threading.Tasks.ValueTask DeclaredMessagePublisher_UnpublishMessageAsync(global::Omnius.Xeus.Api.DeclaredMessagePublisher_UnpublishMessage_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
                 using var function = await _remoting.ConnectAsync(15, cancellationToken);
                 await function.CallActionAsync<global::Omnius.Xeus.Api.DeclaredMessagePublisher_UnpublishMessage_Input>(param, cancellationToken);
             }
-            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_GetReport_Output> DeclaredMessageSubscriber_GetReportAsync(global::System.Threading.CancellationToken cancellationToken)
+            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_GetReport_Output> DeclaredMessageSubscriber_GetReportAsync(global::System.Threading.CancellationToken cancellationToken = default)
             {
                 using var function = await _remoting.ConnectAsync(16, cancellationToken);
                 return await function.CallFunctionAsync<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_GetReport_Output>(cancellationToken);
             }
-            public async global::System.Threading.Tasks.ValueTask DeclaredMessageSubscriber_SubscribeMessageAsync(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_SubscribeMessage_Input param, global::System.Threading.CancellationToken cancellationToken)
+            public async global::System.Threading.Tasks.ValueTask DeclaredMessageSubscriber_SubscribeMessageAsync(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_SubscribeMessage_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
                 using var function = await _remoting.ConnectAsync(17, cancellationToken);
                 await function.CallActionAsync<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_SubscribeMessage_Input>(param, cancellationToken);
             }
-            public async global::System.Threading.Tasks.ValueTask DeclaredMessageSubscriber_UnsubscribeMessageAsync(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_UnsubscribeMessage_Input param, global::System.Threading.CancellationToken cancellationToken)
+            public async global::System.Threading.Tasks.ValueTask DeclaredMessageSubscriber_UnsubscribeMessageAsync(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_UnsubscribeMessage_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
                 using var function = await _remoting.ConnectAsync(18, cancellationToken);
                 await function.CallActionAsync<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_UnsubscribeMessage_Input>(param, cancellationToken);
             }
-            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output> DeclaredMessageSubscriber_ExportMessageAsync(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input param, global::System.Threading.CancellationToken cancellationToken)
+            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output> DeclaredMessageSubscriber_ExportMessageAsync(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
                 using var function = await _remoting.ConnectAsync(19, cancellationToken);
                 return await function.CallFunctionAsync<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input, global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output>(param, cancellationToken);

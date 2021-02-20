@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,14 +14,21 @@ namespace Omnius.Xeus.Service.Presenters
 
     public class FileFinderOptions
     {
-        public string? ConfigDirectoryPath { get; init; }
+        public FileFinderOptions(string configDirectoryPath, IUserProfileFinder userProfileFinder, IBytesPool bytesPool)
+        {
+            this.ConfigDirectoryPath = configDirectoryPath;
+            this.UserProfileFinder = userProfileFinder;
+            this.BytesPool = bytesPool;
+        }
 
-        public IUserProfileFinder? UserProfileFinder { get; init; }
+        public string ConfigDirectoryPath { get; }
 
-        public IBytesPool? BytesPool { get; init; }
+        public IUserProfileFinder UserProfileFinder { get; }
+
+        public IBytesPool BytesPool { get; }
     }
 
-    public interface IFileFinder
+    public interface IFileFinder : IAsyncDisposable
     {
         ValueTask<IEnumerable<XeusFileFoundResult>> FindAll(CancellationToken cancellationToken = default);
     }

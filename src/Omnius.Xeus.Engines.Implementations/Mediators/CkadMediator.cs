@@ -161,10 +161,7 @@ namespace Omnius.Xeus.Engines.Mediators
             {
                 foreach (var nodeProfile in nodeProfiles)
                 {
-                    if (_cloudNodeProfiles.Count >= 2048)
-                    {
-                        return;
-                    }
+                    if (_cloudNodeProfiles.Count >= 2048) return;
 
                     _cloudNodeProfiles.AddLast(nodeProfile);
                 }
@@ -184,10 +181,7 @@ namespace Omnius.Xeus.Engines.Mediators
         {
             lock (_lockObject)
             {
-                if (_cloudNodeProfiles.Count >= 1024)
-                {
-                    return _cloudNodeProfiles.Remove(nodeProfile);
-                }
+                if (_cloudNodeProfiles.Count >= 1024) _cloudNodeProfiles.Remove(nodeProfile);
 
                 return false;
             }
@@ -209,10 +203,7 @@ namespace Omnius.Xeus.Engines.Mediators
                     {
                         int connectionCount = _connections.Select(n => n.HandshakeType == ConnectionHandshakeType.Connected).Count();
 
-                        if (_connections.Count > (_options.MaxConnectionCount / 2))
-                        {
-                            continue;
-                        }
+                        if (_connections.Count > (_options.MaxConnectionCount / 2)) continue;
                     }
 
                     NodeProfile? targetNodeProfile = null;
@@ -231,10 +222,7 @@ namespace Omnius.Xeus.Engines.Mediators
                             .FirstOrDefault();
                     }
 
-                    if (targetNodeProfile == null)
-                    {
-                        continue;
-                    }
+                    if (targetNodeProfile == null) continue;
 
                     bool succeeded = false;
 
@@ -243,10 +231,7 @@ namespace Omnius.Xeus.Engines.Mediators
                         foreach (var connector in _connectors)
                         {
                             var connection = await connector.ConnectAsync(targetAddress, this.EngineName, cancellationToken);
-                            if (connection is null)
-                            {
-                                continue;
-                            }
+                            if (connection is null) continue;
 
                             _connectedAddressSet.Add(targetAddress);
 
@@ -294,19 +279,13 @@ namespace Omnius.Xeus.Engines.Mediators
                     {
                         int connectionCount = _connections.Select(n => n.HandshakeType == ConnectionHandshakeType.Accepted).Count();
 
-                        if (_connections.Count > (_options.MaxConnectionCount / 2))
-                        {
-                            continue;
-                        }
+                        if (_connections.Count > (_options.MaxConnectionCount / 2)) continue;
                     }
 
                     foreach (var connector in _connectors)
                     {
                         var result = await connector.AcceptAsync(this.EngineName, cancellationToken);
-                        if (result.Connection is null || result.Address is null)
-                        {
-                            continue;
-                        }
+                        if (result.Connection is null || result.Address is null) continue;
 
                         await this.TryAddConnectionAsync(result.Connection, result.Address, ConnectionHandshakeType.Accepted, cancellationToken);
                     }
@@ -335,10 +314,7 @@ namespace Omnius.Xeus.Engines.Mediators
                     await Task.WhenAll(enqueueTask, dequeueTask);
 
                     var otherHelloMessage = dequeueTask.Result;
-                    if (otherHelloMessage == null)
-                    {
-                        throw new CkadMediatorException();
-                    }
+                    if (otherHelloMessage == null) throw new CkadMediatorException();
 
                     version = EnumHelper.GetOverlappedMaxValue(myHelloMessage.Versions, otherHelloMessage.Versions);
                 }
@@ -356,19 +332,13 @@ namespace Omnius.Xeus.Engines.Mediators
                         await Task.WhenAll(enqueueTask, dequeueTask);
 
                         var otherProfileMessage = dequeueTask.Result;
-                        if (otherProfileMessage == null)
-                        {
-                            throw new CkadMediatorException();
-                        }
+                        if (otherProfileMessage == null) throw new CkadMediatorException();
 
                         id = otherProfileMessage.Id;
                         nodeProfile = otherProfileMessage.NodeProfile;
                     }
 
-                    if (!this.CanAppend(id.Span))
-                    {
-                        throw new CkadMediatorException();
-                    }
+                    if (!this.CanAppend(id.Span)) throw new CkadMediatorException();
 
                     var status = new ConnectionStatus(connection, address, handshakeType, nodeProfile, id);
 
@@ -416,10 +386,7 @@ namespace Omnius.Xeus.Engines.Mediators
 
                 {
                     map.TryGetValue(appendingNodeDistance, out int count);
-                    if (count > MaxBucketLength)
-                    {
-                        return false;
-                    }
+                    if (count > MaxBucketLength) return false;
 
                     return true;
                 }
@@ -689,10 +656,7 @@ namespace Omnius.Xeus.Engines.Mediators
                         {
                             foreach (var tag in element.Value.ConnectionStatus.ReceivedWantLocations)
                             {
-                                if (!contentLocationMap.TryGetValue(tag, out var nodeProfiles))
-                                {
-                                    continue;
-                                }
+                                if (!contentLocationMap.TryGetValue(tag, out var nodeProfiles)) continue;
 
                                 element.Value.SendingGiveLocations[tag] = nodeProfiles.ToList();
                             }

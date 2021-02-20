@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
-using Omnius.Core.Extensions;
-using Omnius.Xeus.Service.Interactors;
 using Omnius.Xeus.Service.Models;
 
 namespace Omnius.Xeus.Service.Presenters
@@ -15,11 +13,7 @@ namespace Omnius.Xeus.Service.Presenters
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private string _configDirectoryPath;
-        private IUserProfileSubscriber _userProfileSubscriber;
-        private IBytesPool _bytesPool;
-
-        private UserProfileFinderConfig _config;
+        private readonly UserProfileFinderOptions _options;
 
         private readonly HashSet<OmniSignature> _trustedSignatures = new();
         private readonly Dictionary<OmniSignature, XeusUserProfile> _cachedProfiles = new();
@@ -27,9 +21,7 @@ namespace Omnius.Xeus.Service.Presenters
         private readonly Task _watchTask = null!;
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-        private readonly AutoResetEvent _resetEvent = new(true);
         private readonly AsyncReaderWriterLock _asyncLock = new();
-        private readonly object _lockObject = new();
 
         private const int MaxProfileCount = 32 * 1024;
 
@@ -44,10 +36,13 @@ namespace Omnius.Xeus.Service.Presenters
             }
         }
 
+        public static IUserProfileFinderFactory Factory { get; } = new UserProfileFinderFactory();
+
         public UserProfileFinder(UserProfileFinderOptions options)
         {
+            _options = options;
+
             _watchTask = this.WatchAsync();
-            _bytesPool = options.BytesPool ?? BytesPool.Shared;
         }
 
         public async ValueTask InitAsync()
@@ -67,7 +62,7 @@ namespace Omnius.Xeus.Service.Presenters
 
             for (; ; )
             {
-                await _resetEvent.WaitAsync(1000 * 30, cancellationToken);
+                await Task.Delay(1000 * 30, cancellationToken);
 
                 await this.UpdateProfilesAsync(cancellationToken);
             }
@@ -77,20 +72,13 @@ namespace Omnius.Xeus.Service.Presenters
         {
             var profiles = new HashSet<XeusUserProfile>();
 
-            var config = _config;
-
-            foreach (var trustedSignature in config.TrustedSignatures)
+            foreach (var trustedSignature in _options.TrustedSignatures)
             {
-                profiles.UnionWith(await this.InternalFindProfilesAsync(trustedSignature, config.BlockedSignatures, config.SearchDepth, cancellationToken));
+                profiles.UnionWith(await this.InternalFindProfilesAsync(trustedSignature, _options.BlockedSignatures, _options.SearchDepth, cancellationToken));
             }
 
             using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
-                if (_config != config)
-                {
-                    return;
-                }
-
                 _cachedProfiles.Clear();
 
                 foreach (var profile in profiles)
@@ -116,10 +104,7 @@ namespace Omnius.Xeus.Service.Presenters
             foreach (int rank in Enumerable.Range(0, depth))
             {
                 var sectionResults = (await this.InternalGetProfilesAsync(targetSignatures, cancellationToken)).ToList();
-                if (sectionResults.Count == 0)
-                {
-                    break;
-                }
+                if (sectionResults.Count == 0) break;
 
                 checkedSignatures.UnionWith(targetSignatures);
                 checkedSignatures.UnionWith(sectionResults.SelectMany(n => n.Content.BlockedSignatures));
@@ -129,10 +114,7 @@ namespace Omnius.Xeus.Service.Presenters
 
                 results.AddRange(sectionResults);
 
-                if (results.Count > MaxProfileCount)
-                {
-                    break;
-                }
+                if (results.Count > MaxProfileCount) break;
             }
 
             return results.GetRange(0, MaxProfileCount);
@@ -146,27 +128,13 @@ namespace Omnius.Xeus.Service.Presenters
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var result = await _userProfileSubscriber.GetUserProfileAsync(signature, cancellationToken);
-                if (result is null)
-                {
-                    continue;
-                }
+                var result = await _options.UserProfileSubscriber.GetUserProfileAsync(signature, cancellationToken);
+                if (result is null) continue;
 
                 results.Add(result);
             }
 
             return results;
-        }
-
-        public UserProfileFinderConfig Config => _config;
-
-        public async ValueTask SetConfigAsync(UserProfileFinderConfig config, CancellationToken cancellationToken = default)
-        {
-            using (await _asyncLock.WriterLockAsync(cancellationToken))
-            {
-                _config = config;
-                _resetEvent.Set();
-            }
         }
 
         public async ValueTask<XeusUserProfile?> GetUserProfileAsync(OmniSignature signature, CancellationToken cancellationToken = default)

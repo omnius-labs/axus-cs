@@ -10,19 +10,16 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories.Helpers
             var col = database.GetCollection<DocumentStatusEntity>("_document_status");
 
             var entry = col.FindOne(n => n.Name == name);
-            if (entry is null)
-            {
-                return 0;
-            }
+            if (entry is null) return 0;
 
             return entry.Version;
         }
 
-        public static void SetVersion(ILiteDatabase database, string name, int Version)
+        public static void SetVersion(ILiteDatabase database, string name, int version)
         {
             var col = database.GetCollection<DocumentStatusEntity>("_document_status");
 
-            col.Upsert(new DocumentStatusEntity() { Name = name, Version = Version });
+            col.Upsert(new DocumentStatusEntity() { Name = name, Version = version });
         }
     }
 }

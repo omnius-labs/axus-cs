@@ -70,10 +70,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal
             {
                 var col = this.GetCollection();
                 var meta = col.FindOne(n => n.Name == oldName);
-                if (meta is null)
-                {
-                    throw new KeyNotFoundException();
-                }
+                if (meta is null) throw new KeyNotFoundException();
 
                 meta.Name = newName;
 
@@ -103,10 +100,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal
         {
             using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
-                if (name is null)
-                {
-                    throw new ArgumentNullException(nameof(name));
-                }
+                if (name is null) throw new ArgumentNullException(nameof(name));
 
                 var col = this.GetCollection();
                 var id = col.Insert(new BlockMeta() { Name = name }).AsInt64;
@@ -132,10 +126,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal
             {
                 var col = this.GetCollection();
                 var meta = col.FindOne(n => n.Name == name);
-                if (meta is null)
-                {
-                    return null;
-                }
+                if (meta is null) return null;
 
                 var storage = this.GetStorage();
                 await using var liteFileStream = storage.OpenRead(meta.Id);
@@ -158,10 +149,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal
             {
                 var col = this.GetCollection();
                 var meta = col.FindOne(n => n.Name == name);
-                if (meta is null)
-                {
-                    return;
-                }
+                if (meta is null) return;
 
                 var storage = this.GetStorage();
                 storage.Delete(meta.Id);

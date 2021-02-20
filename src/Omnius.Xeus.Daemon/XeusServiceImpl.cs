@@ -7,8 +7,8 @@ using Omnius.Core.Extensions;
 using Omnius.Core.Network.Proxies;
 using Omnius.Core.Network.Upnp;
 using Omnius.Xeus.Api;
-using Omnius.Xeus.Daemon.Configs;
 using Omnius.Xeus.Daemon.Internal;
+using Omnius.Xeus.Daemon.Resources.Models;
 using Omnius.Xeus.Engines.Connectors;
 using Omnius.Xeus.Engines.Exchangers;
 using Omnius.Xeus.Engines.Mediators;
@@ -45,7 +45,7 @@ namespace Omnius.Xeus.Daemon
         public EnginesConfig? Config { get; init; }
     }
 
-    public class XeusServiceImpl : IXeusService
+    public class XeusServiceImpl : AsyncDisposableBase, IXeusService
     {
         private readonly XeusServiceOptions _options;
 
@@ -59,8 +59,24 @@ namespace Omnius.Xeus.Daemon
         private IDeclaredMessagePublisher _declaredMessagePublisher = null!;
         private IDeclaredMessageSubscriber _declaredMessageSubscriber = null!;
 
-        public static async ValueTask<XeusServiceImpl> CreateAsync(XeusServiceOptions options)
+        public static async ValueTask<XeusServiceImpl> CreateAsync(EnginesConfig enginesConfig, CancellationToken cancellationToken = default)
         {
+            var options = new XeusServiceOptions
+            {
+                Socks5ProxyClientFactory = Socks5ProxyClient.Factory,
+                HttpProxyClientFactory = HttpProxyClient.Factory,
+                UpnpClientFactory = UpnpClient.Factory,
+                TcpConnectorFactory = TcpConnector.Factory,
+                CkadMediatorFactory = CkadMediator.Factory,
+                ContentExchangerFactory = ContentExchanger.Factory,
+                DeclaredMessageExchangerFactory = DeclaredMessageExchanger.Factory,
+                ContentPublisherFactory = ContentPublisher.Factory,
+                ContentSubscriberFactory = ContentSubscriber.Factory,
+                DeclaredMessagePublisherFactory = DeclaredMessagePublisher.Factory,
+                DeclaredMessageSubscriberFactory = DeclaredMessageSubscriber.Factory,
+                BytesPool = BytesPool.Shared,
+                Config = enginesConfig,
+            };
             var service = new XeusServiceImpl(options);
             await service.InitAsync();
 
@@ -112,6 +128,17 @@ namespace Omnius.Xeus.Daemon
 
             var declaredMessageExchangerOptions = OptionsGenerator.GenDeclaredMessageExchangerOptions(_config);
             _declaredMessageExchanger = await declaredMessageExchangerFactory.CreateAsync(declaredMessageExchangerOptions, new[] { tcpConnector }, _ckadMediator, _declaredMessagePublisher, _declaredMessageSubscriber, _bytesPool);
+        }
+
+        protected override async ValueTask OnDisposeAsync()
+        {
+            await _declaredMessagePublisher.DisposeAsync();
+            await _declaredMessageSubscriber.DisposeAsync();
+            await _contentPublisher.DisposeAsync();
+            await _contentSubscriber.DisposeAsync();
+            await _contentExchanger.DisposeAsync();
+            await _declaredMessageExchanger.DisposeAsync();
+            await _ckadMediator.DisposeAsync();
         }
 
         public async ValueTask<CkadMediator_GetMyNodeProfile_Output> CkadMediator_GetMyNodeProfileAsync(CancellationToken cancellationToken = default)

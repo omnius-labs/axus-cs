@@ -4,9 +4,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        - USER_ID=${UID}
-        - GROUP_ID=${GID}
+    environment:
+      LOCAL_UID: $UID
+      LOCAL_GID: $GID
     container_name: devenv
     volumes:
       - ../../:/work

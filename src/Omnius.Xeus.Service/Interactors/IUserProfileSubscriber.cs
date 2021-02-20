@@ -16,14 +16,21 @@ namespace Omnius.Xeus.Service.Interactors
 
     public class UserProfileSubscriberOptions
     {
-        public string? ConfigDirectoryPath { get; init; }
+        public UserProfileSubscriberOptions(string configDirectoryPath, IXeusService xeusService, IBytesPool bytesPool)
+        {
+            this.ConfigDirectoryPath = configDirectoryPath;
+            this.XeusService = xeusService;
+            this.BytesPool = bytesPool;
+        }
 
-        public IXeusService? XeusService { get; init; }
+        public string? ConfigDirectoryPath { get; }
 
-        public IBytesPool? BytesPool { get; init; }
+        public IXeusService? XeusService { get; }
+
+        public IBytesPool? BytesPool { get; }
     }
 
-    public interface IUserProfileSubscriber
+    public interface IUserProfileSubscriber : IAsyncDisposable
     {
         ValueTask<IEnumerable<OmniSignature>> GetSignaturesAsync(CancellationToken cancellationToken = default);
 

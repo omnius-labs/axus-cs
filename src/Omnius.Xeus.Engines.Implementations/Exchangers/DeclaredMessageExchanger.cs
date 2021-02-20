@@ -116,10 +116,7 @@ namespace Omnius.Xeus.Engines.Exchangers
                     {
                         int connectionCount = _connectionStatusSet.Select(n => n.HandshakeType == ConnectionHandshakeType.Connected).Count();
 
-                        if (_connectionStatusSet.Count > (_options.MaxConnectionCount / 2))
-                        {
-                            continue;
-                        }
+                        if (_connectionStatusSet.Count > (_options.MaxConnectionCount / 2)) continue;
                     }
 
                     foreach (var signature in await _subscriber.GetSignaturesAsync(cancellationToken))
@@ -143,20 +140,14 @@ namespace Omnius.Xeus.Engines.Exchangers
                                 .FirstOrDefault();
                         }
 
-                        if (targetNodeProfile == null)
-                        {
-                            continue;
-                        }
+                        if (targetNodeProfile == null) continue;
 
                         foreach (var targetAddress in targetNodeProfile.Addresses)
                         {
                             foreach (var connector in _connectors)
                             {
                                 var connection = await connector.ConnectAsync(targetAddress, EngineName, cancellationToken);
-                                if (connection is null)
-                                {
-                                    continue;
-                                }
+                                if (connection is null) continue;
 
                                 _connectedAddressSet.Add(targetAddress);
 
@@ -197,10 +188,7 @@ namespace Omnius.Xeus.Engines.Exchangers
                     {
                         int connectionCount = _connectionStatusSet.Select(n => n.HandshakeType == ConnectionHandshakeType.Accepted).Count();
 
-                        if (_connectionStatusSet.Count > (_options.MaxConnectionCount / 2))
-                        {
-                            continue;
-                        }
+                        if (_connectionStatusSet.Count > (_options.MaxConnectionCount / 2)) continue;
                     }
 
                     foreach (var connector in _connectors)
@@ -282,10 +270,7 @@ namespace Omnius.Xeus.Engines.Exchangers
                     await Task.WhenAll(enqueueTask, dequeueTask);
 
                     var otherHelloMessage = dequeueTask.Result;
-                    if (otherHelloMessage == null)
-                    {
-                        throw new DeclaredMessageExchangerException();
-                    }
+                    if (otherHelloMessage == null) throw new DeclaredMessageExchangerException();
 
                     version = EnumHelper.GetOverlappedMaxValue(myHelloMessage.Versions, otherHelloMessage.Versions);
                 }
@@ -331,10 +316,7 @@ namespace Omnius.Xeus.Engines.Exchangers
             {
                 if (handshakeType == ConnectionHandshakeType.Connected)
                 {
-                    if (signature == null)
-                    {
-                        throw new ArgumentNullException(nameof(signature));
-                    }
+                    if (signature == null) throw new ArgumentNullException(nameof(signature));
 
                     status.Signature = signature;
 
@@ -348,10 +330,7 @@ namespace Omnius.Xeus.Engines.Exchangers
                     await connection.EnqueueAsync(fetchMessage, cancellationToken);
 
                     var fetchResultMessage = await connection.DequeueAsync<DeclaredMessageExchangerFetchResultMessage>(cancellationToken);
-                    if (fetchResultMessage == null)
-                    {
-                        throw new DeclaredMessageExchangerException();
-                    }
+                    if (fetchResultMessage == null) throw new DeclaredMessageExchangerException();
 
                     if (fetchResultMessage.Type == DeclaredMessageExchangerFetchResultType.Found)
                     {
@@ -363,10 +342,7 @@ namespace Omnius.Xeus.Engines.Exchangers
                     else if (fetchResultMessage.Type == DeclaredMessageExchangerFetchResultType.NotFound)
                     {
                         var message = await this.ReadMessageAsync(signature, cancellationToken);
-                        if (message is null)
-                        {
-                            throw new DeclaredMessageExchangerException();
-                        }
+                        if (message is null) throw new DeclaredMessageExchangerException();
 
                         var postMessage = new DeclaredMessageExchangerPostMessage(message);
                         await connection.EnqueueAsync(postMessage, cancellationToken: cancellationToken);
@@ -375,10 +351,7 @@ namespace Omnius.Xeus.Engines.Exchangers
                 else if (handshakeType == ConnectionHandshakeType.Accepted)
                 {
                     var fetchMessage = await connection.DequeueAsync<DeclaredMessageExchangerFetchRequestMessage>(cancellationToken);
-                    if (fetchMessage == null)
-                    {
-                        throw new DeclaredMessageExchangerException();
-                    }
+                    if (fetchMessage == null) throw new DeclaredMessageExchangerException();
 
                     signature = fetchMessage.Signature;
                     status.Signature = signature;
@@ -438,10 +411,7 @@ namespace Omnius.Xeus.Engines.Exchangers
         {
             var wantStorageCreationTime = await _subscriber.ReadMessageCreationTimeAsync(signature, cancellationToken);
             var pushStorageCreationTime = await _publisher.ReadMessageCreationTimeAsync(signature, cancellationToken);
-            if (wantStorageCreationTime is null && pushStorageCreationTime is null)
-            {
-                return null;
-            }
+            if (wantStorageCreationTime is null && pushStorageCreationTime is null) return null;
 
             if ((wantStorageCreationTime ?? DateTime.MinValue) < (pushStorageCreationTime ?? DateTime.MinValue))
             {
@@ -457,10 +427,7 @@ namespace Omnius.Xeus.Engines.Exchangers
         {
             var wantStorageCreationTime = await _subscriber.ReadMessageCreationTimeAsync(signature, cancellationToken);
             var pushStorageCreationTime = await _publisher.ReadMessageCreationTimeAsync(signature, cancellationToken);
-            if (wantStorageCreationTime is null && pushStorageCreationTime is null)
-            {
-                return null;
-            }
+            if (wantStorageCreationTime is null && pushStorageCreationTime is null) return null;
 
             if ((wantStorageCreationTime ?? DateTime.MinValue) < (pushStorageCreationTime ?? DateTime.MinValue))
             {

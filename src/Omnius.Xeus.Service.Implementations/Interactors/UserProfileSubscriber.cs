@@ -13,7 +13,7 @@ using Omnius.Xeus.Service.Models;
 
 namespace Omnius.Xeus.Service.Interactors
 {
-    public sealed class UserProfileSubscriber : DisposableBase, IUserProfileSubscriber
+    public sealed class UserProfileSubscriber : AsyncDisposableBase, IUserProfileSubscriber
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -33,6 +33,8 @@ namespace Omnius.Xeus.Service.Interactors
             }
         }
 
+        public static IUserProfileSubscriberFactory Factory { get; } = new UserProfileSubscriberFactory();
+
         public UserProfileSubscriber(UserProfileSubscriberOptions options)
         {
             _xeusService = options.XeusService ?? throw new ArgumentNullException(nameof(options.XeusService));
@@ -43,7 +45,7 @@ namespace Omnius.Xeus.Service.Interactors
         {
         }
 
-        protected override void OnDispose(bool disposing)
+        protected override async ValueTask OnDisposeAsync()
         {
         }
 
@@ -74,10 +76,7 @@ namespace Omnius.Xeus.Service.Interactors
         public async ValueTask<XeusUserProfile?> GetUserProfileAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
             using var declaredMessage = await this.ExportDeclaredMessageAsync(signature, cancellationToken);
-            if (declaredMessage is null)
-            {
-                return null;
-            }
+            if (declaredMessage is null) return null;
 
             var contentHash = OmniHash.Import(new ReadOnlySequence<byte>(declaredMessage.Value), _bytesPool);
             var content = await this.ExportContentAsync<XeusUserProfileContent>(contentHash, cancellationToken);

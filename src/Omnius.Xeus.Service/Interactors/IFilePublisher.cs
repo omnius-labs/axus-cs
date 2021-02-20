@@ -15,9 +15,15 @@ namespace Omnius.Xeus.Service.Interactors
 
     public class FilePublisherOptions
     {
-        public IXeusService? XeusService { get; init; }
+        public FilePublisherOptions(IXeusService xeusService, IBytesPool bytesPool)
+        {
+            this.XeusService = xeusService;
+            this.BytesPool = bytesPool;
+        }
 
-        public IBytesPool? BytesPool { get; init; }
+        public IXeusService XeusService { get; }
+
+        public IBytesPool BytesPool { get; }
     }
 
     public interface IFilePublisher : IAsyncDisposable

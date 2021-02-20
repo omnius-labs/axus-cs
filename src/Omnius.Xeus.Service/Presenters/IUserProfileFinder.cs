@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -17,31 +18,15 @@ namespace Omnius.Xeus.Service.Presenters
 
     public class UserProfileFinderOptions
     {
-        public string? ConfigDirectoryPath { get; init; }
-
-        public IUserProfileSubscriber? UserProfileSubscriber { get; init; }
-
-        public IBytesPool? BytesPool { get; init; }
-    }
-
-    public interface IUserProfileFinder
-    {
-        UserProfileFinderConfig Config { get; }
-
-        ValueTask SetConfigAsync(UserProfileFinderConfig config, CancellationToken cancellationToken = default);
-
-        ValueTask<XeusUserProfile?> GetUserProfileAsync(OmniSignature signature, CancellationToken cancellationToken = default);
-
-        ValueTask<IEnumerable<XeusUserProfile>> GetUserProfilesAsync(CancellationToken cancellationToken = default);
-    }
-
-    public class UserProfileFinderConfig
-    {
-        public UserProfileFinderConfig(IEnumerable<OmniSignature> trustedSignatures, IEnumerable<OmniSignature> blockedSignatures, int searchDepth)
+        public UserProfileFinderOptions(IEnumerable<OmniSignature> trustedSignatures, IEnumerable<OmniSignature> blockedSignatures, int searchDepth, string configDirectoryPath,
+            IUserProfileSubscriber userProfileSubscriber, IBytesPool bytesPool)
         {
             this.TrustedSignatures = new ReadOnlyListSlim<OmniSignature>(trustedSignatures.ToArray());
             this.BlockedSignatures = new ReadOnlyListSlim<OmniSignature>(blockedSignatures.ToArray());
             this.SearchDepth = searchDepth;
+            this.ConfigDirectoryPath = configDirectoryPath;
+            this.UserProfileSubscriber = userProfileSubscriber;
+            this.BytesPool = bytesPool;
         }
 
         public IReadOnlyList<OmniSignature> TrustedSignatures { get; }
@@ -49,5 +34,18 @@ namespace Omnius.Xeus.Service.Presenters
         public IReadOnlyList<OmniSignature> BlockedSignatures { get; }
 
         public int SearchDepth { get; }
+
+        public string ConfigDirectoryPath { get; }
+
+        public IUserProfileSubscriber UserProfileSubscriber { get; }
+
+        public IBytesPool BytesPool { get; }
+    }
+
+    public interface IUserProfileFinder : IAsyncDisposable
+    {
+        ValueTask<XeusUserProfile?> GetUserProfileAsync(OmniSignature signature, CancellationToken cancellationToken = default);
+
+        ValueTask<IEnumerable<XeusUserProfile>> GetUserProfilesAsync(CancellationToken cancellationToken = default);
     }
 }

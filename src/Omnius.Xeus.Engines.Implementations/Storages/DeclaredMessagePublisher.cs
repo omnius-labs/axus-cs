@@ -100,10 +100,7 @@ namespace Omnius.Xeus.Engines.Storages
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
                 var item = _publisherRepo.Items.Find(signature).FirstOrDefault();
-                if (item == null)
-                {
-                    return false;
-                }
+                if (item == null) return false;
 
                 return true;
             }
@@ -114,10 +111,7 @@ namespace Omnius.Xeus.Engines.Storages
             using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
                 var signature = message.Certificate?.GetOmniSignature();
-                if (signature is null)
-                {
-                    throw new ArgumentNullException(nameof(message.Certificate));
-                }
+                if (signature is null) throw new ArgumentNullException(nameof(message.Certificate));
 
                 using var hub = new BytesHub(_bytesPool);
                 message.Export(hub.Writer, _bytesPool);
@@ -142,10 +136,7 @@ namespace Omnius.Xeus.Engines.Storages
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
                 var item = _publisherRepo.Items.Find(signature).FirstOrDefault();
-                if (item == null)
-                {
-                    return null;
-                }
+                if (item == null) return null;
 
                 return item.CreationTime;
             }
@@ -156,17 +147,11 @@ namespace Omnius.Xeus.Engines.Storages
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
                 var item = _publisherRepo.Items.Find(signature).FirstOrDefault();
-                if (item == null)
-                {
-                    return null;
-                }
+                if (item == null) return null;
 
                 var blockName = ComputeBlockName(signature);
                 var memoryOwner = await _blockStorage.ReadAsync(blockName, cancellationToken);
-                if (memoryOwner is null)
-                {
-                    return null;
-                }
+                if (memoryOwner is null) return null;
 
                 var message = DeclaredMessage.Import(new ReadOnlySequence<byte>(memoryOwner.Memory), _bytesPool);
                 return message;

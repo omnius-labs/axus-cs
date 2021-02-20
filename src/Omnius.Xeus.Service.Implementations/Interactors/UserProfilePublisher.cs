@@ -34,6 +34,8 @@ namespace Omnius.Xeus.Service.Interactors
             }
         }
 
+        public static IUserProfilePublisherFactory Factory { get; } = new UserProfilePublisherFactory();
+
         public UserProfilePublisher(UserProfilePublisherOptions options)
         {
             _xeusService = options.XeusService ?? throw new ArgumentNullException(nameof(options.XeusService));

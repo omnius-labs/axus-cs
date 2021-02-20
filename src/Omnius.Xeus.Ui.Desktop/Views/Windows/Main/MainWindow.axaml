@@ -1,0 +1,35 @@
+<Window x:Class="Omnius.Xeus.Ui.Desktop.Views.Windows.Main.MainWindow"
+        Title="Omnius.Xeus.Ui.Desktop"
+        xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:dataGrid="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
+        xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+        xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+        xmlns:mvm="clr-namespace:Omnius.Xeus.Ui.Desktop.Views.Windows.Main;assembly=Omnius.Lxna.Ui.Desktop"
+        xmlns:fvm="clr-namespace:Omnius.Xeus.Ui.Desktop.Views.Windows.Main.FileSearch;assembly=Omnius.Xeus.Ui.Desktop"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        Width="800"
+        Height="450"
+        FontFamily="Meiryo UI, Lucida Grande, Ubuntu"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450" >
+
+    <Grid ColumnDefinitions="Auto,*">
+        <ListBox Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
+            <ListBox.Styles>
+                <Style Selector="ListBoxItem">
+                    <Setter Property="Height" Value="32" />
+                    <Setter Property="Width" Value="32" />
+                    <Setter Property="FontSize" Value="32"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                </Style>
+            </ListBox.Styles>
+            <ListBoxItem />
+        </ListBox>
+        <Grid Grid.Column="1">
+            <fvm:FileSearchControl x:Name="FileSearchControl" Height="NaN" Width="NaN" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+        </Grid>
+    </Grid>
+</Window>

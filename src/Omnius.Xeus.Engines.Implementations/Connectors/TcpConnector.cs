@@ -85,16 +85,10 @@ namespace Omnius.Xeus.Engines.Connectors
         public async ValueTask<IConnection?> ConnectAsync(OmniAddress address, string serviceId, CancellationToken cancellationToken = default)
         {
             var cap = await _internalTcpConnector.ConnectAsync(address, cancellationToken);
-            if (cap is null)
-            {
-                return null;
-            }
+            if (cap is null) return null;
 
             var connection = await this.InternalConnectAsync(cap, serviceId, cancellationToken);
-            if (connection is null)
-            {
-                return null;
-            }
+            if (connection is null) return null;
 
             return connection;
         }
@@ -156,16 +150,10 @@ namespace Omnius.Xeus.Engines.Connectors
                     await Task.Delay(1000, cancellationToken);
 
                     var (cap, address) = await _internalTcpConnector.AcceptAsync(cancellationToken);
-                    if (cap == null || address == null)
-                    {
-                        continue;
-                    }
+                    if (cap == null || address == null) continue;
 
                     var (connection, serviceId) = await this.InternalAcceptAsync(cap, cancellationToken);
-                    if (connection == null || serviceId == null)
-                    {
-                        continue;
-                    }
+                    if (connection == null || serviceId == null) continue;
 
                     var channel = this.GetAcceptedConnectionChannel(serviceId, false);
                     if (channel == null)

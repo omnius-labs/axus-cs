@@ -76,10 +76,7 @@ namespace Omnius.Xeus.Engines.Connectors.Internal
                 // TcpListenerの追加処理
                 foreach (var listenAddress in listenAddressSet)
                 {
-                    if (!listenAddress.TryParseTcpEndpoint(out var ipAddress, out ushort port, false))
-                    {
-                        continue;
-                    }
+                    if (!listenAddress.TryParseTcpEndpoint(out var ipAddress, out ushort port, false)) continue;
 
                     var tcpListener = new TcpListener(ipAddress, port);
                     tcpListener.Start(3);
@@ -179,10 +176,7 @@ namespace Omnius.Xeus.Engines.Connectors.Internal
         {
             if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
             {
-                if (ipAddress == IPAddress.Any || ipAddress == IPAddress.Loopback || ipAddress == IPAddress.Broadcast)
-                {
-                    return false;
-                }
+                if (ipAddress == IPAddress.Any || ipAddress == IPAddress.Loopback || ipAddress == IPAddress.Broadcast) return false;
 
                 var bytes = ipAddress.GetAddressBytes();
 
@@ -269,10 +263,7 @@ namespace Omnius.Xeus.Engines.Connectors.Internal
             }
             catch (SocketException)
             {
-                if (socket != null)
-                {
-                    socket.Dispose();
-                }
+                socket?.Dispose();
 
                 return null;
             }
@@ -283,15 +274,9 @@ namespace Omnius.Xeus.Engines.Connectors.Internal
             this.ThrowIfDisposingRequested();
 
             var config = _tcpConnectingOptions;
-            if (config == null || !config.Enabled)
-            {
-                return null;
-            }
+            if (config == null || !config.Enabled) return null;
 
-            if (!address.TryParseTcpEndpoint(out var ipAddress, out ushort port))
-            {
-                return null;
-            }
+            if (!address.TryParseTcpEndpoint(out var ipAddress, out ushort port)) return null;
 
             var disposableList = new List<IDisposable>();
 
@@ -303,18 +288,12 @@ namespace Omnius.Xeus.Engines.Connectors.Internal
 
                 if (config.ProxyOptions?.Address is not null)
                 {
-                    if (!config.ProxyOptions.Address.TryParseTcpEndpoint(out var proxyAddress, out ushort proxyPort, true))
-                    {
-                        return null;
-                    }
+                    if (!config.ProxyOptions.Address.TryParseTcpEndpoint(out var proxyAddress, out ushort proxyPort, true)) return null;
 
                     if (config.ProxyOptions.Type == TcpProxyType.Socks5Proxy)
                     {
                         var socket = await ConnectAsync(new IPEndPoint(proxyAddress, proxyPort));
-                        if (socket == null)
-                        {
-                            return null;
-                        }
+                        if (socket == null) return null;
 
                         disposableList.Add(socket);
 
@@ -329,10 +308,7 @@ namespace Omnius.Xeus.Engines.Connectors.Internal
                     else if (config.ProxyOptions.Type == TcpProxyType.HttpProxy)
                     {
                         var socket = await ConnectAsync(new IPEndPoint(proxyAddress, proxyPort));
-                        if (socket == null)
-                        {
-                            return null;
-                        }
+                        if (socket == null) return null;
 
                         disposableList.Add(socket);
 
@@ -348,10 +324,7 @@ namespace Omnius.Xeus.Engines.Connectors.Internal
                 else
                 {
                     var socket = await ConnectAsync(new IPEndPoint(ipAddress, port));
-                    if (socket == null)
-                    {
-                        return null;
-                    }
+                    if (socket == null) return null;
 
                     disposableList.Add(socket);
 
@@ -383,10 +356,7 @@ namespace Omnius.Xeus.Engines.Connectors.Internal
             try
             {
                 var config = _tcpAcceptingOptions;
-                if (config == null || !config.Enabled)
-                {
-                    return default;
-                }
+                if (config == null || !config.Enabled) return default;
 
                 var tcpListeners = _tcpListeners.ToArray();
                 _random.Shuffle(tcpListeners);
@@ -394,10 +364,7 @@ namespace Omnius.Xeus.Engines.Connectors.Internal
                 foreach (var tcpListener in tcpListeners)
                 {
                     var socket = await tcpListener.AcceptSocketAsync();
-                    if (socket is null || socket.RemoteEndPoint is null)
-                    {
-                        continue;
-                    }
+                    if (socket is null || socket.RemoteEndPoint is null) continue;
 
                     garbages.Add(socket);
 
@@ -437,10 +404,7 @@ namespace Omnius.Xeus.Engines.Connectors.Internal
         public async ValueTask<OmniAddress[]> GetListenEndpointsAsync(CancellationToken cancellationToken = default)
         {
             var config = _tcpAcceptingOptions;
-            if (config == null || !config.Enabled)
-            {
-                return Array.Empty<OmniAddress>();
-            }
+            if (config == null || !config.Enabled) return Array.Empty<OmniAddress>();
 
             var results = new List<OmniAddress>();
 
@@ -448,10 +412,7 @@ namespace Omnius.Xeus.Engines.Connectors.Internal
 
             foreach (var listenAddress in config.ListenAddresses)
             {
-                if (!listenAddress.TryParseTcpEndpoint(out var listenIpAddress, out var port))
-                {
-                    continue;
-                }
+                if (!listenAddress.TryParseTcpEndpoint(out var listenIpAddress, out var port)) continue;
 
                 if (listenIpAddress.AddressFamily == AddressFamily.InterNetwork && listenIpAddress == IPAddress.Any)
                 {

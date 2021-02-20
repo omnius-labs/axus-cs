@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -54,9 +53,9 @@ namespace Omnius.Xeus.Engines.Connectors
                 var bandwidthOptions = new BandwidthOptions(1024, 1024);
                 var tcpConnectorOptions = new TcpConnectorOptions(tcpConnectingOptions, tcpAcceptingOptions, bandwidthOptions);
 
-                var socks5ProxyClientFactory = GenISocks5ProxyClientFactory();
-                var httpProxyClientFactory = GenIHttpProxyClientFactory();
-                var upnpClientFactory = GenIUpnpClientFactory();
+                var socks5ProxyClientFactory = GenSocks5ProxyClientFactory();
+                var httpProxyClientFactory = GenHttpProxyClientFactory();
+                var upnpClientFactory = GenUpnpClientFactory();
                 var bytesPool = BytesPool.Shared;
 
                 var tcpConnector = await TcpConnector.Factory.CreateAsync(tcpConnectorOptions, socks5ProxyClientFactory, httpProxyClientFactory, upnpClientFactory, bytesPool);
@@ -70,16 +69,16 @@ namespace Omnius.Xeus.Engines.Connectors
                 var bandwidthOptions = new BandwidthOptions(1024 * 1024, 1024 * 1024);
                 var tcpConnectorOptions = new TcpConnectorOptions(tcpConnectingOptions, tcpAcceptingOptions, bandwidthOptions);
 
-                var socks5ProxyClientFactory = GenISocks5ProxyClientFactory();
-                var httpProxyClientFactory = GenIHttpProxyClientFactory();
-                var upnpClientFactory = GenIUpnpClientFactory();
+                var socks5ProxyClientFactory = GenSocks5ProxyClientFactory();
+                var httpProxyClientFactory = GenHttpProxyClientFactory();
+                var upnpClientFactory = GenUpnpClientFactory();
                 var bytesPool = BytesPool.Shared;
 
                 var tcpConnector = await TcpConnector.Factory.CreateAsync(tcpConnectorOptions, socks5ProxyClientFactory, httpProxyClientFactory, upnpClientFactory, bytesPool);
                 return tcpConnector;
             }
 
-            static ISocks5ProxyClientFactory GenISocks5ProxyClientFactory()
+            static ISocks5ProxyClientFactory GenSocks5ProxyClientFactory()
             {
                 var socks5ProxyClientMock = new Mock<ISocks5ProxyClient>();
                 socks5ProxyClientMock.Setup(n => n.ConnectAsync(It.IsAny<Socket>(), It.IsAny<CancellationToken>())).Throws<Exception>();
@@ -88,7 +87,7 @@ namespace Omnius.Xeus.Engines.Connectors
                 return socks5ProxyClientFactoryMock.Object;
             }
 
-            static IHttpProxyClientFactory GenIHttpProxyClientFactory()
+            static IHttpProxyClientFactory GenHttpProxyClientFactory()
             {
                 var httpProxyClientMock = new Mock<IHttpProxyClient>();
                 httpProxyClientMock.Setup(n => n.ConnectAsync(It.IsAny<Socket>(), It.IsAny<CancellationToken>())).Throws<Exception>();
@@ -97,7 +96,7 @@ namespace Omnius.Xeus.Engines.Connectors
                 return httpProxyClientFactoryMock.Object;
             }
 
-            static IUpnpClientFactory GenIUpnpClientFactory()
+            static IUpnpClientFactory GenUpnpClientFactory()
             {
                 var upnpClientMock = new Mock<IUpnpClient>();
                 upnpClientMock.Setup(n => n.ConnectAsync(It.IsAny<CancellationToken>())).Throws<Exception>();
@@ -130,10 +129,7 @@ namespace Omnius.Xeus.Engines.Connectors
                     int v = 0;
                     await receiver.DequeueAsync(sequence => Varint.TryGetInt32(ref sequence, out v), cancellationToken);
 
-                    if (random.Next() != v)
-                    {
-                        throw new Exception();
-                    }
+                    if (random.Next() != v) throw new Exception();
                 }
             }
 

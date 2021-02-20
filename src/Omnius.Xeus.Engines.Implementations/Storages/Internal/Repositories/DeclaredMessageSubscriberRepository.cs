@@ -125,10 +125,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
 
                     var col = this.GetCollection();
 
-                    if (col.Exists(n => n.Signature == itemEntity.Signature && n.Registrant == itemEntity.Registrant))
-                    {
-                        return;
-                    }
+                    if (col.Exists(n => n.Signature == itemEntity.Signature && n.Registrant == itemEntity.Registrant)) return;
 
                     col.Insert(itemEntity);
                 }
@@ -218,10 +215,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
 
                     var col = this.GetCollection();
 
-                    if (col.Exists(n => n.Signature == itemEntity.Signature))
-                    {
-                        return;
-                    }
+                    if (col.Exists(n => n.Signature == itemEntity.Signature)) return;
 
                     col.Insert(itemEntity);
                 }

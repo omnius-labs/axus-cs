@@ -104,16 +104,10 @@ namespace Omnius.Xeus.Engines.Storages
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                if (exists.HasValue && !exists.Value)
-                {
-                    return Enumerable.Empty<OmniHash>();
-                }
+                if (exists.HasValue && !exists.Value) return Enumerable.Empty<OmniHash>();
 
                 var item = _publisherRepo.Items.Find(contentHash).FirstOrDefault();
-                if (item is null)
-                {
-                    return Enumerable.Empty<OmniHash>();
-                }
+                if (item is null) return Enumerable.Empty<OmniHash>();
 
                 return item.MerkleTreeSections.SelectMany(n => n.Hashes);
             }
@@ -123,10 +117,7 @@ namespace Omnius.Xeus.Engines.Storages
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                if (!_publisherRepo.Items.Exists(contentHash))
-                {
-                    return false;
-                }
+                if (!_publisherRepo.Items.Exists(contentHash)) return false;
 
                 return true;
             }
@@ -137,10 +128,7 @@ namespace Omnius.Xeus.Engines.Storages
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
                 var item = _publisherRepo.Items.Find(contentHash).FirstOrDefault();
-                if (item is null)
-                {
-                    return false;
-                }
+                if (item is null) return false;
 
                 return item.MerkleTreeSections.Any(n => n.Contains(contentHash));
             }
@@ -151,10 +139,7 @@ namespace Omnius.Xeus.Engines.Storages
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
                 var item = _publisherRepo.Items.FindOne(filePath, registrant);
-                if (item is not null)
-                {
-                    return item.ContentHash;
-                }
+                if (item is not null) return item.ContentHash;
             }
 
             {
@@ -334,17 +319,11 @@ namespace Omnius.Xeus.Engines.Storages
             using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
                 var item = _publisherRepo.Items.FindOne(filePath, registrant);
-                if (item == null)
-                {
-                    return;
-                }
+                if (item == null) return;
 
                 _publisherRepo.Items.Delete(filePath, registrant);
 
-                if (_publisherRepo.Items.Exists(item.ContentHash))
-                {
-                    return;
-                }
+                if (_publisherRepo.Items.Exists(item.ContentHash)) return;
 
                 await this.DeleteBlocksAsync(item.ContentHash, item.MerkleTreeSections.SelectMany(n => n.Hashes));
             }
@@ -355,17 +334,11 @@ namespace Omnius.Xeus.Engines.Storages
             using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
                 var item = _publisherRepo.Items.FindOne(contentHash, registrant);
-                if (item == null)
-                {
-                    return;
-                }
+                if (item == null) return;
 
                 _publisherRepo.Items.Delete(item.ContentHash, registrant);
 
-                if (_publisherRepo.Items.Exists(item.ContentHash))
-                {
-                    return;
-                }
+                if (_publisherRepo.Items.Exists(item.ContentHash)) return;
 
                 await this.DeleteBlocksAsync(item.ContentHash, item.MerkleTreeSections.SelectMany(n => n.Hashes));
             }
@@ -385,20 +358,14 @@ namespace Omnius.Xeus.Engines.Storages
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
                 var item = _publisherRepo.Items.Find(contentHash).FirstOrDefault();
-                if (item is null || item.MerkleTreeSections.Any(n => !n.Contains(blockHash)))
-                {
-                    return null;
-                }
+                if (item is null || item.MerkleTreeSections.Any(n => !n.Contains(blockHash))) return null;
 
                 if (item.FilePath is not null)
                 {
                     var lastMerkleTreeSections = item.MerkleTreeSections[^1];
                     if (lastMerkleTreeSections.TryGetIndex(blockHash, out var index))
                     {
-                        if (!File.Exists(item.FilePath))
-                        {
-                            return null;
-                        }
+                        if (!File.Exists(item.FilePath)) return null;
 
                         var position = lastMerkleTreeSections.BlockLength * index;
                         var blockSize = (int)Math.Min(lastMerkleTreeSections.BlockLength, (int)(lastMerkleTreeSections.Length - (ulong)position));

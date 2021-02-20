@@ -2,7 +2,14 @@
 tmp/
 pub/
 patch.txt
-demo/.state/*
+demo/*
+!demo/daemon-run.sh
+!demo/daemon-run.bat
+!demo/ui-desktop-run.sh
+!demo/ui-desktop-run.bat
+
+# Environment
+.env
 
 # Visual Studio Code
 .vscode/*

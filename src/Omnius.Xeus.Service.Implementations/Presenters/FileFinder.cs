@@ -1,11 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Nito.AsyncEx;
 using Omnius.Core;
-using Omnius.Core.Extensions;
 using Omnius.Xeus.Service.Models;
 
 namespace Omnius.Xeus.Service.Presenters
@@ -14,15 +11,7 @@ namespace Omnius.Xeus.Service.Presenters
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private string _configDirectoryPath;
-        private IUserProfileFinder _userProfileFinder;
-        private IBytesPool _bytesPool;
-
-        private readonly AutoResetEvent _resetEvent = new(true);
-        private readonly AsyncReaderWriterLock _asyncLock = new();
-        private readonly object _lockObject = new();
-
-        private const int MaxProfileCount = 32 * 1024;
+        private readonly FileFinderOptions _options;
 
         internal sealed class FileFinderFactory : IFileFinderFactory
         {
@@ -35,10 +24,11 @@ namespace Omnius.Xeus.Service.Presenters
             }
         }
 
+        public static IFileFinderFactory Factory { get; } = new FileFinderFactory();
+
         public FileFinder(FileFinderOptions options)
         {
-            _userProfileFinder = options.UserProfileFinder ?? throw new ArgumentNullException(nameof(options.UserProfileFinder));
-            _bytesPool = options.BytesPool ?? BytesPool.Shared;
+            _options = options;
         }
 
         public async ValueTask InitAsync()
@@ -51,7 +41,7 @@ namespace Omnius.Xeus.Service.Presenters
 
         public async ValueTask<IEnumerable<XeusFileFoundResult>> FindAll(CancellationToken cancellationToken = default)
         {
-            var profiles = await _userProfileFinder.GetUserProfilesAsync(cancellationToken);
+            var profiles = await _options.UserProfileFinder.GetUserProfilesAsync(cancellationToken);
             return profiles.SelectMany(n => n.Content.FileMetas).Select(n => new XeusFileFoundResult(XeusFileFoundResultState.Found, n)).ToList();
         }
     }

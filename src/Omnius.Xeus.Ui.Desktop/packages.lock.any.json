@@ -53,6 +53,63 @@
           "System.Reactive": "5.0.0"
         }
       },
+      "Avalonia.Skia": {
+        "type": "Direct",
+        "requested": "[0.10.0, )",
+        "resolved": "0.10.0",
+        "contentHash": "RitaTRbah6TwX02HC8zFI28D5azQj3BmDGyoQeHm2xcDRbg921bKUkU4GrF+XVCy87JvFsQfSASkYeMBnjB7dQ==",
+        "dependencies": {
+          "Avalonia": "0.10.0",
+          "HarfBuzzSharp": "2.6.1.7",
+          "HarfBuzzSharp.NativeAssets.Linux": "2.6.1.7",
+          "SkiaSharp": "2.80.2",
+          "SkiaSharp.NativeAssets.Linux": "2.80.2"
+        }
+      },
+      "Avalonia.Xaml.Behaviors": {
+        "type": "Direct",
+        "requested": "[0.10.0, )",
+        "resolved": "0.10.0",
+        "contentHash": "jB63kEwU2bjSJwlk1R8djPiwd12Pp9yTQW3/PT+0b3FZtlth+VGyhSq+47x8Kg6oRQWbr5IpusVkRccJbTaAiw==",
+        "dependencies": {
+          "Avalonia": "0.10.0",
+          "Avalonia.Xaml.Interactions": "0.10.0",
+          "Avalonia.Xaml.Interactivity": "0.10.0"
+        }
+      },
+      "Avalonia.Xaml.Interactions": {
+        "type": "Direct",
+        "requested": "[0.10.0, )",
+        "resolved": "0.10.0",
+        "contentHash": "v9KD5P0XqLosUBL0CvVaoajcPrv1WzlVLK/tiMZ2QbFQUKVWFdXaSJwl+H7ux3N0Ij6AwZWj8BvwE1asAmr9AQ==",
+        "dependencies": {
+          "Avalonia": "0.10.0",
+          "Avalonia.Xaml.Interactivity": "0.10.0"
+        }
+      },
+      "Avalonia.Xaml.Interactivity": {
+        "type": "Direct",
+        "requested": "[0.10.0, )",
+        "resolved": "0.10.0",
+        "contentHash": "zexChJ3DLNvF68ARBi1Lt7LyCN9zDMRfPg/bto3gjM9bBSoZ3vGuRggxUkBsVglGy1MkvCMkxVS4BlrdR7OadQ==",
+        "dependencies": {
+          "Avalonia": "0.10.0"
+        }
+      },
+      "Nito.AsyncEx": {
+        "type": "Direct",
+        "requested": "[5.1.0, )",
+        "resolved": "5.1.0",
+        "contentHash": "KOahZdW0fRLnoym5lGtyWpFUZ94I5s0wLgYF5RHhK8RUhXpCiEX+185qjNvkse3H9WJV2/pFfPlKZHv8Eej7Hw==",
+        "dependencies": {
+          "Nito.AsyncEx.Context": "5.1.0",
+          "Nito.AsyncEx.Coordination": "5.1.0",
+          "Nito.AsyncEx.Interop.WaitHandles": "5.1.0",
+          "Nito.AsyncEx.Oop": "5.1.0",
+          "Nito.AsyncEx.Tasks": "5.1.0",
+          "Nito.Cancellation": "1.1.0"
+        }
+      },
       "NLog": {
         "type": "Direct",
         "requested": "[4.7.7, )",
@@ -118,18 +175,6 @@
         "type": "Transitive",
         "resolved": "0.10.0",
         "contentHash": "79a4nP66W8GP8DERv2hN9dcjCqElPNggcOnIpbc5QNKcHWXCF7fNXRmqveaPH8Ot5QDGh54OBIFTuSiF+90vyw=="
-      },
-      "Avalonia.Skia": {
-        "type": "Transitive",
-        "resolved": "0.10.0",
-        "contentHash": "RitaTRbah6TwX02HC8zFI28D5azQj3BmDGyoQeHm2xcDRbg921bKUkU4GrF+XVCy87JvFsQfSASkYeMBnjB7dQ==",
-        "dependencies": {
-          "Avalonia": "0.10.0",
-          "HarfBuzzSharp": "2.6.1.7",
-          "HarfBuzzSharp.NativeAssets.Linux": "2.6.1.7",
-          "SkiaSharp": "2.80.2",
-          "SkiaSharp.NativeAssets.Linux": "2.80.2"
-        }
       },
       "Avalonia.Win32": {
         "type": "Transitive",
@@ -205,19 +250,6 @@
         "contentHash": "LuI1oG+24TUj1ZRQQjM5Ew73BKnZE5NZ/7eAdh1o8ST5dPhUnJvIkiIn2re3MwnkRy6ELRnvEbBxHP8uALKhJw==",
         "dependencies": {
           "Microsoft.NETCore.Platforms": "2.0.0"
-        }
-      },
-      "Nito.AsyncEx": {
-        "type": "Transitive",
-        "resolved": "5.1.0",
-        "contentHash": "KOahZdW0fRLnoym5lGtyWpFUZ94I5s0wLgYF5RHhK8RUhXpCiEX+185qjNvkse3H9WJV2/pFfPlKZHv8Eej7Hw==",
-        "dependencies": {
-          "Nito.AsyncEx.Context": "5.1.0",
-          "Nito.AsyncEx.Coordination": "5.1.0",
-          "Nito.AsyncEx.Interop.WaitHandles": "5.1.0",
-          "Nito.AsyncEx.Oop": "5.1.0",
-          "Nito.AsyncEx.Tasks": "5.1.0",
-          "Nito.Cancellation": "1.1.0"
         }
       },
       "Nito.AsyncEx.Context": {

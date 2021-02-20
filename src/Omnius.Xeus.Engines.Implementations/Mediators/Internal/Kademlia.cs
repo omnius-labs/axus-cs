@@ -91,15 +91,9 @@ namespace Omnius.Xeus.Engines.Engines.Internal
         public static IEnumerable<KademliaElement<T>> Search<T>(ReadOnlySpan<byte> baseId, ReadOnlySpan<byte> targetId, IEnumerable<KademliaElement<T>> elements, int count)
             where T : notnull
         {
-            if (elements is null)
-            {
-                throw new ArgumentNullException(nameof(elements));
-            }
+            if (elements is null) throw new ArgumentNullException(nameof(elements));
 
-            if (count == 0)
-            {
-                return Array.Empty<KademliaElement<T>>();
-            }
+            if (count == 0) Array.Empty<KademliaElement<T>>();
 
             var targetList = new List<SortEntry<T>>();
 

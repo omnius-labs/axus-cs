@@ -4,9 +4,9 @@
     ".NETCoreApp,Version=v5.0": {
       "coverlet.msbuild": {
         "type": "Direct",
-        "requested": "[2.9.0, )",
-        "resolved": "2.9.0",
-        "contentHash": "t+2du2q+z0FFklyP6HGSoKssRj0NequInLvgQ9rtxHskbgmAENxgt83eTQSRyxJ8DAThW8WOYhOuhuXIs//ZyA=="
+        "requested": "[3.0.1, )",
+        "resolved": "3.0.1",
+        "contentHash": "qSS2jZAFd3cPCbH4HESrvekg/zjmU+y5mfqwCfSFdnjL38/6rI1ov6QHGVsSKSlQCcEdqdjBZvO4IL9cEnBh8Q=="
       },
       "Microsoft.NET.Test.Sdk": {
         "type": "Direct",
@@ -27,12 +27,6 @@
           "Castle.Core": "4.4.0",
           "System.Threading.Tasks.Extensions": "4.5.4"
         }
-      },
-      "NLog": {
-        "type": "Direct",
-        "requested": "[4.7.7, )",
-        "resolved": "4.7.7",
-        "contentHash": "lCfAaKel4trne8Suf4/0aR9YPKDFLWKgqBupnHKNYx+cIjutF2BsVxfF2fAb+ObaYN3m5hDjx/ToVS15ouB+SA=="
       },
       "xunit": {
         "type": "Direct",
@@ -297,6 +291,11 @@
         "dependencies": {
           "System.Collections.Immutable": "1.4.0"
         }
+      },
+      "NLog": {
+        "type": "Transitive",
+        "resolved": "4.7.7",
+        "contentHash": "lCfAaKel4trne8Suf4/0aR9YPKDFLWKgqBupnHKNYx+cIjutF2BsVxfF2fAb+ObaYN3m5hDjx/ToVS15ouB+SA=="
       },
       "NuGet.Frameworks": {
         "type": "Transitive",

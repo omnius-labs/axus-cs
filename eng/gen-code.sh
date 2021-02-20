@@ -2,19 +2,10 @@
 
 DOTNET_CLI_TELEMETRY_OPTOUT=1
 
-BIN_DIR="$PWD/bin/tools/linux"
-TOOL_PATH="$BIN_DIR/Omnius.Core.RocketPack.DefinitionCompiler/Omnius.Core.RocketPack.DefinitionCompiler"
-INCLUDE_1="$PWD/refs/core/rpfs/**/*.rpf"
-INCLUDE_2="$PWD/rpfs/**/*.rpf"
+# *.tt
+dotnet tool restore
+dotnet tool run t4 ./src/Omnius.Xeus.Ui.Desktop/Resources/Models/UiSettings.tt -o ./src/Omnius.Xeus.Ui.Desktop/Resources/Models/UiSettings.generated.cs
 
-"$TOOL_PATH" compile -s "$PWD/rpfs/Omnius.Xeus.Engines/Omnius.Xeus.Engines.Models.rpf" -i "$INCLUDE_1" -i "$INCLUDE_2" -o "$PWD/src/Omnius.Xeus.Engines/Models/_RocketPack/_Generated.cs"
-
-"$TOOL_PATH" compile -s "$PWD/rpfs/Omnius.Xeus.Engines.Implementations/Omnius.Xeus.Engines.Connectors.Internal.Models.rpf" -i "$INCLUDE_1" -i "$INCLUDE_2" -o "$PWD/src/Omnius.Xeus.Engines.Implementations/Connectors/Internal/Models/_RocketPack/_Generated.cs"
-"$TOOL_PATH" compile -s "$PWD/rpfs/Omnius.Xeus.Engines.Implementations/Omnius.Xeus.Engines.Storages.Internal.Models.rpf" -i "$INCLUDE_1" -i "$INCLUDE_2" -o "$PWD/src/Omnius.Xeus.Engines.Implementations/Storages/Internal/Models/_RocketPack/_Generated.cs"
-"$TOOL_PATH" compile -s "$PWD/rpfs/Omnius.Xeus.Engines.Implementations/Omnius.Xeus.Engines.Mediators.Internal.Models.rpf" -i "$INCLUDE_1" -i "$INCLUDE_2" -o "$PWD/src/Omnius.Xeus.Engines.Implementations/Mediators/Internal/Models/_RocketPack/_Generated.cs"
-"$TOOL_PATH" compile -s "$PWD/rpfs/Omnius.Xeus.Engines.Implementations/Omnius.Xeus.Engines.Exchangers.Internal.Models.rpf" -i "$INCLUDE_1" -i "$INCLUDE_2" -o "$PWD/src/Omnius.Xeus.Engines.Implementations/Exchangers/Internal/Models/_RocketPack/_Generated.cs"
-
-"$TOOL_PATH" compile -s "$PWD/rpfs/Omnius.Xeus.Api/Omnius.Xeus.Api.rpf" -i "$INCLUDE_1" -i "$INCLUDE_2" -o "$PWD/src/Omnius.Xeus.Api/_RocketPack/_Generated.cs"
-
-"$TOOL_PATH" compile -s "$PWD/rpfs/Omnius.Xeus.Service/Omnius.Xeus.Service.Models.rpf" -i "$INCLUDE_1" -i "$INCLUDE_2" -o "$PWD/src/Omnius.Xeus.Service/Models/_RocketPack/_Generated.cs"
-"$TOOL_PATH" compile -s "$PWD/rpfs/Omnius.Xeus.Service.Implementations/Omnius.Xeus.Service.Internal.Models.rpf" -i "$INCLUDE_1" -i "$INCLUDE_2" -o "$PWD/src/Omnius.Xeus.Service.Implementations/Internal/Models/_RocketPack/_Generated.cs"
+# *.rpf
+RPFC_PATH="$PWD/refs/core/src/Omnius.Core.RocketPack.DefinitionCompiler"
+dotnet run -p $RPFC_PATH -- -c "$PWD/rpfs/config.yml"

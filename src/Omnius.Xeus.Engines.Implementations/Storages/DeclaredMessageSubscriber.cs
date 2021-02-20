@@ -2,14 +2,12 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Pipelines;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
-using Omnius.Core.Io;
 using Omnius.Xeus.Engines.Models;
 using Omnius.Xeus.Engines.Storages.Internal;
 using Omnius.Xeus.Engines.Storages.Internal.Models;
@@ -101,10 +99,7 @@ namespace Omnius.Xeus.Engines.Storages
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                if (_subscriberRepo.Items.Exists(signature))
-                {
-                    return false;
-                }
+                if (_subscriberRepo.Items.Exists(signature)) return false;
 
                 return true;
             }
@@ -131,10 +126,7 @@ namespace Omnius.Xeus.Engines.Storages
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
                 var writtenItem = _subscriberRepo.WrittenItems.FindOne(signature);
-                if (writtenItem == null)
-                {
-                    return null;
-                }
+                if (writtenItem == null) return null;
 
                 return writtenItem.CreationTime;
             }
@@ -143,23 +135,14 @@ namespace Omnius.Xeus.Engines.Storages
         public async ValueTask<DeclaredMessage?> ReadMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
             var item = _subscriberRepo.Items.Find(signature).FirstOrDefault();
-            if (item is null)
-            {
-                return null;
-            }
+            if (item is null) return null;
 
             var writtenItem = _subscriberRepo.WrittenItems.FindOne(signature);
-            if (writtenItem is null)
-            {
-                return null;
-            }
+            if (writtenItem is null) return null;
 
             var blockName = ComputeBlockName(signature);
             using var memoryOwner = await _blockStorage.ReadAsync(blockName, cancellationToken);
-            if (memoryOwner is null)
-            {
-                return null;
-            }
+            if (memoryOwner is null) return null;
 
             var message = DeclaredMessage.Import(new ReadOnlySequence<byte>(memoryOwner.Memory), _bytesPool);
             return message;
@@ -167,27 +150,15 @@ namespace Omnius.Xeus.Engines.Storages
 
         public async ValueTask WriteMessageAsync(DeclaredMessage message, CancellationToken cancellationToken = default)
         {
+            if (!message.Verify()) return;
+
             var signature = message.Certificate?.GetOmniSignature();
-            if (signature == null)
-            {
-                return;
-            }
+            if (signature == null) return;
 
-            if (!message.Verify())
-            {
-                return;
-            }
-
-            if (!_subscriberRepo.Items.Exists(signature))
-            {
-                return;
-            }
+            if (!_subscriberRepo.Items.Exists(signature)) return;
 
             var writtenItem = _subscriberRepo.WrittenItems.FindOne(signature);
-            if (writtenItem is not null && writtenItem.CreationTime >= message.CreationTime.ToDateTime())
-            {
-                return;
-            }
+            if (writtenItem is not null && writtenItem.CreationTime >= message.CreationTime.ToDateTime()) return;
 
             using var hub = new BytesHub(_bytesPool);
             message.Export(hub.Writer, _bytesPool);

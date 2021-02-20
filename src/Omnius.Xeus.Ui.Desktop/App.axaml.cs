@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Omnius.Xeus.Ui.Desktop.Views;
+using Omnius.Xeus.Ui.Desktop.Views.Windows.Main;
 
 namespace Omnius.Xeus.Ui.Desktop
 {
@@ -12,7 +12,11 @@ namespace Omnius.Xeus.Ui.Desktop
             AvaloniaXamlLoader.Load(this);
         }
 
-        public override void OnFrameworkInitializationCompleted()
+        public static new App Current => (App)Application.Current;
+
+        public IClassicDesktopStyleApplicationLifetime? Lifetime => (this.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime);
+
+        public override async void OnFrameworkInitializationCompleted()
         {
             if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
