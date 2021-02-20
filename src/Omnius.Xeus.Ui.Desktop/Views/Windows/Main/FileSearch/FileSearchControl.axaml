@@ -35,7 +35,7 @@
         <dg:DataGrid Grid.Column="2" Items="{Binding CurrentItems}" AutoGenerateColumns="False"
                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
             <dg:DataGrid.Columns>
-                <dg:DataGridTextColumn Header="Name" Binding="{Binding Name.Value}" Width="200" />
+                <!-- <dg:DataGridTextColumn Header="Name" Binding="{Binding Name.Value}" Width="200" /> -->
             </dg:DataGrid.Columns>
         </dg:DataGrid>
     </Grid>
