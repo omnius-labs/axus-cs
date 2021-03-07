@@ -15,7 +15,15 @@
         <TabControl TabStripPlacement="Left">
             <TabItem Header="Connetions">
                 <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="32" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Add"/>
+                    </StackPanel>
                     <dg:DataGrid
+                        Grid.Row="1"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
                         Items="{Binding ConnectionReports}">
