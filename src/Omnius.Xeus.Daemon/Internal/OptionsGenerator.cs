@@ -53,53 +53,39 @@ namespace Omnius.Xeus.Daemon.Internal
                 GenBandwidthOptions(config));
         }
 
-        public static EnginesModels.CkadMediatorOptions GenCkadMediatorOptions(ResourcesModels.EnginesConfig config)
+        public static EnginesModels.CkadMediatorOptions GenCkadMediatorOptions(string configDirectoryPath, ResourcesModels.EnginesConfig config)
         {
-            if (config.WorkingDirectory is null) throw new NullReferenceException(nameof(config.WorkingDirectory));
-
-            return new EnginesModels.CkadMediatorOptions(Path.Combine(config.WorkingDirectory, "ckad_mediator"), 10);
+            return new EnginesModels.CkadMediatorOptions(configDirectoryPath, 10);
         }
 
-        public static EnginesModels.ContentExchangerOptions GenContentExchangerOptions(ResourcesModels.EnginesConfig config)
+        public static EnginesModels.ContentExchangerOptions GenContentExchangerOptions(string configDirectoryPath, ResourcesModels.EnginesConfig config)
         {
-            if (config.WorkingDirectory is null) throw new NullReferenceException(nameof(config.WorkingDirectory));
-
-            return new EnginesModels.ContentExchangerOptions(Path.Combine(config.WorkingDirectory, "content_exchanger"), config?.Exchangers?.ContentExchanger?.MaxConnectionCount ?? 32);
+            return new EnginesModels.ContentExchangerOptions(configDirectoryPath, config?.Exchangers?.ContentExchanger?.MaxConnectionCount ?? 32);
         }
 
-        public static EnginesModels.DeclaredMessageExchangerOptions GenDeclaredMessageExchangerOptions(ResourcesModels.EnginesConfig config)
+        public static EnginesModels.DeclaredMessageExchangerOptions GenDeclaredMessageExchangerOptions(string configDirectoryPath, ResourcesModels.EnginesConfig config)
         {
-            if (config.WorkingDirectory is null) throw new NullReferenceException(nameof(config.WorkingDirectory));
-
-            return new EnginesModels.DeclaredMessageExchangerOptions(Path.Combine(config.WorkingDirectory, "declared_message_exchanger"), config?.Exchangers?.DeclaredMessageExchanger?.MaxConnectionCount ?? 32);
+            return new EnginesModels.DeclaredMessageExchangerOptions(configDirectoryPath, config?.Exchangers?.DeclaredMessageExchanger?.MaxConnectionCount ?? 32);
         }
 
-        public static EnginesModels.ContentPublisherOptions GenContentPublisherOptions(ResourcesModels.EnginesConfig config)
+        public static EnginesModels.ContentPublisherOptions GenContentPublisherOptions(string configDirectoryPath, ResourcesModels.EnginesConfig config)
         {
-            if (config.WorkingDirectory is null) throw new NullReferenceException(nameof(config.WorkingDirectory));
-
-            return new EnginesModels.ContentPublisherOptions(Path.Combine(config.WorkingDirectory, "content_publisher"));
+            return new EnginesModels.ContentPublisherOptions(configDirectoryPath);
         }
 
-        public static EnginesModels.ContentSubscriberOptions GenContentSubscriberOptions(ResourcesModels.EnginesConfig config)
+        public static EnginesModels.ContentSubscriberOptions GenContentSubscriberOptions(string configDirectoryPath, ResourcesModels.EnginesConfig config)
         {
-            if (config.WorkingDirectory is null) throw new NullReferenceException(nameof(config.WorkingDirectory));
-
-            return new EnginesModels.ContentSubscriberOptions(Path.Combine(config.WorkingDirectory, "content_subscriber"));
+            return new EnginesModels.ContentSubscriberOptions(configDirectoryPath);
         }
 
-        public static EnginesModels.DeclaredMessagePublisherOptions GenDeclaredMessagePublisherOptions(ResourcesModels.EnginesConfig config)
+        public static EnginesModels.DeclaredMessagePublisherOptions GenDeclaredMessagePublisherOptions(string configDirectoryPath, ResourcesModels.EnginesConfig config)
         {
-            if (config.WorkingDirectory is null) throw new NullReferenceException(nameof(config.WorkingDirectory));
-
-            return new EnginesModels.DeclaredMessagePublisherOptions(Path.Combine(config.WorkingDirectory, "declared_message_publisher"));
+            return new EnginesModels.DeclaredMessagePublisherOptions(configDirectoryPath);
         }
 
-        public static EnginesModels.DeclaredMessageSubscriberOptions GenDeclaredMessageSubscriberOptions(ResourcesModels.EnginesConfig config)
+        public static EnginesModels.DeclaredMessageSubscriberOptions GenDeclaredMessageSubscriberOptions(string configDirectoryPath, ResourcesModels.EnginesConfig config)
         {
-            if (config.WorkingDirectory is null) throw new NullReferenceException(nameof(config.WorkingDirectory));
-
-            return new EnginesModels.DeclaredMessageSubscriberOptions(Path.Combine(config.WorkingDirectory, "declared_message_subscriber"));
+            return new EnginesModels.DeclaredMessageSubscriberOptions(configDirectoryPath);
         }
     }
 }

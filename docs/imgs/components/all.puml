@@ -6,16 +6,20 @@ skinparam rectangle<<behavior>> {
 sprite $component jar:archimate/component
 
 package Omnius.Xeus.Ui.Desktop {
-    package Omnius.Xeus.Ui.Desktop.Interactors {
-        rectangle FileSearcher <<$component>><<behavior>>
+    package Omnius.Xeus.Ui.Desktop.Presenters {
+        rectangle UserProfileFinder <<$component>><<behavior>>
+        rectangle UserProfileUploader <<$component>><<behavior>>
+        rectangle FileFinder <<$component>><<behavior>>
+        rectangle FileDowndoader <<$component>><<behavior>>
+        rectangle FileUploader <<$component>><<behavior>>
     }
 }
 
-package Omnius.Xeus.Service {
-    rectangle ProfilePublisher <<$component>><<behavior>>
-    rectangle ProfileSubscriber <<$component>><<behavior>>
-    rectangle FileDowndoader <<$component>><<behavior>>
-    rectangle FileUploader <<$component>><<behavior>>
+package Omnius.Xeus.Interactors {
+    rectangle FilePublisher <<$component>><<behavior>>
+    rectangle FileSubscriber <<$component>><<behavior>>
+    rectangle UserProfilePublisher <<$component>><<behavior>>
+    rectangle UserProfileSubscriber <<$component>><<behavior>>
 }
 
 package Omnius.Xeus.Api {
@@ -46,12 +50,16 @@ package Ominus.Xeus.Engines {
     }
 }
 
-FileSearcher -down-> Omnius.Xeus.Service
+UserProfileFinder -down-> UserProfileSubscriber
+UserProfileUploader -down-> UserProfilePublisher
+FileFinder -down-> UserProfileFinder
+FileDowndoader -down-> FileSubscriber
+FileUploader -down-> FilePublisher
 
-ProfilePublisher -down-> XeusService.Client
-ProfileSubscriber -down-> XeusService.Client
-FileDowndoader -down-> XeusService.Client
-FileUploader -down-> XeusService.Client
+FilePublisher -down-> XeusService.Client
+FileSubscriber -down-> XeusService.Client
+UserProfilePublisher -down-> XeusService.Client
+UserProfileSubscriber -down-> XeusService.Client
 
 XeusService.Client .down.> XeusService.Server : TCP
 

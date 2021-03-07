@@ -65,7 +65,7 @@ namespace Omnius.Xeus.Engines.Mediators
             }
         }
 
-        public string EngineName => "node-explorer";
+        public string EngineName => "ckad_mediator";
 
         public static ICkadMediatorFactory Factory { get; } = new CkadMediatorFactory();
 
@@ -113,6 +113,18 @@ namespace Omnius.Xeus.Engines.Mediators
             var results = new ConcurrentBag<ResourceTag>();
             this.GetWantResourceTags?.Invoke((tag) => results.Add(tag));
             return results;
+        }
+
+        public async ValueTask<CkadMediatorReport> GetReportAsync(CancellationToken cancellationToken = default)
+        {
+            var connectionReports = new List<ConnectionReport>();
+
+            foreach (var status in _connections)
+            {
+                connectionReports.Add(new ConnectionReport(status.HandshakeType, status.Address));
+            }
+
+            return new CkadMediatorReport(0, 0, connectionReports.ToArray());
         }
 
         public async ValueTask<NodeProfile[]> FindNodeProfilesAsync(ResourceTag tag, CancellationToken cancellationToken = default)
@@ -187,7 +199,7 @@ namespace Omnius.Xeus.Engines.Mediators
             }
         }
 
-        private readonly VolatileHashSet<OmniAddress> _connectedAddressSet = new(TimeSpan.FromMinutes(30));
+        private readonly VolatileHashSet<OmniAddress> _connectedAddressSet = new(TimeSpan.FromMinutes(3));
 
         private async Task ConnectLoopAsync(CancellationToken cancellationToken)
         {
@@ -418,8 +430,10 @@ namespace Omnius.Xeus.Engines.Mediators
                                 }
                             }
                         }
-                        catch (ObjectDisposedException)
+                        catch (ConnectionException e)
                         {
+                            _logger.Debug(e);
+
                             lock (_lockObject)
                             {
                                 _connections.Remove(status);
@@ -477,8 +491,10 @@ namespace Omnius.Xeus.Engines.Mediators
                                 }
                             }
                         }
-                        catch (ObjectDisposedException)
+                        catch (ConnectionException e)
                         {
+                            _logger.Debug(e);
+
                             lock (_lockObject)
                             {
                                 _connections.Remove(status);
@@ -529,6 +545,7 @@ namespace Omnius.Xeus.Engines.Mediators
 
                     lock (_lockObject)
                     {
+                        _connectedAddressSet.Refresh();
                         _receivedPushLocationMap.Refresh();
                         _receivedGiveLocationMap.Refresh();
 
@@ -687,12 +704,6 @@ namespace Omnius.Xeus.Engines.Mediators
 
                 throw;
             }
-        }
-
-        private enum ConnectionHandshakeType
-        {
-            Connected,
-            Accepted,
         }
 
         private sealed class ConnectionStatus : ISynchronized

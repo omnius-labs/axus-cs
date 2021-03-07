@@ -12,12 +12,15 @@ using Omnius.Xeus.Daemon.Resources.Models;
 using Omnius.Xeus.Engines.Connectors;
 using Omnius.Xeus.Engines.Exchangers;
 using Omnius.Xeus.Engines.Mediators;
+using Omnius.Xeus.Engines.Models;
 using Omnius.Xeus.Engines.Storages;
 
 namespace Omnius.Xeus.Daemon
 {
     public class XeusServiceOptions
     {
+        public IBytesPool? BytesPool { get; init; }
+
         public ISocks5ProxyClientFactory? Socks5ProxyClientFactory { get; init; }
 
         public IHttpProxyClientFactory? HttpProxyClientFactory { get; init; }
@@ -40,9 +43,21 @@ namespace Omnius.Xeus.Daemon
 
         public IDeclaredMessageSubscriberFactory? DeclaredMessageSubscriberFactory { get; init; }
 
-        public IBytesPool? BytesPool { get; init; }
+        public TcpConnectorOptions? TcpConnectorOptions { get; init; }
 
-        public EnginesConfig? Config { get; init; }
+        public CkadMediatorOptions? CkadMediatorOptions { get; init; }
+
+        public ContentPublisherOptions? ContentPublisherOptions { get; init; }
+
+        public ContentSubscriberOptions? ContentSubscriberOptions { get; init; }
+
+        public DeclaredMessagePublisherOptions? DeclaredMessagePublisherOptions { get; init; }
+
+        public DeclaredMessageSubscriberOptions? DeclaredMessageSubscriberOptions { get; init; }
+
+        public ContentExchangerOptions? ContentExchangerOptions { get; init; }
+
+        public DeclaredMessageExchangerOptions? DeclaredMessageExchangerOptions { get; init; }
     }
 
     public class XeusServiceImpl : AsyncDisposableBase, IXeusService
@@ -50,7 +65,6 @@ namespace Omnius.Xeus.Daemon
         private readonly XeusServiceOptions _options;
 
         private IBytesPool _bytesPool = null!;
-        private EnginesConfig _config = null!;
         private ICkadMediator _ckadMediator = null!;
         private IContentExchanger _contentExchanger = null!;
         private IDeclaredMessageExchanger _declaredMessageExchanger = null!;
@@ -59,26 +73,10 @@ namespace Omnius.Xeus.Daemon
         private IDeclaredMessagePublisher _declaredMessagePublisher = null!;
         private IDeclaredMessageSubscriber _declaredMessageSubscriber = null!;
 
-        public static async ValueTask<XeusServiceImpl> CreateAsync(EnginesConfig enginesConfig, CancellationToken cancellationToken = default)
+        public static async ValueTask<XeusServiceImpl> CreateAsync(XeusServiceOptions options, CancellationToken cancellationToken = default)
         {
-            var options = new XeusServiceOptions
-            {
-                Socks5ProxyClientFactory = Socks5ProxyClient.Factory,
-                HttpProxyClientFactory = HttpProxyClient.Factory,
-                UpnpClientFactory = UpnpClient.Factory,
-                TcpConnectorFactory = TcpConnector.Factory,
-                CkadMediatorFactory = CkadMediator.Factory,
-                ContentExchangerFactory = ContentExchanger.Factory,
-                DeclaredMessageExchangerFactory = DeclaredMessageExchanger.Factory,
-                ContentPublisherFactory = ContentPublisher.Factory,
-                ContentSubscriberFactory = ContentSubscriber.Factory,
-                DeclaredMessagePublisherFactory = DeclaredMessagePublisher.Factory,
-                DeclaredMessageSubscriberFactory = DeclaredMessageSubscriber.Factory,
-                BytesPool = BytesPool.Shared,
-                Config = enginesConfig,
-            };
             var service = new XeusServiceImpl(options);
-            await service.InitAsync();
+            await service.InitAsync(cancellationToken);
 
             return service;
         }
@@ -88,9 +86,8 @@ namespace Omnius.Xeus.Daemon
             _options = options;
         }
 
-        private async ValueTask InitAsync()
+        private async ValueTask InitAsync(CancellationToken cancellationToken = default)
         {
-            _config = _options.Config ?? throw new ArgumentNullException();
             _bytesPool = _options.BytesPool ?? throw new ArgumentNullException();
 
             var tcpConnectorFactory = _options.TcpConnectorFactory ?? throw new ArgumentNullException();
@@ -105,28 +102,22 @@ namespace Omnius.Xeus.Daemon
             var contentExchangerFactory = _options.ContentExchangerFactory ?? throw new ArgumentNullException();
             var declaredMessageExchangerFactory = _options.DeclaredMessageExchangerFactory ?? throw new ArgumentNullException();
 
-            var tcpConnectorOptions = OptionsGenerator.GenTcpConnectorOptions(_config);
+            var tcpConnectorOptions = _options.TcpConnectorOptions ?? throw new ArgumentNullException();
+            var ckadMediatorOptions = _options.CkadMediatorOptions ?? throw new ArgumentNullException();
+            var contentPublisherOptions = _options.ContentPublisherOptions ?? throw new ArgumentNullException();
+            var contentSubscriberOptions = _options.ContentSubscriberOptions ?? throw new ArgumentNullException();
+            var declaredMessagePublisherOptions = _options.DeclaredMessagePublisherOptions ?? throw new ArgumentNullException();
+            var declaredMessageSubscriberOptions = _options.DeclaredMessageSubscriberOptions ?? throw new ArgumentNullException();
+            var contentExchangerOptions = _options.ContentExchangerOptions ?? throw new ArgumentNullException();
+            var declaredMessageExchangerOptions = _options.DeclaredMessageExchangerOptions ?? throw new ArgumentNullException();
+
             var tcpConnector = await tcpConnectorFactory.CreateAsync(tcpConnectorOptions, socks5ProxyClientFactory, httpProxyClientFactory, upnpClientFactory, _bytesPool);
-
-            var ckadMediatorOptions = OptionsGenerator.GenCkadMediatorOptions(_config);
             _ckadMediator = await ckadMediatorFactory.CreateAsync(ckadMediatorOptions, new[] { tcpConnector }, _bytesPool);
-
-            var contentPublisherOptions = OptionsGenerator.GenContentPublisherOptions(_config);
             _contentPublisher = await contentPublisherFactory.CreateAsync(contentPublisherOptions, _bytesPool);
-
-            var contentSubscriberOptions = OptionsGenerator.GenContentSubscriberOptions(_config);
             _contentSubscriber = await contentSubscriberFactory.CreateAsync(contentSubscriberOptions, _bytesPool);
-
-            var declaredMessagePublisherOptions = OptionsGenerator.GenDeclaredMessagePublisherOptions(_config);
             _declaredMessagePublisher = await declaredMessagePublisherFactory.CreateAsync(declaredMessagePublisherOptions, _bytesPool);
-
-            var declaredMessageSubscriberOptions = OptionsGenerator.GenDeclaredMessageSubscriberOptions(_config);
             _declaredMessageSubscriber = await declaredMessageSubscriberFactory.CreateAsync(declaredMessageSubscriberOptions, _bytesPool);
-
-            var contentExchangerOptions = OptionsGenerator.GenContentExchangerOptions(_config);
             _contentExchanger = await contentExchangerFactory.CreateAsync(contentExchangerOptions, new[] { tcpConnector }, _ckadMediator, _contentPublisher, _contentSubscriber, _bytesPool);
-
-            var declaredMessageExchangerOptions = OptionsGenerator.GenDeclaredMessageExchangerOptions(_config);
             _declaredMessageExchanger = await declaredMessageExchangerFactory.CreateAsync(declaredMessageExchangerOptions, new[] { tcpConnector }, _ckadMediator, _declaredMessagePublisher, _declaredMessageSubscriber, _bytesPool);
         }
 
@@ -141,6 +132,12 @@ namespace Omnius.Xeus.Daemon
             await _ckadMediator.DisposeAsync();
         }
 
+        public async ValueTask<CkadMediator_GetReport_Output> CkadMediator_GetReportAsync(CancellationToken cancellationToken = default)
+        {
+            var result = await _ckadMediator.GetReportAsync(cancellationToken);
+            return new CkadMediator_GetReport_Output(result);
+        }
+
         public async ValueTask<CkadMediator_GetMyNodeProfile_Output> CkadMediator_GetMyNodeProfileAsync(CancellationToken cancellationToken = default)
         {
             var result = await _ckadMediator.GetMyNodeProfileAsync(cancellationToken);
@@ -150,6 +147,16 @@ namespace Omnius.Xeus.Daemon
         public async ValueTask CkadMediator_AddCloudNodeProfilesAsync(CkadMediator_AddCloudNodeProfiles_Input param, CancellationToken cancellationToken = default)
         {
             await _ckadMediator.AddCloudNodeProfilesAsync(param.NodeProfiles, cancellationToken);
+        }
+
+        public ValueTask<ContentExchanger_GetReport_Output> ContentExchanger_GetReportAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask<DeclaredMessageExchanger_GetReport_Output> DeclaredMessageExchanger_GetReportAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
 
         public async ValueTask<ContentPublisher_GetReport_Output> ContentPublisher_GetReportAsync(CancellationToken cancellationToken = default)

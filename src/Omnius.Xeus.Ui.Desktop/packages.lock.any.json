@@ -700,7 +700,7 @@
           "Omnius.Core.RocketPack.Remoting": "0.0.1-alpha.1"
         }
       },
-      "omnius.xeus.service": {
+      "omnius.xeus.interactors": {
         "type": "Project",
         "dependencies": {
           "LiteDB": "5.0.10",
@@ -717,7 +717,7 @@
           "Omnius.Xeus.Engines": "0.0.1-alpha.1"
         }
       },
-      "omnius.xeus.service.implementations": {
+      "omnius.xeus.interactors.implementations": {
         "type": "Project",
         "dependencies": {
           "LiteDB": "5.0.10",
@@ -733,7 +733,7 @@
           "Omnius.Core.RocketPack.Remoting": "0.0.1-alpha.1",
           "Omnius.Xeus.Api": "0.0.1-alpha.1",
           "Omnius.Xeus.Engines": "0.0.1-alpha.1",
-          "Omnius.Xeus.Service": "0.0.1-alpha.1"
+          "Omnius.Xeus.Interactors": "0.0.1-alpha.1"
         }
       }
     }

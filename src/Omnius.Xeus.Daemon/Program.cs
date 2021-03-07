@@ -1,5 +1,8 @@
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Cocona;
+using Omnius.Core.Helpers;
 
 namespace Omnius.Xeus.Daemon
 {
@@ -12,17 +15,45 @@ namespace Omnius.Xeus.Daemon
             CoconaLiteApp.Run<Program>(args);
         }
 
-        [Command("run")]
-        public async ValueTask RunAsync([Option("state", new char[] { 's' })] string stateDirectoryPath = "../state/daemon")
+        public async ValueTask RunAsync([Argument("state")] string stateDirectoryPath = "../daemon/state", [Argument("logs")] string logsDirectoryPath = "../daemon/logs")
         {
-            _logger.Info("daemon start");
+            DirectoryHelper.CreateDirectory(stateDirectoryPath);
+            DirectoryHelper.CreateDirectory(logsDirectoryPath);
 
-            using (var daemon = new Daemon())
+            SetLogsDirectory(logsDirectoryPath);
+            ChangeLogLevel();
+
+            try
             {
-                await daemon.RunAsync(stateDirectoryPath, this.Context.CancellationToken);
-            }
+                _logger.Info("daemon start");
 
-            _logger.Info("daemon end");
+                using (var daemon = new Daemon())
+                {
+                    await daemon.RunAsync(stateDirectoryPath, this.Context.CancellationToken);
+                }
+
+                _logger.Info("daemon end");
+            }
+            finally
+            {
+                NLog.LogManager.Shutdown();
+            }
+        }
+
+        private static void SetLogsDirectory(string logsDirectoryPath)
+        {
+            var target = (NLog.Targets.FileTarget)NLog.LogManager.Configuration.FindTargetByName("log_file");
+            target.FileName = $"{Path.GetFullPath(logsDirectoryPath)}/${{date:format=yyyy-MM-dd_HH-mm-ss}}.log";
+            target.ArchiveFileName = $"{Path.GetFullPath(logsDirectoryPath)}/logs/archive.{{#}}.log";
+            NLog.LogManager.ReconfigExistingLoggers();
+        }
+
+        private static void ChangeLogLevel()
+        {
+#if DEBUG
+            var rootLoggingRule = NLog.LogManager.Configuration.LoggingRules.First(n => n.NameMatches("*"));
+            rootLoggingRule.EnableLoggingForLevel(NLog.LogLevel.Trace);
+#endif
         }
     }
 }

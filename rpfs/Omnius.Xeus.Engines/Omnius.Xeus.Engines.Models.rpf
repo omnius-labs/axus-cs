@@ -5,7 +5,7 @@ using "Omnius.Core.Network";
 
 namespace "Omnius.Xeus.Engines.Models";
 
-// Models
+// Common
 
 message NodeProfile {
     Addresses: vector<OmniAddress>(capacity: 32),
@@ -30,11 +30,11 @@ message ConsistencyReport {
 }
 
 message ConnectionReport {
-    Type: ConnectionType,
+    HandshakeType: ConnectionHandshakeType,
     Address: OmniAddress,
 }
 
-enum ConnectionType : uint8 {
+enum ConnectionHandshakeType : uint8 {
     Unknown = 0,
     Connected = 1,
     Accepted = 2,
@@ -88,8 +88,9 @@ message CkadMediatorOptions {
 }
 
 message CkadMediatorReport {
-    ConnectingConnectionCount: uint32,
-    AcceptingConnectionCount: uint32,
+    ConnectedConnectionCount: uint32,
+    AcceptedConnectionCount: uint32,
+    Connections: vector<ConnectionReport>,
 }
 
 // ContentExchanger
@@ -100,8 +101,9 @@ message ContentExchangerOptions {
 }
 
 message ContentExchangerReport {
-    ConnectingConnectionCount: uint32,
-    AcceptingConnectionCount: uint32,
+    ConnectedConnectionCount: uint32,
+    AcceptedConnectionCount: uint32,
+    Connections: vector<ConnectionReport>,
 }
 
 // ContentPublisher
@@ -143,8 +145,9 @@ message DeclaredMessageExchangerOptions {
 }
 
 message DeclaredMessageExchangerReport {
-    ConnectingConnectionCount: uint32,
-    AcceptingConnectionCount: uint32,
+    ConnectedConnectionCount: uint32,
+    AcceptedConnectionCount: uint32,
+    Connections: vector<ConnectionReport>,
 }
 
 // DeclaredMessagePublisher

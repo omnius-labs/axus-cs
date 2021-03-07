@@ -3,6 +3,106 @@
 
 namespace Omnius.Xeus.Api
 {
+    public sealed partial class CkadMediator_GetReport_Output : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.CkadMediator_GetReport_Output>
+    {
+        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.CkadMediator_GetReport_Output> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.CkadMediator_GetReport_Output>.Formatter;
+        public static global::Omnius.Xeus.Api.CkadMediator_GetReport_Output Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.CkadMediator_GetReport_Output>.Empty;
+
+        static CkadMediator_GetReport_Output()
+        {
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.CkadMediator_GetReport_Output>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.CkadMediator_GetReport_Output>.Empty = new global::Omnius.Xeus.Api.CkadMediator_GetReport_Output(global::Omnius.Xeus.Engines.Models.CkadMediatorReport.Empty);
+        }
+
+        private readonly global::System.Lazy<int> ___hashCode;
+
+        public CkadMediator_GetReport_Output(global::Omnius.Xeus.Engines.Models.CkadMediatorReport report)
+        {
+            if (report is null) throw new global::System.ArgumentNullException("report");
+
+            this.Report = report;
+
+            ___hashCode = new global::System.Lazy<int>(() =>
+            {
+                var ___h = new global::System.HashCode();
+                if (report != default) ___h.Add(report.GetHashCode());
+                return ___h.ToHashCode();
+            });
+        }
+
+        public global::Omnius.Xeus.Engines.Models.CkadMediatorReport Report { get; }
+
+        public static global::Omnius.Xeus.Api.CkadMediator_GetReport_Output Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            return Formatter.Deserialize(ref reader, 0);
+        }
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            Formatter.Serialize(ref writer, this, 0);
+        }
+
+        public static bool operator ==(global::Omnius.Xeus.Api.CkadMediator_GetReport_Output? left, global::Omnius.Xeus.Api.CkadMediator_GetReport_Output? right)
+        {
+            return (right is null) ? (left is null) : right.Equals(left);
+        }
+        public static bool operator !=(global::Omnius.Xeus.Api.CkadMediator_GetReport_Output? left, global::Omnius.Xeus.Api.CkadMediator_GetReport_Output? right)
+        {
+            return !(left == right);
+        }
+        public override bool Equals(object? other)
+        {
+            if (other is not global::Omnius.Xeus.Api.CkadMediator_GetReport_Output) return false;
+            return this.Equals((global::Omnius.Xeus.Api.CkadMediator_GetReport_Output)other);
+        }
+        public bool Equals(global::Omnius.Xeus.Api.CkadMediator_GetReport_Output? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (this.Report != target.Report) return false;
+
+            return true;
+        }
+        public override int GetHashCode() => ___hashCode.Value;
+
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.CkadMediator_GetReport_Output>
+        {
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Api.CkadMediator_GetReport_Output value, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                if (value.Report != global::Omnius.Xeus.Engines.Models.CkadMediatorReport.Empty)
+                {
+                    w.Write((uint)1);
+                    global::Omnius.Xeus.Engines.Models.CkadMediatorReport.Formatter.Serialize(ref w, value.Report, rank + 1);
+                }
+                w.Write((uint)0);
+            }
+            public global::Omnius.Xeus.Api.CkadMediator_GetReport_Output Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                global::Omnius.Xeus.Engines.Models.CkadMediatorReport p_report = global::Omnius.Xeus.Engines.Models.CkadMediatorReport.Empty;
+
+                for (; ; )
+                {
+                    uint id = r.GetUInt32();
+                    if (id == 0) break;
+                    switch (id)
+                    {
+                        case 1:
+                            {
+                                p_report = global::Omnius.Xeus.Engines.Models.CkadMediatorReport.Formatter.Deserialize(ref r, rank + 1);
+                                break;
+                            }
+                    }
+                }
+
+                return new global::Omnius.Xeus.Api.CkadMediator_GetReport_Output(p_report);
+            }
+        }
+    }
     public sealed partial class CkadMediator_GetMyNodeProfile_Output : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.CkadMediator_GetMyNodeProfile_Output>
     {
         public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.CkadMediator_GetMyNodeProfile_Output> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.CkadMediator_GetMyNodeProfile_Output>.Formatter;
@@ -219,6 +319,206 @@ namespace Omnius.Xeus.Api
                 }
 
                 return new global::Omnius.Xeus.Api.CkadMediator_AddCloudNodeProfiles_Input(p_nodeProfiles);
+            }
+        }
+    }
+    public sealed partial class ContentExchanger_GetReport_Output : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output>
+    {
+        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output>.Formatter;
+        public static global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output>.Empty;
+
+        static ContentExchanger_GetReport_Output()
+        {
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output>.Empty = new global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output(global::Omnius.Xeus.Engines.Models.ContentExchangerReport.Empty);
+        }
+
+        private readonly global::System.Lazy<int> ___hashCode;
+
+        public ContentExchanger_GetReport_Output(global::Omnius.Xeus.Engines.Models.ContentExchangerReport report)
+        {
+            if (report is null) throw new global::System.ArgumentNullException("report");
+
+            this.Report = report;
+
+            ___hashCode = new global::System.Lazy<int>(() =>
+            {
+                var ___h = new global::System.HashCode();
+                if (report != default) ___h.Add(report.GetHashCode());
+                return ___h.ToHashCode();
+            });
+        }
+
+        public global::Omnius.Xeus.Engines.Models.ContentExchangerReport Report { get; }
+
+        public static global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            return Formatter.Deserialize(ref reader, 0);
+        }
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            Formatter.Serialize(ref writer, this, 0);
+        }
+
+        public static bool operator ==(global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output? left, global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output? right)
+        {
+            return (right is null) ? (left is null) : right.Equals(left);
+        }
+        public static bool operator !=(global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output? left, global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output? right)
+        {
+            return !(left == right);
+        }
+        public override bool Equals(object? other)
+        {
+            if (other is not global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output) return false;
+            return this.Equals((global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output)other);
+        }
+        public bool Equals(global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (this.Report != target.Report) return false;
+
+            return true;
+        }
+        public override int GetHashCode() => ___hashCode.Value;
+
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output>
+        {
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output value, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                if (value.Report != global::Omnius.Xeus.Engines.Models.ContentExchangerReport.Empty)
+                {
+                    w.Write((uint)1);
+                    global::Omnius.Xeus.Engines.Models.ContentExchangerReport.Formatter.Serialize(ref w, value.Report, rank + 1);
+                }
+                w.Write((uint)0);
+            }
+            public global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                global::Omnius.Xeus.Engines.Models.ContentExchangerReport p_report = global::Omnius.Xeus.Engines.Models.ContentExchangerReport.Empty;
+
+                for (; ; )
+                {
+                    uint id = r.GetUInt32();
+                    if (id == 0) break;
+                    switch (id)
+                    {
+                        case 1:
+                            {
+                                p_report = global::Omnius.Xeus.Engines.Models.ContentExchangerReport.Formatter.Deserialize(ref r, rank + 1);
+                                break;
+                            }
+                    }
+                }
+
+                return new global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output(p_report);
+            }
+        }
+    }
+    public sealed partial class DeclaredMessageExchanger_GetReport_Output : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output>
+    {
+        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output>.Formatter;
+        public static global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output>.Empty;
+
+        static DeclaredMessageExchanger_GetReport_Output()
+        {
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output>.Empty = new global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output(global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport.Empty);
+        }
+
+        private readonly global::System.Lazy<int> ___hashCode;
+
+        public DeclaredMessageExchanger_GetReport_Output(global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport report)
+        {
+            if (report is null) throw new global::System.ArgumentNullException("report");
+
+            this.Report = report;
+
+            ___hashCode = new global::System.Lazy<int>(() =>
+            {
+                var ___h = new global::System.HashCode();
+                if (report != default) ___h.Add(report.GetHashCode());
+                return ___h.ToHashCode();
+            });
+        }
+
+        public global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport Report { get; }
+
+        public static global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            return Formatter.Deserialize(ref reader, 0);
+        }
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            Formatter.Serialize(ref writer, this, 0);
+        }
+
+        public static bool operator ==(global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output? left, global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output? right)
+        {
+            return (right is null) ? (left is null) : right.Equals(left);
+        }
+        public static bool operator !=(global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output? left, global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output? right)
+        {
+            return !(left == right);
+        }
+        public override bool Equals(object? other)
+        {
+            if (other is not global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output) return false;
+            return this.Equals((global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output)other);
+        }
+        public bool Equals(global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (this.Report != target.Report) return false;
+
+            return true;
+        }
+        public override int GetHashCode() => ___hashCode.Value;
+
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output>
+        {
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output value, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                if (value.Report != global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport.Empty)
+                {
+                    w.Write((uint)1);
+                    global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport.Formatter.Serialize(ref w, value.Report, rank + 1);
+                }
+                w.Write((uint)0);
+            }
+            public global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport p_report = global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport.Empty;
+
+                for (; ; )
+                {
+                    uint id = r.GetUInt32();
+                    if (id == 0) break;
+                    switch (id)
+                    {
+                        case 1:
+                            {
+                                p_report = global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport.Formatter.Deserialize(ref r, rank + 1);
+                                break;
+                            }
+                    }
+                }
+
+                return new global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output(p_report);
             }
         }
     }
@@ -2536,8 +2836,11 @@ namespace Omnius.Xeus.Api
     }
     public interface IXeusService
     {
+        global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.CkadMediator_GetReport_Output> CkadMediator_GetReportAsync(global::System.Threading.CancellationToken cancellationToken = default);
         global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.CkadMediator_GetMyNodeProfile_Output> CkadMediator_GetMyNodeProfileAsync(global::System.Threading.CancellationToken cancellationToken = default);
         global::System.Threading.Tasks.ValueTask CkadMediator_AddCloudNodeProfilesAsync(global::Omnius.Xeus.Api.CkadMediator_AddCloudNodeProfiles_Input param, global::System.Threading.CancellationToken cancellationToken = default);
+        global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output> ContentExchanger_GetReportAsync(global::System.Threading.CancellationToken cancellationToken = default);
+        global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output> DeclaredMessageExchanger_GetReportAsync(global::System.Threading.CancellationToken cancellationToken = default);
         global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.ContentPublisher_GetReport_Output> ContentPublisher_GetReportAsync(global::System.Threading.CancellationToken cancellationToken = default);
         global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.ContentPublisher_PublishContent_File_Output> ContentPublisher_PublishContentAsync(global::Omnius.Xeus.Api.ContentPublisher_PublishContent_File_Input param, global::System.Threading.CancellationToken cancellationToken = default);
         global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.ContentPublisher_PublishContent_Memory_Output> ContentPublisher_PublishContentAsync(global::Omnius.Xeus.Api.ContentPublisher_PublishContent_Memory_Input param, global::System.Threading.CancellationToken cancellationToken = default);
@@ -2562,110 +2865,125 @@ namespace Omnius.Xeus.Api
         {
             private readonly global::Omnius.Core.Network.Connections.IConnection _connection;
             private readonly global::Omnius.Core.IBytesPool _bytesPool;
-            private readonly global::Omnius.Core.RocketPack.Remoting.RocketPackRemoting _remoting;
+            private readonly global::Omnius.Core.RocketPack.Remoting.IRocketPackRemoting _remoting;
             public Client(global::Omnius.Core.Network.Connections.IConnection connection, global::Omnius.Core.IBytesPool bytesPool)
             {
                 _connection = connection;
                 _bytesPool = bytesPool;
-                _remoting = new global::Omnius.Core.RocketPack.Remoting.RocketPackRemoting(_connection, _bytesPool);
+                _remoting = global::Omnius.Core.RocketPack.Remoting.RocketPackRemoting.Factory.Create(_connection, global::Omnius.Core.RocketPack.Remoting.RocketPackRemotingMessenger.Factory, global::Omnius.Core.RocketPack.Remoting.RocketPackRemotingFunction.Factory, _bytesPool);
             }
             protected override async global::System.Threading.Tasks.ValueTask OnDisposeAsync()
             {
                 await _remoting.DisposeAsync();
             }
-            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.CkadMediator_GetMyNodeProfile_Output> CkadMediator_GetMyNodeProfileAsync(global::System.Threading.CancellationToken cancellationToken = default)
+            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.CkadMediator_GetReport_Output> CkadMediator_GetReportAsync(global::System.Threading.CancellationToken cancellationToken = default)
             {
                 using var function = await _remoting.ConnectAsync(1, cancellationToken);
+                return await function.CallFunctionAsync<global::Omnius.Xeus.Api.CkadMediator_GetReport_Output>(cancellationToken);
+            }
+            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.CkadMediator_GetMyNodeProfile_Output> CkadMediator_GetMyNodeProfileAsync(global::System.Threading.CancellationToken cancellationToken = default)
+            {
+                using var function = await _remoting.ConnectAsync(2, cancellationToken);
                 return await function.CallFunctionAsync<global::Omnius.Xeus.Api.CkadMediator_GetMyNodeProfile_Output>(cancellationToken);
             }
             public async global::System.Threading.Tasks.ValueTask CkadMediator_AddCloudNodeProfilesAsync(global::Omnius.Xeus.Api.CkadMediator_AddCloudNodeProfiles_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
-                using var function = await _remoting.ConnectAsync(2, cancellationToken);
+                using var function = await _remoting.ConnectAsync(3, cancellationToken);
                 await function.CallActionAsync<global::Omnius.Xeus.Api.CkadMediator_AddCloudNodeProfiles_Input>(param, cancellationToken);
+            }
+            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output> ContentExchanger_GetReportAsync(global::System.Threading.CancellationToken cancellationToken = default)
+            {
+                using var function = await _remoting.ConnectAsync(4, cancellationToken);
+                return await function.CallFunctionAsync<global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output>(cancellationToken);
+            }
+            public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output> DeclaredMessageExchanger_GetReportAsync(global::System.Threading.CancellationToken cancellationToken = default)
+            {
+                using var function = await _remoting.ConnectAsync(5, cancellationToken);
+                return await function.CallFunctionAsync<global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output>(cancellationToken);
             }
             public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.ContentPublisher_GetReport_Output> ContentPublisher_GetReportAsync(global::System.Threading.CancellationToken cancellationToken = default)
             {
-                using var function = await _remoting.ConnectAsync(3, cancellationToken);
+                using var function = await _remoting.ConnectAsync(6, cancellationToken);
                 return await function.CallFunctionAsync<global::Omnius.Xeus.Api.ContentPublisher_GetReport_Output>(cancellationToken);
             }
             public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.ContentPublisher_PublishContent_File_Output> ContentPublisher_PublishContentAsync(global::Omnius.Xeus.Api.ContentPublisher_PublishContent_File_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
-                using var function = await _remoting.ConnectAsync(4, cancellationToken);
+                using var function = await _remoting.ConnectAsync(7, cancellationToken);
                 return await function.CallFunctionAsync<global::Omnius.Xeus.Api.ContentPublisher_PublishContent_File_Input, global::Omnius.Xeus.Api.ContentPublisher_PublishContent_File_Output>(param, cancellationToken);
             }
             public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.ContentPublisher_PublishContent_Memory_Output> ContentPublisher_PublishContentAsync(global::Omnius.Xeus.Api.ContentPublisher_PublishContent_Memory_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
-                using var function = await _remoting.ConnectAsync(5, cancellationToken);
+                using var function = await _remoting.ConnectAsync(8, cancellationToken);
                 return await function.CallFunctionAsync<global::Omnius.Xeus.Api.ContentPublisher_PublishContent_Memory_Input, global::Omnius.Xeus.Api.ContentPublisher_PublishContent_Memory_Output>(param, cancellationToken);
             }
             public async global::System.Threading.Tasks.ValueTask ContentPublisher_UnpublishContentAsync(global::Omnius.Xeus.Api.ContentPublisher_UnpublishContent_File_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
-                using var function = await _remoting.ConnectAsync(6, cancellationToken);
+                using var function = await _remoting.ConnectAsync(9, cancellationToken);
                 await function.CallActionAsync<global::Omnius.Xeus.Api.ContentPublisher_UnpublishContent_File_Input>(param, cancellationToken);
             }
             public async global::System.Threading.Tasks.ValueTask ContentPublisher_UnpublishContentAsync(global::Omnius.Xeus.Api.ContentPublisher_UnpublishContent_Memory_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
-                using var function = await _remoting.ConnectAsync(7, cancellationToken);
+                using var function = await _remoting.ConnectAsync(10, cancellationToken);
                 await function.CallActionAsync<global::Omnius.Xeus.Api.ContentPublisher_UnpublishContent_Memory_Input>(param, cancellationToken);
             }
             public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.ContentSubscriber_GetReport_Output> ContentSubscriber_GetReportAsync(global::System.Threading.CancellationToken cancellationToken = default)
             {
-                using var function = await _remoting.ConnectAsync(8, cancellationToken);
+                using var function = await _remoting.ConnectAsync(11, cancellationToken);
                 return await function.CallFunctionAsync<global::Omnius.Xeus.Api.ContentSubscriber_GetReport_Output>(cancellationToken);
             }
             public async global::System.Threading.Tasks.ValueTask ContentSubscriber_SubscribeContentAsync(global::Omnius.Xeus.Api.ContentSubscriber_SubscribeContent_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
-                using var function = await _remoting.ConnectAsync(9, cancellationToken);
+                using var function = await _remoting.ConnectAsync(12, cancellationToken);
                 await function.CallActionAsync<global::Omnius.Xeus.Api.ContentSubscriber_SubscribeContent_Input>(param, cancellationToken);
             }
             public async global::System.Threading.Tasks.ValueTask ContentSubscriber_UnsubscribeContentAsync(global::Omnius.Xeus.Api.ContentSubscriber_UnsubscribeContent_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
-                using var function = await _remoting.ConnectAsync(10, cancellationToken);
+                using var function = await _remoting.ConnectAsync(13, cancellationToken);
                 await function.CallActionAsync<global::Omnius.Xeus.Api.ContentSubscriber_UnsubscribeContent_Input>(param, cancellationToken);
             }
             public async global::System.Threading.Tasks.ValueTask ContentSubscriber_ExportContentAsync(global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_File_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
-                using var function = await _remoting.ConnectAsync(11, cancellationToken);
+                using var function = await _remoting.ConnectAsync(14, cancellationToken);
                 await function.CallActionAsync<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_File_Input>(param, cancellationToken);
             }
             public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output> ContentSubscriber_ExportContentAsync(global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
-                using var function = await _remoting.ConnectAsync(12, cancellationToken);
+                using var function = await _remoting.ConnectAsync(15, cancellationToken);
                 return await function.CallFunctionAsync<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Input, global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output>(param, cancellationToken);
             }
             public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.DeclaredMessagePublisher_GetReport_Output> DeclaredMessagePublisher_GetReportAsync(global::System.Threading.CancellationToken cancellationToken = default)
             {
-                using var function = await _remoting.ConnectAsync(13, cancellationToken);
+                using var function = await _remoting.ConnectAsync(16, cancellationToken);
                 return await function.CallFunctionAsync<global::Omnius.Xeus.Api.DeclaredMessagePublisher_GetReport_Output>(cancellationToken);
             }
             public async global::System.Threading.Tasks.ValueTask DeclaredMessagePublisher_PublishMessageAsync(global::Omnius.Xeus.Api.DeclaredMessagePublisher_PublishMessage_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
-                using var function = await _remoting.ConnectAsync(14, cancellationToken);
+                using var function = await _remoting.ConnectAsync(17, cancellationToken);
                 await function.CallActionAsync<global::Omnius.Xeus.Api.DeclaredMessagePublisher_PublishMessage_Input>(param, cancellationToken);
             }
             public async global::System.Threading.Tasks.ValueTask DeclaredMessagePublisher_UnpublishMessageAsync(global::Omnius.Xeus.Api.DeclaredMessagePublisher_UnpublishMessage_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
-                using var function = await _remoting.ConnectAsync(15, cancellationToken);
+                using var function = await _remoting.ConnectAsync(18, cancellationToken);
                 await function.CallActionAsync<global::Omnius.Xeus.Api.DeclaredMessagePublisher_UnpublishMessage_Input>(param, cancellationToken);
             }
             public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_GetReport_Output> DeclaredMessageSubscriber_GetReportAsync(global::System.Threading.CancellationToken cancellationToken = default)
             {
-                using var function = await _remoting.ConnectAsync(16, cancellationToken);
+                using var function = await _remoting.ConnectAsync(19, cancellationToken);
                 return await function.CallFunctionAsync<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_GetReport_Output>(cancellationToken);
             }
             public async global::System.Threading.Tasks.ValueTask DeclaredMessageSubscriber_SubscribeMessageAsync(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_SubscribeMessage_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
-                using var function = await _remoting.ConnectAsync(17, cancellationToken);
+                using var function = await _remoting.ConnectAsync(20, cancellationToken);
                 await function.CallActionAsync<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_SubscribeMessage_Input>(param, cancellationToken);
             }
             public async global::System.Threading.Tasks.ValueTask DeclaredMessageSubscriber_UnsubscribeMessageAsync(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_UnsubscribeMessage_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
-                using var function = await _remoting.ConnectAsync(18, cancellationToken);
+                using var function = await _remoting.ConnectAsync(21, cancellationToken);
                 await function.CallActionAsync<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_UnsubscribeMessage_Input>(param, cancellationToken);
             }
             public async global::System.Threading.Tasks.ValueTask<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output> DeclaredMessageSubscriber_ExportMessageAsync(global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input param, global::System.Threading.CancellationToken cancellationToken = default)
             {
-                using var function = await _remoting.ConnectAsync(19, cancellationToken);
+                using var function = await _remoting.ConnectAsync(22, cancellationToken);
                 return await function.CallFunctionAsync<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input, global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output>(param, cancellationToken);
             }
         }
@@ -2674,13 +2992,13 @@ namespace Omnius.Xeus.Api
             private readonly global::Omnius.Xeus.Api.IXeusService _service;
             private readonly global::Omnius.Core.Network.Connections.IConnection _connection;
             private readonly global::Omnius.Core.IBytesPool _bytesPool;
-            private readonly global::Omnius.Core.RocketPack.Remoting.RocketPackRemoting _remoting;
+            private readonly global::Omnius.Core.RocketPack.Remoting.IRocketPackRemoting _remoting;
             public Server(global::Omnius.Xeus.Api.IXeusService service, global::Omnius.Core.Network.Connections.IConnection connection, global::Omnius.Core.IBytesPool bytesPool)
             {
                 _service = service;
                 _connection = connection;
                 _bytesPool = bytesPool;
-                _remoting = new global::Omnius.Core.RocketPack.Remoting.RocketPackRemoting(_connection, _bytesPool);
+                _remoting = global::Omnius.Core.RocketPack.Remoting.RocketPackRemoting.Factory.Create(_connection, global::Omnius.Core.RocketPack.Remoting.RocketPackRemotingMessenger.Factory, global::Omnius.Core.RocketPack.Remoting.RocketPackRemotingFunction.Factory, _bytesPool);
             }
             protected override async global::System.Threading.Tasks.ValueTask OnDisposeAsync()
             {
@@ -2696,95 +3014,110 @@ namespace Omnius.Xeus.Api
                     {
                         case 1:
                             {
-                                await function.ListenFunctionAsync<global::Omnius.Xeus.Api.CkadMediator_GetMyNodeProfile_Output>(_service.CkadMediator_GetMyNodeProfileAsync, cancellationToken);
+                                await function.ListenFunctionAsync<global::Omnius.Xeus.Api.CkadMediator_GetReport_Output>(_service.CkadMediator_GetReportAsync, cancellationToken);
                             }
                             break;
                         case 2:
                             {
-                                await function.ListenActionAsync<global::Omnius.Xeus.Api.CkadMediator_AddCloudNodeProfiles_Input>(_service.CkadMediator_AddCloudNodeProfilesAsync, cancellationToken);
+                                await function.ListenFunctionAsync<global::Omnius.Xeus.Api.CkadMediator_GetMyNodeProfile_Output>(_service.CkadMediator_GetMyNodeProfileAsync, cancellationToken);
                             }
                             break;
                         case 3:
                             {
-                                await function.ListenFunctionAsync<global::Omnius.Xeus.Api.ContentPublisher_GetReport_Output>(_service.ContentPublisher_GetReportAsync, cancellationToken);
+                                await function.ListenActionAsync<global::Omnius.Xeus.Api.CkadMediator_AddCloudNodeProfiles_Input>(_service.CkadMediator_AddCloudNodeProfilesAsync, cancellationToken);
                             }
                             break;
                         case 4:
                             {
-                                await function.ListenFunctionAsync<global::Omnius.Xeus.Api.ContentPublisher_PublishContent_File_Input, global::Omnius.Xeus.Api.ContentPublisher_PublishContent_File_Output>(_service.ContentPublisher_PublishContentAsync, cancellationToken);
+                                await function.ListenFunctionAsync<global::Omnius.Xeus.Api.ContentExchanger_GetReport_Output>(_service.ContentExchanger_GetReportAsync, cancellationToken);
                             }
                             break;
                         case 5:
                             {
-                                await function.ListenFunctionAsync<global::Omnius.Xeus.Api.ContentPublisher_PublishContent_Memory_Input, global::Omnius.Xeus.Api.ContentPublisher_PublishContent_Memory_Output>(_service.ContentPublisher_PublishContentAsync, cancellationToken);
+                                await function.ListenFunctionAsync<global::Omnius.Xeus.Api.DeclaredMessageExchanger_GetReport_Output>(_service.DeclaredMessageExchanger_GetReportAsync, cancellationToken);
                             }
                             break;
                         case 6:
                             {
-                                await function.ListenActionAsync<global::Omnius.Xeus.Api.ContentPublisher_UnpublishContent_File_Input>(_service.ContentPublisher_UnpublishContentAsync, cancellationToken);
+                                await function.ListenFunctionAsync<global::Omnius.Xeus.Api.ContentPublisher_GetReport_Output>(_service.ContentPublisher_GetReportAsync, cancellationToken);
                             }
                             break;
                         case 7:
                             {
-                                await function.ListenActionAsync<global::Omnius.Xeus.Api.ContentPublisher_UnpublishContent_Memory_Input>(_service.ContentPublisher_UnpublishContentAsync, cancellationToken);
+                                await function.ListenFunctionAsync<global::Omnius.Xeus.Api.ContentPublisher_PublishContent_File_Input, global::Omnius.Xeus.Api.ContentPublisher_PublishContent_File_Output>(_service.ContentPublisher_PublishContentAsync, cancellationToken);
                             }
                             break;
                         case 8:
                             {
-                                await function.ListenFunctionAsync<global::Omnius.Xeus.Api.ContentSubscriber_GetReport_Output>(_service.ContentSubscriber_GetReportAsync, cancellationToken);
+                                await function.ListenFunctionAsync<global::Omnius.Xeus.Api.ContentPublisher_PublishContent_Memory_Input, global::Omnius.Xeus.Api.ContentPublisher_PublishContent_Memory_Output>(_service.ContentPublisher_PublishContentAsync, cancellationToken);
                             }
                             break;
                         case 9:
                             {
-                                await function.ListenActionAsync<global::Omnius.Xeus.Api.ContentSubscriber_SubscribeContent_Input>(_service.ContentSubscriber_SubscribeContentAsync, cancellationToken);
+                                await function.ListenActionAsync<global::Omnius.Xeus.Api.ContentPublisher_UnpublishContent_File_Input>(_service.ContentPublisher_UnpublishContentAsync, cancellationToken);
                             }
                             break;
                         case 10:
                             {
-                                await function.ListenActionAsync<global::Omnius.Xeus.Api.ContentSubscriber_UnsubscribeContent_Input>(_service.ContentSubscriber_UnsubscribeContentAsync, cancellationToken);
+                                await function.ListenActionAsync<global::Omnius.Xeus.Api.ContentPublisher_UnpublishContent_Memory_Input>(_service.ContentPublisher_UnpublishContentAsync, cancellationToken);
                             }
                             break;
                         case 11:
                             {
-                                await function.ListenActionAsync<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_File_Input>(_service.ContentSubscriber_ExportContentAsync, cancellationToken);
+                                await function.ListenFunctionAsync<global::Omnius.Xeus.Api.ContentSubscriber_GetReport_Output>(_service.ContentSubscriber_GetReportAsync, cancellationToken);
                             }
                             break;
                         case 12:
                             {
-                                await function.ListenFunctionAsync<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Input, global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output>(_service.ContentSubscriber_ExportContentAsync, cancellationToken);
+                                await function.ListenActionAsync<global::Omnius.Xeus.Api.ContentSubscriber_SubscribeContent_Input>(_service.ContentSubscriber_SubscribeContentAsync, cancellationToken);
                             }
                             break;
                         case 13:
                             {
-                                await function.ListenFunctionAsync<global::Omnius.Xeus.Api.DeclaredMessagePublisher_GetReport_Output>(_service.DeclaredMessagePublisher_GetReportAsync, cancellationToken);
+                                await function.ListenActionAsync<global::Omnius.Xeus.Api.ContentSubscriber_UnsubscribeContent_Input>(_service.ContentSubscriber_UnsubscribeContentAsync, cancellationToken);
                             }
                             break;
                         case 14:
                             {
-                                await function.ListenActionAsync<global::Omnius.Xeus.Api.DeclaredMessagePublisher_PublishMessage_Input>(_service.DeclaredMessagePublisher_PublishMessageAsync, cancellationToken);
+                                await function.ListenActionAsync<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_File_Input>(_service.ContentSubscriber_ExportContentAsync, cancellationToken);
                             }
                             break;
                         case 15:
                             {
-                                await function.ListenActionAsync<global::Omnius.Xeus.Api.DeclaredMessagePublisher_UnpublishMessage_Input>(_service.DeclaredMessagePublisher_UnpublishMessageAsync, cancellationToken);
+                                await function.ListenFunctionAsync<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Input, global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output>(_service.ContentSubscriber_ExportContentAsync, cancellationToken);
                             }
                             break;
                         case 16:
                             {
-                                await function.ListenFunctionAsync<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_GetReport_Output>(_service.DeclaredMessageSubscriber_GetReportAsync, cancellationToken);
+                                await function.ListenFunctionAsync<global::Omnius.Xeus.Api.DeclaredMessagePublisher_GetReport_Output>(_service.DeclaredMessagePublisher_GetReportAsync, cancellationToken);
                             }
                             break;
                         case 17:
                             {
-                                await function.ListenActionAsync<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_SubscribeMessage_Input>(_service.DeclaredMessageSubscriber_SubscribeMessageAsync, cancellationToken);
+                                await function.ListenActionAsync<global::Omnius.Xeus.Api.DeclaredMessagePublisher_PublishMessage_Input>(_service.DeclaredMessagePublisher_PublishMessageAsync, cancellationToken);
                             }
                             break;
                         case 18:
                             {
-                                await function.ListenActionAsync<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_UnsubscribeMessage_Input>(_service.DeclaredMessageSubscriber_UnsubscribeMessageAsync, cancellationToken);
+                                await function.ListenActionAsync<global::Omnius.Xeus.Api.DeclaredMessagePublisher_UnpublishMessage_Input>(_service.DeclaredMessagePublisher_UnpublishMessageAsync, cancellationToken);
                             }
                             break;
                         case 19:
+                            {
+                                await function.ListenFunctionAsync<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_GetReport_Output>(_service.DeclaredMessageSubscriber_GetReportAsync, cancellationToken);
+                            }
+                            break;
+                        case 20:
+                            {
+                                await function.ListenActionAsync<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_SubscribeMessage_Input>(_service.DeclaredMessageSubscriber_SubscribeMessageAsync, cancellationToken);
+                            }
+                            break;
+                        case 21:
+                            {
+                                await function.ListenActionAsync<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_UnsubscribeMessage_Input>(_service.DeclaredMessageSubscriber_UnsubscribeMessageAsync, cancellationToken);
+                            }
+                            break;
+                        case 22:
                             {
                                 await function.ListenFunctionAsync<global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Input, global::Omnius.Xeus.Api.DeclaredMessageSubscriber_ExportMessage_Output>(_service.DeclaredMessageSubscriber_ExportMessageAsync, cancellationToken);
                             }

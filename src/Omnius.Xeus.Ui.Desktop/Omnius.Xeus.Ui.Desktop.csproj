@@ -33,8 +33,8 @@
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core\Omnius.Core.csproj" />
     <ProjectReference Include="..\Omnius.Xeus.Engines\Omnius.Xeus.Engines.csproj" />
     <ProjectReference Include="..\Omnius.Xeus.Api\Omnius.Xeus.Api.csproj" />
-    <ProjectReference Include="..\Omnius.Xeus.Service\Omnius.Xeus.Service.csproj" />
-    <ProjectReference Include="..\Omnius.Xeus.Service.Implementations\Omnius.Xeus.Service.Implementations.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Interactors\Omnius.Xeus.Interactors.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Interactors.Implementations\Omnius.Xeus.Interactors.Implementations.csproj" />
   </ItemGroup>
 
 </Project>

@@ -8,9 +8,9 @@ using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Helpers;
+using Omnius.Xeus.Engines.Helpers;
 using Omnius.Xeus.Engines.Storages.Internal.Models;
 using Omnius.Xeus.Engines.Storages.Internal.Repositories.Entities;
-using Omnius.Xeus.Engines.Storages.Internal.Repositories.Helpers;
 
 namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
 {
@@ -65,13 +65,13 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
             {
                 using (await _asyncLock.WriterLockAsync(cancellationToken))
                 {
-                    if (VersionHelper.GetVersion(_database, CollectionName) <= 0)
+                    if (LiteDatabaseVersionHelper.GetVersion(_database, CollectionName) <= 0)
                     {
                         var col = this.GetCollection();
                         col.EnsureIndex(x => x.ContentHash, false);
                     }
 
-                    VersionHelper.SetVersion(_database, CollectionName, 1);
+                    LiteDatabaseVersionHelper.SetVersion(_database, CollectionName, 1);
                 }
             }
 
@@ -166,13 +166,13 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
             {
                 using (await _asyncLock.WriterLockAsync(cancellationToken))
                 {
-                    if (VersionHelper.GetVersion(_database, CollectionName) <= 0)
+                    if (LiteDatabaseVersionHelper.GetVersion(_database, CollectionName) <= 0)
                     {
                         var col = this.GetCollection();
                         col.EnsureIndex(x => x.ContentHash, true);
                     }
 
-                    VersionHelper.SetVersion(_database, CollectionName, 1);
+                    LiteDatabaseVersionHelper.SetVersion(_database, CollectionName, 1);
                 }
             }
 

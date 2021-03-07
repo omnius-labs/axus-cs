@@ -7,7 +7,7 @@
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Daemon)",
             "program": "${workspaceFolder}/tmp/bin/win/Omnius.Xeus.Daemon/Debug/net5.0/Omnius.Xeus.Daemon.dll",
-            "args": ["run", "-s", "./demo/state/daemon"],
+            "args": ["./demo/daemon_1/state", "./demo/daemon_1/logs"],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "stopAtEntry": false
@@ -18,7 +18,7 @@
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Ui.Desktop)",
             "program": "${workspaceFolder}/tmp/bin/win/Omnius.Xeus.Ui.Desktop/Debug/net5.0/Omnius.Xeus.Ui.Desktop.dll",
-            "args": ["./demo/state/ui-desktop"],
+            "args": ["./demo/ui-desktop_1/state", "./demo/ui-desktop_1/logs"],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "stopAtEntry": false
@@ -29,7 +29,7 @@
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Daemon)",
             "program": "${workspaceFolder}/tmp/bin/linux/Omnius.Xeus.Daemon/Debug/net5.0/Omnius.Xeus.Daemon.dll",
-            "args": ["run", "-s", "./demo/state/daemon"],
+            "args": ["./demo/daemon_1/state", "./demo/daemon_1/logs"],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "stopAtEntry": false
@@ -40,7 +40,7 @@
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Ui.Desktop)",
             "program": "${workspaceFolder}/tmp/bin/linux/Omnius.Xeus.Ui.Desktop/Debug/net5.0/Omnius.Xeus.Ui.Desktop.dll",
-            "args": ["./demo/state/ui-desktop"],
+            "args": ["./demo/ui-desktop_1/state", "./demo/ui-desktop_1/logs"],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "stopAtEntry": false
@@ -51,7 +51,7 @@
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Daemon)",
             "program": "${workspaceFolder}/tmp/bin/mac/Omnius.Xeus.Daemon/Debug/net5.0/Omnius.Xeus.Daemon.dll",
-            "args": ["run", "-s", "./demo/state/daemon"],
+            "args": ["./demo/daemon_1/state", "./demo/daemon_1/logs"],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "stopAtEntry": false
@@ -62,7 +62,7 @@
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Ui.Desktop)",
             "program": "${workspaceFolder}/tmp/bin/mac/Omnius.Xeus.Ui.Desktop/Debug/net5.0/Omnius.Xeus.Ui.Desktop.dll",
-            "args": ["./demo/state/ui-desktop"],
+            "args": ["./demo/ui-desktop_1/state", "./demo/ui-desktop_1/logs"],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "stopAtEntry": false

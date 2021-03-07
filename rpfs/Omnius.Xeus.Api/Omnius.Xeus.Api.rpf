@@ -5,8 +5,13 @@ using "Omnius.Xeus.Engines.Models";
 namespace "Omnius.Xeus.Api";
 
 service XeusService {
+    CkadMediator_GetReport: () -> (CkadMediator_GetReport_Output),
     CkadMediator_GetMyNodeProfile: () -> (CkadMediator_GetMyNodeProfile_Output),
     CkadMediator_AddCloudNodeProfiles: (CkadMediator_AddCloudNodeProfiles_Input) -> (),
+
+    ContentExchanger_GetReport: () -> (ContentExchanger_GetReport_Output),
+
+    DeclaredMessageExchanger_GetReport: () -> (DeclaredMessageExchanger_GetReport_Output),
 
     ContentPublisher_GetReport: () -> (ContentPublisher_GetReport_Output),
     ContentPublisher_PublishContent: (ContentPublisher_PublishContent_File_Input) -> (ContentPublisher_PublishContent_File_Output),
@@ -30,12 +35,24 @@ service XeusService {
     DeclaredMessageSubscriber_ExportMessage: (DeclaredMessageSubscriber_ExportMessage_Input) -> (DeclaredMessageSubscriber_ExportMessage_Output),
 }
 
+message CkadMediator_GetReport_Output {
+    Report: CkadMediatorReport,
+}
+
 message CkadMediator_GetMyNodeProfile_Output {
     NodeProfile: NodeProfile,
 }
 
 message CkadMediator_AddCloudNodeProfiles_Input {
     NodeProfiles: vector<NodeProfile>(capacity: 32),
+}
+
+message ContentExchanger_GetReport_Output {
+    Report: ContentExchangerReport,
+}
+
+message DeclaredMessageExchanger_GetReport_Output {
+    Report: DeclaredMessageExchangerReport,
 }
 
 message ContentPublisher_GetReport_Output {

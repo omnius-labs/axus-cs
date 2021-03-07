@@ -7,7 +7,7 @@ using "Omnius.Xeus.Engines.Models";
 namespace "Omnius.Xeus.Engines.Storages.Internal.Models";
 option csharp_access_level "internal";
 
-// Models
+// Common
 
 message MerkleTreeSection {
     Depth: int32,

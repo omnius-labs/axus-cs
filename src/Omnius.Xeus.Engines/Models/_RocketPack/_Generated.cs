@@ -3,7 +3,7 @@
 
 namespace Omnius.Xeus.Engines.Models
 {
-    public enum ConnectionType : byte
+    public enum ConnectionHandshakeType : byte
     {
         Unknown = 0,
         Connected = 1,
@@ -562,28 +562,28 @@ namespace Omnius.Xeus.Engines.Models
         static ConnectionReport()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.ConnectionReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.ConnectionReport>.Empty = new global::Omnius.Xeus.Engines.Models.ConnectionReport((global::Omnius.Xeus.Engines.Models.ConnectionType)0, global::Omnius.Core.Network.OmniAddress.Empty);
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.ConnectionReport>.Empty = new global::Omnius.Xeus.Engines.Models.ConnectionReport((global::Omnius.Xeus.Engines.Models.ConnectionHandshakeType)0, global::Omnius.Core.Network.OmniAddress.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public ConnectionReport(global::Omnius.Xeus.Engines.Models.ConnectionType type, global::Omnius.Core.Network.OmniAddress address)
+        public ConnectionReport(global::Omnius.Xeus.Engines.Models.ConnectionHandshakeType handshakeType, global::Omnius.Core.Network.OmniAddress address)
         {
             if (address is null) throw new global::System.ArgumentNullException("address");
 
-            this.Type = type;
+            this.HandshakeType = handshakeType;
             this.Address = address;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (type != default) ___h.Add(type.GetHashCode());
+                if (handshakeType != default) ___h.Add(handshakeType.GetHashCode());
                 if (address != default) ___h.Add(address.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public global::Omnius.Xeus.Engines.Models.ConnectionType Type { get; }
+        public global::Omnius.Xeus.Engines.Models.ConnectionHandshakeType HandshakeType { get; }
         public global::Omnius.Core.Network.OmniAddress Address { get; }
 
         public static global::Omnius.Xeus.Engines.Models.ConnectionReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -614,7 +614,7 @@ namespace Omnius.Xeus.Engines.Models
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.Type != target.Type) return false;
+            if (this.HandshakeType != target.HandshakeType) return false;
             if (this.Address != target.Address) return false;
 
             return true;
@@ -627,10 +627,10 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.Type != (global::Omnius.Xeus.Engines.Models.ConnectionType)0)
+                if (value.HandshakeType != (global::Omnius.Xeus.Engines.Models.ConnectionHandshakeType)0)
                 {
                     w.Write((uint)1);
-                    w.Write((ulong)value.Type);
+                    w.Write((ulong)value.HandshakeType);
                 }
                 if (value.Address != global::Omnius.Core.Network.OmniAddress.Empty)
                 {
@@ -643,7 +643,7 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                global::Omnius.Xeus.Engines.Models.ConnectionType p_type = (global::Omnius.Xeus.Engines.Models.ConnectionType)0;
+                global::Omnius.Xeus.Engines.Models.ConnectionHandshakeType p_handshakeType = (global::Omnius.Xeus.Engines.Models.ConnectionHandshakeType)0;
                 global::Omnius.Core.Network.OmniAddress p_address = global::Omnius.Core.Network.OmniAddress.Empty;
 
                 for (; ; )
@@ -654,7 +654,7 @@ namespace Omnius.Xeus.Engines.Models
                     {
                         case 1:
                             {
-                                p_type = (global::Omnius.Xeus.Engines.Models.ConnectionType)r.GetUInt64();
+                                p_handshakeType = (global::Omnius.Xeus.Engines.Models.ConnectionHandshakeType)r.GetUInt64();
                                 break;
                             }
                         case 2:
@@ -665,7 +665,7 @@ namespace Omnius.Xeus.Engines.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Models.ConnectionReport(p_type, p_address);
+                return new global::Omnius.Xeus.Engines.Models.ConnectionReport(p_handshakeType, p_address);
             }
         }
     }
@@ -1528,27 +1528,42 @@ namespace Omnius.Xeus.Engines.Models
         static CkadMediatorReport()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.CkadMediatorReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.CkadMediatorReport>.Empty = new global::Omnius.Xeus.Engines.Models.CkadMediatorReport(0, 0);
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.CkadMediatorReport>.Empty = new global::Omnius.Xeus.Engines.Models.CkadMediatorReport(0, 0, global::System.Array.Empty<global::Omnius.Xeus.Engines.Models.ConnectionReport>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public CkadMediatorReport(uint connectingConnectionCount, uint acceptingConnectionCount)
+        public static readonly int MaxConnectionsCount = 2147483647;
+
+        public CkadMediatorReport(uint connectedConnectionCount, uint acceptedConnectionCount, global::Omnius.Xeus.Engines.Models.ConnectionReport[] connections)
         {
-            this.ConnectingConnectionCount = connectingConnectionCount;
-            this.AcceptingConnectionCount = acceptingConnectionCount;
+            if (connections is null) throw new global::System.ArgumentNullException("connections");
+            if (connections.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("connections");
+            foreach (var n in connections)
+            {
+                if (n is null) throw new global::System.ArgumentNullException("n");
+            }
+
+            this.ConnectedConnectionCount = connectedConnectionCount;
+            this.AcceptedConnectionCount = acceptedConnectionCount;
+            this.Connections = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Xeus.Engines.Models.ConnectionReport>(connections);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (connectingConnectionCount != default) ___h.Add(connectingConnectionCount.GetHashCode());
-                if (acceptingConnectionCount != default) ___h.Add(acceptingConnectionCount.GetHashCode());
+                if (connectedConnectionCount != default) ___h.Add(connectedConnectionCount.GetHashCode());
+                if (acceptedConnectionCount != default) ___h.Add(acceptedConnectionCount.GetHashCode());
+                foreach (var n in connections)
+                {
+                    if (n != default) ___h.Add(n.GetHashCode());
+                }
                 return ___h.ToHashCode();
             });
         }
 
-        public uint ConnectingConnectionCount { get; }
-        public uint AcceptingConnectionCount { get; }
+        public uint ConnectedConnectionCount { get; }
+        public uint AcceptedConnectionCount { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Xeus.Engines.Models.ConnectionReport> Connections { get; }
 
         public static global::Omnius.Xeus.Engines.Models.CkadMediatorReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -1578,8 +1593,9 @@ namespace Omnius.Xeus.Engines.Models
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.ConnectingConnectionCount != target.ConnectingConnectionCount) return false;
-            if (this.AcceptingConnectionCount != target.AcceptingConnectionCount) return false;
+            if (this.ConnectedConnectionCount != target.ConnectedConnectionCount) return false;
+            if (this.AcceptedConnectionCount != target.AcceptedConnectionCount) return false;
+            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Connections, target.Connections)) return false;
 
             return true;
         }
@@ -1591,15 +1607,24 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.ConnectingConnectionCount != 0)
+                if (value.ConnectedConnectionCount != 0)
                 {
                     w.Write((uint)1);
-                    w.Write(value.ConnectingConnectionCount);
+                    w.Write(value.ConnectedConnectionCount);
                 }
-                if (value.AcceptingConnectionCount != 0)
+                if (value.AcceptedConnectionCount != 0)
                 {
                     w.Write((uint)2);
-                    w.Write(value.AcceptingConnectionCount);
+                    w.Write(value.AcceptedConnectionCount);
+                }
+                if (value.Connections.Count != 0)
+                {
+                    w.Write((uint)3);
+                    w.Write((uint)value.Connections.Count);
+                    foreach (var n in value.Connections)
+                    {
+                        global::Omnius.Xeus.Engines.Models.ConnectionReport.Formatter.Serialize(ref w, n, rank + 1);
+                    }
                 }
                 w.Write((uint)0);
             }
@@ -1607,8 +1632,9 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                uint p_connectingConnectionCount = 0;
-                uint p_acceptingConnectionCount = 0;
+                uint p_connectedConnectionCount = 0;
+                uint p_acceptedConnectionCount = 0;
+                global::Omnius.Xeus.Engines.Models.ConnectionReport[] p_connections = global::System.Array.Empty<global::Omnius.Xeus.Engines.Models.ConnectionReport>();
 
                 for (; ; )
                 {
@@ -1618,18 +1644,28 @@ namespace Omnius.Xeus.Engines.Models
                     {
                         case 1:
                             {
-                                p_connectingConnectionCount = r.GetUInt32();
+                                p_connectedConnectionCount = r.GetUInt32();
                                 break;
                             }
                         case 2:
                             {
-                                p_acceptingConnectionCount = r.GetUInt32();
+                                p_acceptedConnectionCount = r.GetUInt32();
+                                break;
+                            }
+                        case 3:
+                            {
+                                var length = r.GetUInt32();
+                                p_connections = new global::Omnius.Xeus.Engines.Models.ConnectionReport[length];
+                                for (int i = 0; i < p_connections.Length; i++)
+                                {
+                                    p_connections[i] = global::Omnius.Xeus.Engines.Models.ConnectionReport.Formatter.Deserialize(ref r, rank + 1);
+                                }
                                 break;
                             }
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Models.CkadMediatorReport(p_connectingConnectionCount, p_acceptingConnectionCount);
+                return new global::Omnius.Xeus.Engines.Models.CkadMediatorReport(p_connectedConnectionCount, p_acceptedConnectionCount, p_connections);
             }
         }
     }
@@ -1758,27 +1794,42 @@ namespace Omnius.Xeus.Engines.Models
         static ContentExchangerReport()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.ContentExchangerReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.ContentExchangerReport>.Empty = new global::Omnius.Xeus.Engines.Models.ContentExchangerReport(0, 0);
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.ContentExchangerReport>.Empty = new global::Omnius.Xeus.Engines.Models.ContentExchangerReport(0, 0, global::System.Array.Empty<global::Omnius.Xeus.Engines.Models.ConnectionReport>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public ContentExchangerReport(uint connectingConnectionCount, uint acceptingConnectionCount)
+        public static readonly int MaxConnectionsCount = 2147483647;
+
+        public ContentExchangerReport(uint connectedConnectionCount, uint acceptedConnectionCount, global::Omnius.Xeus.Engines.Models.ConnectionReport[] connections)
         {
-            this.ConnectingConnectionCount = connectingConnectionCount;
-            this.AcceptingConnectionCount = acceptingConnectionCount;
+            if (connections is null) throw new global::System.ArgumentNullException("connections");
+            if (connections.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("connections");
+            foreach (var n in connections)
+            {
+                if (n is null) throw new global::System.ArgumentNullException("n");
+            }
+
+            this.ConnectedConnectionCount = connectedConnectionCount;
+            this.AcceptedConnectionCount = acceptedConnectionCount;
+            this.Connections = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Xeus.Engines.Models.ConnectionReport>(connections);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (connectingConnectionCount != default) ___h.Add(connectingConnectionCount.GetHashCode());
-                if (acceptingConnectionCount != default) ___h.Add(acceptingConnectionCount.GetHashCode());
+                if (connectedConnectionCount != default) ___h.Add(connectedConnectionCount.GetHashCode());
+                if (acceptedConnectionCount != default) ___h.Add(acceptedConnectionCount.GetHashCode());
+                foreach (var n in connections)
+                {
+                    if (n != default) ___h.Add(n.GetHashCode());
+                }
                 return ___h.ToHashCode();
             });
         }
 
-        public uint ConnectingConnectionCount { get; }
-        public uint AcceptingConnectionCount { get; }
+        public uint ConnectedConnectionCount { get; }
+        public uint AcceptedConnectionCount { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Xeus.Engines.Models.ConnectionReport> Connections { get; }
 
         public static global::Omnius.Xeus.Engines.Models.ContentExchangerReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -1808,8 +1859,9 @@ namespace Omnius.Xeus.Engines.Models
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.ConnectingConnectionCount != target.ConnectingConnectionCount) return false;
-            if (this.AcceptingConnectionCount != target.AcceptingConnectionCount) return false;
+            if (this.ConnectedConnectionCount != target.ConnectedConnectionCount) return false;
+            if (this.AcceptedConnectionCount != target.AcceptedConnectionCount) return false;
+            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Connections, target.Connections)) return false;
 
             return true;
         }
@@ -1821,15 +1873,24 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.ConnectingConnectionCount != 0)
+                if (value.ConnectedConnectionCount != 0)
                 {
                     w.Write((uint)1);
-                    w.Write(value.ConnectingConnectionCount);
+                    w.Write(value.ConnectedConnectionCount);
                 }
-                if (value.AcceptingConnectionCount != 0)
+                if (value.AcceptedConnectionCount != 0)
                 {
                     w.Write((uint)2);
-                    w.Write(value.AcceptingConnectionCount);
+                    w.Write(value.AcceptedConnectionCount);
+                }
+                if (value.Connections.Count != 0)
+                {
+                    w.Write((uint)3);
+                    w.Write((uint)value.Connections.Count);
+                    foreach (var n in value.Connections)
+                    {
+                        global::Omnius.Xeus.Engines.Models.ConnectionReport.Formatter.Serialize(ref w, n, rank + 1);
+                    }
                 }
                 w.Write((uint)0);
             }
@@ -1837,8 +1898,9 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                uint p_connectingConnectionCount = 0;
-                uint p_acceptingConnectionCount = 0;
+                uint p_connectedConnectionCount = 0;
+                uint p_acceptedConnectionCount = 0;
+                global::Omnius.Xeus.Engines.Models.ConnectionReport[] p_connections = global::System.Array.Empty<global::Omnius.Xeus.Engines.Models.ConnectionReport>();
 
                 for (; ; )
                 {
@@ -1848,18 +1910,28 @@ namespace Omnius.Xeus.Engines.Models
                     {
                         case 1:
                             {
-                                p_connectingConnectionCount = r.GetUInt32();
+                                p_connectedConnectionCount = r.GetUInt32();
                                 break;
                             }
                         case 2:
                             {
-                                p_acceptingConnectionCount = r.GetUInt32();
+                                p_acceptedConnectionCount = r.GetUInt32();
+                                break;
+                            }
+                        case 3:
+                            {
+                                var length = r.GetUInt32();
+                                p_connections = new global::Omnius.Xeus.Engines.Models.ConnectionReport[length];
+                                for (int i = 0; i < p_connections.Length; i++)
+                                {
+                                    p_connections[i] = global::Omnius.Xeus.Engines.Models.ConnectionReport.Formatter.Deserialize(ref r, rank + 1);
+                                }
                                 break;
                             }
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Models.ContentExchangerReport(p_connectingConnectionCount, p_acceptingConnectionCount);
+                return new global::Omnius.Xeus.Engines.Models.ContentExchangerReport(p_connectedConnectionCount, p_acceptedConnectionCount, p_connections);
             }
         }
     }
@@ -2686,27 +2758,42 @@ namespace Omnius.Xeus.Engines.Models
         static DeclaredMessageExchangerReport()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport>.Empty = new global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport(0, 0);
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport>.Empty = new global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport(0, 0, global::System.Array.Empty<global::Omnius.Xeus.Engines.Models.ConnectionReport>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public DeclaredMessageExchangerReport(uint connectingConnectionCount, uint acceptingConnectionCount)
+        public static readonly int MaxConnectionsCount = 2147483647;
+
+        public DeclaredMessageExchangerReport(uint connectedConnectionCount, uint acceptedConnectionCount, global::Omnius.Xeus.Engines.Models.ConnectionReport[] connections)
         {
-            this.ConnectingConnectionCount = connectingConnectionCount;
-            this.AcceptingConnectionCount = acceptingConnectionCount;
+            if (connections is null) throw new global::System.ArgumentNullException("connections");
+            if (connections.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("connections");
+            foreach (var n in connections)
+            {
+                if (n is null) throw new global::System.ArgumentNullException("n");
+            }
+
+            this.ConnectedConnectionCount = connectedConnectionCount;
+            this.AcceptedConnectionCount = acceptedConnectionCount;
+            this.Connections = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Xeus.Engines.Models.ConnectionReport>(connections);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (connectingConnectionCount != default) ___h.Add(connectingConnectionCount.GetHashCode());
-                if (acceptingConnectionCount != default) ___h.Add(acceptingConnectionCount.GetHashCode());
+                if (connectedConnectionCount != default) ___h.Add(connectedConnectionCount.GetHashCode());
+                if (acceptedConnectionCount != default) ___h.Add(acceptedConnectionCount.GetHashCode());
+                foreach (var n in connections)
+                {
+                    if (n != default) ___h.Add(n.GetHashCode());
+                }
                 return ___h.ToHashCode();
             });
         }
 
-        public uint ConnectingConnectionCount { get; }
-        public uint AcceptingConnectionCount { get; }
+        public uint ConnectedConnectionCount { get; }
+        public uint AcceptedConnectionCount { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Xeus.Engines.Models.ConnectionReport> Connections { get; }
 
         public static global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -2736,8 +2823,9 @@ namespace Omnius.Xeus.Engines.Models
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.ConnectingConnectionCount != target.ConnectingConnectionCount) return false;
-            if (this.AcceptingConnectionCount != target.AcceptingConnectionCount) return false;
+            if (this.ConnectedConnectionCount != target.ConnectedConnectionCount) return false;
+            if (this.AcceptedConnectionCount != target.AcceptedConnectionCount) return false;
+            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Connections, target.Connections)) return false;
 
             return true;
         }
@@ -2749,15 +2837,24 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.ConnectingConnectionCount != 0)
+                if (value.ConnectedConnectionCount != 0)
                 {
                     w.Write((uint)1);
-                    w.Write(value.ConnectingConnectionCount);
+                    w.Write(value.ConnectedConnectionCount);
                 }
-                if (value.AcceptingConnectionCount != 0)
+                if (value.AcceptedConnectionCount != 0)
                 {
                     w.Write((uint)2);
-                    w.Write(value.AcceptingConnectionCount);
+                    w.Write(value.AcceptedConnectionCount);
+                }
+                if (value.Connections.Count != 0)
+                {
+                    w.Write((uint)3);
+                    w.Write((uint)value.Connections.Count);
+                    foreach (var n in value.Connections)
+                    {
+                        global::Omnius.Xeus.Engines.Models.ConnectionReport.Formatter.Serialize(ref w, n, rank + 1);
+                    }
                 }
                 w.Write((uint)0);
             }
@@ -2765,8 +2862,9 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                uint p_connectingConnectionCount = 0;
-                uint p_acceptingConnectionCount = 0;
+                uint p_connectedConnectionCount = 0;
+                uint p_acceptedConnectionCount = 0;
+                global::Omnius.Xeus.Engines.Models.ConnectionReport[] p_connections = global::System.Array.Empty<global::Omnius.Xeus.Engines.Models.ConnectionReport>();
 
                 for (; ; )
                 {
@@ -2776,18 +2874,28 @@ namespace Omnius.Xeus.Engines.Models
                     {
                         case 1:
                             {
-                                p_connectingConnectionCount = r.GetUInt32();
+                                p_connectedConnectionCount = r.GetUInt32();
                                 break;
                             }
                         case 2:
                             {
-                                p_acceptingConnectionCount = r.GetUInt32();
+                                p_acceptedConnectionCount = r.GetUInt32();
+                                break;
+                            }
+                        case 3:
+                            {
+                                var length = r.GetUInt32();
+                                p_connections = new global::Omnius.Xeus.Engines.Models.ConnectionReport[length];
+                                for (int i = 0; i < p_connections.Length; i++)
+                                {
+                                    p_connections[i] = global::Omnius.Xeus.Engines.Models.ConnectionReport.Formatter.Deserialize(ref r, rank + 1);
+                                }
                                 break;
                             }
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport(p_connectingConnectionCount, p_acceptingConnectionCount);
+                return new global::Omnius.Xeus.Engines.Models.DeclaredMessageExchangerReport(p_connectedConnectionCount, p_acceptedConnectionCount, p_connections);
             }
         }
     }

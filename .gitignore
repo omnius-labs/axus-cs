@@ -3,10 +3,8 @@ tmp/
 pub/
 patch.txt
 demo/*
-!demo/daemon-run.sh
-!demo/daemon-run.bat
-!demo/ui-desktop-run.sh
-!demo/ui-desktop-run.bat
+!demo/daemon-run_*.sh
+!demo/ui-desktop-run_*.bat
 
 # Environment
 .env

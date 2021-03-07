@@ -14,7 +14,7 @@
       Output: ./src/Omnius.Xeus.Engines.Implementations/Exchangers/Internal/Models/_RocketPack/_Generated.cs
     - Input: ./rpfs/Omnius.Xeus.Api/Omnius.Xeus.Api.rpf
       Output: ./src/Omnius.Xeus.Api/_RocketPack/_Generated.cs
-    - Input: ./rpfs/Omnius.Xeus.Service/Omnius.Xeus.Service.Models.rpf
-      Output: ./src/Omnius.Xeus.Service/Models/_RocketPack/_Generated.cs
-    - Input: ./rpfs/Omnius.Xeus.Service.Implementations/Omnius.Xeus.Service.Internal.Models.rpf
-      Output: ./src/Omnius.Xeus.Service.Implementations/Internal/Models/_RocketPack/_Generated.cs
+    - Input: ./rpfs/Omnius.Xeus.Interactors/Omnius.Xeus.Interactors.Models.rpf
+      Output: ./src/Omnius.Xeus.Interactors/Models/_RocketPack/_Generated.cs
+    - Input: ./rpfs/Omnius.Xeus.Interactors.Implementations/Omnius.Xeus.Interactors.Internal.Models.rpf
+      Output: ./src/Omnius.Xeus.Interactors.Implementations/Internal/Models/_RocketPack/_Generated.cs

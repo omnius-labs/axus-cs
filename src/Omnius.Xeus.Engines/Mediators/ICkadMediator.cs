@@ -17,6 +17,8 @@ namespace Omnius.Xeus.Engines.Mediators
 
     public interface ICkadMediator : IAsyncDisposable
     {
+        ValueTask<CkadMediatorReport> GetReportAsync(CancellationToken cancellationToken = default);
+
         event GetResourceTags? GetPublishResourceTags;
 
         event GetResourceTags? GetWantResourceTags;

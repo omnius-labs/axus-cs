@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 
-namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Primitives
+namespace Omnius.Xeus.Ui.Desktop.Views.Primitives
 {
     public abstract class StatefulWindowBase : Window
     {

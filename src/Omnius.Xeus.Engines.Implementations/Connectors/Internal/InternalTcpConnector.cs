@@ -76,7 +76,7 @@ namespace Omnius.Xeus.Engines.Connectors.Internal
                 // TcpListenerの追加処理
                 foreach (var listenAddress in listenAddressSet)
                 {
-                    if (!listenAddress.TryParseTcpEndpoint(out var ipAddress, out ushort port, false)) continue;
+                    if (!listenAddress.TryGetTcpEndpoint(out var ipAddress, out ushort port, false)) continue;
 
                     var tcpListener = new TcpListener(ipAddress, port);
                     tcpListener.Start(3);
@@ -276,7 +276,7 @@ namespace Omnius.Xeus.Engines.Connectors.Internal
             var config = _tcpConnectingOptions;
             if (config == null || !config.Enabled) return null;
 
-            if (!address.TryParseTcpEndpoint(out var ipAddress, out ushort port)) return null;
+            if (!address.TryGetTcpEndpoint(out var ipAddress, out ushort port)) return null;
 
             var disposableList = new List<IDisposable>();
 
@@ -288,7 +288,7 @@ namespace Omnius.Xeus.Engines.Connectors.Internal
 
                 if (config.ProxyOptions?.Address is not null)
                 {
-                    if (!config.ProxyOptions.Address.TryParseTcpEndpoint(out var proxyAddress, out ushort proxyPort, true)) return null;
+                    if (!config.ProxyOptions.Address.TryGetTcpEndpoint(out var proxyAddress, out ushort proxyPort, true)) return null;
 
                     if (config.ProxyOptions.Type == TcpProxyType.Socks5Proxy)
                     {
@@ -412,7 +412,7 @@ namespace Omnius.Xeus.Engines.Connectors.Internal
 
             foreach (var listenAddress in config.ListenAddresses)
             {
-                if (!listenAddress.TryParseTcpEndpoint(out var listenIpAddress, out var port)) continue;
+                if (!listenAddress.TryGetTcpEndpoint(out var listenIpAddress, out var port)) continue;
 
                 if (listenIpAddress.AddressFamily == AddressFamily.InterNetwork && listenIpAddress == IPAddress.Any)
                 {

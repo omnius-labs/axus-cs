@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Helpers
+namespace Omnius.Xeus.Ui.Desktop.Views.Helpers
 {
     public static class ConvertHelper
     {
