@@ -43,7 +43,7 @@ namespace Omnius.Xeus.Daemon
         private static void SetLogsDirectory(string logsDirectoryPath)
         {
             var target = (NLog.Targets.FileTarget)NLog.LogManager.Configuration.FindTargetByName("log_file");
-            target.FileName = $"{Path.GetFullPath(logsDirectoryPath)}/${{date:format=yyyy-MM-dd_HH-mm-ss}}.log";
+            target.FileName = $"{Path.GetFullPath(logsDirectoryPath)}/${{date:format=yyyy-MM-dd}}.log";
             target.ArchiveFileName = $"{Path.GetFullPath(logsDirectoryPath)}/logs/archive.{{#}}.log";
             NLog.LogManager.ReconfigExistingLoggers();
         }
