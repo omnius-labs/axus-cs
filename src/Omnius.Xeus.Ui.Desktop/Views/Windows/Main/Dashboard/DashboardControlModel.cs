@@ -7,6 +7,7 @@ using Avalonia.Threading;
 using Omnius.Core;
 using Omnius.Core.Extensions;
 using Omnius.Core.Network;
+using Omnius.Lxna.Ui.Desktop.Presenters;
 using Omnius.Lxna.Ui.Desktop.Presenters.Primitives;
 using Omnius.Xeus.Ui.Desktop.Resources;
 using Reactive.Bindings;

@@ -53,7 +53,7 @@ namespace Omnius.Xeus.Engines.Storages
             _bytesStorageFactory = bytesStorageFactory;
             _bytesPool = bytesPool;
 
-            _publisherRepo = new ContentPublisherRepository(Path.Combine(_options.ConfigDirectoryPath, "content_publisher"));
+            _publisherRepo = new ContentPublisherRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
             _blockStorage = bytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
         }
 

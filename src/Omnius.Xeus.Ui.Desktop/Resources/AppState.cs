@@ -190,10 +190,7 @@ namespace Omnius.Xeus.Ui.Desktop.Resources
                     await _dashboard.DisposeAsync();
                 }
 
-                var dashboardOption = new DashboardOptions(
-                    _xeusService,
-                    _bytesPool);
-                _dashboard = await Dashboard.Factory.CreateAsync(dashboardOption, cancellationToken);
+                _dashboard = await Dashboard.Factory.CreateAsync(_xeusService, _bytesPool, cancellationToken);
 
                 await options.SaveAsync(this.GetOptionsFilePath());
 

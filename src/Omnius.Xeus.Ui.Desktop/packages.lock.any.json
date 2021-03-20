@@ -152,12 +152,6 @@
         "resolved": "1.1.118",
         "contentHash": "Onx6ovGSqXSK07n/0eM3ZusiNdB6cIlJdabQhWGgJp3Vooy9AaLS/tigeybOJAobqbtggTamoWndz72JscZBvw=="
       },
-      "XamlNameReferenceGenerator": {
-        "type": "Direct",
-        "requested": "[1.1.2, )",
-        "resolved": "1.1.2",
-        "contentHash": "u2zVamjQg2z+tBpmxfkX06/nQ4kMdg8XsQL41oV3D2CRJUGV2xiQ8Dyr+3UfhOAP8miLh/04sK1IfZ/ZLfs7tA=="
-      },
       "YamlDotNet": {
         "type": "Direct",
         "requested": "[9.1.4, )",

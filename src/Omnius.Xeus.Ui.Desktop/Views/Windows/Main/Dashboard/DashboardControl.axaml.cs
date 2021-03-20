@@ -3,7 +3,7 @@ using Avalonia.Markup.Xaml;
 
 namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main.Dashboard
 {
-    public class DashboardControl : UserControl
+    public partial class DashboardControl : UserControl
     {
         public DashboardControl()
         {

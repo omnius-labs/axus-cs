@@ -12,7 +12,7 @@ using Omnius.Xeus.Ui.Desktop.Views.Windows.Main.Dashboard;
 
 namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main
 {
-    public class MainWindow : StatefulWindowBase
+    public partial class MainWindow : StatefulWindowBase
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 

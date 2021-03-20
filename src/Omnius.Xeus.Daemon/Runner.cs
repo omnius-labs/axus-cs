@@ -143,7 +143,7 @@ namespace Omnius.Xeus.Daemon
                     })
                     .Write();
 
-                tcpListener = new TcpListener(ipAddress, port);
+                tcpListener = new TcpListener(ipAddress!, port);
                 tcpListener.Start();
                 using var canceller = cancellationToken.Register(() => tcpListener.Stop());
 

@@ -1,3 +1,4 @@
+using Omnius.Lxna.Ui.Desktop.Presenters.Primitives;
 using Omnius.Xeus.Interactors.Models;
 
 namespace Omnius.Lxna.Ui.Desktop.Presenters

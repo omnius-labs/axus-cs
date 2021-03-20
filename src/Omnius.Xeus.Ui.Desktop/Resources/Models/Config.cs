@@ -1,8 +1,6 @@
 using System;
-using System.IO;
-using System.Text.Json;
 using System.Threading.Tasks;
-using Omnius.Xeus.Ui.Desktop.Internal;
+using Omnius.Xeus.Utils;
 
 namespace Omnius.Xeus.Ui.Desktop.Resources.Models
 {
