@@ -56,10 +56,10 @@ namespace Omnius.Xeus.Engines.Mediators
 
         internal sealed class CkadMediatorFactory : ICkadMediatorFactory
         {
-            public async ValueTask<ICkadMediator> CreateAsync(CkadMediatorOptions options, IEnumerable<IConnector> connectors, IBytesPool bytesPool)
+            public async ValueTask<ICkadMediator> CreateAsync(CkadMediatorOptions options, IEnumerable<IConnector> connectors, IBytesPool bytesPool, CancellationToken cancellationToken = default)
             {
                 var result = new CkadMediator(options, connectors, bytesPool);
-                await result.InitAsync();
+                await result.InitAsync(cancellationToken);
 
                 return result;
             }
@@ -85,7 +85,7 @@ namespace Omnius.Xeus.Engines.Mediators
             return id;
         }
 
-        public async ValueTask InitAsync()
+        public async ValueTask InitAsync(CancellationToken cancellationToken = default)
         {
             _connectLoopTask = this.ConnectLoopAsync(_cancellationTokenSource.Token);
             _acceptLoopTask = this.AcceptLoopAsync(_cancellationTokenSource.Token);
@@ -336,7 +336,7 @@ namespace Omnius.Xeus.Engines.Mediators
                     ReadOnlyMemory<byte> id;
                     NodeProfile? nodeProfile = null;
                     {
-                        var myNodeProflie = await this.GetMyNodeProfileAsync();
+                        var myNodeProflie = await this.GetMyNodeProfileAsync(cancellationToken);
                         var myProfileMessage = new CkadMediatorProfileMessage(_myId, myNodeProflie);
 
                         var enqueueTask = connection.EnqueueAsync(myProfileMessage, cancellationToken).AsTask();
@@ -350,7 +350,7 @@ namespace Omnius.Xeus.Engines.Mediators
                         nodeProfile = otherProfileMessage.NodeProfile;
                     }
 
-                    if (!this.CanAppend(id.Span)) throw new CkadMediatorException();
+                    if (!this.CanAddConnection(id.Span)) throw new CkadMediatorException();
 
                     var status = new ConnectionStatus(connection, address, handshakeType, nodeProfile, id);
 
@@ -381,7 +381,7 @@ namespace Omnius.Xeus.Engines.Mediators
         }
 
         // kademliaのk-bucketの距離毎のノード数は最大20とする。(k=20)
-        private bool CanAppend(ReadOnlySpan<byte> id)
+        private bool CanAddConnection(ReadOnlySpan<byte> id)
         {
             lock (_lockObject)
             {

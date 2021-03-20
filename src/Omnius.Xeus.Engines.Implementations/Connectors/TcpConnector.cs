@@ -38,10 +38,11 @@ namespace Omnius.Xeus.Engines.Connectors
 
         internal sealed class ConnectionControllerFactory : ITcpConnectorFactory
         {
-            public async ValueTask<ITcpConnector> CreateAsync(TcpConnectorOptions options, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool)
+            public async ValueTask<ITcpConnector> CreateAsync(TcpConnectorOptions options, ISocks5ProxyClientFactory socks5ProxyClientFactory,
+                IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool, CancellationToken cancellationToken = default)
             {
                 var result = new TcpConnector(options, socks5ProxyClientFactory, httpProxyClientFactory, upnpClientFactory, bytesPool);
-                await result.InitAsync();
+                await result.InitAsync(cancellationToken);
 
                 return result;
             }
@@ -49,7 +50,8 @@ namespace Omnius.Xeus.Engines.Connectors
 
         public static ITcpConnectorFactory Factory { get; } = new ConnectionControllerFactory();
 
-        internal TcpConnector(TcpConnectorOptions options, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool)
+        internal TcpConnector(TcpConnectorOptions options, ISocks5ProxyClientFactory socks5ProxyClientFactory,
+            IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool)
         {
             _options = options;
             _socks5ProxyClientFactory = socks5ProxyClientFactory;
@@ -58,7 +60,7 @@ namespace Omnius.Xeus.Engines.Connectors
             _bytesPool = bytesPool;
         }
 
-        public async ValueTask InitAsync()
+        public async ValueTask InitAsync(CancellationToken cancellationToken = default)
         {
             _internalTcpConnector = await InternalTcpConnector.Factory.CreateAsync(_options.ConnectingOptions, _options.AcceptingOptions, _socks5ProxyClientFactory, _httpProxyClientFactory, _upnpClientFactory, _bytesPool);
             _baseConnectionDispatcher = new BaseConnectionDispatcher(new BaseConnectionDispatcherOptions()

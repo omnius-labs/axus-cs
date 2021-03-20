@@ -32,10 +32,11 @@ namespace Omnius.Xeus.Engines.Connectors.Internal
 
         public sealed class InternalTcpConnectorFactory
         {
-            public async ValueTask<InternalTcpConnector> CreateAsync(TcpConnectingOptions tcpConnectOptions, TcpAcceptingOptions tcpAcceptOptions, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool)
+            public async ValueTask<InternalTcpConnector> CreateAsync(TcpConnectingOptions tcpConnectOptions, TcpAcceptingOptions tcpAcceptOptions,
+                ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool, CancellationToken cancellationToken = default)
             {
                 var result = new InternalTcpConnector(tcpConnectOptions, tcpAcceptOptions, socks5ProxyClientFactory, httpProxyClientFactory, upnpClientFactory, bytesPool);
-                await result.InitAsync();
+                await result.InitAsync(cancellationToken);
 
                 return result;
             }
@@ -43,7 +44,8 @@ namespace Omnius.Xeus.Engines.Connectors.Internal
 
         public static InternalTcpConnectorFactory Factory { get; } = new InternalTcpConnectorFactory();
 
-        internal InternalTcpConnector(TcpConnectingOptions tcpConnectOptions, TcpAcceptingOptions tcpAcceptOptions, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool)
+        internal InternalTcpConnector(TcpConnectingOptions tcpConnectOptions, TcpAcceptingOptions tcpAcceptOptions,
+            ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool)
         {
             _tcpConnectingOptions = tcpConnectOptions;
             _tcpAcceptingOptions = tcpAcceptOptions;
@@ -54,7 +56,7 @@ namespace Omnius.Xeus.Engines.Connectors.Internal
             _bytesPool = bytesPool;
         }
 
-        internal async ValueTask InitAsync()
+        internal async ValueTask InitAsync(CancellationToken cancellationToken = default)
         {
             await this.StartTcpListen();
         }

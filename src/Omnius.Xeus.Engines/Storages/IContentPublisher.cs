@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
+using Omnius.Core.Storages;
 using Omnius.Xeus.Engines.Models;
 using Omnius.Xeus.Engines.Storages.Primitives;
 
@@ -11,7 +12,7 @@ namespace Omnius.Xeus.Engines.Storages
 {
     public interface IContentPublisherFactory
     {
-        ValueTask<IContentPublisher> CreateAsync(ContentPublisherOptions options, IBytesPool bytesPool);
+        ValueTask<IContentPublisher> CreateAsync(ContentPublisherOptions options, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, CancellationToken cancellationToken = default);
     }
 
     public interface IContentPublisher : IReadOnlyContents, IAsyncDisposable

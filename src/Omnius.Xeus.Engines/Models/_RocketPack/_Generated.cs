@@ -2523,31 +2523,31 @@ namespace Omnius.Xeus.Engines.Models
         static ContentSubscribedItemReport()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.ContentSubscribedItemReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.ContentSubscribedItemReport>.Empty = new global::Omnius.Xeus.Engines.Models.ContentSubscribedItemReport(global::Omnius.Core.Cryptography.OmniHash.Empty, string.Empty);
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.ContentSubscribedItemReport>.Empty = new global::Omnius.Xeus.Engines.Models.ContentSubscribedItemReport(null, string.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxRegistrantLength = 2147483647;
 
-        public ContentSubscribedItemReport(global::Omnius.Core.Cryptography.OmniHash rootHash, string registrant)
+        public ContentSubscribedItemReport(global::Omnius.Core.Cryptography.OmniHash? contentHash, string registrant)
         {
             if (registrant is null) throw new global::System.ArgumentNullException("registrant");
             if (registrant.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("registrant");
 
-            this.RootHash = rootHash;
+            this.ContentHash = contentHash;
             this.Registrant = registrant;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (rootHash != default) ___h.Add(rootHash.GetHashCode());
+                if (contentHash is not null) ___h.Add(contentHash.Value.GetHashCode());
                 if (registrant != default) ___h.Add(registrant.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
+        public global::Omnius.Core.Cryptography.OmniHash? ContentHash { get; }
         public string Registrant { get; }
 
         public static global::Omnius.Xeus.Engines.Models.ContentSubscribedItemReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -2578,7 +2578,8 @@ namespace Omnius.Xeus.Engines.Models
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.RootHash != target.RootHash) return false;
+            if ((this.ContentHash is null) != (target.ContentHash is null)) return false;
+            if ((this.ContentHash is not null) && (target.ContentHash is not null) && this.ContentHash != target.ContentHash) return false;
             if (this.Registrant != target.Registrant) return false;
 
             return true;
@@ -2591,10 +2592,10 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.RootHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
+                if (value.ContentHash != null)
                 {
                     w.Write((uint)1);
-                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.RootHash, rank + 1);
+                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.ContentHash.Value, rank + 1);
                 }
                 if (value.Registrant != string.Empty)
                 {
@@ -2607,7 +2608,7 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                global::Omnius.Core.Cryptography.OmniHash p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
+                global::Omnius.Core.Cryptography.OmniHash? p_contentHash = null;
                 string p_registrant = string.Empty;
 
                 for (; ; )
@@ -2618,7 +2619,7 @@ namespace Omnius.Xeus.Engines.Models
                     {
                         case 1:
                             {
-                                p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 2:
@@ -2629,7 +2630,7 @@ namespace Omnius.Xeus.Engines.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Models.ContentSubscribedItemReport(p_rootHash, p_registrant);
+                return new global::Omnius.Xeus.Engines.Models.ContentSubscribedItemReport(p_contentHash, p_registrant);
             }
         }
     }

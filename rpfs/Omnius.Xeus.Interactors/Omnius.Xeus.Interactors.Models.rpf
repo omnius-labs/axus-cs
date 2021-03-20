@@ -6,6 +6,15 @@ using "Omnius.Xeus.Engines.Models";
 
 namespace "Omnius.Xeus.Interactors.Models";
 
+// Common
+
+message XeusFileMeta {
+    ContentHash: OmniHash,
+    Name: string(capacity: 256),
+    Size: uint64,
+    Tags: vector<string(capacity: 256)>(capacity: 8),
+}
+
 message XeusUserProfile {
     Signature: OmniSignature,
     CreationTime: timestamp,
@@ -18,21 +27,74 @@ message XeusUserProfileContent {
     FileMetas: vector<XeusFileMeta>(capacity: 32 * 1024 * 1024),
 }
 
-message XeusFileMeta {
-    ContentHash: OmniHash,
-    Name: string(capacity: 256),
-    Size: uint64,
-    Tags: vector<string(capacity: 256)>(capacity: 8),
+// Dashboard
+
+message ConnectionReport {
+    EngineName: string(capacity: 256),
+    HandshakeType: ConnectionHandshakeType,
+    Address: OmniAddress,
 }
 
-enum XeusFileFoundResultState : int8 {
-    Found = 1,
-    Downloading = 2,
-    Downloaded = 4,
-    Uploaded = 8,
+// FileFinder
+
+message FileFinderOptions {
+    ConfigDirectoryPath: string(capacity: 1024),
 }
 
-message XeusFileFoundResult {
-    State: XeusFileFoundResultState,
+// FileDownloader
+
+message FileDownloaderOptions {
+    ConfigDirectoryPath: string(capacity: 1024),
+}
+
+message DownloadingFileReport {
     FileMeta: XeusFileMeta,
+    TargetDirectoryPath: string(capacity: 1024),
+    CreationTime: timestamp,
+}
+
+// FileUploader
+
+message FileUploaderOptions {
+    ConfigDirectoryPath: string(capacity: 1024),
+}
+
+message UploadingFileReport {
+    FilePath: string(capacity: 1024),
+    CreationTime: timestamp,
+}
+
+// UserProfileFinder
+
+message UserProfileFinderOptions {
+    ConfigDirectoryPath: string(capacity: 1024),
+}
+
+message UserProfileFinderSearchOptions {
+    TrustedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
+    BlockedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
+    SearchDepth: uint32,
+    MaxUserProfileCount: uint32,
+}
+
+// UserProfileDownloader
+
+message UserProfileDownloaderOptions {
+    ConfigDirectoryPath: string(capacity: 1024),
+}
+
+message DownloadingUserProfileReport {
+    Signature: OmniSignature,
+    CreationTime: timestamp,
+}
+
+// UserProfileUploader
+
+message UserProfileUploaderOptions {
+    ConfigDirectoryPath: string(capacity: 1024),
+}
+
+message UploadingUserProfileReport {
+    Signature: OmniSignature,
+    CreationTime: timestamp,
 }

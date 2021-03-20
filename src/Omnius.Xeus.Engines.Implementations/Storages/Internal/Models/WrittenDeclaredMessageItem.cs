@@ -3,7 +3,7 @@ using Omnius.Core.Cryptography;
 
 namespace Omnius.Xeus.Engines.Storages.Internal.Models
 {
-    internal sealed class WrittenDeclaredMessageItem
+    internal record WrittenDeclaredMessageItem
     {
         public WrittenDeclaredMessageItem(OmniSignature signature, DateTime creationTime)
         {

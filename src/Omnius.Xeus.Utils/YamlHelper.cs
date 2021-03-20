@@ -3,7 +3,7 @@ using System.Text;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace Omnius.Xeus.Daemon.Internal
+namespace Omnius.Xeus.Utils
 {
     public static class YamlHelper
     {

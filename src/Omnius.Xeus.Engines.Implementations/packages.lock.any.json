@@ -272,6 +272,11 @@
           "System.Runtime": "4.3.0"
         }
       },
+      "YamlDotNet": {
+        "type": "Transitive",
+        "resolved": "9.1.4",
+        "contentHash": "dVVZVhQxTI4xTNc9YorE+RruBFPPYKP44kMijE6Z5OQQE7zK+SEmh2sPm091CrTYVz1jjIuXKIBm1kFLrlsQJg=="
+      },
       "omnius.core": {
         "type": "Project",
         "dependencies": {
@@ -358,6 +363,17 @@
           "Omnius.Core": "0.0.1-alpha.1"
         }
       },
+      "omnius.core.storages": {
+        "type": "Project",
+        "dependencies": {
+          "LiteDB": "5.0.10",
+          "NLog": "4.7.7",
+          "Nito.AsyncEx": "5.1.0",
+          "Omnius.Core": "0.0.1-alpha.1",
+          "Omnius.Core.RocketPack": "0.0.1-alpha.1",
+          "Omnius.Core.Serialization": "0.0.1-alpha.1"
+        }
+      },
       "omnius.xeus.engines": {
         "type": "Project",
         "dependencies": {
@@ -370,7 +386,20 @@
           "Omnius.Core.Network.Proxies": "0.0.1-alpha.1",
           "Omnius.Core.Network.Upnp": "0.0.1-alpha.1",
           "Omnius.Core.RocketPack": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack.Remoting": "0.0.1-alpha.1"
+          "Omnius.Core.RocketPack.Remoting": "0.0.1-alpha.1",
+          "Omnius.Core.Storages": "0.0.1-alpha.1"
+        }
+      },
+      "omnius.xeus.utils": {
+        "type": "Project",
+        "dependencies": {
+          "LiteDB": "5.0.10",
+          "NLog": "4.7.7",
+          "Omnius.Core.Collections": "0.0.1-alpha.1",
+          "Omnius.Core.Cryptography": "0.0.1-alpha.1",
+          "Omnius.Core.Network": "0.0.1-alpha.1",
+          "Omnius.Xeus.Engines": "0.0.1-alpha.1",
+          "YamlDotNet": "9.1.4"
         }
       }
     }

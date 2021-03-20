@@ -6,9 +6,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Omnius.Core.Extensions;
 
-namespace Omnius.Lxna.Ui.Desktop.Presenters.Models.Primitives
+namespace Omnius.Lxna.Ui.Desktop.Presenters.Primitives
 {
-    public class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>
+    internal class ObservableDictionary<TKey, TValue> : IDictionary<TKey, TValue>
         where TKey : notnull
         where TValue : notnull
     {

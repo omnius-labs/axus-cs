@@ -3,7 +3,7 @@ using Omnius.Xeus.Engines.Storages.Internal.Models;
 
 namespace Omnius.Xeus.Engines.Storages.Internal.Repositories.Entities
 {
-    internal sealed class SubscribedContentItemEntity
+    internal record SubscribedContentItemEntity
     {
         public int Id { get; set; }
 

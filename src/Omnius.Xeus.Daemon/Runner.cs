@@ -13,6 +13,7 @@ using Omnius.Core.Network.Caps;
 using Omnius.Core.Network.Connections;
 using Omnius.Core.Network.Proxies;
 using Omnius.Core.Network.Upnp;
+using Omnius.Core.Storages;
 using Omnius.Xeus.Api;
 using Omnius.Xeus.Daemon.Internal;
 using Omnius.Xeus.Daemon.Resources.Models;
@@ -23,11 +24,11 @@ using Omnius.Xeus.Engines.Storages;
 
 namespace Omnius.Xeus.Daemon
 {
-    public class Daemon : DisposableBase
+    public class Runner : DisposableBase
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        public Daemon()
+        public Runner()
         {
         }
 
@@ -50,6 +51,7 @@ namespace Omnius.Xeus.Daemon
                 Socks5ProxyClientFactory = Socks5ProxyClient.Factory,
                 HttpProxyClientFactory = HttpProxyClient.Factory,
                 UpnpClientFactory = UpnpClient.Factory,
+                BytesStorageFactory = LiteDatabaseBytesStorage.Factory,
                 TcpConnectorFactory = TcpConnector.Factory,
                 CkadMediatorFactory = CkadMediator.Factory,
                 ContentExchangerFactory = ContentExchanger.Factory,

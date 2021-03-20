@@ -1,23 +1,27 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Caching\Omnius.Core.Caching.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Collections\Omnius.Core.Collections.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Cryptography\Omnius.Core.Cryptography.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Network\Omnius.Core.Network.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Network.Proxies\Omnius.Core.Network.Proxies.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Network.Upnp\Omnius.Core.Network.Upnp.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.RocketPack\Omnius.Core.RocketPack.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Network\Omnius.Core.Network.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.RocketPack.Remoting\Omnius.Core.RocketPack.Remoting.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.RocketPack\Omnius.Core.RocketPack.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Storages\Omnius.Core.Storages.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core\Omnius.Core.csproj" />
-    <ProjectReference Include="..\Omnius.Xeus.Engines\Omnius.Xeus.Engines.csproj" />
     <ProjectReference Include="..\Omnius.Xeus.Api\Omnius.Xeus.Api.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Engines\Omnius.Xeus.Engines.csproj" />
     <ProjectReference Include="..\Omnius.Xeus.Interactors\Omnius.Xeus.Interactors.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Utils\Omnius.Xeus.Utils.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="LiteDB" Version="5.0.10" />
     <PackageReference Include="NLog" Version="4.7.7" />
     <PackageReference Include="Nito.AsyncEx" Version="5.1.0" />
+    <PackageReference Include="System.Linq.Async" Version="5.0.0" />
   </ItemGroup>
 
 </Project>

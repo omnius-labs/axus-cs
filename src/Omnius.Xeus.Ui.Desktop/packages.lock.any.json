@@ -96,6 +96,15 @@
           "Avalonia": "0.10.0"
         }
       },
+      "DynamicData": {
+        "type": "Direct",
+        "requested": "[7.1.1, )",
+        "resolved": "7.1.1",
+        "contentHash": "Pc6J5bFnSxEa64PV2V67FMcLlDdpv6m+zTBKSnRN3aLon/WtWWy8kuDpHFbJlgXHtqc6Nxloj9ItuvDlvKC/8w==",
+        "dependencies": {
+          "System.Reactive": "5.0.0"
+        }
+      },
       "Nito.AsyncEx": {
         "type": "Direct",
         "requested": "[5.1.0, )",
@@ -142,6 +151,12 @@
         "requested": "[1.1.118, )",
         "resolved": "1.1.118",
         "contentHash": "Onx6ovGSqXSK07n/0eM3ZusiNdB6cIlJdabQhWGgJp3Vooy9AaLS/tigeybOJAobqbtggTamoWndz72JscZBvw=="
+      },
+      "XamlNameReferenceGenerator": {
+        "type": "Direct",
+        "requested": "[1.1.2, )",
+        "resolved": "1.1.2",
+        "contentHash": "u2zVamjQg2z+tBpmxfkX06/nQ4kMdg8XsQL41oV3D2CRJUGV2xiQ8Dyr+3UfhOAP8miLh/04sK1IfZ/ZLfs7tA=="
       },
       "YamlDotNet": {
         "type": "Direct",
@@ -195,14 +210,6 @@
           "Avalonia": "0.10.0",
           "Avalonia.FreeDesktop": "0.10.0",
           "Avalonia.Skia": "0.10.0"
-        }
-      },
-      "DynamicData": {
-        "type": "Transitive",
-        "resolved": "6.17.14",
-        "contentHash": "tbzTTfridK49Tfdg1vdSfQ7ecp9ZfqwLGDNLtn8ZeumGgOQbOrXXZp2TCgkHgNfnxXo1eDSOSGBMfEfWaOPlSw==",
-        "dependencies": {
-          "System.Reactive": "4.4.1"
         }
       },
       "HarfBuzzSharp": {
@@ -446,6 +453,11 @@
           "System.Runtime.Extensions": "4.3.0"
         }
       },
+      "System.Linq.Async": {
+        "type": "Transitive",
+        "resolved": "5.0.0",
+        "contentHash": "cPtIuuH8TIjVHSi2ewwReWGW1PfChPE0LxPIDlfwVcLuTM9GANFTXiMB7k3aC4sk3f0cQU25LNKzx+jZMxijqw=="
+      },
       "System.Memory": {
         "type": "Transitive",
         "resolved": "4.5.3",
@@ -675,6 +687,17 @@
           "Omnius.Core": "0.0.1-alpha.1"
         }
       },
+      "omnius.core.storages": {
+        "type": "Project",
+        "dependencies": {
+          "LiteDB": "5.0.10",
+          "NLog": "4.7.7",
+          "Nito.AsyncEx": "5.1.0",
+          "Omnius.Core": "0.0.1-alpha.1",
+          "Omnius.Core.RocketPack": "0.0.1-alpha.1",
+          "Omnius.Core.Serialization": "0.0.1-alpha.1"
+        }
+      },
       "omnius.xeus.api": {
         "type": "Project",
         "dependencies": {
@@ -697,7 +720,8 @@
           "Omnius.Core.Network.Proxies": "0.0.1-alpha.1",
           "Omnius.Core.Network.Upnp": "0.0.1-alpha.1",
           "Omnius.Core.RocketPack": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack.Remoting": "0.0.1-alpha.1"
+          "Omnius.Core.RocketPack.Remoting": "0.0.1-alpha.1",
+          "Omnius.Core.Storages": "0.0.1-alpha.1"
         }
       },
       "omnius.xeus.interactors": {
@@ -713,6 +737,7 @@
           "Omnius.Core.Network.Upnp": "0.0.1-alpha.1",
           "Omnius.Core.RocketPack": "0.0.1-alpha.1",
           "Omnius.Core.RocketPack.Remoting": "0.0.1-alpha.1",
+          "Omnius.Core.Storages": "0.0.1-alpha.1",
           "Omnius.Xeus.Api": "0.0.1-alpha.1",
           "Omnius.Xeus.Engines": "0.0.1-alpha.1"
         }
@@ -731,9 +756,24 @@
           "Omnius.Core.Network.Upnp": "0.0.1-alpha.1",
           "Omnius.Core.RocketPack": "0.0.1-alpha.1",
           "Omnius.Core.RocketPack.Remoting": "0.0.1-alpha.1",
+          "Omnius.Core.Storages": "0.0.1-alpha.1",
           "Omnius.Xeus.Api": "0.0.1-alpha.1",
           "Omnius.Xeus.Engines": "0.0.1-alpha.1",
-          "Omnius.Xeus.Interactors": "0.0.1-alpha.1"
+          "Omnius.Xeus.Interactors": "0.0.1-alpha.1",
+          "Omnius.Xeus.Utils": "0.0.1-alpha.1",
+          "System.Linq.Async": "5.0.0"
+        }
+      },
+      "omnius.xeus.utils": {
+        "type": "Project",
+        "dependencies": {
+          "LiteDB": "5.0.10",
+          "NLog": "4.7.7",
+          "Omnius.Core.Collections": "0.0.1-alpha.1",
+          "Omnius.Core.Cryptography": "0.0.1-alpha.1",
+          "Omnius.Core.Network": "0.0.1-alpha.1",
+          "Omnius.Xeus.Engines": "0.0.1-alpha.1",
+          "YamlDotNet": "9.1.4"
         }
       }
     }

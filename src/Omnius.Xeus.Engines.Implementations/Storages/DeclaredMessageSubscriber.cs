@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
+using Omnius.Core.Storages;
 using Omnius.Xeus.Engines.Models;
 using Omnius.Xeus.Engines.Storages.Internal;
 using Omnius.Xeus.Engines.Storages.Internal.Models;
@@ -23,16 +24,16 @@ namespace Omnius.Xeus.Engines.Storages
         private readonly IBytesPool _bytesPool;
 
         private readonly DeclaredMessageSubscriberRepository _subscriberRepo;
-        private readonly BlockStogage _blockStorage;
+        private readonly IBytesStorage<string> _blockStorage;
 
         private readonly AsyncReaderWriterLock _asyncLock = new();
 
         internal sealed class DeclaredMessageSubscriberFactory : IDeclaredMessageSubscriberFactory
         {
-            public async ValueTask<IDeclaredMessageSubscriber> CreateAsync(DeclaredMessageSubscriberOptions options, IBytesPool bytesPool)
+            public async ValueTask<IDeclaredMessageSubscriber> CreateAsync(DeclaredMessageSubscriberOptions options, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, CancellationToken cancellationToken = default)
             {
-                var result = new DeclaredMessageSubscriber(options, bytesPool);
-                await result.InitAsync();
+                var result = new DeclaredMessageSubscriber(options, bytesStorageFactory, bytesPool);
+                await result.InitAsync(cancellationToken);
 
                 return result;
             }
@@ -40,19 +41,19 @@ namespace Omnius.Xeus.Engines.Storages
 
         public static IDeclaredMessageSubscriberFactory Factory { get; } = new DeclaredMessageSubscriberFactory();
 
-        private DeclaredMessageSubscriber(DeclaredMessageSubscriberOptions options, IBytesPool bytesPool)
+        private DeclaredMessageSubscriber(DeclaredMessageSubscriberOptions options, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool)
         {
             _options = options;
             _bytesPool = bytesPool;
 
-            _subscriberRepo = new DeclaredMessageSubscriberRepository(Path.Combine(_options.ConfigDirectoryPath, "declared_message_subscriber.db"));
-            _blockStorage = new BlockStogage(Path.Combine(_options.ConfigDirectoryPath, "blocks.db"), _bytesPool);
+            _subscriberRepo = new DeclaredMessageSubscriberRepository(Path.Combine(_options.ConfigDirectoryPath, "declared_message_subscriber"));
+            _blockStorage = bytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
         }
 
-        internal async ValueTask InitAsync()
+        internal async ValueTask InitAsync(CancellationToken cancellationToken = default)
         {
-            await _subscriberRepo.MigrateAsync();
-            await _blockStorage.MigrateAsync();
+            await _subscriberRepo.MigrateAsync(cancellationToken);
+            await _blockStorage.MigrateAsync(cancellationToken);
         }
 
         protected override async ValueTask OnDisposeAsync()
@@ -141,7 +142,7 @@ namespace Omnius.Xeus.Engines.Storages
             if (writtenItem is null) return null;
 
             var blockName = ComputeBlockName(signature);
-            using var memoryOwner = await _blockStorage.ReadAsync(blockName, cancellationToken);
+            using var memoryOwner = await _blockStorage.TryReadAsync(blockName, cancellationToken);
             if (memoryOwner is null) return null;
 
             var message = DeclaredMessage.Import(new ReadOnlySequence<byte>(memoryOwner.Memory), _bytesPool);

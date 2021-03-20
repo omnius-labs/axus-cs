@@ -7,8 +7,7 @@ using Avalonia.Threading;
 using Omnius.Core;
 using Omnius.Core.Extensions;
 using Omnius.Core.Network;
-using Omnius.Lxna.Ui.Desktop.Presenters.Models;
-using Omnius.Lxna.Ui.Desktop.Presenters.Models.Primitives;
+using Omnius.Lxna.Ui.Desktop.Presenters.Primitives;
 using Omnius.Xeus.Ui.Desktop.Resources;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
@@ -57,7 +56,7 @@ namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main.Dashboard
                 // FIXME
                 {
                     var dashboard = _state.GetDashboard();
-                    await dashboard.AddCloudNodeProfile(new[] { new EnginesModels.NodeProfile(new[] { OmniAddress.Parse("tcp(ip4(127.0.0.1),41000)") }, new[] { "ckad_mediator" }) }, cancellationToken);
+                    await dashboard.AddCloudNodeProfileAsync(new[] { new EnginesModels.NodeProfile(new[] { OmniAddress.Parse("tcp(ip4(127.0.0.1),41000)") }, new[] { "ckad_mediator" }) }, cancellationToken);
                 }
 
                 for (; ; )
@@ -65,7 +64,7 @@ namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main.Dashboard
                     await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
 
                     var dashboard = _state.GetDashboard();
-                    var connectionReports = await dashboard.GetConnectionReports(cancellationToken);
+                    var connectionReports = await dashboard.GetConnectionReportsAsync(cancellationToken);
 
                     await Dispatcher.UIThread.InvokeAsync(() =>
                     {

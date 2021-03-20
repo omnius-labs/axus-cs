@@ -1858,30 +1858,29 @@ namespace Omnius.Xeus.Api
         static ContentSubscriber_ExportContent_Memory_Output()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output>.Empty = new global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output(global::Omnius.Core.MemoryOwner<byte>.Empty);
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output>.Empty = new global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output(null);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxMemoryLength = 33554432;
 
-        public ContentSubscriber_ExportContent_Memory_Output(global::System.Buffers.IMemoryOwner<byte> memory)
+        public ContentSubscriber_ExportContent_Memory_Output(global::System.Buffers.IMemoryOwner<byte>? memory)
         {
-            if (memory is null) throw new global::System.ArgumentNullException("memory");
-            if (memory.Memory.Length > 33554432) throw new global::System.ArgumentOutOfRangeException("memory");
+            if (memory is not null && memory.Memory.Length > 33554432) throw new global::System.ArgumentOutOfRangeException("memory");
 
             _memory = memory;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (!memory.Memory.IsEmpty) ___h.Add(global::Omnius.Core.Helpers.ObjectHelper.GetHashCode(memory.Memory.Span));
+                if (memory is not null && !memory.Memory.IsEmpty) ___h.Add(global::Omnius.Core.Helpers.ObjectHelper.GetHashCode(memory.Memory.Span));
                 return ___h.ToHashCode();
             });
         }
 
-        private readonly global::System.Buffers.IMemoryOwner<byte> _memory;
-        public global::System.ReadOnlyMemory<byte> Memory => _memory.Memory;
+        private readonly global::System.Buffers.IMemoryOwner<byte>? _memory;
+        public global::System.ReadOnlyMemory<byte>? Memory => _memory?.Memory;
 
         public static global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Output Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -1911,7 +1910,8 @@ namespace Omnius.Xeus.Api
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (!global::Omnius.Core.BytesOperations.Equals(this.Memory.Span, target.Memory.Span)) return false;
+            if ((this.Memory is null) != (target.Memory is null)) return false;
+            if ((this.Memory is not null) && (target.Memory is not null) && !global::Omnius.Core.BytesOperations.Equals(this.Memory.Value.Span, target.Memory.Value.Span)) return false;
 
             return true;
         }
@@ -1928,10 +1928,10 @@ namespace Omnius.Xeus.Api
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (!value.Memory.IsEmpty)
+                if (value.Memory != null)
                 {
                     w.Write((uint)1);
-                    w.Write(value.Memory.Span);
+                    w.Write(value.Memory.Value.Span);
                 }
                 w.Write((uint)0);
             }
@@ -1939,7 +1939,7 @@ namespace Omnius.Xeus.Api
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                global::System.Buffers.IMemoryOwner<byte> p_memory = global::Omnius.Core.MemoryOwner<byte>.Empty;
+                global::System.Buffers.IMemoryOwner<byte>? p_memory = null;
 
                 for (; ; )
                 {

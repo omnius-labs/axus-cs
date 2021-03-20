@@ -27,9 +27,9 @@ namespace Omnius.Xeus.Daemon
             {
                 _logger.Info("daemon start");
 
-                using (var daemon = new Daemon())
+                using (var runner = new Runner())
                 {
-                    await daemon.RunAsync(stateDirectoryPath, this.Context.CancellationToken);
+                    await runner.RunAsync(stateDirectoryPath, this.Context.CancellationToken);
                 }
 
                 _logger.Info("daemon end");

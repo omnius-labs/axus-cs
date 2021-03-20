@@ -8,9 +8,9 @@ using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Helpers;
-using Omnius.Xeus.Engines.Helpers;
 using Omnius.Xeus.Engines.Storages.Internal.Models;
 using Omnius.Xeus.Engines.Storages.Internal.Repositories.Entities;
+using Omnius.Xeus.Utils.Extentions;
 
 namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
 {
@@ -18,11 +18,11 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
     {
         private readonly LiteDatabase _database;
 
-        public DeclaredMessagePublisherRepository(string filePath)
+        public DeclaredMessagePublisherRepository(string dirPath)
         {
-            DirectoryHelper.CreateDirectory(Path.GetDirectoryName(filePath)!);
+            DirectoryHelper.CreateDirectory(dirPath);
 
-            _database = new LiteDatabase(filePath);
+            _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
             this.Items = new PublishedDeclaredMessageItemRepository(_database);
         }
 
@@ -40,7 +40,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
 
         public sealed class PublishedDeclaredMessageItemRepository
         {
-            private const string CollectionName = "items";
+            private const string CollectionName = "published_items";
 
             private readonly LiteDatabase _database;
 
@@ -55,13 +55,13 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
             {
                 using (await _asyncLock.WriterLockAsync(cancellationToken))
                 {
-                    if (LiteDatabaseVersionHelper.GetVersion(_database, CollectionName) <= 0)
+                    if (_database.GetDocumentVersion(CollectionName) <= 0)
                     {
                         var col = this.GetCollection();
                         col.EnsureIndex(x => x.Signature, false);
                     }
 
-                    LiteDatabaseVersionHelper.SetVersion(_database, CollectionName, 1);
+                    _database.SetDocumentVersion(CollectionName, 1);
                 }
             }
 

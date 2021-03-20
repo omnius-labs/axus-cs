@@ -1,10 +1,10 @@
 using LiteDB;
 
-namespace Omnius.Xeus.Engines.Helpers
+namespace Omnius.Xeus.Utils.Extentions
 {
-    internal static class LiteDatabaseVersionHelper
+    public static class LiteDatabaseExtentions
     {
-        public static int GetVersion(ILiteDatabase database, string name)
+        public static int GetDocumentVersion(this ILiteDatabase database, string name)
         {
             var col = database.GetCollection<DocumentStatusEntity>("_document_status");
 
@@ -14,7 +14,7 @@ namespace Omnius.Xeus.Engines.Helpers
             return entry.Version;
         }
 
-        public static void SetVersion(ILiteDatabase database, string name, int version)
+        public static void SetDocumentVersion(this ILiteDatabase database, string name, int version)
         {
             var col = database.GetCollection<DocumentStatusEntity>("_document_status");
 

@@ -2,7 +2,7 @@ using Omnius.Core.Cryptography;
 
 namespace Omnius.Xeus.Engines.Storages.Internal.Repositories.Entities
 {
-    internal sealed class OmniSignatureEntity
+    internal record OmniSignatureEntity
     {
         public string? Name { get; set; }
 

@@ -11,6 +11,7 @@ using Omnius.Core.Cryptography;
 using Omnius.Core.Cryptography.Functions;
 using Omnius.Core.Extensions;
 using Omnius.Core.Io;
+using Omnius.Core.Storages;
 using Omnius.Xeus.Engines.Models;
 using Omnius.Xeus.Engines.Storages.Internal;
 using Omnius.Xeus.Engines.Storages.Internal.Models;
@@ -23,10 +24,11 @@ namespace Omnius.Xeus.Engines.Storages
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         private readonly ContentPublisherOptions _options;
+        private readonly IBytesStorageFactory _bytesStorageFactory;
         private readonly IBytesPool _bytesPool;
 
         private readonly ContentPublisherRepository _publisherRepo;
-        private readonly BlockStogage _blockStorage;
+        private readonly IBytesStorage<string> _blockStorage;
 
         private readonly AsyncReaderWriterLock _asyncLock = new();
 
@@ -34,10 +36,10 @@ namespace Omnius.Xeus.Engines.Storages
 
         internal sealed class ContentPublisherFactory : IContentPublisherFactory
         {
-            public async ValueTask<IContentPublisher> CreateAsync(ContentPublisherOptions options, IBytesPool bytesPool)
+            public async ValueTask<IContentPublisher> CreateAsync(ContentPublisherOptions options, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, CancellationToken cancellationToken = default)
             {
-                var result = new ContentPublisher(options, bytesPool);
-                await result.InitAsync();
+                var result = new ContentPublisher(options, bytesStorageFactory, bytesPool);
+                await result.InitAsync(cancellationToken);
 
                 return result;
             }
@@ -45,19 +47,20 @@ namespace Omnius.Xeus.Engines.Storages
 
         public static IContentPublisherFactory Factory { get; } = new ContentPublisherFactory();
 
-        private ContentPublisher(ContentPublisherOptions options, IBytesPool bytesPool)
+        private ContentPublisher(ContentPublisherOptions options, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool)
         {
             _options = options;
+            _bytesStorageFactory = bytesStorageFactory;
             _bytesPool = bytesPool;
 
-            _publisherRepo = new ContentPublisherRepository(Path.Combine(_options.ConfigDirectoryPath, "content_publisher.db"));
-            _blockStorage = new BlockStogage(Path.Combine(_options.ConfigDirectoryPath, "blocks.db"), _bytesPool);
+            _publisherRepo = new ContentPublisherRepository(Path.Combine(_options.ConfigDirectoryPath, "content_publisher"));
+            _blockStorage = bytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
         }
 
-        internal async ValueTask InitAsync()
+        internal async ValueTask InitAsync(CancellationToken cancellationToken = default)
         {
-            await _publisherRepo.MigrateAsync();
-            await _blockStorage.MigrateAsync();
+            await _publisherRepo.MigrateAsync(cancellationToken);
+            await _blockStorage.MigrateAsync(cancellationToken);
         }
 
         protected override async ValueTask OnDisposeAsync()
@@ -192,7 +195,7 @@ namespace Omnius.Xeus.Engines.Storages
             {
                 var oldName = ComputeBlockName(oldPrefix, blockHash);
                 var newName = ComputeBlockName(newPrefix, blockHash);
-                await _blockStorage.RenameAsync(oldName, newName, cancellationToken);
+                await _blockStorage.ChangeKeyAsync(oldName, newName, cancellationToken);
             }
         }
 
@@ -349,7 +352,7 @@ namespace Omnius.Xeus.Engines.Storages
             foreach (var blockHash in blockHashes)
             {
                 var blockName = ComputeBlockName(StringConverter.HashToString(contentHash), blockHash);
-                await _blockStorage.DeleteAsync(blockName);
+                await _blockStorage.TryDeleteAsync(blockName);
             }
         }
 
@@ -380,7 +383,7 @@ namespace Omnius.Xeus.Engines.Storages
                 }
 
                 var blockName = ComputeBlockName(StringConverter.HashToString(contentHash), blockHash);
-                return await _blockStorage.ReadAsync(blockName, cancellationToken);
+                return await _blockStorage.TryReadAsync(blockName, cancellationToken);
             }
         }
 

@@ -3,7 +3,7 @@ using Omnius.Core.Cryptography;
 
 namespace Omnius.Xeus.Engines.Storages.Internal.Models
 {
-    internal sealed class PublishedContentItem
+    internal record PublishedContentItem
     {
         public PublishedContentItem(OmniHash contentHash, string? filePath, string registrant, MerkleTreeSection[] merkleTreeSections)
         {

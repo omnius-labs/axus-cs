@@ -6,3 +6,15 @@ using "Omnius.Xeus.Engines.Models";
 using "Omnius.Xeus.Interactors.Models";
 
 namespace "Omnius.Xeus.Interactors.Internal.Models";
+
+message DownloadingUserProfileItem {
+    Signature: OmniSignature,
+    ContentHash: OmniHash,
+    CreationTime: timestamp,
+}
+
+message UploadingUserProfileItem {
+    Signature: OmniSignature,
+    ContentHash: OmniHash,
+    CreationTime: timestamp,
+}

@@ -48,10 +48,11 @@ namespace Omnius.Xeus.Engines.Exchangers
 
         internal sealed class DeclaredMessageExchangerFactory : IDeclaredMessageExchangerFactory
         {
-            public async ValueTask<IDeclaredMessageExchanger> CreateAsync(DeclaredMessageExchangerOptions options, IEnumerable<IConnector> connectors, ICkadMediator nodeFinder, IDeclaredMessagePublisher pushStorage, IDeclaredMessageSubscriber wantStorage, IBytesPool bytesPool)
+            public async ValueTask<IDeclaredMessageExchanger> CreateAsync(DeclaredMessageExchangerOptions options, IEnumerable<IConnector> connectors,
+                ICkadMediator nodeFinder, IDeclaredMessagePublisher pushStorage, IDeclaredMessageSubscriber wantStorage, IBytesPool bytesPool, CancellationToken cancellationToken = default)
             {
                 var result = new DeclaredMessageExchanger(options, connectors, nodeFinder, pushStorage, wantStorage, bytesPool);
-                await result.InitAsync();
+                await result.InitAsync(cancellationToken);
 
                 return result;
             }
@@ -61,7 +62,8 @@ namespace Omnius.Xeus.Engines.Exchangers
 
         public static IDeclaredMessageExchangerFactory Factory { get; } = new DeclaredMessageExchangerFactory();
 
-        internal DeclaredMessageExchanger(DeclaredMessageExchangerOptions options, IEnumerable<IConnector> connectors, ICkadMediator nodeFinder, IDeclaredMessagePublisher pushStorage, IDeclaredMessageSubscriber wantStorage, IBytesPool bytesPool)
+        internal DeclaredMessageExchanger(DeclaredMessageExchangerOptions options, IEnumerable<IConnector> connectors,
+            ICkadMediator nodeFinder, IDeclaredMessagePublisher pushStorage, IDeclaredMessageSubscriber wantStorage, IBytesPool bytesPool, CancellationToken cancellationToken = default)
         {
             _options = options;
             _connectors.AddRange(connectors);
@@ -71,7 +73,7 @@ namespace Omnius.Xeus.Engines.Exchangers
             _bytesPool = bytesPool;
         }
 
-        public async ValueTask InitAsync()
+        public async ValueTask InitAsync(CancellationToken cancellationToken = default)
         {
             _connectLoopTask = this.ConnectLoopAsync(_cancellationTokenSource.Token);
             _acceptLoopTask = this.AcceptLoopAsync(_cancellationTokenSource.Token);

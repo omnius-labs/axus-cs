@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
+using Omnius.Core.Storages;
 using Omnius.Xeus.Engines.Models;
 using Omnius.Xeus.Engines.Storages.Primitives;
 
@@ -11,7 +12,7 @@ namespace Omnius.Xeus.Engines.Storages
 {
     public interface IContentSubscriberFactory
     {
-        ValueTask<IContentSubscriber> CreateAsync(ContentSubscriberOptions options, IBytesPool bytesPool);
+        ValueTask<IContentSubscriber> CreateAsync(ContentSubscriberOptions options, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, CancellationToken cancellationToken = default);
     }
 
     public interface IContentSubscriber : IWritableContents, IAsyncDisposable
@@ -22,8 +23,8 @@ namespace Omnius.Xeus.Engines.Storages
 
         ValueTask UnsubscribeContentAsync(OmniHash contentHash, string registrant, CancellationToken cancellationToken = default);
 
-        ValueTask ExportContentAsync(OmniHash contentHash, string filePath, CancellationToken cancellationToken = default);
+        ValueTask<bool> ExportContentAsync(OmniHash contentHash, string filePath, CancellationToken cancellationToken = default);
 
-        ValueTask ExportContentAsync(OmniHash contentHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default);
+        ValueTask<bool> ExportContentAsync(OmniHash contentHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default);
     }
 }

@@ -3,7 +3,7 @@ using Omnius.Core.Cryptography;
 
 namespace Omnius.Xeus.Engines.Storages.Internal.Models
 {
-    internal sealed class SubscribedDeclaredMessageItem
+    internal record SubscribedDeclaredMessageItem
     {
         public SubscribedDeclaredMessageItem(OmniSignature signature, string registrant)
         {

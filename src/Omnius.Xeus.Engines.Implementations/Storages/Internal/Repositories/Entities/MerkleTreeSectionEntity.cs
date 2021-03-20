@@ -5,7 +5,7 @@ using Omnius.Xeus.Engines.Storages.Internal.Models;
 
 namespace Omnius.Xeus.Engines.Storages.Internal.Repositories.Entities
 {
-    internal sealed class MerkleTreeSectionEntity
+    internal record MerkleTreeSectionEntity
     {
         public int Depth { get; set; }
 

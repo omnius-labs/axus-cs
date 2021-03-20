@@ -1,7 +1,6 @@
-using Omnius.Lxna.Ui.Desktop.Presenters.Models.Primitives;
 using Omnius.Xeus.Interactors.Models;
 
-namespace Omnius.Lxna.Ui.Desktop.Presenters.Models
+namespace Omnius.Lxna.Ui.Desktop.Presenters
 {
     public class ConnectionReportViewModel : BindableBase
     {
@@ -26,6 +25,6 @@ namespace Omnius.Lxna.Ui.Desktop.Presenters.Models
 
         public string HandshakeType => this.Model?.HandshakeType.ToString() ?? "";
 
-        public string Address => this.Model?.Address.ToString() ?? ";";
+        public string Address => this.Model?.Address.ToString() ?? "";
     }
 }

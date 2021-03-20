@@ -6,6 +6,7 @@ using Omnius.Core;
 using Omnius.Core.Extensions;
 using Omnius.Core.Network.Proxies;
 using Omnius.Core.Network.Upnp;
+using Omnius.Core.Storages;
 using Omnius.Xeus.Api;
 using Omnius.Xeus.Daemon.Internal;
 using Omnius.Xeus.Daemon.Resources.Models;
@@ -26,6 +27,8 @@ namespace Omnius.Xeus.Daemon
         public IHttpProxyClientFactory? HttpProxyClientFactory { get; init; }
 
         public IUpnpClientFactory? UpnpClientFactory { get; init; }
+
+        public IBytesStorageFactory? BytesStorageFactory { get; init; }
 
         public ITcpConnectorFactory? TcpConnectorFactory { get; init; }
 
@@ -94,6 +97,7 @@ namespace Omnius.Xeus.Daemon
             var socks5ProxyClientFactory = _options.Socks5ProxyClientFactory ?? throw new ArgumentNullException();
             var httpProxyClientFactory = _options.HttpProxyClientFactory ?? throw new ArgumentNullException();
             var upnpClientFactory = _options.UpnpClientFactory ?? throw new ArgumentNullException();
+            var bytesStorageFactory = _options.BytesStorageFactory ?? throw new ArgumentNullException();
             var ckadMediatorFactory = _options.CkadMediatorFactory ?? throw new ArgumentNullException();
             var contentPublisherFactory = _options.ContentPublisherFactory ?? throw new ArgumentNullException();
             var contentSubscriberFactory = _options.ContentSubscriberFactory ?? throw new ArgumentNullException();
@@ -111,14 +115,14 @@ namespace Omnius.Xeus.Daemon
             var contentExchangerOptions = _options.ContentExchangerOptions ?? throw new ArgumentNullException();
             var declaredMessageExchangerOptions = _options.DeclaredMessageExchangerOptions ?? throw new ArgumentNullException();
 
-            var tcpConnector = await tcpConnectorFactory.CreateAsync(tcpConnectorOptions, socks5ProxyClientFactory, httpProxyClientFactory, upnpClientFactory, _bytesPool);
-            _ckadMediator = await ckadMediatorFactory.CreateAsync(ckadMediatorOptions, new[] { tcpConnector }, _bytesPool);
-            _contentPublisher = await contentPublisherFactory.CreateAsync(contentPublisherOptions, _bytesPool);
-            _contentSubscriber = await contentSubscriberFactory.CreateAsync(contentSubscriberOptions, _bytesPool);
-            _declaredMessagePublisher = await declaredMessagePublisherFactory.CreateAsync(declaredMessagePublisherOptions, _bytesPool);
-            _declaredMessageSubscriber = await declaredMessageSubscriberFactory.CreateAsync(declaredMessageSubscriberOptions, _bytesPool);
-            _contentExchanger = await contentExchangerFactory.CreateAsync(contentExchangerOptions, new[] { tcpConnector }, _ckadMediator, _contentPublisher, _contentSubscriber, _bytesPool);
-            _declaredMessageExchanger = await declaredMessageExchangerFactory.CreateAsync(declaredMessageExchangerOptions, new[] { tcpConnector }, _ckadMediator, _declaredMessagePublisher, _declaredMessageSubscriber, _bytesPool);
+            var tcpConnector = await tcpConnectorFactory.CreateAsync(tcpConnectorOptions, socks5ProxyClientFactory, httpProxyClientFactory, upnpClientFactory, _bytesPool, cancellationToken);
+            _ckadMediator = await ckadMediatorFactory.CreateAsync(ckadMediatorOptions, new[] { tcpConnector }, _bytesPool, cancellationToken);
+            _contentPublisher = await contentPublisherFactory.CreateAsync(contentPublisherOptions, bytesStorageFactory, _bytesPool, cancellationToken);
+            _contentSubscriber = await contentSubscriberFactory.CreateAsync(contentSubscriberOptions, bytesStorageFactory, _bytesPool, cancellationToken);
+            _declaredMessagePublisher = await declaredMessagePublisherFactory.CreateAsync(declaredMessagePublisherOptions, bytesStorageFactory, _bytesPool, cancellationToken);
+            _declaredMessageSubscriber = await declaredMessageSubscriberFactory.CreateAsync(declaredMessageSubscriberOptions, bytesStorageFactory, _bytesPool, cancellationToken);
+            _contentExchanger = await contentExchangerFactory.CreateAsync(contentExchangerOptions, new[] { tcpConnector }, _ckadMediator, _contentPublisher, _contentSubscriber, _bytesPool, cancellationToken);
+            _declaredMessageExchanger = await declaredMessageExchangerFactory.CreateAsync(declaredMessageExchangerOptions, new[] { tcpConnector }, _ckadMediator, _declaredMessagePublisher, _declaredMessageSubscriber, _bytesPool, cancellationToken);
         }
 
         protected override async ValueTask OnDisposeAsync()

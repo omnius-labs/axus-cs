@@ -19,9 +19,9 @@ namespace Omnius.Xeus.Interactors
 
         internal sealed class DashboardFactory : IDashboardFactory
         {
-            public async ValueTask<IDashboard> CreateAsync(DashboardOptions options, CancellationToken cancellationToken = default)
+            public async ValueTask<IDashboard> CreateAsync(IXeusService xeusService, IBytesPool bytesPool, CancellationToken cancellationToken = default)
             {
-                var result = new Dashboard(options);
+                var result = new Dashboard(xeusService, bytesPool);
                 await result.InitAsync(cancellationToken);
 
                 return result;
@@ -30,10 +30,10 @@ namespace Omnius.Xeus.Interactors
 
         public static IDashboardFactory Factory { get; } = new DashboardFactory();
 
-        public Dashboard(DashboardOptions options)
+        public Dashboard(IXeusService xeusService, IBytesPool bytesPool)
         {
-            _xeusService = options.XeusService;
-            _bytesPool = options.BytesPool;
+            _xeusService = xeusService;
+            _bytesPool = bytesPool;
         }
 
         public async ValueTask InitAsync(CancellationToken cancellationToken = default)
@@ -44,7 +44,7 @@ namespace Omnius.Xeus.Interactors
         {
         }
 
-        public async ValueTask<IEnumerable<ConnectionReport>> GetConnectionReports(CancellationToken cancellationToken = default)
+        public async ValueTask<IEnumerable<ConnectionReport>> GetConnectionReportsAsync(CancellationToken cancellationToken = default)
         {
             var results = new List<ConnectionReport>();
 
@@ -54,13 +54,13 @@ namespace Omnius.Xeus.Interactors
             return results;
         }
 
-        public async ValueTask<EnginesModels.NodeProfile> GetMyNodeProfile(CancellationToken cancellationToken = default)
+        public async ValueTask<EnginesModels.NodeProfile> GetMyNodeProfileAsync(CancellationToken cancellationToken = default)
         {
             var output = await _xeusService.CkadMediator_GetMyNodeProfileAsync(cancellationToken);
             return output.NodeProfile;
         }
 
-        public async ValueTask AddCloudNodeProfile(IEnumerable<EnginesModels.NodeProfile> nodeProfiles, CancellationToken cancellationToken = default)
+        public async ValueTask AddCloudNodeProfileAsync(IEnumerable<EnginesModels.NodeProfile> nodeProfiles, CancellationToken cancellationToken = default)
         {
             var input = new CkadMediator_AddCloudNodeProfiles_Input(nodeProfiles.ToArray());
             await _xeusService.CkadMediator_AddCloudNodeProfilesAsync(input, cancellationToken);

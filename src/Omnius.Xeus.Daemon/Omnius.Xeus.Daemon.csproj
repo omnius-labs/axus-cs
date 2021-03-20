@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Collections\Omnius.Core.Collections.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Storages\Omnius.Core.Storages.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Cryptography\Omnius.Core.Cryptography.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Io\Omnius.Core.Io.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Network.Proxies\Omnius.Core.Network.Proxies.csproj" />
@@ -17,6 +18,7 @@
     <ProjectReference Include="..\Omnius.Xeus.Engines.Implementations\Omnius.Xeus.Engines.Implementations.csproj" />
     <ProjectReference Include="..\Omnius.Xeus.Engines\Omnius.Xeus.Engines.csproj" />
     <ProjectReference Include="..\Omnius.Xeus.Api\Omnius.Xeus.Api.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Utils\Omnius.Xeus.Utils.csproj" />
   </ItemGroup>
 
   <ItemGroup>

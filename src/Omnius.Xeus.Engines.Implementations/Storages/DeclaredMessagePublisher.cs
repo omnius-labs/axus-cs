@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
+using Omnius.Core.Storages;
 using Omnius.Xeus.Engines.Models;
 using Omnius.Xeus.Engines.Storages.Internal;
 using Omnius.Xeus.Engines.Storages.Internal.Models;
@@ -23,16 +24,16 @@ namespace Omnius.Xeus.Engines.Storages
         private readonly IBytesPool _bytesPool;
 
         private readonly DeclaredMessagePublisherRepository _publisherRepo;
-        private readonly BlockStogage _blockStorage;
+        private readonly IBytesStorage<string> _blockStorage;
 
         private readonly AsyncReaderWriterLock _asyncLock = new();
 
         internal sealed class DeclaredMessagePublisherFactory : IDeclaredMessagePublisherFactory
         {
-            public async ValueTask<IDeclaredMessagePublisher> CreateAsync(DeclaredMessagePublisherOptions options, IBytesPool bytesPool)
+            public async ValueTask<IDeclaredMessagePublisher> CreateAsync(DeclaredMessagePublisherOptions options, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, CancellationToken cancellationToken = default)
             {
-                var result = new DeclaredMessagePublisher(options, bytesPool);
-                await result.InitAsync();
+                var result = new DeclaredMessagePublisher(options, bytesStorageFactory, bytesPool);
+                await result.InitAsync(cancellationToken);
 
                 return result;
             }
@@ -40,19 +41,19 @@ namespace Omnius.Xeus.Engines.Storages
 
         public static IDeclaredMessagePublisherFactory Factory { get; } = new DeclaredMessagePublisherFactory();
 
-        private DeclaredMessagePublisher(DeclaredMessagePublisherOptions options, IBytesPool bytesPool)
+        private DeclaredMessagePublisher(DeclaredMessagePublisherOptions options, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool)
         {
             _options = options;
             _bytesPool = bytesPool;
 
-            _publisherRepo = new DeclaredMessagePublisherRepository(Path.Combine(_options.ConfigDirectoryPath, "declared_message_publisher.db"));
-            _blockStorage = new BlockStogage(Path.Combine(_options.ConfigDirectoryPath, "blocks.db"), _bytesPool);
+            _publisherRepo = new DeclaredMessagePublisherRepository(Path.Combine(_options.ConfigDirectoryPath, "declared_message_publisher"));
+            _blockStorage = bytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
         }
 
-        internal async ValueTask InitAsync()
+        internal async ValueTask InitAsync(CancellationToken cancellationToken = default)
         {
-            await _publisherRepo.MigrateAsync();
-            await _blockStorage.MigrateAsync();
+            await _publisherRepo.MigrateAsync(cancellationToken);
+            await _blockStorage.MigrateAsync(cancellationToken);
         }
 
         protected override async ValueTask OnDisposeAsync()
@@ -150,7 +151,7 @@ namespace Omnius.Xeus.Engines.Storages
                 if (item == null) return null;
 
                 var blockName = ComputeBlockName(signature);
-                var memoryOwner = await _blockStorage.ReadAsync(blockName, cancellationToken);
+                var memoryOwner = await _blockStorage.TryReadAsync(blockName, cancellationToken);
                 if (memoryOwner is null) return null;
 
                 var message = DeclaredMessage.Import(new ReadOnlySequence<byte>(memoryOwner.Memory), _bytesPool);

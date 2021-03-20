@@ -7,7 +7,7 @@ using Omnius.Xeus.Engines.Storages.Internal.Models;
 
 namespace Omnius.Xeus.Engines.Storages.Internal.Repositories.Entities
 {
-    internal sealed class PublishedContentItemEntity
+    internal record PublishedContentItemEntity
     {
         public OmniHashEntity? ContentHash { get; set; }
 

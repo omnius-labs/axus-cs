@@ -10,7 +10,7 @@ namespace Omnius.Xeus.Engines.Mediators
 {
     public interface ICkadMediatorFactory
     {
-        ValueTask<ICkadMediator> CreateAsync(CkadMediatorOptions options, IEnumerable<IConnector> connectors, IBytesPool bytesPool);
+        ValueTask<ICkadMediator> CreateAsync(CkadMediatorOptions options, IEnumerable<IConnector> connectors, IBytesPool bytesPool, CancellationToken cancellationToken = default);
     }
 
     public delegate void GetResourceTags(Action<ResourceTag> append);

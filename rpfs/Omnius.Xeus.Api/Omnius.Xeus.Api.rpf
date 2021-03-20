@@ -109,7 +109,7 @@ message ContentSubscriber_ExportContent_Memory_Input {
 }
 
 message ContentSubscriber_ExportContent_Memory_Output {
-    Memory: bytes(capacity: 32 * 1024 * 1024, recyclable: true),
+    Memory: bytes?(capacity: 32 * 1024 * 1024, recyclable: true),
 }
 
 message DeclaredMessagePublisher_GetReport_Output {

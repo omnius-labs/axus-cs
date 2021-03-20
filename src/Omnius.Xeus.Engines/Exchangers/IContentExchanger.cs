@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Xeus.Engines.Connectors.Primitives;
@@ -11,7 +12,8 @@ namespace Omnius.Xeus.Engines.Exchangers
 {
     public interface IContentExchangerFactory
     {
-        ValueTask<IContentExchanger> CreateAsync(ContentExchangerOptions options, IEnumerable<IConnector> connectors, ICkadMediator nodeFinder, IContentPublisher pushStorage, IContentSubscriber wantStorage, IBytesPool bytesPool);
+        ValueTask<IContentExchanger> CreateAsync(ContentExchangerOptions options, IEnumerable<IConnector> connectors,
+            ICkadMediator nodeFinder, IContentPublisher pushStorage, IContentSubscriber wantStorage, IBytesPool bytesPool, CancellationToken cancellationToken = default);
     }
 
     public interface IContentExchanger : IAsyncDisposable

@@ -133,7 +133,7 @@ message ContentSubscriberReport {
 }
 
 message ContentSubscribedItemReport {
-    RootHash: OmniHash,
+    ContentHash: OmniHash?,
     Registrant: string,
 }
 

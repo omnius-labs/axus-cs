@@ -52,10 +52,10 @@ namespace Omnius.Xeus.Engines.Exchangers
         internal sealed class ContentExchangerFactory : IContentExchangerFactory
         {
             public async ValueTask<IContentExchanger> CreateAsync(ContentExchangerOptions options, IEnumerable<IConnector> connectors,
-                ICkadMediator nodeFinder, IContentPublisher pushStorage, IContentSubscriber wantStorage, IBytesPool bytesPool)
+                ICkadMediator nodeFinder, IContentPublisher pushStorage, IContentSubscriber wantStorage, IBytesPool bytesPool, CancellationToken cancellationToken = default)
             {
                 var result = new ContentExchanger(options, connectors, nodeFinder, pushStorage, wantStorage, bytesPool);
-                await result.InitAsync();
+                await result.InitAsync(cancellationToken);
 
                 return result;
             }
@@ -74,7 +74,7 @@ namespace Omnius.Xeus.Engines.Exchangers
             _bytesPool = bytesPool;
         }
 
-        public async ValueTask InitAsync()
+        public async ValueTask InitAsync(CancellationToken cancellationToken = default)
         {
             _connectLoopTask = this.ConnectLoopAsync(_cancellationTokenSource.Token);
             _acceptLoopTask = this.AcceptLoopAsync(_cancellationTokenSource.Token);
@@ -320,10 +320,16 @@ namespace Omnius.Xeus.Engines.Exchangers
                         {
                             lock (connectionStatus.LockObject)
                             {
-                                if (connectionStatus.SendingDataMessage != null)
+                                var dataMessage = connectionStatus.SendingDataMessage;
+                                if (dataMessage is not null)
                                 {
-                                    if (connectionStatus.Connection.TryEnqueue(connectionStatus.SendingDataMessage))
+                                    if (connectionStatus.Connection.TryEnqueue(dataMessage))
                                     {
+                                        foreach (var block in dataMessage.GiveBlocks)
+                                        {
+                                            block.Dispose();
+                                        }
+
                                         connectionStatus.SendingDataMessage = null;
                                     }
                                 }
@@ -371,14 +377,24 @@ namespace Omnius.Xeus.Engines.Exchangers
                         {
                             if (connectionStatus.Connection.TryDequeue<ContentExchangerDataMessage>(out var dataMessage))
                             {
-                                lock (connectionStatus.LockObject)
+                                try
                                 {
-                                    connectionStatus.ReceivedWantBlockHashes = dataMessage.WantBlockHashes.ToArray();
-                                }
+                                    lock (connectionStatus.LockObject)
+                                    {
+                                        connectionStatus.ReceivedWantBlockHashes = dataMessage.WantBlockHashes.ToArray();
+                                    }
 
-                                foreach (var block in dataMessage.GiveBlocks)
+                                    foreach (var block in dataMessage.GiveBlocks)
+                                    {
+                                        await _subscriber.WriteBlockAsync(connectionStatus.ContentHash, block.Hash, block.Value, cancellationToken);
+                                    }
+                                }
+                                finally
                                 {
-                                    await _subscriber.WriteBlockAsync(connectionStatus.ContentHash, block.Hash, block.Value, cancellationToken);
+                                    foreach (var block in dataMessage.GiveBlocks)
+                                    {
+                                        block.Dispose();
+                                    }
                                 }
                             }
                         }

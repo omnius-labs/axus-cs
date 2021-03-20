@@ -8,9 +8,9 @@ using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Helpers;
-using Omnius.Xeus.Engines.Helpers;
 using Omnius.Xeus.Engines.Storages.Internal.Models;
 using Omnius.Xeus.Engines.Storages.Internal.Repositories.Entities;
+using Omnius.Xeus.Utils.Extentions;
 
 namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
 {
@@ -18,11 +18,11 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
     {
         private readonly LiteDatabase _database;
 
-        public DeclaredMessageSubscriberRepository(string filePath)
+        public DeclaredMessageSubscriberRepository(string dirPath)
         {
-            DirectoryHelper.CreateDirectory(Path.GetDirectoryName(filePath)!);
+            DirectoryHelper.CreateDirectory(dirPath);
 
-            _database = new LiteDatabase(filePath);
+            _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
             this.Items = new SubscribedDeclaredMessageItemRepository(_database);
             this.WrittenItems = new WrittenDeclaredMessageItemRepository(_database);
         }
@@ -44,7 +44,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
 
         public sealed class SubscribedDeclaredMessageItemRepository
         {
-            private const string CollectionName = "items";
+            private const string CollectionName = "subscribed_items";
 
             private readonly LiteDatabase _database;
 
@@ -55,24 +55,24 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
                 _database = database;
             }
 
-            public ILiteCollection<SubscribedDeclaredMessageItemEntity> GetCollection()
-            {
-                var col = _database.GetCollection<SubscribedDeclaredMessageItemEntity>(CollectionName);
-                return col;
-            }
-
             internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
             {
                 using (await _asyncLock.WriterLockAsync(cancellationToken))
                 {
-                    if (LiteDatabaseVersionHelper.GetVersion(_database, CollectionName) <= 0)
+                    if (_database.GetDocumentVersion(CollectionName) <= 0)
                     {
                         var col = this.GetCollection();
                         col.EnsureIndex(x => x.Signature, false);
                     }
 
-                    LiteDatabaseVersionHelper.SetVersion(_database, CollectionName, 1);
+                    _database.SetDocumentVersion(CollectionName, 1);
                 }
+            }
+
+            public ILiteCollection<SubscribedDeclaredMessageItemEntity> GetCollection()
+            {
+                var col = _database.GetCollection<SubscribedDeclaredMessageItemEntity>(CollectionName);
+                return col;
             }
 
             public bool Exists(OmniSignature signature)
@@ -156,24 +156,24 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
                 _database = database;
             }
 
-            public ILiteCollection<WrittenDeclaredMessageItemEntity> GetCollection()
-            {
-                var col = _database.GetCollection<WrittenDeclaredMessageItemEntity>(CollectionName);
-                return col;
-            }
-
             internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
             {
                 using (await _asyncLock.WriterLockAsync(cancellationToken))
                 {
-                    if (LiteDatabaseVersionHelper.GetVersion(_database, CollectionName) <= 0)
+                    if (_database.GetDocumentVersion(CollectionName) <= 0)
                     {
                         var col = this.GetCollection();
                         col.EnsureIndex(x => x.Signature, true);
                     }
 
-                    LiteDatabaseVersionHelper.SetVersion(_database, CollectionName, 1);
+                    _database.SetDocumentVersion(CollectionName, 1);
                 }
+            }
+
+            public ILiteCollection<WrittenDeclaredMessageItemEntity> GetCollection()
+            {
+                var col = _database.GetCollection<WrittenDeclaredMessageItemEntity>(CollectionName);
+                return col;
             }
 
             public bool Exists(OmniSignature signature)
