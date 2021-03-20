@@ -96,15 +96,6 @@
           "Avalonia": "0.10.0"
         }
       },
-      "DynamicData": {
-        "type": "Direct",
-        "requested": "[7.1.1, )",
-        "resolved": "7.1.1",
-        "contentHash": "Pc6J5bFnSxEa64PV2V67FMcLlDdpv6m+zTBKSnRN3aLon/WtWWy8kuDpHFbJlgXHtqc6Nxloj9ItuvDlvKC/8w==",
-        "dependencies": {
-          "System.Reactive": "5.0.0"
-        }
-      },
       "Nito.AsyncEx": {
         "type": "Direct",
         "requested": "[5.1.0, )",
@@ -204,6 +195,14 @@
           "Avalonia": "0.10.0",
           "Avalonia.FreeDesktop": "0.10.0",
           "Avalonia.Skia": "0.10.0"
+        }
+      },
+      "DynamicData": {
+        "type": "Transitive",
+        "resolved": "6.17.14",
+        "contentHash": "tbzTTfridK49Tfdg1vdSfQ7ecp9ZfqwLGDNLtn8ZeumGgOQbOrXXZp2TCgkHgNfnxXo1eDSOSGBMfEfWaOPlSw==",
+        "dependencies": {
+          "System.Reactive": "4.4.1"
         }
       },
       "HarfBuzzSharp": {
@@ -446,11 +445,6 @@
           "System.Runtime": "4.3.0",
           "System.Runtime.Extensions": "4.3.0"
         }
-      },
-      "System.Linq.Async": {
-        "type": "Transitive",
-        "resolved": "5.0.0",
-        "contentHash": "cPtIuuH8TIjVHSi2ewwReWGW1PfChPE0LxPIDlfwVcLuTM9GANFTXiMB7k3aC4sk3f0cQU25LNKzx+jZMxijqw=="
       },
       "System.Memory": {
         "type": "Transitive",
@@ -754,8 +748,7 @@
           "Omnius.Xeus.Api": "0.0.1-alpha.1",
           "Omnius.Xeus.Engines": "0.0.1-alpha.1",
           "Omnius.Xeus.Interactors": "0.0.1-alpha.1",
-          "Omnius.Xeus.Utils": "0.0.1-alpha.1",
-          "System.Linq.Async": "5.0.0"
+          "Omnius.Xeus.Utils": "0.0.1-alpha.1"
         }
       },
       "omnius.xeus.utils": {
