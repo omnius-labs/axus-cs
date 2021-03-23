@@ -14,9 +14,9 @@ using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 using EnginesModels = Omnius.Xeus.Engines.Models;
 
-namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main.Dashboard
+namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main.Peers
 {
-    public class DashboardControlModel : AsyncDisposableBase
+    public class PeersControlModel : AsyncDisposableBase
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -29,12 +29,12 @@ namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main.Dashboard
 
         private readonly CompositeDisposable _disposable = new();
 
-        public DashboardControlModel(AppState status)
+        public PeersControlModel(AppState status)
         {
             _state = status;
             _refreshTask = this.RefreshAsync(_cancellationTokenSource.Token);
 
-            var uiSettings = _state.GetUiSettings();
+            var uiState = _state.GetUiState();
 
             this.ConnectionReports = _connectionReportMap.Values.ToReadOnlyReactiveCollection().AddTo(_disposable);
         }

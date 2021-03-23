@@ -1,0 +1,8 @@
+{
+    "profiles": {
+        "Omnius.Xeus.Ui.Desktop": {
+            "commandName": "Project",
+            "commandLineArgs": "./demo/ui-desktop_1/state ./demo/ui-desktop_1/logs"
+        }
+    }
+}

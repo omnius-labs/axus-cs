@@ -46,7 +46,7 @@ namespace Omnius.Xeus.Engines.Storages
             _options = options;
             _bytesPool = bytesPool;
 
-            _subscriberRepo = new DeclaredMessageSubscriberRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
+            _subscriberRepo = new DeclaredMessageSubscriberRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
             _blockStorage = bytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
         }
 

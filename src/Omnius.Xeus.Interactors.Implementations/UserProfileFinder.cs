@@ -54,9 +54,8 @@ namespace Omnius.Xeus.Interactors
             _bytesStorageFactory = bytesStorageFactory;
             _bytesPool = bytesPool;
 
-            var configDir = Path.Combine(_options.ConfigDirectoryPath, "user_profile_finder");
-            _optionsStorage = _bytesStorageFactory.Create<string>(Path.Combine(configDir, "options"), _bytesPool);
-            _cachedUserProfileStorage = _bytesStorageFactory.Create<OmniSignatureEntity>(Path.Combine(configDir, "user_profiles"), _bytesPool);
+            _optionsStorage = _bytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "options"), _bytesPool);
+            _cachedUserProfileStorage = _bytesStorageFactory.Create<OmniSignatureEntity>(Path.Combine(_options.ConfigDirectoryPath, "user_profiles"), _bytesPool);
         }
 
         internal async ValueTask InitAsync(CancellationToken cancellationToken = default)

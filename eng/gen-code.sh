@@ -4,7 +4,7 @@ DOTNET_CLI_TELEMETRY_OPTOUT=1
 
 # *.tt
 dotnet tool restore
-dotnet tool run t4 ./src/Omnius.Xeus.Ui.Desktop/Resources/Models/UiSettings.tt -o ./src/Omnius.Xeus.Ui.Desktop/Resources/Models/UiSettings.generated.cs
+dotnet tool run t4 ./src/Omnius.Xeus.Ui.Desktop/Resources/Models/UiState.tt -o ./src/Omnius.Xeus.Ui.Desktop/Resources/Models/UiState.generated.cs
 
 # *.rpf
 RPFC_PATH="$PWD/refs/core/src/Omnius.Core.RocketPack.DefinitionCompiler"

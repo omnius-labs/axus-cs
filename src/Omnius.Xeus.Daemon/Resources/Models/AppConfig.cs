@@ -4,7 +4,7 @@ using Omnius.Xeus.Utils;
 
 namespace Omnius.Xeus.Daemon.Resources.Models
 {
-    public class Config
+    public class AppConfig
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -14,11 +14,11 @@ namespace Omnius.Xeus.Daemon.Resources.Models
 
         public EnginesConfig? Engines { get; init; }
 
-        public static async ValueTask<Config?> LoadAsync(string configPath)
+        public static async ValueTask<AppConfig?> LoadAsync(string configPath)
         {
             try
             {
-                return YamlHelper.ReadFile<Config>(configPath);
+                return YamlHelper.ReadFile<AppConfig>(configPath);
             }
             catch (Exception e)
             {

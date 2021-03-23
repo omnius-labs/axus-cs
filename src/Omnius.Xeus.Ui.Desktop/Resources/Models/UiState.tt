@@ -23,7 +23,7 @@ using System.Runtime.CompilerServices;
 
 namespace Omnius.Lxna.Ui.Desktop.Resources.Models
 {
-    public sealed partial class UiSettings : INotifyPropertyChanged
+    public sealed partial class UiState : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 

@@ -59,8 +59,7 @@ namespace Omnius.Xeus.Interactors
             _bytesStorageFactory = bytesStorageFactory;
             _bytesPool = bytesPool;
 
-            var configDir = Path.Combine(_options.ConfigDirectoryPath, "user_profile_downloader");
-            _userProfileUploaderRepo = new UserProfileUploaderRepository(Path.Combine(configDir, "status"));
+            _userProfileUploaderRepo = new UserProfileUploaderRepository(Path.Combine(options.ConfigDirectoryPath, "state"));
         }
 
         internal async ValueTask InitAsync(CancellationToken cancellationToken = default)

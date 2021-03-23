@@ -74,12 +74,12 @@ namespace Omnius.Xeus.Daemon
             await this.ListenAsync(service, config.ListenAddress, cancellationToken);
         }
 
-        private async ValueTask<Config> LoadConfigAsync(string configPath, CancellationToken cancellationToken = default)
+        private async ValueTask<AppConfig> LoadConfigAsync(string configPath, CancellationToken cancellationToken = default)
         {
-            var config = await Config.LoadAsync(configPath);
+            var config = await AppConfig.LoadAsync(configPath);
             if (config is not null) return config;
 
-            config = new Config()
+            config = new AppConfig()
             {
                 Version = 1,
                 ListenAddress = OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 32321).ToString(),

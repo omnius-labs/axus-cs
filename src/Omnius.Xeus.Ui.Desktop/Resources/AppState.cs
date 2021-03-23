@@ -13,6 +13,7 @@ using Omnius.Core.Network.Connections;
 using Omnius.Lxna.Ui.Desktop.Resources.Models;
 using Omnius.Xeus.Api;
 using Omnius.Xeus.Interactors;
+using Omnius.Xeus.Interactors.Models;
 using Omnius.Xeus.Ui.Desktop.Resources.Models;
 
 namespace Omnius.Xeus.Ui.Desktop.Resources
@@ -23,9 +24,12 @@ namespace Omnius.Xeus.Ui.Desktop.Resources
         private readonly IBytesPool _bytesPool;
 
         private IXeusService _xeusService = null!;
-        private UiSettings _uiSettings = null!;
-        private Options _options = null!;
         private IDashboard _dashboard = null!;
+        private IUserProfileFinder _userProfileFinder = null!;
+        private IUserProfileDownloader _userProfileDownloader = null!;
+        private IUserProfileUploader _userProfileUploader = null!;
+        private UiState _uiState = null!;
+        private AppSettings _options = null!;
 
         private readonly AsyncReaderWriterLock _asyncLock = new();
 
@@ -50,7 +54,7 @@ namespace Omnius.Xeus.Ui.Desktop.Resources
 
         private string GetConfigFilePath() => Path.Combine(_stateDirectoryPath, "config.yml");
 
-        private string GetUiSettingsFilePath() => Path.Combine(_stateDirectoryPath, "ui_settings.json");
+        private string GetUiStateFilePath() => Path.Combine(_stateDirectoryPath, "ui_settings.json");
 
         private string GetOptionsFilePath() => Path.Combine(_stateDirectoryPath, "options.json");
 
@@ -58,8 +62,9 @@ namespace Omnius.Xeus.Ui.Desktop.Resources
         {
             var config = await this.LoadConfigAsync(cancellationToken);
             _xeusService = await this.CreateXeusServiceAsync(config, cancellationToken);
+            _dashboard = await Dashboard.Factory.CreateAsync(_xeusService, _bytesPool, cancellationToken);
 
-            _uiSettings = await this.LoadUiSettingsAsync(cancellationToken);
+            _uiState = await this.LoadUiStateAsync(cancellationToken);
 
             var option = await this.LoadOptionsAsync(cancellationToken);
             await this.UpdateOptionsAsync(option, cancellationToken);
@@ -72,16 +77,16 @@ namespace Omnius.Xeus.Ui.Desktop.Resources
 
         private async ValueTask SaveAsync()
         {
-            await _uiSettings.SaveAsync(this.GetUiSettingsFilePath());
+            await _uiState.SaveAsync(this.GetUiStateFilePath());
         }
 
         public IBytesPool GetBytesPool() => _bytesPool;
 
         public IXeusService GetXeusService() => _xeusService;
 
-        public UiSettings GetUiSettings() => _uiSettings;
+        public UiState GetUiState() => _uiState;
 
-        public Options GetOptions()
+        public AppSettings GetOptions()
         {
             using (_asyncLock.ReaderLock())
             {
@@ -97,12 +102,12 @@ namespace Omnius.Xeus.Ui.Desktop.Resources
             }
         }
 
-        private async ValueTask<Config> LoadConfigAsync(CancellationToken cancellationToken = default)
+        private async ValueTask<AppConfig> LoadConfigAsync(CancellationToken cancellationToken = default)
         {
-            var config = await Config.LoadAsync(this.GetConfigFilePath());
+            var config = await AppConfig.LoadAsync(this.GetConfigFilePath());
             if (config is not null) return config;
 
-            config = new Config()
+            config = new AppConfig()
             {
                 DaemonAddress = OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 40001).ToString(),
             };
@@ -112,21 +117,21 @@ namespace Omnius.Xeus.Ui.Desktop.Resources
             return config;
         }
 
-        private async ValueTask<UiSettings> LoadUiSettingsAsync(CancellationToken cancellationToken = default)
+        private async ValueTask<UiState> LoadUiStateAsync(CancellationToken cancellationToken = default)
         {
-            var uiSettings = await UiSettings.LoadAsync(this.GetUiSettingsFilePath());
+            var uiState = await UiState.LoadAsync(this.GetUiStateFilePath());
 
-            if (uiSettings is null)
+            if (uiState is null)
             {
-                uiSettings = new UiSettings
+                uiState = new UiState
                 {
                 };
             }
 
-            return uiSettings;
+            return uiState;
         }
 
-        private async ValueTask<IXeusService> CreateXeusServiceAsync(Config config, CancellationToken cancellationToken = default)
+        private async ValueTask<IXeusService> CreateXeusServiceAsync(AppConfig config, CancellationToken cancellationToken = default)
         {
             if (config.DaemonAddress is null) throw new Exception("DaemonAddress is not found.");
 
@@ -156,32 +161,29 @@ namespace Omnius.Xeus.Ui.Desktop.Resources
 
         private async ValueTask<Socket> ConnectAsync(IPAddress ipAddress, ushort port, CancellationToken cancellationToken = default)
         {
-            for (; ; )
-            {
-                cancellationToken.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
 
-                var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                await socket.ConnectAsync(new IPEndPoint(ipAddress, port), TimeSpan.FromSeconds(3), cancellationToken);
-                return socket;
-            }
+            var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            await socket.ConnectAsync(new IPEndPoint(ipAddress, port), TimeSpan.FromSeconds(3), cancellationToken);
+            return socket;
         }
 
-        private async ValueTask<Options> LoadOptionsAsync(CancellationToken cancellationToken = default)
+        private async ValueTask<AppSettings> LoadOptionsAsync(CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                var options = await Options.LoadAsync(this.GetOptionsFilePath());
+                var options = await AppSettings.LoadAsync(this.GetOptionsFilePath());
 
                 if (options is null)
                 {
-                    options = new Options();
+                    options = new AppSettings();
                 }
 
                 return options;
             }
         }
 
-        public async ValueTask UpdateOptionsAsync(Options options, CancellationToken cancellationToken = default)
+        public async ValueTask UpdateOptionsAsync(AppSettings options, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.WriterLockAsync(cancellationToken))
             {

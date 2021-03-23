@@ -1,11 +1,11 @@
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main.Dashboard
+namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main.Upload
 {
-    public partial class DashboardControl : UserControl
+    public partial class UploadControl : UserControl
     {
-        public DashboardControl()
+        public UploadControl()
         {
             this.InitializeComponent();
         }
@@ -15,9 +15,9 @@ namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main.Dashboard
             AvaloniaXamlLoader.Load(this);
         }
 
-        public DashboardControlModel? Model
+        public UploadControlModel? Model
         {
-            get => this.DataContext as DashboardControlModel;
+            get => this.DataContext as UploadControlModel;
             set => this.DataContext = value;
         }
     }

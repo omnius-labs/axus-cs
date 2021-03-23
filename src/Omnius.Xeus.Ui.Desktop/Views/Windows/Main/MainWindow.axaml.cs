@@ -8,7 +8,11 @@ using Omnius.Core;
 using Omnius.Core.Helpers;
 using Omnius.Xeus.Ui.Desktop.Resources;
 using Omnius.Xeus.Ui.Desktop.Views.Primitives;
-using Omnius.Xeus.Ui.Desktop.Views.Windows.Main.Dashboard;
+using Omnius.Xeus.Ui.Desktop.Views.Windows.Main.Download;
+using Omnius.Xeus.Ui.Desktop.Views.Windows.Main.Peers;
+using Omnius.Xeus.Ui.Desktop.Views.Windows.Main.Settings;
+using Omnius.Xeus.Ui.Desktop.Views.Windows.Main.Status;
+using Omnius.Xeus.Ui.Desktop.Views.Windows.Main.Upload;
 
 namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main
 {
@@ -48,7 +52,11 @@ namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main
             _state = await AppState.Factory.CreateAsync(stateDirectoryPath, bytesPool);
 
             this.Model = new MainWindowModel(_state);
-            this.DashboardControl.Model = new DashboardControlModel(_state);
+            this.StatusControl.Model = new StatusControlModel(_state);
+            this.PeersControl.Model = new PeersControlModel(_state);
+            this.DownloadControl.Model = new DownloadControlModel(_state);
+            this.UploadControl.Model = new UploadControlModel(_state);
+            this.SettingsControl.Model = new SettingsControlModel(_state);
         }
 
         private static void SetLogsDirectory(string logsDirectoryPath)
@@ -69,9 +77,29 @@ namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main
 
         protected override async ValueTask OnDispose()
         {
-            if (this.DashboardControl.Model is DashboardControlModel dashboardControlModel)
+            if (this.StatusControl.Model is StatusControlModel statusControlModel)
             {
-                await dashboardControlModel.DisposeAsync();
+                await statusControlModel.DisposeAsync();
+            }
+
+            if (this.PeersControl.Model is PeersControlModel peersControlModel)
+            {
+                await peersControlModel.DisposeAsync();
+            }
+
+            if (this.DownloadControl.Model is DownloadControlModel downloadControlModel)
+            {
+                await downloadControlModel.DisposeAsync();
+            }
+
+            if (this.UploadControl.Model is UploadControlModel uploadControlModel)
+            {
+                await uploadControlModel.DisposeAsync();
+            }
+
+            if (this.SettingsControl.Model is SettingsControlModel settingsControlModel)
+            {
+                await settingsControlModel.DisposeAsync();
             }
 
             if (this.Model is MainWindowModel mainWindowModel)
@@ -95,6 +123,14 @@ namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main
             set => this.DataContext = value;
         }
 
-        public DashboardControl DashboardControl => this.FindControl<DashboardControl>(nameof(this.DashboardControl));
+        public StatusControl StatusControl => this.FindControl<StatusControl>(nameof(this.StatusControl));
+
+        public PeersControl PeersControl => this.FindControl<PeersControl>(nameof(this.PeersControl));
+
+        public DownloadControl DownloadControl => this.FindControl<DownloadControl>(nameof(this.DownloadControl));
+
+        public UploadControl UploadControl => this.FindControl<UploadControl>(nameof(this.UploadControl));
+
+        public SettingsControl SettingsControl => this.FindControl<SettingsControl>(nameof(this.SettingsControl));
     }
 }
