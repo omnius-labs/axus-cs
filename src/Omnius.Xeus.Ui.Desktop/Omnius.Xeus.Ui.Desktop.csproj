@@ -38,4 +38,13 @@
     <ProjectReference Include="..\Omnius.Xeus.Utils\Omnius.Xeus.Utils.csproj" />
   </ItemGroup>
 
+  <Target Name="Preview">
+    <Error Condition="$(XamlFile) == ''" Text="Specify /p:XamlFile=path" />
+    <PropertyGroup>
+      <PreviewerPort Condition="'$(PreviewerPort)' == ''">6001</PreviewerPort>
+      <FullPathToPreviewXaml>$([System.IO.Path]::GetFullPath('$(XamlFile)'))</FullPathToPreviewXaml>
+      <FileUriToPreviewXaml>file:///$(FullPathToPreviewXaml.Replace('\', '/').TrimStart('/'))</FileUriToPreviewXaml>
+    </PropertyGroup>
+    <Exec Command="dotnet exec --runtimeconfig $(ProjectRuntimeConfigFilePath) --depsfile $(ProjectDepsFilePath) $(PkgAvalonia)/tools/netcoreapp2.0/designer/Avalonia.Designer.HostApp.dll --method html --html-url http://127.0.0.1:$(PreviewerPort) --transport $(FileUriToPreviewXaml) $(TargetPath)" />
+  </Target>
 </Project>

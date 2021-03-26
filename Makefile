@@ -7,9 +7,15 @@ test:
 update:
 	bash ./eng/update.sh
 
+build:
+	dotnet build
+
+run-designer: build
+	dotnet msbuild ./src/Omnius.Xeus.Ui.Desktop/ /t:Preview /p:XamlFile=Views/Windows/Main/MainWindow.axaml
+
 clean:
 	rm -rf ./bin
 	rm -rf ./tmp
 	rm -rf ./pub
 
-.PHONY: init-tools gen-code test update format clean
+.PHONY: build
