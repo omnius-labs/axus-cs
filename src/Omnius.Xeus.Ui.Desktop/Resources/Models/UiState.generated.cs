@@ -29,5 +29,89 @@ namespace Omnius.Lxna.Ui.Desktop.Resources.Models
                 }
             }
         }
+        private bool _mainWindowModel_SelectedTab_Status;
+
+        public bool MainWindowModel_SelectedTab_Status
+        {
+            get => _mainWindowModel_SelectedTab_Status;
+            set
+            {
+                if (_mainWindowModel_SelectedTab_Status != value)
+                {
+                    _mainWindowModel_SelectedTab_Status = value;
+                    this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTab_Status));
+                }
+            }
+        }
+        private bool _mainWindowModel_SelectedTab_Peers;
+
+        public bool MainWindowModel_SelectedTab_Peers
+        {
+            get => _mainWindowModel_SelectedTab_Peers;
+            set
+            {
+                if (_mainWindowModel_SelectedTab_Peers != value)
+                {
+                    _mainWindowModel_SelectedTab_Peers = value;
+                    this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTab_Peers));
+                }
+            }
+        }
+        private bool _mainWindowModel_SelectedTab_Search;
+
+        public bool MainWindowModel_SelectedTab_Search
+        {
+            get => _mainWindowModel_SelectedTab_Search;
+            set
+            {
+                if (_mainWindowModel_SelectedTab_Search != value)
+                {
+                    _mainWindowModel_SelectedTab_Search = value;
+                    this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTab_Search));
+                }
+            }
+        }
+        private bool _mainWindowModel_SelectedTab_Download;
+
+        public bool MainWindowModel_SelectedTab_Download
+        {
+            get => _mainWindowModel_SelectedTab_Download;
+            set
+            {
+                if (_mainWindowModel_SelectedTab_Download != value)
+                {
+                    _mainWindowModel_SelectedTab_Download = value;
+                    this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTab_Download));
+                }
+            }
+        }
+        private bool _mainWindowModel_SelectedTab_Upload;
+
+        public bool MainWindowModel_SelectedTab_Upload
+        {
+            get => _mainWindowModel_SelectedTab_Upload;
+            set
+            {
+                if (_mainWindowModel_SelectedTab_Upload != value)
+                {
+                    _mainWindowModel_SelectedTab_Upload = value;
+                    this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTab_Upload));
+                }
+            }
+        }
+        private bool _mainWindowModel_SelectedTab_Settings;
+
+        public bool MainWindowModel_SelectedTab_Settings
+        {
+            get => _mainWindowModel_SelectedTab_Settings;
+            set
+            {
+                if (_mainWindowModel_SelectedTab_Settings != value)
+                {
+                    _mainWindowModel_SelectedTab_Settings = value;
+                    this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTab_Settings));
+                }
+            }
+        }
     }
 }

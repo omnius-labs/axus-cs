@@ -117,9 +117,9 @@ namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main
             NLog.LogManager.Shutdown();
         }
 
-        public MainWindowModel? Model
+        public IMainWindowModel? Model
         {
-            get => this.DataContext as MainWindowModel;
+            get => this.DataContext as IMainWindowModel;
             set => this.DataContext = value;
         }
 
