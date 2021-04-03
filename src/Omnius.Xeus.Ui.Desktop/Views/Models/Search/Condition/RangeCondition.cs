@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Omnius.Xeus.Ui.Desktop.Views.Models.Search.Condition
