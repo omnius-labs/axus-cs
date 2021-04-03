@@ -14,8 +14,8 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 5.0.102
-      - name: Install dotnet format
-        run: dotnet tool install -g dotnet-format
+      - name: Setup dotnet tool
+        run: dotnet tool restore
       - name: format-check
         run: dotnet format --check --dry-run
       - name: Install dependencies
@@ -35,8 +35,8 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 5.0.102
-      - name: Install dotnet format
-        run: dotnet tool install -g dotnet-format
+      - name: Setup dotnet tool
+        run: dotnet tool restore
       - name: format-check
         run: dotnet format --check --dry-run
       - name: Install dependencies
