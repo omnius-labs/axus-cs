@@ -4,7 +4,7 @@ gen-code:
 	bash ./eng/gen-code.sh
 
 test:
-	bash ./eng/test.sh
+	dotnet test --no-restore --filter "FullyQualifiedName~Omnius.Xeus"
 
 build:
 	dotnet build
@@ -15,11 +15,11 @@ run-designer: build
 format:
 	dotnet tool run dotnet-format
 
-update-dotnet-tool:
-	bash ./eng/update-dotnet-tool.sh
-
 update-nugut:
 	dotnet tool run nukeeper update
+
+update-dotnet-tool:
+	bash ./eng/update-dotnet-tool.sh
 
 update-sln:
 	bash ./eng/update-sln.sh
