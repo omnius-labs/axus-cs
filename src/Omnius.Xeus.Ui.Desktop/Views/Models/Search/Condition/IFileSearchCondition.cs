@@ -1,4 +1,4 @@
-﻿namespace Omnius.Xeus.Ui.Desktop.Views.Models.Search.Condition
+namespace Omnius.Xeus.Ui.Desktop.Views.Models.Search.Condition
 {
     public enum FileSearchConditionType
     {
