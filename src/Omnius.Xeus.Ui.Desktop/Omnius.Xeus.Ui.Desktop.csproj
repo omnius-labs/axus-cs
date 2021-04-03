@@ -23,7 +23,7 @@
     <PackageReference Include="Avalonia.Xaml.Interactions" Version="0.10.0" />
     <PackageReference Include="Avalonia.Xaml.Interactivity" Version="0.10.0" />
     <PackageReference Include="NLog" Version="4.7.9" />
-    <PackageReference Include="NLog.Config" Version="4.7.7" />
+    <PackageReference Include="NLog.Config" Version="4.7.9" />
     <PackageReference Include="ReactiveProperty" Version="7.8.3" />
     <PackageReference Include="Nito.AsyncEx" Version="5.1.0" />
     <PackageReference Include="YamlDotNet" Version="11.0.1" />
