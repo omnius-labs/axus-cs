@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace Omnius.Xeus.Ui.Desktop.Interactors.Models.FileSearch.Condition
+namespace Omnius.Xeus.Ui.Desktop.Views.Models.Search.Condition
 {
     public class RegexCondition : IFileSearchCondition<string>, IEquatable<RegexCondition>
     {

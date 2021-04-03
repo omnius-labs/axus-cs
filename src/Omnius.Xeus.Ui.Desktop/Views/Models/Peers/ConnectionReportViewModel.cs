@@ -1,7 +1,7 @@
-using Omnius.Lxna.Ui.Desktop.Presenters.Primitives;
 using Omnius.Xeus.Interactors.Models;
+using Omnius.Xeus.Ui.Desktop.Views.Models.Primitives;
 
-namespace Omnius.Lxna.Ui.Desktop.Presenters
+namespace Omnius.Xeus.Ui.Desktop.Views.Models.Peers
 {
     public class ConnectionReportViewModel : BindableBase
     {

@@ -1,4 +1,4 @@
-namespace Omnius.Lxna.Ui.Desktop.Presenters.Primitives
+namespace Omnius.Xeus.Ui.Desktop.Views.Models.Primitives
 {
     public interface IDropable
     {

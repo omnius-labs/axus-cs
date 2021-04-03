@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Omnius.Xeus.Ui.Desktop.Interactors.Models.FileSearch.Condition
+namespace Omnius.Xeus.Ui.Desktop.Views.Models.Search.Condition
 {
     public class RangeCondition<T> : IFileSearchCondition<T>, IEquatable<RangeCondition<T>>
         where T : IComparable<T>, IEquatable<T>

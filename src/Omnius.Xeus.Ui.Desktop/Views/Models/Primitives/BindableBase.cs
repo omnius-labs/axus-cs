@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Omnius.Lxna.Ui.Desktop.Presenters.Primitives
+namespace Omnius.Xeus.Ui.Desktop.Views.Models.Primitives
 {
     public abstract class BindableBase : INotifyPropertyChanged
     {

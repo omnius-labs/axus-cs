@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Omnius.Core;
 
-namespace Omnius.Lxna.Ui.Desktop.Presenters.Primitives
+namespace Omnius.Xeus.Ui.Desktop.Views.Models.Primitives
 {
     public abstract class TreeViewModelBase : DisposableBase, IDropable
     {
