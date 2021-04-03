@@ -1,13 +1,10 @@
 PreviewXamlFile := Views/Windows/Main/MainWindow.axaml
 
 gen-code:
-	docker-compose -f ./docker/dev/docker-compose.yml run --rm devenv sh ./eng/gen-code.sh
+	bash ./eng/gen-code.sh
 
 test:
-	docker-compose -f ./docker/dev/docker-compose.yml run --rm devenv sh ./eng/test.sh
-
-update:
-	bash ./eng/update.sh
+	bash ./eng/test.sh
 
 build:
 	dotnet build
@@ -15,9 +12,21 @@ build:
 run-designer: build
 	dotnet msbuild ./src/Omnius.Xeus.Ui.Desktop/ /t:Preview /p:XamlFile=$(PreviewXamlFile)
 
+format:
+	dotnet tool run dotnet-format
+
+update-dotnet-tool:
+	bash ./eng/update-dotnet-tool.sh
+
+update-nugut:
+	dotnet tool run nukeeper update
+
+update-sln:
+	bash ./eng/update-sln.sh
+
 clean:
 	rm -rf ./bin
 	rm -rf ./tmp
 	rm -rf ./pub
 
-.PHONY: build
+.PHONY: test build
