@@ -23,7 +23,7 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
       - name: Test
-        run: dotnet test --no-restore --verbosity normal --filter "FullyQualifiedName\!~Omnius.Core"
+        run: dotnet test --no-restore --verbosity normal --filter "FullyQualifiedName~Omnius.Xeus"
   windows:
     runs-on: windows-latest
     steps:
@@ -40,4 +40,4 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
       - name: Test
-        run: dotnet test --no-restore --verbosity normal --filter "FullyQualifiedName\!~Omnius.Core"
+        run: dotnet test --no-restore --verbosity normal --filter "FullyQualifiedName~Omnius.Xeus"
