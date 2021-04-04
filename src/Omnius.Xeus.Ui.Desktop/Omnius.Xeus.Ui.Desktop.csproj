@@ -3,10 +3,6 @@
     <OutputType>WinExe</OutputType>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>C:\home\repos\omnius-labs\xeus\tmp\bin\win\Omnius.Xeus.Ui.Desktop\Debug\</OutputPath>
-  </PropertyGroup>
-
   <ItemGroup>
     <None Update="NLog.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
