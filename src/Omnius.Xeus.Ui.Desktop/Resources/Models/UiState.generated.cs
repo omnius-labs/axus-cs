@@ -22,7 +22,7 @@ namespace Omnius.Lxna.Ui.Desktop.Resources.Models
             get => _fileSearchControl_TreeViewWidth;
             set
             {
-                if (_fileSearchControl_TreeViewWidth != value)
+                if (!_fileSearchControl_TreeViewWidth.Equals(value))
                 {
                     _fileSearchControl_TreeViewWidth = value;
                     this.RaisePropertyChanged(nameof(FileSearchControl_TreeViewWidth));
@@ -36,7 +36,7 @@ namespace Omnius.Lxna.Ui.Desktop.Resources.Models
             get => _mainWindowModel_SelectedTab_Status;
             set
             {
-                if (_mainWindowModel_SelectedTab_Status != value)
+                if (!_mainWindowModel_SelectedTab_Status.Equals(value))
                 {
                     _mainWindowModel_SelectedTab_Status = value;
                     this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTab_Status));
@@ -50,7 +50,7 @@ namespace Omnius.Lxna.Ui.Desktop.Resources.Models
             get => _mainWindowModel_SelectedTab_Peers;
             set
             {
-                if (_mainWindowModel_SelectedTab_Peers != value)
+                if (!_mainWindowModel_SelectedTab_Peers.Equals(value))
                 {
                     _mainWindowModel_SelectedTab_Peers = value;
                     this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTab_Peers));
@@ -64,7 +64,7 @@ namespace Omnius.Lxna.Ui.Desktop.Resources.Models
             get => _mainWindowModel_SelectedTab_Search;
             set
             {
-                if (_mainWindowModel_SelectedTab_Search != value)
+                if (!_mainWindowModel_SelectedTab_Search.Equals(value))
                 {
                     _mainWindowModel_SelectedTab_Search = value;
                     this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTab_Search));
@@ -78,7 +78,7 @@ namespace Omnius.Lxna.Ui.Desktop.Resources.Models
             get => _mainWindowModel_SelectedTab_Download;
             set
             {
-                if (_mainWindowModel_SelectedTab_Download != value)
+                if (!_mainWindowModel_SelectedTab_Download.Equals(value))
                 {
                     _mainWindowModel_SelectedTab_Download = value;
                     this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTab_Download));
@@ -92,7 +92,7 @@ namespace Omnius.Lxna.Ui.Desktop.Resources.Models
             get => _mainWindowModel_SelectedTab_Upload;
             set
             {
-                if (_mainWindowModel_SelectedTab_Upload != value)
+                if (!_mainWindowModel_SelectedTab_Upload.Equals(value))
                 {
                     _mainWindowModel_SelectedTab_Upload = value;
                     this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTab_Upload));
@@ -106,7 +106,7 @@ namespace Omnius.Lxna.Ui.Desktop.Resources.Models
             get => _mainWindowModel_SelectedTab_Settings;
             set
             {
-                if (_mainWindowModel_SelectedTab_Settings != value)
+                if (!_mainWindowModel_SelectedTab_Settings.Equals(value))
                 {
                     _mainWindowModel_SelectedTab_Settings = value;
                     this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTab_Settings));

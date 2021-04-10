@@ -14,8 +14,6 @@
     xmlns:settings="clr-namespace:Omnius.Xeus.Ui.Desktop.Views.Windows.Main.Settings;assembly=Omnius.Xeus.Ui.Desktop"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Width="800"
-    Height="500"
     FontFamily="Meiryo UI, Lucida Grande, Ubuntu"
     x:CompileBindings="True"
     x:DataType="local:IMainWindowModel"

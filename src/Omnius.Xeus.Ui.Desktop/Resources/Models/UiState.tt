@@ -47,7 +47,7 @@ namespace Omnius.Lxna.Ui.Desktop.Resources.Models
             get => <#= generatedFieldName #>;
             set
             {
-                if (<#= generatedFieldName #> != value)
+                if (!<#= generatedFieldName #>.Equals(value))
                 {
                     <#= generatedFieldName #> = value;
                     this.RaisePropertyChanged(nameof(<#= name #>));

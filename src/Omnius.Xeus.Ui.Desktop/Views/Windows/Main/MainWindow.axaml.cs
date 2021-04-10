@@ -7,12 +7,12 @@ using Avalonia.Markup.Xaml;
 using Omnius.Core;
 using Omnius.Core.Helpers;
 using Omnius.Xeus.Ui.Desktop.Resources;
-using Omnius.Xeus.Ui.Desktop.Views.Primitives;
 using Omnius.Xeus.Ui.Desktop.Views.Windows.Main.Download;
 using Omnius.Xeus.Ui.Desktop.Views.Windows.Main.Peers;
 using Omnius.Xeus.Ui.Desktop.Views.Windows.Main.Settings;
 using Omnius.Xeus.Ui.Desktop.Views.Windows.Main.Status;
 using Omnius.Xeus.Ui.Desktop.Views.Windows.Main.Upload;
+using Omnius.Xeus.Ui.Desktop.Views.Windows.Primitives;
 
 namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main
 {
@@ -43,7 +43,9 @@ namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main
             DirectoryHelper.CreateDirectory(logsDirectoryPath);
 
             SetLogsDirectory(logsDirectoryPath);
-            ChangeLogLevel();
+#if DEBUG
+            ChangeLogLevel(NLog.LogLevel.Trace);
+#endif
 
             _logger.Info("desktop-ui start");
 
@@ -67,12 +69,10 @@ namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main
             NLog.LogManager.ReconfigExistingLoggers();
         }
 
-        private static void ChangeLogLevel()
+        private static void ChangeLogLevel(NLog.LogLevel logLevel)
         {
-#if DEBUG
             var rootLoggingRule = NLog.LogManager.Configuration.LoggingRules.First(n => n.NameMatches("*"));
-            rootLoggingRule.EnableLoggingForLevel(NLog.LogLevel.Trace);
-#endif
+            rootLoggingRule.EnableLoggingForLevel(logLevel);
         }
 
         protected override async ValueTask OnDispose()

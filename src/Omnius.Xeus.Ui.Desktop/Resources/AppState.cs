@@ -27,10 +27,9 @@ namespace Omnius.Xeus.Ui.Desktop.Resources
         private IUserProfileFinder _userProfileFinder = null!;
         private IUserProfileDownloader _userProfileDownloader = null!;
         private IUserProfileUploader _userProfileUploader = null!;
+
         private AppSettings _appSettings = null!;
         private UiState _uiState = null!;
-
-        private readonly AsyncReaderWriterLock _asyncLock = new();
 
         public class AppStateFactory
         {
@@ -64,36 +63,8 @@ namespace Omnius.Xeus.Ui.Desktop.Resources
             _dashboard = await Dashboard.Factory.CreateAsync(_xeusService, _bytesPool, cancellationToken);
 
             _uiState = await this.LoadUiStateAsync(cancellationToken);
-
-            var appSettings = await this.LoadAppSettingsAsync(cancellationToken);
-            await this.UpdateAppSettingsAsync(appSettings, cancellationToken);
+            _appSettings = await this.LoadAppSettingsAsync(cancellationToken);
         }
-
-        protected override async ValueTask OnDisposeAsync()
-        {
-            await this.SaveAsync();
-        }
-
-        private async ValueTask SaveAsync()
-        {
-            await _uiState.SaveAsync(this.GetUiStateFilePath());
-        }
-
-        public IBytesPool GetBytesPool() => _bytesPool;
-
-        public IXeusService GetXeusService() => _xeusService;
-
-        public IDashboard GetDashboard() => _dashboard;
-
-        public AppSettings GetAppSettings()
-        {
-            using (_asyncLock.ReaderLock())
-            {
-                return _appSettings;
-            }
-        }
-
-        public UiState GetUiState() => _uiState;
 
         private async ValueTask<AppConfig> LoadAppConfigAsync(CancellationToken cancellationToken = default)
         {
@@ -108,20 +79,6 @@ namespace Omnius.Xeus.Ui.Desktop.Resources
             await appConfig.SaveAsync(this.GetAppConfigFilePath());
 
             return appConfig;
-        }
-
-        private async ValueTask<UiState> LoadUiStateAsync(CancellationToken cancellationToken = default)
-        {
-            var uiState = await UiState.LoadAsync(this.GetUiStateFilePath());
-
-            if (uiState is null)
-            {
-                uiState = new UiState
-                {
-                };
-            }
-
-            return uiState;
         }
 
         private async ValueTask<IXeusService> CreateXeusServiceAsync(AppConfig appConfig, CancellationToken cancellationToken = default)
@@ -161,10 +118,22 @@ namespace Omnius.Xeus.Ui.Desktop.Resources
             return socket;
         }
 
+        private async ValueTask<UiState> LoadUiStateAsync(CancellationToken cancellationToken = default)
+        {
+            var uiState = await UiState.LoadAsync(this.GetUiStateFilePath());
+
+            if (uiState is null)
+            {
+                uiState = new UiState
+                {
+                };
+            }
+
+            return uiState;
+        }
+
         private async ValueTask<AppSettings> LoadAppSettingsAsync(CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.ReaderLockAsync(cancellationToken))
-            {
                 var appSettings = await AppSettings.LoadAsync(this.GetAppSettingsFilePath());
 
                 if (appSettings is null)
@@ -173,16 +142,26 @@ namespace Omnius.Xeus.Ui.Desktop.Resources
                 }
 
                 return appSettings;
-            }
         }
 
-        public async ValueTask UpdateAppSettingsAsync(AppSettings appSettings, CancellationToken cancellationToken = default)
+        protected override async ValueTask OnDisposeAsync()
         {
-            using (await _asyncLock.WriterLockAsync(cancellationToken))
-            {
-                await appSettings.SaveAsync(this.GetAppSettingsFilePath());
-                _appSettings = appSettings;
-            }
+            await this.SaveAsync();
         }
+
+        private async ValueTask SaveAsync()
+        {
+            await _uiState.SaveAsync(this.GetUiStateFilePath());
+        }
+
+        public IBytesPool GetBytesPool() => _bytesPool;
+
+        public IXeusService GetXeusService() => _xeusService;
+
+        public IDashboard GetDashboard() => _dashboard;
+
+        public AppSettings GetAppSettings() => _appSettings;
+
+        public UiState GetUiState() => _uiState;
     }
 }
