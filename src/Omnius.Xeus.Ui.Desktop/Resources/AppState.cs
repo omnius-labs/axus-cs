@@ -134,14 +134,14 @@ namespace Omnius.Xeus.Ui.Desktop.Resources
 
         private async ValueTask<AppSettings> LoadAppSettingsAsync(CancellationToken cancellationToken = default)
         {
-                var appSettings = await AppSettings.LoadAsync(this.GetAppSettingsFilePath());
+            var appSettings = await AppSettings.LoadAsync(this.GetAppSettingsFilePath());
 
-                if (appSettings is null)
-                {
-                    appSettings = new AppSettings();
-                }
+            if (appSettings is null)
+            {
+                appSettings = new AppSettings();
+            }
 
-                return appSettings;
+            return appSettings;
         }
 
         protected override async ValueTask OnDisposeAsync()
