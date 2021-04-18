@@ -20,7 +20,7 @@ jobs:
       uses: peter-evans/create-pull-request@v3
       with:
         token: ${{ secrets.PAT }}
-        commit-message: Update report
+        commit-message: Update submodules
         committer: GitHub <noreply@github.com>
         author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
         branch: update/submodules
