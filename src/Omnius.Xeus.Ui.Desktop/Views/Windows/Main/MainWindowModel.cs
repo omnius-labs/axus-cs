@@ -9,7 +9,7 @@ namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main
 {
     public interface IMainWindowModel
     {
-        public SelectedTabState SelectedTab { get; }
+        public SelectedTabState SelectedTabState { get; }
     }
 
     public sealed class SelectedTabState
@@ -33,12 +33,12 @@ namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main
 
         public DesignMainWindowModel()
         {
-            this.SelectedTab.Status = new ReactivePropertySlim<bool>(true).AddTo(_disposable);
-            this.SelectedTab.Peers = new ReactivePropertySlim<bool>(false).AddTo(_disposable);
-            this.SelectedTab.Search = new ReactivePropertySlim<bool>(false).AddTo(_disposable);
-            this.SelectedTab.Download = new ReactivePropertySlim<bool>(false).AddTo(_disposable);
-            this.SelectedTab.Upload = new ReactivePropertySlim<bool>(false).AddTo(_disposable);
-            this.SelectedTab.Settings = new ReactivePropertySlim<bool>(false).AddTo(_disposable);
+            this.SelectedTabState.Status = new ReactivePropertySlim<bool>(true).AddTo(_disposable);
+            this.SelectedTabState.Peers = new ReactivePropertySlim<bool>(false).AddTo(_disposable);
+            this.SelectedTabState.Search = new ReactivePropertySlim<bool>(false).AddTo(_disposable);
+            this.SelectedTabState.Download = new ReactivePropertySlim<bool>(false).AddTo(_disposable);
+            this.SelectedTabState.Upload = new ReactivePropertySlim<bool>(false).AddTo(_disposable);
+            this.SelectedTabState.Settings = new ReactivePropertySlim<bool>(false).AddTo(_disposable);
         }
 
         protected override void OnDispose(bool disposing)
@@ -46,7 +46,7 @@ namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main
             _disposable.Dispose();
         }
 
-        public SelectedTabState SelectedTab { get; } = new();
+        public SelectedTabState SelectedTabState { get; } = new();
     }
 
     public class MainWindowModel : AsyncDisposableBase, IMainWindowModel
@@ -61,12 +61,12 @@ namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main
 
             var uiState = _state.GetUiState();
 
-            this.SelectedTab.Status = uiState.ToReactivePropertySlimAsSynchronized(n => n.MainWindowModel_SelectedTab_Status).AddTo(_disposable);
-            this.SelectedTab.Peers = uiState.ToReactivePropertySlimAsSynchronized(n => n.MainWindowModel_SelectedTab_Peers).AddTo(_disposable);
-            this.SelectedTab.Search = uiState.ToReactivePropertySlimAsSynchronized(n => n.MainWindowModel_SelectedTab_Search).AddTo(_disposable);
-            this.SelectedTab.Download = uiState.ToReactivePropertySlimAsSynchronized(n => n.MainWindowModel_SelectedTab_Download).AddTo(_disposable);
-            this.SelectedTab.Upload = uiState.ToReactivePropertySlimAsSynchronized(n => n.MainWindowModel_SelectedTab_Upload).AddTo(_disposable);
-            this.SelectedTab.Settings = uiState.ToReactivePropertySlimAsSynchronized(n => n.MainWindowModel_SelectedTab_Settings).AddTo(_disposable);
+            this.SelectedTabState.Status = uiState.ToReactivePropertySlimAsSynchronized(n => n.MainWindowModel_SelectedTabState_Status).AddTo(_disposable);
+            this.SelectedTabState.Peers = uiState.ToReactivePropertySlimAsSynchronized(n => n.MainWindowModel_SelectedTabState_Peers).AddTo(_disposable);
+            this.SelectedTabState.Search = uiState.ToReactivePropertySlimAsSynchronized(n => n.MainWindowModel_SelectedTabState_Search).AddTo(_disposable);
+            this.SelectedTabState.Download = uiState.ToReactivePropertySlimAsSynchronized(n => n.MainWindowModel_SelectedTabState_Download).AddTo(_disposable);
+            this.SelectedTabState.Upload = uiState.ToReactivePropertySlimAsSynchronized(n => n.MainWindowModel_SelectedTabState_Upload).AddTo(_disposable);
+            this.SelectedTabState.Settings = uiState.ToReactivePropertySlimAsSynchronized(n => n.MainWindowModel_SelectedTabState_Settings).AddTo(_disposable);
         }
 
         protected override async ValueTask OnDisposeAsync()
@@ -74,6 +74,6 @@ namespace Omnius.Xeus.Ui.Desktop.Views.Windows.Main
             _disposable.Dispose();
         }
 
-        public SelectedTabState SelectedTab { get; } = new();
+        public SelectedTabState SelectedTabState { get; } = new();
     }
 }

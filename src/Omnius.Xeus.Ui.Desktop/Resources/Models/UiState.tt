@@ -8,12 +8,12 @@
     var pairs = new List<(string, string)>
     {
         ("FileSearchControl_TreeViewWidth", "double"),
-        ("MainWindowModel_SelectedTab_Status", "bool"),
-        ("MainWindowModel_SelectedTab_Peers", "bool"),
-        ("MainWindowModel_SelectedTab_Search", "bool"),
-        ("MainWindowModel_SelectedTab_Download", "bool"),
-        ("MainWindowModel_SelectedTab_Upload", "bool"),
-        ("MainWindowModel_SelectedTab_Settings", "bool"),
+        ("MainWindowModel_SelectedTabState_Status", "bool"),
+        ("MainWindowModel_SelectedTabState_Peers", "bool"),
+        ("MainWindowModel_SelectedTabState_Search", "bool"),
+        ("MainWindowModel_SelectedTabState_Download", "bool"),
+        ("MainWindowModel_SelectedTabState_Upload", "bool"),
+        ("MainWindowModel_SelectedTabState_Settings", "bool"),
     };
 
     static string GenFieldName(string name)
