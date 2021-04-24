@@ -29,87 +29,87 @@ namespace Omnius.Lxna.Ui.Desktop.Resources.Models
                 }
             }
         }
-        private bool _mainWindowModel_SelectedTab_Status;
+        private bool _mainWindowModel_SelectedTabState_Status;
 
-        public bool MainWindowModel_SelectedTab_Status
+        public bool MainWindowModel_SelectedTabState_Status
         {
-            get => _mainWindowModel_SelectedTab_Status;
+            get => _mainWindowModel_SelectedTabState_Status;
             set
             {
-                if (!_mainWindowModel_SelectedTab_Status.Equals(value))
+                if (!_mainWindowModel_SelectedTabState_Status.Equals(value))
                 {
-                    _mainWindowModel_SelectedTab_Status = value;
-                    this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTab_Status));
+                    _mainWindowModel_SelectedTabState_Status = value;
+                    this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTabState_Status));
                 }
             }
         }
-        private bool _mainWindowModel_SelectedTab_Peers;
+        private bool _mainWindowModel_SelectedTabState_Peers;
 
-        public bool MainWindowModel_SelectedTab_Peers
+        public bool MainWindowModel_SelectedTabState_Peers
         {
-            get => _mainWindowModel_SelectedTab_Peers;
+            get => _mainWindowModel_SelectedTabState_Peers;
             set
             {
-                if (!_mainWindowModel_SelectedTab_Peers.Equals(value))
+                if (!_mainWindowModel_SelectedTabState_Peers.Equals(value))
                 {
-                    _mainWindowModel_SelectedTab_Peers = value;
-                    this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTab_Peers));
+                    _mainWindowModel_SelectedTabState_Peers = value;
+                    this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTabState_Peers));
                 }
             }
         }
-        private bool _mainWindowModel_SelectedTab_Search;
+        private bool _mainWindowModel_SelectedTabState_Search;
 
-        public bool MainWindowModel_SelectedTab_Search
+        public bool MainWindowModel_SelectedTabState_Search
         {
-            get => _mainWindowModel_SelectedTab_Search;
+            get => _mainWindowModel_SelectedTabState_Search;
             set
             {
-                if (!_mainWindowModel_SelectedTab_Search.Equals(value))
+                if (!_mainWindowModel_SelectedTabState_Search.Equals(value))
                 {
-                    _mainWindowModel_SelectedTab_Search = value;
-                    this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTab_Search));
+                    _mainWindowModel_SelectedTabState_Search = value;
+                    this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTabState_Search));
                 }
             }
         }
-        private bool _mainWindowModel_SelectedTab_Download;
+        private bool _mainWindowModel_SelectedTabState_Download;
 
-        public bool MainWindowModel_SelectedTab_Download
+        public bool MainWindowModel_SelectedTabState_Download
         {
-            get => _mainWindowModel_SelectedTab_Download;
+            get => _mainWindowModel_SelectedTabState_Download;
             set
             {
-                if (!_mainWindowModel_SelectedTab_Download.Equals(value))
+                if (!_mainWindowModel_SelectedTabState_Download.Equals(value))
                 {
-                    _mainWindowModel_SelectedTab_Download = value;
-                    this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTab_Download));
+                    _mainWindowModel_SelectedTabState_Download = value;
+                    this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTabState_Download));
                 }
             }
         }
-        private bool _mainWindowModel_SelectedTab_Upload;
+        private bool _mainWindowModel_SelectedTabState_Upload;
 
-        public bool MainWindowModel_SelectedTab_Upload
+        public bool MainWindowModel_SelectedTabState_Upload
         {
-            get => _mainWindowModel_SelectedTab_Upload;
+            get => _mainWindowModel_SelectedTabState_Upload;
             set
             {
-                if (!_mainWindowModel_SelectedTab_Upload.Equals(value))
+                if (!_mainWindowModel_SelectedTabState_Upload.Equals(value))
                 {
-                    _mainWindowModel_SelectedTab_Upload = value;
-                    this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTab_Upload));
+                    _mainWindowModel_SelectedTabState_Upload = value;
+                    this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTabState_Upload));
                 }
             }
         }
-        private bool _mainWindowModel_SelectedTab_Settings;
+        private bool _mainWindowModel_SelectedTabState_Settings;
 
-        public bool MainWindowModel_SelectedTab_Settings
+        public bool MainWindowModel_SelectedTabState_Settings
         {
-            get => _mainWindowModel_SelectedTab_Settings;
+            get => _mainWindowModel_SelectedTabState_Settings;
             set
             {
-                if (!_mainWindowModel_SelectedTab_Settings.Equals(value))
+                if (!_mainWindowModel_SelectedTabState_Settings.Equals(value))
                 {
-                    _mainWindowModel_SelectedTab_Settings = value;
-                    this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTab_Settings));
+                    _mainWindowModel_SelectedTabState_Settings = value;
+                    this.RaisePropertyChanged(nameof(MainWindowModel_SelectedTabState_Settings));
                 }
             }
         }

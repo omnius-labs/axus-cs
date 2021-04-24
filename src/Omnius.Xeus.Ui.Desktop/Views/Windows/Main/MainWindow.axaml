@@ -27,22 +27,22 @@
 
     <Grid>
         <TabControl TabStripPlacement="Left" SelectedIndex="-1">
-            <TabItem Header="Status" IsSelected="{Binding SelectedTab.Status.Value}">
+            <TabItem Header="Status" IsSelected="{Binding SelectedTabState.Status.Value}">
                 <status:StatusControl x:Name="StatusControl" Height="NaN" Width="NaN" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             </TabItem>
-            <TabItem Header="Peers" IsSelected="{Binding SelectedTab.Peers.Value}">
+            <TabItem Header="Peers" IsSelected="{Binding SelectedTabState.Peers.Value}">
                 <peers:PeersControl x:Name="PeersControl" Height="NaN" Width="NaN" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             </TabItem>
-            <TabItem Header="Search" IsSelected="{Binding SelectedTab.Search.Value}">
+            <TabItem Header="Search" IsSelected="{Binding SelectedTabState.Search.Value}">
                 <search:SearchControl x:Name="SearchControl" Height="NaN" Width="NaN" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             </TabItem>
-            <TabItem Header="Download" IsSelected="{Binding SelectedTab.Download.Value}">
+            <TabItem Header="Download" IsSelected="{Binding SelectedTabState.Download.Value}">
                 <download:DownloadControl x:Name="DownloadControl" Height="NaN" Width="NaN" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             </TabItem>
-            <TabItem Header="Upload" IsSelected="{Binding SelectedTab.Upload.Value}">
+            <TabItem Header="Upload" IsSelected="{Binding SelectedTabState.Upload.Value}">
                 <upload:UploadControl x:Name="UploadControl" Height="NaN" Width="NaN" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             </TabItem>
-            <TabItem Header="Settings" IsSelected="{Binding SelectedTab.Settings.Value}">
+            <TabItem Header="Settings" IsSelected="{Binding SelectedTabState.Settings.Value}">
                 <settings:SettingsControl x:Name="SettingsControl" Height="NaN" Width="NaN" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             </TabItem>
         </TabControl>
