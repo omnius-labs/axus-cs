@@ -22,9 +22,9 @@
       },
       "YamlDotNet": {
         "type": "Direct",
-        "requested": "[11.0.1, )",
-        "resolved": "11.0.1",
-        "contentHash": "UvICfSN4gJfAmOsuY/go0hb5SFfr3ZYCXb7jg66yT7kh+wSJEt7tUiwuoCNMpt8ScEXLDwXttpFoWKWeirYU1A=="
+        "requested": "[11.1.1, )",
+        "resolved": "11.1.1",
+        "contentHash": "FWSee6b+CnrimzZijOF+Bcym9Hf9qWQ/dyhk1f0KGeZ4Eh++6kymVZGWKOYIqcaEh5/IUx7b2lnq+JeeSn7E3Q=="
       },
       "Microsoft.NETCore.Platforms": {
         "type": "Transitive",
