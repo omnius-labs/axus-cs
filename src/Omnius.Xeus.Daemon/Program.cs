@@ -21,7 +21,9 @@ namespace Omnius.Xeus.Daemon
             DirectoryHelper.CreateDirectory(logsDirectoryPath);
 
             SetLogsDirectory(logsDirectoryPath);
-            ChangeLogLevel();
+#if DEBUG
+            ChangeLogLevel(NLog.LogLevel.Trace);
+#endif
 
             try
             {
@@ -48,12 +50,10 @@ namespace Omnius.Xeus.Daemon
             NLog.LogManager.ReconfigExistingLoggers();
         }
 
-        private static void ChangeLogLevel()
+        private static void ChangeLogLevel(NLog.LogLevel logLevel)
         {
-#if DEBUG
             var rootLoggingRule = NLog.LogManager.Configuration.LoggingRules.First(n => n.NameMatches("*"));
-            rootLoggingRule.EnableLoggingForLevel(NLog.LogLevel.Trace);
-#endif
+            rootLoggingRule.EnableLoggingForLevel(logLevel);
         }
     }
 }
