@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Omnius.Xeus.Daemon (Win)",
+            "name": "daemon (Win)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Daemon)",
@@ -13,7 +13,7 @@
             "stopAtEntry": false
         },
         {
-            "name": "Omnius.Xeus.Ui.Desktop (Win)",
+            "name": "ui-desktop (Win)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Ui.Desktop)",
@@ -24,7 +24,7 @@
             "stopAtEntry": false
         },
         {
-            "name": "Omnius.Xeus.Daemon (Linux)",
+            "name": "daemon (Linux)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Daemon)",
@@ -35,7 +35,7 @@
             "stopAtEntry": false
         },
         {
-            "name": "Omnius.Xeus.Ui.Desktop (Linux)",
+            "name": "ui-desktop (Linux)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Ui.Desktop)",
@@ -46,7 +46,7 @@
             "stopAtEntry": false
         },
         {
-            "name": "Omnius.Xeus.Daemon (Mac)",
+            "name": "daemon (Mac)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Daemon)",
@@ -57,7 +57,7 @@
             "stopAtEntry": false
         },
         {
-            "name": "Omnius.Xeus.Ui.Desktop (Mac)",
+            "name": "ui-desktop (Mac)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Ui.Desktop)",

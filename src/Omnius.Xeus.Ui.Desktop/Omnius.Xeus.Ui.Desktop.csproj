@@ -4,20 +4,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="NLog.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.10.0" />
-    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.0" />
     <PackageReference Include="Avalonia.Controls.DataGrid" Version="0.10.0" />
     <PackageReference Include="Avalonia.Desktop" Version="0.10.0" />
     <PackageReference Include="Avalonia.Skia" Version="0.10.0" />
     <PackageReference Include="Avalonia.Xaml.Behaviors" Version="0.10.0" />
     <PackageReference Include="Avalonia.Xaml.Interactions" Version="0.10.0" />
     <PackageReference Include="Avalonia.Xaml.Interactivity" Version="0.10.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
     <PackageReference Include="NLog" Version="4.7.9" />
     <PackageReference Include="NLog.Config" Version="4.7.9" />
     <PackageReference Include="ReactiveProperty" Version="7.8.3" />
@@ -32,6 +26,12 @@
     <ProjectReference Include="..\Omnius.Xeus.Interactors.Implementations\Omnius.Xeus.Interactors.Implementations.csproj" />
     <ProjectReference Include="..\Omnius.Xeus.Interactors\Omnius.Xeus.Interactors.csproj" />
     <ProjectReference Include="..\Omnius.Xeus.Utils\Omnius.Xeus.Utils.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <Target Name="Preview">

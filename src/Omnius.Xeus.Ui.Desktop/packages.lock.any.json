@@ -42,17 +42,6 @@
           "Avalonia.X11": "0.10.0"
         }
       },
-      "Avalonia.ReactiveUI": {
-        "type": "Direct",
-        "requested": "[0.10.0, )",
-        "resolved": "0.10.0",
-        "contentHash": "as9xqxbq6idUi3ceJNqUiZh5ZUvYWox55Sv7rqxAnLJrXkpZ42OPy0NyfDatx5U7AVawg5rHN0PImTC/jZ9/mA==",
-        "dependencies": {
-          "Avalonia": "0.10.0",
-          "ReactiveUI": "12.1.1",
-          "System.Reactive": "5.0.0"
-        }
-      },
       "Avalonia.Skia": {
         "type": "Direct",
         "requested": "[0.10.0, )",
@@ -94,6 +83,15 @@
         "contentHash": "zexChJ3DLNvF68ARBi1Lt7LyCN9zDMRfPg/bto3gjM9bBSoZ3vGuRggxUkBsVglGy1MkvCMkxVS4BlrdR7OadQ==",
         "dependencies": {
           "Avalonia": "0.10.0"
+        }
+      },
+      "Microsoft.Extensions.DependencyInjection": {
+        "type": "Direct",
+        "requested": "[5.0.1, )",
+        "resolved": "5.0.1",
+        "contentHash": "//mDNrYeiJ0eh/awFhDFJQzkRVra/njU5Y4fyK7X29g5HScrzbUkKOKlyTtygthcGFt4zNC8G5CFCjb/oizomA==",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "5.0.0"
         }
       },
       "Nito.AsyncEx": {
@@ -197,14 +195,6 @@
           "Avalonia.Skia": "0.10.0"
         }
       },
-      "DynamicData": {
-        "type": "Transitive",
-        "resolved": "6.17.14",
-        "contentHash": "tbzTTfridK49Tfdg1vdSfQ7ecp9ZfqwLGDNLtn8ZeumGgOQbOrXXZp2TCgkHgNfnxXo1eDSOSGBMfEfWaOPlSw==",
-        "dependencies": {
-          "System.Reactive": "4.4.1"
-        }
-      },
       "HarfBuzzSharp": {
         "type": "Transitive",
         "resolved": "2.6.1.7",
@@ -233,6 +223,11 @@
         "type": "Transitive",
         "resolved": "5.0.10",
         "contentHash": "x70WuqMDuP75dajqSLvO+AnI/BbwS6da+ukTO7rueV7VoXoQ5CRA9FV4r7cOS4OUr2NS1Up7LDIutjCxQycRvg=="
+      },
+      "Microsoft.Extensions.DependencyInjection.Abstractions": {
+        "type": "Transitive",
+        "resolved": "5.0.0",
+        "contentHash": "ORj7Zh81gC69TyvmcUm9tSzytcy8AVousi+IVRAI8nLieQjOFryRusSFh7+aLk16FN9pQNqJAiMd7BTKINK0kA=="
       },
       "Microsoft.NETCore.Platforms": {
         "type": "Transitive",
@@ -324,17 +319,6 @@
         "resolved": "7.8.3",
         "contentHash": "hcI70/V+MsB4tNT/NdDz2spP5mlG5Xn+924htNBPY8aKwbMYiu42b1vOnQeKRYwsvRfYIiBki1j3kUOE8YzE6A=="
       },
-      "ReactiveUI": {
-        "type": "Transitive",
-        "resolved": "12.1.1",
-        "contentHash": "em3AreHYvqV6gMpFgzOM5oEBeBepX5Loogs4Tui9tPT4KXaQtwSNV2PQngnzvCBS/WrVGNgL9haqkwKMThw3TA==",
-        "dependencies": {
-          "DynamicData": "6.17.14",
-          "Splat": "9.6.1",
-          "System.Reactive": "4.4.1",
-          "System.Runtime.Serialization.Primitives": "4.3.0"
-        }
-      },
       "SkiaSharp": {
         "type": "Transitive",
         "resolved": "2.80.2",
@@ -350,11 +334,6 @@
         "dependencies": {
           "SkiaSharp": "2.80.2"
         }
-      },
-      "Splat": {
-        "type": "Transitive",
-        "resolved": "9.6.1",
-        "contentHash": "DnPE1EGikkEobogmWX2Wsqtwnefw8i7lsh2rvRrZu7OCapB3gd7cDcdk9zztGVZGCAfl75A61qHt1QrIOOH3Ow=="
       },
       "Sprache": {
         "type": "Transitive",
@@ -530,15 +509,6 @@
         "dependencies": {
           "Microsoft.NETCore.Platforms": "1.1.0",
           "Microsoft.NETCore.Targets": "1.1.0",
-          "System.Runtime": "4.3.0"
-        }
-      },
-      "System.Runtime.Serialization.Primitives": {
-        "type": "Transitive",
-        "resolved": "4.3.0",
-        "contentHash": "Wz+0KOukJGAlXjtKr+5Xpuxf8+c8739RI1C+A2BoQZT+wMCCoMDDdO8/4IRHfaVINqL78GO8dW8G2lW/e45Mcw==",
-        "dependencies": {
-          "System.Resources.ResourceManager": "4.3.0",
           "System.Runtime": "4.3.0"
         }
       },
