@@ -1195,24 +1195,24 @@ namespace Omnius.Xeus.Api
 
         public static readonly int MaxRegistrantLength = 2147483647;
 
-        public ContentPublisher_UnpublishContent_Memory_Input(global::Omnius.Core.Cryptography.OmniHash contentHash, string registrant)
+        public ContentPublisher_UnpublishContent_Memory_Input(global::Omnius.Core.Cryptography.OmniHash rootHash, string registrant)
         {
             if (registrant is null) throw new global::System.ArgumentNullException("registrant");
             if (registrant.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("registrant");
 
-            this.ContentHash = contentHash;
+            this.RootHash = rootHash;
             this.Registrant = registrant;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (contentHash != default) ___h.Add(contentHash.GetHashCode());
+                if (rootHash != default) ___h.Add(rootHash.GetHashCode());
                 if (registrant != default) ___h.Add(registrant.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public global::Omnius.Core.Cryptography.OmniHash ContentHash { get; }
+        public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
         public string Registrant { get; }
 
         public static global::Omnius.Xeus.Api.ContentPublisher_UnpublishContent_Memory_Input Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -1243,7 +1243,7 @@ namespace Omnius.Xeus.Api
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.ContentHash != target.ContentHash) return false;
+            if (this.RootHash != target.RootHash) return false;
             if (this.Registrant != target.Registrant) return false;
 
             return true;
@@ -1256,10 +1256,10 @@ namespace Omnius.Xeus.Api
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.ContentHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
+                if (value.RootHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
                 {
                     w.Write((uint)1);
-                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.ContentHash, rank + 1);
+                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.RootHash, rank + 1);
                 }
                 if (value.Registrant != string.Empty)
                 {
@@ -1272,7 +1272,7 @@ namespace Omnius.Xeus.Api
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                global::Omnius.Core.Cryptography.OmniHash p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
+                global::Omnius.Core.Cryptography.OmniHash p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
                 string p_registrant = string.Empty;
 
                 for (; ; )
@@ -1283,7 +1283,7 @@ namespace Omnius.Xeus.Api
                     {
                         case 1:
                             {
-                                p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 2:
@@ -1294,7 +1294,7 @@ namespace Omnius.Xeus.Api
                     }
                 }
 
-                return new global::Omnius.Xeus.Api.ContentPublisher_UnpublishContent_Memory_Input(p_contentHash, p_registrant);
+                return new global::Omnius.Xeus.Api.ContentPublisher_UnpublishContent_Memory_Input(p_rootHash, p_registrant);
             }
         }
     }
@@ -1413,24 +1413,24 @@ namespace Omnius.Xeus.Api
 
         public static readonly int MaxRegistrantLength = 2147483647;
 
-        public ContentSubscriber_SubscribeContent_Input(global::Omnius.Core.Cryptography.OmniHash contentHash, string registrant)
+        public ContentSubscriber_SubscribeContent_Input(global::Omnius.Core.Cryptography.OmniHash rootHash, string registrant)
         {
             if (registrant is null) throw new global::System.ArgumentNullException("registrant");
             if (registrant.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("registrant");
 
-            this.ContentHash = contentHash;
+            this.RootHash = rootHash;
             this.Registrant = registrant;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (contentHash != default) ___h.Add(contentHash.GetHashCode());
+                if (rootHash != default) ___h.Add(rootHash.GetHashCode());
                 if (registrant != default) ___h.Add(registrant.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public global::Omnius.Core.Cryptography.OmniHash ContentHash { get; }
+        public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
         public string Registrant { get; }
 
         public static global::Omnius.Xeus.Api.ContentSubscriber_SubscribeContent_Input Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -1461,7 +1461,7 @@ namespace Omnius.Xeus.Api
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.ContentHash != target.ContentHash) return false;
+            if (this.RootHash != target.RootHash) return false;
             if (this.Registrant != target.Registrant) return false;
 
             return true;
@@ -1474,10 +1474,10 @@ namespace Omnius.Xeus.Api
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.ContentHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
+                if (value.RootHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
                 {
                     w.Write((uint)1);
-                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.ContentHash, rank + 1);
+                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.RootHash, rank + 1);
                 }
                 if (value.Registrant != string.Empty)
                 {
@@ -1490,7 +1490,7 @@ namespace Omnius.Xeus.Api
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                global::Omnius.Core.Cryptography.OmniHash p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
+                global::Omnius.Core.Cryptography.OmniHash p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
                 string p_registrant = string.Empty;
 
                 for (; ; )
@@ -1501,7 +1501,7 @@ namespace Omnius.Xeus.Api
                     {
                         case 1:
                             {
-                                p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 2:
@@ -1512,7 +1512,7 @@ namespace Omnius.Xeus.Api
                     }
                 }
 
-                return new global::Omnius.Xeus.Api.ContentSubscriber_SubscribeContent_Input(p_contentHash, p_registrant);
+                return new global::Omnius.Xeus.Api.ContentSubscriber_SubscribeContent_Input(p_rootHash, p_registrant);
             }
         }
     }
@@ -1531,24 +1531,24 @@ namespace Omnius.Xeus.Api
 
         public static readonly int MaxRegistrantLength = 2147483647;
 
-        public ContentSubscriber_UnsubscribeContent_Input(global::Omnius.Core.Cryptography.OmniHash contentHash, string registrant)
+        public ContentSubscriber_UnsubscribeContent_Input(global::Omnius.Core.Cryptography.OmniHash rootHash, string registrant)
         {
             if (registrant is null) throw new global::System.ArgumentNullException("registrant");
             if (registrant.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("registrant");
 
-            this.ContentHash = contentHash;
+            this.RootHash = rootHash;
             this.Registrant = registrant;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (contentHash != default) ___h.Add(contentHash.GetHashCode());
+                if (rootHash != default) ___h.Add(rootHash.GetHashCode());
                 if (registrant != default) ___h.Add(registrant.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public global::Omnius.Core.Cryptography.OmniHash ContentHash { get; }
+        public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
         public string Registrant { get; }
 
         public static global::Omnius.Xeus.Api.ContentSubscriber_UnsubscribeContent_Input Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -1579,7 +1579,7 @@ namespace Omnius.Xeus.Api
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.ContentHash != target.ContentHash) return false;
+            if (this.RootHash != target.RootHash) return false;
             if (this.Registrant != target.Registrant) return false;
 
             return true;
@@ -1592,10 +1592,10 @@ namespace Omnius.Xeus.Api
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.ContentHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
+                if (value.RootHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
                 {
                     w.Write((uint)1);
-                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.ContentHash, rank + 1);
+                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.RootHash, rank + 1);
                 }
                 if (value.Registrant != string.Empty)
                 {
@@ -1608,7 +1608,7 @@ namespace Omnius.Xeus.Api
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                global::Omnius.Core.Cryptography.OmniHash p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
+                global::Omnius.Core.Cryptography.OmniHash p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
                 string p_registrant = string.Empty;
 
                 for (; ; )
@@ -1619,7 +1619,7 @@ namespace Omnius.Xeus.Api
                     {
                         case 1:
                             {
-                                p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 2:
@@ -1630,7 +1630,7 @@ namespace Omnius.Xeus.Api
                     }
                 }
 
-                return new global::Omnius.Xeus.Api.ContentSubscriber_UnsubscribeContent_Input(p_contentHash, p_registrant);
+                return new global::Omnius.Xeus.Api.ContentSubscriber_UnsubscribeContent_Input(p_rootHash, p_registrant);
             }
         }
     }
@@ -1649,24 +1649,24 @@ namespace Omnius.Xeus.Api
 
         public static readonly int MaxFilePathLength = 2147483647;
 
-        public ContentSubscriber_ExportContent_File_Input(global::Omnius.Core.Cryptography.OmniHash contentHash, string filePath)
+        public ContentSubscriber_ExportContent_File_Input(global::Omnius.Core.Cryptography.OmniHash rootHash, string filePath)
         {
             if (filePath is null) throw new global::System.ArgumentNullException("filePath");
             if (filePath.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("filePath");
 
-            this.ContentHash = contentHash;
+            this.RootHash = rootHash;
             this.FilePath = filePath;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (contentHash != default) ___h.Add(contentHash.GetHashCode());
+                if (rootHash != default) ___h.Add(rootHash.GetHashCode());
                 if (filePath != default) ___h.Add(filePath.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public global::Omnius.Core.Cryptography.OmniHash ContentHash { get; }
+        public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
         public string FilePath { get; }
 
         public static global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_File_Input Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -1697,7 +1697,7 @@ namespace Omnius.Xeus.Api
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.ContentHash != target.ContentHash) return false;
+            if (this.RootHash != target.RootHash) return false;
             if (this.FilePath != target.FilePath) return false;
 
             return true;
@@ -1710,10 +1710,10 @@ namespace Omnius.Xeus.Api
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.ContentHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
+                if (value.RootHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
                 {
                     w.Write((uint)1);
-                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.ContentHash, rank + 1);
+                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.RootHash, rank + 1);
                 }
                 if (value.FilePath != string.Empty)
                 {
@@ -1726,7 +1726,7 @@ namespace Omnius.Xeus.Api
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                global::Omnius.Core.Cryptography.OmniHash p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
+                global::Omnius.Core.Cryptography.OmniHash p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
                 string p_filePath = string.Empty;
 
                 for (; ; )
@@ -1737,7 +1737,7 @@ namespace Omnius.Xeus.Api
                     {
                         case 1:
                             {
-                                p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 2:
@@ -1748,7 +1748,7 @@ namespace Omnius.Xeus.Api
                     }
                 }
 
-                return new global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_File_Input(p_contentHash, p_filePath);
+                return new global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_File_Input(p_rootHash, p_filePath);
             }
         }
     }
@@ -1765,19 +1765,19 @@ namespace Omnius.Xeus.Api
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public ContentSubscriber_ExportContent_Memory_Input(global::Omnius.Core.Cryptography.OmniHash contentHash)
+        public ContentSubscriber_ExportContent_Memory_Input(global::Omnius.Core.Cryptography.OmniHash rootHash)
         {
-            this.ContentHash = contentHash;
+            this.RootHash = rootHash;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (contentHash != default) ___h.Add(contentHash.GetHashCode());
+                if (rootHash != default) ___h.Add(rootHash.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public global::Omnius.Core.Cryptography.OmniHash ContentHash { get; }
+        public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
 
         public static global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Input Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -1807,7 +1807,7 @@ namespace Omnius.Xeus.Api
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.ContentHash != target.ContentHash) return false;
+            if (this.RootHash != target.RootHash) return false;
 
             return true;
         }
@@ -1819,10 +1819,10 @@ namespace Omnius.Xeus.Api
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.ContentHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
+                if (value.RootHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
                 {
                     w.Write((uint)1);
-                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.ContentHash, rank + 1);
+                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.RootHash, rank + 1);
                 }
                 w.Write((uint)0);
             }
@@ -1830,7 +1830,7 @@ namespace Omnius.Xeus.Api
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                global::Omnius.Core.Cryptography.OmniHash p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
+                global::Omnius.Core.Cryptography.OmniHash p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
 
                 for (; ; )
                 {
@@ -1840,13 +1840,13 @@ namespace Omnius.Xeus.Api
                     {
                         case 1:
                             {
-                                p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
                 }
 
-                return new global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Input(p_contentHash);
+                return new global::Omnius.Xeus.Api.ContentSubscriber_ExportContent_Memory_Input(p_rootHash);
             }
         }
     }
@@ -2863,14 +2863,14 @@ namespace Omnius.Xeus.Api
     {
         public class Client : global::Omnius.Core.AsyncDisposableBase, global::Omnius.Xeus.Api.IXeusService
         {
-            private readonly global::Omnius.Core.Network.Connections.IConnection _connection;
+            private readonly global::Omnius.Core.Net.Connections.IConnection _connection;
             private readonly global::Omnius.Core.IBytesPool _bytesPool;
-            private readonly global::Omnius.Core.RocketPack.Remoting.IRocketPackRemoting _remoting;
-            public Client(global::Omnius.Core.Network.Connections.IConnection connection, global::Omnius.Core.IBytesPool bytesPool)
+            private readonly global::Omnius.Core.Remoting.IRemoting _remoting;
+            public Client(global::Omnius.Core.Net.Connections.IConnection connection, global::Omnius.Core.IBytesPool bytesPool)
             {
                 _connection = connection;
                 _bytesPool = bytesPool;
-                _remoting = global::Omnius.Core.RocketPack.Remoting.RocketPackRemoting.Factory.Create(_connection, global::Omnius.Core.RocketPack.Remoting.RocketPackRemotingMessenger.Factory, global::Omnius.Core.RocketPack.Remoting.RocketPackRemotingFunction.Factory, _bytesPool);
+                _remoting = global::Omnius.Core.Remoting.Remoting.Factory.Create(_connection, global::Omnius.Core.Remoting.RemotingMessenger.Factory, global::Omnius.Core.Remoting.RemotingFunction.Factory, _bytesPool);
             }
             protected override async global::System.Threading.Tasks.ValueTask OnDisposeAsync()
             {
@@ -2990,15 +2990,15 @@ namespace Omnius.Xeus.Api
         public class Server : global::Omnius.Core.AsyncDisposableBase
         {
             private readonly global::Omnius.Xeus.Api.IXeusService _service;
-            private readonly global::Omnius.Core.Network.Connections.IConnection _connection;
+            private readonly global::Omnius.Core.Net.Connections.IConnection _connection;
             private readonly global::Omnius.Core.IBytesPool _bytesPool;
-            private readonly global::Omnius.Core.RocketPack.Remoting.IRocketPackRemoting _remoting;
-            public Server(global::Omnius.Xeus.Api.IXeusService service, global::Omnius.Core.Network.Connections.IConnection connection, global::Omnius.Core.IBytesPool bytesPool)
+            private readonly global::Omnius.Core.Remoting.IRemoting _remoting;
+            public Server(global::Omnius.Xeus.Api.IXeusService service, global::Omnius.Core.Net.Connections.IConnection connection, global::Omnius.Core.IBytesPool bytesPool)
             {
                 _service = service;
                 _connection = connection;
                 _bytesPool = bytesPool;
-                _remoting = global::Omnius.Core.RocketPack.Remoting.RocketPackRemoting.Factory.Create(_connection, global::Omnius.Core.RocketPack.Remoting.RocketPackRemotingMessenger.Factory, global::Omnius.Core.RocketPack.Remoting.RocketPackRemotingFunction.Factory, _bytesPool);
+                _remoting = global::Omnius.Core.Remoting.Remoting.Factory.Create(_connection, global::Omnius.Core.Remoting.RemotingMessenger.Factory, global::Omnius.Core.Remoting.RemotingFunction.Factory, _bytesPool);
             }
             protected override async global::System.Threading.Tasks.ValueTask OnDisposeAsync()
             {

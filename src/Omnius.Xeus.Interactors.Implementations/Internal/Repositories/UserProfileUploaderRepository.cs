@@ -60,7 +60,7 @@ namespace Omnius.Xeus.Interactors.Internal.Repositories
                     {
                         var col = this.GetCollection();
                         col.EnsureIndex(x => x.Signature, false);
-                        col.EnsureIndex(x => x.ContentHash, false);
+                        col.EnsureIndex(x => x.RootHash, false);
                     }
 
                     _database.SetDocumentVersion(CollectionName, 1);
@@ -84,14 +84,14 @@ namespace Omnius.Xeus.Interactors.Internal.Repositories
                 }
             }
 
-            public bool Exists(OmniHash contentHash)
+            public bool Exists(OmniHash rootHash)
             {
                 using (_asyncLock.ReaderLock())
                 {
-                    var contentHashEntity = OmniHashEntity.Import(contentHash);
+                    var rootHashEntity = OmniHashEntity.Import(rootHash);
 
                     var col = this.GetCollection();
-                    return col.Exists(n => n.ContentHash == contentHashEntity);
+                    return col.Exists(n => n.RootHash == rootHashEntity);
                 }
             }
 
@@ -123,7 +123,7 @@ namespace Omnius.Xeus.Interactors.Internal.Repositories
 
                     var col = this.GetCollection();
 
-                    col.DeleteMany(n => n.Signature == itemEntity.Signature && n.ContentHash == itemEntity.ContentHash);
+                    col.DeleteMany(n => n.Signature == itemEntity.Signature && n.RootHash == itemEntity.RootHash);
                     col.Insert(itemEntity);
                 }
             }
@@ -139,14 +139,14 @@ namespace Omnius.Xeus.Interactors.Internal.Repositories
                 }
             }
 
-            public void Delete(OmniHash contentHash)
+            public void Delete(OmniHash rootHash)
             {
                 using (_asyncLock.WriterLock())
                 {
-                    var contentHashEntity = OmniHashEntity.Import(contentHash);
+                    var rootHashEntity = OmniHashEntity.Import(rootHash);
 
                     var col = this.GetCollection();
-                    col.DeleteMany(n => n.ContentHash == contentHashEntity);
+                    col.DeleteMany(n => n.RootHash == rootHashEntity);
                 }
             }
         }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
-using Omnius.Core.Network;
+using Omnius.Core.Net;
 using Omnius.Xeus.Api;
 using Omnius.Xeus.Interactors.Models;
 using EnginesModels = Omnius.Xeus.Engines.Models;

@@ -42,7 +42,7 @@
 
     <StackPanel Orientation="Vertical" Margin="16">
         <StackPanel Orientation="Horizontal">
-            <Label Classes="title" Content="My node address" />
+            <Label Classes="title" Content="My node profile" />
             <TextBox Classes="value" />
             <Button Classes="action" Content="Copy"/>
         </StackPanel>

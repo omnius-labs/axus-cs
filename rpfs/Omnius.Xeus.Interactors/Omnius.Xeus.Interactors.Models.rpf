@@ -1,30 +1,36 @@
 syntax v1.0;
 
 using "Omnius.Core.Cryptography";
-using "Omnius.Core.Network";
+using "Omnius.Core.Net";
 using "Omnius.Xeus.Engines.Models";
 
 namespace "Omnius.Xeus.Interactors.Models";
 
 // Common
 
-message XeusFileMeta {
-    ContentHash: OmniHash,
-    Name: string(capacity: 256),
-    Size: uint64,
-    Tags: vector<string(capacity: 256)>(capacity: 8),
-}
-
-message XeusUserProfile {
+message UserProfile {
     Signature: OmniSignature,
     CreationTime: timestamp,
-    Content: XeusUserProfileContent,
+    Content: UserProfileContent,
 }
 
-message XeusUserProfileContent {
+message UserProfileContent {
     TrustedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
     BlockedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
-    FileMetas: vector<XeusFileMeta>(capacity: 32 * 1024 * 1024),
+    Boxes: vector<Box>(capacity: 32 * 1024 * 1024),
+}
+
+message Box {
+    Name: string?(capacity: 256),
+    Tags: vector<string(capacity: 256)>(capacity: 8),
+    Seeds: vector<Seed>(capacity: 32 * 1024 * 1024),
+    Boxes: vector<Box>(capacity: 32 * 1024 * 1024),
+}
+
+message Seed {
+    RootHash: OmniHash,
+    Name: string(capacity: 256),
+    Size: uint64,
 }
 
 // Dashboard
@@ -48,7 +54,7 @@ message FileDownloaderOptions {
 }
 
 message DownloadingFileReport {
-    FileMeta: XeusFileMeta,
+    Seed: Seed,
     TargetDirectoryPath: string(capacity: 1024),
     CreationTime: timestamp,
 }

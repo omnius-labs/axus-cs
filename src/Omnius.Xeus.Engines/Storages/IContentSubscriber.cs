@@ -19,12 +19,12 @@ namespace Omnius.Xeus.Engines.Storages
     {
         ValueTask<ContentSubscriberReport> GetReportAsync(CancellationToken cancellationToken = default);
 
-        ValueTask SubscribeContentAsync(OmniHash contentHash, string registrant, CancellationToken cancellationToken = default);
+        ValueTask SubscribeContentAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default);
 
-        ValueTask UnsubscribeContentAsync(OmniHash contentHash, string registrant, CancellationToken cancellationToken = default);
+        ValueTask UnsubscribeContentAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default);
 
-        ValueTask<bool> ExportContentAsync(OmniHash contentHash, string filePath, CancellationToken cancellationToken = default);
+        ValueTask<bool> ExportContentAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default);
 
-        ValueTask<bool> ExportContentAsync(OmniHash contentHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default);
+        ValueTask<bool> ExportContentAsync(OmniHash rootHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default);
     }
 }

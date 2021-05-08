@@ -7,8 +7,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Omnius.Xeus.Engines.Implementations\Omnius.Xeus.Engines.Implementations.csproj" />
     <ProjectReference Include="..\..\src\Omnius.Xeus.Engines\Omnius.Xeus.Engines.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Network.Proxies\Omnius.Core.Network.Proxies.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Network.Upnp\Omnius.Core.Network.Upnp.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Net.Proxies\Omnius.Core.Net.Proxies.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Net.Upnp\Omnius.Core.Net.Upnp.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.UnitTestToolkit\Omnius.Core.UnitTestToolkit.csproj" />
   </ItemGroup>
 

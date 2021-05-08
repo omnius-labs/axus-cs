@@ -62,7 +62,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
                     if (_database.GetDocumentVersion(CollectionName) <= 0)
                     {
                         var col = this.GetCollection();
-                        col.EnsureIndex(x => x.ContentHash, false);
+                        col.EnsureIndex(x => x.RootHash, false);
                     }
 
                     _database.SetDocumentVersion(CollectionName, 1);
@@ -75,14 +75,14 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
                 return col;
             }
 
-            public bool Exists(OmniHash contentHash)
+            public bool Exists(OmniHash rootHash)
             {
                 using (_asyncLock.ReaderLock())
                 {
-                    var contentHashEntity = OmniHashEntity.Import(contentHash);
+                    var rootHashEntity = OmniHashEntity.Import(rootHash);
 
                     var col = this.GetCollection();
-                    return col.Exists(n => n.ContentHash == contentHashEntity);
+                    return col.Exists(n => n.RootHash == rootHashEntity);
                 }
             }
 
@@ -95,25 +95,25 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
                 }
             }
 
-            public IEnumerable<SubscribedContentItem> Find(OmniHash contentHash)
+            public IEnumerable<SubscribedContentItem> Find(OmniHash rootHash)
             {
                 using (_asyncLock.ReaderLock())
                 {
-                    var contentHashEntity = OmniHashEntity.Import(contentHash);
+                    var rootHashEntity = OmniHashEntity.Import(rootHash);
 
                     var col = this.GetCollection();
-                    return col.Find(n => n.ContentHash == contentHashEntity).Select(n => n.Export());
+                    return col.Find(n => n.RootHash == rootHashEntity).Select(n => n.Export());
                 }
             }
 
-            public SubscribedContentItem? FindOne(OmniHash contentHash, string registrant)
+            public SubscribedContentItem? FindOne(OmniHash rootHash, string registrant)
             {
                 using (_asyncLock.ReaderLock())
                 {
-                    var contentHashEntity = OmniHashEntity.Import(contentHash);
+                    var rootHashEntity = OmniHashEntity.Import(rootHash);
 
                     var col = this.GetCollection();
-                    return col.FindOne(n => n.ContentHash == contentHashEntity && n.Registrant == registrant)?.Export();
+                    return col.FindOne(n => n.RootHash == rootHashEntity && n.Registrant == registrant)?.Export();
                 }
             }
 
@@ -125,20 +125,20 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
 
                     var col = this.GetCollection();
 
-                    if (col.Exists(n => n.ContentHash == itemEntity.ContentHash && n.Registrant == itemEntity.Registrant)) return;
+                    if (col.Exists(n => n.RootHash == itemEntity.RootHash && n.Registrant == itemEntity.Registrant)) return;
 
                     col.Insert(itemEntity);
                 }
             }
 
-            public void Delete(OmniHash contentHash, string registrant)
+            public void Delete(OmniHash rootHash, string registrant)
             {
                 using (_asyncLock.WriterLock())
                 {
-                    var contentHashEntity = OmniHashEntity.Import(contentHash);
+                    var rootHashEntity = OmniHashEntity.Import(rootHash);
 
                     var col = this.GetCollection();
-                    col.DeleteMany(n => n.ContentHash == contentHashEntity && n.Registrant == registrant);
+                    col.DeleteMany(n => n.RootHash == rootHashEntity && n.Registrant == registrant);
                 }
             }
         }
@@ -163,7 +163,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
                     if (_database.GetDocumentVersion(CollectionName) <= 0)
                     {
                         var col = this.GetCollection();
-                        col.EnsureIndex(x => x.ContentHash, true);
+                        col.EnsureIndex(x => x.RootHash, true);
                     }
 
                     _database.SetDocumentVersion(CollectionName, 1);
@@ -176,14 +176,14 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
                 return col;
             }
 
-            public bool Exists(OmniHash contentHash)
+            public bool Exists(OmniHash rootHash)
             {
                 using (_asyncLock.ReaderLock())
                 {
-                    var contentHashEntity = OmniHashEntity.Import(contentHash);
+                    var rootHashEntity = OmniHashEntity.Import(rootHash);
 
                     var col = this.GetCollection();
-                    return col.Exists(n => n.ContentHash == contentHashEntity);
+                    return col.Exists(n => n.RootHash == rootHashEntity);
                 }
             }
 
@@ -196,14 +196,14 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
                 }
             }
 
-            public DecodedContentItem? FindOne(OmniHash contentHash)
+            public DecodedContentItem? FindOne(OmniHash rootHash)
             {
                 using (_asyncLock.ReaderLock())
                 {
-                    var contentHashEntity = OmniHashEntity.Import(contentHash);
+                    var rootHashEntity = OmniHashEntity.Import(rootHash);
 
                     var col = this.GetCollection();
-                    return col.FindOne(n => n.ContentHash == contentHashEntity)?.Export();
+                    return col.FindOne(n => n.RootHash == rootHashEntity)?.Export();
                 }
             }
 
@@ -215,20 +215,20 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
 
                     var col = this.GetCollection();
 
-                    if (col.Exists(n => n.ContentHash == itemEntity.ContentHash)) return;
+                    if (col.Exists(n => n.RootHash == itemEntity.RootHash)) return;
 
                     col.Insert(itemEntity);
                 }
             }
 
-            public void Delete(OmniHash contentHash)
+            public void Delete(OmniHash rootHash)
             {
                 using (_asyncLock.WriterLock())
                 {
-                    var contentHashEntity = OmniHashEntity.Import(contentHash);
+                    var rootHashEntity = OmniHashEntity.Import(rootHash);
 
                     var col = this.GetCollection();
-                    col.DeleteMany(n => n.ContentHash == contentHashEntity);
+                    col.DeleteMany(n => n.RootHash == rootHashEntity);
                 }
             }
         }

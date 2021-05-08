@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Omnius.Core.Network;
-using Omnius.Core.Network.Connections;
+using Omnius.Core.Net;
+using Omnius.Core.Net.Connections;
 
 namespace Omnius.Xeus.Engines.Connectors.Primitives
 {

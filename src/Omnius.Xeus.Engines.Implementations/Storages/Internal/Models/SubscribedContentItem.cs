@@ -4,13 +4,13 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Models
 {
     internal record SubscribedContentItem
     {
-        public SubscribedContentItem(OmniHash contentHash, string registrant)
+        public SubscribedContentItem(OmniHash rootHash, string registrant)
         {
-            this.ContentHash = contentHash;
+            this.RootHash = rootHash;
             this.Registrant = registrant;
         }
 
-        public OmniHash ContentHash { get; }
+        public OmniHash RootHash { get; }
 
         public string Registrant { get; }
     }

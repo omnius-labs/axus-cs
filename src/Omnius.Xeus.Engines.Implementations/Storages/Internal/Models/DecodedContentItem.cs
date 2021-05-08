@@ -5,13 +5,13 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Models
 {
     internal record DecodedContentItem
     {
-        public DecodedContentItem(OmniHash contentHash, MerkleTreeSection[] merkleTreeSections)
+        public DecodedContentItem(OmniHash rootHash, MerkleTreeSection[] merkleTreeSections)
         {
-            this.ContentHash = contentHash;
+            this.RootHash = rootHash;
             this.MerkleTreeSections = new ReadOnlyListSlim<MerkleTreeSection>(merkleTreeSections);
         }
 
-        public OmniHash ContentHash { get; }
+        public OmniHash RootHash { get; }
 
         public ReadOnlyListSlim<MerkleTreeSection> MerkleTreeSections { get; }
     }

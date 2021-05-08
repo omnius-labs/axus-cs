@@ -10,8 +10,8 @@ using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Cryptography.Functions;
 using Omnius.Core.Extensions;
-using Omnius.Core.Io;
 using Omnius.Core.Storages;
+using Omnius.Core.Streams;
 using Omnius.Xeus.Engines.Models;
 using Omnius.Xeus.Engines.Storages.Internal;
 using Omnius.Xeus.Engines.Storages.Internal.Models;
@@ -77,7 +77,7 @@ namespace Omnius.Xeus.Engines.Storages
 
                 foreach (var item in _publisherRepo.Items.FindAll())
                 {
-                    itemReports.Add(new ContentPublishedItemReport(item.FilePath, item.ContentHash, item.Registrant));
+                    itemReports.Add(new ContentPublishedItemReport(item.FilePath, item.RootHash, item.Registrant));
                 }
 
                 return new ContentPublisherReport(itemReports.ToArray());
@@ -88,7 +88,7 @@ namespace Omnius.Xeus.Engines.Storages
         {
         }
 
-        public async ValueTask<IEnumerable<OmniHash>> GetContentHashesAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<IEnumerable<OmniHash>> GetRootHashesAsync(CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
@@ -96,44 +96,44 @@ namespace Omnius.Xeus.Engines.Storages
 
                 foreach (var item in _publisherRepo.Items.FindAll())
                 {
-                    results.Add(item.ContentHash);
+                    results.Add(item.RootHash);
                 }
 
                 return results;
             }
         }
 
-        public async ValueTask<IEnumerable<OmniHash>> GetBlockHashesAsync(OmniHash contentHash, bool? exists = null, CancellationToken cancellationToken = default)
+        public async ValueTask<IEnumerable<OmniHash>> GetBlockHashesAsync(OmniHash rootHash, bool? exists = null, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
                 if (exists.HasValue && !exists.Value) return Enumerable.Empty<OmniHash>();
 
-                var item = _publisherRepo.Items.Find(contentHash).FirstOrDefault();
+                var item = _publisherRepo.Items.Find(rootHash).FirstOrDefault();
                 if (item is null) return Enumerable.Empty<OmniHash>();
 
                 return item.MerkleTreeSections.SelectMany(n => n.Hashes);
             }
         }
 
-        public async ValueTask<bool> ContainsContentAsync(OmniHash contentHash, CancellationToken cancellationToken = default)
+        public async ValueTask<bool> ContainsContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                if (!_publisherRepo.Items.Exists(contentHash)) return false;
+                if (!_publisherRepo.Items.Exists(rootHash)) return false;
 
                 return true;
             }
         }
 
-        public async ValueTask<bool> ContainsBlockAsync(OmniHash contentHash, OmniHash blockHash, CancellationToken cancellationToken = default)
+        public async ValueTask<bool> ContainsBlockAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                var item = _publisherRepo.Items.Find(contentHash).FirstOrDefault();
+                var item = _publisherRepo.Items.Find(rootHash).FirstOrDefault();
                 if (item is null) return false;
 
-                return item.MerkleTreeSections.Any(n => n.Contains(contentHash));
+                return item.MerkleTreeSections.Any(n => n.Contains(rootHash));
             }
         }
 
@@ -142,28 +142,28 @@ namespace Omnius.Xeus.Engines.Storages
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
                 var item = _publisherRepo.Items.FindOne(filePath, registrant);
-                if (item is not null) return item.ContentHash;
+                if (item is not null) return item.RootHash;
             }
 
             {
                 var tempPrefix = "_temp_" + this.GenUniqueId();
 
                 var lastMerkleTreeSection = await this.EncodeFileAsync(filePath, cancellationToken);
-                var (contentHash, middleMerkleTreeSections) = await this.EncodeMerkleTreeSectionsAsync(lastMerkleTreeSection, tempPrefix, cancellationToken);
+                var (rootHash, middleMerkleTreeSections) = await this.EncodeMerkleTreeSectionsAsync(lastMerkleTreeSection, tempPrefix, cancellationToken);
 
                 var mergedMerkleTreeSections = middleMerkleTreeSections.Append(lastMerkleTreeSection).ToArray();
-                var item = new PublishedContentItem(contentHash, filePath, registrant, mergedMerkleTreeSections);
+                var item = new PublishedContentItem(rootHash, filePath, registrant, mergedMerkleTreeSections);
 
                 using (await _asyncLock.WriterLockAsync(cancellationToken))
                 {
                     // FIXME
                     // 途中で処理が中断された場合に残骸となったブロックを除去する処理が必要
-                    await this.RenameBlocksAsync(tempPrefix, StringConverter.HashToString(contentHash), middleMerkleTreeSections.SelectMany(n => n.Hashes), cancellationToken);
+                    await this.RenameBlocksAsync(tempPrefix, StringConverter.HashToString(rootHash), middleMerkleTreeSections.SelectMany(n => n.Hashes), cancellationToken);
 
                     _publisherRepo.Items.Upsert(item);
                 }
 
-                return contentHash;
+                return rootHash;
             }
         }
 
@@ -172,21 +172,21 @@ namespace Omnius.Xeus.Engines.Storages
             var tempPrefix = "_temp_" + this.GenUniqueId();
 
             var lastMerkleTreeSection = await this.EncodeMemoryAsync(sequence, tempPrefix, cancellationToken);
-            var (contentHash, middleMerkleTreeSections) = await this.EncodeMerkleTreeSectionsAsync(lastMerkleTreeSection, tempPrefix, cancellationToken);
+            var (rootHash, middleMerkleTreeSections) = await this.EncodeMerkleTreeSectionsAsync(lastMerkleTreeSection, tempPrefix, cancellationToken);
 
             var mergedMerkleTreeSections = middleMerkleTreeSections.Append(lastMerkleTreeSection).ToArray();
-            var item = new PublishedContentItem(contentHash, null, registrant, mergedMerkleTreeSections);
+            var item = new PublishedContentItem(rootHash, null, registrant, mergedMerkleTreeSections);
 
             using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
                 // FIXME
                 // 途中で処理が中断された場合に残骸となったブロックを除去する処理が必要
-                await this.RenameBlocksAsync(tempPrefix, StringConverter.HashToString(contentHash), mergedMerkleTreeSections.SelectMany(n => n.Hashes), cancellationToken);
+                await this.RenameBlocksAsync(tempPrefix, StringConverter.HashToString(rootHash), mergedMerkleTreeSections.SelectMany(n => n.Hashes), cancellationToken);
 
                 _publisherRepo.Items.Upsert(item);
             }
 
-            return contentHash;
+            return rootHash;
         }
 
         private async ValueTask RenameBlocksAsync(string oldPrefix, string newPrefix, IEnumerable<OmniHash> blockHashes, CancellationToken cancellationToken = default)
@@ -302,11 +302,11 @@ namespace Omnius.Xeus.Engines.Storages
                     var memory = memoryOwner.Memory.Slice(0, (int)sequence.Length);
                     sequence.CopyTo(memory.Span);
 
-                    var contentHash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(memory.Span));
+                    var rootHash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(memory.Span));
 
-                    await this.WriteBlockAsync(blockNamePrefix, contentHash, memory);
+                    await this.WriteBlockAsync(blockNamePrefix, rootHash, memory);
 
-                    return (contentHash, resultMerkleTreeSections.ToArray());
+                    return (rootHash, resultMerkleTreeSections.ToArray());
                 }
             }
         }
@@ -326,41 +326,41 @@ namespace Omnius.Xeus.Engines.Storages
 
                 _publisherRepo.Items.Delete(filePath, registrant);
 
-                if (_publisherRepo.Items.Exists(item.ContentHash)) return;
+                if (_publisherRepo.Items.Exists(item.RootHash)) return;
 
-                await this.DeleteBlocksAsync(item.ContentHash, item.MerkleTreeSections.SelectMany(n => n.Hashes));
+                await this.DeleteBlocksAsync(item.RootHash, item.MerkleTreeSections.SelectMany(n => n.Hashes));
             }
         }
 
-        public async ValueTask UnpublishContentAsync(OmniHash contentHash, string registrant, CancellationToken cancellationToken = default)
+        public async ValueTask UnpublishContentAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
-                var item = _publisherRepo.Items.FindOne(contentHash, registrant);
+                var item = _publisherRepo.Items.FindOne(rootHash, registrant);
                 if (item == null) return;
 
-                _publisherRepo.Items.Delete(item.ContentHash, registrant);
+                _publisherRepo.Items.Delete(item.RootHash, registrant);
 
-                if (_publisherRepo.Items.Exists(item.ContentHash)) return;
+                if (_publisherRepo.Items.Exists(item.RootHash)) return;
 
-                await this.DeleteBlocksAsync(item.ContentHash, item.MerkleTreeSections.SelectMany(n => n.Hashes));
+                await this.DeleteBlocksAsync(item.RootHash, item.MerkleTreeSections.SelectMany(n => n.Hashes));
             }
         }
 
-        private async ValueTask DeleteBlocksAsync(OmniHash contentHash, IEnumerable<OmniHash> blockHashes)
+        private async ValueTask DeleteBlocksAsync(OmniHash rootHash, IEnumerable<OmniHash> blockHashes)
         {
             foreach (var blockHash in blockHashes)
             {
-                var blockName = ComputeBlockName(StringConverter.HashToString(contentHash), blockHash);
+                var blockName = ComputeBlockName(StringConverter.HashToString(rootHash), blockHash);
                 await _blockStorage.TryDeleteAsync(blockName);
             }
         }
 
-        public async ValueTask<IMemoryOwner<byte>?> ReadBlockAsync(OmniHash contentHash, OmniHash blockHash, CancellationToken cancellationToken = default)
+        public async ValueTask<IMemoryOwner<byte>?> ReadBlockAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                var item = _publisherRepo.Items.Find(contentHash).FirstOrDefault();
+                var item = _publisherRepo.Items.Find(rootHash).FirstOrDefault();
                 if (item is null || item.MerkleTreeSections.Any(n => !n.Contains(blockHash))) return null;
 
                 if (item.FilePath is not null)
@@ -382,7 +382,7 @@ namespace Omnius.Xeus.Engines.Storages
                     }
                 }
 
-                var blockName = ComputeBlockName(StringConverter.HashToString(contentHash), blockHash);
+                var blockName = ComputeBlockName(StringConverter.HashToString(rootHash), blockHash);
                 return await _blockStorage.TryReadAsync(blockName, cancellationToken);
             }
         }

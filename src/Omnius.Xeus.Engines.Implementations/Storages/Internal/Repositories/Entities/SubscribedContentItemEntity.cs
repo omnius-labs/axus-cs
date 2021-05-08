@@ -7,18 +7,18 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories.Entities
     {
         public int Id { get; set; }
 
-        public OmniHashEntity? ContentHash { get; set; }
+        public OmniHashEntity? RootHash { get; set; }
 
         public string? Registrant { get; set; }
 
         public static SubscribedContentItemEntity Import(SubscribedContentItem value)
         {
-            return new SubscribedContentItemEntity() { ContentHash = OmniHashEntity.Import(value.ContentHash), Registrant = value.Registrant };
+            return new SubscribedContentItemEntity() { RootHash = OmniHashEntity.Import(value.RootHash), Registrant = value.Registrant };
         }
 
         public SubscribedContentItem Export()
         {
-            return new SubscribedContentItem(this.ContentHash?.Export() ?? OmniHash.Empty, this.Registrant ?? string.Empty);
+            return new SubscribedContentItem(this.RootHash?.Export() ?? OmniHash.Empty, this.Registrant ?? string.Empty);
         }
     }
 }

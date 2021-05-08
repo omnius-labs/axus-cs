@@ -1,7 +1,7 @@
 syntax v1.0;
 
 using "Omnius.Core.Cryptography";
-using "Omnius.Core.Network";
+using "Omnius.Core.Net";
 using "Omnius.Xeus.Engines.Models";
 
 namespace "Omnius.Xeus.Engines.Storages.Internal.Models";

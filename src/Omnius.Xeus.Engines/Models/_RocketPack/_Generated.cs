@@ -23,7 +23,7 @@ namespace Omnius.Xeus.Engines.Models
         static NodeProfile()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.NodeProfile>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.NodeProfile>.Empty = new global::Omnius.Xeus.Engines.Models.NodeProfile(global::System.Array.Empty<global::Omnius.Core.Network.OmniAddress>(), global::System.Array.Empty<string>());
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.NodeProfile>.Empty = new global::Omnius.Xeus.Engines.Models.NodeProfile(global::System.Array.Empty<global::Omnius.Core.Net.OmniAddress>(), global::System.Array.Empty<string>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -31,7 +31,7 @@ namespace Omnius.Xeus.Engines.Models
         public static readonly int MaxAddressesCount = 32;
         public static readonly int MaxEngineNamesCount = 32;
 
-        public NodeProfile(global::Omnius.Core.Network.OmniAddress[] addresses, string[] engineNames)
+        public NodeProfile(global::Omnius.Core.Net.OmniAddress[] addresses, string[] engineNames)
         {
             if (addresses is null) throw new global::System.ArgumentNullException("addresses");
             if (addresses.Length > 32) throw new global::System.ArgumentOutOfRangeException("addresses");
@@ -47,7 +47,7 @@ namespace Omnius.Xeus.Engines.Models
                 if (n.Length > 256) throw new global::System.ArgumentOutOfRangeException("n");
             }
 
-            this.Addresses = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Network.OmniAddress>(addresses);
+            this.Addresses = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Net.OmniAddress>(addresses);
             this.EngineNames = new global::Omnius.Core.Collections.ReadOnlyListSlim<string>(engineNames);
 
             ___hashCode = new global::System.Lazy<int>(() =>
@@ -65,7 +65,7 @@ namespace Omnius.Xeus.Engines.Models
             });
         }
 
-        public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Network.OmniAddress> Addresses { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Net.OmniAddress> Addresses { get; }
         public global::Omnius.Core.Collections.ReadOnlyListSlim<string> EngineNames { get; }
 
         public static global::Omnius.Xeus.Engines.Models.NodeProfile Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -115,7 +115,7 @@ namespace Omnius.Xeus.Engines.Models
                     w.Write((uint)value.Addresses.Count);
                     foreach (var n in value.Addresses)
                     {
-                        global::Omnius.Core.Network.OmniAddress.Formatter.Serialize(ref w, n, rank + 1);
+                        global::Omnius.Core.Net.OmniAddress.Formatter.Serialize(ref w, n, rank + 1);
                     }
                 }
                 if (value.EngineNames.Count != 0)
@@ -133,7 +133,7 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                global::Omnius.Core.Network.OmniAddress[] p_addresses = global::System.Array.Empty<global::Omnius.Core.Network.OmniAddress>();
+                global::Omnius.Core.Net.OmniAddress[] p_addresses = global::System.Array.Empty<global::Omnius.Core.Net.OmniAddress>();
                 string[] p_engineNames = global::System.Array.Empty<string>();
 
                 for (; ; )
@@ -145,10 +145,10 @@ namespace Omnius.Xeus.Engines.Models
                         case 1:
                             {
                                 var length = r.GetUInt32();
-                                p_addresses = new global::Omnius.Core.Network.OmniAddress[length];
+                                p_addresses = new global::Omnius.Core.Net.OmniAddress[length];
                                 for (int i = 0; i < p_addresses.Length; i++)
                                 {
-                                    p_addresses[i] = global::Omnius.Core.Network.OmniAddress.Formatter.Deserialize(ref r, rank + 1);
+                                    p_addresses[i] = global::Omnius.Core.Net.OmniAddress.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
@@ -562,12 +562,12 @@ namespace Omnius.Xeus.Engines.Models
         static ConnectionReport()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.ConnectionReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.ConnectionReport>.Empty = new global::Omnius.Xeus.Engines.Models.ConnectionReport((global::Omnius.Xeus.Engines.Models.ConnectionHandshakeType)0, global::Omnius.Core.Network.OmniAddress.Empty);
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.ConnectionReport>.Empty = new global::Omnius.Xeus.Engines.Models.ConnectionReport((global::Omnius.Xeus.Engines.Models.ConnectionHandshakeType)0, global::Omnius.Core.Net.OmniAddress.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public ConnectionReport(global::Omnius.Xeus.Engines.Models.ConnectionHandshakeType handshakeType, global::Omnius.Core.Network.OmniAddress address)
+        public ConnectionReport(global::Omnius.Xeus.Engines.Models.ConnectionHandshakeType handshakeType, global::Omnius.Core.Net.OmniAddress address)
         {
             if (address is null) throw new global::System.ArgumentNullException("address");
 
@@ -584,7 +584,7 @@ namespace Omnius.Xeus.Engines.Models
         }
 
         public global::Omnius.Xeus.Engines.Models.ConnectionHandshakeType HandshakeType { get; }
-        public global::Omnius.Core.Network.OmniAddress Address { get; }
+        public global::Omnius.Core.Net.OmniAddress Address { get; }
 
         public static global::Omnius.Xeus.Engines.Models.ConnectionReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -632,10 +632,10 @@ namespace Omnius.Xeus.Engines.Models
                     w.Write((uint)1);
                     w.Write((ulong)value.HandshakeType);
                 }
-                if (value.Address != global::Omnius.Core.Network.OmniAddress.Empty)
+                if (value.Address != global::Omnius.Core.Net.OmniAddress.Empty)
                 {
                     w.Write((uint)2);
-                    global::Omnius.Core.Network.OmniAddress.Formatter.Serialize(ref w, value.Address, rank + 1);
+                    global::Omnius.Core.Net.OmniAddress.Formatter.Serialize(ref w, value.Address, rank + 1);
                 }
                 w.Write((uint)0);
             }
@@ -644,7 +644,7 @@ namespace Omnius.Xeus.Engines.Models
                 if (rank > 256) throw new global::System.FormatException();
 
                 global::Omnius.Xeus.Engines.Models.ConnectionHandshakeType p_handshakeType = (global::Omnius.Xeus.Engines.Models.ConnectionHandshakeType)0;
-                global::Omnius.Core.Network.OmniAddress p_address = global::Omnius.Core.Network.OmniAddress.Empty;
+                global::Omnius.Core.Net.OmniAddress p_address = global::Omnius.Core.Net.OmniAddress.Empty;
 
                 for (; ; )
                 {
@@ -659,7 +659,7 @@ namespace Omnius.Xeus.Engines.Models
                             }
                         case 2:
                             {
-                                p_address = global::Omnius.Core.Network.OmniAddress.Formatter.Deserialize(ref r, rank + 1);
+                                p_address = global::Omnius.Core.Net.OmniAddress.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
@@ -928,7 +928,7 @@ namespace Omnius.Xeus.Engines.Models
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public TcpProxyOptions(global::Omnius.Xeus.Engines.Models.TcpProxyType type, global::Omnius.Core.Network.OmniAddress? address)
+        public TcpProxyOptions(global::Omnius.Xeus.Engines.Models.TcpProxyType type, global::Omnius.Core.Net.OmniAddress? address)
         {
             this.Type = type;
             this.Address = address;
@@ -943,7 +943,7 @@ namespace Omnius.Xeus.Engines.Models
         }
 
         public global::Omnius.Xeus.Engines.Models.TcpProxyType Type { get; }
-        public global::Omnius.Core.Network.OmniAddress? Address { get; }
+        public global::Omnius.Core.Net.OmniAddress? Address { get; }
 
         public static global::Omnius.Xeus.Engines.Models.TcpProxyOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -995,7 +995,7 @@ namespace Omnius.Xeus.Engines.Models
                 if (value.Address != null)
                 {
                     w.Write((uint)2);
-                    global::Omnius.Core.Network.OmniAddress.Formatter.Serialize(ref w, value.Address, rank + 1);
+                    global::Omnius.Core.Net.OmniAddress.Formatter.Serialize(ref w, value.Address, rank + 1);
                 }
                 w.Write((uint)0);
             }
@@ -1004,7 +1004,7 @@ namespace Omnius.Xeus.Engines.Models
                 if (rank > 256) throw new global::System.FormatException();
 
                 global::Omnius.Xeus.Engines.Models.TcpProxyType p_type = (global::Omnius.Xeus.Engines.Models.TcpProxyType)0;
-                global::Omnius.Core.Network.OmniAddress? p_address = null;
+                global::Omnius.Core.Net.OmniAddress? p_address = null;
 
                 for (; ; )
                 {
@@ -1019,7 +1019,7 @@ namespace Omnius.Xeus.Engines.Models
                             }
                         case 2:
                             {
-                                p_address = global::Omnius.Core.Network.OmniAddress.Formatter.Deserialize(ref r, rank + 1);
+                                p_address = global::Omnius.Core.Net.OmniAddress.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
@@ -1037,14 +1037,14 @@ namespace Omnius.Xeus.Engines.Models
         static TcpAcceptingOptions()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.TcpAcceptingOptions>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.TcpAcceptingOptions>.Empty = new global::Omnius.Xeus.Engines.Models.TcpAcceptingOptions(false, global::System.Array.Empty<global::Omnius.Core.Network.OmniAddress>(), false);
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Engines.Models.TcpAcceptingOptions>.Empty = new global::Omnius.Xeus.Engines.Models.TcpAcceptingOptions(false, global::System.Array.Empty<global::Omnius.Core.Net.OmniAddress>(), false);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxListenAddressesCount = 32;
 
-        public TcpAcceptingOptions(bool enabled, global::Omnius.Core.Network.OmniAddress[] listenAddresses, bool useUpnp)
+        public TcpAcceptingOptions(bool enabled, global::Omnius.Core.Net.OmniAddress[] listenAddresses, bool useUpnp)
         {
             if (listenAddresses is null) throw new global::System.ArgumentNullException("listenAddresses");
             if (listenAddresses.Length > 32) throw new global::System.ArgumentOutOfRangeException("listenAddresses");
@@ -1053,7 +1053,7 @@ namespace Omnius.Xeus.Engines.Models
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
             this.Enabled = enabled;
-            this.ListenAddresses = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Network.OmniAddress>(listenAddresses);
+            this.ListenAddresses = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Net.OmniAddress>(listenAddresses);
             this.UseUpnp = useUpnp;
 
             ___hashCode = new global::System.Lazy<int>(() =>
@@ -1070,7 +1070,7 @@ namespace Omnius.Xeus.Engines.Models
         }
 
         public bool Enabled { get; }
-        public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Network.OmniAddress> ListenAddresses { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Net.OmniAddress> ListenAddresses { get; }
         public bool UseUpnp { get; }
 
         public static global::Omnius.Xeus.Engines.Models.TcpAcceptingOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -1126,7 +1126,7 @@ namespace Omnius.Xeus.Engines.Models
                     w.Write((uint)value.ListenAddresses.Count);
                     foreach (var n in value.ListenAddresses)
                     {
-                        global::Omnius.Core.Network.OmniAddress.Formatter.Serialize(ref w, n, rank + 1);
+                        global::Omnius.Core.Net.OmniAddress.Formatter.Serialize(ref w, n, rank + 1);
                     }
                 }
                 if (value.UseUpnp != false)
@@ -1141,7 +1141,7 @@ namespace Omnius.Xeus.Engines.Models
                 if (rank > 256) throw new global::System.FormatException();
 
                 bool p_enabled = false;
-                global::Omnius.Core.Network.OmniAddress[] p_listenAddresses = global::System.Array.Empty<global::Omnius.Core.Network.OmniAddress>();
+                global::Omnius.Core.Net.OmniAddress[] p_listenAddresses = global::System.Array.Empty<global::Omnius.Core.Net.OmniAddress>();
                 bool p_useUpnp = false;
 
                 for (; ; )
@@ -1158,10 +1158,10 @@ namespace Omnius.Xeus.Engines.Models
                         case 2:
                             {
                                 var length = r.GetUInt32();
-                                p_listenAddresses = new global::Omnius.Core.Network.OmniAddress[length];
+                                p_listenAddresses = new global::Omnius.Core.Net.OmniAddress[length];
                                 for (int i = 0; i < p_listenAddresses.Length; i++)
                                 {
-                                    p_listenAddresses[i] = global::Omnius.Core.Network.OmniAddress.Formatter.Deserialize(ref r, rank + 1);
+                                    p_listenAddresses[i] = global::Omnius.Core.Net.OmniAddress.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
@@ -2173,28 +2173,28 @@ namespace Omnius.Xeus.Engines.Models
         public static readonly int MaxFilePathLength = 2147483647;
         public static readonly int MaxRegistrantLength = 2147483647;
 
-        public ContentPublishedItemReport(string? filePath, global::Omnius.Core.Cryptography.OmniHash? contentHash, string registrant)
+        public ContentPublishedItemReport(string? filePath, global::Omnius.Core.Cryptography.OmniHash? rootHash, string registrant)
         {
             if (filePath is not null && filePath.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("filePath");
             if (registrant is null) throw new global::System.ArgumentNullException("registrant");
             if (registrant.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("registrant");
 
             this.FilePath = filePath;
-            this.ContentHash = contentHash;
+            this.RootHash = rootHash;
             this.Registrant = registrant;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
                 if (filePath != default) ___h.Add(filePath.GetHashCode());
-                if (contentHash is not null) ___h.Add(contentHash.Value.GetHashCode());
+                if (rootHash is not null) ___h.Add(rootHash.Value.GetHashCode());
                 if (registrant != default) ___h.Add(registrant.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
         public string? FilePath { get; }
-        public global::Omnius.Core.Cryptography.OmniHash? ContentHash { get; }
+        public global::Omnius.Core.Cryptography.OmniHash? RootHash { get; }
         public string Registrant { get; }
 
         public static global::Omnius.Xeus.Engines.Models.ContentPublishedItemReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -2226,8 +2226,8 @@ namespace Omnius.Xeus.Engines.Models
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.FilePath != target.FilePath) return false;
-            if ((this.ContentHash is null) != (target.ContentHash is null)) return false;
-            if ((this.ContentHash is not null) && (target.ContentHash is not null) && this.ContentHash != target.ContentHash) return false;
+            if ((this.RootHash is null) != (target.RootHash is null)) return false;
+            if ((this.RootHash is not null) && (target.RootHash is not null) && this.RootHash != target.RootHash) return false;
             if (this.Registrant != target.Registrant) return false;
 
             return true;
@@ -2245,10 +2245,10 @@ namespace Omnius.Xeus.Engines.Models
                     w.Write((uint)1);
                     w.Write(value.FilePath);
                 }
-                if (value.ContentHash != null)
+                if (value.RootHash != null)
                 {
                     w.Write((uint)2);
-                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.ContentHash.Value, rank + 1);
+                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.RootHash.Value, rank + 1);
                 }
                 if (value.Registrant != string.Empty)
                 {
@@ -2262,7 +2262,7 @@ namespace Omnius.Xeus.Engines.Models
                 if (rank > 256) throw new global::System.FormatException();
 
                 string? p_filePath = null;
-                global::Omnius.Core.Cryptography.OmniHash? p_contentHash = null;
+                global::Omnius.Core.Cryptography.OmniHash? p_rootHash = null;
                 string p_registrant = string.Empty;
 
                 for (; ; )
@@ -2278,7 +2278,7 @@ namespace Omnius.Xeus.Engines.Models
                             }
                         case 2:
                             {
-                                p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 3:
@@ -2289,7 +2289,7 @@ namespace Omnius.Xeus.Engines.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Models.ContentPublishedItemReport(p_filePath, p_contentHash, p_registrant);
+                return new global::Omnius.Xeus.Engines.Models.ContentPublishedItemReport(p_filePath, p_rootHash, p_registrant);
             }
         }
     }
@@ -2530,24 +2530,24 @@ namespace Omnius.Xeus.Engines.Models
 
         public static readonly int MaxRegistrantLength = 2147483647;
 
-        public ContentSubscribedItemReport(global::Omnius.Core.Cryptography.OmniHash? contentHash, string registrant)
+        public ContentSubscribedItemReport(global::Omnius.Core.Cryptography.OmniHash? rootHash, string registrant)
         {
             if (registrant is null) throw new global::System.ArgumentNullException("registrant");
             if (registrant.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("registrant");
 
-            this.ContentHash = contentHash;
+            this.RootHash = rootHash;
             this.Registrant = registrant;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (contentHash is not null) ___h.Add(contentHash.Value.GetHashCode());
+                if (rootHash is not null) ___h.Add(rootHash.Value.GetHashCode());
                 if (registrant != default) ___h.Add(registrant.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public global::Omnius.Core.Cryptography.OmniHash? ContentHash { get; }
+        public global::Omnius.Core.Cryptography.OmniHash? RootHash { get; }
         public string Registrant { get; }
 
         public static global::Omnius.Xeus.Engines.Models.ContentSubscribedItemReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -2578,8 +2578,8 @@ namespace Omnius.Xeus.Engines.Models
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if ((this.ContentHash is null) != (target.ContentHash is null)) return false;
-            if ((this.ContentHash is not null) && (target.ContentHash is not null) && this.ContentHash != target.ContentHash) return false;
+            if ((this.RootHash is null) != (target.RootHash is null)) return false;
+            if ((this.RootHash is not null) && (target.RootHash is not null) && this.RootHash != target.RootHash) return false;
             if (this.Registrant != target.Registrant) return false;
 
             return true;
@@ -2592,10 +2592,10 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.ContentHash != null)
+                if (value.RootHash != null)
                 {
                     w.Write((uint)1);
-                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.ContentHash.Value, rank + 1);
+                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.RootHash.Value, rank + 1);
                 }
                 if (value.Registrant != string.Empty)
                 {
@@ -2608,7 +2608,7 @@ namespace Omnius.Xeus.Engines.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                global::Omnius.Core.Cryptography.OmniHash? p_contentHash = null;
+                global::Omnius.Core.Cryptography.OmniHash? p_rootHash = null;
                 string p_registrant = string.Empty;
 
                 for (; ; )
@@ -2619,7 +2619,7 @@ namespace Omnius.Xeus.Engines.Models
                     {
                         case 1:
                             {
-                                p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 2:
@@ -2630,7 +2630,7 @@ namespace Omnius.Xeus.Engines.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Models.ContentSubscribedItemReport(p_contentHash, p_registrant);
+                return new global::Omnius.Xeus.Engines.Models.ContentSubscribedItemReport(p_rootHash, p_registrant);
             }
         }
     }

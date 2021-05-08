@@ -5,15 +5,15 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Models
 {
     internal record PublishedContentItem
     {
-        public PublishedContentItem(OmniHash contentHash, string? filePath, string registrant, MerkleTreeSection[] merkleTreeSections)
+        public PublishedContentItem(OmniHash rootHash, string? filePath, string registrant, MerkleTreeSection[] merkleTreeSections)
         {
-            this.ContentHash = contentHash;
+            this.RootHash = rootHash;
             this.FilePath = filePath;
             this.Registrant = registrant;
             this.MerkleTreeSections = new ReadOnlyListSlim<MerkleTreeSection>(merkleTreeSections);
         }
 
-        public OmniHash ContentHash { get; }
+        public OmniHash RootHash { get; }
 
         public string? FilePath { get; }
 

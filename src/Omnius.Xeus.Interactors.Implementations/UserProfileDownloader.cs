@@ -124,8 +124,8 @@ namespace Omnius.Xeus.Interactors
                     var declaredMessage = await this.InternalExportDeclaredMessageAsync(item.Signature, cancellationToken);
                     if (declaredMessage is null) continue;
 
-                    var contentHash = OmniHash.Import(new ReadOnlySequence<byte>(declaredMessage.Value), _bytesPool);
-                    var newItem = new DownloadingUserProfileItem(item.Signature, contentHash, declaredMessage.CreationTime);
+                    var rootHash = OmniHash.Import(new ReadOnlySequence<byte>(declaredMessage.Value), _bytesPool);
+                    var newItem = new DownloadingUserProfileItem(item.Signature, rootHash, declaredMessage.CreationTime);
                     _userProfileDownloaderRepo.Items.Upsert(newItem);
                 }
             }
@@ -136,19 +136,19 @@ namespace Omnius.Xeus.Interactors
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
                 var subscribedItems = await this.InternalGetContentSubscribedItemReportsAsync(cancellationToken);
-                var subscribedContentHashSet = new HashSet<OmniHash>();
-                subscribedContentHashSet.UnionWith(subscribedItems.Where(n => n.Registrant == Registrant).Select(n => n.ContentHash).Where(n => n.HasValue).Select(n => n!.Value));
+                var subscribedRootHashSet = new HashSet<OmniHash>();
+                subscribedRootHashSet.UnionWith(subscribedItems.Where(n => n.Registrant == Registrant).Select(n => n.RootHash).Where(n => n.HasValue).Select(n => n!.Value));
 
-                foreach (var contentHash in subscribedContentHashSet)
+                foreach (var rootHash in subscribedRootHashSet)
                 {
-                    if (_userProfileDownloaderRepo.Items.Exists(contentHash)) continue;
-                    await this.InternalUnsubscribeContentAsync(contentHash, cancellationToken);
+                    if (_userProfileDownloaderRepo.Items.Exists(rootHash)) continue;
+                    await this.InternalUnsubscribeContentAsync(rootHash, cancellationToken);
                 }
 
-                foreach (var contentHash in _userProfileDownloaderRepo.Items.FindAll().Select(n => n.ContentHash))
+                foreach (var rootHash in _userProfileDownloaderRepo.Items.FindAll().Select(n => n.RootHash))
                 {
-                    if (subscribedContentHashSet.Contains(contentHash)) continue;
-                    await this.InternalSubscribeContentAsync(contentHash, cancellationToken);
+                    if (subscribedRootHashSet.Contains(rootHash)) continue;
+                    await this.InternalSubscribeContentAsync(rootHash, cancellationToken);
                 }
             }
         }
@@ -200,8 +200,8 @@ namespace Omnius.Xeus.Interactors
                 var declaredMessage = await this.InternalExportDeclaredMessageAsync(signature, cancellationToken);
                 if (declaredMessage is null) return null;
 
-                var contentHash = OmniHash.Import(new ReadOnlySequence<byte>(declaredMessage.Value), _bytesPool);
-                var content = await this.InternalExportContentAsync(contentHash, cancellationToken);
+                var rootHash = OmniHash.Import(new ReadOnlySequence<byte>(declaredMessage.Value), _bytesPool);
+                var content = await this.InternalExportContentAsync(rootHash, cancellationToken);
                 if (content is null) return null;
 
                 return new XeusUserProfile(signature, declaredMessage.CreationTime, content);
@@ -226,9 +226,9 @@ namespace Omnius.Xeus.Interactors
             await _xeusService.DeclaredMessageSubscriber_SubscribeMessageAsync(input, cancellationToken);
         }
 
-        private async ValueTask InternalSubscribeContentAsync(OmniHash contentHash, CancellationToken cancellationToken = default)
+        private async ValueTask InternalSubscribeContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
-            var input = new ContentSubscriber_SubscribeContent_Input(contentHash, Registrant);
+            var input = new ContentSubscriber_SubscribeContent_Input(rootHash, Registrant);
             await _xeusService.ContentSubscriber_SubscribeContentAsync(input, cancellationToken);
         }
 
@@ -238,9 +238,9 @@ namespace Omnius.Xeus.Interactors
             await _xeusService.DeclaredMessageSubscriber_UnsubscribeMessageAsync(input, cancellationToken);
         }
 
-        private async ValueTask InternalUnsubscribeContentAsync(OmniHash contentHash, CancellationToken cancellationToken = default)
+        private async ValueTask InternalUnsubscribeContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
-            var input = new ContentSubscriber_UnsubscribeContent_Input(contentHash, Registrant);
+            var input = new ContentSubscriber_UnsubscribeContent_Input(rootHash, Registrant);
             await _xeusService.ContentSubscriber_UnsubscribeContentAsync(input, cancellationToken);
         }
 
@@ -251,9 +251,9 @@ namespace Omnius.Xeus.Interactors
             return output.DeclaredMessage;
         }
 
-        private async ValueTask<XeusUserProfileContent?> InternalExportContentAsync(OmniHash contentHash, CancellationToken cancellationToken = default)
+        private async ValueTask<XeusUserProfileContent?> InternalExportContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
-            var input = new ContentSubscriber_ExportContent_Memory_Input(contentHash);
+            var input = new ContentSubscriber_ExportContent_Memory_Input(rootHash);
             var output = await _xeusService.ContentSubscriber_ExportContentAsync(input, cancellationToken);
             if (output.Memory is null) return null;
             return XeusUserProfileContent.Import(new ReadOnlySequence<byte>(output.Memory.Value), _bytesPool);
