@@ -19,8 +19,8 @@ namespace Omnius.Xeus.Interactors
     {
         ValueTask<IEnumerable<DownloadingFileReport>> GetDownloadingFileReportsAsync(CancellationToken cancellationToken = default);
 
-        ValueTask RegisterAsync(XeusFileMeta fileMeta, string targetDirectoryPath, CancellationToken cancellationToken = default);
+        ValueTask RegisterAsync(Box box, string targetDirectoryPath, CancellationToken cancellationToken = default);
 
-        ValueTask UnregisterAsync(XeusFileMeta fileMeta, string targetDirectoryPath, CancellationToken cancellationToken = default);
+        ValueTask UnregisterAsync(Box box, string targetDirectoryPath, CancellationToken cancellationToken = default);
     }
 }

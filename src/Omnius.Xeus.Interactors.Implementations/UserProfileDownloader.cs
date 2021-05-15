@@ -191,7 +191,7 @@ namespace Omnius.Xeus.Interactors
             }
         }
 
-        public async ValueTask<XeusUserProfile?> ExportAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+        public async ValueTask<UserProfile?> ExportAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
@@ -204,7 +204,7 @@ namespace Omnius.Xeus.Interactors
                 var content = await this.InternalExportContentAsync(rootHash, cancellationToken);
                 if (content is null) return null;
 
-                return new XeusUserProfile(signature, declaredMessage.CreationTime, content);
+                return new UserProfile(signature, declaredMessage.CreationTime, content);
             }
         }
 
@@ -251,12 +251,12 @@ namespace Omnius.Xeus.Interactors
             return output.DeclaredMessage;
         }
 
-        private async ValueTask<XeusUserProfileContent?> InternalExportContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+        private async ValueTask<UserProfileContent?> InternalExportContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
             var input = new ContentSubscriber_ExportContent_Memory_Input(rootHash);
             var output = await _xeusService.ContentSubscriber_ExportContentAsync(input, cancellationToken);
             if (output.Memory is null) return null;
-            return XeusUserProfileContent.Import(new ReadOnlySequence<byte>(output.Memory.Value), _bytesPool);
+            return UserProfileContent.Import(new ReadOnlySequence<byte>(output.Memory.Value), _bytesPool);
         }
     }
 }

@@ -159,7 +159,7 @@ namespace Omnius.Xeus.Interactors
             }
         }
 
-        public async ValueTask RegisterAsync(XeusUserProfileContent content, OmniDigitalSignature digitalSignature, CancellationToken cancellationToken = default)
+        public async ValueTask RegisterAsync(UserProfileContent content, OmniDigitalSignature digitalSignature, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
@@ -211,7 +211,7 @@ namespace Omnius.Xeus.Interactors
             await _xeusService.DeclaredMessagePublisher_PublishMessageAsync(input, cancellationToken);
         }
 
-        private async ValueTask<OmniHash> InternalPublishContentAsync(XeusUserProfileContent content, CancellationToken cancellationToken = default)
+        private async ValueTask<OmniHash> InternalPublishContentAsync(UserProfileContent content, CancellationToken cancellationToken = default)
         {
             using var hub = new BytesHub();
             content.Export(hub.Writer, _bytesPool);
