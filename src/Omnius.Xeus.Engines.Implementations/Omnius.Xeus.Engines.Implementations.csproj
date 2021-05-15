@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <PackageReference Include="LiteDB" Version="5.0.10" />
-    <PackageReference Include="NLog" Version="4.7.9" />
+    <PackageReference Include="NLog" Version="4.7.10" />
     <PackageReference Include="Nito.AsyncEx" Version="5.1.0" />
   </ItemGroup>
 
