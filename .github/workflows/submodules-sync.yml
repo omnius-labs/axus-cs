@@ -1,6 +1,9 @@
 name: Submodules Sync
 
 on:
+  repository_dispatch:
+    types:
+      - core-repo-updated
   workflow_dispatch:
 
 jobs:
