@@ -4,7 +4,13 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    labels:
+      - "dependencies"
+      - "automerge"
   - package-ecosystem: nuget
     directory: "/"
     schedule:
-      interval: weekly
+      interval: "daily"
+    labels:
+      - "dependencies"
+      - "automerge"
