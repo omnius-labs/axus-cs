@@ -10,7 +10,7 @@
     <PackageReference Include="Avalonia.Skia" Version="0.10.0" />
     <PackageReference Include="Avalonia.Xaml.Behaviors" Version="0.10.4" />
     <PackageReference Include="Avalonia.Xaml.Interactions" Version="0.10.0" />
-    <PackageReference Include="Avalonia.Xaml.Interactivity" Version="0.10.0" />
+    <PackageReference Include="Avalonia.Xaml.Interactivity" Version="0.10.4" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
     <PackageReference Include="NLog" Version="4.7.10" />
     <PackageReference Include="NLog.Config" Version="4.7.9" />
