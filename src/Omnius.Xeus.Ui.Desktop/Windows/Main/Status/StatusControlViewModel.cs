@@ -3,6 +3,7 @@ using System.Reactive.Disposables;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
+using Reactive.Bindings;
 
 namespace Omnius.Xeus.Ui.Desktop.Windows.Main.Status
 {
@@ -28,5 +29,7 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main.Status
         protected override async ValueTask OnDisposeAsync()
         {
         }
+
+        public ReactiveProperty<string> MyNodeProfile { get; }
     }
 }

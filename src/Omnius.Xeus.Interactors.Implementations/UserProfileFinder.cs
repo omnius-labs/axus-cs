@@ -124,7 +124,7 @@ namespace Omnius.Xeus.Interactors
             }
         }
 
-        private async IAsyncEnumerable<XeusUserProfile> InternalRecursiveFindProfilesAsync(IEnumerable<OmniSignature> rootSignatures, IEnumerable<OmniSignature> ignoreSignatures, int depth, int maxCount, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        private async IAsyncEnumerable<UserProfile> InternalRecursiveFindProfilesAsync(IEnumerable<OmniSignature> rootSignatures, IEnumerable<OmniSignature> ignoreSignatures, int depth, int maxCount, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             if (maxCount == 0) yield break;
 
@@ -158,13 +158,13 @@ namespace Omnius.Xeus.Interactors
             }
         }
 
-        private async IAsyncEnumerable<XeusUserProfile> InternalFindProfilesAsync(IEnumerable<OmniSignature> signatures, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        private async IAsyncEnumerable<UserProfile> InternalFindProfilesAsync(IEnumerable<OmniSignature> signatures, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             foreach (var signature in signatures)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var cachedProfile = await _cachedUserProfileStorage.TryGetValueAsync<OmniSignatureEntity, XeusUserProfile>(OmniSignatureEntity.Import(signature), cancellationToken);
+                var cachedProfile = await _cachedUserProfileStorage.TryGetValueAsync<OmniSignatureEntity, UserProfile>(OmniSignatureEntity.Import(signature), cancellationToken);
                 var downloadedProfile = await _userProfileDownloader.ExportAsync(signature, cancellationToken);
 
                 if (cachedProfile is not null)
@@ -192,19 +192,19 @@ namespace Omnius.Xeus.Interactors
             }
         }
 
-        public async ValueTask<XeusUserProfile?> FindOneAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+        public async ValueTask<UserProfile?> FindOneAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                return await _cachedUserProfileStorage.TryGetValueAsync<OmniSignatureEntity, XeusUserProfile>(OmniSignatureEntity.Import(signature), cancellationToken);
+                return await _cachedUserProfileStorage.TryGetValueAsync<OmniSignatureEntity, UserProfile>(OmniSignatureEntity.Import(signature), cancellationToken);
             }
         }
 
-        public async IAsyncEnumerable<XeusUserProfile> FindAllAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<UserProfile> FindAllAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                await foreach (var value in _cachedUserProfileStorage.GetValuesAsync<OmniSignatureEntity, XeusUserProfile>(cancellationToken))
+                await foreach (var value in _cachedUserProfileStorage.GetValuesAsync<OmniSignatureEntity, UserProfile>(cancellationToken))
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     yield return value;

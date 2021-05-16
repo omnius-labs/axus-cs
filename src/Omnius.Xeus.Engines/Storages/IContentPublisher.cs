@@ -25,6 +25,6 @@ namespace Omnius.Xeus.Engines.Storages
 
         ValueTask UnpublishContentAsync(string filePath, string registrant, CancellationToken cancellationToken = default);
 
-        ValueTask UnpublishContentAsync(OmniHash contentHash, string registrant, CancellationToken cancellationToken = default);
+        ValueTask UnpublishContentAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default);
     }
 }

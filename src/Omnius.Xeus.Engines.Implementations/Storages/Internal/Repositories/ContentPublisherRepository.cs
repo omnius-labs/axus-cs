@@ -58,7 +58,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
                     if (_database.GetDocumentVersion(CollectionName) <= 0)
                     {
                         var col = this.GetCollection();
-                        col.EnsureIndex(x => x.ContentHash, false);
+                        col.EnsureIndex(x => x.RootHash, false);
                         col.EnsureIndex(x => x.FilePath, false);
                     }
 
@@ -72,14 +72,14 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
                 return col;
             }
 
-            public bool Exists(OmniHash contentHash)
+            public bool Exists(OmniHash rootHash)
             {
                 using (_asyncLock.ReaderLock())
                 {
-                    var contentHashEntity = OmniHashEntity.Import(contentHash);
+                    var rootHashEntity = OmniHashEntity.Import(rootHash);
 
                     var col = this.GetCollection();
-                    return col.Exists(n => n.ContentHash == contentHashEntity);
+                    return col.Exists(n => n.RootHash == rootHashEntity);
                 }
             }
 
@@ -101,14 +101,14 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
                 }
             }
 
-            public IEnumerable<PublishedContentItem> Find(OmniHash contentHash)
+            public IEnumerable<PublishedContentItem> Find(OmniHash rootHash)
             {
                 using (_asyncLock.ReaderLock())
                 {
-                    var contentHashEntity = OmniHashEntity.Import(contentHash);
+                    var rootHashEntity = OmniHashEntity.Import(rootHash);
 
                     var col = this.GetCollection();
-                    return col.Find(n => n.ContentHash == contentHashEntity).Select(n => n.Export()).ToArray();
+                    return col.Find(n => n.RootHash == rootHashEntity).Select(n => n.Export()).ToArray();
                 }
             }
 
@@ -121,14 +121,14 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
                 }
             }
 
-            public PublishedContentItem? FindOne(OmniHash contentHash, string registrant)
+            public PublishedContentItem? FindOne(OmniHash rootHash, string registrant)
             {
                 using (_asyncLock.ReaderLock())
                 {
-                    var contentHashEntity = OmniHashEntity.Import(contentHash);
+                    var rootHashEntity = OmniHashEntity.Import(rootHash);
 
                     var col = this.GetCollection();
-                    return col.FindOne(n => n.ContentHash == contentHashEntity && n.FilePath == null && n.Registrant == registrant)?.Export();
+                    return col.FindOne(n => n.RootHash == rootHashEntity && n.FilePath == null && n.Registrant == registrant)?.Export();
                 }
             }
 
@@ -146,21 +146,21 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories
                     }
                     else
                     {
-                        col.DeleteMany(n => n.ContentHash == itemEntity.ContentHash && n.FilePath == null && n.Registrant == item.Registrant);
+                        col.DeleteMany(n => n.RootHash == itemEntity.RootHash && n.FilePath == null && n.Registrant == item.Registrant);
                     }
 
                     col.Insert(itemEntity);
                 }
             }
 
-            public void Delete(OmniHash contentHash, string registrant)
+            public void Delete(OmniHash rootHash, string registrant)
             {
                 using (_asyncLock.WriterLock())
                 {
-                    var contentHashEntity = OmniHashEntity.Import(contentHash);
+                    var rootHashEntity = OmniHashEntity.Import(rootHash);
 
                     var col = this.GetCollection();
-                    col.DeleteMany(n => n.ContentHash == contentHashEntity && n.FilePath == null && n.Registrant == registrant);
+                    col.DeleteMany(n => n.RootHash == rootHashEntity && n.FilePath == null && n.Registrant == registrant);
                 }
             }
 

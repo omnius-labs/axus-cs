@@ -81,7 +81,7 @@ message ContentPublisher_UnpublishContent_File_Input {
 }
 
 message ContentPublisher_UnpublishContent_Memory_Input {
-    ContentHash: OmniHash,
+    RootHash: OmniHash,
     Registrant: string,
 }
 
@@ -90,22 +90,22 @@ message ContentSubscriber_GetReport_Output {
 }
 
 message ContentSubscriber_SubscribeContent_Input {
-    ContentHash: OmniHash,
+    RootHash: OmniHash,
     Registrant: string,
 }
 
 message ContentSubscriber_UnsubscribeContent_Input {
-    ContentHash: OmniHash,
+    RootHash: OmniHash,
     Registrant: string,
 }
 
 message ContentSubscriber_ExportContent_File_Input {
-    ContentHash: OmniHash,
+    RootHash: OmniHash,
     FilePath: string,
 }
 
 message ContentSubscriber_ExportContent_Memory_Input {
-    ContentHash: OmniHash,
+    RootHash: OmniHash,
 }
 
 message ContentSubscriber_ExportContent_Memory_Output {

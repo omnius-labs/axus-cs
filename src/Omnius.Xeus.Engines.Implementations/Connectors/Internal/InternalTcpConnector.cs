@@ -7,10 +7,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Extensions;
-using Omnius.Core.Network;
-using Omnius.Core.Network.Caps;
-using Omnius.Core.Network.Proxies;
-using Omnius.Core.Network.Upnp;
+using Omnius.Core.Net;
+using Omnius.Core.Net.Caps;
+using Omnius.Core.Net.Proxies;
+using Omnius.Core.Net.Upnp;
 using Omnius.Xeus.Engines.Models;
 
 namespace Omnius.Xeus.Engines.Connectors.Internal

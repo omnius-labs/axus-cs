@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using Omnius.Core;
-using Omnius.Core.Network;
+using Omnius.Core.Net;
 using Omnius.Xeus.Interactors;
 using Omnius.Xeus.Ui.Desktop.Configuration;
 using Omnius.Xeus.Ui.Desktop.Models.Peers;

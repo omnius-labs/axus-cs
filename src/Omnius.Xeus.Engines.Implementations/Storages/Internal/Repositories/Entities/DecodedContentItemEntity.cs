@@ -9,7 +9,7 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories.Entities
     {
         public int Id { get; set; }
 
-        public OmniHashEntity? ContentHash { get; set; }
+        public OmniHashEntity? RootHash { get; set; }
 
         public MerkleTreeSectionEntity[]? MerkleTreeSections { get; set; }
 
@@ -17,14 +17,14 @@ namespace Omnius.Xeus.Engines.Storages.Internal.Repositories.Entities
         {
             return new DecodedContentItemEntity()
             {
-                ContentHash = OmniHashEntity.Import(value.ContentHash),
+                RootHash = OmniHashEntity.Import(value.RootHash),
                 MerkleTreeSections = value.MerkleTreeSections?.Select(n => MerkleTreeSectionEntity.Import(n))?.ToArray() ?? Array.Empty<MerkleTreeSectionEntity>(),
             };
         }
 
         public DecodedContentItem Export()
         {
-            return new DecodedContentItem(this.ContentHash?.Export() ?? OmniHash.Empty, this.MerkleTreeSections?.Select(n => n.Export())?.ToArray() ?? Array.Empty<MerkleTreeSection>());
+            return new DecodedContentItem(this.RootHash?.Export() ?? OmniHash.Empty, this.MerkleTreeSections?.Select(n => n.Export())?.ToArray() ?? Array.Empty<MerkleTreeSection>());
         }
     }
 }

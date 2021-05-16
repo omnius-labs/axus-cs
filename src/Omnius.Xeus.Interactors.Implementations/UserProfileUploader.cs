@@ -128,18 +128,18 @@ namespace Omnius.Xeus.Interactors
             {
                 var publishedItems = await this.InternalGetContentPublishedItemReportsAsync(cancellationToken);
                 var set = new HashSet<OmniHash>();
-                set.UnionWith(publishedItems.Where(n => n.Registrant == Registrant).Select(n => n.ContentHash).Where(n => n.HasValue).Select(n => n!.Value));
+                set.UnionWith(publishedItems.Where(n => n.Registrant == Registrant).Select(n => n.RootHash).Where(n => n.HasValue).Select(n => n!.Value));
 
-                foreach (var contentHash in set)
+                foreach (var rootHash in set)
                 {
-                    if (_userProfileUploaderRepo.Items.Exists(contentHash)) continue;
-                    await this.InternalUnpublishContentAsync(contentHash, cancellationToken);
+                    if (_userProfileUploaderRepo.Items.Exists(rootHash)) continue;
+                    await this.InternalUnpublishContentAsync(rootHash, cancellationToken);
                 }
 
-                foreach (var contentHash in _userProfileUploaderRepo.Items.FindAll().Select(n => n.ContentHash))
+                foreach (var rootHash in _userProfileUploaderRepo.Items.FindAll().Select(n => n.RootHash))
                 {
-                    if (set.Contains(contentHash)) continue;
-                    _userProfileUploaderRepo.Items.Delete(contentHash);
+                    if (set.Contains(rootHash)) continue;
+                    _userProfileUploaderRepo.Items.Delete(rootHash);
                 }
             }
         }
@@ -159,14 +159,14 @@ namespace Omnius.Xeus.Interactors
             }
         }
 
-        public async ValueTask RegisterAsync(XeusUserProfileContent content, OmniDigitalSignature digitalSignature, CancellationToken cancellationToken = default)
+        public async ValueTask RegisterAsync(UserProfileContent content, OmniDigitalSignature digitalSignature, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
-                var contentHash = await this.InternalPublishContentAsync(content, cancellationToken);
-                await this.InternalPublishDeclaredMessageAsync(contentHash, digitalSignature, cancellationToken);
+                var rootHash = await this.InternalPublishContentAsync(content, cancellationToken);
+                await this.InternalPublishDeclaredMessageAsync(rootHash, digitalSignature, cancellationToken);
 
-                var item = new UploadingUserProfileItem(digitalSignature.GetOmniSignature(), contentHash, Timestamp.FromDateTime(DateTime.UtcNow));
+                var item = new UploadingUserProfileItem(digitalSignature.GetOmniSignature(), rootHash, Timestamp.FromDateTime(DateTime.UtcNow));
                 _userProfileUploaderRepo.Items.Upsert(item);
             }
         }
@@ -179,7 +179,7 @@ namespace Omnius.Xeus.Interactors
                 if (item is null) return;
 
                 await this.InternalUnpublishDeclaredMessageAsync(item.Signature, cancellationToken);
-                await this.InternalUnpublishContentAsync(item.ContentHash, cancellationToken);
+                await this.InternalUnpublishContentAsync(item.RootHash, cancellationToken);
 
                 _userProfileUploaderRepo.Items.Delete(item.Signature);
             }
@@ -197,10 +197,10 @@ namespace Omnius.Xeus.Interactors
             return output.Report.ContentPublishedItems;
         }
 
-        private async ValueTask InternalPublishDeclaredMessageAsync(OmniHash contentHash, OmniDigitalSignature digitalSignature, CancellationToken cancellationToken = default)
+        private async ValueTask InternalPublishDeclaredMessageAsync(OmniHash rootHash, OmniDigitalSignature digitalSignature, CancellationToken cancellationToken = default)
         {
             using var hub = new BytesHub();
-            contentHash.Export(hub.Writer, _bytesPool);
+            rootHash.Export(hub.Writer, _bytesPool);
 
             var sequence = hub.Reader.GetSequence();
             var memoryOwner = _bytesPool.Memory.Rent((int)sequence.Length).Shrink((int)sequence.Length);
@@ -211,7 +211,7 @@ namespace Omnius.Xeus.Interactors
             await _xeusService.DeclaredMessagePublisher_PublishMessageAsync(input, cancellationToken);
         }
 
-        private async ValueTask<OmniHash> InternalPublishContentAsync(XeusUserProfileContent content, CancellationToken cancellationToken = default)
+        private async ValueTask<OmniHash> InternalPublishContentAsync(UserProfileContent content, CancellationToken cancellationToken = default)
         {
             using var hub = new BytesHub();
             content.Export(hub.Writer, _bytesPool);
@@ -231,9 +231,9 @@ namespace Omnius.Xeus.Interactors
             await _xeusService.DeclaredMessagePublisher_UnpublishMessageAsync(input, cancellationToken);
         }
 
-        private async ValueTask InternalUnpublishContentAsync(OmniHash contentHash, CancellationToken cancellationToken = default)
+        private async ValueTask InternalUnpublishContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
-            var input = new ContentPublisher_UnpublishContent_Memory_Input(contentHash, Registrant);
+            var input = new ContentPublisher_UnpublishContent_Memory_Input(rootHash, Registrant);
             await _xeusService.ContentPublisher_UnpublishContentAsync(input, cancellationToken);
         }
     }
