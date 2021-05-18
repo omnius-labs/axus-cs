@@ -21,7 +21,7 @@ namespace Omnius.Xeus.Interactors
     {
         ValueTask<IEnumerable<UploadingUserProfileReport>> GetUploadingUserProfileReportsAsync(CancellationToken cancellationToken = default);
 
-        ValueTask RegisterAsync(XeusUserProfileContent content, OmniDigitalSignature digitalSignature, CancellationToken cancellationToken = default);
+        ValueTask RegisterAsync(UserProfileContent content, OmniDigitalSignature digitalSignature, CancellationToken cancellationToken = default);
 
         ValueTask UnregisterAsync(OmniSignature signature, CancellationToken cancellationToken = default);
     }

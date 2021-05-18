@@ -1,7 +1,7 @@
 ﻿syntax v1.0;
 
 using "Omnius.Core.Cryptography";
-using "Omnius.Core.Network";
+using "Omnius.Core.Net";
 
 namespace "Omnius.Xeus.Engines.Models";
 
@@ -118,7 +118,7 @@ message ContentPublisherReport {
 
 message ContentPublishedItemReport {
     FilePath: string?,
-    ContentHash: OmniHash?,
+    RootHash: OmniHash?,
     Registrant: string,
 }
 
@@ -133,7 +133,7 @@ message ContentSubscriberReport {
 }
 
 message ContentSubscribedItemReport {
-    ContentHash: OmniHash?,
+    RootHash: OmniHash?,
     Registrant: string,
 }
 

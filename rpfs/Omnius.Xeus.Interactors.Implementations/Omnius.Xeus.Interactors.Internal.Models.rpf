@@ -1,7 +1,7 @@
 syntax v1.0;
 
 using "Omnius.Core.Cryptography";
-using "Omnius.Core.Network";
+using "Omnius.Core.Net";
 using "Omnius.Xeus.Engines.Models";
 using "Omnius.Xeus.Interactors.Models";
 
@@ -9,12 +9,12 @@ namespace "Omnius.Xeus.Interactors.Internal.Models";
 
 message DownloadingUserProfileItem {
     Signature: OmniSignature,
-    ContentHash: OmniHash,
+    RootHash: OmniHash,
     CreationTime: timestamp,
 }
 
 message UploadingUserProfileItem {
     Signature: OmniSignature,
-    ContentHash: OmniHash,
+    RootHash: OmniHash,
     CreationTime: timestamp,
 }

@@ -25,8 +25,8 @@ namespace Omnius.Xeus.Interactors
 
         ValueTask SetSearchOptionsAsync(UserProfileFinderSearchOptions searchOptions, CancellationToken cancellationToken = default);
 
-        ValueTask<XeusUserProfile?> FindOneAsync(OmniSignature signature, CancellationToken cancellationToken = default);
+        ValueTask<UserProfile?> FindOneAsync(OmniSignature signature, CancellationToken cancellationToken = default);
 
-        IAsyncEnumerable<XeusUserProfile> FindAllAsync(CancellationToken cancellationToken = default);
+        IAsyncEnumerable<UserProfile> FindAllAsync(CancellationToken cancellationToken = default);
     }
 }

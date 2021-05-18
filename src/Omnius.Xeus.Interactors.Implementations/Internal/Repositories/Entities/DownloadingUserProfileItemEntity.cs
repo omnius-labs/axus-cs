@@ -12,7 +12,7 @@ namespace Omnius.Xeus.Interactors.Internal.Repositories.Entities
     {
         public OmniSignatureEntity? Signature { get; set; }
 
-        public OmniHashEntity? ContentHash { get; set; }
+        public OmniHashEntity? RootHash { get; set; }
 
         public DateTime CreationTime { get; set; }
 
@@ -21,14 +21,14 @@ namespace Omnius.Xeus.Interactors.Internal.Repositories.Entities
             return new DownloadingUserProfileItemEntity()
             {
                 Signature = OmniSignatureEntity.Import(value.Signature),
-                ContentHash = OmniHashEntity.Import(value.ContentHash),
+                RootHash = OmniHashEntity.Import(value.RootHash),
                 CreationTime = value.CreationTime.ToDateTime(),
             };
         }
 
         public DownloadingUserProfileItem Export()
         {
-            return new DownloadingUserProfileItem(this.Signature?.Export() ?? OmniSignature.Empty, this.ContentHash?.Export() ?? OmniHash.Empty, Timestamp.FromDateTime(this.CreationTime));
+            return new DownloadingUserProfileItem(this.Signature?.Export() ?? OmniSignature.Empty, this.RootHash?.Export() ?? OmniHash.Empty, Timestamp.FromDateTime(this.CreationTime));
         }
     }
 }

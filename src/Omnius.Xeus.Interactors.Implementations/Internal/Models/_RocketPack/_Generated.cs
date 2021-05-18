@@ -16,25 +16,25 @@ namespace Omnius.Xeus.Interactors.Internal.Models
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public DownloadingUserProfileItem(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.Cryptography.OmniHash contentHash, global::Omnius.Core.RocketPack.Timestamp creationTime)
+        public DownloadingUserProfileItem(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.Cryptography.OmniHash rootHash, global::Omnius.Core.RocketPack.Timestamp creationTime)
         {
             if (signature is null) throw new global::System.ArgumentNullException("signature");
             this.Signature = signature;
-            this.ContentHash = contentHash;
+            this.RootHash = rootHash;
             this.CreationTime = creationTime;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
                 if (signature != default) ___h.Add(signature.GetHashCode());
-                if (contentHash != default) ___h.Add(contentHash.GetHashCode());
+                if (rootHash != default) ___h.Add(rootHash.GetHashCode());
                 if (creationTime != default) ___h.Add(creationTime.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
         public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
-        public global::Omnius.Core.Cryptography.OmniHash ContentHash { get; }
+        public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
         public global::Omnius.Core.RocketPack.Timestamp CreationTime { get; }
 
         public static global::Omnius.Xeus.Interactors.Internal.Models.DownloadingUserProfileItem Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -66,7 +66,7 @@ namespace Omnius.Xeus.Interactors.Internal.Models
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.Signature != target.Signature) return false;
-            if (this.ContentHash != target.ContentHash) return false;
+            if (this.RootHash != target.RootHash) return false;
             if (this.CreationTime != target.CreationTime) return false;
 
             return true;
@@ -84,10 +84,10 @@ namespace Omnius.Xeus.Interactors.Internal.Models
                     w.Write((uint)1);
                     global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
                 }
-                if (value.ContentHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
+                if (value.RootHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
                 {
                     w.Write((uint)2);
-                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.ContentHash, rank + 1);
+                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.RootHash, rank + 1);
                 }
                 if (value.CreationTime != global::Omnius.Core.RocketPack.Timestamp.Zero)
                 {
@@ -101,7 +101,7 @@ namespace Omnius.Xeus.Interactors.Internal.Models
                 if (rank > 256) throw new global::System.FormatException();
 
                 global::Omnius.Core.Cryptography.OmniSignature p_signature = global::Omnius.Core.Cryptography.OmniSignature.Empty;
-                global::Omnius.Core.Cryptography.OmniHash p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
+                global::Omnius.Core.Cryptography.OmniHash p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
                 global::Omnius.Core.RocketPack.Timestamp p_creationTime = global::Omnius.Core.RocketPack.Timestamp.Zero;
 
                 for (; ; )
@@ -117,7 +117,7 @@ namespace Omnius.Xeus.Interactors.Internal.Models
                             }
                         case 2:
                             {
-                                p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 3:
@@ -128,7 +128,7 @@ namespace Omnius.Xeus.Interactors.Internal.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Interactors.Internal.Models.DownloadingUserProfileItem(p_signature, p_contentHash, p_creationTime);
+                return new global::Omnius.Xeus.Interactors.Internal.Models.DownloadingUserProfileItem(p_signature, p_rootHash, p_creationTime);
             }
         }
     }
@@ -145,25 +145,25 @@ namespace Omnius.Xeus.Interactors.Internal.Models
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public UploadingUserProfileItem(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.Cryptography.OmniHash contentHash, global::Omnius.Core.RocketPack.Timestamp creationTime)
+        public UploadingUserProfileItem(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.Cryptography.OmniHash rootHash, global::Omnius.Core.RocketPack.Timestamp creationTime)
         {
             if (signature is null) throw new global::System.ArgumentNullException("signature");
             this.Signature = signature;
-            this.ContentHash = contentHash;
+            this.RootHash = rootHash;
             this.CreationTime = creationTime;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
                 if (signature != default) ___h.Add(signature.GetHashCode());
-                if (contentHash != default) ___h.Add(contentHash.GetHashCode());
+                if (rootHash != default) ___h.Add(rootHash.GetHashCode());
                 if (creationTime != default) ___h.Add(creationTime.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
         public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
-        public global::Omnius.Core.Cryptography.OmniHash ContentHash { get; }
+        public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
         public global::Omnius.Core.RocketPack.Timestamp CreationTime { get; }
 
         public static global::Omnius.Xeus.Interactors.Internal.Models.UploadingUserProfileItem Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -195,7 +195,7 @@ namespace Omnius.Xeus.Interactors.Internal.Models
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.Signature != target.Signature) return false;
-            if (this.ContentHash != target.ContentHash) return false;
+            if (this.RootHash != target.RootHash) return false;
             if (this.CreationTime != target.CreationTime) return false;
 
             return true;
@@ -213,10 +213,10 @@ namespace Omnius.Xeus.Interactors.Internal.Models
                     w.Write((uint)1);
                     global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
                 }
-                if (value.ContentHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
+                if (value.RootHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
                 {
                     w.Write((uint)2);
-                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.ContentHash, rank + 1);
+                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.RootHash, rank + 1);
                 }
                 if (value.CreationTime != global::Omnius.Core.RocketPack.Timestamp.Zero)
                 {
@@ -230,7 +230,7 @@ namespace Omnius.Xeus.Interactors.Internal.Models
                 if (rank > 256) throw new global::System.FormatException();
 
                 global::Omnius.Core.Cryptography.OmniSignature p_signature = global::Omnius.Core.Cryptography.OmniSignature.Empty;
-                global::Omnius.Core.Cryptography.OmniHash p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
+                global::Omnius.Core.Cryptography.OmniHash p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
                 global::Omnius.Core.RocketPack.Timestamp p_creationTime = global::Omnius.Core.RocketPack.Timestamp.Zero;
 
                 for (; ; )
@@ -246,7 +246,7 @@ namespace Omnius.Xeus.Interactors.Internal.Models
                             }
                         case 2:
                             {
-                                p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 3:
@@ -257,7 +257,7 @@ namespace Omnius.Xeus.Interactors.Internal.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Interactors.Internal.Models.UploadingUserProfileItem(p_signature, p_contentHash, p_creationTime);
+                return new global::Omnius.Xeus.Interactors.Internal.Models.UploadingUserProfileItem(p_signature, p_rootHash, p_creationTime);
             }
         }
     }

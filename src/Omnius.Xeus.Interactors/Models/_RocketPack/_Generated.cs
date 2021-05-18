@@ -3,188 +3,20 @@
 
 namespace Omnius.Xeus.Interactors.Models
 {
-    public sealed partial class XeusFileMeta : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.XeusFileMeta>
+    public sealed partial class UserProfile : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.UserProfile>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Interactors.Models.XeusFileMeta> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.XeusFileMeta>.Formatter;
-        public static global::Omnius.Xeus.Interactors.Models.XeusFileMeta Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.XeusFileMeta>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Interactors.Models.UserProfile> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.UserProfile>.Formatter;
+        public static global::Omnius.Xeus.Interactors.Models.UserProfile Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.UserProfile>.Empty;
 
-        static XeusFileMeta()
+        static UserProfile()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.XeusFileMeta>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.XeusFileMeta>.Empty = new global::Omnius.Xeus.Interactors.Models.XeusFileMeta(global::Omnius.Core.Cryptography.OmniHash.Empty, string.Empty, 0, global::System.Array.Empty<string>());
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.UserProfile>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.UserProfile>.Empty = new global::Omnius.Xeus.Interactors.Models.UserProfile(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Timestamp.Zero, global::Omnius.Xeus.Interactors.Models.UserProfileContent.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public static readonly int MaxNameLength = 256;
-        public static readonly int MaxTagsCount = 8;
-
-        public XeusFileMeta(global::Omnius.Core.Cryptography.OmniHash contentHash, string name, ulong size, string[] tags)
-        {
-            if (name is null) throw new global::System.ArgumentNullException("name");
-            if (name.Length > 256) throw new global::System.ArgumentOutOfRangeException("name");
-            if (tags is null) throw new global::System.ArgumentNullException("tags");
-            if (tags.Length > 8) throw new global::System.ArgumentOutOfRangeException("tags");
-            foreach (var n in tags)
-            {
-                if (n is null) throw new global::System.ArgumentNullException("n");
-                if (n.Length > 256) throw new global::System.ArgumentOutOfRangeException("n");
-            }
-
-            this.ContentHash = contentHash;
-            this.Name = name;
-            this.Size = size;
-            this.Tags = new global::Omnius.Core.Collections.ReadOnlyListSlim<string>(tags);
-
-            ___hashCode = new global::System.Lazy<int>(() =>
-            {
-                var ___h = new global::System.HashCode();
-                if (contentHash != default) ___h.Add(contentHash.GetHashCode());
-                if (name != default) ___h.Add(name.GetHashCode());
-                if (size != default) ___h.Add(size.GetHashCode());
-                foreach (var n in tags)
-                {
-                    if (n != default) ___h.Add(n.GetHashCode());
-                }
-                return ___h.ToHashCode();
-            });
-        }
-
-        public global::Omnius.Core.Cryptography.OmniHash ContentHash { get; }
-        public string Name { get; }
-        public ulong Size { get; }
-        public global::Omnius.Core.Collections.ReadOnlyListSlim<string> Tags { get; }
-
-        public static global::Omnius.Xeus.Interactors.Models.XeusFileMeta Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
-        {
-            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
-            return Formatter.Deserialize(ref reader, 0);
-        }
-        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
-        {
-            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
-            Formatter.Serialize(ref writer, this, 0);
-        }
-
-        public static bool operator ==(global::Omnius.Xeus.Interactors.Models.XeusFileMeta? left, global::Omnius.Xeus.Interactors.Models.XeusFileMeta? right)
-        {
-            return (right is null) ? (left is null) : right.Equals(left);
-        }
-        public static bool operator !=(global::Omnius.Xeus.Interactors.Models.XeusFileMeta? left, global::Omnius.Xeus.Interactors.Models.XeusFileMeta? right)
-        {
-            return !(left == right);
-        }
-        public override bool Equals(object? other)
-        {
-            if (other is not global::Omnius.Xeus.Interactors.Models.XeusFileMeta) return false;
-            return this.Equals((global::Omnius.Xeus.Interactors.Models.XeusFileMeta)other);
-        }
-        public bool Equals(global::Omnius.Xeus.Interactors.Models.XeusFileMeta? target)
-        {
-            if (target is null) return false;
-            if (object.ReferenceEquals(this, target)) return true;
-            if (this.ContentHash != target.ContentHash) return false;
-            if (this.Name != target.Name) return false;
-            if (this.Size != target.Size) return false;
-            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Tags, target.Tags)) return false;
-
-            return true;
-        }
-        public override int GetHashCode() => ___hashCode.Value;
-
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Interactors.Models.XeusFileMeta>
-        {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Interactors.Models.XeusFileMeta value, in int rank)
-            {
-                if (rank > 256) throw new global::System.FormatException();
-
-                if (value.ContentHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
-                {
-                    w.Write((uint)1);
-                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.ContentHash, rank + 1);
-                }
-                if (value.Name != string.Empty)
-                {
-                    w.Write((uint)2);
-                    w.Write(value.Name);
-                }
-                if (value.Size != 0)
-                {
-                    w.Write((uint)3);
-                    w.Write(value.Size);
-                }
-                if (value.Tags.Count != 0)
-                {
-                    w.Write((uint)4);
-                    w.Write((uint)value.Tags.Count);
-                    foreach (var n in value.Tags)
-                    {
-                        w.Write(n);
-                    }
-                }
-                w.Write((uint)0);
-            }
-            public global::Omnius.Xeus.Interactors.Models.XeusFileMeta Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
-            {
-                if (rank > 256) throw new global::System.FormatException();
-
-                global::Omnius.Core.Cryptography.OmniHash p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
-                string p_name = string.Empty;
-                ulong p_size = 0;
-                string[] p_tags = global::System.Array.Empty<string>();
-
-                for (; ; )
-                {
-                    uint id = r.GetUInt32();
-                    if (id == 0) break;
-                    switch (id)
-                    {
-                        case 1:
-                            {
-                                p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
-                                break;
-                            }
-                        case 2:
-                            {
-                                p_name = r.GetString(256);
-                                break;
-                            }
-                        case 3:
-                            {
-                                p_size = r.GetUInt64();
-                                break;
-                            }
-                        case 4:
-                            {
-                                var length = r.GetUInt32();
-                                p_tags = new string[length];
-                                for (int i = 0; i < p_tags.Length; i++)
-                                {
-                                    p_tags[i] = r.GetString(256);
-                                }
-                                break;
-                            }
-                    }
-                }
-
-                return new global::Omnius.Xeus.Interactors.Models.XeusFileMeta(p_contentHash, p_name, p_size, p_tags);
-            }
-        }
-    }
-    public sealed partial class XeusUserProfile : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.XeusUserProfile>
-    {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Interactors.Models.XeusUserProfile> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.XeusUserProfile>.Formatter;
-        public static global::Omnius.Xeus.Interactors.Models.XeusUserProfile Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.XeusUserProfile>.Empty;
-
-        static XeusUserProfile()
-        {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.XeusUserProfile>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.XeusUserProfile>.Empty = new global::Omnius.Xeus.Interactors.Models.XeusUserProfile(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Timestamp.Zero, global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent.Empty);
-        }
-
-        private readonly global::System.Lazy<int> ___hashCode;
-
-        public XeusUserProfile(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Timestamp creationTime, global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent content)
+        public UserProfile(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Timestamp creationTime, global::Omnius.Xeus.Interactors.Models.UserProfileContent content)
         {
             if (signature is null) throw new global::System.ArgumentNullException("signature");
             if (content is null) throw new global::System.ArgumentNullException("content");
@@ -205,9 +37,9 @@ namespace Omnius.Xeus.Interactors.Models
 
         public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
         public global::Omnius.Core.RocketPack.Timestamp CreationTime { get; }
-        public global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent Content { get; }
+        public global::Omnius.Xeus.Interactors.Models.UserProfileContent Content { get; }
 
-        public static global::Omnius.Xeus.Interactors.Models.XeusUserProfile Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Interactors.Models.UserProfile Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -218,20 +50,20 @@ namespace Omnius.Xeus.Interactors.Models
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(global::Omnius.Xeus.Interactors.Models.XeusUserProfile? left, global::Omnius.Xeus.Interactors.Models.XeusUserProfile? right)
+        public static bool operator ==(global::Omnius.Xeus.Interactors.Models.UserProfile? left, global::Omnius.Xeus.Interactors.Models.UserProfile? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(global::Omnius.Xeus.Interactors.Models.XeusUserProfile? left, global::Omnius.Xeus.Interactors.Models.XeusUserProfile? right)
+        public static bool operator !=(global::Omnius.Xeus.Interactors.Models.UserProfile? left, global::Omnius.Xeus.Interactors.Models.UserProfile? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (other is not global::Omnius.Xeus.Interactors.Models.XeusUserProfile) return false;
-            return this.Equals((global::Omnius.Xeus.Interactors.Models.XeusUserProfile)other);
+            if (other is not global::Omnius.Xeus.Interactors.Models.UserProfile) return false;
+            return this.Equals((global::Omnius.Xeus.Interactors.Models.UserProfile)other);
         }
-        public bool Equals(global::Omnius.Xeus.Interactors.Models.XeusUserProfile? target)
+        public bool Equals(global::Omnius.Xeus.Interactors.Models.UserProfile? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -243,9 +75,9 @@ namespace Omnius.Xeus.Interactors.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Interactors.Models.XeusUserProfile>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Interactors.Models.UserProfile>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Interactors.Models.XeusUserProfile value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Interactors.Models.UserProfile value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -259,20 +91,20 @@ namespace Omnius.Xeus.Interactors.Models
                     w.Write((uint)2);
                     w.Write(value.CreationTime);
                 }
-                if (value.Content != global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent.Empty)
+                if (value.Content != global::Omnius.Xeus.Interactors.Models.UserProfileContent.Empty)
                 {
                     w.Write((uint)3);
-                    global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent.Formatter.Serialize(ref w, value.Content, rank + 1);
+                    global::Omnius.Xeus.Interactors.Models.UserProfileContent.Formatter.Serialize(ref w, value.Content, rank + 1);
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Interactors.Models.XeusUserProfile Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Interactors.Models.UserProfile Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
                 global::Omnius.Core.Cryptography.OmniSignature p_signature = global::Omnius.Core.Cryptography.OmniSignature.Empty;
                 global::Omnius.Core.RocketPack.Timestamp p_creationTime = global::Omnius.Core.RocketPack.Timestamp.Zero;
-                global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent p_content = global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent.Empty;
+                global::Omnius.Xeus.Interactors.Models.UserProfileContent p_content = global::Omnius.Xeus.Interactors.Models.UserProfileContent.Empty;
 
                 for (; ; )
                 {
@@ -292,34 +124,34 @@ namespace Omnius.Xeus.Interactors.Models
                             }
                         case 3:
                             {
-                                p_content = global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent.Formatter.Deserialize(ref r, rank + 1);
+                                p_content = global::Omnius.Xeus.Interactors.Models.UserProfileContent.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
                 }
 
-                return new global::Omnius.Xeus.Interactors.Models.XeusUserProfile(p_signature, p_creationTime, p_content);
+                return new global::Omnius.Xeus.Interactors.Models.UserProfile(p_signature, p_creationTime, p_content);
             }
         }
     }
-    public sealed partial class XeusUserProfileContent : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent>
+    public sealed partial class UserProfileContent : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.UserProfileContent>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent>.Formatter;
-        public static global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Interactors.Models.UserProfileContent> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.UserProfileContent>.Formatter;
+        public static global::Omnius.Xeus.Interactors.Models.UserProfileContent Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.UserProfileContent>.Empty;
 
-        static XeusUserProfileContent()
+        static UserProfileContent()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent>.Empty = new global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent(global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>(), global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>(), global::System.Array.Empty<global::Omnius.Xeus.Interactors.Models.XeusFileMeta>());
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.UserProfileContent>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.UserProfileContent>.Empty = new global::Omnius.Xeus.Interactors.Models.UserProfileContent(global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>(), global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>(), global::System.Array.Empty<global::Omnius.Xeus.Interactors.Models.Box>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxTrustedSignaturesCount = 32768;
         public static readonly int MaxBlockedSignaturesCount = 32768;
-        public static readonly int MaxFileMetasCount = 33554432;
+        public static readonly int MaxBoxesCount = 33554432;
 
-        public XeusUserProfileContent(global::Omnius.Core.Cryptography.OmniSignature[] trustedSignatures, global::Omnius.Core.Cryptography.OmniSignature[] blockedSignatures, global::Omnius.Xeus.Interactors.Models.XeusFileMeta[] fileMetas)
+        public UserProfileContent(global::Omnius.Core.Cryptography.OmniSignature[] trustedSignatures, global::Omnius.Core.Cryptography.OmniSignature[] blockedSignatures, global::Omnius.Xeus.Interactors.Models.Box[] boxes)
         {
             if (trustedSignatures is null) throw new global::System.ArgumentNullException("trustedSignatures");
             if (trustedSignatures.Length > 32768) throw new global::System.ArgumentOutOfRangeException("trustedSignatures");
@@ -333,16 +165,16 @@ namespace Omnius.Xeus.Interactors.Models
             {
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
-            if (fileMetas is null) throw new global::System.ArgumentNullException("fileMetas");
-            if (fileMetas.Length > 33554432) throw new global::System.ArgumentOutOfRangeException("fileMetas");
-            foreach (var n in fileMetas)
+            if (boxes is null) throw new global::System.ArgumentNullException("boxes");
+            if (boxes.Length > 33554432) throw new global::System.ArgumentOutOfRangeException("boxes");
+            foreach (var n in boxes)
             {
                 if (n is null) throw new global::System.ArgumentNullException("n");
             }
 
             this.TrustedSignatures = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Cryptography.OmniSignature>(trustedSignatures);
             this.BlockedSignatures = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Cryptography.OmniSignature>(blockedSignatures);
-            this.FileMetas = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Xeus.Interactors.Models.XeusFileMeta>(fileMetas);
+            this.Boxes = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Xeus.Interactors.Models.Box>(boxes);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -355,7 +187,7 @@ namespace Omnius.Xeus.Interactors.Models
                 {
                     if (n != default) ___h.Add(n.GetHashCode());
                 }
-                foreach (var n in fileMetas)
+                foreach (var n in boxes)
                 {
                     if (n != default) ___h.Add(n.GetHashCode());
                 }
@@ -365,9 +197,9 @@ namespace Omnius.Xeus.Interactors.Models
 
         public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Cryptography.OmniSignature> TrustedSignatures { get; }
         public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Cryptography.OmniSignature> BlockedSignatures { get; }
-        public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Xeus.Interactors.Models.XeusFileMeta> FileMetas { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Xeus.Interactors.Models.Box> Boxes { get; }
 
-        public static global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Interactors.Models.UserProfileContent Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -378,34 +210,34 @@ namespace Omnius.Xeus.Interactors.Models
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent? left, global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent? right)
+        public static bool operator ==(global::Omnius.Xeus.Interactors.Models.UserProfileContent? left, global::Omnius.Xeus.Interactors.Models.UserProfileContent? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent? left, global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent? right)
+        public static bool operator !=(global::Omnius.Xeus.Interactors.Models.UserProfileContent? left, global::Omnius.Xeus.Interactors.Models.UserProfileContent? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (other is not global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent) return false;
-            return this.Equals((global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent)other);
+            if (other is not global::Omnius.Xeus.Interactors.Models.UserProfileContent) return false;
+            return this.Equals((global::Omnius.Xeus.Interactors.Models.UserProfileContent)other);
         }
-        public bool Equals(global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent? target)
+        public bool Equals(global::Omnius.Xeus.Interactors.Models.UserProfileContent? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.TrustedSignatures, target.TrustedSignatures)) return false;
             if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.BlockedSignatures, target.BlockedSignatures)) return false;
-            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.FileMetas, target.FileMetas)) return false;
+            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Boxes, target.Boxes)) return false;
 
             return true;
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Interactors.Models.UserProfileContent>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Interactors.Models.UserProfileContent value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -427,24 +259,24 @@ namespace Omnius.Xeus.Interactors.Models
                         global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, n, rank + 1);
                     }
                 }
-                if (value.FileMetas.Count != 0)
+                if (value.Boxes.Count != 0)
                 {
                     w.Write((uint)3);
-                    w.Write((uint)value.FileMetas.Count);
-                    foreach (var n in value.FileMetas)
+                    w.Write((uint)value.Boxes.Count);
+                    foreach (var n in value.Boxes)
                     {
-                        global::Omnius.Xeus.Interactors.Models.XeusFileMeta.Formatter.Serialize(ref w, n, rank + 1);
+                        global::Omnius.Xeus.Interactors.Models.Box.Formatter.Serialize(ref w, n, rank + 1);
                     }
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Interactors.Models.UserProfileContent Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
                 global::Omnius.Core.Cryptography.OmniSignature[] p_trustedSignatures = global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>();
                 global::Omnius.Core.Cryptography.OmniSignature[] p_blockedSignatures = global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>();
-                global::Omnius.Xeus.Interactors.Models.XeusFileMeta[] p_fileMetas = global::System.Array.Empty<global::Omnius.Xeus.Interactors.Models.XeusFileMeta>();
+                global::Omnius.Xeus.Interactors.Models.Box[] p_boxes = global::System.Array.Empty<global::Omnius.Xeus.Interactors.Models.Box>();
 
                 for (; ; )
                 {
@@ -475,17 +307,354 @@ namespace Omnius.Xeus.Interactors.Models
                         case 3:
                             {
                                 var length = r.GetUInt32();
-                                p_fileMetas = new global::Omnius.Xeus.Interactors.Models.XeusFileMeta[length];
-                                for (int i = 0; i < p_fileMetas.Length; i++)
+                                p_boxes = new global::Omnius.Xeus.Interactors.Models.Box[length];
+                                for (int i = 0; i < p_boxes.Length; i++)
                                 {
-                                    p_fileMetas[i] = global::Omnius.Xeus.Interactors.Models.XeusFileMeta.Formatter.Deserialize(ref r, rank + 1);
+                                    p_boxes[i] = global::Omnius.Xeus.Interactors.Models.Box.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
                     }
                 }
 
-                return new global::Omnius.Xeus.Interactors.Models.XeusUserProfileContent(p_trustedSignatures, p_blockedSignatures, p_fileMetas);
+                return new global::Omnius.Xeus.Interactors.Models.UserProfileContent(p_trustedSignatures, p_blockedSignatures, p_boxes);
+            }
+        }
+    }
+    public sealed partial class Box : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.Box>
+    {
+        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Interactors.Models.Box> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.Box>.Formatter;
+        public static global::Omnius.Xeus.Interactors.Models.Box Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.Box>.Empty;
+
+        static Box()
+        {
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.Box>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.Box>.Empty = new global::Omnius.Xeus.Interactors.Models.Box(null, global::System.Array.Empty<string>(), global::System.Array.Empty<global::Omnius.Xeus.Interactors.Models.Seed>(), global::System.Array.Empty<global::Omnius.Xeus.Interactors.Models.Box>());
+        }
+
+        private readonly global::System.Lazy<int> ___hashCode;
+
+        public static readonly int MaxNameLength = 256;
+        public static readonly int MaxTagsCount = 8;
+        public static readonly int MaxSeedsCount = 33554432;
+        public static readonly int MaxBoxesCount = 33554432;
+
+        public Box(string? name, string[] tags, global::Omnius.Xeus.Interactors.Models.Seed[] seeds, global::Omnius.Xeus.Interactors.Models.Box[] boxes)
+        {
+            if (name is not null && name.Length > 256) throw new global::System.ArgumentOutOfRangeException("name");
+            if (tags is null) throw new global::System.ArgumentNullException("tags");
+            if (tags.Length > 8) throw new global::System.ArgumentOutOfRangeException("tags");
+            foreach (var n in tags)
+            {
+                if (n is null) throw new global::System.ArgumentNullException("n");
+                if (n.Length > 256) throw new global::System.ArgumentOutOfRangeException("n");
+            }
+            if (seeds is null) throw new global::System.ArgumentNullException("seeds");
+            if (seeds.Length > 33554432) throw new global::System.ArgumentOutOfRangeException("seeds");
+            foreach (var n in seeds)
+            {
+                if (n is null) throw new global::System.ArgumentNullException("n");
+            }
+            if (boxes is null) throw new global::System.ArgumentNullException("boxes");
+            if (boxes.Length > 33554432) throw new global::System.ArgumentOutOfRangeException("boxes");
+            foreach (var n in boxes)
+            {
+                if (n is null) throw new global::System.ArgumentNullException("n");
+            }
+
+            this.Name = name;
+            this.Tags = new global::Omnius.Core.Collections.ReadOnlyListSlim<string>(tags);
+            this.Seeds = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Xeus.Interactors.Models.Seed>(seeds);
+            this.Boxes = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Xeus.Interactors.Models.Box>(boxes);
+
+            ___hashCode = new global::System.Lazy<int>(() =>
+            {
+                var ___h = new global::System.HashCode();
+                if (name != default) ___h.Add(name.GetHashCode());
+                foreach (var n in tags)
+                {
+                    if (n != default) ___h.Add(n.GetHashCode());
+                }
+                foreach (var n in seeds)
+                {
+                    if (n != default) ___h.Add(n.GetHashCode());
+                }
+                foreach (var n in boxes)
+                {
+                    if (n != default) ___h.Add(n.GetHashCode());
+                }
+                return ___h.ToHashCode();
+            });
+        }
+
+        public string? Name { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<string> Tags { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Xeus.Interactors.Models.Seed> Seeds { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Xeus.Interactors.Models.Box> Boxes { get; }
+
+        public static global::Omnius.Xeus.Interactors.Models.Box Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            return Formatter.Deserialize(ref reader, 0);
+        }
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            Formatter.Serialize(ref writer, this, 0);
+        }
+
+        public static bool operator ==(global::Omnius.Xeus.Interactors.Models.Box? left, global::Omnius.Xeus.Interactors.Models.Box? right)
+        {
+            return (right is null) ? (left is null) : right.Equals(left);
+        }
+        public static bool operator !=(global::Omnius.Xeus.Interactors.Models.Box? left, global::Omnius.Xeus.Interactors.Models.Box? right)
+        {
+            return !(left == right);
+        }
+        public override bool Equals(object? other)
+        {
+            if (other is not global::Omnius.Xeus.Interactors.Models.Box) return false;
+            return this.Equals((global::Omnius.Xeus.Interactors.Models.Box)other);
+        }
+        public bool Equals(global::Omnius.Xeus.Interactors.Models.Box? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (this.Name != target.Name) return false;
+            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Tags, target.Tags)) return false;
+            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Seeds, target.Seeds)) return false;
+            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Boxes, target.Boxes)) return false;
+
+            return true;
+        }
+        public override int GetHashCode() => ___hashCode.Value;
+
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Interactors.Models.Box>
+        {
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Interactors.Models.Box value, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                if (value.Name != null)
+                {
+                    w.Write((uint)1);
+                    w.Write(value.Name);
+                }
+                if (value.Tags.Count != 0)
+                {
+                    w.Write((uint)2);
+                    w.Write((uint)value.Tags.Count);
+                    foreach (var n in value.Tags)
+                    {
+                        w.Write(n);
+                    }
+                }
+                if (value.Seeds.Count != 0)
+                {
+                    w.Write((uint)3);
+                    w.Write((uint)value.Seeds.Count);
+                    foreach (var n in value.Seeds)
+                    {
+                        global::Omnius.Xeus.Interactors.Models.Seed.Formatter.Serialize(ref w, n, rank + 1);
+                    }
+                }
+                if (value.Boxes.Count != 0)
+                {
+                    w.Write((uint)4);
+                    w.Write((uint)value.Boxes.Count);
+                    foreach (var n in value.Boxes)
+                    {
+                        global::Omnius.Xeus.Interactors.Models.Box.Formatter.Serialize(ref w, n, rank + 1);
+                    }
+                }
+                w.Write((uint)0);
+            }
+            public global::Omnius.Xeus.Interactors.Models.Box Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                string? p_name = null;
+                string[] p_tags = global::System.Array.Empty<string>();
+                global::Omnius.Xeus.Interactors.Models.Seed[] p_seeds = global::System.Array.Empty<global::Omnius.Xeus.Interactors.Models.Seed>();
+                global::Omnius.Xeus.Interactors.Models.Box[] p_boxes = global::System.Array.Empty<global::Omnius.Xeus.Interactors.Models.Box>();
+
+                for (; ; )
+                {
+                    uint id = r.GetUInt32();
+                    if (id == 0) break;
+                    switch (id)
+                    {
+                        case 1:
+                            {
+                                p_name = r.GetString(256);
+                                break;
+                            }
+                        case 2:
+                            {
+                                var length = r.GetUInt32();
+                                p_tags = new string[length];
+                                for (int i = 0; i < p_tags.Length; i++)
+                                {
+                                    p_tags[i] = r.GetString(256);
+                                }
+                                break;
+                            }
+                        case 3:
+                            {
+                                var length = r.GetUInt32();
+                                p_seeds = new global::Omnius.Xeus.Interactors.Models.Seed[length];
+                                for (int i = 0; i < p_seeds.Length; i++)
+                                {
+                                    p_seeds[i] = global::Omnius.Xeus.Interactors.Models.Seed.Formatter.Deserialize(ref r, rank + 1);
+                                }
+                                break;
+                            }
+                        case 4:
+                            {
+                                var length = r.GetUInt32();
+                                p_boxes = new global::Omnius.Xeus.Interactors.Models.Box[length];
+                                for (int i = 0; i < p_boxes.Length; i++)
+                                {
+                                    p_boxes[i] = global::Omnius.Xeus.Interactors.Models.Box.Formatter.Deserialize(ref r, rank + 1);
+                                }
+                                break;
+                            }
+                    }
+                }
+
+                return new global::Omnius.Xeus.Interactors.Models.Box(p_name, p_tags, p_seeds, p_boxes);
+            }
+        }
+    }
+    public sealed partial class Seed : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.Seed>
+    {
+        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Interactors.Models.Seed> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.Seed>.Formatter;
+        public static global::Omnius.Xeus.Interactors.Models.Seed Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.Seed>.Empty;
+
+        static Seed()
+        {
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.Seed>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.Seed>.Empty = new global::Omnius.Xeus.Interactors.Models.Seed(global::Omnius.Core.Cryptography.OmniHash.Empty, string.Empty, 0);
+        }
+
+        private readonly global::System.Lazy<int> ___hashCode;
+
+        public static readonly int MaxNameLength = 256;
+
+        public Seed(global::Omnius.Core.Cryptography.OmniHash rootHash, string name, ulong size)
+        {
+            if (name is null) throw new global::System.ArgumentNullException("name");
+            if (name.Length > 256) throw new global::System.ArgumentOutOfRangeException("name");
+            this.RootHash = rootHash;
+            this.Name = name;
+            this.Size = size;
+
+            ___hashCode = new global::System.Lazy<int>(() =>
+            {
+                var ___h = new global::System.HashCode();
+                if (rootHash != default) ___h.Add(rootHash.GetHashCode());
+                if (name != default) ___h.Add(name.GetHashCode());
+                if (size != default) ___h.Add(size.GetHashCode());
+                return ___h.ToHashCode();
+            });
+        }
+
+        public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
+        public string Name { get; }
+        public ulong Size { get; }
+
+        public static global::Omnius.Xeus.Interactors.Models.Seed Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            return Formatter.Deserialize(ref reader, 0);
+        }
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            Formatter.Serialize(ref writer, this, 0);
+        }
+
+        public static bool operator ==(global::Omnius.Xeus.Interactors.Models.Seed? left, global::Omnius.Xeus.Interactors.Models.Seed? right)
+        {
+            return (right is null) ? (left is null) : right.Equals(left);
+        }
+        public static bool operator !=(global::Omnius.Xeus.Interactors.Models.Seed? left, global::Omnius.Xeus.Interactors.Models.Seed? right)
+        {
+            return !(left == right);
+        }
+        public override bool Equals(object? other)
+        {
+            if (other is not global::Omnius.Xeus.Interactors.Models.Seed) return false;
+            return this.Equals((global::Omnius.Xeus.Interactors.Models.Seed)other);
+        }
+        public bool Equals(global::Omnius.Xeus.Interactors.Models.Seed? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (this.RootHash != target.RootHash) return false;
+            if (this.Name != target.Name) return false;
+            if (this.Size != target.Size) return false;
+
+            return true;
+        }
+        public override int GetHashCode() => ___hashCode.Value;
+
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Interactors.Models.Seed>
+        {
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Interactors.Models.Seed value, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                if (value.RootHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
+                {
+                    w.Write((uint)1);
+                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.RootHash, rank + 1);
+                }
+                if (value.Name != string.Empty)
+                {
+                    w.Write((uint)2);
+                    w.Write(value.Name);
+                }
+                if (value.Size != 0)
+                {
+                    w.Write((uint)3);
+                    w.Write(value.Size);
+                }
+                w.Write((uint)0);
+            }
+            public global::Omnius.Xeus.Interactors.Models.Seed Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                global::Omnius.Core.Cryptography.OmniHash p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
+                string p_name = string.Empty;
+                ulong p_size = 0;
+
+                for (; ; )
+                {
+                    uint id = r.GetUInt32();
+                    if (id == 0) break;
+                    switch (id)
+                    {
+                        case 1:
+                            {
+                                p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                break;
+                            }
+                        case 2:
+                            {
+                                p_name = r.GetString(256);
+                                break;
+                            }
+                        case 3:
+                            {
+                                p_size = r.GetUInt64();
+                                break;
+                            }
+                    }
+                }
+
+                return new global::Omnius.Xeus.Interactors.Models.Seed(p_rootHash, p_name, p_size);
             }
         }
     }
@@ -497,14 +666,14 @@ namespace Omnius.Xeus.Interactors.Models
         static ConnectionReport()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.ConnectionReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.ConnectionReport>.Empty = new global::Omnius.Xeus.Interactors.Models.ConnectionReport(string.Empty, (global::Omnius.Xeus.Engines.Models.ConnectionHandshakeType)0, global::Omnius.Core.Network.OmniAddress.Empty);
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.ConnectionReport>.Empty = new global::Omnius.Xeus.Interactors.Models.ConnectionReport(string.Empty, (global::Omnius.Xeus.Engines.Models.ConnectionHandshakeType)0, global::Omnius.Core.Net.OmniAddress.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxEngineNameLength = 256;
 
-        public ConnectionReport(string engineName, global::Omnius.Xeus.Engines.Models.ConnectionHandshakeType handshakeType, global::Omnius.Core.Network.OmniAddress address)
+        public ConnectionReport(string engineName, global::Omnius.Xeus.Engines.Models.ConnectionHandshakeType handshakeType, global::Omnius.Core.Net.OmniAddress address)
         {
             if (engineName is null) throw new global::System.ArgumentNullException("engineName");
             if (engineName.Length > 256) throw new global::System.ArgumentOutOfRangeException("engineName");
@@ -526,7 +695,7 @@ namespace Omnius.Xeus.Interactors.Models
 
         public string EngineName { get; }
         public global::Omnius.Xeus.Engines.Models.ConnectionHandshakeType HandshakeType { get; }
-        public global::Omnius.Core.Network.OmniAddress Address { get; }
+        public global::Omnius.Core.Net.OmniAddress Address { get; }
 
         public static global::Omnius.Xeus.Interactors.Models.ConnectionReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -580,10 +749,10 @@ namespace Omnius.Xeus.Interactors.Models
                     w.Write((uint)2);
                     w.Write((ulong)value.HandshakeType);
                 }
-                if (value.Address != global::Omnius.Core.Network.OmniAddress.Empty)
+                if (value.Address != global::Omnius.Core.Net.OmniAddress.Empty)
                 {
                     w.Write((uint)3);
-                    global::Omnius.Core.Network.OmniAddress.Formatter.Serialize(ref w, value.Address, rank + 1);
+                    global::Omnius.Core.Net.OmniAddress.Formatter.Serialize(ref w, value.Address, rank + 1);
                 }
                 w.Write((uint)0);
             }
@@ -593,7 +762,7 @@ namespace Omnius.Xeus.Interactors.Models
 
                 string p_engineName = string.Empty;
                 global::Omnius.Xeus.Engines.Models.ConnectionHandshakeType p_handshakeType = (global::Omnius.Xeus.Engines.Models.ConnectionHandshakeType)0;
-                global::Omnius.Core.Network.OmniAddress p_address = global::Omnius.Core.Network.OmniAddress.Empty;
+                global::Omnius.Core.Net.OmniAddress p_address = global::Omnius.Core.Net.OmniAddress.Empty;
 
                 for (; ; )
                 {
@@ -613,7 +782,7 @@ namespace Omnius.Xeus.Interactors.Models
                             }
                         case 3:
                             {
-                                p_address = global::Omnius.Core.Network.OmniAddress.Formatter.Deserialize(ref r, rank + 1);
+                                p_address = global::Omnius.Core.Net.OmniAddress.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
@@ -837,33 +1006,33 @@ namespace Omnius.Xeus.Interactors.Models
         static DownloadingFileReport()
         {
             global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.DownloadingFileReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.DownloadingFileReport>.Empty = new global::Omnius.Xeus.Interactors.Models.DownloadingFileReport(global::Omnius.Xeus.Interactors.Models.XeusFileMeta.Empty, string.Empty, global::Omnius.Core.RocketPack.Timestamp.Zero);
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Interactors.Models.DownloadingFileReport>.Empty = new global::Omnius.Xeus.Interactors.Models.DownloadingFileReport(global::Omnius.Xeus.Interactors.Models.Seed.Empty, string.Empty, global::Omnius.Core.RocketPack.Timestamp.Zero);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxTargetDirectoryPathLength = 1024;
 
-        public DownloadingFileReport(global::Omnius.Xeus.Interactors.Models.XeusFileMeta fileMeta, string targetDirectoryPath, global::Omnius.Core.RocketPack.Timestamp creationTime)
+        public DownloadingFileReport(global::Omnius.Xeus.Interactors.Models.Seed seed, string targetDirectoryPath, global::Omnius.Core.RocketPack.Timestamp creationTime)
         {
-            if (fileMeta is null) throw new global::System.ArgumentNullException("fileMeta");
+            if (seed is null) throw new global::System.ArgumentNullException("seed");
             if (targetDirectoryPath is null) throw new global::System.ArgumentNullException("targetDirectoryPath");
             if (targetDirectoryPath.Length > 1024) throw new global::System.ArgumentOutOfRangeException("targetDirectoryPath");
-            this.FileMeta = fileMeta;
+            this.Seed = seed;
             this.TargetDirectoryPath = targetDirectoryPath;
             this.CreationTime = creationTime;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (fileMeta != default) ___h.Add(fileMeta.GetHashCode());
+                if (seed != default) ___h.Add(seed.GetHashCode());
                 if (targetDirectoryPath != default) ___h.Add(targetDirectoryPath.GetHashCode());
                 if (creationTime != default) ___h.Add(creationTime.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public global::Omnius.Xeus.Interactors.Models.XeusFileMeta FileMeta { get; }
+        public global::Omnius.Xeus.Interactors.Models.Seed Seed { get; }
         public string TargetDirectoryPath { get; }
         public global::Omnius.Core.RocketPack.Timestamp CreationTime { get; }
 
@@ -895,7 +1064,7 @@ namespace Omnius.Xeus.Interactors.Models
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.FileMeta != target.FileMeta) return false;
+            if (this.Seed != target.Seed) return false;
             if (this.TargetDirectoryPath != target.TargetDirectoryPath) return false;
             if (this.CreationTime != target.CreationTime) return false;
 
@@ -909,10 +1078,10 @@ namespace Omnius.Xeus.Interactors.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.FileMeta != global::Omnius.Xeus.Interactors.Models.XeusFileMeta.Empty)
+                if (value.Seed != global::Omnius.Xeus.Interactors.Models.Seed.Empty)
                 {
                     w.Write((uint)1);
-                    global::Omnius.Xeus.Interactors.Models.XeusFileMeta.Formatter.Serialize(ref w, value.FileMeta, rank + 1);
+                    global::Omnius.Xeus.Interactors.Models.Seed.Formatter.Serialize(ref w, value.Seed, rank + 1);
                 }
                 if (value.TargetDirectoryPath != string.Empty)
                 {
@@ -930,7 +1099,7 @@ namespace Omnius.Xeus.Interactors.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                global::Omnius.Xeus.Interactors.Models.XeusFileMeta p_fileMeta = global::Omnius.Xeus.Interactors.Models.XeusFileMeta.Empty;
+                global::Omnius.Xeus.Interactors.Models.Seed p_seed = global::Omnius.Xeus.Interactors.Models.Seed.Empty;
                 string p_targetDirectoryPath = string.Empty;
                 global::Omnius.Core.RocketPack.Timestamp p_creationTime = global::Omnius.Core.RocketPack.Timestamp.Zero;
 
@@ -942,7 +1111,7 @@ namespace Omnius.Xeus.Interactors.Models
                     {
                         case 1:
                             {
-                                p_fileMeta = global::Omnius.Xeus.Interactors.Models.XeusFileMeta.Formatter.Deserialize(ref r, rank + 1);
+                                p_seed = global::Omnius.Xeus.Interactors.Models.Seed.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 2:
@@ -958,7 +1127,7 @@ namespace Omnius.Xeus.Interactors.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Interactors.Models.DownloadingFileReport(p_fileMeta, p_targetDirectoryPath, p_creationTime);
+                return new global::Omnius.Xeus.Interactors.Models.DownloadingFileReport(p_seed, p_targetDirectoryPath, p_creationTime);
             }
         }
     }

@@ -4,8 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Extensions;
-using Omnius.Core.Network.Proxies;
-using Omnius.Core.Network.Upnp;
+using Omnius.Core.Net.Proxies;
+using Omnius.Core.Net.Upnp;
 using Omnius.Core.Storages;
 using Omnius.Xeus.Api;
 using Omnius.Xeus.Daemon.Configuration;
@@ -188,7 +188,7 @@ namespace Omnius.Xeus.Daemon
 
         public async ValueTask ContentPublisher_UnpublishContentAsync(ContentPublisher_UnpublishContent_Memory_Input param, CancellationToken cancellationToken = default)
         {
-            await _contentPublisher.UnpublishContentAsync(param.ContentHash, param.Registrant, cancellationToken);
+            await _contentPublisher.UnpublishContentAsync(param.RootHash, param.Registrant, cancellationToken);
         }
 
         public async ValueTask<ContentSubscriber_GetReport_Output> ContentSubscriber_GetReportAsync(CancellationToken cancellationToken = default)
@@ -199,23 +199,23 @@ namespace Omnius.Xeus.Daemon
 
         public async ValueTask ContentSubscriber_SubscribeContentAsync(ContentSubscriber_SubscribeContent_Input param, CancellationToken cancellationToken = default)
         {
-            await _contentSubscriber.SubscribeContentAsync(param.ContentHash, param.Registrant, cancellationToken);
+            await _contentSubscriber.SubscribeContentAsync(param.RootHash, param.Registrant, cancellationToken);
         }
 
         public async ValueTask ContentSubscriber_UnsubscribeContentAsync(ContentSubscriber_UnsubscribeContent_Input param, CancellationToken cancellationToken = default)
         {
-            await _contentSubscriber.UnsubscribeContentAsync(param.ContentHash, param.Registrant, cancellationToken);
+            await _contentSubscriber.UnsubscribeContentAsync(param.RootHash, param.Registrant, cancellationToken);
         }
 
         public async ValueTask ContentSubscriber_ExportContentAsync(ContentSubscriber_ExportContent_File_Input param, CancellationToken cancellationToken = default)
         {
-            await _contentSubscriber.ExportContentAsync(param.ContentHash, param.FilePath, cancellationToken);
+            await _contentSubscriber.ExportContentAsync(param.RootHash, param.FilePath, cancellationToken);
         }
 
         public async ValueTask<ContentSubscriber_ExportContent_Memory_Output> ContentSubscriber_ExportContentAsync(ContentSubscriber_ExportContent_Memory_Input param, CancellationToken cancellationToken = default)
         {
             using var hub = new BytesHub();
-            await _contentSubscriber.ExportContentAsync(param.ContentHash, hub.Writer, cancellationToken);
+            await _contentSubscriber.ExportContentAsync(param.RootHash, hub.Writer, cancellationToken);
 
             var sequence = hub.Reader.GetSequence();
             var memoryOwner = _bytesPool.Memory.Rent((int)sequence.Length).Shrink((int)sequence.Length);

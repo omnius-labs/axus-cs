@@ -24,6 +24,6 @@ namespace Omnius.Xeus.Interactors
 
         ValueTask UnregisterAsync(OmniSignature signature, CancellationToken cancellationToken = default);
 
-        ValueTask<XeusUserProfile?> ExportAsync(OmniSignature signature, CancellationToken cancellationToken = default);
+        ValueTask<UserProfile?> ExportAsync(OmniSignature signature, CancellationToken cancellationToken = default);
     }
 }

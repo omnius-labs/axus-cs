@@ -279,19 +279,19 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public ContentExchangerHandshakeRequestMessage(global::Omnius.Core.Cryptography.OmniHash contentHash)
+        public ContentExchangerHandshakeRequestMessage(global::Omnius.Core.Cryptography.OmniHash rootHash)
         {
-            this.ContentHash = contentHash;
+            this.RootHash = rootHash;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (contentHash != default) ___h.Add(contentHash.GetHashCode());
+                if (rootHash != default) ___h.Add(rootHash.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public global::Omnius.Core.Cryptography.OmniHash ContentHash { get; }
+        public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
 
         public static global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -321,7 +321,7 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.ContentHash != target.ContentHash) return false;
+            if (this.RootHash != target.RootHash) return false;
 
             return true;
         }
@@ -333,10 +333,10 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.ContentHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
+                if (value.RootHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
                 {
                     w.Write((uint)1);
-                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.ContentHash, rank + 1);
+                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.RootHash, rank + 1);
                 }
                 w.Write((uint)0);
             }
@@ -344,7 +344,7 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                global::Omnius.Core.Cryptography.OmniHash p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
+                global::Omnius.Core.Cryptography.OmniHash p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
 
                 for (; ; )
                 {
@@ -354,13 +354,13 @@ namespace Omnius.Xeus.Engines.Exchangers.Internal.Models
                     {
                         case 1:
                             {
-                                p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
                 }
 
-                return new global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage(p_contentHash);
+                return new global::Omnius.Xeus.Engines.Exchangers.Internal.Models.ContentExchangerHandshakeRequestMessage(p_rootHash);
             }
         }
     }

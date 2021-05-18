@@ -2,8 +2,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
-using Omnius.Core.Network.Proxies;
-using Omnius.Core.Network.Upnp;
+using Omnius.Core.Net.Proxies;
+using Omnius.Core.Net.Upnp;
 using Omnius.Xeus.Engines.Connectors.Primitives;
 using Omnius.Xeus.Engines.Models;
 

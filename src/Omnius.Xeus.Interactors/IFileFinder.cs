@@ -15,6 +15,6 @@ namespace Omnius.Xeus.Interactors
 
     public interface IFileFinder : IAsyncDisposable
     {
-        IAsyncEnumerable<XeusFileMeta> FindAllAsync(CancellationToken cancellationToken = default);
+        IAsyncEnumerable<Box> FindAllAsync(CancellationToken cancellationToken = default);
     }
 }
