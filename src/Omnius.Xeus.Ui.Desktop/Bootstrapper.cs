@@ -58,7 +58,7 @@ namespace Omnius.Xeus.Ui.Desktop
             {
                 appSettings = new AppSettings()
                 {
-                    DaemonAddress = OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 40001).ToString(),
+                    DaemonAddress = OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 32321).ToString(),
                 };
 
                 await appSettings.SaveAsync(filePath);

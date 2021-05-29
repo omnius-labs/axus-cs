@@ -12,6 +12,10 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main
     public interface IMainWindowViewModel
     {
         public SelectedTabState SelectedTabState { get; }
+
+        public IStatusControlViewModel StatusControlViewModel { get; }
+
+        public IPeersControlViewModel PeersControlViewModel { get; }
     }
 
     public sealed class SelectedTabState
@@ -49,6 +53,10 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main
         }
 
         public SelectedTabState SelectedTabState { get; } = new();
+
+        public IStatusControlViewModel StatusControlViewModel { get; }
+
+        public IPeersControlViewModel PeersControlViewModel { get; }
     }
 
     public class MainWindowViewModel : AsyncDisposableBase, IMainWindowViewModel

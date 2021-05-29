@@ -658,15 +658,15 @@ namespace Omnius.Xeus.Services.Models
             }
         }
     }
-    public sealed partial class GroupedConnectionReport : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.GroupedConnectionReport>
+    public sealed partial class ConnectionsReport : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.ConnectionsReport>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.GroupedConnectionReport> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.GroupedConnectionReport>.Formatter;
-        public static global::Omnius.Xeus.Services.Models.GroupedConnectionReport Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.GroupedConnectionReport>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.ConnectionsReport> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.ConnectionsReport>.Formatter;
+        public static global::Omnius.Xeus.Services.Models.ConnectionsReport Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.ConnectionsReport>.Empty;
 
-        static GroupedConnectionReport()
+        static ConnectionsReport()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.GroupedConnectionReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.GroupedConnectionReport>.Empty = new global::Omnius.Xeus.Services.Models.GroupedConnectionReport(string.Empty, global::System.Array.Empty<global::Omnius.Xeus.Engines.Models.ConnectionReport>());
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.ConnectionsReport>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.ConnectionsReport>.Empty = new global::Omnius.Xeus.Services.Models.ConnectionsReport(string.Empty, global::System.Array.Empty<global::Omnius.Xeus.Engines.Models.ConnectionReport>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -674,7 +674,7 @@ namespace Omnius.Xeus.Services.Models
         public static readonly int MaxEngineNameLength = 256;
         public static readonly int MaxConnectionsCount = 2147483647;
 
-        public GroupedConnectionReport(string engineName, global::Omnius.Xeus.Engines.Models.ConnectionReport[] connections)
+        public ConnectionsReport(string engineName, global::Omnius.Xeus.Engines.Models.ConnectionReport[] connections)
         {
             if (engineName is null) throw new global::System.ArgumentNullException("engineName");
             if (engineName.Length > 256) throw new global::System.ArgumentOutOfRangeException("engineName");
@@ -703,7 +703,7 @@ namespace Omnius.Xeus.Services.Models
         public string EngineName { get; }
         public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Xeus.Engines.Models.ConnectionReport> Connections { get; }
 
-        public static global::Omnius.Xeus.Services.Models.GroupedConnectionReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        public static global::Omnius.Xeus.Services.Models.ConnectionsReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
             var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
@@ -714,20 +714,20 @@ namespace Omnius.Xeus.Services.Models
             Formatter.Serialize(ref writer, this, 0);
         }
 
-        public static bool operator ==(global::Omnius.Xeus.Services.Models.GroupedConnectionReport? left, global::Omnius.Xeus.Services.Models.GroupedConnectionReport? right)
+        public static bool operator ==(global::Omnius.Xeus.Services.Models.ConnectionsReport? left, global::Omnius.Xeus.Services.Models.ConnectionsReport? right)
         {
             return (right is null) ? (left is null) : right.Equals(left);
         }
-        public static bool operator !=(global::Omnius.Xeus.Services.Models.GroupedConnectionReport? left, global::Omnius.Xeus.Services.Models.GroupedConnectionReport? right)
+        public static bool operator !=(global::Omnius.Xeus.Services.Models.ConnectionsReport? left, global::Omnius.Xeus.Services.Models.ConnectionsReport? right)
         {
             return !(left == right);
         }
         public override bool Equals(object? other)
         {
-            if (other is not global::Omnius.Xeus.Services.Models.GroupedConnectionReport) return false;
-            return this.Equals((global::Omnius.Xeus.Services.Models.GroupedConnectionReport)other);
+            if (other is not global::Omnius.Xeus.Services.Models.ConnectionsReport) return false;
+            return this.Equals((global::Omnius.Xeus.Services.Models.ConnectionsReport)other);
         }
-        public bool Equals(global::Omnius.Xeus.Services.Models.GroupedConnectionReport? target)
+        public bool Equals(global::Omnius.Xeus.Services.Models.ConnectionsReport? target)
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
@@ -738,9 +738,9 @@ namespace Omnius.Xeus.Services.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.GroupedConnectionReport>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.ConnectionsReport>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Services.Models.GroupedConnectionReport value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Services.Models.ConnectionsReport value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -760,7 +760,7 @@ namespace Omnius.Xeus.Services.Models
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Services.Models.GroupedConnectionReport Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Services.Models.ConnectionsReport Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -791,7 +791,7 @@ namespace Omnius.Xeus.Services.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Services.Models.GroupedConnectionReport(p_engineName, p_connections);
+                return new global::Omnius.Xeus.Services.Models.ConnectionsReport(p_engineName, p_connections);
             }
         }
     }
