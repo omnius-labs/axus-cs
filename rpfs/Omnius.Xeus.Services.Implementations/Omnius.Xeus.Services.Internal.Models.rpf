@@ -1,0 +1,20 @@
+syntax v1.0;
+
+using "Omnius.Core.Cryptography";
+using "Omnius.Core.Net";
+using "Omnius.Xeus.Engines.Models";
+using "Omnius.Xeus.Services.Models";
+
+namespace "Omnius.Xeus.Services.Internal.Models";
+
+message DownloadingUserProfileItem {
+    Signature: OmniSignature,
+    RootHash: OmniHash,
+    CreationTime: timestamp,
+}
+
+message UploadingUserProfileItem {
+    Signature: OmniSignature,
+    RootHash: OmniHash,
+    CreationTime: timestamp,
+}

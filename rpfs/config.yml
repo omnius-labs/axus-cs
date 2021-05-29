@@ -12,9 +12,9 @@
       Output: ./src/Omnius.Xeus.Engines.Implementations/Mediators/Internal/Models/_RocketPack/_Generated.cs
     - Input: ./rpfs/Omnius.Xeus.Engines.Implementations/Omnius.Xeus.Engines.Exchangers.Internal.Models.rpf
       Output: ./src/Omnius.Xeus.Engines.Implementations/Exchangers/Internal/Models/_RocketPack/_Generated.cs
-    - Input: ./rpfs/Omnius.Xeus.Api/Omnius.Xeus.Api.rpf
-      Output: ./src/Omnius.Xeus.Api/_RocketPack/_Generated.cs
-    - Input: ./rpfs/Omnius.Xeus.Interactors/Omnius.Xeus.Interactors.Models.rpf
-      Output: ./src/Omnius.Xeus.Interactors/Models/_RocketPack/_Generated.cs
-    - Input: ./rpfs/Omnius.Xeus.Interactors.Implementations/Omnius.Xeus.Interactors.Internal.Models.rpf
-      Output: ./src/Omnius.Xeus.Interactors.Implementations/Internal/Models/_RocketPack/_Generated.cs
+    - Input: ./rpfs/Omnius.Xeus.Daemon/Omnius.Xeus.Daemon.rpf
+      Output: ./src/Omnius.Xeus.Daemon/_RocketPack/_Generated.cs
+    - Input: ./rpfs/Omnius.Xeus.Services/Omnius.Xeus.Services.Models.rpf
+      Output: ./src/Omnius.Xeus.Services/Models/_RocketPack/_Generated.cs
+    - Input: ./rpfs/Omnius.Xeus.Services.Implementations/Omnius.Xeus.Services.Internal.Models.rpf
+      Output: ./src/Omnius.Xeus.Services.Implementations/Internal/Models/_RocketPack/_Generated.cs

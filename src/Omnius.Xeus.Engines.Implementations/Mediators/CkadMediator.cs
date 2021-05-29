@@ -29,7 +29,7 @@ namespace Omnius.Xeus.Engines.Mediators
 
         private readonly ReadOnlyMemory<byte> _myId;
 
-        private readonly HashSet<ConnectionStatus> _connections = new();
+        private readonly HashSet<ConnectionStatus> _connectionStatusSet = new();
         private readonly LinkedList<NodeProfile> _cloudNodeProfiles = new();
 
         private readonly HashSet<string> _availableEngineNameSet = new();
@@ -119,7 +119,7 @@ namespace Omnius.Xeus.Engines.Mediators
         {
             var connectionReports = new List<ConnectionReport>();
 
-            foreach (var status in _connections)
+            foreach (var status in _connectionStatusSet)
             {
                 connectionReports.Add(new ConnectionReport(status.HandshakeType, status.Address));
             }
@@ -213,9 +213,9 @@ namespace Omnius.Xeus.Engines.Mediators
 
                     lock (_lockObject)
                     {
-                        int connectionCount = _connections.Select(n => n.HandshakeType == ConnectionHandshakeType.Connected).Count();
+                        int connectionCount = _connectionStatusSet.Select(n => n.HandshakeType == ConnectionHandshakeType.Connected).Count();
 
-                        if (_connections.Count > (_options.MaxConnectionCount / 2)) continue;
+                        if (_connectionStatusSet.Count > (_options.MaxConnectionCount / 2)) continue;
                     }
 
                     NodeProfile? targetNodeProfile = null;
@@ -226,7 +226,7 @@ namespace Omnius.Xeus.Engines.Mediators
                         random.Shuffle(nodeProfiles);
 
                         var ignoreAddressSet = new HashSet<OmniAddress>();
-                        ignoreAddressSet.UnionWith(_connections.Select(n => n.Address));
+                        ignoreAddressSet.UnionWith(_connectionStatusSet.Select(n => n.Address));
                         ignoreAddressSet.UnionWith(_connectedAddressSet);
 
                         targetNodeProfile = nodeProfiles
@@ -289,9 +289,9 @@ namespace Omnius.Xeus.Engines.Mediators
 
                     lock (_lockObject)
                     {
-                        int connectionCount = _connections.Select(n => n.HandshakeType == ConnectionHandshakeType.Accepted).Count();
+                        int connectionCount = _connectionStatusSet.Select(n => n.HandshakeType == ConnectionHandshakeType.Accepted).Count();
 
-                        if (_connections.Count > (_options.MaxConnectionCount / 2)) continue;
+                        if (_connectionStatusSet.Count > (_options.MaxConnectionCount / 2)) continue;
                     }
 
                     foreach (var connector in _connectors)
@@ -356,7 +356,7 @@ namespace Omnius.Xeus.Engines.Mediators
 
                     lock (_lockObject)
                     {
-                        _connections.Add(status);
+                        _connectionStatusSet.Add(status);
                     }
 
                     return true;
@@ -388,7 +388,7 @@ namespace Omnius.Xeus.Engines.Mediators
                 var appendingNodeDistance = Kademlia.Distance(_myId.Span, id);
 
                 var map = new Dictionary<int, int>();
-                foreach (var connectionStatus in _connections)
+                foreach (var connectionStatus in _connectionStatusSet)
                 {
                     var nodeDistance = Kademlia.Distance(_myId.Span, id);
                     map.TryGetValue(nodeDistance, out int count);
@@ -415,7 +415,7 @@ namespace Omnius.Xeus.Engines.Mediators
 
                     await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
 
-                    foreach (var status in _connections.ToArray())
+                    foreach (var status in _connectionStatusSet.ToArray())
                     {
                         try
                         {
@@ -436,7 +436,7 @@ namespace Omnius.Xeus.Engines.Mediators
 
                             lock (_lockObject)
                             {
-                                _connections.Remove(status);
+                                _connectionStatusSet.Remove(status);
                             }
                         }
                     }
@@ -464,7 +464,7 @@ namespace Omnius.Xeus.Engines.Mediators
 
                     await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
 
-                    foreach (var status in _connections.ToArray())
+                    foreach (var status in _connectionStatusSet.ToArray())
                     {
                         try
                         {
@@ -497,7 +497,7 @@ namespace Omnius.Xeus.Engines.Mediators
 
                             lock (_lockObject)
                             {
-                                _connections.Remove(status);
+                                _connectionStatusSet.Remove(status);
                             }
                         }
                     }
@@ -549,7 +549,7 @@ namespace Omnius.Xeus.Engines.Mediators
                         _receivedPushLocationMap.Refresh();
                         _receivedGiveLocationMap.Refresh();
 
-                        foreach (var connectionStatus in _connections)
+                        foreach (var connectionStatus in _connectionStatusSet)
                         {
                             connectionStatus.Refresh();
                         }
@@ -578,7 +578,7 @@ namespace Omnius.Xeus.Engines.Mediators
 
                     lock (_lockObject)
                     {
-                        foreach (var connectionStatus in _connections)
+                        foreach (var connectionStatus in _connectionStatusSet)
                         {
                             elements.Add(new KademliaElement<ComputingNodeElement>(connectionStatus.Id, new ComputingNodeElement(connectionStatus)));
                         }

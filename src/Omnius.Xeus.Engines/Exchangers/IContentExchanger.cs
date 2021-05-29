@@ -18,5 +18,6 @@ namespace Omnius.Xeus.Engines.Exchangers
 
     public interface IContentExchanger : IAsyncDisposable
     {
+        ValueTask<ContentExchangerReport> GetReportAsync(CancellationToken cancellationToken = default);
     }
 }

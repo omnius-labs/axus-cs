@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Avalonia.Threading;
 using Omnius.Core;
 using Omnius.Core.Net;
-using Omnius.Xeus.Interactors;
+using Omnius.Xeus.Services;
 using Omnius.Xeus.Ui.Desktop.Configuration;
 using Omnius.Xeus.Ui.Desktop.Models.Peers;
 using Omnius.Xeus.Ui.Desktop.Models.Primitives;
@@ -61,16 +61,12 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main.Peers
         {
             try
             {
-                // FIXME
-                {
-                    await _dashboard.AddCloudNodeProfileAsync(new[] { new EnginesModels.NodeProfile(new[] { OmniAddress.Parse("tcp(ip4(127.0.0.1),41000)") }, new[] { "ckad_mediator" }) }, cancellationToken);
-                }
-
                 for (; ; )
                 {
                     await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
 
-                    var connectionReports = await _dashboard.GetConnectionReportsAsync(cancellationToken);
+                    var myNodeProfile = await _dashboard.GetMyNodeProfileAsync(cancellationToken);
+                    var myNodeProfileText = XeusMessageConverter.UserProfileToString()
 
                     await Dispatcher.UIThread.InvokeAsync(() =>
                     {

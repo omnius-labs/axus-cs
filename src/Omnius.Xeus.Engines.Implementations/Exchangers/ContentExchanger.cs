@@ -105,6 +105,18 @@ namespace Omnius.Xeus.Engines.Exchangers
             _cancellationTokenSource.Dispose();
         }
 
+        public async ValueTask<ContentExchangerReport> GetReportAsync(CancellationToken cancellationToken = default)
+        {
+            var connectionReports = new List<ConnectionReport>();
+
+            foreach (var status in _connectionStatusSet)
+            {
+                connectionReports.Add(new ConnectionReport(status.HandshakeType, status.Address));
+            }
+
+            return new ContentExchangerReport(0, 0, connectionReports.ToArray());
+        }
+
         private readonly VolatileHashSet<OmniAddress> _connectedAddressSet = new(TimeSpan.FromMinutes(30));
 
         private async Task ConnectLoopAsync(CancellationToken cancellationToken)
@@ -512,12 +524,6 @@ namespace Omnius.Xeus.Engines.Exchangers
         private static ResourceTag HashToResourceTag(OmniHash hash)
         {
             return new ResourceTag(hash, EngineName);
-        }
-
-        private enum ConnectionHandshakeType
-        {
-            Connected,
-            Accepted,
         }
 
         private sealed class ConnectionStatus : ISynchronized

@@ -21,10 +21,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core\Omnius.Core.csproj" />
-    <ProjectReference Include="..\Omnius.Xeus.Api\Omnius.Xeus.Api.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Daemon\Omnius.Xeus.Daemon.csproj" />
     <ProjectReference Include="..\Omnius.Xeus.Engines\Omnius.Xeus.Engines.csproj" />
-    <ProjectReference Include="..\Omnius.Xeus.Interactors.Implementations\Omnius.Xeus.Interactors.Implementations.csproj" />
-    <ProjectReference Include="..\Omnius.Xeus.Interactors\Omnius.Xeus.Interactors.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Services.Implementations\Omnius.Xeus.Services.Implementations.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Services\Omnius.Xeus.Services.csproj" />
     <ProjectReference Include="..\Omnius.Xeus.Utils\Omnius.Xeus.Utils.csproj" />
   </ItemGroup>
 

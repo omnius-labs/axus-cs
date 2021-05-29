@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -12,11 +10,12 @@ using Omnius.Core.Extensions;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Caps;
 using Omnius.Core.Net.Connections;
-using Omnius.Xeus.Api;
-using Omnius.Xeus.Interactors;
+using Omnius.Xeus.Daemon;
+using Omnius.Xeus.Services;
 using Omnius.Xeus.Ui.Desktop.Configuration;
 using Omnius.Xeus.Ui.Desktop.Windows.Main;
 using Omnius.Xeus.Ui.Desktop.Windows.Main.Peers;
+using Omnius.Xeus.Ui.Desktop.Windows.Main.Status;
 
 namespace Omnius.Xeus.Ui.Desktop
 {
@@ -44,6 +43,7 @@ namespace Omnius.Xeus.Ui.Desktop
             serviceCollection.AddSingleton(dashboard);
 
             serviceCollection.AddSingleton<IMainWindowViewModel, MainWindowViewModel>();
+            serviceCollection.AddSingleton<IStatusControlViewModel, StatusControlViewModel>();
             serviceCollection.AddSingleton<IPeersControlViewModel, PeersControlViewModel>();
 
             ServiceProvider = serviceCollection.BuildServiceProvider();
