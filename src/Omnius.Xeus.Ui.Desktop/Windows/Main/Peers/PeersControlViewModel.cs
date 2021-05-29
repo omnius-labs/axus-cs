@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 using Avalonia.Threading;
 using Omnius.Core;
 using Omnius.Core.Net;
+using Omnius.Xeus.Engines.Models;
 using Omnius.Xeus.Services;
 using Omnius.Xeus.Ui.Desktop.Configuration;
 using Omnius.Xeus.Ui.Desktop.Models.Peers;
 using Omnius.Xeus.Ui.Desktop.Models.Primitives;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
-using EnginesModels = Omnius.Xeus.Engines.Models;
 
 namespace Omnius.Xeus.Ui.Desktop.Windows.Main.Peers
 {
@@ -30,7 +30,7 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main.Peers
 
         private readonly Task _refreshTask;
 
-        private readonly ObservableDictionary<OmniAddress, ConnectionReportElement> _connectionReportMap = new();
+        private readonly ObservableDictionary<(string, OmniAddress), ConnectionReportElement> _connectionReportMap = new();
 
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
@@ -61,30 +61,36 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main.Peers
         {
             try
             {
+                // FIXME
+                {
+                    await _dashboard.AddCloudNodeProfileAsync(new[] { new NodeProfile(new[] { OmniAddress.Parse("tcp(ip4(127.0.0.1),41000)") }, new[] { "ckad_mediator" }) }, cancellationToken);
+                }
+
                 for (; ; )
                 {
                     await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
 
-                    var myNodeProfile = await _dashboard.GetMyNodeProfileAsync(cancellationToken);
-                    var myNodeProfileText = XeusMessageConverter.UserProfileToString()
+                    var connectionReports = await _dashboard.GetConnectionReportsAsync(cancellationToken);
+                    var elements = connectionReports.SelectMany(n => n.Connections.Select(m => new ConnectionReportElement(n.EngineName, m)))
+                        .ToDictionary(n => (n.EngineName, n.Model.Address));
 
                     await Dispatcher.UIThread.InvokeAsync(() =>
                     {
-                        foreach (var address in _connectionReportMap.Keys.ToArray())
+                        foreach (var key in _connectionReportMap.Keys.ToArray())
                         {
-                            if (connectionReports.Any(n => n.Address == address)) continue;
-                            _connectionReportMap.Remove(address);
+                            if (elements.ContainsKey(key)) continue;
+                            _connectionReportMap.Remove(key);
                         }
 
-                        foreach (var report in connectionReports)
+                        foreach (var (key, element) in elements)
                         {
-                            if (!_connectionReportMap.TryGetValue(report.Address, out var viewModel))
+                            if (!_connectionReportMap.TryGetValue(key, out var viewModel))
                             {
-                                _connectionReportMap.Add(report.Address, new ConnectionReportElement(report));
+                                _connectionReportMap.Add(key, element);
                             }
                             else
                             {
-                                viewModel.Model = report;
+                                viewModel.Model = element.Model;
                             }
                         }
                     });

@@ -44,12 +44,12 @@ namespace Omnius.Xeus.Services
         {
         }
 
-        public async ValueTask<IEnumerable<GroupedConnectionReport>> GetConnectionReportsAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<IEnumerable<ConnectionsReport>> GetConnectionReportsAsync(CancellationToken cancellationToken = default)
         {
-            var results = new List<GroupedConnectionReport>();
+            var results = new List<ConnectionsReport>();
 
             var output = await _xeusService.CkadMediator_GetReportAsync(cancellationToken);
-            results.Add(new GroupedConnectionReport("ckad_mediator", output.Report.Connections.ToArray()));
+            results.Add(new ConnectionsReport("ckad_mediator", output.Report.Connections.ToArray()));
 
             return results;
         }

@@ -35,7 +35,7 @@ message Seed {
 
 // Dashboard
 
-message GroupedConnectionReport {
+message ConnectionsReport {
     EngineName: string(capacity: 256),
     Connections: vector<ConnectionReport>,
 }

@@ -16,7 +16,7 @@ namespace Omnius.Xeus.Services
 
     public interface IDashboard : IAsyncDisposable
     {
-        ValueTask<IEnumerable<GroupedConnectionReport>> GetConnectionReportsAsync(CancellationToken cancellationToken = default);
+        ValueTask<IEnumerable<ConnectionsReport>> GetConnectionReportsAsync(CancellationToken cancellationToken = default);
 
         ValueTask<EnginesModels.NodeProfile> GetMyNodeProfileAsync(CancellationToken cancellationToken = default);
 

@@ -28,10 +28,10 @@
     <Grid>
         <TabControl TabStripPlacement="Left" SelectedIndex="-1">
             <TabItem Header="Status" IsSelected="{Binding SelectedTabState.Status.Value}">
-                <status:StatusControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                <status:StatusControl DataContext="{Binding StatusControlViewModel}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             </TabItem>
             <TabItem Header="Peers" IsSelected="{Binding SelectedTabState.Peers.Value}">
-                <peers:PeersControl DataContext="{Binding }" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                <peers:PeersControl DataContext="{Binding PeersControlViewModel}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             </TabItem>
             <TabItem Header="Search" IsSelected="{Binding SelectedTabState.Search.Value}">
                 <search:SearchControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
