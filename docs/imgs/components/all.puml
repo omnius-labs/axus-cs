@@ -15,14 +15,14 @@ package Omnius.Xeus.Ui.Desktop {
     }
 }
 
-package Omnius.Xeus.Interactors {
+package Omnius.Xeus.Services {
     rectangle FilePublisher <<$component>><<behavior>>
     rectangle FileSubscriber <<$component>><<behavior>>
     rectangle UserProfilePublisher <<$component>><<behavior>>
     rectangle UserProfileSubscriber <<$component>><<behavior>>
 }
 
-package Omnius.Xeus.Api {
+package Omnius.Xeus.Daemon {
     rectangle XeusService.Client <<$component>><<behavior>>
     rectangle XeusService.Server <<$component>><<behavior>>
 }

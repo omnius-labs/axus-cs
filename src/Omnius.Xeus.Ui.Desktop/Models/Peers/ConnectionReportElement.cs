@@ -1,4 +1,4 @@
-using Omnius.Xeus.Interactors.Models;
+using Omnius.Xeus.Services.Models;
 using Omnius.Xeus.Ui.Desktop.Models.Primitives;
 
 namespace Omnius.Xeus.Ui.Desktop.Models.Peers

@@ -62,14 +62,14 @@
     <BaseOutputPath Condition=" '$(BaseOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\bin\linux\$(MSBuildProjectName)\</BaseOutputPath>
   </PropertyGroup>
 
-  <PropertyGroup>
+  <!-- <PropertyGroup>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
     <NuGetLockFilePath>packages.lock.any.json</NuGetLockFilePath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(ContinuousIntegrationBuild)' == 'true' ">
     <RestoreLockedMode>true</RestoreLockedMode>
-  </PropertyGroup>
+  </PropertyGroup> -->
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <PathMap>$(RepoRoot)=.</PathMap>

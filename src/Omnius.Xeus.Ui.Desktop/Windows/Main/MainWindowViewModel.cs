@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Xeus.Ui.Desktop.Configuration;
 using Omnius.Xeus.Ui.Desktop.Windows.Main.Peers;
+using Omnius.Xeus.Ui.Desktop.Windows.Main.Status;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 
@@ -56,9 +57,10 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main
 
         private readonly CompositeDisposable _disposable = new();
 
-        public MainWindowViewModel(UiState uiState, IPeersControlViewModel peersControlViewModel)
+        public MainWindowViewModel(UiState uiState, IStatusControlViewModel statusControlViewModel, IPeersControlViewModel peersControlViewModel)
         {
             _uiState = uiState;
+            this.StatusControlViewModel = statusControlViewModel;
             this.PeersControlViewModel = peersControlViewModel;
 
             this.SelectedTabState.Status = uiState.ToReactivePropertySlimAsSynchronized(n => n.MainWindowModel_SelectedTabState_Status).AddTo(_disposable);
@@ -75,6 +77,8 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main
         }
 
         public SelectedTabState SelectedTabState { get; } = new();
+
+        public IStatusControlViewModel StatusControlViewModel { get; }
 
         public IPeersControlViewModel PeersControlViewModel { get; }
     }

@@ -1,0 +1,105 @@
+syntax v1.0;
+
+using "Omnius.Core.Cryptography";
+using "Omnius.Core.Net";
+using "Omnius.Xeus.Engines.Models";
+
+namespace "Omnius.Xeus.Services.Models";
+
+// Common
+
+message UserProfile {
+    Signature: OmniSignature,
+    CreationTime: timestamp,
+    Content: UserProfileContent,
+}
+
+message UserProfileContent {
+    TrustedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
+    BlockedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
+    Boxes: vector<Box>(capacity: 32 * 1024 * 1024),
+}
+
+message Box {
+    Name: string?(capacity: 256),
+    Tags: vector<string(capacity: 256)>(capacity: 8),
+    Seeds: vector<Seed>(capacity: 32 * 1024 * 1024),
+    Boxes: vector<Box>(capacity: 32 * 1024 * 1024),
+}
+
+message Seed {
+    RootHash: OmniHash,
+    Name: string(capacity: 256),
+    Size: uint64,
+}
+
+// Dashboard
+
+message GroupedConnectionReport {
+    EngineName: string(capacity: 256),
+    Connections: vector<ConnectionReport>,
+}
+
+// FileFinder
+
+message FileFinderOptions {
+    ConfigDirectoryPath: string(capacity: 1024),
+}
+
+// FileDownloader
+
+message FileDownloaderOptions {
+    ConfigDirectoryPath: string(capacity: 1024),
+}
+
+message DownloadingFileReport {
+    Seed: Seed,
+    TargetDirectoryPath: string(capacity: 1024),
+    CreationTime: timestamp,
+}
+
+// FileUploader
+
+message FileUploaderOptions {
+    ConfigDirectoryPath: string(capacity: 1024),
+}
+
+message UploadingFileReport {
+    FilePath: string(capacity: 1024),
+    CreationTime: timestamp,
+}
+
+// UserProfileFinder
+
+message UserProfileFinderOptions {
+    ConfigDirectoryPath: string(capacity: 1024),
+}
+
+message UserProfileFinderSearchOptions {
+    TrustedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
+    BlockedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
+    SearchDepth: uint32,
+    MaxUserProfileCount: uint32,
+}
+
+// UserProfileDownloader
+
+message UserProfileDownloaderOptions {
+    ConfigDirectoryPath: string(capacity: 1024),
+}
+
+message DownloadingUserProfileReport {
+    Signature: OmniSignature,
+    CreationTime: timestamp,
+}
+
+// UserProfileUploader
+
+message UserProfileUploaderOptions {
+    ConfigDirectoryPath: string(capacity: 1024),
+}
+
+message UploadingUserProfileReport {
+    Signature: OmniSignature,
+    CreationTime: timestamp,
+}
