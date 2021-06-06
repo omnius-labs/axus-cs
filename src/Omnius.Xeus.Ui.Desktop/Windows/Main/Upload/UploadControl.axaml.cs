@@ -14,11 +14,5 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main.Upload
         {
             AvaloniaXamlLoader.Load(this);
         }
-
-        public UploadControlViewModel? ViewModel
-        {
-            get => this.DataContext as UploadControlViewModel;
-            set => this.DataContext = value;
-        }
     }
 }

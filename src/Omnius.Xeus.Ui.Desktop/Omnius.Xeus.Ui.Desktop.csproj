@@ -1,37 +1,44 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="0.10.5" />
-    <PackageReference Include="Avalonia.Controls.DataGrid" Version="0.10.5" />
-    <PackageReference Include="Avalonia.Desktop" Version="0.10.5" />
-    <PackageReference Include="Avalonia.Skia" Version="0.10.5" />
-    <PackageReference Include="Avalonia.Xaml.Behaviors" Version="0.10.5.1" />
-    <PackageReference Include="Avalonia.Xaml.Interactions" Version="0.10.5.1" />
-    <PackageReference Include="Avalonia.Xaml.Interactivity" Version="0.10.5.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
-    <PackageReference Include="NLog" Version="4.7.10" />
-    <PackageReference Include="NLog.Config" Version="4.7.10" />
-    <PackageReference Include="ReactiveProperty" Version="7.10.0" />
-    <PackageReference Include="Nito.AsyncEx" Version="5.1.0" />
-    <PackageReference Include="YamlDotNet" Version="11.1.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core\Omnius.Core.csproj" />
-    <ProjectReference Include="..\Omnius.Xeus.Daemon\Omnius.Xeus.Daemon.csproj" />
-    <ProjectReference Include="..\Omnius.Xeus.Engines\Omnius.Xeus.Engines.csproj" />
-    <ProjectReference Include="..\Omnius.Xeus.Services.Implementations\Omnius.Xeus.Services.Implementations.csproj" />
-    <ProjectReference Include="..\Omnius.Xeus.Services\Omnius.Xeus.Services.csproj" />
-    <ProjectReference Include="..\Omnius.Xeus.Utils\Omnius.Xeus.Utils.csproj" />
+    <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="0.10.5" />
+    <PackageReference Include="Avalonia.Desktop" Version="0.10.5" />
+    <PackageReference Include="Avalonia.Skia" Version="0.10.5" />
+    <PackageReference Include="Avalonia.Xaml.Behaviors" Version="0.10.5.1" />
+    <PackageReference Include="Avalonia.Xaml.Interactions" Version="0.10.5.1" />
+    <PackageReference Include="Avalonia.Xaml.Interactivity" Version="0.10.5.1" />
+    <PackageReference Include="Avalonia" Version="0.10.5" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
+    <PackageReference Include="Nito.AsyncEx" Version="5.1.0" />
+    <PackageReference Include="NLog.Config" Version="4.7.10" />
+    <PackageReference Include="NLog" Version="4.7.10" />
+    <PackageReference Include="ReactiveProperty" Version="7.10.0" />
+    <PackageReference Include="YamlDotNet" Version="11.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Avalonia\Omnius.Core.Avalonia.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Utils\Omnius.Core.Utils.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core\Omnius.Core.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Daemon\Omnius.Xeus.Daemon.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Engines\Omnius.Xeus.Engines.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Services.Implementations\Omnius.Xeus.Services.Implementations.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Services\Omnius.Xeus.Services.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Utils\Omnius.Xeus.Utils.csproj" />
   </ItemGroup>
 
   <Target Name="Preview">
@@ -43,4 +50,5 @@
     </PropertyGroup>
     <Exec Command="dotnet exec --runtimeconfig $(ProjectRuntimeConfigFilePath) --depsfile $(ProjectDepsFilePath) $(PkgAvalonia)/tools/netcoreapp2.0/designer/Avalonia.Designer.HostApp.dll --method html --html-url http://127.0.0.1:$(PreviewerPort) --transport $(FileUriToPreviewXaml) $(TargetPath)" />
   </Target>
+
 </Project>

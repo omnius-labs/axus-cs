@@ -9,15 +9,6 @@ using Reactive.Bindings.Extensions;
 
 namespace Omnius.Xeus.Ui.Desktop.Windows.Main
 {
-    public interface IMainWindowViewModel
-    {
-        public SelectedTabState SelectedTabState { get; }
-
-        public IStatusControlViewModel StatusControlViewModel { get; }
-
-        public IPeersControlViewModel PeersControlViewModel { get; }
-    }
-
     public sealed class SelectedTabState
     {
         public ReactivePropertySlim<bool>? Status { get; set; }
@@ -33,39 +24,13 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main
         public ReactivePropertySlim<bool>? Settings { get; set; }
     }
 
-    public class DesignMainWindowViewModel : DisposableBase, IMainWindowViewModel
-    {
-        private readonly CompositeDisposable _disposable = new();
-
-        public DesignMainWindowViewModel()
-        {
-            this.SelectedTabState.Status = new ReactivePropertySlim<bool>(true).AddTo(_disposable);
-            this.SelectedTabState.Peers = new ReactivePropertySlim<bool>(false).AddTo(_disposable);
-            this.SelectedTabState.Search = new ReactivePropertySlim<bool>(false).AddTo(_disposable);
-            this.SelectedTabState.Download = new ReactivePropertySlim<bool>(false).AddTo(_disposable);
-            this.SelectedTabState.Upload = new ReactivePropertySlim<bool>(false).AddTo(_disposable);
-            this.SelectedTabState.Settings = new ReactivePropertySlim<bool>(false).AddTo(_disposable);
-        }
-
-        protected override void OnDispose(bool disposing)
-        {
-            _disposable.Dispose();
-        }
-
-        public SelectedTabState SelectedTabState { get; } = new();
-
-        public IStatusControlViewModel StatusControlViewModel { get; }
-
-        public IPeersControlViewModel PeersControlViewModel { get; }
-    }
-
-    public class MainWindowViewModel : AsyncDisposableBase, IMainWindowViewModel
+    public class MainWindowViewModel : AsyncDisposableBase
     {
         private readonly UiState _uiState;
 
         private readonly CompositeDisposable _disposable = new();
 
-        public MainWindowViewModel(UiState uiState, IStatusControlViewModel statusControlViewModel, IPeersControlViewModel peersControlViewModel)
+        public MainWindowViewModel(UiState uiState, StatusControlViewModel statusControlViewModel, PeersControlViewModel peersControlViewModel)
         {
             _uiState = uiState;
             this.StatusControlViewModel = statusControlViewModel;
@@ -86,8 +51,8 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main
 
         public SelectedTabState SelectedTabState { get; } = new();
 
-        public IStatusControlViewModel StatusControlViewModel { get; }
+        public StatusControlViewModel StatusControlViewModel { get; }
 
-        public IPeersControlViewModel PeersControlViewModel { get; }
+        public PeersControlViewModel PeersControlViewModel { get; }
     }
 }

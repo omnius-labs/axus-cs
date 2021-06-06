@@ -14,11 +14,5 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main.Peers
         {
             AvaloniaXamlLoader.Load(this);
         }
-
-        public PeersControlViewModel? Model
-        {
-            get => this.DataContext as PeersControlViewModel;
-            set => this.DataContext = value;
-        }
     }
 }

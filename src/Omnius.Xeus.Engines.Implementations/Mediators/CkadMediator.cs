@@ -174,7 +174,7 @@ namespace Omnius.Xeus.Engines.Mediators
                 foreach (var nodeProfile in nodeProfiles)
                 {
                     if (_cloudNodeProfiles.Count >= 2048) return;
-
+                    if (_cloudNodeProfiles.Any(n => n.Addresses.Any(m => nodeProfile.Addresses.Contains(m)))) continue;
                     _cloudNodeProfiles.AddLast(nodeProfile);
                 }
             }
@@ -193,7 +193,10 @@ namespace Omnius.Xeus.Engines.Mediators
         {
             lock (_lockObject)
             {
-                if (_cloudNodeProfiles.Count >= 1024) _cloudNodeProfiles.Remove(nodeProfile);
+                if (_cloudNodeProfiles.Count >= 1024)
+                {
+                    _cloudNodeProfiles.Remove(nodeProfile);
+                }
 
                 return false;
             }
@@ -350,12 +353,11 @@ namespace Omnius.Xeus.Engines.Mediators
                         nodeProfile = otherProfileMessage.NodeProfile;
                     }
 
-                    if (!this.CanAddConnection(id.Span)) throw new CkadMediatorException();
-
-                    var status = new ConnectionStatus(connection, address, handshakeType, nodeProfile, id);
-
                     lock (_lockObject)
                     {
+                        if (!this.CanAddConnection(id.Span)) throw new CkadMediatorException();
+
+                        var status = new ConnectionStatus(connection, address, handshakeType, nodeProfile, id);
                         _connectionStatusSet.Add(status);
                     }
 
@@ -380,28 +382,34 @@ namespace Omnius.Xeus.Engines.Mediators
             return false;
         }
 
-        // kademliaのk-bucketの距離毎のノード数は最大20とする。(k=20)
         private bool CanAddConnection(ReadOnlySpan<byte> id)
         {
             lock (_lockObject)
             {
-                var appendingNodeDistance = Kademlia.Distance(_myId.Span, id);
+                // 自分自身の場合は接続しない
+                if (BytesOperations.Equals(_myId.Span, id)) return false;
 
-                var map = new Dictionary<int, int>();
+                // 既に接続済みの場合は接続しない
+                foreach (var status in _connectionStatusSet)
+                {
+                    if (BytesOperations.Equals(status.Id.Span, id)) return false;
+                }
+
+                // k-bucketに空きがある場合は追加する
+                // kademliaのk-bucketの距離毎のノード数は最大20とする。(k=20)
+                var targetNodeDistance = Kademlia.Distance(_myId.Span, id);
+
+                var countMap = new Dictionary<int, int>();
                 foreach (var connectionStatus in _connectionStatusSet)
                 {
                     var nodeDistance = Kademlia.Distance(_myId.Span, id);
-                    map.TryGetValue(nodeDistance, out int count);
-                    count++;
-                    map[nodeDistance] = count;
+                    countMap.AddOrUpdate(nodeDistance, (_) => 1, (_, current) => current + 1);
                 }
 
-                {
-                    map.TryGetValue(appendingNodeDistance, out int count);
-                    if (count > MaxBucketLength) return false;
+                countMap.TryGetValue(targetNodeDistance, out int count);
+                if (count > MaxBucketLength) return false;
 
-                    return true;
-                }
+                return true;
             }
         }
 
@@ -583,6 +591,9 @@ namespace Omnius.Xeus.Engines.Mediators
                             elements.Add(new KademliaElement<ComputingNodeElement>(connectionStatus.Id, new ComputingNodeElement(connectionStatus)));
                         }
                     }
+
+                    // 自分のノードプロファイルを追加
+                    sendingPushNodeProfiles.Add(await this.GetMyNodeProfileAsync(cancellationToken));
 
                     lock (_lockObject)
                     {

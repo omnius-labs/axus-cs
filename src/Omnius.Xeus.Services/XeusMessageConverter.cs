@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using Omnius.Core;
 using Omnius.Core.Serialization;
@@ -8,19 +9,22 @@ namespace Omnius.Xeus.Services
 {
     public static class XeusMessageConverter
     {
-        private static readonly string _prefix = "xeus:";
+        private static readonly string _schema = "xeus";
+        private static readonly string _nodeProfilePath = "node-profile";
 
-        private static string AddPrefix(string value)
+        private static string AddSchemaAndPath(string path, string value)
         {
-            return _prefix + value;
+            return $"{_schema}:{path}/{value}";
         }
 
-        private static bool TryRemovePrefix(string text, [NotNullWhen(true)] out string? value)
+        private static bool TryRemoveSchemaAndPath(string text, string path, [NotNullWhen(true)] out string? value)
         {
-            value = null;
-            if (!text.StartsWith(_prefix)) return false;
+            var targetPrefix = $"{_schema}:{path}/";
 
-            value = text[_prefix.Length..];
+            value = null;
+            if (!text.StartsWith(targetPrefix)) return false;
+
+            value = text[targetPrefix.Length..];
             return true;
         }
 
@@ -32,15 +36,15 @@ namespace Omnius.Xeus.Services
             nodeProfile.Export(inHub.Writer, bytesPool);
 
             using var outHub = new BytesHub(bytesPool);
-            OmniMessageConverter.Write(1, inHub.Reader.GetSequence(), outHub.Writer);
+            if (!OmniMessageConverter.TryWrite(1, inHub.Reader.GetSequence(), outHub.Writer)) throw new Exception();
 
-            return AddPrefix(OmniBase.Encode(outHub.Reader.GetSequence(), ConvertStringType.Base58));
+            return AddSchemaAndPath(_nodeProfilePath, OmniBase.Encode(outHub.Reader.GetSequence(), ConvertStringType.Base58));
         }
 
         public static bool TryStringToNodeProfile(string text, [NotNullWhen(true)] out NodeProfile? nodeProfile)
         {
             nodeProfile = null;
-            if (!TryRemovePrefix(text, out var value)) return false;
+            if (!TryRemoveSchemaAndPath(text, _nodeProfilePath, out var value)) return false;
 
             var bytesPool = BytesPool.Shared;
 
@@ -48,7 +52,7 @@ namespace Omnius.Xeus.Services
             if (!OmniBase.TryDecode(value, inHub.Writer)) return false;
 
             using var outHub = new BytesHub(bytesPool);
-            OmniMessageConverter.Read(inHub.Reader.GetSequence(), out var version, outHub.Writer);
+            if (!OmniMessageConverter.TryRead(inHub.Reader.GetSequence(), out var version, outHub.Writer)) return false;
 
             nodeProfile = NodeProfile.Import(outHub.Reader.GetSequence(), bytesPool);
             return true;

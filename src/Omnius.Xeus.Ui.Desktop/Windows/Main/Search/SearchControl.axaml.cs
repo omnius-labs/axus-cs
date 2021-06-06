@@ -14,11 +14,5 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main.Search
         {
             AvaloniaXamlLoader.Load(this);
         }
-
-        public SearchControlViewModel? Model
-        {
-            get => this.DataContext as SearchControlViewModel;
-            set => this.DataContext = value;
-        }
     }
 }

@@ -11,8 +11,6 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main
             : base()
         {
             this.InitializeComponent();
-
-            this.ViewModel = Bootstrapper.ServiceProvider!.GetRequiredService<IMainWindowViewModel>();
         }
 
         private void InitializeComponent()
@@ -26,15 +24,15 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main
 
         protected override async ValueTask OnDisposeAsync()
         {
-            if (this.ViewModel is MainWindowViewModel mainWindowViewModel)
+            if (this.ViewModel is MainWindowViewModel viewModel)
             {
-                await mainWindowViewModel.DisposeAsync();
+                await viewModel.DisposeAsync();
             }
         }
 
-        public IMainWindowViewModel? ViewModel
+        public MainWindowViewModel? ViewModel
         {
-            get => this.DataContext as IMainWindowViewModel;
+            get => this.DataContext as MainWindowViewModel;
             set => this.DataContext = value;
         }
     }

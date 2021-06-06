@@ -3,7 +3,7 @@ using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Omnius.Core.Helpers;
-using Omnius.Xeus.Utils;
+using Omnius.Core.Utils;
 
 namespace Omnius.Xeus.Ui.Desktop.Configuration
 {
@@ -24,7 +24,7 @@ namespace Omnius.Xeus.Ui.Desktop.Configuration
         public async ValueTask SaveAsync(string configPath)
         {
             DirectoryHelper.CreateDirectory(Path.GetDirectoryName(configPath)!);
-            await JsonHelper.WriteFileAsync(configPath, this);
+            await JsonHelper.WriteFileAsync(configPath, this, true);
         }
     }
 }

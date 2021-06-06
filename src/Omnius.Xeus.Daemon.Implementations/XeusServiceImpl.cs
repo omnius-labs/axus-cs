@@ -150,14 +150,16 @@ namespace Omnius.Xeus.Daemon
             await _ckadMediator.AddCloudNodeProfilesAsync(param.NodeProfiles, cancellationToken);
         }
 
-        public ValueTask<ContentExchanger_GetReport_Output> ContentExchanger_GetReportAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<ContentExchanger_GetReport_Output> ContentExchanger_GetReportAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var result = await _contentExchanger.GetReportAsync(cancellationToken);
+            return new ContentExchanger_GetReport_Output(result);
         }
 
-        public ValueTask<DeclaredMessageExchanger_GetReport_Output> DeclaredMessageExchanger_GetReportAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<DeclaredMessageExchanger_GetReport_Output> DeclaredMessageExchanger_GetReportAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var result = await _declaredMessageExchanger.GetReportAsync(cancellationToken);
+            return new DeclaredMessageExchanger_GetReport_Output(result);
         }
 
         public async ValueTask<ContentPublisher_GetReport_Output> ContentPublisher_GetReportAsync(CancellationToken cancellationToken = default)

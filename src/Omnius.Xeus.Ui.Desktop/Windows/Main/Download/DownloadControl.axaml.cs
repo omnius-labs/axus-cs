@@ -14,11 +14,5 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main.Download
         {
             AvaloniaXamlLoader.Load(this);
         }
-
-        public DownloadControlViewModel? Model
-        {
-            get => this.DataContext as DownloadControlViewModel;
-            set => this.DataContext = value;
-        }
     }
 }

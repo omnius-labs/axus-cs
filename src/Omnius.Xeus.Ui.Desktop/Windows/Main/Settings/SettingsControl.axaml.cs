@@ -14,11 +14,5 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main.Settings
         {
             AvaloniaXamlLoader.Load(this);
         }
-
-        public SettingsControlViewModel? Model
-        {
-            get => this.DataContext as SettingsControlViewModel;
-            set => this.DataContext = value;
-        }
     }
 }

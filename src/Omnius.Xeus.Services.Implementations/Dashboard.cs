@@ -48,8 +48,14 @@ namespace Omnius.Xeus.Services
         {
             var results = new List<ConnectionsReport>();
 
-            var output = await _xeusService.CkadMediator_GetReportAsync(cancellationToken);
-            results.Add(new ConnectionsReport("ckad_mediator", output.Report.Connections.ToArray()));
+            var ckadMediator_output = await _xeusService.CkadMediator_GetReportAsync(cancellationToken);
+            results.Add(new ConnectionsReport("ckad_mediator", ckadMediator_output.Report.Connections.ToArray()));
+
+            var contentExchanger_output = await _xeusService.ContentExchanger_GetReportAsync(cancellationToken);
+            results.Add(new ConnectionsReport("content_exchanger", contentExchanger_output.Report.Connections.ToArray()));
+
+            var declaredMessageExchanger_output = await _xeusService.DeclaredMessageExchanger_GetReportAsync(cancellationToken);
+            results.Add(new ConnectionsReport("declared_message_exchanger", declaredMessageExchanger_output.Report.Connections.ToArray()));
 
             return results;
         }

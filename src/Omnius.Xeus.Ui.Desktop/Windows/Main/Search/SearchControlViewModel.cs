@@ -6,18 +6,7 @@ using Omnius.Core;
 
 namespace Omnius.Xeus.Ui.Desktop.Windows.Main.Search
 {
-    public interface ISearchControlViewModel
-    {
-    }
-
-    public class DesignSearchControlViewModel : DisposableBase, ISearchControlViewModel
-    {
-        protected override void OnDispose(bool disposing)
-        {
-        }
-    }
-
-    public class SearchControlViewModel : AsyncDisposableBase, ISearchControlViewModel
+    public class SearchControlViewModel : AsyncDisposableBase
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
