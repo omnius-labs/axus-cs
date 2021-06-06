@@ -14,11 +14,5 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main.Status
         {
             AvaloniaXamlLoader.Load(this);
         }
-
-        public StatusControlViewModel? Model
-        {
-            get => this.DataContext as StatusControlViewModel;
-            set => this.DataContext = value;
-        }
     }
 }

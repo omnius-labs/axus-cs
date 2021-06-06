@@ -416,18 +416,22 @@ namespace Omnius.Xeus.Engines.Connectors.Internal
             {
                 if (!listenAddress.TryGetTcpEndpoint(out var listenIpAddress, out var port)) continue;
 
+#if DEBUG
+                results.Add(OmniAddress.CreateTcpEndpoint(listenIpAddress, port));
+#endif
+
                 if (listenIpAddress.AddressFamily == AddressFamily.InterNetwork && listenIpAddress == IPAddress.Any)
                 {
-                    foreach (var globalIpAddress in globalIpAddresses.Select(n => n.AddressFamily == AddressFamily.InterNetwork))
+                    foreach (var globalIpAddress in globalIpAddresses.Where(n => n.AddressFamily == AddressFamily.InterNetwork))
                     {
-                        results.Add(OmniAddress.CreateTcpEndpoint(listenIpAddress, port));
+                        results.Add(OmniAddress.CreateTcpEndpoint(globalIpAddress, port));
                     }
                 }
                 else if (listenIpAddress.AddressFamily == AddressFamily.InterNetworkV6 && listenIpAddress == IPAddress.IPv6Any)
                 {
-                    foreach (var globalIpAddress in globalIpAddresses.Select(n => n.AddressFamily == AddressFamily.InterNetworkV6))
+                    foreach (var globalIpAddress in globalIpAddresses.Where(n => n.AddressFamily == AddressFamily.InterNetworkV6))
                     {
-                        results.Add(OmniAddress.CreateTcpEndpoint(listenIpAddress, port));
+                        results.Add(OmniAddress.CreateTcpEndpoint(globalIpAddress, port));
                     }
                 }
             }

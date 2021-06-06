@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Omnius.Core;
+using Omnius.Core.Avalonia;
 using Omnius.Core.Extensions;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Caps;
@@ -13,6 +14,8 @@ using Omnius.Core.Net.Connections;
 using Omnius.Xeus.Daemon;
 using Omnius.Xeus.Services;
 using Omnius.Xeus.Ui.Desktop.Configuration;
+using Omnius.Xeus.Ui.Desktop.Windows;
+using Omnius.Xeus.Ui.Desktop.Windows.AddNodes;
 using Omnius.Xeus.Ui.Desktop.Windows.Main;
 using Omnius.Xeus.Ui.Desktop.Windows.Main.Peers;
 using Omnius.Xeus.Ui.Desktop.Windows.Main.Status;
@@ -30,39 +33,61 @@ namespace Omnius.Xeus.Ui.Desktop
             var bytesPool = BytesPool.Shared;
             serviceCollection.AddSingleton<IBytesPool>(bytesPool);
 
+            var config = await LoadConfigAsync(stateDirectoryPath, cancellationToken);
+            serviceCollection.AddSingleton(config);
+
             var appSettings = await LoadAppSettingsAsync(stateDirectoryPath, cancellationToken);
             serviceCollection.AddSingleton(appSettings);
 
             var uiState = await LoadUiStateAsync(stateDirectoryPath, cancellationToken);
             serviceCollection.AddSingleton(uiState);
 
-            var xeusService = await CreateXeusServiceAsync(appSettings, bytesPool, cancellationToken);
+            var xeusService = await CreateXeusServiceAsync(config, bytesPool, cancellationToken);
             serviceCollection.AddSingleton(xeusService);
 
             var dashboard = await Dashboard.Factory.CreateAsync(xeusService, bytesPool, cancellationToken);
             serviceCollection.AddSingleton(dashboard);
 
-            serviceCollection.AddSingleton<IMainWindowViewModel, MainWindowViewModel>();
-            serviceCollection.AddSingleton<IStatusControlViewModel, StatusControlViewModel>();
-            serviceCollection.AddSingleton<IPeersControlViewModel, PeersControlViewModel>();
+            serviceCollection.AddSingleton<IApplicationDispatcher, ApplicationDispatcher>();
+            serviceCollection.AddSingleton<IMainWindowProvider, MainWindowProvider>();
+            serviceCollection.AddSingleton<IDialogService, DialogService>();
+            serviceCollection.AddSingleton<IClipboardService, ClipboardService>();
+
+            serviceCollection.AddTransient<MainWindowViewModel>();
+            serviceCollection.AddTransient<StatusControlViewModel>();
+            serviceCollection.AddTransient<PeersControlViewModel>();
+            serviceCollection.AddTransient<AddNodesWindowViewModel>();
 
             ServiceProvider = serviceCollection.BuildServiceProvider();
+        }
+
+        private static async ValueTask<AppConfig> LoadConfigAsync(string stateDirectoryPath, CancellationToken cancellationToken = default)
+        {
+            var filePath = Path.Combine(stateDirectoryPath, "config.yml");
+            var config = await AppConfig.LoadAsync(filePath);
+            if (config is not null) return config;
+
+            config = new AppConfig()
+            {
+                DaemonAddress = OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 32321).ToString(),
+            };
+
+            await config.SaveAsync(filePath);
+
+            return config;
         }
 
         private static async ValueTask<AppSettings> LoadAppSettingsAsync(string stateDirectoryPath, CancellationToken cancellationToken = default)
         {
             var filePath = Path.Combine(stateDirectoryPath, "app_settings.json");
             var appSettings = await AppSettings.LoadAsync(filePath);
+            if (appSettings is not null) return appSettings;
 
-            if (appSettings is null)
+            appSettings = new AppSettings()
             {
-                appSettings = new AppSettings()
-                {
-                    DaemonAddress = OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 32321).ToString(),
-                };
+            };
 
-                await appSettings.SaveAsync(filePath);
-            }
+            await appSettings.SaveAsync(filePath);
 
             return appSettings;
         }
@@ -71,24 +96,22 @@ namespace Omnius.Xeus.Ui.Desktop
         {
             var filePath = Path.Combine(stateDirectoryPath, "ui_state.json");
             var uiState = await UiState.LoadAsync(filePath);
+            if (uiState is not null) return uiState;
 
-            if (uiState is null)
+            uiState = new UiState
             {
-                uiState = new UiState
-                {
-                };
+            };
 
-                await uiState.SaveAsync(filePath);
-            }
+            await uiState.SaveAsync(filePath);
 
             return uiState;
         }
 
-        private static async ValueTask<IXeusService> CreateXeusServiceAsync(AppSettings appSettings, IBytesPool bytesPool, CancellationToken cancellationToken = default)
+        private static async ValueTask<IXeusService> CreateXeusServiceAsync(AppConfig config, IBytesPool bytesPool, CancellationToken cancellationToken = default)
         {
-            if (appSettings.DaemonAddress is null) throw new Exception("DaemonAddress is not found.");
+            if (config.DaemonAddress is null) throw new Exception("DaemonAddress is not found.");
 
-            var daemonAddress = new OmniAddress(appSettings.DaemonAddress);
+            var daemonAddress = new OmniAddress(config.DaemonAddress);
             if (!daemonAddress.TryGetTcpEndpoint(out var ipAddress, out var port)) throw new Exception("DaemonAddress is invalid format.");
 
             var socket = await ConnectAsync(ipAddress, port, cancellationToken);

@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 using Avalonia.Threading;
 using Omnius.Core;
 using Omnius.Core.Net;
-using Omnius.Xeus.Engines.Models;
 using Omnius.Xeus.Services;
-using Omnius.Xeus.Ui.Desktop.Configuration;
 using Omnius.Xeus.Ui.Desktop.Models.Peers;
 using Omnius.Xeus.Ui.Desktop.Models.Primitives;
 using Reactive.Bindings;
@@ -16,17 +14,12 @@ using Reactive.Bindings.Extensions;
 
 namespace Omnius.Xeus.Ui.Desktop.Windows.Main.Peers
 {
-    public interface IPeersControlViewModel
-    {
-        ReadOnlyReactiveCollection<ConnectionReportElement> ConnectionReports { get; }
-    }
-
-    public class PeersControlViewModel : AsyncDisposableBase, IPeersControlViewModel
+    public class PeersControlViewModel : AsyncDisposableBase
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly UiState _uiState;
         private readonly IDashboard _dashboard;
+        private readonly IDialogService _dialogService;
 
         private readonly Task _refreshTask;
 
@@ -36,13 +29,15 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main.Peers
 
         private readonly CompositeDisposable _disposable = new();
 
-        public PeersControlViewModel(UiState uiStatus, IDashboard dashboard)
+        public PeersControlViewModel(IDashboard dashboard, IDialogService dialogService)
         {
-            _uiState = uiStatus;
             _dashboard = dashboard;
+            _dialogService = dialogService;
 
             _refreshTask = this.RefreshAsync(_cancellationTokenSource.Token);
 
+            this.AddNodeCommand = new ReactiveCommand().AddTo(_disposable);
+            this.AddNodeCommand.Subscribe(() => this.AddNodeProfiles());
             this.ConnectionReports = _connectionReportMap.Values.ToReadOnlyReactiveCollection().AddTo(_disposable);
         }
 
@@ -55,17 +50,20 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main.Peers
             _disposable.Dispose();
         }
 
+        public ReactiveCommand AddNodeCommand { get; }
+
         public ReadOnlyReactiveCollection<ConnectionReportElement> ConnectionReports { get; }
+
+        private async void AddNodeProfiles()
+        {
+            var nodeProfiles = await _dialogService.OpenAddNodesWindowAsync();
+            await _dashboard.AddCloudNodeProfileAsync(nodeProfiles);
+        }
 
         private async Task RefreshAsync(CancellationToken cancellationToken = default)
         {
             try
             {
-                // FIXME
-                {
-                    await _dashboard.AddCloudNodeProfileAsync(new[] { new NodeProfile(new[] { OmniAddress.Parse("tcp(ip4(127.0.0.1),41000)") }, new[] { "ckad_mediator" }) }, cancellationToken);
-                }
-
                 for (; ; )
                 {
                     await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);

@@ -9,42 +9,38 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:CompileBindings="True"
-    x:DataType="local:IStatusControlViewModel"
+    x:DataType="local:StatusControlViewModel"
     mc:Ignorable="d"
     d:DesignWidth="800"
     d:DesignHeight="500" >
 
-    <Design.DataContext>
-        <local:DesignStatusControlViewModel />
-    </Design.DataContext>
-
     <UserControl.Styles>
         <Style Selector="Label.title">
-            <Setter Property="Margin" Value="0,0,16,0" />
-            <Setter Property="Height" Value="24" />
+            <Setter Property="Margin" Value="8" />
+            <Setter Property="Height" Value="26" />
             <Setter Property="Width" Value="120" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
         <Style Selector="TextBox.value">
-            <Setter Property="Margin" Value="0,0,16,0" />
-            <Setter Property="Height" Value="24" />
+            <Setter Property="Margin" Value="8" />
+            <Setter Property="Height" Value="26" />
             <Setter Property="Width" Value="360" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
             <Setter Property="IsReadOnly" Value="true" />
         </Style>
         <Style Selector="Button.action">
-            <Setter Property="Margin" Value="0,0,16,0" />
-            <Setter Property="Height" Value="24" />
+            <Setter Property="Margin" Value="8" />
+            <Setter Property="Height" Value="32" />
             <Setter Property="Width" Value="120" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
     </UserControl.Styles>
 
-    <StackPanel Orientation="Vertical" Margin="16">
+    <StackPanel Orientation="Vertical" Margin="8">
         <StackPanel Orientation="Horizontal">
             <Label Classes="title" Content="My node profile" />
-            <TextBox Classes="value" />
-            <Button Classes="action" Content="Copy"/>
+            <TextBox Classes="value" Text="{Binding MyNodeProfile.Value}" IsReadOnly="true" TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
+            <Button Classes="action" Content="Copy" Command="{Binding CopyMyNodeProfileCommand} "/>
         </StackPanel>
     </StackPanel>
 

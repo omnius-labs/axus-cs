@@ -6,18 +6,7 @@ using Omnius.Core;
 
 namespace Omnius.Xeus.Ui.Desktop.Windows.Main.Settings
 {
-    public interface ISettingsControlViewModel
-    {
-    }
-
-    public class DesignSettingsControlViewModel : DisposableBase, ISettingsControlViewModel
-    {
-        protected override void OnDispose(bool disposing)
-        {
-        }
-    }
-
-    public class SettingsControlViewModel : AsyncDisposableBase, ISettingsControlViewModel
+    public class SettingsControlViewModel : AsyncDisposableBase
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 

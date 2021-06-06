@@ -2,9 +2,12 @@
 tmp/
 pub/
 patch.txt
-demo/*
-!demo/daemon-run_*.sh
-!demo/ui-desktop-run_*.bat
+demo/daemon_*/logs/
+demo/daemon_*/state/*
+!demo/daemon_*/state/config.yml
+demo/ui-desktop_*/logs/
+demo/ui-desktop_*/state/*
+!demo/ui-desktop_*/state/config.yml
 
 # Environment
 .env
