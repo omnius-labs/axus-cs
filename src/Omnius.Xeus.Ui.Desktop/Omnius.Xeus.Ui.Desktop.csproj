@@ -22,7 +22,7 @@
     <PackageReference Include="Avalonia.Xaml.Interactions" Version="0.10.6.6" />
     <PackageReference Include="Avalonia.Xaml.Interactivity" Version="0.10.6.6" />
     <PackageReference Include="Avalonia" Version="0.10.6" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
     <PackageReference Include="Nito.AsyncEx" Version="5.1.0" />
     <PackageReference Include="NLog.Config" Version="4.7.10" />
     <PackageReference Include="NLog" Version="4.7.10" />
