@@ -131,7 +131,7 @@ namespace Omnius.Xeus.Ui.Desktop
             };
             var baseConnection = new BaseConnection(cap, baseConnectionDispatcher, baseConnectionOptions);
 
-            var service = new XeusService.Client(baseConnection, bytesPool);
+            var service = new XeusServiceRemoting.Client(baseConnection, bytesPool);
             return service;
         }
 

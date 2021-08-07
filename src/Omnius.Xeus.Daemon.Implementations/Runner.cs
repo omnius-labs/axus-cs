@@ -35,7 +35,7 @@ namespace Omnius.Xeus.Daemon
         {
         }
 
-        public async ValueTask RunAsync(string stateDirectoryPath, CancellationToken cancellationToken = default)
+        public async ValueTask EventLoopAsync(string stateDirectoryPath, CancellationToken cancellationToken = default)
         {
             DirectoryHelper.CreateDirectory(stateDirectoryPath);
 
@@ -69,7 +69,7 @@ namespace Omnius.Xeus.Daemon
                 DeclaredMessageExchangerOptions = OptionsGenerator.GenDeclaredMessageExchangerOptions(Path.Combine(stateDirectoryPath, "omnius.xeus.engines", "declared_message_exchanger"), config.Engines),
             };
 
-            await using var service = await XeusServiceImpl.CreateAsync(options, cancellationToken);
+            await using var service = await XeusService.CreateAsync(options, cancellationToken);
             await this.ListenAsync(service, config.ListenAddress, cancellationToken);
         }
 
@@ -125,7 +125,7 @@ namespace Omnius.Xeus.Daemon
             return config;
         }
 
-        private async ValueTask ListenAsync(XeusServiceImpl service, string listenAddress, CancellationToken cancellationToken = default)
+        private async ValueTask ListenAsync(XeusService service, string listenAddress, CancellationToken cancellationToken = default)
         {
             var listenOmniAddress = new OmniAddress(listenAddress);
             if (!listenOmniAddress.TryGetTcpEndpoint(out var ipAddress, out var port)) throw new Exception("listenAddress is invalid format.");
@@ -170,7 +170,7 @@ namespace Omnius.Xeus.Daemon
                     {
                         _logger.Info("event loop start");
 
-                        await using var server = new XeusService.Server(service, connection, BytesPool.Shared);
+                        await using var server = new XeusServiceRemoting.Server(service, connection, BytesPool.Shared);
                         await server.EventLoopAsync(cancellationToken);
                     }
                     catch (Exception e)
@@ -179,13 +179,13 @@ namespace Omnius.Xeus.Daemon
                     }
                     finally
                     {
-                        _logger.Info("event loop end");
+                        _logger.Info("event loop stop");
                     }
                 }
             }
             finally
             {
-                _logger.Info("listen end");
+                _logger.Info("listen stop");
 
                 if (tcpListener is not null)
                 {

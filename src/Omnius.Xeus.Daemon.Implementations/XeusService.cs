@@ -15,7 +15,7 @@ using Omnius.Xeus.Engines.Storages;
 
 namespace Omnius.Xeus.Daemon
 {
-    public class XeusServiceOptions
+    public record XeusServiceOptions
     {
         public IBytesPool? BytesPool { get; init; }
 
@@ -60,7 +60,7 @@ namespace Omnius.Xeus.Daemon
         public DeclaredMessageExchangerOptions? DeclaredMessageExchangerOptions { get; init; }
     }
 
-    public class XeusServiceImpl : AsyncDisposableBase, IXeusService
+    public class XeusService : AsyncDisposableBase, IXeusService
     {
         private readonly XeusServiceOptions _options;
 
@@ -73,15 +73,15 @@ namespace Omnius.Xeus.Daemon
         private IDeclaredMessagePublisher _declaredMessagePublisher = null!;
         private IDeclaredMessageSubscriber _declaredMessageSubscriber = null!;
 
-        public static async ValueTask<XeusServiceImpl> CreateAsync(XeusServiceOptions options, CancellationToken cancellationToken = default)
+        public static async ValueTask<XeusService> CreateAsync(XeusServiceOptions options, CancellationToken cancellationToken = default)
         {
-            var service = new XeusServiceImpl(options);
+            var service = new XeusService(options);
             await service.InitAsync(cancellationToken);
 
             return service;
         }
 
-        private XeusServiceImpl(XeusServiceOptions options)
+        private XeusService(XeusServiceOptions options)
         {
             _options = options;
         }
@@ -133,131 +133,94 @@ namespace Omnius.Xeus.Daemon
             await _ckadMediator.DisposeAsync();
         }
 
-        public async ValueTask<CkadMediator_GetReport_Output> CkadMediator_GetReportAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<GetReportResult> GetReportAsync(CancellationToken cancellationToken = default)
         {
-            var result = await _ckadMediator.GetReportAsync(cancellationToken);
-            return new CkadMediator_GetReport_Output(result);
+            return new GetReportResult();
         }
 
-        public async ValueTask<CkadMediator_GetMyNodeProfile_Output> CkadMediator_GetMyNodeProfileAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<GetMyNodeProfileResult> GetMyNodeProfileAsync(CancellationToken cancellationToken = default)
         {
             var result = await _ckadMediator.GetMyNodeProfileAsync(cancellationToken);
-            return new CkadMediator_GetMyNodeProfile_Output(result);
+            return new GetMyNodeProfileResult(result);
         }
 
-        public async ValueTask CkadMediator_AddCloudNodeProfilesAsync(CkadMediator_AddCloudNodeProfiles_Input param, CancellationToken cancellationToken = default)
+        public async ValueTask AddCloudNodeProfilesAsync(AddCloudNodeProfilesRequest request, CancellationToken cancellationToken = default)
         {
-            await _ckadMediator.AddCloudNodeProfilesAsync(param.NodeProfiles, cancellationToken);
+            await _ckadMediator.AddCloudNodeProfilesAsync(request.NodeProfiles, cancellationToken);
         }
 
-        public async ValueTask<ContentExchanger_GetReport_Output> ContentExchanger_GetReportAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<PublishFileContentResult> PublishFileContentAsync(PublishFileContentRequest request, CancellationToken cancellationToken = default)
         {
-            var result = await _contentExchanger.GetReportAsync(cancellationToken);
-            return new ContentExchanger_GetReport_Output(result);
+            var result = await _contentPublisher.PublishContentAsync(request.FilePath, request.Registrant, cancellationToken);
+            return new PublishFileContentResult(result);
         }
 
-        public async ValueTask<DeclaredMessageExchanger_GetReport_Output> DeclaredMessageExchanger_GetReportAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<PublishMemoryContentResult> PublishMemoryContentAsync(PublishMemoryContentRequest request, CancellationToken cancellationToken = default)
         {
-            var result = await _declaredMessageExchanger.GetReportAsync(cancellationToken);
-            return new DeclaredMessageExchanger_GetReport_Output(result);
+            var result = await _contentPublisher.PublishContentAsync(new ReadOnlySequence<byte>(request.Memory), request.Registrant, cancellationToken);
+            return new PublishMemoryContentResult(result);
         }
 
-        public async ValueTask<ContentPublisher_GetReport_Output> ContentPublisher_GetReportAsync(CancellationToken cancellationToken = default)
+        public async ValueTask UnpublishFileContentAsync(UnpublishFileContentRequest request, CancellationToken cancellationToken = default)
         {
-            var result = await _contentPublisher.GetReportAsync(cancellationToken);
-            return new ContentPublisher_GetReport_Output(result);
+            await _contentPublisher.UnpublishContentAsync(request.FilePath, request.Registrant, cancellationToken);
         }
 
-        public async ValueTask<ContentPublisher_PublishContent_File_Output> ContentPublisher_PublishContentAsync(ContentPublisher_PublishContent_File_Input param, CancellationToken cancellationToken = default)
+        public async ValueTask UnpublishMemoryContentAsync(UnpublishMemoryContentRequest request, CancellationToken cancellationToken = default)
         {
-            var result = await _contentPublisher.PublishContentAsync(param.FilePath, param.Registrant, cancellationToken);
-            return new ContentPublisher_PublishContent_File_Output(result);
+            await _contentPublisher.UnpublishContentAsync(request.RootHash, request.Registrant, cancellationToken);
         }
 
-        public async ValueTask<ContentPublisher_PublishContent_Memory_Output> ContentPublisher_PublishContentAsync(ContentPublisher_PublishContent_Memory_Input param, CancellationToken cancellationToken = default)
+        public async ValueTask SubscribeContentAsync(SubscribeContentRequest request, CancellationToken cancellationToken = default)
         {
-            var result = await _contentPublisher.PublishContentAsync(new ReadOnlySequence<byte>(param.Memory), param.Registrant, cancellationToken);
-            return new ContentPublisher_PublishContent_Memory_Output(result);
+            await _contentSubscriber.SubscribeContentAsync(request.RootHash, request.Registrant, cancellationToken);
         }
 
-        public async ValueTask ContentPublisher_UnpublishContentAsync(ContentPublisher_UnpublishContent_File_Input param, CancellationToken cancellationToken = default)
+        public async ValueTask UnsubscribeContentAsync(UnsubscribeContentRequest request, CancellationToken cancellationToken = default)
         {
-            await _contentPublisher.UnpublishContentAsync(param.FilePath, param.Registrant, cancellationToken);
+            await _contentSubscriber.UnsubscribeContentAsync(request.RootHash, request.Registrant, cancellationToken);
         }
 
-        public async ValueTask ContentPublisher_UnpublishContentAsync(ContentPublisher_UnpublishContent_Memory_Input param, CancellationToken cancellationToken = default)
+        public async ValueTask ExportFileContentAsync(ExportFileContentRequest request, CancellationToken cancellationToken = default)
         {
-            await _contentPublisher.UnpublishContentAsync(param.RootHash, param.Registrant, cancellationToken);
+            await _contentSubscriber.ExportContentAsync(request.RootHash, request.FilePath, cancellationToken);
         }
 
-        public async ValueTask<ContentSubscriber_GetReport_Output> ContentSubscriber_GetReportAsync(CancellationToken cancellationToken = default)
-        {
-            var result = await _contentSubscriber.GetReportAsync(cancellationToken);
-            return new ContentSubscriber_GetReport_Output(result);
-        }
-
-        public async ValueTask ContentSubscriber_SubscribeContentAsync(ContentSubscriber_SubscribeContent_Input param, CancellationToken cancellationToken = default)
-        {
-            await _contentSubscriber.SubscribeContentAsync(param.RootHash, param.Registrant, cancellationToken);
-        }
-
-        public async ValueTask ContentSubscriber_UnsubscribeContentAsync(ContentSubscriber_UnsubscribeContent_Input param, CancellationToken cancellationToken = default)
-        {
-            await _contentSubscriber.UnsubscribeContentAsync(param.RootHash, param.Registrant, cancellationToken);
-        }
-
-        public async ValueTask ContentSubscriber_ExportContentAsync(ContentSubscriber_ExportContent_File_Input param, CancellationToken cancellationToken = default)
-        {
-            await _contentSubscriber.ExportContentAsync(param.RootHash, param.FilePath, cancellationToken);
-        }
-
-        public async ValueTask<ContentSubscriber_ExportContent_Memory_Output> ContentSubscriber_ExportContentAsync(ContentSubscriber_ExportContent_Memory_Input param, CancellationToken cancellationToken = default)
+        public async ValueTask<ExportMemoryContentResult> ExportMemoryContentAsync(ExportMemoryContentRequest request, CancellationToken cancellationToken = default)
         {
             using var hub = new BytesHub();
-            await _contentSubscriber.ExportContentAsync(param.RootHash, hub.Writer, cancellationToken);
+            await _contentSubscriber.ExportContentAsync(request.RootHash, hub.Writer, cancellationToken);
 
             var sequence = hub.Reader.GetSequence();
             var memoryOwner = _bytesPool.Memory.Rent((int)sequence.Length).Shrink((int)sequence.Length);
             hub.Reader.GetSequence().CopyTo(memoryOwner.Memory.Span);
-            return new ContentSubscriber_ExportContent_Memory_Output(memoryOwner);
+            return new ExportMemoryContentResult(memoryOwner);
         }
 
-        public async ValueTask<DeclaredMessagePublisher_GetReport_Output> DeclaredMessagePublisher_GetReportAsync(CancellationToken cancellationToken = default)
+        public async ValueTask PublishDeclaredMessageAsync(PublishDeclaredMessageRequest request, CancellationToken cancellationToken = default)
         {
-            var result = await _declaredMessagePublisher.GetReportAsync(cancellationToken);
-            return new DeclaredMessagePublisher_GetReport_Output(result);
+            await _declaredMessagePublisher.PublishMessageAsync(request.Message, request.Registrant, cancellationToken);
         }
 
-        public async ValueTask DeclaredMessagePublisher_PublishMessageAsync(DeclaredMessagePublisher_PublishMessage_Input param, CancellationToken cancellationToken = default)
+        public async ValueTask UnpublishDeclaredMessageAsync(UnpublishDeclaredMessageRequest request, CancellationToken cancellationToken = default)
         {
-            await _declaredMessagePublisher.PublishMessageAsync(param.Message, param.Registrant, cancellationToken);
+            await _declaredMessagePublisher.UnpublishMessageAsync(request.Signature, request.Registrant, cancellationToken);
         }
 
-        public async ValueTask DeclaredMessagePublisher_UnpublishMessageAsync(DeclaredMessagePublisher_UnpublishMessage_Input param, CancellationToken cancellationToken = default)
+        public async ValueTask SubscribeDeclaredMessageAsync(SubscribeDeclaredMessageRequest request, CancellationToken cancellationToken = default)
         {
-            await _declaredMessagePublisher.UnpublishMessageAsync(param.Signature, param.Registrant, cancellationToken);
+            await _declaredMessageSubscriber.SubscribeMessageAsync(request.Signature, request.Registrant, cancellationToken);
         }
 
-        public async ValueTask<DeclaredMessageSubscriber_GetReport_Output> DeclaredMessageSubscriber_GetReportAsync(CancellationToken cancellationToken = default)
+        public async ValueTask UnsubscribeDeclaredMessageAsync(UnsubscribeDeclaredMessageRequest request, CancellationToken cancellationToken = default)
         {
-            var result = await _declaredMessageSubscriber.GetReportAsync(cancellationToken);
-            return new DeclaredMessageSubscriber_GetReport_Output(result);
+            await _declaredMessageSubscriber.UnsubscribeMessageAsync(request.Signature, request.Registrant, cancellationToken);
         }
 
-        public async ValueTask DeclaredMessageSubscriber_SubscribeMessageAsync(DeclaredMessageSubscriber_SubscribeMessage_Input param, CancellationToken cancellationToken = default)
+        public async ValueTask<ExportDeclaredMessageResult> ExportDeclaredMessageAsync(ExportDeclaredMessageRequest request, CancellationToken cancellationToken = default)
         {
-            await _declaredMessageSubscriber.SubscribeMessageAsync(param.Signature, param.Registrant, cancellationToken);
-        }
-
-        public async ValueTask DeclaredMessageSubscriber_UnsubscribeMessageAsync(DeclaredMessageSubscriber_UnsubscribeMessage_Input param, CancellationToken cancellationToken = default)
-        {
-            await _declaredMessageSubscriber.UnsubscribeMessageAsync(param.Signature, param.Registrant, cancellationToken);
-        }
-
-        public async ValueTask<DeclaredMessageSubscriber_ExportMessage_Output> DeclaredMessageSubscriber_ExportMessageAsync(DeclaredMessageSubscriber_ExportMessage_Input param, CancellationToken cancellationToken = default)
-        {
-            var result = await _declaredMessageSubscriber.ReadMessageAsync(param.Signature, cancellationToken);
-            return new DeclaredMessageSubscriber_ExportMessage_Output(result);
+            var result = await _declaredMessageSubscriber.ReadMessageAsync(request.Signature, cancellationToken);
+            return new ExportDeclaredMessageResult(result);
         }
     }
 }

@@ -1,8 +1,6 @@
 using System;
-using System.IO;
 using System.Linq;
 using Omnius.Core.Net;
-using Configuration = Omnius.Xeus.Daemon.Configuration;
 using EnginesModels = Omnius.Xeus.Engines.Models;
 
 namespace Omnius.Xeus.Daemon.Internal

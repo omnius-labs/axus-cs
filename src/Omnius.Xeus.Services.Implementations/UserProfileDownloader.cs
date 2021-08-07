@@ -103,7 +103,7 @@ namespace Omnius.Xeus.Services
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                var subscribedItems = await this.InternalGetDeclaredMessageSubscribedItemReportsAsync(cancellationToken);
+                var subscribedItems = await this.InternalGetSubscribedDeclaredMessageReportsAsync(cancellationToken);
                 var subscribedSignatureSet = new HashSet<OmniSignature>();
                 subscribedSignatureSet.UnionWith(subscribedItems.Where(n => n.Registrant == Registrant).Select(n => n.Signature));
 
@@ -135,7 +135,7 @@ namespace Omnius.Xeus.Services
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                var subscribedItems = await this.InternalGetContentSubscribedItemReportsAsync(cancellationToken);
+                var subscribedItems = await this.InternalGetSubscribedContentReportsAsync(cancellationToken);
                 var subscribedRootHashSet = new HashSet<OmniHash>();
                 subscribedRootHashSet.UnionWith(subscribedItems.Where(n => n.Registrant == Registrant).Select(n => n.RootHash).Where(n => n.HasValue).Select(n => n!.Value));
 
@@ -208,16 +208,16 @@ namespace Omnius.Xeus.Services
             }
         }
 
-        private async ValueTask<IEnumerable<DeclaredMessageSubscribedItemReport>> InternalGetDeclaredMessageSubscribedItemReportsAsync(CancellationToken cancellationToken = default)
+        private async ValueTask<IEnumerable<SubscribedDeclaredMessageReport>> InternalGetSubscribedDeclaredMessageReportsAsync(CancellationToken cancellationToken = default)
         {
             var output = await _xeusService.DeclaredMessageSubscriber_GetReportAsync(cancellationToken);
-            return output.Report.DeclaredMessageSubscribedItems;
+            return output.Report.SubscribedDeclaredMessages;
         }
 
-        private async ValueTask<IEnumerable<ContentSubscribedItemReport>> InternalGetContentSubscribedItemReportsAsync(CancellationToken cancellationToken = default)
+        private async ValueTask<IEnumerable<SubscribedContentReport>> InternalGetSubscribedContentReportsAsync(CancellationToken cancellationToken = default)
         {
             var output = await _xeusService.ContentSubscriber_GetReportAsync(cancellationToken);
-            return output.Report.ContentSubscribedItems;
+            return output.Report.SubscribedContents;
         }
 
         private async ValueTask InternalSubscribeDeclaredMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)

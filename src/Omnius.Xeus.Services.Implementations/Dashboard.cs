@@ -48,28 +48,28 @@ namespace Omnius.Xeus.Services
         {
             var results = new List<ConnectionsReport>();
 
-            var ckadMediator_output = await _xeusService.CkadMediator_GetReportAsync(cancellationToken);
-            results.Add(new ConnectionsReport("ckad_mediator", ckadMediator_output.Report.Connections.ToArray()));
+            // var ckadMediator_output = await _xeusService.CkadMediator_GetReportAsync(cancellationToken);
+            // results.Add(new ConnectionsReport("ckad_mediator", ckadMediator_output.Report.Connections.ToArray()));
 
-            var contentExchanger_output = await _xeusService.ContentExchanger_GetReportAsync(cancellationToken);
-            results.Add(new ConnectionsReport("content_exchanger", contentExchanger_output.Report.Connections.ToArray()));
+            // var contentExchanger_output = await _xeusService.ContentExchanger_GetReportAsync(cancellationToken);
+            // results.Add(new ConnectionsReport("content_exchanger", contentExchanger_output.Report.Connections.ToArray()));
 
-            var declaredMessageExchanger_output = await _xeusService.DeclaredMessageExchanger_GetReportAsync(cancellationToken);
-            results.Add(new ConnectionsReport("declared_message_exchanger", declaredMessageExchanger_output.Report.Connections.ToArray()));
+            // var declaredMessageExchanger_output = await _xeusService.DeclaredMessageExchanger_GetReportAsync(cancellationToken);
+            // results.Add(new ConnectionsReport("declared_message_exchanger", declaredMessageExchanger_output.Report.Connections.ToArray()));
 
             return results;
         }
 
         public async ValueTask<EnginesModels.NodeProfile> GetMyNodeProfileAsync(CancellationToken cancellationToken = default)
         {
-            var output = await _xeusService.CkadMediator_GetMyNodeProfileAsync(cancellationToken);
-            return output.NodeProfile;
+            var result = await _xeusService.GetMyNodeProfileAsync(cancellationToken);
+            return result.NodeProfile;
         }
 
         public async ValueTask AddCloudNodeProfileAsync(IEnumerable<EnginesModels.NodeProfile> nodeProfiles, CancellationToken cancellationToken = default)
         {
-            var input = new CkadMediator_AddCloudNodeProfiles_Input(nodeProfiles.ToArray());
-            await _xeusService.CkadMediator_AddCloudNodeProfilesAsync(input, cancellationToken);
+            var request = new AddCloudNodeProfilesRequest(nodeProfiles.ToArray());
+            await _xeusService.AddCloudNodeProfilesAsync(request, cancellationToken);
         }
     }
 }

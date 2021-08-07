@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using Omnius.Core.Utils;
-using Omnius.Xeus.Utils;
 
 namespace Omnius.Xeus.Daemon.Configuration
 {

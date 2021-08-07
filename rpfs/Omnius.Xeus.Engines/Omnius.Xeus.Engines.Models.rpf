@@ -40,9 +40,9 @@ enum ConnectionHandshakeType : uint8 {
     Accepted = 2,
 }
 
-// TcpConnector
+// TcpConnectionFactory
 
-message TcpConnectorOptions {
+message TcpConnectionFactoryOptions {
     ConnectingOptions: TcpConnectingOptions,
     AcceptingOptions: TcpAcceptingOptions,
     BandwidthOptions: BandwidthOptions,
@@ -75,7 +75,7 @@ message BandwidthOptions {
     MaxReceiveBytesPerSeconds: uint32,
 }
 
-message TcpConnectorReport {
+message TcpConnectionFactoryReport {
     ConnectedCount: uint32,
     AcceptedCount: uint32,
 }
@@ -113,10 +113,10 @@ message ContentPublisherOptions {
 }
 
 message ContentPublisherReport {
-    ContentPublishedItems: vector<ContentPublishedItemReport>,
+    PublishedContents: vector<PublishedContentReport>,
 }
 
-message ContentPublishedItemReport {
+message PublishedContentReport {
     FilePath: string?,
     RootHash: OmniHash?,
     Registrant: string,
@@ -129,10 +129,10 @@ message ContentSubscriberOptions {
 }
 
 message ContentSubscriberReport {
-    ContentSubscribedItems: vector<ContentSubscribedItemReport>,
+    SubscribedContents: vector<SubscribedContentReport>,
 }
 
-message ContentSubscribedItemReport {
+message SubscribedContentReport {
     RootHash: OmniHash?,
     Registrant: string,
 }
@@ -157,10 +157,10 @@ message DeclaredMessagePublisherOptions {
 }
 
 message DeclaredMessagePublisherReport {
-    DeclaredMessagePublishedItems: vector<DeclaredMessagePublishedItemReport>,
+    PublishedDeclaredMessages: vector<PublishedDeclaredMessageReport>,
 }
 
-message DeclaredMessagePublishedItemReport {
+message PublishedDeclaredMessageReport {
     Signature: OmniSignature,
     Registrant: string,
 }
@@ -172,10 +172,10 @@ message DeclaredMessageSubscriberOptions {
 }
 
 message DeclaredMessageSubscriberReport {
-    DeclaredMessageSubscribedItems: vector<DeclaredMessageSubscribedItemReport>,
+    SubscribedDeclaredMessages: vector<SubscribedDeclaredMessageReport>,
 }
 
-message DeclaredMessageSubscribedItemReport {
+message SubscribedDeclaredMessageReport {
     Signature: OmniSignature,
     Registrant: string,
 }

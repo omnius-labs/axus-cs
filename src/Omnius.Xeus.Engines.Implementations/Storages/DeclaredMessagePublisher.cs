@@ -66,11 +66,11 @@ namespace Omnius.Xeus.Engines.Storages
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                var itemReports = new List<DeclaredMessagePublishedItemReport>();
+                var itemReports = new List<PublishedDeclaredMessageReport>();
 
                 foreach (var item in _publisherRepo.Items.FindAll())
                 {
-                    itemReports.Add(new DeclaredMessagePublishedItemReport(item.Signature, item.Registrant));
+                    itemReports.Add(new PublishedDeclaredMessageReport(item.Signature, item.Registrant));
                 }
 
                 return new DeclaredMessagePublisherReport(itemReports.ToArray());

@@ -153,11 +153,11 @@ namespace Omnius.Xeus.Engines.Storages
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                var itemReports = new List<ContentSubscribedItemReport>();
+                var itemReports = new List<SubscribedContentReport>();
 
                 foreach (var item in _subscriberRepo.Items.FindAll())
                 {
-                    itemReports.Add(new ContentSubscribedItemReport(item.RootHash, item.Registrant));
+                    itemReports.Add(new SubscribedContentReport(item.RootHash, item.Registrant));
                 }
 
                 return new ContentSubscriberReport(itemReports.ToArray());

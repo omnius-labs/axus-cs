@@ -29,15 +29,12 @@ namespace Omnius.Xeus.Daemon
             {
                 _logger.Info("daemon start");
 
-                using (var runner = new Runner())
-                {
-                    await runner.RunAsync(stateDirectoryPath, this.Context.CancellationToken);
-                }
-
-                _logger.Info("daemon end");
+                using var runner = new Runner();
+                await runner.EventLoopAsync(stateDirectoryPath, this.Context.CancellationToken);
             }
             finally
             {
+                _logger.Info("daemon stop");
                 NLog.LogManager.Shutdown();
             }
         }

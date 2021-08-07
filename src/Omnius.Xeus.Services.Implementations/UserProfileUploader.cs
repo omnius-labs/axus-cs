@@ -104,7 +104,7 @@ namespace Omnius.Xeus.Services
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                var publishedItems = await this.InternalGetDeclaredMessagePublishedItemReportsAsync(cancellationToken);
+                var publishedItems = await this.InternalGetPublishedDeclaredMessageReportsAsync(cancellationToken);
                 var set = new HashSet<OmniSignature>();
                 set.UnionWith(publishedItems.Where(n => n.Registrant == Registrant).Select(n => n.Signature));
 
@@ -126,7 +126,7 @@ namespace Omnius.Xeus.Services
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                var publishedItems = await this.InternalGetContentPublishedItemReportsAsync(cancellationToken);
+                var publishedItems = await this.InternalGetPublishedContentReportsAsync(cancellationToken);
                 var set = new HashSet<OmniHash>();
                 set.UnionWith(publishedItems.Where(n => n.Registrant == Registrant).Select(n => n.RootHash).Where(n => n.HasValue).Select(n => n!.Value));
 
@@ -185,16 +185,16 @@ namespace Omnius.Xeus.Services
             }
         }
 
-        private async ValueTask<IEnumerable<DeclaredMessagePublishedItemReport>> InternalGetDeclaredMessagePublishedItemReportsAsync(CancellationToken cancellationToken = default)
+        private async ValueTask<IEnumerable<PublishedDeclaredMessageReport>> InternalGetPublishedDeclaredMessageReportsAsync(CancellationToken cancellationToken = default)
         {
             var output = await _xeusService.DeclaredMessagePublisher_GetReportAsync(cancellationToken);
-            return output.Report.DeclaredMessagePublishedItems;
+            return output.Report.PublishedDeclaredMessages;
         }
 
-        private async ValueTask<IEnumerable<ContentPublishedItemReport>> InternalGetContentPublishedItemReportsAsync(CancellationToken cancellationToken = default)
+        private async ValueTask<IEnumerable<PublishedContentReport>> InternalGetPublishedContentReportsAsync(CancellationToken cancellationToken = default)
         {
             var output = await _xeusService.ContentPublisher_GetReportAsync(cancellationToken);
-            return output.Report.ContentPublishedItems;
+            return output.Report.PublishedContents;
         }
 
         private async ValueTask InternalPublishDeclaredMessageAsync(OmniHash rootHash, OmniDigitalSignature digitalSignature, CancellationToken cancellationToken = default)
