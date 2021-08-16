@@ -14,11 +14,11 @@ using Omnius.Xeus.Utils;
 
 namespace Omnius.Xeus.Engines.Internal.Repositories
 {
-    internal sealed partial class PublishedShoutRepository : DisposableBase
+    internal sealed partial class PublishedShoutStorageRepository : DisposableBase
     {
         private readonly LiteDatabase _database;
 
-        public PublishedShoutRepository(string dirPath)
+        public PublishedShoutStorageRepository(string dirPath)
         {
             DirectoryHelper.CreateDirectory(dirPath);
 

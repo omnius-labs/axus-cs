@@ -8,14 +8,22 @@ using System.Threading.Tasks;
 using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
+using Omnius.Core.Pipelines;
 using Omnius.Core.Storages;
-using Omnius.Xeus.Engines.Models;
 using Omnius.Xeus.Engines.Internal;
 using Omnius.Xeus.Engines.Internal.Models;
 using Omnius.Xeus.Engines.Internal.Repositories;
+using Omnius.Xeus.Models;
 
 namespace Omnius.Xeus.Engines
 {
+    public record PublishedShoutStorageOptions
+    {
+        public string? ConfigDirectoryPath { get; init; }
+        public IBytesStorageFactory? BytesStorageFactory { get; init; }
+        public IBytesPool? BytesPool { get; init; }
+    }
+
     public sealed partial class PublishedShoutStorage : AsyncDisposableBase, IPublishedShoutStorage
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
@@ -28,32 +36,12 @@ namespace Omnius.Xeus.Engines
 
         private readonly AsyncReaderWriterLock _asyncLock = new();
 
-        internal sealed class PublishedShoutStorageFactory : IPublishedShoutStorageFactory
-        {
-            public async ValueTask<IPublishedShoutStorage> CreateAsync(PublishedShoutStorageOptions options, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, CancellationToken cancellationToken = default)
-            {
-                var result = new PublishedShoutStorage(options, bytesStorageFactory, bytesPool);
-                await result.InitAsync(cancellationToken);
-
-                return result;
-            }
-        }
-
-        public static IPublishedShoutStorageFactory Factory { get; } = new PublishedShoutStorageFactory();
-
-        private PublishedShoutStorage(PublishedShoutStorageOptions options, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool)
+        private PublishedShoutStorage(PublishedShoutStorageOptions options)
         {
             _options = options;
-            _bytesPool = bytesPool;
 
             _publisherRepo = new PublishedShoutStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
-            _blockStorage = bytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
-        }
-
-        internal async ValueTask InitAsync(CancellationToken cancellationToken = default)
-        {
-            await _publisherRepo.MigrateAsync(cancellationToken);
-            await _blockStorage.MigrateAsync(cancellationToken);
+            _blockStorage = _options.BytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
         }
 
         protected override async ValueTask OnDisposeAsync()
@@ -62,18 +50,24 @@ namespace Omnius.Xeus.Engines
             _blockStorage.Dispose();
         }
 
+        public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
+        {
+            await _publisherRepo.MigrateAsync(cancellationToken);
+            await _blockStorage.MigrateAsync(cancellationToken);
+        }
+
         public async ValueTask<PublishedShoutStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                var itemReports = new List<PublishedShoutStorageReport>();
+                var shoutReports = new List<PublishedShoutReport>();
 
                 foreach (var item in _publisherRepo.Items.FindAll())
                 {
-                    itemReports.Add(new PublishedShoutStorageReport(item.Signature, item.Registrant));
+                    shoutReports.Add(new PublishedShoutReport(item.Signature, item.Registrant));
                 }
 
-                return new PublishedShoutStorageReport(itemReports.ToArray());
+                return new PublishedShoutStorageReport(shoutReports.ToArray());
             }
         }
 
@@ -114,13 +108,13 @@ namespace Omnius.Xeus.Engines
                 var signature = message.Certificate?.GetOmniSignature();
                 if (signature is null) throw new ArgumentNullException(nameof(message.Certificate));
 
-                using var hub = new BytesPipe(_bytesPool);
-                message.Export(hub.Writer, _bytesPool);
+                using var bytesPipe = new BytesPipe(_bytesPool);
+                message.Export(bytesPipe.Writer, _bytesPool);
 
-                _publisherRepo.Items.Insert(new PublishedShoutStorageItem(signature, message.CreationTime.ToDateTime(), registrant));
+                _publisherRepo.Items.Insert(new PublishedShoutItem(signature, message.CreationTime.ToDateTime(), registrant));
 
                 var blockName = ComputeBlockName(signature);
-                await _blockStorage.WriteAsync(blockName, hub.Reader.GetSequence(), cancellationToken);
+                await _blockStorage.WriteAsync(blockName, bytesPipe.Reader.GetSequence(), cancellationToken);
             }
         }
 

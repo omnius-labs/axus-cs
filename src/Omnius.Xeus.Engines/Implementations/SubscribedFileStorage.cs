@@ -9,20 +9,28 @@ using System.Threading.Tasks;
 using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
+using Omnius.Core.Pipelines;
 using Omnius.Core.Storages;
 using Omnius.Core.Streams;
 using Omnius.Xeus.Engines.Internal;
 using Omnius.Xeus.Engines.Internal.Models;
 using Omnius.Xeus.Engines.Internal.Repositories;
+using Omnius.Xeus.Models;
 
 namespace Omnius.Xeus.Engines
 {
+    public record SubscribedFileStorageOptions
+    {
+        public string? ConfigDirectoryPath { get; init; }
+        public IBytesStorageFactory? BytesStorageFactory { get; init; }
+        public IBytesPool? BytesPool { get; init; }
+    }
+
     public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscribedFileStorage
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         private readonly SubscribedFileStorageOptions _options;
-        private readonly IBytesPool _bytesPool;
 
         private readonly SubscribedFileStorageRepository _subscriberRepo;
         private readonly IBytesStorage<string> _blockStorage;
@@ -33,26 +41,12 @@ namespace Omnius.Xeus.Engines
 
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-        internal sealed class SubscribedFileStorageFactory : ISubscribedFileStorageFactory
-        {
-            public async ValueTask<ISubscribedFileStorage> CreateAsync(SubscribedFileStorageOptions options, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, CancellationToken cancellationToken = default)
-            {
-                var result = new SubscribedFileStorage(options, bytesStorageFactory, bytesPool);
-                await result.InitAsync(cancellationToken);
-
-                return result;
-            }
-        }
-
-        public static ISubscribedFileStorageFactory Factory { get; } = new SubscribedFileStorageFactory();
-
-        private SubscribedFileStorage(SubscribedFileStorageOptions options, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool)
+        private SubscribedFileStorage(SubscribedFileStorageOptions options)
         {
             _options = options;
-            _bytesPool = bytesPool;
 
             _subscriberRepo = new SubscribedFileStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
-            _blockStorage = bytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
+            _blockStorage = _options.BytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _options.BytesPool);
         }
 
         internal async ValueTask InitAsync(CancellationToken cancellationToken = default)
@@ -83,7 +77,7 @@ namespace Omnius.Xeus.Engines
 
                     await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
 
-                    await this.UpdateDecodedContentItemAsync(_cancellationTokenSource.Token);
+                    await this.UpdateDecodedFileItemAsync(_cancellationTokenSource.Token);
                 }
             }
             catch (OperationCanceledException e)
@@ -98,7 +92,7 @@ namespace Omnius.Xeus.Engines
             }
         }
 
-        private async ValueTask UpdateDecodedContentItemAsync(CancellationToken cancellationToken = default)
+        private async ValueTask UpdateDecodedFileItemAsync(CancellationToken cancellationToken = default)
         {
             var decodedItems = _subscriberRepo.DecodedItems.FindAll();
 
@@ -115,7 +109,7 @@ namespace Omnius.Xeus.Engines
 
                 lock (await _asyncLock.WriterLockAsync(cancellationToken))
                 {
-                    _subscriberRepo.DecodedItems.Insert(new DecodedContentItem(decodedItem.RootHash, decodedItem.MerkleTreeSections.Append(nextMerkleTreeSection).ToArray()));
+                    _subscriberRepo.DecodedItems.Insert(new DecodedFileItem(decodedItem.RootHash, decodedItem.MerkleTreeSections.Append(nextMerkleTreeSection).ToArray()));
                 }
             }
         }
@@ -134,7 +128,7 @@ namespace Omnius.Xeus.Engines
 
         private async ValueTask<MerkleTreeSection?> DecodeMerkleTreeSectionAsync(OmniHash rootHash, IEnumerable<OmniHash> blockHashes, CancellationToken cancellationToken = default)
         {
-            using var hub = new BytesPipe();
+            using var bytesPipe = new BytesPipe();
 
             foreach (var blockHash in blockHashes)
             {
@@ -142,24 +136,24 @@ namespace Omnius.Xeus.Engines
                 using var memoryOwner = await _blockStorage.TryReadAsync(blockName, cancellationToken);
                 if (memoryOwner is null) return null;
 
-                hub.Writer.Write(memoryOwner.Memory.Span);
+                bytesPipe.Writer.Write(memoryOwner.Memory.Span);
             }
 
-            return MerkleTreeSection.Import(hub.Reader.GetSequence(), _bytesPool);
+            return MerkleTreeSection.Import(bytesPipe.Reader.GetSequence(), _options.BytesPool);
         }
 
         public async ValueTask<SubscribedFileStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                var itemReports = new List<SubscribedContentReport>();
+                var fileReports = new List<SubscribedFileReport>();
 
                 foreach (var item in _subscriberRepo.Items.FindAll())
                 {
-                    itemReports.Add(new SubscribedContentReport(item.RootHash, item.Registrant));
+                    fileReports.Add(new SubscribedFileReport(item.RootHash, item.Registrant));
                 }
 
-                return new SubscribedFileStorageReport(itemReports.ToArray());
+                return new SubscribedFileStorageReport(fileReports.ToArray());
             }
         }
 
@@ -216,7 +210,7 @@ namespace Omnius.Xeus.Engines
             }
         }
 
-        public async ValueTask<bool> ContainsContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+        public async ValueTask<bool> ContainsFileAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
@@ -237,7 +231,7 @@ namespace Omnius.Xeus.Engines
             }
         }
 
-        public async ValueTask SubscribeContentAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default)
+        public async ValueTask SubscribeFileAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
@@ -245,7 +239,7 @@ namespace Omnius.Xeus.Engines
             }
         }
 
-        public async ValueTask UnsubscribeContentAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default)
+        public async ValueTask UnsubscribeFileAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
@@ -266,15 +260,15 @@ namespace Omnius.Xeus.Engines
             }
         }
 
-        public async ValueTask<bool> ExportContentAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default)
+        public async ValueTask<bool> ExportFileAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default)
         {
             bool result = false;
 
             try
             {
-                using var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bytesPool);
+                using var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _options.BytesPool);
                 var writer = PipeWriter.Create(fileStream);
-                result = await this.ExportContentAsync(rootHash, writer, cancellationToken);
+                result = await this.ExportFileAsync(rootHash, writer, cancellationToken);
                 await writer.CompleteAsync();
             }
             finally
@@ -288,7 +282,7 @@ namespace Omnius.Xeus.Engines
             return result;
         }
 
-        public async ValueTask<bool> ExportContentAsync(OmniHash rootHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default)
+        public async ValueTask<bool> ExportFileAsync(OmniHash rootHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {

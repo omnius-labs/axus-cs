@@ -1,6 +1,7 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,30 +11,22 @@ using Omnius.Core.Helpers;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Connections;
 using Omnius.Xeus.Engines.Internal;
+using Omnius.Xeus.Engines.Internal.Models;
 using Omnius.Xeus.Engines.Primitives;
+using Omnius.Xeus.Models;
 
 namespace Omnius.Xeus.Engines.Exchangers
 {
-    public interface IFileExchangerFactory
-    {
-        ValueTask<IFileExchanger> CreateAsync(FileExchangerOptions options, CancellationToken cancellationToken = default);
-    }
-
-    public sealed class ContentExchanger : AsyncDisposableBase, IContentExchanger
+    public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly ContentExchangerOptions _options;
-        private readonly List<Connectors.Primitives.IConnectionConnector> _connectors = new();
-        private readonly IMediator _ckadMediator;
-        private readonly IPublishedFileStorage _publisher;
-        private readonly ISubscribedFileStorage _subscriber;
-        private readonly IBytesPool _bytesPool;
+        private readonly FileExchangerOptions _options;
 
-        private readonly HashSet<ConnectionStatus> _connectionStatusSet = new();
+        private ImmutableHashSet<SessionStatus> _sessionStatusSet = ImmutableHashSet<SessionStatus>.Empty;
 
-        private readonly HashSet<ContentLocation> _resourceTags = new();
-        private readonly object _resourceTagsLockObject = new();
+        private ImmutableHashSet<ContentClue> _pushContentClues = ImmutableHashSet<ContentClue>.Empty;
+        private ImmutableHashSet<ContentClue> _wantContentClues = ImmutableHashSet<ContentClue>.Empty;
 
         private Task _connectLoopTask = null!;
         private Task _acceptLoopTask = null!;
@@ -45,55 +38,17 @@ namespace Omnius.Xeus.Engines.Exchangers
 
         private readonly object _lockObject = new();
 
-        private const string EngineName = "content-exchanger";
+        private const string ServiceName = "file_exchanger";
 
-        internal sealed class ContentExchangerFactory : IContentExchangerFactory
-        {
-            public async ValueTask<IContentExchanger> CreateAsync(ContentExchangerOptions options, IEnumerable<Connectors.Primitives.IConnectionConnector> connectors,
-                IMediator nodeFinder, IPublishedFileStorage pushStorage, ISubscribedFileStorage wantStorage, IBytesPool bytesPool, CancellationToken cancellationToken = default)
-            {
-                var result = new ContentExchanger(options, connectors, nodeFinder, pushStorage, wantStorage, bytesPool);
-                await result.InitAsync(cancellationToken);
-
-                return result;
-            }
-        }
-
-        public static IContentExchangerFactory Factory { get; } = new ContentExchangerFactory();
-
-        internal ContentExchanger(ContentExchangerOptions options, IEnumerable<Connectors.Primitives.IConnectionConnector> connectors,
-            IMediator nodeFinder, IPublishedFileStorage pushStorage, ISubscribedFileStorage wantStorage, IBytesPool bytesPool)
+        public FileExchanger(FileExchangerOptions options)
         {
             _options = options;
-            _connectors.AddRange(connectors);
-            _ckadMediator = nodeFinder;
-            _publisher = pushStorage;
-            _subscriber = wantStorage;
-            _bytesPool = bytesPool;
-        }
 
-        public async ValueTask InitAsync(CancellationToken cancellationToken = default)
-        {
             _connectLoopTask = this.ConnectLoopAsync(_cancellationTokenSource.Token);
             _acceptLoopTask = this.AcceptLoopAsync(_cancellationTokenSource.Token);
             _sendLoopTask = this.SendLoopAsync(_cancellationTokenSource.Token);
             _receiveLoopTask = this.ReceiveLoopAsync(_cancellationTokenSource.Token);
             _computeLoopTask = this.ComputeLoopAsync(_cancellationTokenSource.Token);
-
-            _ckadMediator.GetPublishResourceTags += (append) =>
-            {
-                ContentLocation[] resourceTags;
-
-                lock (_resourceTagsLockObject)
-                {
-                    resourceTags = _resourceTags.ToArray();
-                }
-
-                foreach (var resourceTag in resourceTags)
-                {
-                    append.Invoke(resourceTag);
-                }
-            };
         }
 
         protected override async ValueTask OnDisposeAsync()
@@ -103,16 +58,26 @@ namespace Omnius.Xeus.Engines.Exchangers
             _cancellationTokenSource.Dispose();
         }
 
-        public async ValueTask<ContentExchangerReport> GetReportAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<FileExchangerReport> GetReportAsync(CancellationToken cancellationToken = default)
         {
-            var connectionReports = new List<ConnectionReport>();
+            var sessionReports = new List<SessionReport>();
 
-            foreach (var status in _connectionStatusSet)
+            foreach (var status in _sessionStatusSet)
             {
-                connectionReports.Add(new ConnectionReport(status.HandshakeType, status.Address));
+                sessionReports.Add(new SessionReport(status.Session.HandshakeType, status.Session.Address));
             }
 
-            return new ContentExchangerReport(0, 0, connectionReports.ToArray());
+            return new FileExchangerReport(0, 0, sessionReports.ToArray());
+        }
+
+        public IEnumerable<ContentClue> GetPushContentClues()
+        {
+            return _pushContentClues;
+        }
+
+        public IEnumerable<ContentClue> GetWantContentClues()
+        {
+            return _wantContentClues;
         }
 
         private readonly VolatileHashSet<OmniAddress> _connectedAddressSet = new(TimeSpan.FromMinutes(30));
@@ -127,28 +92,24 @@ namespace Omnius.Xeus.Engines.Exchangers
                 {
                     await Task.Delay(1000, cancellationToken);
 
-                    lock (_lockObject)
+                    _connectedAddressSet.Refresh();
+
+                    int connectionCount = _sessionStatusSet.Select(n => n.Session.HandshakeType == SessionHandshakeType.Connected).Count();
+                    if (_sessionStatusSet.Count > (_options.MaxSessionCount / 2)) continue;
+
+                    foreach (var contentHash in await _options.SubscribedFileStorage.GetRootHashesAsync(cancellationToken))
                     {
-                        _connectedAddressSet.Refresh();
-
-                        int connectionCount = _connectionStatusSet.Select(n => n.HandshakeType == ConnectionHandshakeType.Connected).Count();
-
-                        if (_connectionStatusSet.Count > (_options.MaxConnectionCount / 2)) continue;
-                    }
-
-                    foreach (var hash in await _subscriber.GetRootHashesAsync(cancellationToken))
-                    {
-                        var tag = HashToResourceTag(hash);
+                        var contentClue = HashToContentClue(contentHash);
 
                         NodeLocation? targetNodeLocation = null;
                         {
-                            var nodeLocations = await _ckadMediator.FindNodeLocationsAsync(tag, cancellationToken);
+                            var nodeLocations = await _options.NodeFinder.FindNodeLocationsAsync(contentClue, cancellationToken);
                             random.Shuffle(nodeLocations);
 
                             var ignoreAddressSet = new HashSet<OmniAddress>();
                             lock (_lockObject)
                             {
-                                ignoreAddressSet.UnionWith(_connectionStatusSet.Select(n => n.Address));
+                                ignoreAddressSet.UnionWith(_sessionStatusSet.Select(n => n.Session.Address));
                                 ignoreAddressSet.UnionWith(_connectedAddressSet);
                             }
 
@@ -161,14 +122,14 @@ namespace Omnius.Xeus.Engines.Exchangers
 
                         foreach (var targetAddress in targetNodeLocation.Addresses)
                         {
-                            foreach (var connector in _connectors)
+                            foreach (var connector in _options.Connectors ?? Enumerable.Empty<ISessionConnector>())
                             {
-                                var connection = await connector.ConnectAsync(targetAddress, EngineName, cancellationToken);
-                                if (connection is null) continue;
+                                var session = await connector.ConnectAsync(targetAddress, ServiceName, cancellationToken);
+                                if (session is null) continue;
 
                                 _connectedAddressSet.Add(targetAddress);
 
-                                if (await this.TryAddConnectionAsync(connection, targetAddress, ConnectionHandshakeType.Connected, hash, cancellationToken))
+                                if (await this.TryAddConnectedSessionAsync(session, contentHash, cancellationToken))
                                 {
                                     goto End;
                                 }
@@ -203,17 +164,17 @@ namespace Omnius.Xeus.Engines.Exchangers
 
                     lock (_lockObject)
                     {
-                        int connectionCount = _connectionStatusSet.Select(n => n.HandshakeType == ConnectionHandshakeType.Accepted).Count();
+                        int connectionCount = _sessionStatusSet.Select(n => n.Session.HandshakeType == SessionHandshakeType.Accepted).Count();
 
-                        if (_connectionStatusSet.Count > (_options.MaxConnectionCount / 2)) continue;
+                        if (_sessionStatusSet.Count > (_options.MaxSessionCount / 2)) continue;
                     }
 
-                    foreach (var connector in _connectors)
+                    foreach (var accepter in _options.Accepters ?? Enumerable.Empty<ISessionAccepter>())
                     {
-                        var result = await connector.AcceptAsync(EngineName, cancellationToken);
-                        if (result.Connection is null || result.Address is null) continue;
+                        var session = await accepter.AcceptAsync(ServiceName, cancellationToken);
+                        if (session is null) continue;
 
-                        await this.TryAddConnectionAsync(result.Connection, result.Address, ConnectionHandshakeType.Accepted, null, cancellationToken);
+                        await this.TryAddAcceptedSessionAsync(session, cancellationToken);
                     }
                 }
             }
@@ -229,63 +190,22 @@ namespace Omnius.Xeus.Engines.Exchangers
             }
         }
 
-        private async ValueTask<bool> TryAddConnectionAsync(IConnection connection, OmniAddress address,
-            ConnectionHandshakeType handshakeType, OmniHash? rootHash, CancellationToken cancellationToken = default)
+        private async ValueTask<bool> TryAddConnectedSessionAsync(ISession session, OmniHash rootHash, CancellationToken cancellationToken = default)
         {
             try
             {
-                ContentExchangerVersion? version = 0;
+                var version = await this.HandshakeVersionAsync(session.Connection, cancellationToken);
+                if (version is null) return false;
 
-                // バージョン情報の交換
+                if (version == FileExchangerVersion.Version1)
                 {
-                    var myHelloMessage = new ContentExchangerHelloMessage(new[] { ContentExchangerVersion.Version1 });
+                    var requestMessage = new FileExchangerHandshakeRequestMessage(rootHash);
+                    var resultMessage = await session.Connection.SendAndReceiveAsync<FileExchangerHandshakeRequestMessage, FileExchangerHandshakeResultMessage>(requestMessage, cancellationToken);
 
-                    var enqueueTask = connection.EnqueueAsync(myHelloMessage, cancellationToken).AsTask();
-                    var dequeueTask = connection.DequeueAsync<ContentExchangerHelloMessage>(cancellationToken).AsTask();
-                    await Task.WhenAll(enqueueTask, dequeueTask);
+                    if (resultMessage.Type != FileExchangerHandshakeResultType.Accepted) return false;
 
-                    var otherHelloMessage = dequeueTask.Result;
-                    if (otherHelloMessage == null) throw new ContentExchangerException();
-
-                    version = EnumHelper.GetOverlappedMaxValue(myHelloMessage.Versions, otherHelloMessage.Versions);
-                }
-
-                if (version == ContentExchangerVersion.Version1)
-                {
-                    if (handshakeType == ConnectionHandshakeType.Connected)
-                    {
-                        if (rootHash is null) throw new ArgumentNullException(nameof(rootHash));
-
-                        var requestExchangeMessage = new ContentExchangerHandshakeRequestMessage(rootHash.Value);
-
-                        await connection.EnqueueAsync(requestExchangeMessage, cancellationToken);
-                        var requestExchangeResultMessage = await connection.DequeueAsync<ContentExchangerHandshakeResultMessage>(cancellationToken);
-
-                        if (requestExchangeResultMessage == null || requestExchangeResultMessage.Type != ContentExchangerHandshakeResultType.Accepted) throw new ContentExchangerException();
-                    }
-                    else if (handshakeType == ConnectionHandshakeType.Accepted)
-                    {
-                        var requestExchangeMessage = await connection.DequeueAsync<ContentExchangerHandshakeRequestMessage>(cancellationToken);
-                        if (requestExchangeMessage == null) throw new ContentExchangerException();
-
-                        rootHash = requestExchangeMessage.RootHash;
-
-                        bool accepted = await _publisher.ContainsContentAsync(rootHash.Value, cancellationToken) || await _subscriber.ContainsContentAsync(rootHash.Value, cancellationToken);
-                        var requestExchangeResultMessage = new ContentExchangerHandshakeResultMessage(accepted ? ContentExchangerHandshakeResultType.Accepted : ContentExchangerHandshakeResultType.Rejected);
-                        await connection.EnqueueAsync(requestExchangeResultMessage, cancellationToken);
-
-                        if (!accepted) throw new ContentExchangerException();
-                    }
-                    else
-                    {
-                        throw new NotSupportedException();
-                    }
-
-                    lock (_lockObject)
-                    {
-                        var status = new ConnectionStatus(connection, address, handshakeType, rootHash.Value);
-                        _connectionStatusSet.Add(status);
-                    }
+                    var status = new SessionStatus(session, rootHash);
+                    _sessionStatusSet = _sessionStatusSet.Add(status);
 
                     return true;
                 }
@@ -297,17 +217,65 @@ namespace Omnius.Xeus.Engines.Exchangers
             catch (OperationCanceledException e)
             {
                 _logger.Debug(e);
-
-                connection.Dispose();
             }
             catch (Exception e)
             {
                 _logger.Warn(e);
-
-                connection.Dispose();
             }
 
             return false;
+        }
+
+        private async ValueTask<bool> TryAddAcceptedSessionAsync(ISession session, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var version = await this.HandshakeVersionAsync(session.Connection, cancellationToken);
+                if (version is null) return false;
+
+                if (version == FileExchangerVersion.Version1)
+                {
+                    var requestMessage = await session.Connection.Receiver.ReceiveAsync<FileExchangerHandshakeRequestMessage>(cancellationToken);
+                    var rootHash = requestMessage.RootHash;
+
+                    bool accepted = false;
+                    accepted |= await _options.PublishedFileStorage.ContainsFileAsync(rootHash, cancellationToken);
+                    accepted |= await _options.SubscribedFileStorage.ContainsFileAsync(rootHash, cancellationToken);
+
+                    var resultMessage = new FileExchangerHandshakeResultMessage(accepted ? FileExchangerHandshakeResultType.Accepted : FileExchangerHandshakeResultType.Rejected);
+                    await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
+
+                    if (!accepted) return false;
+
+                    var status = new SessionStatus(session, rootHash);
+                    _sessionStatusSet = _sessionStatusSet.Add(status);
+
+                    return true;
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }
+            catch (OperationCanceledException e)
+            {
+                _logger.Debug(e);
+            }
+            catch (Exception e)
+            {
+                _logger.Warn(e);
+            }
+
+            return false;
+        }
+
+        private async ValueTask<FileExchangerVersion?> HandshakeVersionAsync(IConnection connection, CancellationToken cancellationToken = default)
+        {
+            var myHelloMessage = new FileExchangerHelloMessage(new[] { FileExchangerVersion.Version1 });
+            var otherHelloMessage = await connection.ExchangeAsync(myHelloMessage, cancellationToken);
+
+            var version = EnumHelper.GetOverlappedMaxValue(myHelloMessage.Versions, otherHelloMessage.Versions);
+            return version;
         }
 
         private async Task SendLoopAsync(CancellationToken cancellationToken)
@@ -318,29 +286,23 @@ namespace Omnius.Xeus.Engines.Exchangers
                 {
                     await Task.Delay(1, cancellationToken);
 
-                    ConnectionStatus[] connectionStatuses;
-                    lock (_lockObject)
-                    {
-                        connectionStatuses = _connectionStatusSet.ToArray();
-                    }
-
-                    foreach (var connectionStatus in connectionStatuses)
+                    foreach (var sessionStatus in _sessionStatusSet)
                     {
                         try
                         {
-                            lock (connectionStatus.LockObject)
+                            lock (sessionStatus.LockObject)
                             {
-                                var dataMessage = connectionStatus.SendingDataMessage;
+                                var dataMessage = sessionStatus.SendingDataMessage;
                                 if (dataMessage is not null)
                                 {
-                                    if (connectionStatus.Connection.TryEnqueue(dataMessage))
+                                    if (sessionStatus.Session.Connection.Sender.TrySend(dataMessage))
                                     {
                                         foreach (var block in dataMessage.GiveBlocks)
                                         {
                                             block.Dispose();
                                         }
 
-                                        connectionStatus.SendingDataMessage = null;
+                                        sessionStatus.SendingDataMessage = null;
                                     }
                                 }
                             }
@@ -349,7 +311,7 @@ namespace Omnius.Xeus.Engines.Exchangers
                         {
                             lock (_lockObject)
                             {
-                                _connectionStatusSet.Remove(connectionStatus);
+                                _sessionStatusSet.Remove(sessionStatus);
                             }
                         }
                     }
@@ -375,17 +337,17 @@ namespace Omnius.Xeus.Engines.Exchangers
                 {
                     await Task.Delay(1, cancellationToken);
 
-                    ConnectionStatus[] connectionStatuses;
+                    SessionStatus[] connectionStatuses;
                     lock (_lockObject)
                     {
-                        connectionStatuses = _connectionStatusSet.ToArray();
+                        connectionStatuses = _sessionStatusSet.ToArray();
                     }
 
                     foreach (var connectionStatus in connectionStatuses)
                     {
                         try
                         {
-                            if (connectionStatus.Connection.TryDequeue<ContentExchangerDataMessage>(out var dataMessage))
+                            if (connectionStatus.Session.Connection.Receiver.TryReceive<FileExchangerDataMessage>(out var dataMessage))
                             {
                                 try
                                 {
@@ -396,7 +358,7 @@ namespace Omnius.Xeus.Engines.Exchangers
 
                                     foreach (var block in dataMessage.GiveBlocks)
                                     {
-                                        await _subscriber.WriteBlockAsync(connectionStatus.RootHash, block.Hash, block.Value, cancellationToken);
+                                        await _options.SubscribedFileStorage.WriteBlockAsync(connectionStatus.ContentHash, block.Hash, block.Value, cancellationToken);
                                     }
                                 }
                                 finally
@@ -412,7 +374,7 @@ namespace Omnius.Xeus.Engines.Exchangers
                         {
                             lock (_lockObject)
                             {
-                                _connectionStatusSet.Remove(connectionStatus);
+                                _sessionStatusSet.Remove(connectionStatus);
                             }
                         }
                     }
@@ -440,21 +402,22 @@ namespace Omnius.Xeus.Engines.Exchangers
                 {
                     await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken).ConfigureAwait(false);
 
-                    await this.UpdateResourceTagsAsync(cancellationToken);
+                    await this.UpdatePushContentCluesAsync(cancellationToken);
+                    await this.UpdateWantContentCluesAsync(cancellationToken);
 
-                    ConnectionStatus[] connectionStatuses;
+                    SessionStatus[] connectionStatuses;
                     lock (_lockObject)
                     {
-                        connectionStatuses = _connectionStatusSet.ToArray();
+                        connectionStatuses = _sessionStatusSet.ToArray();
                     }
 
                     foreach (var connectionStatus in connectionStatuses)
                     {
                         OmniHash[] wantBlockHashes;
                         {
-                            wantBlockHashes = (await _subscriber.GetBlockHashesAsync(connectionStatus.RootHash, false, cancellationToken))
+                            wantBlockHashes = (await _options.SubscribedFileStorage.GetBlockHashesAsync(connectionStatus.ContentHash, false, cancellationToken))
                                 .Randomize()
-                                .Take(ContentExchangerDataMessage.MaxWantBlockHashesCount)
+                                .Take(FileExchangerDataMessage.MaxWantBlockHashesCount)
                                 .ToArray();
                         }
 
@@ -466,15 +429,15 @@ namespace Omnius.Xeus.Engines.Exchangers
                                 receivedWantBlockHashSet.UnionWith(connectionStatus.ReceivedWantBlockHashes ?? Array.Empty<OmniHash>());
                             }
 
-                            foreach (var contentStorage in new IReadOnlyContents[] { _subscriber, _publisher })
+                            foreach (var contentStorage in new IReadOnlyFileStorage[] { _options.PublishedFileStorage, _options.SubscribedFileStorage })
                             {
-                                foreach (var hash in (await contentStorage.GetBlockHashesAsync(connectionStatus.RootHash, true, cancellationToken)).Randomize())
+                                foreach (var hash in (await contentStorage.GetBlockHashesAsync(connectionStatus.ContentHash, true, cancellationToken)).Randomize())
                                 {
-                                    var memoryOwner = await contentStorage.ReadBlockAsync(connectionStatus.RootHash, hash, cancellationToken);
+                                    var memoryOwner = await contentStorage.ReadBlockAsync(connectionStatus.ContentHash, hash, cancellationToken);
                                     if (memoryOwner is null) continue;
 
                                     giveBlocks.Add(new Block(hash, memoryOwner));
-                                    if (giveBlocks.Count >= ContentExchangerDataMessage.MaxGiveBlocksCount)
+                                    if (giveBlocks.Count >= FileExchangerDataMessage.MaxGiveBlocksCount)
                                     {
                                         goto End;
                                     }
@@ -486,7 +449,7 @@ namespace Omnius.Xeus.Engines.Exchangers
 
                         lock (connectionStatus.LockObject)
                         {
-                            connectionStatus.SendingDataMessage = new ContentExchangerDataMessage(wantBlockHashes, giveBlocks.ToArray());
+                            connectionStatus.SendingDataMessage = new FileExchangerDataMessage(wantBlockHashes, giveBlocks.ToArray());
                         }
                     }
                 }
@@ -503,68 +466,35 @@ namespace Omnius.Xeus.Engines.Exchangers
             }
         }
 
-        private async ValueTask UpdateResourceTagsAsync(CancellationToken cancellationToken = default)
+        private async ValueTask UpdatePushContentCluesAsync(CancellationToken cancellationToken = default)
         {
-            var resourceTags = new List<ContentLocation>();
-            foreach (var hash in await _subscriber.GetRootHashesAsync(cancellationToken))
+            var builder = ImmutableHashSet.CreateBuilder<ContentClue>();
+
+            foreach (var contentHash in await _options.PublishedFileStorage.GetRootHashesAsync(cancellationToken))
             {
-                var tag = HashToResourceTag(hash);
-                resourceTags.Add(tag);
+                var contentClue = HashToContentClue(contentHash);
+                builder.Add(contentClue);
             }
 
-            lock (_resourceTagsLockObject)
-            {
-                _resourceTags.Clear();
-                _resourceTags.UnionWith(resourceTags);
-            }
+            _pushContentClues = builder.ToImmutable();
         }
 
-        private static ContentLocation HashToResourceTag(OmniHash hash)
+        private async ValueTask UpdateWantContentCluesAsync(CancellationToken cancellationToken = default)
         {
-            return new ContentLocation(hash, EngineName);
-        }
+            var builder = ImmutableHashSet.CreateBuilder<ContentClue>();
 
-        private sealed class ConnectionStatus : ISynchronized
-        {
-            public ConnectionStatus(IConnection connection, OmniAddress address, ConnectionHandshakeType handshakeType, OmniHash rootHash)
+            foreach (var contentHash in await _options.SubscribedFileStorage.GetRootHashesAsync(cancellationToken))
             {
-                this.Connection = connection;
-                this.Address = address;
-                this.HandshakeType = handshakeType;
-                this.RootHash = rootHash;
+                var contentClue = HashToContentClue(contentHash);
+                builder.Add(contentClue);
             }
 
-            public object LockObject { get; } = new object();
-
-            public IConnection Connection { get; }
-
-            public OmniAddress Address { get; }
-
-            public ConnectionHandshakeType HandshakeType { get; }
-
-            public OmniHash RootHash { get; }
-
-            public ContentExchangerDataMessage? SendingDataMessage { get; set; }
-
-            public OmniHash[]? ReceivedWantBlockHashes { get; set; }
-        }
-    }
-
-    public sealed class ContentExchangerException : Exception
-    {
-        public ContentExchangerException()
-            : base()
-        {
+            _wantContentClues = builder.ToImmutable();
         }
 
-        public ContentExchangerException(string message)
-            : base(message)
+        private static ContentClue HashToContentClue(OmniHash hash)
         {
-        }
-
-        public ContentExchangerException(string message, Exception innerException)
-            : base(message, innerException)
-        {
+            return new ContentClue(ServiceName, hash);
         }
     }
 }

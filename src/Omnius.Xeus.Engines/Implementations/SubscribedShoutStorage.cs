@@ -8,50 +8,39 @@ using System.Threading.Tasks;
 using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
+using Omnius.Core.Pipelines;
 using Omnius.Core.Storages;
 using Omnius.Xeus.Engines.Internal;
 using Omnius.Xeus.Engines.Internal.Models;
+using Omnius.Xeus.Engines.Internal.Repositories;
+using Omnius.Xeus.Models;
 
 namespace Omnius.Xeus.Engines
 {
+    public record SubscribedShoutStorageOptions
+    {
+        public string? ConfigDirectoryPath { get; init; }
+        public IBytesStorageFactory? BytesStorageFactory { get; init; }
+        public IBytesPool? BytesPool { get; init; }
+    }
+
     public sealed partial class SubscribedShoutStorage : AsyncDisposableBase, ISubscribedShoutStorage
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         private readonly SubscribedShoutStorageOptions _options;
-        private readonly IBytesPool _bytesPool;
 
         private readonly SubscribedShoutStorageRepository _subscriberRepo;
         private readonly IBytesStorage<string> _blockStorage;
 
         private readonly AsyncReaderWriterLock _asyncLock = new();
 
-        internal sealed class SubscribedShoutStorageFactory : ISubscribedShoutStorageFactory
-        {
-            public async ValueTask<ISubscribedShoutStorage> CreateAsync(SubscribedShoutStorageOptions options, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, CancellationToken cancellationToken = default)
-            {
-                var result = new SubscribedShoutStorage(options, bytesStorageFactory, bytesPool);
-                await result.InitAsync(cancellationToken);
-
-                return result;
-            }
-        }
-
-        public static ISubscribedShoutStorageFactory Factory { get; } = new SubscribedShoutStorageFactory();
-
-        private SubscribedShoutStorage(SubscribedShoutStorageOptions options, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool)
+        private SubscribedShoutStorage(SubscribedShoutStorageOptions options)
         {
             _options = options;
-            _bytesPool = bytesPool;
 
             _subscriberRepo = new SubscribedShoutStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
-            _blockStorage = bytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
-        }
-
-        internal async ValueTask InitAsync(CancellationToken cancellationToken = default)
-        {
-            await _subscriberRepo.MigrateAsync(cancellationToken);
-            await _blockStorage.MigrateAsync(cancellationToken);
+            _blockStorage = _options.BytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _options.BytesPool);
         }
 
         protected override async ValueTask OnDisposeAsync()
@@ -60,18 +49,24 @@ namespace Omnius.Xeus.Engines
             _blockStorage.Dispose();
         }
 
+        public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
+        {
+            await _subscriberRepo.MigrateAsync(cancellationToken);
+            await _blockStorage.MigrateAsync(cancellationToken);
+        }
+
         public async ValueTask<SubscribedShoutStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                var itemReports = new List<SubscribedShoutStorageReport>();
+                var shoutReports = new List<SubscribedShoutReport>();
 
                 foreach (var item in _subscriberRepo.Items.FindAll())
                 {
-                    itemReports.Add(new SubscribedShoutStorageReport(item.Signature, item.Registrant));
+                    shoutReports.Add(new SubscribedShoutReport(item.Signature, item.Registrant));
                 }
 
-                return new SubscribedShoutStorageReport(itemReports.ToArray());
+                return new SubscribedShoutStorageReport(shoutReports.ToArray());
             }
         }
 
@@ -104,7 +99,7 @@ namespace Omnius.Xeus.Engines
             }
         }
 
-        public async ValueTask SubscribeMessageAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default)
+        public async ValueTask SubscribeShoutAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
@@ -112,7 +107,7 @@ namespace Omnius.Xeus.Engines
             }
         }
 
-        public async ValueTask UnsubscribeMessageAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default)
+        public async ValueTask UnsubscribeShoutAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
@@ -143,7 +138,7 @@ namespace Omnius.Xeus.Engines
             using var memoryOwner = await _blockStorage.TryReadAsync(blockName, cancellationToken);
             if (memoryOwner is null) return null;
 
-            var message = Shout.Import(new ReadOnlySequence<byte>(memoryOwner.Memory), _bytesPool);
+            var message = Shout.Import(new ReadOnlySequence<byte>(memoryOwner.Memory), _options.BytesPool);
             return message;
         }
 
@@ -159,13 +154,13 @@ namespace Omnius.Xeus.Engines
             var writtenItem = _subscriberRepo.WrittenItems.FindOne(signature);
             if (writtenItem is not null && writtenItem.CreationTime >= message.CreationTime.ToDateTime()) return;
 
-            using var hub = new BytesPipe(_bytesPool);
-            message.Export(hub.Writer, _bytesPool);
+            using var bytesPise = new BytesPipe(_options.BytesPool);
+            message.Export(bytesPise.Writer, _options.BytesPool);
 
-            _subscriberRepo.WrittenItems.Insert(new WrittenDeclaredMessageItem(signature, message.CreationTime.ToDateTime()));
+            _subscriberRepo.WrittenItems.Insert(new WrittenShoutItem(signature, message.CreationTime.ToDateTime()));
 
             var blockName = ComputeBlockName(signature);
-            await _blockStorage.WriteAsync(blockName, hub.Reader.GetSequence(), cancellationToken);
+            await _blockStorage.WriteAsync(blockName, bytesPise.Reader.GetSequence(), cancellationToken);
         }
 
         private static string ComputeBlockName(OmniSignature signature)
