@@ -1,0 +1,138 @@
+syntax v1.0;
+
+using "Omnius.Core.Cryptography";
+using "Omnius.Core.Net";
+using "Omnius.Xeus.Models";
+
+namespace "Omnius.Xeus.Engines.Internal.Models";
+option csharp_access_level "internal";
+
+// Common
+
+message Block {
+    Hash: OmniHash,
+    Value: bytes(capacity: 4 * 1024 * 1024, recyclable: true),
+}
+
+message MerkleTreeSection {
+    Depth: int32,
+    BlockLength: uint32,
+    Length: uint64,
+    Hashes: vector<OmniHash>(capacity: 1024 * 1024 * 1024),
+}
+
+// SessionManager
+
+message SessionManagerHelloMessage {
+    Versions: vector<SessionManagerVersion>(capacity: 32),
+}
+
+enum SessionManagerVersion : int8 {
+    Unknown = 0,
+    Version1 = 1,
+}
+
+message SessionManagerSessionRequestMessage {
+    Scheme: string,
+}
+
+message SessionManagerSessionResultMessage {
+    Type: SessionManagerSessionResultType,
+}
+
+enum SessionManagerSessionResultType : uint8 {
+    Unknown = 0,
+    Rejected = 1,
+    Accepted = 2,
+}
+
+// NodeFinder
+
+message NodeFinderHelloMessage {
+    Versions: vector<NodeFinderVersion>(capacity: 32),
+}
+
+enum NodeFinderVersion : int8 {
+    Unknown = 0,
+    Version1 = 1,
+}
+
+message NodeFinderProfileMessage {
+    Id: bytes(capacity: 32),
+    NodeLocation: NodeLocation,
+}
+
+message NodeFinderDataMessage {
+    PushCloudNodeLocations: vector<NodeLocation>(capacity: 256),
+    WantContentClues: vector<ContentClue>(capacity: 256),
+    GiveContentLocations: vector<ContentLocation>(capacity: 256),
+    PushContentLocations: vector<ContentLocation>(capacity: 256),
+}
+
+message ContentLocation {
+    ContentClue: ContentClue,
+    NodeLocations: vector<NodeLocation>(capacity: 8192),
+}
+
+// FileExchanger
+
+message FileExchangerHelloMessage {
+    Versions: vector<FileExchangerVersion>(capacity: 32),
+}
+
+enum FileExchangerVersion : uint8 {
+    Unknown = 0,
+    Version1 = 1,
+}
+
+message FileExchangerHandshakeRequestMessage {
+    RootHash: OmniHash,
+}
+
+message FileExchangerHandshakeResultMessage {
+    Type: FileExchangerHandshakeResultType,
+}
+
+enum FileExchangerHandshakeResultType : uint8 {
+    Unknown = 0,
+    Rejected = 1,
+    Accepted = 2,
+}
+
+message FileExchangerDataMessage {
+    WantBlockHashes: vector<OmniHash>(capacity: 8192),
+    GiveBlocks: vector<Block>(capacity: 8),
+}
+
+// ShoutExchanger
+
+message ShoutExchangerHelloMessage {
+    Versions: vector<ShoutExchangerVersion>(capacity: 32),
+}
+
+enum ShoutExchangerVersion : uint8 {
+    Unknown = 0,
+    Version1 = 1,
+}
+
+message ShoutExchangerFetchRequestMessage {
+    Signature: OmniSignature,
+    CreationTime: timestamp,
+}
+
+message ShoutExchangerFetchResultMessage {
+    Type: ShoutExchangerFetchResultType,
+    Shout: Shout?,
+}
+
+enum ShoutExchangerFetchResultType : uint8 {
+    Unknown = 0,
+    Rejected = 1,
+    Found = 2,
+    NotFound = 3,
+    Same = 4,
+}
+
+message ShoutExchangerPostMessage {
+    Shout: Shout,
+}

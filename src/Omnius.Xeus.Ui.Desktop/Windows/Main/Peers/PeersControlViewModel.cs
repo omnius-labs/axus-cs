@@ -37,7 +37,7 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main.Peers
             _refreshTask = this.RefreshAsync(_cancellationTokenSource.Token);
 
             this.AddNodeCommand = new ReactiveCommand().AddTo(_disposable);
-            this.AddNodeCommand.Subscribe(() => this.AddNodeProfiles());
+            this.AddNodeCommand.Subscribe(() => this.AddNodeLocations());
             this.ConnectionReports = _connectionReportMap.Values.ToReadOnlyReactiveCollection().AddTo(_disposable);
         }
 
@@ -54,10 +54,10 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main.Peers
 
         public ReadOnlyReactiveCollection<ConnectionReportElement> ConnectionReports { get; }
 
-        private async void AddNodeProfiles()
+        private async void AddNodeLocations()
         {
-            var nodeProfiles = await _dialogService.OpenAddNodesWindowAsync();
-            await _dashboard.AddCloudNodeProfileAsync(nodeProfiles);
+            var nodeLocations = await _dialogService.OpenAddNodesWindowAsync();
+            await _dashboard.AddCloudNodeLocationAsync(nodeLocations);
         }
 
         private async Task RefreshAsync(CancellationToken cancellationToken = default)

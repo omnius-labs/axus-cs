@@ -19,7 +19,7 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.AddNodes
         private readonly UiState _uiState;
         private readonly IClipboardService _clipboardService;
 
-        private readonly List<NodeProfile> _nodeProfiles = new();
+        private readonly List<NodeLocation> _nodeLocations = new();
 
         private readonly CompositeDisposable _disposable = new();
 
@@ -45,7 +45,7 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.AddNodes
             _disposable.Dispose();
         }
 
-        public IEnumerable<NodeProfile> GetNodeProfiles() => _nodeProfiles.ToArray();
+        public IEnumerable<NodeLocation> GetNodeLocations() => _nodeLocations.ToArray();
 
         public ReactivePropertySlim<string> Text { get; }
 
@@ -55,8 +55,8 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.AddNodes
 
         private async void Ok(object state)
         {
-            _nodeProfiles.Clear();
-            _nodeProfiles.AddRange(await this.ParseNodeProfilesAsync());
+            _nodeLocations.Clear();
+            _nodeLocations.AddRange(await this.ParseNodeLocationsAsync());
 
             var window = (Window)state;
             window.Close();
@@ -68,14 +68,14 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.AddNodes
             window.Close();
         }
 
-        private async ValueTask<IEnumerable<NodeProfile>> ParseNodeProfilesAsync()
+        private async ValueTask<IEnumerable<NodeLocation>> ParseNodeLocationsAsync()
         {
-            var results = new List<NodeProfile>();
+            var results = new List<NodeLocation>();
 
             foreach (var line in this.Text.Value.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries).Select(n => n.Trim()))
             {
-                if (!XeusMessageConverter.TryStringToNodeProfile(line, out var nodeProfile)) continue;
-                results.Add(nodeProfile);
+                if (!XeusMessageConverter.TryStringToNodeLocation(line, out var nodeLocation)) continue;
+                results.Add(nodeLocation);
             }
 
             return results;

@@ -10,7 +10,7 @@ namespace Omnius.Xeus.Services
     public static class XeusMessageConverter
     {
         private static readonly string _schema = "xeus";
-        private static readonly string _nodeProfilePath = "node-profile";
+        private static readonly string _nodeLocationPath = "node-profile";
 
         private static string AddSchemaAndPath(string path, string value)
         {
@@ -28,33 +28,33 @@ namespace Omnius.Xeus.Services
             return true;
         }
 
-        public static string NodeProfileToString(NodeProfile nodeProfile)
+        public static string NodeLocationToString(NodeLocation nodeLocation)
         {
             var bytesPool = BytesPool.Shared;
 
-            using var inHub = new BytesHub(bytesPool);
-            nodeProfile.Export(inHub.Writer, bytesPool);
+            using var inHub = new BytesPipe(bytesPool);
+            nodeLocation.Export(inHub.Writer, bytesPool);
 
-            using var outHub = new BytesHub(bytesPool);
+            using var outHub = new BytesPipe(bytesPool);
             if (!OmniMessageConverter.TryWrite(1, inHub.Reader.GetSequence(), outHub.Writer)) throw new Exception();
 
-            return AddSchemaAndPath(_nodeProfilePath, OmniBase.Encode(outHub.Reader.GetSequence(), ConvertStringType.Base58));
+            return AddSchemaAndPath(_nodeLocationPath, OmniBase.Encode(outHub.Reader.GetSequence(), ConvertStringType.Base58));
         }
 
-        public static bool TryStringToNodeProfile(string text, [NotNullWhen(true)] out NodeProfile? nodeProfile)
+        public static bool TryStringToNodeLocation(string text, [NotNullWhen(true)] out NodeLocation? nodeLocation)
         {
-            nodeProfile = null;
-            if (!TryRemoveSchemaAndPath(text, _nodeProfilePath, out var value)) return false;
+            nodeLocation = null;
+            if (!TryRemoveSchemaAndPath(text, _nodeLocationPath, out var value)) return false;
 
             var bytesPool = BytesPool.Shared;
 
-            using var inHub = new BytesHub(bytesPool);
+            using var inHub = new BytesPipe(bytesPool);
             if (!OmniBase.TryDecode(value, inHub.Writer)) return false;
 
-            using var outHub = new BytesHub(bytesPool);
+            using var outHub = new BytesPipe(bytesPool);
             if (!OmniMessageConverter.TryRead(inHub.Reader.GetSequence(), out var version, outHub.Writer)) return false;
 
-            nodeProfile = NodeProfile.Import(outHub.Reader.GetSequence(), bytesPool);
+            nodeLocation = NodeLocation.Import(outHub.Reader.GetSequence(), bytesPool);
             return true;
         }
     }

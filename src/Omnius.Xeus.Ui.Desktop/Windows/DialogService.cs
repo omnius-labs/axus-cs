@@ -10,7 +10,7 @@ namespace Omnius.Xeus.Ui.Desktop.Windows
 {
     public interface IDialogService
     {
-        ValueTask<IEnumerable<NodeProfile>> OpenAddNodesWindowAsync();
+        ValueTask<IEnumerable<NodeLocation>> OpenAddNodesWindowAsync();
     }
 
     public class DialogService : IDialogService
@@ -24,13 +24,13 @@ namespace Omnius.Xeus.Ui.Desktop.Windows
             _mainWindowProvider = mainWindowProvider;
         }
 
-        public async ValueTask<IEnumerable<NodeProfile>> OpenAddNodesWindowAsync()
+        public async ValueTask<IEnumerable<NodeLocation>> OpenAddNodesWindowAsync()
         {
             var window = await _applicationDispatcher.InvokeAsync(() => new AddNodesWindow());
             window.ViewModel = Bootstrapper.ServiceProvider?.GetRequiredService<AddNodesWindowViewModel>() ?? throw new NullReferenceException();
 
             await window.ShowDialog(_mainWindowProvider.GetMainWindow());
-            return window.ViewModel.GetNodeProfiles();
+            return window.ViewModel.GetNodeLocations();
         }
     }
 }

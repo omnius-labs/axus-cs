@@ -28,9 +28,9 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main.Status
         {
             _dashboard = dashboard;
             _clipboardService = clipboardService;
-            this.MyNodeProfile = new ReactiveProperty<string>().AddTo(_disposable);
-            this.CopyMyNodeProfileCommand = new ReactiveCommand().AddTo(_disposable);
-            this.CopyMyNodeProfileCommand.Subscribe(() => this.CopyMyNodeProfile()).AddTo(_disposable);
+            this.MyNodeLocation = new ReactiveProperty<string>().AddTo(_disposable);
+            this.CopyMyNodeLocationCommand = new ReactiveCommand().AddTo(_disposable);
+            this.CopyMyNodeLocationCommand.Subscribe(() => this.CopyMyNodeLocation()).AddTo(_disposable);
 
             _refreshTask = this.RefreshAsync(_cancellationTokenSource.Token);
         }
@@ -44,13 +44,13 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main.Status
             _cancellationTokenSource.Dispose();
         }
 
-        public ReactiveProperty<string> MyNodeProfile { get; }
+        public ReactiveProperty<string> MyNodeLocation { get; }
 
-        public ReactiveCommand CopyMyNodeProfileCommand { get; }
+        public ReactiveCommand CopyMyNodeLocationCommand { get; }
 
-        private async void CopyMyNodeProfile()
+        private async void CopyMyNodeLocation()
         {
-            await _clipboardService.SetTextAsync(this.MyNodeProfile.Value);
+            await _clipboardService.SetTextAsync(this.MyNodeLocation.Value);
         }
 
         private async Task RefreshAsync(CancellationToken cancellationToken = default)
@@ -61,11 +61,11 @@ namespace Omnius.Xeus.Ui.Desktop.Windows.Main.Status
                 {
                     await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
 
-                    var myNodeProfile = await _dashboard.GetMyNodeProfileAsync(cancellationToken);
+                    var myNodeLocation = await _dashboard.GetMyNodeLocationAsync(cancellationToken);
 
                     await Dispatcher.UIThread.InvokeAsync(() =>
                     {
-                        this.MyNodeProfile.Value = XeusMessageConverter.NodeProfileToString(myNodeProfile);
+                        this.MyNodeLocation.Value = XeusMessageConverter.NodeLocationToString(myNodeLocation);
                     });
                 }
             }

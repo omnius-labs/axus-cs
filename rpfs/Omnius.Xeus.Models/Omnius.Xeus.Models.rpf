@@ -1,0 +1,109 @@
+﻿syntax v1.0;
+
+using "Omnius.Core.Cryptography";
+using "Omnius.Core.Net";
+
+namespace "Omnius.Xeus.Models";
+
+// Common
+
+message NodeLocation {
+    Addresses: vector<OmniAddress>(capacity: 32),
+}
+
+message ContentClue {
+    Scheme: string(capacity: 256),
+    ContentHash: OmniHash,
+}
+
+message Shout {
+    CreationTime: timestamp,
+    Value: bytes(capacity: 32 * 1024 * 1024, recyclable: true),
+    Certificate: OmniCertificate?,
+}
+
+message ConsistencyReport {
+    BadBlockCount: uint32,
+    CheckedBlockCount: uint32,
+    TotalBlockCount: uint32,
+}
+
+message SessionReport {
+    HandshakeType: SessionHandshakeType,
+    Address: OmniAddress,
+}
+
+enum SessionHandshakeType : uint8 {
+    Unknown = 0,
+    Connected = 1,
+    Accepted = 2,
+}
+
+// NodeFinder
+
+message NodeFinderReport {
+    ConnectedSessionCount: uint32,
+    AcceptedSessionCount: uint32,
+    Sessions: vector<SessionReport>,
+}
+
+// FileExchanger
+
+message FileExchangerReport {
+    ConnectedSessionCount: uint32,
+    AcceptedSessionCount: uint32,
+    Sessions: vector<SessionReport>,
+}
+
+// PublishedFileStorage
+
+message PublishedFileStorageReport {
+    PublishedFiles: vector<PublishedFileReport>,
+}
+
+message PublishedFileReport {
+    FilePath: string?,
+    RootHash: OmniHash?,
+    Registrant: string,
+}
+
+// SubscribedFileStorage
+
+message SubscribedFileStorageReport {
+    SubscribedFiles: vector<SubscribedFileReport>,
+}
+
+message SubscribedFileReport {
+    RootHash: OmniHash?,
+    Registrant: string,
+}
+
+// ShoutExchanger
+
+message ShoutExchangerReport {
+    ConnectedSessionCount: uint32,
+    AcceptedSessionCount: uint32,
+    Sessions: vector<SessionReport>,
+}
+
+// PublishedShout
+
+message PublishedShoutStorageReport {
+    PublishedShouts: vector<PublishedShoutReport>,
+}
+
+message PublishedShoutReport {
+    Signature: OmniSignature,
+    Registrant: string,
+}
+
+// SubscribedShout
+
+message SubscribedShoutStorageReport {
+    SubscribedShouts: vector<SubscribedShoutReport>,
+}
+
+message SubscribedShoutReport {
+    Signature: OmniSignature,
+    Registrant: string,
+}

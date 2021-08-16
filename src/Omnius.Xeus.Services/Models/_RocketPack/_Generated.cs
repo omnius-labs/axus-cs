@@ -3,15 +3,15 @@
 
 namespace Omnius.Xeus.Services.Models
 {
-    public sealed partial class UserProfile : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfile>
+    public sealed partial class UserProfile : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfile>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.UserProfile> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfile>.Formatter;
-        public static global::Omnius.Xeus.Services.Models.UserProfile Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfile>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.UserProfile> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfile>.Formatter;
+        public static global::Omnius.Xeus.Services.Models.UserProfile Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfile>.Empty;
 
         static UserProfile()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfile>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfile>.Empty = new global::Omnius.Xeus.Services.Models.UserProfile(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Timestamp.Zero, global::Omnius.Xeus.Services.Models.UserProfileContent.Empty);
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfile>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfile>.Empty = new global::Omnius.Xeus.Services.Models.UserProfile(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Timestamp.Zero, global::Omnius.Xeus.Services.Models.UserProfileContent.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -41,12 +41,12 @@ namespace Omnius.Xeus.Services.Models
 
         public static global::Omnius.Xeus.Services.Models.UserProfile Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -75,9 +75,9 @@ namespace Omnius.Xeus.Services.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.UserProfile>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.UserProfile>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Services.Models.UserProfile value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Xeus.Services.Models.UserProfile value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -98,7 +98,7 @@ namespace Omnius.Xeus.Services.Models
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Services.Models.UserProfile Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Services.Models.UserProfile Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -134,15 +134,15 @@ namespace Omnius.Xeus.Services.Models
             }
         }
     }
-    public sealed partial class UserProfileContent : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileContent>
+    public sealed partial class UserProfileContent : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileContent>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.UserProfileContent> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileContent>.Formatter;
-        public static global::Omnius.Xeus.Services.Models.UserProfileContent Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileContent>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.UserProfileContent> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileContent>.Formatter;
+        public static global::Omnius.Xeus.Services.Models.UserProfileContent Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileContent>.Empty;
 
         static UserProfileContent()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileContent>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileContent>.Empty = new global::Omnius.Xeus.Services.Models.UserProfileContent(global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>(), global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>(), global::System.Array.Empty<global::Omnius.Xeus.Services.Models.Box>());
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileContent>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileContent>.Empty = new global::Omnius.Xeus.Services.Models.UserProfileContent(global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>(), global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>(), global::System.Array.Empty<global::Omnius.Xeus.Services.Models.Box>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -201,12 +201,12 @@ namespace Omnius.Xeus.Services.Models
 
         public static global::Omnius.Xeus.Services.Models.UserProfileContent Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -235,9 +235,9 @@ namespace Omnius.Xeus.Services.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.UserProfileContent>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.UserProfileContent>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Services.Models.UserProfileContent value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Xeus.Services.Models.UserProfileContent value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -270,7 +270,7 @@ namespace Omnius.Xeus.Services.Models
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Services.Models.UserProfileContent Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Services.Models.UserProfileContent Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -321,15 +321,15 @@ namespace Omnius.Xeus.Services.Models
             }
         }
     }
-    public sealed partial class Box : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.Box>
+    public sealed partial class Box : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.Box>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.Box> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.Box>.Formatter;
-        public static global::Omnius.Xeus.Services.Models.Box Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.Box>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.Box> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.Box>.Formatter;
+        public static global::Omnius.Xeus.Services.Models.Box Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.Box>.Empty;
 
         static Box()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.Box>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.Box>.Empty = new global::Omnius.Xeus.Services.Models.Box(null, global::System.Array.Empty<string>(), global::System.Array.Empty<global::Omnius.Xeus.Services.Models.Seed>(), global::System.Array.Empty<global::Omnius.Xeus.Services.Models.Box>());
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.Box>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.Box>.Empty = new global::Omnius.Xeus.Services.Models.Box(null, global::System.Array.Empty<string>(), global::System.Array.Empty<global::Omnius.Xeus.Services.Models.Seed>(), global::System.Array.Empty<global::Omnius.Xeus.Services.Models.Box>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -394,12 +394,12 @@ namespace Omnius.Xeus.Services.Models
 
         public static global::Omnius.Xeus.Services.Models.Box Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -429,9 +429,9 @@ namespace Omnius.Xeus.Services.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.Box>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.Box>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Services.Models.Box value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Xeus.Services.Models.Box value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -469,7 +469,7 @@ namespace Omnius.Xeus.Services.Models
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Services.Models.Box Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Services.Models.Box Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -526,15 +526,15 @@ namespace Omnius.Xeus.Services.Models
             }
         }
     }
-    public sealed partial class Seed : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.Seed>
+    public sealed partial class Seed : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.Seed>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.Seed> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.Seed>.Formatter;
-        public static global::Omnius.Xeus.Services.Models.Seed Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.Seed>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.Seed> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.Seed>.Formatter;
+        public static global::Omnius.Xeus.Services.Models.Seed Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.Seed>.Empty;
 
         static Seed()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.Seed>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.Seed>.Empty = new global::Omnius.Xeus.Services.Models.Seed(global::Omnius.Core.Cryptography.OmniHash.Empty, string.Empty, 0);
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.Seed>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.Seed>.Empty = new global::Omnius.Xeus.Services.Models.Seed(global::Omnius.Core.Cryptography.OmniHash.Empty, string.Empty, 0);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -565,12 +565,12 @@ namespace Omnius.Xeus.Services.Models
 
         public static global::Omnius.Xeus.Services.Models.Seed Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -599,9 +599,9 @@ namespace Omnius.Xeus.Services.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.Seed>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.Seed>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Services.Models.Seed value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Xeus.Services.Models.Seed value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -622,7 +622,7 @@ namespace Omnius.Xeus.Services.Models
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Services.Models.Seed Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Services.Models.Seed Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -658,15 +658,15 @@ namespace Omnius.Xeus.Services.Models
             }
         }
     }
-    public sealed partial class ConnectionsReport : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.ConnectionsReport>
+    public sealed partial class ConnectionsReport : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.ConnectionsReport>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.ConnectionsReport> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.ConnectionsReport>.Formatter;
-        public static global::Omnius.Xeus.Services.Models.ConnectionsReport Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.ConnectionsReport>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.ConnectionsReport> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.ConnectionsReport>.Formatter;
+        public static global::Omnius.Xeus.Services.Models.ConnectionsReport Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.ConnectionsReport>.Empty;
 
         static ConnectionsReport()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.ConnectionsReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.ConnectionsReport>.Empty = new global::Omnius.Xeus.Services.Models.ConnectionsReport(string.Empty, global::System.Array.Empty<global::Omnius.Xeus.Engines.Models.ConnectionReport>());
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.ConnectionsReport>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.ConnectionsReport>.Empty = new global::Omnius.Xeus.Services.Models.ConnectionsReport(string.Empty, global::System.Array.Empty<global::Omnius.Xeus.Models.SessionReport>());
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -674,7 +674,7 @@ namespace Omnius.Xeus.Services.Models
         public static readonly int MaxEngineNameLength = 256;
         public static readonly int MaxConnectionsCount = 2147483647;
 
-        public ConnectionsReport(string engineName, global::Omnius.Xeus.Engines.Models.ConnectionReport[] connections)
+        public ConnectionsReport(string engineName, global::Omnius.Xeus.Models.SessionReport[] connections)
         {
             if (engineName is null) throw new global::System.ArgumentNullException("engineName");
             if (engineName.Length > 256) throw new global::System.ArgumentOutOfRangeException("engineName");
@@ -686,7 +686,7 @@ namespace Omnius.Xeus.Services.Models
             }
 
             this.EngineName = engineName;
-            this.Connections = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Xeus.Engines.Models.ConnectionReport>(connections);
+            this.Connections = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Xeus.Models.SessionReport>(connections);
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -701,16 +701,16 @@ namespace Omnius.Xeus.Services.Models
         }
 
         public string EngineName { get; }
-        public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Xeus.Engines.Models.ConnectionReport> Connections { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Xeus.Models.SessionReport> Connections { get; }
 
         public static global::Omnius.Xeus.Services.Models.ConnectionsReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -738,9 +738,9 @@ namespace Omnius.Xeus.Services.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.ConnectionsReport>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.ConnectionsReport>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Services.Models.ConnectionsReport value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Xeus.Services.Models.ConnectionsReport value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -755,17 +755,17 @@ namespace Omnius.Xeus.Services.Models
                     w.Write((uint)value.Connections.Count);
                     foreach (var n in value.Connections)
                     {
-                        global::Omnius.Xeus.Engines.Models.ConnectionReport.Formatter.Serialize(ref w, n, rank + 1);
+                        global::Omnius.Xeus.Models.SessionReport.Formatter.Serialize(ref w, n, rank + 1);
                     }
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Services.Models.ConnectionsReport Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Services.Models.ConnectionsReport Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
                 string p_engineName = string.Empty;
-                global::Omnius.Xeus.Engines.Models.ConnectionReport[] p_connections = global::System.Array.Empty<global::Omnius.Xeus.Engines.Models.ConnectionReport>();
+                global::Omnius.Xeus.Models.SessionReport[] p_connections = global::System.Array.Empty<global::Omnius.Xeus.Models.SessionReport>();
 
                 for (; ; )
                 {
@@ -781,10 +781,10 @@ namespace Omnius.Xeus.Services.Models
                         case 2:
                             {
                                 var length = r.GetUInt32();
-                                p_connections = new global::Omnius.Xeus.Engines.Models.ConnectionReport[length];
+                                p_connections = new global::Omnius.Xeus.Models.SessionReport[length];
                                 for (int i = 0; i < p_connections.Length; i++)
                                 {
-                                    p_connections[i] = global::Omnius.Xeus.Engines.Models.ConnectionReport.Formatter.Deserialize(ref r, rank + 1);
+                                    p_connections[i] = global::Omnius.Xeus.Models.SessionReport.Formatter.Deserialize(ref r, rank + 1);
                                 }
                                 break;
                             }
@@ -795,15 +795,15 @@ namespace Omnius.Xeus.Services.Models
             }
         }
     }
-    public sealed partial class FileFinderOptions : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.FileFinderOptions>
+    public sealed partial class FileFinderOptions : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.FileFinderOptions>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.FileFinderOptions> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.FileFinderOptions>.Formatter;
-        public static global::Omnius.Xeus.Services.Models.FileFinderOptions Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.FileFinderOptions>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.FileFinderOptions> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.FileFinderOptions>.Formatter;
+        public static global::Omnius.Xeus.Services.Models.FileFinderOptions Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.FileFinderOptions>.Empty;
 
         static FileFinderOptions()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.FileFinderOptions>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.FileFinderOptions>.Empty = new global::Omnius.Xeus.Services.Models.FileFinderOptions(string.Empty);
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.FileFinderOptions>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.FileFinderOptions>.Empty = new global::Omnius.Xeus.Services.Models.FileFinderOptions(string.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -829,12 +829,12 @@ namespace Omnius.Xeus.Services.Models
 
         public static global::Omnius.Xeus.Services.Models.FileFinderOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -861,9 +861,9 @@ namespace Omnius.Xeus.Services.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.FileFinderOptions>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.FileFinderOptions>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Services.Models.FileFinderOptions value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Xeus.Services.Models.FileFinderOptions value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -874,7 +874,7 @@ namespace Omnius.Xeus.Services.Models
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Services.Models.FileFinderOptions Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Services.Models.FileFinderOptions Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -898,15 +898,15 @@ namespace Omnius.Xeus.Services.Models
             }
         }
     }
-    public sealed partial class FileDownloaderOptions : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.FileDownloaderOptions>
+    public sealed partial class FileDownloaderOptions : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.FileDownloaderOptions>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.FileDownloaderOptions> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.FileDownloaderOptions>.Formatter;
-        public static global::Omnius.Xeus.Services.Models.FileDownloaderOptions Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.FileDownloaderOptions>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.FileDownloaderOptions> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.FileDownloaderOptions>.Formatter;
+        public static global::Omnius.Xeus.Services.Models.FileDownloaderOptions Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.FileDownloaderOptions>.Empty;
 
         static FileDownloaderOptions()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.FileDownloaderOptions>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.FileDownloaderOptions>.Empty = new global::Omnius.Xeus.Services.Models.FileDownloaderOptions(string.Empty);
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.FileDownloaderOptions>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.FileDownloaderOptions>.Empty = new global::Omnius.Xeus.Services.Models.FileDownloaderOptions(string.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -932,12 +932,12 @@ namespace Omnius.Xeus.Services.Models
 
         public static global::Omnius.Xeus.Services.Models.FileDownloaderOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -964,9 +964,9 @@ namespace Omnius.Xeus.Services.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.FileDownloaderOptions>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.FileDownloaderOptions>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Services.Models.FileDownloaderOptions value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Xeus.Services.Models.FileDownloaderOptions value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -977,7 +977,7 @@ namespace Omnius.Xeus.Services.Models
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Services.Models.FileDownloaderOptions Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Services.Models.FileDownloaderOptions Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1001,15 +1001,15 @@ namespace Omnius.Xeus.Services.Models
             }
         }
     }
-    public sealed partial class DownloadingFileReport : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.DownloadingFileReport>
+    public sealed partial class DownloadingFileReport : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.DownloadingFileReport>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.DownloadingFileReport> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.DownloadingFileReport>.Formatter;
-        public static global::Omnius.Xeus.Services.Models.DownloadingFileReport Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.DownloadingFileReport>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.DownloadingFileReport> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.DownloadingFileReport>.Formatter;
+        public static global::Omnius.Xeus.Services.Models.DownloadingFileReport Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.DownloadingFileReport>.Empty;
 
         static DownloadingFileReport()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.DownloadingFileReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.DownloadingFileReport>.Empty = new global::Omnius.Xeus.Services.Models.DownloadingFileReport(global::Omnius.Xeus.Services.Models.Seed.Empty, string.Empty, global::Omnius.Core.RocketPack.Timestamp.Zero);
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.DownloadingFileReport>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.DownloadingFileReport>.Empty = new global::Omnius.Xeus.Services.Models.DownloadingFileReport(global::Omnius.Xeus.Services.Models.Seed.Empty, string.Empty, global::Omnius.Core.RocketPack.Timestamp.Zero);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -1041,12 +1041,12 @@ namespace Omnius.Xeus.Services.Models
 
         public static global::Omnius.Xeus.Services.Models.DownloadingFileReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -1075,9 +1075,9 @@ namespace Omnius.Xeus.Services.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.DownloadingFileReport>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.DownloadingFileReport>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Services.Models.DownloadingFileReport value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Xeus.Services.Models.DownloadingFileReport value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1098,7 +1098,7 @@ namespace Omnius.Xeus.Services.Models
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Services.Models.DownloadingFileReport Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Services.Models.DownloadingFileReport Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1134,15 +1134,15 @@ namespace Omnius.Xeus.Services.Models
             }
         }
     }
-    public sealed partial class FileUploaderOptions : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.FileUploaderOptions>
+    public sealed partial class FileUploaderOptions : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.FileUploaderOptions>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.FileUploaderOptions> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.FileUploaderOptions>.Formatter;
-        public static global::Omnius.Xeus.Services.Models.FileUploaderOptions Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.FileUploaderOptions>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.FileUploaderOptions> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.FileUploaderOptions>.Formatter;
+        public static global::Omnius.Xeus.Services.Models.FileUploaderOptions Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.FileUploaderOptions>.Empty;
 
         static FileUploaderOptions()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.FileUploaderOptions>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.FileUploaderOptions>.Empty = new global::Omnius.Xeus.Services.Models.FileUploaderOptions(string.Empty);
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.FileUploaderOptions>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.FileUploaderOptions>.Empty = new global::Omnius.Xeus.Services.Models.FileUploaderOptions(string.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -1168,12 +1168,12 @@ namespace Omnius.Xeus.Services.Models
 
         public static global::Omnius.Xeus.Services.Models.FileUploaderOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -1200,9 +1200,9 @@ namespace Omnius.Xeus.Services.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.FileUploaderOptions>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.FileUploaderOptions>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Services.Models.FileUploaderOptions value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Xeus.Services.Models.FileUploaderOptions value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1213,7 +1213,7 @@ namespace Omnius.Xeus.Services.Models
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Services.Models.FileUploaderOptions Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Services.Models.FileUploaderOptions Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1237,15 +1237,15 @@ namespace Omnius.Xeus.Services.Models
             }
         }
     }
-    public sealed partial class UploadingFileReport : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UploadingFileReport>
+    public sealed partial class UploadingFileReport : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UploadingFileReport>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.UploadingFileReport> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UploadingFileReport>.Formatter;
-        public static global::Omnius.Xeus.Services.Models.UploadingFileReport Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UploadingFileReport>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.UploadingFileReport> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UploadingFileReport>.Formatter;
+        public static global::Omnius.Xeus.Services.Models.UploadingFileReport Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UploadingFileReport>.Empty;
 
         static UploadingFileReport()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UploadingFileReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UploadingFileReport>.Empty = new global::Omnius.Xeus.Services.Models.UploadingFileReport(string.Empty, global::Omnius.Core.RocketPack.Timestamp.Zero);
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UploadingFileReport>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UploadingFileReport>.Empty = new global::Omnius.Xeus.Services.Models.UploadingFileReport(string.Empty, global::Omnius.Core.RocketPack.Timestamp.Zero);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -1273,12 +1273,12 @@ namespace Omnius.Xeus.Services.Models
 
         public static global::Omnius.Xeus.Services.Models.UploadingFileReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -1306,9 +1306,9 @@ namespace Omnius.Xeus.Services.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.UploadingFileReport>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.UploadingFileReport>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Services.Models.UploadingFileReport value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Xeus.Services.Models.UploadingFileReport value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1324,7 +1324,7 @@ namespace Omnius.Xeus.Services.Models
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Services.Models.UploadingFileReport Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Services.Models.UploadingFileReport Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1354,15 +1354,15 @@ namespace Omnius.Xeus.Services.Models
             }
         }
     }
-    public sealed partial class UserProfileFinderOptions : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileFinderOptions>
+    public sealed partial class UserProfileFinderOptions : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileFinderOptions>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.UserProfileFinderOptions> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileFinderOptions>.Formatter;
-        public static global::Omnius.Xeus.Services.Models.UserProfileFinderOptions Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileFinderOptions>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.UserProfileFinderOptions> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileFinderOptions>.Formatter;
+        public static global::Omnius.Xeus.Services.Models.UserProfileFinderOptions Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileFinderOptions>.Empty;
 
         static UserProfileFinderOptions()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileFinderOptions>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileFinderOptions>.Empty = new global::Omnius.Xeus.Services.Models.UserProfileFinderOptions(string.Empty);
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileFinderOptions>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileFinderOptions>.Empty = new global::Omnius.Xeus.Services.Models.UserProfileFinderOptions(string.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -1388,12 +1388,12 @@ namespace Omnius.Xeus.Services.Models
 
         public static global::Omnius.Xeus.Services.Models.UserProfileFinderOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -1420,9 +1420,9 @@ namespace Omnius.Xeus.Services.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.UserProfileFinderOptions>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.UserProfileFinderOptions>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Services.Models.UserProfileFinderOptions value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Xeus.Services.Models.UserProfileFinderOptions value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1433,7 +1433,7 @@ namespace Omnius.Xeus.Services.Models
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Services.Models.UserProfileFinderOptions Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Services.Models.UserProfileFinderOptions Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1457,15 +1457,15 @@ namespace Omnius.Xeus.Services.Models
             }
         }
     }
-    public sealed partial class UserProfileFinderSearchOptions : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions>
+    public sealed partial class UserProfileFinderSearchOptions : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions>.Formatter;
-        public static global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions>.Formatter;
+        public static global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions>.Empty;
 
         static UserProfileFinderSearchOptions()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions>.Empty = new global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions(global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>(), global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>(), 0, 0);
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions>.Empty = new global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions(global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>(), global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>(), 0, 0);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -1516,12 +1516,12 @@ namespace Omnius.Xeus.Services.Models
 
         public static global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -1551,9 +1551,9 @@ namespace Omnius.Xeus.Services.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1587,7 +1587,7 @@ namespace Omnius.Xeus.Services.Models
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Services.Models.UserProfileFinderSearchOptions Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1639,15 +1639,15 @@ namespace Omnius.Xeus.Services.Models
             }
         }
     }
-    public sealed partial class UserProfileDownloaderOptions : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions>
+    public sealed partial class UserProfileDownloaderOptions : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions>.Formatter;
-        public static global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions>.Formatter;
+        public static global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions>.Empty;
 
         static UserProfileDownloaderOptions()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions>.Empty = new global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions(string.Empty);
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions>.Empty = new global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions(string.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -1673,12 +1673,12 @@ namespace Omnius.Xeus.Services.Models
 
         public static global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -1705,9 +1705,9 @@ namespace Omnius.Xeus.Services.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1718,7 +1718,7 @@ namespace Omnius.Xeus.Services.Models
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Services.Models.UserProfileDownloaderOptions Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1742,15 +1742,15 @@ namespace Omnius.Xeus.Services.Models
             }
         }
     }
-    public sealed partial class DownloadingUserProfileReport : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport>
+    public sealed partial class DownloadingUserProfileReport : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport>.Formatter;
-        public static global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport>.Formatter;
+        public static global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport>.Empty;
 
         static DownloadingUserProfileReport()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport>.Empty = new global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Timestamp.Zero);
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport>.Empty = new global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Timestamp.Zero);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -1775,12 +1775,12 @@ namespace Omnius.Xeus.Services.Models
 
         public static global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -1808,9 +1808,9 @@ namespace Omnius.Xeus.Services.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1826,7 +1826,7 @@ namespace Omnius.Xeus.Services.Models
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Services.Models.DownloadingUserProfileReport Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1856,15 +1856,15 @@ namespace Omnius.Xeus.Services.Models
             }
         }
     }
-    public sealed partial class UserProfileUploaderOptions : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions>
+    public sealed partial class UserProfileUploaderOptions : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions>.Formatter;
-        public static global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions>.Formatter;
+        public static global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions>.Empty;
 
         static UserProfileUploaderOptions()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions>.Empty = new global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions(string.Empty);
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions>.Empty = new global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions(string.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -1890,12 +1890,12 @@ namespace Omnius.Xeus.Services.Models
 
         public static global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -1922,9 +1922,9 @@ namespace Omnius.Xeus.Services.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1935,7 +1935,7 @@ namespace Omnius.Xeus.Services.Models
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Services.Models.UserProfileUploaderOptions Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -1959,15 +1959,15 @@ namespace Omnius.Xeus.Services.Models
             }
         }
     }
-    public sealed partial class UploadingUserProfileReport : global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UploadingUserProfileReport>
+    public sealed partial class UploadingUserProfileReport : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UploadingUserProfileReport>
     {
-        public static global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.UploadingUserProfileReport> Formatter => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UploadingUserProfileReport>.Formatter;
-        public static global::Omnius.Xeus.Services.Models.UploadingUserProfileReport Empty => global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UploadingUserProfileReport>.Empty;
+        public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.UploadingUserProfileReport> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UploadingUserProfileReport>.Formatter;
+        public static global::Omnius.Xeus.Services.Models.UploadingUserProfileReport Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UploadingUserProfileReport>.Empty;
 
         static UploadingUserProfileReport()
         {
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UploadingUserProfileReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketPackObject<global::Omnius.Xeus.Services.Models.UploadingUserProfileReport>.Empty = new global::Omnius.Xeus.Services.Models.UploadingUserProfileReport(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Timestamp.Zero);
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UploadingUserProfileReport>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Services.Models.UploadingUserProfileReport>.Empty = new global::Omnius.Xeus.Services.Models.UploadingUserProfileReport(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Timestamp.Zero);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
@@ -1992,12 +1992,12 @@ namespace Omnius.Xeus.Services.Models
 
         public static global::Omnius.Xeus.Services.Models.UploadingUserProfileReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var reader = new global::Omnius.Core.RocketPack.RocketPackObjectReader(sequence, bytesPool);
+            var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
             return Formatter.Deserialize(ref reader, 0);
         }
         public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
         {
-            var writer = new global::Omnius.Core.RocketPack.RocketPackObjectWriter(bufferWriter, bytesPool);
+            var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
             Formatter.Serialize(ref writer, this, 0);
         }
 
@@ -2025,9 +2025,9 @@ namespace Omnius.Xeus.Services.Models
         }
         public override int GetHashCode() => ___hashCode.Value;
 
-        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketPackObjectFormatter<global::Omnius.Xeus.Services.Models.UploadingUserProfileReport>
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Services.Models.UploadingUserProfileReport>
         {
-            public void Serialize(ref global::Omnius.Core.RocketPack.RocketPackObjectWriter w, in global::Omnius.Xeus.Services.Models.UploadingUserProfileReport value, in int rank)
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Xeus.Services.Models.UploadingUserProfileReport value, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 
@@ -2043,7 +2043,7 @@ namespace Omnius.Xeus.Services.Models
                 }
                 w.Write((uint)0);
             }
-            public global::Omnius.Xeus.Services.Models.UploadingUserProfileReport Deserialize(ref global::Omnius.Core.RocketPack.RocketPackObjectReader r, in int rank)
+            public global::Omnius.Xeus.Services.Models.UploadingUserProfileReport Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
             {
                 if (rank > 256) throw new global::System.FormatException();
 

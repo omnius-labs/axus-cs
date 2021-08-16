@@ -43,10 +43,10 @@ package Ominus.Xeus.Engines {
         rectangle CkadMediator <<$component>><<behavior>>
     }
     package Ominus.Xeus.Engines.Storages {
-        rectangle ContentPublisher <<$component>><<behavior>>
-        rectangle ContentSubscriber <<$component>><<behavior>>
-        rectangle DeclaredMessagePublisher <<$component>><<behavior>>
-        rectangle DeclaredMessageSubscriber <<$component>><<behavior>>
+        rectangle PublishedFileStorage <<$component>><<behavior>>
+        rectangle SubscribedFileStorage <<$component>><<behavior>>
+        rectangle PublishedDeclaredMessage <<$component>><<behavior>>
+        rectangle SubscribedDeclaredMessage <<$component>><<behavior>>
     }
 }
 
@@ -71,12 +71,12 @@ CkadMediator -left-> TcpConnector
 
 ContentExchanger -up-> TcpConnector
 ContentExchanger -up-> CkadMediator
-ContentExchanger -down-> ContentPublisher
-ContentExchanger -down-> ContentSubscriber
+ContentExchanger -down-> PublishedFileStorage
+ContentExchanger -down-> SubscribedFileStorage
 
 DeclaredMessageExchanger -up-> TcpConnector
 DeclaredMessageExchanger -up-> CkadMediator
-DeclaredMessageExchanger -down-> DeclaredMessagePublisher
-DeclaredMessageExchanger -down-> DeclaredMessageSubscriber
+DeclaredMessageExchanger -down-> PublishedDeclaredMessage
+DeclaredMessageExchanger -down-> SubscribedDeclaredMessage
 
 @enduml

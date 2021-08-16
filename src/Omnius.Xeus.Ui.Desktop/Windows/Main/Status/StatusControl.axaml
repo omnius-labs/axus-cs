@@ -39,8 +39,8 @@
     <StackPanel Orientation="Vertical" Margin="8">
         <StackPanel Orientation="Horizontal">
             <Label Classes="title" Content="My node profile" />
-            <TextBox Classes="value" Text="{Binding MyNodeProfile.Value}" IsReadOnly="true" TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
-            <Button Classes="action" Content="Copy" Command="{Binding CopyMyNodeProfileCommand} "/>
+            <TextBox Classes="value" Text="{Binding MyNodeLocation.Value}" IsReadOnly="true" TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
+            <Button Classes="action" Content="Copy" Command="{Binding CopyMyNodeLocationCommand} "/>
         </StackPanel>
     </StackPanel>
 

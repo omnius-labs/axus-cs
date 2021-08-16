@@ -2,7 +2,7 @@ syntax v1.0;
 
 using "Omnius.Core.Cryptography";
 using "Omnius.Core.Net";
-using "Omnius.Xeus.Engines.Models";
+using "Omnius.Xeus.Models";
 
 namespace "Omnius.Xeus.Services.Models";
 
@@ -37,7 +37,7 @@ message Seed {
 
 message ConnectionsReport {
     EngineName: string(capacity: 256),
-    Connections: vector<ConnectionReport>,
+    Connections: vector<SessionReport>,
 }
 
 // FileFinder

@@ -18,8 +18,8 @@ namespace Omnius.Xeus.Services
     {
         ValueTask<IEnumerable<ConnectionsReport>> GetConnectionReportsAsync(CancellationToken cancellationToken = default);
 
-        ValueTask<EnginesModels.NodeProfile> GetMyNodeProfileAsync(CancellationToken cancellationToken = default);
+        ValueTask<EnginesModels.NodeLocation> GetMyNodeLocationAsync(CancellationToken cancellationToken = default);
 
-        ValueTask AddCloudNodeProfileAsync(IEnumerable<EnginesModels.NodeProfile> nodeProfiles, CancellationToken cancellationToken = default);
+        ValueTask AddCloudNodeLocationAsync(IEnumerable<EnginesModels.NodeLocation> nodeLocations, CancellationToken cancellationToken = default);
     }
 }

@@ -1,0 +1,117 @@
+syntax v1.0;
+
+using "Omnius.Xeus.Models";
+
+namespace "Omnius.Xeus.Remoting";
+
+service XeusService {
+    GetReport: () -> (GetReportResult),
+
+    GetMyNodeLocation: () -> (GetMyNodeLocationResult),
+    AddCloudNodeLocations: (AddCloudNodeLocationsRequest) -> (),
+
+    PublishFileInStorage: (PublishFileInStorageRequest) -> (PublishFileInStorageResult),
+    PublishFileInMemory: (PublishFileInMemoryRequest) -> (PublishFileInMemoryResult),
+    UnpublishFileInStorage: (UnpublishFileInStorageRequest) -> (),
+    UnpublishFileInMemory: (UnpublishFileInMemoryRequest) -> (),
+
+    SubscribeFile: (SubscribeFileRequest) -> (),
+    UnsubscribeFile: (UnsubscribeFileRequest) -> (),
+    ExportFileToStorage: (ExportFileToStorageRequest) -> (),
+    ExportFileToMemory: (ExportFileToMemoryRequest) -> (ExportFileToMemoryResult),
+
+    PublishShout: (PublishShoutRequest) -> (),
+    UnpublishShout: (UnpublishShoutRequest) -> (),
+
+    SubscribeShout: (SubscribeShoutRequest) -> (),
+    UnsubscribeShout: (UnsubscribeShoutRequest) -> (),
+    ExportShout: (ExportShoutRequest) -> (ExportShoutResult),
+}
+
+message GetReportResult {
+}
+
+message GetMyNodeLocationResult {
+    NodeLocation: NodeLocation,
+}
+
+message AddCloudNodeLocationsRequest {
+    NodeLocations: vector<NodeLocation>(capacity: 32),
+}
+
+message PublishFileInStorageRequest {
+    FilePath: string,
+    Registrant: string,
+}
+message PublishFileInStorageResult {
+    Hash: OmniHash,
+}
+
+message PublishFileInMemoryRequest {
+    Memory: bytes(capacity: 32 * 1024 * 1024),
+    Registrant: string,
+}
+message PublishFileInMemoryResult {
+    Hash: OmniHash,
+}
+
+message UnpublishFileInStorageRequest {
+    FilePath: string,
+    Registrant: string,
+}
+
+message UnpublishFileInMemoryRequest {
+    RootHash: OmniHash,
+    Registrant: string,
+}
+
+message SubscribeFileRequest {
+    RootHash: OmniHash,
+    Registrant: string,
+}
+
+message UnsubscribeFileRequest {
+    RootHash: OmniHash,
+    Registrant: string,
+}
+
+message ExportFileToStorageRequest {
+    RootHash: OmniHash,
+    FilePath: string,
+}
+
+message ExportFileToMemoryRequest {
+    RootHash: OmniHash,
+}
+
+message ExportFileToMemoryResult {
+    Memory: bytes?(capacity: 32 * 1024 * 1024, recyclable: true),
+}
+
+message PublishShoutRequest {
+    Message: Shout,
+    Registrant: string,
+}
+
+message UnpublishShoutRequest {
+    Signature: OmniSignature,
+    Registrant: string,
+}
+
+message SubscribeShoutRequest {
+    Signature: OmniSignature,
+    Registrant: string,
+}
+
+message UnsubscribeShoutRequest {
+    Signature: OmniSignature,
+    Registrant: string,
+}
+
+message ExportShoutRequest {
+    Signature: OmniSignature,
+}
+
+message ExportShoutResult {
+    Shout: Shout?,
+}
