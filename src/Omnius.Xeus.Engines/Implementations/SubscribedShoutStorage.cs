@@ -17,17 +17,12 @@ using Omnius.Xeus.Models;
 
 namespace Omnius.Xeus.Engines
 {
-    public record SubscribedShoutStorageOptions
-    {
-        public string? ConfigDirectoryPath { get; init; }
-        public IBytesStorageFactory? BytesStorageFactory { get; init; }
-        public IBytesPool? BytesPool { get; init; }
-    }
-
     public sealed partial class SubscribedShoutStorage : AsyncDisposableBase, ISubscribedShoutStorage
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
+        private readonly IBytesStorageFactory _bytesStorageFactory;
+        private readonly IBytesPool _bytesPool;
         private readonly SubscribedShoutStorageOptions _options;
 
         private readonly SubscribedShoutStorageRepository _subscriberRepo;
@@ -35,12 +30,14 @@ namespace Omnius.Xeus.Engines
 
         private readonly AsyncReaderWriterLock _asyncLock = new();
 
-        private SubscribedShoutStorage(SubscribedShoutStorageOptions options)
+        public SubscribedShoutStorage(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, SubscribedShoutStorageOptions options)
         {
+            _bytesStorageFactory = bytesStorageFactory;
+            _bytesPool = bytesPool;
             _options = options;
 
             _subscriberRepo = new SubscribedShoutStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
-            _blockStorage = _options.BytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _options.BytesPool);
+            _blockStorage = _bytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
         }
 
         protected override async ValueTask OnDisposeAsync()
@@ -138,7 +135,7 @@ namespace Omnius.Xeus.Engines
             using var memoryOwner = await _blockStorage.TryReadAsync(blockName, cancellationToken);
             if (memoryOwner is null) return null;
 
-            var message = Shout.Import(new ReadOnlySequence<byte>(memoryOwner.Memory), _options.BytesPool);
+            var message = Shout.Import(new ReadOnlySequence<byte>(memoryOwner.Memory), _bytesPool);
             return message;
         }
 
@@ -154,8 +151,8 @@ namespace Omnius.Xeus.Engines
             var writtenItem = _subscriberRepo.WrittenItems.FindOne(signature);
             if (writtenItem is not null && writtenItem.CreationTime >= message.CreationTime.ToDateTime()) return;
 
-            using var bytesPise = new BytesPipe(_options.BytesPool);
-            message.Export(bytesPise.Writer, _options.BytesPool);
+            using var bytesPise = new BytesPipe(_bytesPool);
+            message.Export(bytesPise.Writer, _bytesPool);
 
             _subscriberRepo.WrittenItems.Insert(new WrittenShoutItem(signature, message.CreationTime.ToDateTime()));
 

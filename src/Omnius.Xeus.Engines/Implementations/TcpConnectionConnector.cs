@@ -25,10 +25,24 @@ namespace Omnius.Xeus.Engines
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
+        private readonly IBandwidthLimiter _senderBandwidthLimiter;
+        private readonly IBandwidthLimiter _receiverBandwidthLimiter;
+        private readonly ISocks5ProxyClientFactory _socks5ProxyClientFactory;
+        private readonly IHttpProxyClientFactory _httpProxyClientFactory;
+        private readonly IBatchActionDispatcher _batchActionDispatcher;
+        private readonly IBytesPool _bytesPool;
         private readonly TcpConnectionConnectorOptions _options;
 
-        public TcpConnectionConnector(TcpConnectionConnectorOptions options)
+        private const int MaxReceiveByteCount = 1024 * 1024 * 8;
+
+        public TcpConnectionConnector(IBandwidthLimiter senderBandwidthLimiter, IBandwidthLimiter receiverBandwidthLimiter, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, TcpConnectionConnectorOptions options)
         {
+            _senderBandwidthLimiter = senderBandwidthLimiter;
+            _receiverBandwidthLimiter = receiverBandwidthLimiter;
+            _socks5ProxyClientFactory = socks5ProxyClientFactory;
+            _httpProxyClientFactory = httpProxyClientFactory;
+            _batchActionDispatcher = batchActionDispatcher;
+            _bytesPool = bytesPool;
             _options = options;
         }
 
@@ -41,13 +55,8 @@ namespace Omnius.Xeus.Engines
             var cap = await this.ConnectCapAsync(address, cancellationToken);
             if (cap == null) return null;
 
-            var bridgeConnectionOptions = new BridgeConnectionOptions
-            {
-                MaxReceiveByteCount = 1024 * 1024 * 256,
-                BatchActionDispatcher = _options.BatchActionDispatcher,
-                BytesPool = BytesPool.Shared,
-            };
-            var bridgeConnection = new BridgeConnection(cap, bridgeConnectionOptions);
+            var bridgeConnectionOptions = new BridgeConnectionOptions(MaxReceiveByteCount);
+            var bridgeConnection = new BridgeConnection(cap, _senderBandwidthLimiter, _receiverBandwidthLimiter, _batchActionDispatcher, _bytesPool, bridgeConnectionOptions);
             return bridgeConnection;
         }
 
@@ -69,14 +78,14 @@ namespace Omnius.Xeus.Engines
                 {
                     if (!_options.Proxy.Address.TryGetTcpEndpoint(out var proxyAddress, out ushort proxyPort, true)) return null;
 
-                    if (_options.Socks5ProxyClientFactory is not null && _options.Proxy.Type == TcpProxyType.Socks5Proxy)
+                    if (_socks5ProxyClientFactory is not null && _options.Proxy.Type == TcpProxyType.Socks5Proxy)
                     {
                         var socket = await ConnectSocketAsync(new IPEndPoint(proxyAddress, proxyPort), cancellationToken);
                         if (socket == null) return null;
 
                         disposableList.Add(socket);
 
-                        var proxy = _options.Socks5ProxyClientFactory.Create(ipAddress.ToString(), port);
+                        var proxy = _socks5ProxyClientFactory.Create(ipAddress.ToString(), port);
                         await proxy.ConnectAsync(socket, cancellationToken);
 
                         var cap = new SocketCap(socket);
@@ -84,14 +93,14 @@ namespace Omnius.Xeus.Engines
 
                         return cap;
                     }
-                    else if (_options.HttpProxyClientFactory is not null && _options.Proxy.Type == TcpProxyType.HttpProxy)
+                    else if (_httpProxyClientFactory is not null && _options.Proxy.Type == TcpProxyType.HttpProxy)
                     {
                         var socket = await ConnectSocketAsync(new IPEndPoint(proxyAddress, proxyPort), cancellationToken);
                         if (socket == null) return null;
 
                         disposableList.Add(socket);
 
-                        var proxy = _options.HttpProxyClientFactory.Create(ipAddress.ToString(), port);
+                        var proxy = _httpProxyClientFactory.Create(ipAddress.ToString(), port);
                         await proxy.ConnectAsync(socket, cancellationToken);
 
                         var cap = new SocketCap(socket);

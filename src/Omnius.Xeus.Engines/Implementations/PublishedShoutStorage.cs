@@ -17,31 +17,27 @@ using Omnius.Xeus.Models;
 
 namespace Omnius.Xeus.Engines
 {
-    public record PublishedShoutStorageOptions
-    {
-        public string? ConfigDirectoryPath { get; init; }
-        public IBytesStorageFactory? BytesStorageFactory { get; init; }
-        public IBytesPool? BytesPool { get; init; }
-    }
-
     public sealed partial class PublishedShoutStorage : AsyncDisposableBase, IPublishedShoutStorage
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly PublishedShoutStorageOptions _options;
+        private readonly IBytesStorageFactory _bytesStorageFactory;
         private readonly IBytesPool _bytesPool;
+        private readonly PublishedShoutStorageOptions _options;
 
         private readonly PublishedShoutStorageRepository _publisherRepo;
         private readonly IBytesStorage<string> _blockStorage;
 
         private readonly AsyncReaderWriterLock _asyncLock = new();
 
-        private PublishedShoutStorage(PublishedShoutStorageOptions options)
+        public PublishedShoutStorage(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, PublishedShoutStorageOptions options)
         {
+            _bytesStorageFactory = bytesStorageFactory;
+            _bytesPool = bytesPool;
             _options = options;
 
             _publisherRepo = new PublishedShoutStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
-            _blockStorage = _options.BytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
+            _blockStorage = _bytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
         }
 
         protected override async ValueTask OnDisposeAsync()

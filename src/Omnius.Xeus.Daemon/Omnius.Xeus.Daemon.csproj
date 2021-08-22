@@ -20,6 +20,7 @@
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Tasks\Omnius.Core.Tasks.csproj" />
     <ProjectReference Include="..\Omnius.Xeus.Remoting\Omnius.Xeus.Remoting.csproj" />
     <ProjectReference Include="..\Omnius.Xeus.Models\Omnius.Xeus.Models.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Engines\Omnius.Xeus.Engines.csproj" />
     <ProjectReference Include="..\Omnius.Xeus.Utils\Omnius.Xeus.Utils.csproj" />
   </ItemGroup>
 

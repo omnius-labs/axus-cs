@@ -9,13 +9,11 @@ using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Storages;
-using Omnius.Core.Storages.Extensions;
-using Omnius.Xeus.Services.Internal.Repositories.Entities;
 using Omnius.Xeus.Services.Models;
 
 namespace Omnius.Xeus.Services
 {
-    public sealed class UserProfileFinder : AsyncDisposableBase, IUserProfileFinder
+    public sealed class UserProfileFinder : AsyncDisposableBase
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 

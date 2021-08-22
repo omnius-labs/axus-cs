@@ -10,48 +10,32 @@ using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.RocketPack;
 using Omnius.Core.Storages;
-using Omnius.Xeus.Daemon;
-using Omnius.Xeus.Engines.Models;
+using Omnius.Xeus.Remoting;
 using Omnius.Xeus.Services.Internal.Models;
 using Omnius.Xeus.Services.Internal.Repositories;
 using Omnius.Xeus.Services.Models;
 
 namespace Omnius.Xeus.Services
 {
-    public sealed class UserProfileDownloader : AsyncDisposableBase, IUserProfileDownloader
+    public sealed class UserProfileDownloader : AsyncDisposableBase
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly UserProfileDownloaderOptions _options;
         private readonly IXeusService _xeusService;
         private readonly IBytesStorageFactory _bytesStorageFactory;
         private readonly IBytesPool _bytesPool;
+        private readonly UserProfileDownloaderOptions _options;
 
         private readonly UserProfileDownloaderRepository _userProfileDownloaderRepo;
 
-        private Task _watchTask = null!;
+        private readonly Task _watchTask;
 
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
         private readonly AsyncReaderWriterLock _asyncLock = new();
         private const string Registrant = "Omnius.Xeus.Services.UserProfileDownloader";
 
-        internal sealed class UserProfileDownloaderFactory : IUserProfileDownloaderFactory
-        {
-            public async ValueTask<IUserProfileDownloader> CreateAsync(UserProfileDownloaderOptions options, IXeusService xeusService,
-                IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, CancellationToken cancellationToken = default)
-            {
-                var result = new UserProfileDownloader(options, xeusService, bytesStorageFactory, bytesPool);
-                await result.InitAsync(cancellationToken);
-
-                return result;
-            }
-        }
-
-        public static IUserProfileDownloaderFactory Factory { get; } = new UserProfileDownloaderFactory();
-
-        public UserProfileDownloader(UserProfileDownloaderOptions options, IXeusService xeusService,
-            IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool)
+        public UserProfileDownloader(IXeusService xeusService, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, UserProfileDownloaderOptions options)
         {
             _options = options;
             _xeusService = xeusService;
@@ -59,10 +43,7 @@ namespace Omnius.Xeus.Services
             _bytesPool = bytesPool;
 
             _userProfileDownloaderRepo = new UserProfileDownloaderRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
-        }
 
-        internal async ValueTask InitAsync(CancellationToken cancellationToken = default)
-        {
             _watchTask = this.WatchAsync(_cancellationTokenSource.Token);
         }
 
@@ -135,7 +116,7 @@ namespace Omnius.Xeus.Services
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                var subscribedItems = await this.InternalGetSubscribedContentReportsAsync(cancellationToken);
+                var subscribedItems = await this.InternalGetSubscribedReportsAsync(cancellationToken);
                 var subscribedRootHashSet = new HashSet<OmniHash>();
                 subscribedRootHashSet.UnionWith(subscribedItems.Where(n => n.Registrant == Registrant).Select(n => n.RootHash).Where(n => n.HasValue).Select(n => n!.Value));
 
@@ -208,55 +189,5 @@ namespace Omnius.Xeus.Services
             }
         }
 
-        private async ValueTask<IEnumerable<SubscribedDeclaredMessageReport>> InternalGetSubscribedDeclaredMessageReportsAsync(CancellationToken cancellationToken = default)
-        {
-            var output = await _xeusService.SubscribedDeclaredMessage_GetReportAsync(cancellationToken);
-            return output.Report.SubscribedDeclaredMessages;
-        }
-
-        private async ValueTask<IEnumerable<SubscribedContentReport>> InternalGetSubscribedContentReportsAsync(CancellationToken cancellationToken = default)
-        {
-            var output = await _xeusService.SubscribedFileStorage_GetReportAsync(cancellationToken);
-            return output.Report.SubscribedContents;
-        }
-
-        private async ValueTask InternalSubscribeDeclaredMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
-        {
-            var input = new SubscribedDeclaredMessage_SubscribeMessage_Input(signature, Registrant);
-            await _xeusService.SubscribedDeclaredMessage_SubscribeMessageAsync(input, cancellationToken);
-        }
-
-        private async ValueTask InternalSubscribeContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
-        {
-            var input = new SubscribedFileStorage_SubscribeContent_Input(rootHash, Registrant);
-            await _xeusService.SubscribedFileStorage_SubscribeContentAsync(input, cancellationToken);
-        }
-
-        private async ValueTask InternalUnsubscribeDeclaredMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
-        {
-            var input = new SubscribedDeclaredMessage_UnsubscribeMessage_Input(signature, Registrant);
-            await _xeusService.SubscribedDeclaredMessage_UnsubscribeMessageAsync(input, cancellationToken);
-        }
-
-        private async ValueTask InternalUnsubscribeContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
-        {
-            var input = new SubscribedFileStorage_UnsubscribeContent_Input(rootHash, Registrant);
-            await _xeusService.SubscribedFileStorage_UnsubscribeContentAsync(input, cancellationToken);
-        }
-
-        private async ValueTask<Shout?> InternalExportDeclaredMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
-        {
-            var input = new SubscribedDeclaredMessage_ExportMessage_Input(signature);
-            var output = await _xeusService.SubscribedDeclaredMessage_ExportMessageAsync(input, cancellationToken);
-            return output.DeclaredMessage;
-        }
-
-        private async ValueTask<UserProfileContent?> InternalExportContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
-        {
-            var input = new SubscribedFileStorage_ExportContent_Memory_Input(rootHash);
-            var output = await _xeusService.SubscribedFileStorage_ExportContentAsync(input, cancellationToken);
-            if (output.Memory is null) return null;
-            return UserProfileContent.Import(new ReadOnlySequence<byte>(output.Memory.Value), _bytesPool);
-        }
     }
 }

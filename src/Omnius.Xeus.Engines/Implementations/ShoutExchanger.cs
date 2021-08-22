@@ -17,29 +17,18 @@ using Omnius.Xeus.Engines.Internal;
 using Omnius.Xeus.Engines.Internal.Models;
 using Omnius.Xeus.Models;
 
-namespace Omnius.Xeus.Engines.Exchangers
+namespace Omnius.Xeus.Engines
 {
-    public record ShoutExchangerOptions
-    {
-        public IReadOnlyCollection<ISessionConnector>? Connectors { get; init; }
-
-        public IReadOnlyCollection<ISessionAccepter>? Accepters { get; init; }
-
-        public INodeFinder? NodeFinder { get; init; }
-
-        public IPublishedShoutStorage? PublishedShoutStorage { get; init; }
-
-        public ISubscribedShoutStorage? SubscribedShoutStorage { get; init; }
-
-        public IBytesPool? BytesPool { get; init; }
-
-        public uint MaxSessionCount { get; init; }
-    }
-
     public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchanger
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
+        private readonly ISessionConnector _sessionConnector;
+        private readonly ISessionAccepter _sessionAccepter;
+        private readonly INodeFinder _nodeFinder;
+        private readonly IPublishedShoutStorage _publishedShoutStorage;
+        private readonly ISubscribedShoutStorage _subscribedShoutStorage;
+        private readonly IBytesPool _bytesPool;
         private readonly ShoutExchangerOptions _options;
 
         private ImmutableHashSet<SessionStatus> _sessionStatusSet = ImmutableHashSet<SessionStatus>.Empty;
@@ -57,8 +46,15 @@ namespace Omnius.Xeus.Engines.Exchangers
 
         private const string ServiceName = "shout_exchanger";
 
-        public ShoutExchanger(ShoutExchangerOptions options)
+        public ShoutExchanger(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
+            IPublishedShoutStorage publishedShoutStorage, ISubscribedShoutStorage subscribedShoutStorage, IBytesPool bytesPool, ShoutExchangerOptions options)
         {
+            _sessionConnector = sessionConnector;
+            _sessionAccepter = sessionAccepter;
+            _nodeFinder = nodeFinder;
+            _publishedShoutStorage = publishedShoutStorage;
+            _subscribedShoutStorage = subscribedShoutStorage;
+            _bytesPool = bytesPool;
             _options = options;
 
             _connectLoopTask = this.ConnectLoopAsync(_cancellationTokenSource.Token);
@@ -110,13 +106,13 @@ namespace Omnius.Xeus.Engines.Exchangers
                     int connectionCount = _sessionStatusSet.Select(n => n.Session.HandshakeType == SessionHandshakeType.Connected).Count();
                     if (_sessionStatusSet.Count > (_options.MaxSessionCount / 2)) continue;
 
-                    foreach (var signature in await _options.SubscribedShoutStorage.GetSignaturesAsync(cancellationToken))
+                    foreach (var signature in await _subscribedShoutStorage.GetSignaturesAsync(cancellationToken))
                     {
                         var contentClue = SignatureToContentClue(signature);
 
                         NodeLocation? targetNodeLocation = null;
                         {
-                            var nodeLocations = await _options.NodeFinder.FindNodeLocationsAsync(contentClue, cancellationToken);
+                            var nodeLocations = await _nodeFinder.FindNodeLocationsAsync(contentClue, cancellationToken);
                             random.Shuffle(nodeLocations);
 
                             var ignoreAddressSet = new HashSet<OmniAddress>();
@@ -135,17 +131,14 @@ namespace Omnius.Xeus.Engines.Exchangers
 
                         foreach (var targetAddress in targetNodeLocation.Addresses)
                         {
-                            foreach (var connector in _options.Connectors ?? Enumerable.Empty<ISessionConnector>())
+                            var session = await _sessionConnector.ConnectAsync(targetAddress, ServiceName, cancellationToken);
+                            if (session is null) continue;
+
+                            _connectedAddressSet.Add(targetAddress);
+
+                            if (await this.TryAddConnectedSessionAsync(session, signature, cancellationToken))
                             {
-                                var session = await connector.ConnectAsync(targetAddress, ServiceName, cancellationToken);
-                                if (session is null) continue;
-
-                                _connectedAddressSet.Add(targetAddress);
-
-                                if (await this.TryAddConnectedSessionAsync(session, signature, cancellationToken))
-                                {
-                                    goto End;
-                                }
+                                goto End;
                             }
                         }
 
@@ -182,13 +175,10 @@ namespace Omnius.Xeus.Engines.Exchangers
                         if (_sessionStatusSet.Count > (_options.MaxSessionCount / 2)) continue;
                     }
 
-                    foreach (var accepter in _options.Accepters ?? Enumerable.Empty<ISessionAccepter>())
-                    {
-                        var session = await accepter.AcceptAsync(ServiceName, cancellationToken);
-                        if (session is null) continue;
+                    var session = await _sessionAccepter.AcceptAsync(ServiceName, cancellationToken);
+                    if (session is null) continue;
 
-                        await this.TryAddAcceptedSessionAsync(session, cancellationToken);
-                    }
+                    await this.TryAddAcceptedSessionAsync(session, cancellationToken);
                 }
             }
             catch (OperationCanceledException e)
@@ -220,7 +210,7 @@ namespace Omnius.Xeus.Engines.Exchangers
 
                     if (resultMessage.Type == ShoutExchangerFetchResultType.Found && resultMessage.Shout is not null)
                     {
-                        await _options.SubscribedShoutStorage.WriteShoutAsync(resultMessage.Shout, cancellationToken);
+                        await _subscribedShoutStorage.WriteShoutAsync(resultMessage.Shout, cancellationToken);
                     }
                     else if (resultMessage.Type == ShoutExchangerFetchResultType.NotFound)
                     {
@@ -283,7 +273,7 @@ namespace Omnius.Xeus.Engines.Exchangers
                         var postMessage = await session.Connection.Receiver.ReceiveAsync<ShoutExchangerPostMessage>(cancellationToken);
                         if (postMessage.Shout is null) return false;
 
-                        await _options.SubscribedShoutStorage.WriteShoutAsync(postMessage.Shout, cancellationToken);
+                        await _subscribedShoutStorage.WriteShoutAsync(postMessage.Shout, cancellationToken);
                     }
 
                     return true;
@@ -316,8 +306,8 @@ namespace Omnius.Xeus.Engines.Exchangers
 
         private async ValueTask<DateTime?> ReadMessageCreationTimeAsync(OmniSignature signature, CancellationToken cancellationToken)
         {
-            var wantStorageCreationTime = await _options.SubscribedShoutStorage.ReadShoutCreationTimeAsync(signature, cancellationToken);
-            var pushStorageCreationTime = await _options.PublishedShoutStorage.ReadShoutCreationTimeAsync(signature, cancellationToken);
+            var wantStorageCreationTime = await _subscribedShoutStorage.ReadShoutCreationTimeAsync(signature, cancellationToken);
+            var pushStorageCreationTime = await _publishedShoutStorage.ReadShoutCreationTimeAsync(signature, cancellationToken);
             if (wantStorageCreationTime is null && pushStorageCreationTime is null) return null;
 
             if ((wantStorageCreationTime ?? DateTime.MinValue) < (pushStorageCreationTime ?? DateTime.MinValue))
@@ -332,17 +322,17 @@ namespace Omnius.Xeus.Engines.Exchangers
 
         public async ValueTask<Shout?> ReadMessageAsync(OmniSignature signature, CancellationToken cancellationToken)
         {
-            var wantStorageCreationTime = await _options.SubscribedShoutStorage.ReadShoutCreationTimeAsync(signature, cancellationToken);
-            var pushStorageCreationTime = await _options.PublishedShoutStorage.ReadShoutCreationTimeAsync(signature, cancellationToken);
+            var wantStorageCreationTime = await _subscribedShoutStorage.ReadShoutCreationTimeAsync(signature, cancellationToken);
+            var pushStorageCreationTime = await _publishedShoutStorage.ReadShoutCreationTimeAsync(signature, cancellationToken);
             if (wantStorageCreationTime is null && pushStorageCreationTime is null) return null;
 
             if ((wantStorageCreationTime ?? DateTime.MinValue) < (pushStorageCreationTime ?? DateTime.MinValue))
             {
-                return await _options.PublishedShoutStorage.ReadShoutAsync(signature, cancellationToken);
+                return await _publishedShoutStorage.ReadShoutAsync(signature, cancellationToken);
             }
             else
             {
-                return await _options.SubscribedShoutStorage.ReadShoutAsync(signature, cancellationToken);
+                return await _subscribedShoutStorage.ReadShoutAsync(signature, cancellationToken);
             }
         }
 
@@ -376,7 +366,7 @@ namespace Omnius.Xeus.Engines.Exchangers
         {
             var builder = ImmutableHashSet.CreateBuilder<ContentClue>();
 
-            foreach (var contentHash in await _options.PublishedShoutStorage.GetSignaturesAsync(cancellationToken))
+            foreach (var contentHash in await _publishedShoutStorage.GetSignaturesAsync(cancellationToken))
             {
                 var contentClue = SignatureToContentClue(contentHash);
                 builder.Add(contentClue);
@@ -389,7 +379,7 @@ namespace Omnius.Xeus.Engines.Exchangers
         {
             var builder = ImmutableHashSet.CreateBuilder<ContentClue>();
 
-            foreach (var contentHash in await _options.SubscribedShoutStorage.GetSignaturesAsync(cancellationToken))
+            foreach (var contentHash in await _subscribedShoutStorage.GetSignaturesAsync(cancellationToken))
             {
                 var contentClue = SignatureToContentClue(contentHash);
                 builder.Add(contentClue);

@@ -1,6 +1,6 @@
 using System;
 
-namespace Omnius.Xeus.Engines.Exchangers
+namespace Omnius.Xeus.Engines
 {
     public sealed class FileExchangerException : Exception
     {

@@ -1,6 +1,7 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
@@ -9,6 +10,7 @@ using Omnius.Core;
 using Omnius.Core.Helpers;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Connections;
+using Omnius.Core.Pipelines;
 using Omnius.Xeus.Engines.Internal;
 using Omnius.Xeus.Engines.Internal.Models;
 using Omnius.Xeus.Engines.Primitives;
@@ -20,15 +22,18 @@ namespace Omnius.Xeus.Engines
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
+        private readonly ISessionConnector _sessionConnector;
+        private readonly ISessionAccepter _sessionAccepter;
+        private readonly IBytesPool _bytesPool;
         private readonly NodeFinderOptions _options;
+
+        private readonly EventPipe<IContentExchanger> _contentExchangerEventPipe = new();
+        private readonly NodeFinderEvents _events;
 
         private readonly byte[] _myId;
 
         private readonly HashSet<SessionStatus> _sessionStatusSet = new();
         private readonly LinkedList<NodeLocation> _cloudNodeLocations = new();
-
-        private readonly HashSet<string> _availableEngineNameSet = new();
-        private readonly object _availableEngineNameSetLockObject = new();
 
         private readonly VolatileListDictionary<ContentClue, NodeLocation> _receivedPushContentLocationMap = new(TimeSpan.FromMinutes(30));
         private readonly VolatileListDictionary<ContentClue, NodeLocation> _receivedGiveContentLocationMap = new(TimeSpan.FromMinutes(30));
@@ -46,10 +51,15 @@ namespace Omnius.Xeus.Engines
         private const int MaxBucketLength = 20;
         private const string ServiceName = "node_finder";
 
-        internal NodeFinder(NodeFinderOptions options)
+        public NodeFinder(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, IBytesPool bytesPool, NodeFinderOptions options)
         {
+            _sessionConnector = sessionConnector;
+            _sessionAccepter = sessionAccepter;
+            _bytesPool = bytesPool;
             _options = options;
             _myId = GenId();
+
+            _events = new NodeFinderEvents(_contentExchangerEventPipe.Subscriber);
 
             _connectLoopTask = this.ConnectLoopAsync(_cancellationTokenSource.Token);
             _acceptLoopTask = this.AcceptLoopAsync(_cancellationTokenSource.Token);
@@ -73,6 +83,8 @@ namespace Omnius.Xeus.Engines
             _cancellationTokenSource.Dispose();
         }
 
+        public INodeFinderEvents Events => _events;
+
         public async ValueTask<NodeFinderReport> GetReportAsync(CancellationToken cancellationToken = default)
         {
             var sessionReports = new List<SessionReport>();
@@ -88,10 +100,7 @@ namespace Omnius.Xeus.Engines
         public async ValueTask<NodeLocation> GetMyNodeLocationAsync(CancellationToken cancellationToken = default)
         {
             var addresses = new List<OmniAddress>();
-            foreach (var accepter in _options.Accepters ?? Enumerable.Empty<ISessionAccepter>())
-            {
-                addresses.AddRange(await accepter.GetListenEndpointsAsync(cancellationToken));
-            }
+            addresses.AddRange(await _sessionAccepter.GetListenEndpointsAsync(cancellationToken));
 
             var myNodeLocation = new NodeLocation(addresses.ToArray());
             return myNodeLocation;
@@ -110,18 +119,18 @@ namespace Omnius.Xeus.Engines
             }
         }
 
-        public async ValueTask<NodeLocation[]> FindNodeLocationsAsync(ContentClue clue, CancellationToken cancellationToken = default)
+        public async ValueTask<NodeLocation[]> FindNodeLocationsAsync(ContentClue contentClue, CancellationToken cancellationToken = default)
         {
             lock (_lockObject)
             {
                 var result = new HashSet<NodeLocation>();
 
-                if (_receivedPushContentLocationMap.TryGetValue(clue, out var nodeLocations1))
+                if (_receivedPushContentLocationMap.TryGetValue(contentClue, out var nodeLocations1))
                 {
                     result.UnionWith(nodeLocations1);
                 }
 
-                if (_receivedGiveContentLocationMap.TryGetValue(clue, out var nodeLocations2))
+                if (_receivedGiveContentLocationMap.TryGetValue(contentClue, out var nodeLocations2))
                 {
                     result.UnionWith(nodeLocations2);
                 }
@@ -193,18 +202,15 @@ namespace Omnius.Xeus.Engines
 
                     foreach (var targetAddress in targetNodeLocation.Addresses)
                     {
-                        foreach (var connector in _options.Connectors ?? Enumerable.Empty<ISessionConnector>())
+                        var session = await _sessionConnector.ConnectAsync(targetAddress, ServiceName, cancellationToken);
+                        if (session is null) continue;
+
+                        _connectedAddressSet.Add(targetAddress);
+
+                        if (await this.TryAddSessionAsync(session, cancellationToken))
                         {
-                            var session = await connector.ConnectAsync(targetAddress, ServiceName, cancellationToken);
-                            if (session is null) continue;
-
-                            _connectedAddressSet.Add(targetAddress);
-
-                            if (await this.TryAddSessionAsync(session, cancellationToken))
-                            {
-                                succeeded = true;
-                                goto End;
-                            }
+                            succeeded = true;
+                            goto End;
                         }
                     }
 
@@ -247,13 +253,10 @@ namespace Omnius.Xeus.Engines
                         if (_sessionStatusSet.Count > (_options.MaxSessionCount / 2)) continue;
                     }
 
-                    foreach (var accepter in _options.Accepters ?? Enumerable.Empty<ISessionAccepter>())
-                    {
-                        var session = await accepter.AcceptAsync(ServiceName, cancellationToken);
-                        if (session is null) continue;
+                    var session = await _sessionAccepter.AcceptAsync(ServiceName, cancellationToken);
+                    if (session is null) continue;
 
-                        await this.TryAddSessionAsync(session, cancellationToken);
-                    }
+                    await this.TryAddSessionAsync(session, cancellationToken);
                 }
             }
             catch (OperationCanceledException e)
@@ -511,21 +514,21 @@ namespace Omnius.Xeus.Engines
                         sendingPushNodeLocations.AddRange(_cloudNodeLocations);
                     }
 
-                    foreach (var exchanger in _options.Exchangers ?? Enumerable.Empty<IContentExchanger>())
+                    foreach (var contentExchanger in _contentExchangerEventPipe.Publicher.Publish())
                     {
-                        foreach (var contentClue in exchanger.GetPushContentClues())
+                        foreach (var contentClue in contentExchanger.GetPushContentClues())
                         {
                             contentLocationMap.GetOrAdd(contentClue, (_) => new HashSet<NodeLocation>())
                                 .Add(myNodeLocation);
                         }
 
-                        foreach (var contentClue in exchanger.GetPushContentClues())
+                        foreach (var contentClue in contentExchanger.GetPushContentClues())
                         {
                             sendingPushContentLocationMap.GetOrAdd(contentClue, (_) => new HashSet<NodeLocation>())
                                 .Add(myNodeLocation);
                         }
 
-                        foreach (var contentClue in exchanger.GetWantContentClues())
+                        foreach (var contentClue in contentExchanger.GetWantContentClues())
                         {
                             sendingWantContentClueSet.Add(contentClue);
                         }

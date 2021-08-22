@@ -1,4 +1,4 @@
-namespace Omnius.Xeus.Engines.Exchangers
+namespace Omnius.Xeus.Engines
 {
     public sealed partial class ShoutExchanger
     {

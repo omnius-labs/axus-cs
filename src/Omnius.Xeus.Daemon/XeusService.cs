@@ -1,226 +1,212 @@
 using System;
-using System.Buffers;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
+using Omnius.Core.Cryptography;
+using Omnius.Core.Net;
+using Omnius.Core.Net.Connections;
 using Omnius.Core.Net.Proxies;
 using Omnius.Core.Net.Upnp;
-using Omnius.Core.Pipelines;
 using Omnius.Core.Storages;
-using Omnius.Xeus.Engines.Connectors;
-using Omnius.Xeus.Engines.Exchangers;
-using Omnius.Xeus.Engines.Mediators;
-using Omnius.Xeus.Engines.Models;
+using Omnius.Core.Tasks;
+using Omnius.Xeus.Daemon.Configuration;
 using Omnius.Xeus.Engines;
+using Omnius.Xeus.Remoting;
+using EnginesModels = Omnius.Xeus.Engines;
 
 namespace Omnius.Xeus.Daemon
 {
-    public record XeusServiceOptions
-    {
-        public IBytesPool? BytesPool { get; init; }
-
-        public ISocks5ProxyClientFactory? Socks5ProxyClientFactory { get; init; }
-
-        public IHttpProxyClientFactory? HttpProxyClientFactory { get; init; }
-
-        public IUpnpClientFactory? UpnpClientFactory { get; init; }
-
-        public IBytesStorageFactory? BytesStorageFactory { get; init; }
-
-        public ITcpConnectorFactory? TcpConnectorFactory { get; init; }
-
-        public ICkadMediatorFactory? CkadMediatorFactory { get; init; }
-
-        public IContentExchangerFactory? ContentExchangerFactory { get; init; }
-
-        public IDeclaredMessageExchangerFactory? DeclaredMessageExchangerFactory { get; init; }
-
-        public IPublishedFileStorageFactory? PublishedFileStorageFactory { get; init; }
-
-        public ISubscribedFileStorageFactory? SubscribedFileStorageFactory { get; init; }
-
-        public IPublishedDeclaredMessageFactory? PublishedDeclaredMessageFactory { get; init; }
-
-        public ISubscribedDeclaredMessageFactory? SubscribedDeclaredMessageFactory { get; init; }
-
-        public TcpConnectionFactoryOptions? TcpConnectionFactoryOptions { get; init; }
-
-        public CkadMediatorOptions? CkadMediatorOptions { get; init; }
-
-        public PublishedFileStorageOptions? PublishedFileStorageOptions { get; init; }
-
-        public SubscribedFileStorageOptions? SubscribedFileStorageOptions { get; init; }
-
-        public PublishedDeclaredMessageOptions? PublishedDeclaredMessageOptions { get; init; }
-
-        public SubscribedDeclaredMessageOptions? SubscribedDeclaredMessageOptions { get; init; }
-
-        public ContentExchangerOptions? ContentExchangerOptions { get; init; }
-
-        public DeclaredMessageExchangerOptions? DeclaredMessageExchangerOptions { get; init; }
-    }
-
     public class XeusService : AsyncDisposableBase, IXeusService
     {
-        private readonly XeusServiceOptions _options;
+        private readonly ISessionConnector _sessionConnector;
+        private readonly ISessionAccepter _sessionAccepter;
+        private readonly INodeFinder _nodeFinder;
+        private readonly IPublishedFileStorage _publishedFileStorage;
+        private readonly ISubscribedFileStorage _subscribedFileStorage;
+        private readonly IFileExchanger _fileExchanger;
+        private readonly IPublishedShoutStorage _publishedShoutStorage;
+        private readonly ISubscribedShoutStorage _subscribedShoutStorage;
+        private readonly IShoutExchanger _shoutExchanger;
 
-        private IBytesPool _bytesPool = null!;
-        private IConnecitonMediator _ckadMediator = null!;
-        private IContentExchanger _contentExchanger = null!;
-        private IDeclaredMessageExchanger _declaredMessageExchanger = null!;
-        private IPublishedFileStorage _contentPublisher = null!;
-        private ISubscribedFileStorage _contentSubscriber = null!;
-        private IPublishedShoutStorage _declaredMessagePublisher = null!;
-        private ISubscribedShoutStorage _declaredMessageSubscriber = null!;
-
-        public static async ValueTask<XeusService> CreateAsync(XeusServiceOptions options, CancellationToken cancellationToken = default)
+        public XeusService(string workingDirectoryPath, AppConfig appConfig)
         {
-            var service = new XeusService(options);
-            await service.InitAsync(cancellationToken);
+            var digitalSignature = OmniDigitalSignature.Create("", OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256);
 
-            return service;
-        }
+            var bytesPool = BytesPool.Shared;
+            var batchActionDispatcher = new BatchActionDispatcher(TimeSpan.FromMilliseconds(10));
 
-        private XeusService(XeusServiceOptions options)
-        {
-            _options = options;
-        }
+            var senderBandwidthLimiter = new BandwidthLimiter(appConfig.Engines?.Bandwidth?.MaxSendBytesPerSeconds ?? int.MaxValue);
+            var receiverBandwidthLimiter = new BandwidthLimiter(appConfig.Engines?.Bandwidth?.MaxReceiveBytesPerSeconds ?? int.MaxValue);
 
-        private async ValueTask InitAsync(CancellationToken cancellationToken = default)
-        {
-            _bytesPool = _options.BytesPool ?? throw new ArgumentNullException();
+            var connectionConnectors = new List<IConnectionConnector>();
 
-            var tcpConnectorFactory = _options.TcpConnectorFactory ?? throw new ArgumentNullException();
-            var socks5ProxyClientFactory = _options.Socks5ProxyClientFactory ?? throw new ArgumentNullException();
-            var httpProxyClientFactory = _options.HttpProxyClientFactory ?? throw new ArgumentNullException();
-            var upnpClientFactory = _options.UpnpClientFactory ?? throw new ArgumentNullException();
-            var bytesStorageFactory = _options.BytesStorageFactory ?? throw new ArgumentNullException();
-            var ckadMediatorFactory = _options.CkadMediatorFactory ?? throw new ArgumentNullException();
-            var contentPublisherFactory = _options.PublishedFileStorageFactory ?? throw new ArgumentNullException();
-            var contentSubscriberFactory = _options.SubscribedFileStorageFactory ?? throw new ArgumentNullException();
-            var declaredMessagePublisherFactory = _options.PublishedDeclaredMessageFactory ?? throw new ArgumentNullException();
-            var declaredMessageSubscriberFactory = _options.SubscribedDeclaredMessageFactory ?? throw new ArgumentNullException();
-            var contentExchangerFactory = _options.ContentExchangerFactory ?? throw new ArgumentNullException();
-            var declaredMessageExchangerFactory = _options.DeclaredMessageExchangerFactory ?? throw new ArgumentNullException();
+            foreach (var tcpConnectorConfig in appConfig.Engines?.SessionConnector?.TcpConnectors ?? Array.Empty<TcpConnectorConfig>())
+            {
+                var tcpProxyType = tcpConnectorConfig.Proxy?.Type switch
+                {
+                    Configuration.TcpProxyType.Unknown => EnginesModels.TcpProxyType.Unknown,
+                    Configuration.TcpProxyType.HttpProxy => EnginesModels.TcpProxyType.HttpProxy,
+                    Configuration.TcpProxyType.Socks5Proxy => EnginesModels.TcpProxyType.Socks5Proxy,
+                    _ => EnginesModels.TcpProxyType.Unknown,
+                };
+                var tcpProxyAddress = OmniAddress.Parse(tcpConnectorConfig.Proxy?.Address);
+                var tcpProxyOptions = new TcpProxyOptions(tcpProxyType, tcpProxyAddress);
+                var tcpConnectionConnectorOptions = new TcpConnectionConnectorOptions(tcpProxyOptions);
+                var tcpConnectionConnector = new TcpConnectionConnector(senderBandwidthLimiter, receiverBandwidthLimiter, Socks5ProxyClient.Factory, HttpProxyClient.Factory, batchActionDispatcher, bytesPool, tcpConnectionConnectorOptions);
+                connectionConnectors.Add(tcpConnectionConnector);
+            }
 
-            var tcpConnectionFactoryOptions = _options.TcpConnectionFactoryOptions ?? throw new ArgumentNullException();
-            var ckadMediatorOptions = _options.CkadMediatorOptions ?? throw new ArgumentNullException();
-            var contentPublisherOptions = _options.PublishedFileStorageOptions ?? throw new ArgumentNullException();
-            var contentSubscriberOptions = _options.SubscribedFileStorageOptions ?? throw new ArgumentNullException();
-            var declaredMessagePublisherOptions = _options.PublishedDeclaredMessageOptions ?? throw new ArgumentNullException();
-            var declaredMessageSubscriberOptions = _options.SubscribedDeclaredMessageOptions ?? throw new ArgumentNullException();
-            var contentExchangerOptions = _options.ContentExchangerOptions ?? throw new ArgumentNullException();
-            var declaredMessageExchangerOptions = _options.DeclaredMessageExchangerOptions ?? throw new ArgumentNullException();
+            var sessionConnectorOptions = new SessionConnectorOptions(digitalSignature);
+            _sessionConnector = new SessionConnector(connectionConnectors, batchActionDispatcher, bytesPool, sessionConnectorOptions);
 
-            var tcpConnectionFactory = await tcpConnectorFactory.CreateAsync(tcpConnectionFactoryOptions, socks5ProxyClientFactory, httpProxyClientFactory, upnpClientFactory, _bytesPool, cancellationToken);
-            _ckadMediator = await ckadMediatorFactory.CreateAsync(ckadMediatorOptions, new[] { tcpConnectionFactory }, _bytesPool, cancellationToken);
-            _contentPublisher = await contentPublisherFactory.CreateAsync(contentPublisherOptions, bytesStorageFactory, _bytesPool, cancellationToken);
-            _contentSubscriber = await contentSubscriberFactory.CreateAsync(contentSubscriberOptions, bytesStorageFactory, _bytesPool, cancellationToken);
-            _declaredMessagePublisher = await declaredMessagePublisherFactory.CreateAsync(declaredMessagePublisherOptions, bytesStorageFactory, _bytesPool, cancellationToken);
-            _declaredMessageSubscriber = await declaredMessageSubscriberFactory.CreateAsync(declaredMessageSubscriberOptions, bytesStorageFactory, _bytesPool, cancellationToken);
-            _contentExchanger = await contentExchangerFactory.CreateAsync(contentExchangerOptions, new[] { tcpConnectionFactory }, _ckadMediator, _contentPublisher, _contentSubscriber, _bytesPool, cancellationToken);
-            _declaredMessageExchanger = await declaredMessageExchangerFactory.CreateAsync(declaredMessageExchangerOptions, new[] { tcpConnectionFactory }, _ckadMediator, _declaredMessagePublisher, _declaredMessageSubscriber, _bytesPool, cancellationToken);
+            var connectionAccepters = new List<IConnectionAccepter>();
+
+            foreach (var tcpConnectionAccepterConfig in appConfig.Engines?.SessionAccepter?.TcpAccepters ?? Array.Empty<TcpAccepterConfig>())
+            {
+                var useUpnp = tcpConnectionAccepterConfig.UseUpnp;
+                var listenAddress = OmniAddress.Parse(tcpConnectionAccepterConfig.ListenAddress);
+                var tcpConnectionAccepterOption = new TcpConnectionAccepterOptions(useUpnp, listenAddress);
+                var tcpConnectionAccepter = new TcpConnectionAccepter(senderBandwidthLimiter, receiverBandwidthLimiter, UpnpClient.Factory, batchActionDispatcher, bytesPool, tcpConnectionAccepterOption);
+                connectionAccepters.Add(tcpConnectionAccepter);
+            }
+
+            var sessionAccepterOptions = new SessionAccepterOptions(digitalSignature);
+            _sessionAccepter = new SessionAccepter(connectionAccepters, batchActionDispatcher, bytesPool, sessionAccepterOptions);
+
+            var nodeFinderOptions = new NodeFinderOptions(workingDirectoryPath, appConfig.Engines?.NodeFinder?.MaxSessionCount ?? int.MaxValue);
+            _nodeFinder = new NodeFinder(_sessionConnector, _sessionAccepter, bytesPool, nodeFinderOptions);
+
+            var publishedFileStorageOptions = new PublishedFileStorageOptions(workingDirectoryPath);
+            _publishedFileStorage = new PublishedFileStorage(LiteDatabaseBytesStorage.Factory, bytesPool, publishedFileStorageOptions);
+
+            var subscribedFileStorageOptions = new SubscribedFileStorageOptions(workingDirectoryPath);
+            _subscribedFileStorage = new SubscribedFileStorage(LiteDatabaseBytesStorage.Factory, bytesPool, subscribedFileStorageOptions);
+
+            var fileExchangerOptions = new FileExchangerOptions(appConfig.Engines?.FileExchanger?.MaxSessionCount ?? int.MaxValue);
+            _fileExchanger = new FileExchanger(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedFileStorage, _subscribedFileStorage, bytesPool, fileExchangerOptions);
+
+            var publishedShoutStorageOptions = new PublishedShoutStorageOptions(workingDirectoryPath);
+            _publishedShoutStorage = new PublishedShoutStorage(LiteDatabaseBytesStorage.Factory, bytesPool, publishedShoutStorageOptions);
+
+            var subscribedShoutStorageOptions = new SubscribedShoutStorageOptions(workingDirectoryPath);
+            _subscribedShoutStorage = new SubscribedShoutStorage(LiteDatabaseBytesStorage.Factory, bytesPool, subscribedShoutStorageOptions);
+
+            var shoutExchangerOptions = new ShoutExchangerOptions(appConfig.Engines?.ShoutExchanger?.MaxSessionCount ?? int.MaxValue);
+            _shoutExchanger = new ShoutExchanger(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedShoutStorage, _subscribedShoutStorage, bytesPool, shoutExchangerOptions);
         }
 
         protected override async ValueTask OnDisposeAsync()
         {
-            await _declaredMessagePublisher.DisposeAsync();
-            await _declaredMessageSubscriber.DisposeAsync();
-            await _contentPublisher.DisposeAsync();
-            await _contentSubscriber.DisposeAsync();
-            await _contentExchanger.DisposeAsync();
-            await _declaredMessageExchanger.DisposeAsync();
-            await _ckadMediator.DisposeAsync();
+            await _sessionConnector.DisposeAsync();
+            await _sessionAccepter.DisposeAsync();
+            await _nodeFinder.DisposeAsync();
+            await _publishedFileStorage.DisposeAsync();
+            await _subscribedFileStorage.DisposeAsync();
+            await _fileExchanger.DisposeAsync();
+            await _publishedShoutStorage.DisposeAsync();
+            await _subscribedShoutStorage.DisposeAsync();
+            await _shoutExchanger.DisposeAsync();
         }
 
-        public async ValueTask<GetReportResult> GetReportAsync(CancellationToken cancellationToken = default)
+        public ValueTask<GetSessionsReportResult> GetSessionsReportAsync(CancellationToken cancellationToken = default)
         {
-            return new GetReportResult();
+            throw new NotImplementedException();
+        }
+
+        public ValueTask<GetPublishedFilesReportResult> GetPublishedFilesReportAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask<GetSubscribedFilesReportResult> GetSubscribedFilesReportAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask<GetPublishedShoutsReportResult> GetPublishedShoutsReportAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ValueTask<GetSubscribedShoutsReportResult> GetSubscribedShoutsReportAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
 
         public async ValueTask<GetMyNodeLocationResult> GetMyNodeLocationAsync(CancellationToken cancellationToken = default)
         {
-            var result = await _ckadMediator.GetMyNodeLocationAsync(cancellationToken);
-            return new GetMyNodeLocationResult(result);
+            throw new System.NotImplementedException();
         }
 
-        public async ValueTask AddCloudNodeLocationsAsync(AddCloudNodeLocationsRequest request, CancellationToken cancellationToken = default)
+        public async ValueTask AddCloudNodeLocationsAsync(AddCloudNodeLocationsRequest param, CancellationToken cancellationToken = default)
         {
-            await _ckadMediator.AddCloudNodeLocationsAsync(request.NodeLocations, cancellationToken);
+            throw new System.NotImplementedException();
         }
 
-        public async ValueTask<PublishFileContentResult> PublishFileContentAsync(PublishFileContentRequest request, CancellationToken cancellationToken = default)
+        public async ValueTask<PublishFileFromStorageResult> PublishFileFromStorageAsync(PublishFileFromStorageRequest param, CancellationToken cancellationToken = default)
         {
-            var result = await _contentPublisher.PublishFileAsync(request.FilePath, request.Registrant, cancellationToken);
-            return new PublishFileContentResult(result);
+            throw new System.NotImplementedException();
         }
 
-        public async ValueTask<PublishMemoryContentResult> PublishMemoryContentAsync(PublishMemoryContentRequest request, CancellationToken cancellationToken = default)
+        public async ValueTask<PublishFileFromMemoryResult> PublishFileFromMemoryAsync(PublishFileFromMemoryRequest param, CancellationToken cancellationToken = default)
         {
-            var result = await _contentPublisher.PublishFileAsync(new ReadOnlySequence<byte>(request.Memory), request.Registrant, cancellationToken);
-            return new PublishMemoryContentResult(result);
+            throw new System.NotImplementedException();
         }
 
-        public async ValueTask UnpublishFileContentAsync(UnpublishFileContentRequest request, CancellationToken cancellationToken = default)
+        public async ValueTask UnpublishFileFromStorageAsync(UnpublishFileFromStorageRequest param, CancellationToken cancellationToken = default)
         {
-            await _contentPublisher.UnpublishFileAsync(request.FilePath, request.Registrant, cancellationToken);
+            throw new System.NotImplementedException();
         }
 
-        public async ValueTask UnpublishMemoryContentAsync(UnpublishMemoryContentRequest request, CancellationToken cancellationToken = default)
+        public async ValueTask UnpublishFileFromMemoryAsync(UnpublishFileFromMemoryRequest param, CancellationToken cancellationToken = default)
         {
-            await _contentPublisher.UnpublishFileAsync(request.RootHash, request.Registrant, cancellationToken);
+            throw new System.NotImplementedException();
         }
 
-        public async ValueTask SubscribeContentAsync(SubscribeContentRequest request, CancellationToken cancellationToken = default)
+        public async ValueTask SubscribeFileAsync(SubscribeFileRequest param, CancellationToken cancellationToken = default)
         {
-            await _contentSubscriber.SubscribeContentAsync(request.RootHash, request.Registrant, cancellationToken);
+            throw new System.NotImplementedException();
         }
 
-        public async ValueTask UnsubscribeContentAsync(UnsubscribeContentRequest request, CancellationToken cancellationToken = default)
+        public async ValueTask UnsubscribeFileAsync(UnsubscribeFileRequest param, CancellationToken cancellationToken = default)
         {
-            await _contentSubscriber.UnsubscribeContentAsync(request.RootHash, request.Registrant, cancellationToken);
+            throw new System.NotImplementedException();
         }
 
-        public async ValueTask ExportFileContentAsync(ExportFileContentRequest request, CancellationToken cancellationToken = default)
+        public async ValueTask<TryExportFileToStorageResult> TryExportFileToStorageAsync(TryExportFileToStorageRequest param, CancellationToken cancellationToken = default)
         {
-            await _contentSubscriber.ExportContentAsync(request.RootHash, request.FilePath, cancellationToken);
+            throw new System.NotImplementedException();
         }
 
-        public async ValueTask<ExportMemoryContentResult> ExportMemoryContentAsync(ExportMemoryContentRequest request, CancellationToken cancellationToken = default)
+        public async ValueTask<TryExportFileToMemoryResult> TryExportFileToMemoryAsync(TryExportFileToMemoryRequest param, CancellationToken cancellationToken = default)
         {
-            using var hub = new BytesPipe();
-            await _contentSubscriber.ExportContentAsync(request.RootHash, hub.Writer, cancellationToken);
-
-            var sequence = hub.Reader.GetSequence();
-            var memoryOwner = _bytesPool.Memory.Rent((int)sequence.Length).Shrink((int)sequence.Length);
-            hub.Reader.GetSequence().CopyTo(memoryOwner.Memory.Span);
-            return new ExportMemoryContentResult(memoryOwner);
+            throw new System.NotImplementedException();
         }
 
-        public async ValueTask PublishDeclaredMessageAsync(PublishDeclaredMessageRequest request, CancellationToken cancellationToken = default)
+        public async ValueTask PublishShoutAsync(PublishShoutRequest param, CancellationToken cancellationToken = default)
         {
-            await _declaredMessagePublisher.PublishShoutAsync(request.Message, request.Registrant, cancellationToken);
+            throw new System.NotImplementedException();
         }
 
-        public async ValueTask UnpublishDeclaredMessageAsync(UnpublishDeclaredMessageRequest request, CancellationToken cancellationToken = default)
+        public async ValueTask UnpublishShoutAsync(UnpublishShoutRequest param, CancellationToken cancellationToken = default)
         {
-            await _declaredMessagePublisher.UnpublishShoutAsync(request.Signature, request.Registrant, cancellationToken);
+            throw new System.NotImplementedException();
         }
 
-        public async ValueTask SubscribeDeclaredMessageAsync(SubscribeDeclaredMessageRequest request, CancellationToken cancellationToken = default)
+        public async ValueTask SubscribeShoutAsync(SubscribeShoutRequest param, CancellationToken cancellationToken = default)
         {
-            await _declaredMessageSubscriber.SubscribeMessageAsync(request.Signature, request.Registrant, cancellationToken);
+            throw new System.NotImplementedException();
         }
 
-        public async ValueTask UnsubscribeDeclaredMessageAsync(UnsubscribeDeclaredMessageRequest request, CancellationToken cancellationToken = default)
+        public async ValueTask UnsubscribeShoutAsync(UnsubscribeShoutRequest param, CancellationToken cancellationToken = default)
         {
-            await _declaredMessageSubscriber.UnsubscribeMessageAsync(request.Signature, request.Registrant, cancellationToken);
+            throw new System.NotImplementedException();
         }
 
-        public async ValueTask<ExportDeclaredMessageResult> ExportDeclaredMessageAsync(ExportDeclaredMessageRequest request, CancellationToken cancellationToken = default)
+        public async ValueTask<TryExportShoutResult> TryExportShoutAsync(TryExportShoutRequest param, CancellationToken cancellationToken = default)
         {
-            var result = await _declaredMessageSubscriber.ReadShoutAsync(request.Signature, cancellationToken);
-            return new ExportDeclaredMessageResult(result);
+            throw new System.NotImplementedException();
         }
     }
 }

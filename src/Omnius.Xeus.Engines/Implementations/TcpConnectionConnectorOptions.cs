@@ -9,24 +9,25 @@ namespace Omnius.Xeus.Engines
 {
     public record TcpConnectionConnectorOptions
     {
-        public TcpProxyOptions? Proxy { get; init; }
+        public TcpConnectionConnectorOptions(TcpProxyOptions proxy)
+        {
+            this.Proxy = proxy;
+        }
 
-        public IBandwidthLimiter? SenderBandwidthLimiter { get; init; }
-
-        public IBandwidthLimiter? ReceiverBandwidthLimiter { get; init; }
-
-        public ISocks5ProxyClientFactory? Socks5ProxyClientFactory { get; init; }
-
-        public IHttpProxyClientFactory? HttpProxyClientFactory { get; init; }
-
-        public IBatchActionDispatcher? BatchActionDispatcher { get; init; }
+        public TcpProxyOptions Proxy { get; }
     }
 
     public record TcpProxyOptions
     {
-        public TcpProxyType Type { get; init; }
+        public TcpProxyOptions(TcpProxyType type, OmniAddress address)
+        {
+            this.Type = type;
+            this.Address = address;
+        }
 
-        public OmniAddress? Address { get; init; }
+        public TcpProxyType Type { get; }
+
+        public OmniAddress Address { get; }
     }
 
     public enum TcpProxyType : byte

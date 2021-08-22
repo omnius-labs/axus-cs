@@ -17,7 +17,7 @@ namespace Omnius.Xeus.Engines
             private readonly bool _useUpnp;
             private readonly IUpnpClientFactory _upnpClientFactory;
 
-            private readonly List<TcpListener> _tcpListeners = new();
+            private TcpListener? _tcpListener;
 
             public TcpListenerManager(bool useUpnp, IUpnpClientFactory upnpClientFactory)
             {
@@ -25,44 +25,37 @@ namespace Omnius.Xeus.Engines
                 _upnpClientFactory = upnpClientFactory;
             }
 
-            public static async ValueTask<TcpListenerManager> CreateAsync(IEnumerable<OmniAddress> listenAddresses, bool useUpnp, IUpnpClientFactory upnpClientFactory, CancellationToken cancellationToken = default)
+            public static async ValueTask<TcpListenerManager> CreateAsync(OmniAddress listenAddress, bool useUpnp, IUpnpClientFactory upnpClientFactory, CancellationToken cancellationToken = default)
             {
                 var tcpListenerManager = new TcpListenerManager(useUpnp, upnpClientFactory);
-                await tcpListenerManager.InitAsync(listenAddresses, cancellationToken);
+                await tcpListenerManager.InitAsync(listenAddress, cancellationToken);
                 return tcpListenerManager;
             }
 
-            private async ValueTask InitAsync(IEnumerable<OmniAddress> listenAddresses, CancellationToken cancellationToken = default)
+            private async ValueTask InitAsync(OmniAddress listenAddress, CancellationToken cancellationToken = default)
             {
-                var listenAddressSet = new HashSet<OmniAddress>(listenAddresses);
-
                 IUpnpClient? upnpClient = null;
 
                 try
                 {
                     // TcpListenerの追加処理
-                    foreach (var listenAddress in listenAddressSet)
+                    if (!listenAddress.TryGetTcpEndpoint(out var ipAddress, out ushort port, false)) return;
+
+                    _tcpListener = new TcpListener(ipAddress, port);
+                    _tcpListener.Start(3);
+
+                    if (_useUpnp)
                     {
-                        if (!listenAddress.TryGetTcpEndpoint(out var ipAddress, out ushort port, false)) continue;
-
-                        var tcpListener = new TcpListener(ipAddress, port);
-                        tcpListener.Start(3);
-
-                        _tcpListeners.Add(tcpListener);
-
-                        if (_useUpnp)
+                        // "0.0.0.0"以外はUPnPでのポート開放対象外
+                        if (ipAddress == IPAddress.Any)
                         {
-                            // "0.0.0.0"以外はUPnPでのポート開放対象外
-                            if (ipAddress == IPAddress.Any)
+                            if (upnpClient == null)
                             {
-                                if (upnpClient == null)
-                                {
-                                    upnpClient = _upnpClientFactory.Create();
-                                    await upnpClient.ConnectAsync(cancellationToken);
-                                }
-
-                                await upnpClient.OpenPortAsync(UpnpProtocolType.Tcp, port, port, "Xeus", cancellationToken);
+                                upnpClient = _upnpClientFactory.Create();
+                                await upnpClient.ConnectAsync(cancellationToken);
                             }
+
+                            await upnpClient.OpenPortAsync(UpnpProtocolType.Tcp, port, port, "Xeus", cancellationToken);
                         }
                     }
                 }
@@ -87,11 +80,11 @@ namespace Omnius.Xeus.Engines
 
                 try
                 {
-                    foreach (var tcpListener in _tcpListeners)
+                    if (_tcpListener is not null)
                     {
-                        var ipEndpoint = (IPEndPoint)tcpListener.LocalEndpoint;
+                        var ipEndpoint = (IPEndPoint)_tcpListener.LocalEndpoint;
 
-                        tcpListener.Stop();
+                        _tcpListener.Stop();
 
                         if (_useUpnp)
                         {
@@ -108,8 +101,6 @@ namespace Omnius.Xeus.Engines
                             }
                         }
                     }
-
-                    _tcpListeners.Clear();
                 }
                 catch (Exception e)
                 {
@@ -130,14 +121,9 @@ namespace Omnius.Xeus.Engines
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                foreach (var tcpListener in _tcpListeners)
-                {
-                    if (!tcpListener.Pending()) continue;
-                    var socket = tcpListener.AcceptSocket();
-                    return socket;
-                }
-
-                return null;
+                if (_tcpListener is null || !_tcpListener.Pending()) return null;
+                var socket = _tcpListener.AcceptSocket();
+                return socket;
             }
         }
     }

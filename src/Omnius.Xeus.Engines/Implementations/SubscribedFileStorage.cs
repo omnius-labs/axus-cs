@@ -12,6 +12,7 @@ using Omnius.Core.Cryptography;
 using Omnius.Core.Pipelines;
 using Omnius.Core.Storages;
 using Omnius.Core.Streams;
+using Omnius.Core.Tasks;
 using Omnius.Xeus.Engines.Internal;
 using Omnius.Xeus.Engines.Internal.Models;
 using Omnius.Xeus.Engines.Internal.Repositories;
@@ -19,17 +20,12 @@ using Omnius.Xeus.Models;
 
 namespace Omnius.Xeus.Engines
 {
-    public record SubscribedFileStorageOptions
-    {
-        public string? ConfigDirectoryPath { get; init; }
-        public IBytesStorageFactory? BytesStorageFactory { get; init; }
-        public IBytesPool? BytesPool { get; init; }
-    }
-
     public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscribedFileStorage
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
+        private readonly IBytesStorageFactory _bytesStorageFactory;
+        private readonly IBytesPool _bytesPool;
         private readonly SubscribedFileStorageOptions _options;
 
         private readonly SubscribedFileStorageRepository _subscriberRepo;
@@ -41,12 +37,14 @@ namespace Omnius.Xeus.Engines
 
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-        private SubscribedFileStorage(SubscribedFileStorageOptions options)
+        public SubscribedFileStorage(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, SubscribedFileStorageOptions options)
         {
+            _bytesStorageFactory = bytesStorageFactory;
+            _bytesPool = bytesPool;
             _options = options;
 
             _subscriberRepo = new SubscribedFileStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
-            _blockStorage = _options.BytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _options.BytesPool);
+            _blockStorage = _bytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
         }
 
         internal async ValueTask InitAsync(CancellationToken cancellationToken = default)
@@ -139,7 +137,7 @@ namespace Omnius.Xeus.Engines
                 bytesPipe.Writer.Write(memoryOwner.Memory.Span);
             }
 
-            return MerkleTreeSection.Import(bytesPipe.Reader.GetSequence(), _options.BytesPool);
+            return MerkleTreeSection.Import(bytesPipe.Reader.GetSequence(), _bytesPool);
         }
 
         public async ValueTask<SubscribedFileStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
@@ -266,7 +264,7 @@ namespace Omnius.Xeus.Engines
 
             try
             {
-                using var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _options.BytesPool);
+                using var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bytesPool);
                 var writer = PipeWriter.Create(fileStream);
                 result = await this.ExportFileAsync(rootHash, writer, cancellationToken);
                 await writer.CompleteAsync();

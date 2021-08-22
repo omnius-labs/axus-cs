@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using Omnius.Core.Net.Connections.Secure;
 using Omnius.Core.Net.Connections.Secure.V1;
 using Omnius.Core.Net.Proxies;
 using Omnius.Core.Net.Upnp;
+using Omnius.Core.Tasks;
 using Omnius.Xeus.Engines.Internal.Models;
 using Omnius.Xeus.Models;
 
@@ -20,7 +22,9 @@ namespace Omnius.Xeus.Engines
     public sealed partial class SessionAccepter : AsyncDisposableBase, ISessionAccepter
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
-
+        private readonly ImmutableArray<IConnectionAccepter> _connectionAccepters;
+        private readonly IBatchActionDispatcher _batchActionDispatcher;
+        private readonly IBytesPool _bytesPool;
         private readonly SessionAccepterOptions _options;
 
         private readonly SessionChannels _sessionChannels = new(3);
@@ -29,8 +33,13 @@ namespace Omnius.Xeus.Engines
 
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-        internal SessionAccepter(SessionAccepterOptions options)
+        private const int MaxReceiveByteCount = 1024 * 1024 * 8;
+
+        public SessionAccepter(IEnumerable<IConnectionAccepter> connectionAccepters, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, SessionAccepterOptions options)
         {
+            _connectionAccepters = connectionAccepters.ToImmutableArray();
+            _batchActionDispatcher = batchActionDispatcher;
+            _bytesPool = bytesPool;
             _options = options;
 
             _acceptLoopTask = this.InternalAcceptLoopAsync(_cancellationTokenSource.Token);
@@ -87,7 +96,7 @@ namespace Omnius.Xeus.Engines
 
         private async ValueTask<ISession?> InternalAcceptAsync(CancellationToken cancellationToken = default)
         {
-            foreach (var accepter in _options.Accepters ?? Enumerable.Empty<IConnectionAccepter>())
+            foreach (var accepter in _connectionAccepters)
             {
                 var acceptedResult = await accepter.AcceptAsync(cancellationToken);
                 if (acceptedResult is null) continue;
@@ -102,7 +111,7 @@ namespace Omnius.Xeus.Engines
             return null;
         }
 
-        private async ValueTask<ISession> CreateSessionAsync(IConnection connection, OmniAddress address, CancellationToken cancellationToken)
+        private async ValueTask<ISession?> CreateSessionAsync(IConnection connection, OmniAddress address, CancellationToken cancellationToken)
         {
             var sendHelloMessage = new SessionManagerHelloMessage(new[] { SessionManagerVersion.Version1 });
             var receiveHelloMessage = await connection.ExchangeAsync(sendHelloMessage, cancellationToken);
@@ -111,16 +120,11 @@ namespace Omnius.Xeus.Engines
 
             if (version == SessionManagerVersion.Version1)
             {
-                var secureConnectionOptions = new OmniSecureConnectionOptions()
-                {
-                    Type = OmniSecureConnectionType.Accepted,
-                    DigitalSignature = _options.DigitalSignature,
-                    BatchActionDispatcher = _options.BatchActionDispatcher,
-                    BytesPool = _options.BytesPool,
-                };
-                var secureConnection = new OmniSecureConnection(connection, secureConnectionOptions);
+                var secureConnectionOptions = new OmniSecureConnectionOptions(OmniSecureConnectionType.Accepted, _options.DigitalSignature, MaxReceiveByteCount);
+                var secureConnection = OmniSecureConnection.CreateV1(connection, _batchActionDispatcher, _bytesPool, secureConnectionOptions);
 
                 await secureConnection.HandshakeAsync(cancellationToken);
+                if (secureConnection.Signature is null) return null;
 
                 var receivedMessage = await connection.Receiver.ReceiveAsync<SessionManagerSessionRequestMessage>(cancellationToken);
                 var sendingMessage = new SessionManagerSessionResultMessage(_sessionChannels.Contains(receivedMessage.Scheme) ? SessionManagerSessionResultType.Accepted : SessionManagerSessionResultType.Rejected);
@@ -140,9 +144,9 @@ namespace Omnius.Xeus.Engines
         {
             var results = new List<OmniAddress>();
 
-            foreach (var accepter in _options.Accepters ?? Enumerable.Empty<IConnectionAccepter>())
+            foreach (var connectionAccepter in _connectionAccepters)
             {
-                results.AddRange(await accepter.GetListenEndpointsAsync(cancellationToken));
+                results.AddRange(await connectionAccepter.GetListenEndpointsAsync(cancellationToken));
             }
 
             return results.ToArray();

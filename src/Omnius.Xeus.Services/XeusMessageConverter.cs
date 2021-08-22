@@ -1,9 +1,9 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using Omnius.Core;
+using Omnius.Core.Pipelines;
 using Omnius.Core.Serialization;
-using Omnius.Xeus.Engines.Models;
-using Omnius.Xeus.Services.Models;
+using Omnius.Xeus.Models;
 
 namespace Omnius.Xeus.Services
 {
@@ -32,13 +32,13 @@ namespace Omnius.Xeus.Services
         {
             var bytesPool = BytesPool.Shared;
 
-            using var inHub = new BytesPipe(bytesPool);
-            nodeLocation.Export(inHub.Writer, bytesPool);
+            using var inBytesPipe = new BytesPipe(bytesPool);
+            nodeLocation.Export(inBytesPipe.Writer, bytesPool);
 
-            using var outHub = new BytesPipe(bytesPool);
-            if (!OmniMessageConverter.TryWrite(1, inHub.Reader.GetSequence(), outHub.Writer)) throw new Exception();
+            using var outBytesPipe = new BytesPipe(bytesPool);
+            if (!OmniMessageConverter.TryWrite(1, inBytesPipe.Reader.GetSequence(), outBytesPipe.Writer)) throw new Exception();
 
-            return AddSchemaAndPath(_nodeLocationPath, OmniBase.Encode(outHub.Reader.GetSequence(), ConvertStringType.Base58));
+            return AddSchemaAndPath(_nodeLocationPath, OmniBase.Encode(outBytesPipe.Reader.GetSequence(), ConvertStringType.Base58)!);
         }
 
         public static bool TryStringToNodeLocation(string text, [NotNullWhen(true)] out NodeLocation? nodeLocation)
@@ -48,13 +48,13 @@ namespace Omnius.Xeus.Services
 
             var bytesPool = BytesPool.Shared;
 
-            using var inHub = new BytesPipe(bytesPool);
-            if (!OmniBase.TryDecode(value, inHub.Writer)) return false;
+            using var inBytesPipe = new BytesPipe(bytesPool);
+            if (!OmniBase.TryDecode(value, inBytesPipe.Writer)) return false;
 
-            using var outHub = new BytesPipe(bytesPool);
-            if (!OmniMessageConverter.TryRead(inHub.Reader.GetSequence(), out var version, outHub.Writer)) return false;
+            using var outBytesPipe = new BytesPipe(bytesPool);
+            if (!OmniMessageConverter.TryRead(inBytesPipe.Reader.GetSequence(), out var version, outBytesPipe.Writer)) return false;
 
-            nodeLocation = NodeLocation.Import(outHub.Reader.GetSequence(), bytesPool);
+            nodeLocation = NodeLocation.Import(outBytesPipe.Reader.GetSequence(), bytesPool);
             return true;
         }
     }

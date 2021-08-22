@@ -4,40 +4,23 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
-using Omnius.Xeus.Daemon;
+using Omnius.Xeus.Models;
+using Omnius.Xeus.Remoting;
 using Omnius.Xeus.Services.Models;
-using EnginesModels = Omnius.Xeus.Engines.Models;
 
 namespace Omnius.Xeus.Services
 {
-    public sealed class Dashboard : AsyncDisposableBase, IDashboard
+    public sealed class Dashboard : AsyncDisposableBase
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         private readonly IXeusService _xeusService;
         private readonly IBytesPool _bytesPool;
 
-        internal sealed class DashboardFactory : IDashboardFactory
-        {
-            public async ValueTask<IDashboard> CreateAsync(IXeusService xeusService, IBytesPool bytesPool, CancellationToken cancellationToken = default)
-            {
-                var result = new Dashboard(xeusService, bytesPool);
-                await result.InitAsync(cancellationToken);
-
-                return result;
-            }
-        }
-
-        public static IDashboardFactory Factory { get; } = new DashboardFactory();
-
         public Dashboard(IXeusService xeusService, IBytesPool bytesPool)
         {
             _xeusService = xeusService;
             _bytesPool = bytesPool;
-        }
-
-        public async ValueTask InitAsync(CancellationToken cancellationToken = default)
-        {
         }
 
         protected override async ValueTask OnDisposeAsync()
@@ -60,13 +43,13 @@ namespace Omnius.Xeus.Services
             return results;
         }
 
-        public async ValueTask<EnginesModels.NodeLocation> GetMyNodeLocationAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<NodeLocation> GetMyNodeLocationAsync(CancellationToken cancellationToken = default)
         {
             var result = await _xeusService.GetMyNodeLocationAsync(cancellationToken);
             return result.NodeLocation;
         }
 
-        public async ValueTask AddCloudNodeLocationAsync(IEnumerable<EnginesModels.NodeLocation> nodeLocations, CancellationToken cancellationToken = default)
+        public async ValueTask AddCloudNodeLocationsAsync(IEnumerable<NodeLocation> nodeLocations, CancellationToken cancellationToken = default)
         {
             var request = new AddCloudNodeLocationsRequest(nodeLocations.ToArray());
             await _xeusService.AddCloudNodeLocationsAsync(request, cancellationToken);

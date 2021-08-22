@@ -5,30 +5,35 @@ using "Omnius.Xeus.Models";
 namespace "Omnius.Xeus.Remoting";
 
 service XeusService {
-    GetReport: () -> (GetReportResult),
+    GetSessionsReport: () -> (GetSessionsReportResult),
 
     GetMyNodeLocation: () -> (GetMyNodeLocationResult),
     AddCloudNodeLocations: (AddCloudNodeLocationsRequest) -> (),
 
-    PublishFileInStorage: (PublishFileInStorageRequest) -> (PublishFileInStorageResult),
-    PublishFileInMemory: (PublishFileInMemoryRequest) -> (PublishFileInMemoryResult),
-    UnpublishFileInStorage: (UnpublishFileInStorageRequest) -> (),
-    UnpublishFileInMemory: (UnpublishFileInMemoryRequest) -> (),
+    GetPublishedFilesReport: () -> (GetPublishedFilesReportResult),
+    PublishFileFromStorage: (PublishFileFromStorageRequest) -> (PublishFileFromStorageResult),
+    PublishFileFromMemory: (PublishFileFromMemoryRequest) -> (PublishFileFromMemoryResult),
+    UnpublishFileFromStorage: (UnpublishFileFromStorageRequest) -> (),
+    UnpublishFileFromMemory: (UnpublishFileFromMemoryRequest) -> (),
 
+    GetSubscribedFilesReport: () -> (GetSubscribedFilesReportResult),
     SubscribeFile: (SubscribeFileRequest) -> (),
     UnsubscribeFile: (UnsubscribeFileRequest) -> (),
-    ExportFileToStorage: (ExportFileToStorageRequest) -> (),
-    ExportFileToMemory: (ExportFileToMemoryRequest) -> (ExportFileToMemoryResult),
+    TryExportFileToStorage: (TryExportFileToStorageRequest) -> (TryExportFileToStorageResult),
+    TryExportFileToMemory: (TryExportFileToMemoryRequest) -> (TryExportFileToMemoryResult),
 
+    GetPublishedShoutsReport: () -> (GetPublishedShoutsReportResult),
     PublishShout: (PublishShoutRequest) -> (),
     UnpublishShout: (UnpublishShoutRequest) -> (),
 
+    GetSubscribedShoutsReport: () -> (GetSubscribedShoutsReportResult),
     SubscribeShout: (SubscribeShoutRequest) -> (),
     UnsubscribeShout: (UnsubscribeShoutRequest) -> (),
-    ExportShout: (ExportShoutRequest) -> (ExportShoutResult),
+    TryExportShout: (TryExportShoutRequest) -> (TryExportShoutResult),
 }
 
-message GetReportResult {
+message GetSessionsReportResult {
+    Sessions: vector<SessionReport>(capacity: 8192),
 }
 
 message GetMyNodeLocationResult {
@@ -39,30 +44,38 @@ message AddCloudNodeLocationsRequest {
     NodeLocations: vector<NodeLocation>(capacity: 32),
 }
 
-message PublishFileInStorageRequest {
+message GetPublishedFilesReportResult {
+    PublishedFiles: vector<PublishedFileReport>,
+}
+
+message PublishFileFromStorageRequest {
     FilePath: string,
     Registrant: string,
 }
-message PublishFileInStorageResult {
+message PublishFileFromStorageResult {
     Hash: OmniHash,
 }
 
-message PublishFileInMemoryRequest {
+message PublishFileFromMemoryRequest {
     Memory: bytes(capacity: 32 * 1024 * 1024),
     Registrant: string,
 }
-message PublishFileInMemoryResult {
+message PublishFileFromMemoryResult {
     Hash: OmniHash,
 }
 
-message UnpublishFileInStorageRequest {
+message UnpublishFileFromStorageRequest {
     FilePath: string,
     Registrant: string,
 }
 
-message UnpublishFileInMemoryRequest {
+message UnpublishFileFromMemoryRequest {
     RootHash: OmniHash,
     Registrant: string,
+}
+
+message GetSubscribedFilesReportResult {
+    SubscribedFiles: vector<SubscribedFileReport>,
 }
 
 message SubscribeFileRequest {
@@ -75,17 +88,25 @@ message UnsubscribeFileRequest {
     Registrant: string,
 }
 
-message ExportFileToStorageRequest {
+message TryExportFileToStorageRequest {
     RootHash: OmniHash,
     FilePath: string,
 }
 
-message ExportFileToMemoryRequest {
+message TryExportFileToStorageResult {
+    Success: bool,
+}
+
+message TryExportFileToMemoryRequest {
     RootHash: OmniHash,
 }
 
-message ExportFileToMemoryResult {
+message TryExportFileToMemoryResult {
     Memory: bytes?(capacity: 32 * 1024 * 1024, recyclable: true),
+}
+
+message GetPublishedShoutsReportResult {
+    PublishedShouts: vector<PublishedShoutReport>,
 }
 
 message PublishShoutRequest {
@@ -98,6 +119,10 @@ message UnpublishShoutRequest {
     Registrant: string,
 }
 
+message GetSubscribedShoutsReportResult {
+    SubscribedShouts: vector<SubscribedShoutReport>,
+}
+
 message SubscribeShoutRequest {
     Signature: OmniSignature,
     Registrant: string,
@@ -108,10 +133,10 @@ message UnsubscribeShoutRequest {
     Registrant: string,
 }
 
-message ExportShoutRequest {
+message TryExportShoutRequest {
     Signature: OmniSignature,
 }
 
-message ExportShoutResult {
+message TryExportShoutResult {
     Shout: Shout?,
 }

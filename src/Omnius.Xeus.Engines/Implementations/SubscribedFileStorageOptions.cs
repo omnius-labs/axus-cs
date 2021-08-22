@@ -3,9 +3,9 @@ using Omnius.Core.Storages;
 
 namespace Omnius.Xeus.Engines
 {
-    public record PublishedFileStorageOptions
+    public record SubscribedFileStorageOptions
     {
-        public PublishedFileStorageOptions(string configDirectoryPath)
+        public SubscribedFileStorageOptions(string configDirectoryPath)
         {
             this.ConfigDirectoryPath = configDirectoryPath;
         }

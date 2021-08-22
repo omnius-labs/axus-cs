@@ -3,9 +3,9 @@ using Omnius.Core;
 
 namespace Omnius.Xeus.Engines
 {
-    public record FileExchangerOptions
+    public record ShoutExchangerOptions
     {
-        public FileExchangerOptions(uint maxSessionCount)
+        public ShoutExchangerOptions(uint maxSessionCount)
         {
             this.MaxSessionCount = maxSessionCount;
         }

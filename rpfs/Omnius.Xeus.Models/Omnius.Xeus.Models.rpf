@@ -29,6 +29,7 @@ message ConsistencyReport {
 }
 
 message SessionReport {
+    ServiceName: string(capacity: 256),
     HandshakeType: SessionHandshakeType,
     Address: OmniAddress,
 }

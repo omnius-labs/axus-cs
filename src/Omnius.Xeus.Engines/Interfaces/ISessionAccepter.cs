@@ -1,10 +1,11 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core.Net;
 
 namespace Omnius.Xeus.Engines
 {
-    public interface ISessionAccepter
+    public interface ISessionAccepter : IAsyncDisposable
     {
         ValueTask<ISession> AcceptAsync(string scheme, CancellationToken cancellationToken = default);
 

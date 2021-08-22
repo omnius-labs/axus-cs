@@ -11,7 +11,7 @@ using Omnius.Core.Cryptography;
 using Omnius.Core.Helpers;
 using Omnius.Xeus.Services.Internal.Models;
 using Omnius.Xeus.Services.Internal.Repositories.Entities;
-using Omnius.Xeus.Utils.Extentions;
+using Omnius.Xeus.Utils;
 
 namespace Omnius.Xeus.Services.Internal.Repositories
 {

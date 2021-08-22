@@ -35,36 +35,38 @@ namespace Omnius.Xeus.Daemon.Configuration
 
     public class EnginesConfig
     {
-        public ConnectorsConfig? Connectors { get; init; }
-
-        public ExchangersConfig? Exchangers { get; init; }
-    }
-
-    public class ConnectorsConfig
-    {
-        public TcpConnectorConfig? TcpConnector { get; init; }
-    }
-
-    public class TcpConnectorConfig
-    {
         public BandwidthConfig? Bandwidth { get; init; }
 
-        public TcpConnectingConfig? Connecting { get; init; }
+        public SessionConnectorConfig? SessionConnector { get; init; }
 
-        public TcpAcceptingConfig? Accepting { get; init; }
+        public SessionAccepterConfig? SessionAccepter { get; init; }
+
+        public NodeFinderConfig? NodeFinder { get; init; }
+
+        public FileExchangerConfig? FileExchanger { get; init; }
+
+        public ShoutExchangerConfig? ShoutExchanger { get; init; }
     }
 
     public class BandwidthConfig
     {
-        public uint MaxSendBytesPerSeconds { get; init; }
+        public int MaxSendBytesPerSeconds { get; init; }
 
-        public uint MaxReceiveBytesPerSeconds { get; init; }
+        public int MaxReceiveBytesPerSeconds { get; init; }
     }
 
-    public class TcpConnectingConfig
+    public class SessionConnectorConfig
     {
-        public bool Enabled { get; init; }
+        public TcpConnectorConfig[]? TcpConnectors { get; init; }
+    }
 
+    public class SessionAccepterConfig
+    {
+        public TcpAccepterConfig[]? TcpAccepters { get; init; }
+    }
+
+    public class TcpConnectorConfig
+    {
         public TcpProxyConfig? Proxy { get; init; }
     }
 
@@ -82,29 +84,25 @@ namespace Omnius.Xeus.Daemon.Configuration
         Socks5Proxy = 2,
     }
 
-    public class TcpAcceptingConfig
+    public class TcpAccepterConfig
     {
-        public bool Enabled { get; init; }
-
-        public string[]? ListenAddresses { get; init; }
-
         public bool UseUpnp { get; init; }
+
+        public string? ListenAddress { get; init; }
     }
 
-    public class ExchangersConfig
+    public class NodeFinderConfig
     {
-        public ContentExchangerConfig? ContentExchanger { get; init; }
-
-        public DeclaredMessageConfig? DeclaredMessageExchanger { get; init; }
+        public uint MaxSessionCount { get; init; }
     }
 
-    public class ContentExchangerConfig
+    public class FileExchangerConfig
     {
-        public uint MaxConnectionCount { get; init; }
+        public uint MaxSessionCount { get; init; }
     }
 
-    public class DeclaredMessageConfig
+    public class ShoutExchangerConfig
     {
-        public uint MaxConnectionCount { get; init; }
+        public uint MaxSessionCount { get; init; }
     }
 }

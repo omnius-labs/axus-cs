@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Omnius.Core.Net;
+using Omnius.Core.Net.Connections;
 using Omnius.Core.Net.Upnp;
 using Omnius.Core.Tasks;
 
@@ -7,12 +8,14 @@ namespace Omnius.Xeus.Engines
 {
     public record TcpConnectionAccepterOptions
     {
-        public bool UseUpnp { get; init; }
+        public TcpConnectionAccepterOptions(bool useUpnp, OmniAddress listenAddress)
+        {
+            this.UseUpnp = useUpnp;
+            this.ListenAddress = listenAddress;
+        }
 
-        public IReadOnlyCollection<OmniAddress>? ListenAddresses { get; init; }
+        public bool UseUpnp { get; }
 
-        public IUpnpClientFactory? UpnpClientFactory { get; init; }
-
-        public IBatchActionDispatcher? BatchActionDispatcher { get; init; }
+        public OmniAddress ListenAddress { get; }
     }
 }

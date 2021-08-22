@@ -23,6 +23,8 @@ namespace Omnius.Xeus.Engines
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
+        private readonly IBytesStorageFactory _bytesStorageFactory;
+        private readonly IBytesPool _bytesPool;
         private readonly PublishedFileStorageOptions _options;
 
         private readonly PublishedFileStorageRepository _publisherRepo;
@@ -32,12 +34,14 @@ namespace Omnius.Xeus.Engines
 
         private const int MaxBlockLength = 8 * 1024 * 1024;
 
-        private PublishedFileStorage(PublishedFileStorageOptions options)
+        public PublishedFileStorage(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, PublishedFileStorageOptions options)
         {
+            _bytesStorageFactory = bytesStorageFactory;
+            _bytesPool = bytesPool;
             _options = options;
 
             _publisherRepo = new PublishedFileStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
-            _blockStorage = _options.BytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _options.BytesPool);
+            _blockStorage = _bytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
         }
 
         protected override async ValueTask OnDisposeAsync()
@@ -190,7 +194,7 @@ namespace Omnius.Xeus.Engines
 
             var blockHashes = new List<OmniHash>();
 
-            using (var memoryOwner = _options.BytesPool.Memory.Rent(MaxBlockLength))
+            using (var memoryOwner = _bytesPool.Memory.Rent(MaxBlockLength))
             {
                 var remain = inStream.Length;
 
@@ -217,7 +221,7 @@ namespace Omnius.Xeus.Engines
             var blockHashes = new List<OmniHash>();
             var sequenceLength = sequence.Length;
 
-            using var memoryOwner = _options.BytesPool.Memory.Rent(MaxBlockLength);
+            using var memoryOwner = _bytesPool.Memory.Rent(MaxBlockLength);
 
             while (sequence.Length > 0)
             {
@@ -244,15 +248,15 @@ namespace Omnius.Xeus.Engines
             // ハッシュ値からMerkle treeを作成する
             for (; ; )
             {
-                using var bytesPool = new BytesPipe(_options.BytesPool);
+                using var bytesPool = new BytesPipe(_bytesPool);
 
-                lastMerkleTreeSection.Export(bytesPool.Writer, _options.BytesPool);
+                lastMerkleTreeSection.Export(bytesPool.Writer, _bytesPool);
 
                 if (bytesPool.Writer.WrittenBytes > MaxBlockLength)
                 {
                     var hashList = new List<OmniHash>();
 
-                    using (var memoryOwner = _options.BytesPool.Memory.Rent(MaxBlockLength))
+                    using (var memoryOwner = _bytesPool.Memory.Rent(MaxBlockLength))
                     {
                         var sequence = bytesPool.Reader.GetSequence();
                         var remain = sequence.Length;
@@ -280,7 +284,7 @@ namespace Omnius.Xeus.Engines
                 }
                 else
                 {
-                    using var memoryOwner = _options.BytesPool.Memory.Rent(MaxBlockLength);
+                    using var memoryOwner = _bytesPool.Memory.Rent(MaxBlockLength);
                     var sequence = bytesPool.Reader.GetSequence();
 
                     var memory = memoryOwner.Memory.Slice(0, (int)sequence.Length);
@@ -357,9 +361,9 @@ namespace Omnius.Xeus.Engines
                         var position = lastMerkleTreeSections.BlockLength * index;
                         var blockSize = (int)Math.Min(lastMerkleTreeSections.BlockLength, (int)(lastMerkleTreeSections.Length - (ulong)position));
 
-                        using var fileStream = new UnbufferedFileStream(item.FilePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _options.BytesPool);
+                        using var fileStream = new UnbufferedFileStream(item.FilePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bytesPool);
                         fileStream.Seek(position, SeekOrigin.Begin);
-                        var memoryOwner = _options.BytesPool.Memory.Rent(blockSize).Shrink(blockSize);
+                        var memoryOwner = _bytesPool.Memory.Rent(blockSize).Shrink(blockSize);
                         await fileStream.ReadAsync(memoryOwner.Memory, cancellationToken);
 
                         return memoryOwner;

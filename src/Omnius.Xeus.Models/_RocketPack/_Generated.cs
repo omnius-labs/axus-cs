@@ -520,27 +520,34 @@ namespace Omnius.Xeus.Models
         static SessionReport()
         {
             global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Models.SessionReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Models.SessionReport>.Empty = new global::Omnius.Xeus.Models.SessionReport((global::Omnius.Xeus.Models.SessionHandshakeType)0, global::Omnius.Core.Net.OmniAddress.Empty);
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Models.SessionReport>.Empty = new global::Omnius.Xeus.Models.SessionReport(string.Empty, (global::Omnius.Xeus.Models.SessionHandshakeType)0, global::Omnius.Core.Net.OmniAddress.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public SessionReport(global::Omnius.Xeus.Models.SessionHandshakeType handshakeType, global::Omnius.Core.Net.OmniAddress address)
+        public static readonly int MaxServiceNameLength = 256;
+
+        public SessionReport(string serviceName, global::Omnius.Xeus.Models.SessionHandshakeType handshakeType, global::Omnius.Core.Net.OmniAddress address)
         {
+            if (serviceName is null) throw new global::System.ArgumentNullException("serviceName");
+            if (serviceName.Length > 256) throw new global::System.ArgumentOutOfRangeException("serviceName");
             if (address is null) throw new global::System.ArgumentNullException("address");
 
+            this.ServiceName = serviceName;
             this.HandshakeType = handshakeType;
             this.Address = address;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
+                if (serviceName != default) ___h.Add(serviceName.GetHashCode());
                 if (handshakeType != default) ___h.Add(handshakeType.GetHashCode());
                 if (address != default) ___h.Add(address.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
+        public string ServiceName { get; }
         public global::Omnius.Xeus.Models.SessionHandshakeType HandshakeType { get; }
         public global::Omnius.Core.Net.OmniAddress Address { get; }
 
@@ -572,6 +579,7 @@ namespace Omnius.Xeus.Models
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
+            if (this.ServiceName != target.ServiceName) return false;
             if (this.HandshakeType != target.HandshakeType) return false;
             if (this.Address != target.Address) return false;
 
@@ -585,14 +593,19 @@ namespace Omnius.Xeus.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.HandshakeType != (global::Omnius.Xeus.Models.SessionHandshakeType)0)
+                if (value.ServiceName != string.Empty)
                 {
                     w.Write((uint)1);
+                    w.Write(value.ServiceName);
+                }
+                if (value.HandshakeType != (global::Omnius.Xeus.Models.SessionHandshakeType)0)
+                {
+                    w.Write((uint)2);
                     w.Write((ulong)value.HandshakeType);
                 }
                 if (value.Address != global::Omnius.Core.Net.OmniAddress.Empty)
                 {
-                    w.Write((uint)2);
+                    w.Write((uint)3);
                     global::Omnius.Core.Net.OmniAddress.Formatter.Serialize(ref w, value.Address, rank + 1);
                 }
                 w.Write((uint)0);
@@ -601,6 +614,7 @@ namespace Omnius.Xeus.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
+                string p_serviceName = string.Empty;
                 global::Omnius.Xeus.Models.SessionHandshakeType p_handshakeType = (global::Omnius.Xeus.Models.SessionHandshakeType)0;
                 global::Omnius.Core.Net.OmniAddress p_address = global::Omnius.Core.Net.OmniAddress.Empty;
 
@@ -612,10 +626,15 @@ namespace Omnius.Xeus.Models
                     {
                         case 1:
                             {
-                                p_handshakeType = (global::Omnius.Xeus.Models.SessionHandshakeType)r.GetUInt64();
+                                p_serviceName = r.GetString(256);
                                 break;
                             }
                         case 2:
+                            {
+                                p_handshakeType = (global::Omnius.Xeus.Models.SessionHandshakeType)r.GetUInt64();
+                                break;
+                            }
+                        case 3:
                             {
                                 p_address = global::Omnius.Core.Net.OmniAddress.Formatter.Deserialize(ref r, rank + 1);
                                 break;
@@ -623,7 +642,7 @@ namespace Omnius.Xeus.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Models.SessionReport(p_handshakeType, p_address);
+                return new global::Omnius.Xeus.Models.SessionReport(p_serviceName, p_handshakeType, p_address);
             }
         }
     }

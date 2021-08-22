@@ -12,6 +12,7 @@ using Omnius.Core.Net.Caps;
 using Omnius.Core.Net.Connections;
 using Omnius.Core.Net.Connections.Secure;
 using Omnius.Core.Net.Connections.Secure.V1;
+using Omnius.Core.Tasks;
 using Omnius.Xeus.Engines.Internal.Models;
 using Omnius.Xeus.Models;
 
@@ -21,12 +22,20 @@ namespace Omnius.Xeus.Engines
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
+        private readonly IEnumerable<IConnectionConnector> _connectionConnectors;
+        private readonly IBatchActionDispatcher _batchActionDispatcher;
+        private readonly IBytesPool _bytesPool;
         private readonly SessionConnectorOptions _options;
 
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-        internal SessionConnector(SessionConnectorOptions options)
+        private const int MaxReceiveByteCount = 1024 * 1024 * 8;
+
+        public SessionConnector(IEnumerable<IConnectionConnector> connectionConnectors, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, SessionConnectorOptions options)
         {
+            _connectionConnectors = connectionConnectors;
+            _batchActionDispatcher = batchActionDispatcher;
+            _bytesPool = bytesPool;
             _options = options;
         }
 
@@ -38,9 +47,9 @@ namespace Omnius.Xeus.Engines
 
         public async ValueTask<ISession?> ConnectAsync(OmniAddress address, string scheme, CancellationToken cancellationToken = default)
         {
-            foreach (var connector in _options.Connectors ?? Enumerable.Empty<IConnectionConnector>())
+            foreach (var connectionConnector in _connectionConnectors)
             {
-                var connection = await connector.ConnectAsync(address, cancellationToken);
+                var connection = await connectionConnector.ConnectAsync(address, cancellationToken);
                 if (connection is null) continue;
 
                 var session = await this.CreateSessionAsync(connection, address, scheme, cancellationToken);
@@ -50,7 +59,7 @@ namespace Omnius.Xeus.Engines
             return null;
         }
 
-        private async ValueTask<ISession> CreateSessionAsync(IConnection connection, OmniAddress address, string scheme, CancellationToken cancellationToken)
+        private async ValueTask<ISession?> CreateSessionAsync(IConnection connection, OmniAddress address, string scheme, CancellationToken cancellationToken)
         {
             using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             linkedTokenSource.CancelAfter(TimeSpan.FromSeconds(20));
@@ -62,16 +71,11 @@ namespace Omnius.Xeus.Engines
 
             if (version == SessionManagerVersion.Version1)
             {
-                var secureConnectionOptions = new OmniSecureConnectionOptions()
-                {
-                    Type = OmniSecureConnectionType.Connected,
-                    DigitalSignature = _options.DigitalSignature,
-                    BatchActionDispatcher = _options.BatchActionDispatcher,
-                    BytesPool = _options.BytesPool,
-                };
-                var secureConnection = new OmniSecureConnection(connection, secureConnectionOptions);
+                var secureConnectionOptions = new OmniSecureConnectionOptions(OmniSecureConnectionType.Connected, _options.DigitalSignature, MaxReceiveByteCount);
+                var secureConnection = OmniSecureConnection.CreateV1(connection, _batchActionDispatcher, _bytesPool, secureConnectionOptions);
 
                 await secureConnection.HandshakeAsync(linkedTokenSource.Token);
+                if (secureConnection.Signature is null) return null;
 
                 var sessionRequestMessage = new SessionManagerSessionRequestMessage(scheme);
                 var sessionResultMessage = secureConnection.SendAndReceiveAsync<SessionManagerSessionRequestMessage, SessionManagerSessionResultMessage>(sessionRequestMessage, linkedTokenSource.Token);
