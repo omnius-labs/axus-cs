@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Avalonia.Threading;
 using Omnius.Core;
 using Omnius.Core.Avalonia;
-using Omnius.Xeus.Services;
+using Omnius.Xeus.Intaractors;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 

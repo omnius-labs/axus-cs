@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <RootNamespace>Omnius.Xeus.Engines</RootNamespace>
+    <RootNamespace>Omnius.Xeus.Service.Engines</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Omnius.Xeus.Engines.Implementations\Omnius.Xeus.Engines.Implementations.csproj" />
-    <ProjectReference Include="..\..\src\Omnius.Xeus.Engines\Omnius.Xeus.Engines.csproj" />
+    <ProjectReference Include="..\..\src\Omnius.Xeus.Service.Engines.Implementations\Omnius.Xeus.Service.Engines.Implementations.csproj" />
+    <ProjectReference Include="..\..\src\Omnius.Xeus.Service.Engines\Omnius.Xeus.Service.Engines.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Net.Proxies\Omnius.Core.Net.Proxies.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Net.Upnp\Omnius.Core.Net.Upnp.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.UnitTestToolkit\Omnius.Core.UnitTestToolkit.csproj" />

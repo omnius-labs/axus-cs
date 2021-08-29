@@ -35,9 +35,9 @@
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Avalonia\Omnius.Core.Avalonia.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Utils\Omnius.Core.Utils.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core\Omnius.Core.csproj" />
-    <ProjectReference Include="..\Omnius.Xeus.Models\Omnius.Xeus.Models.csproj" />
-    <ProjectReference Include="..\Omnius.Xeus.Remoting\Omnius.Xeus.Remoting.csproj" />
-    <ProjectReference Include="..\Omnius.Xeus.Services\Omnius.Xeus.Services.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Service.Models\Omnius.Xeus.Service.Models.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Service.Remoting\Omnius.Xeus.Service.Remoting.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Intaractors\Omnius.Xeus.Intaractors.csproj" />
     <ProjectReference Include="..\Omnius.Xeus.Utils\Omnius.Xeus.Utils.csproj" />
   </ItemGroup>
 

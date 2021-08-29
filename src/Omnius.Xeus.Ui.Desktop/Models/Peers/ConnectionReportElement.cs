@@ -1,5 +1,5 @@
-using Omnius.Xeus.Engines.Models;
-using Omnius.Xeus.Services.Models;
+using Omnius.Xeus.Service.Engines.Models;
+using Omnius.Xeus.Intaractors.Models;
 using Omnius.Xeus.Ui.Desktop.Models.Primitives;
 
 namespace Omnius.Xeus.Ui.Desktop.Models.Peers

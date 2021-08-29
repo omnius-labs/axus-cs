@@ -2,12 +2,12 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build (Omnius.Xeus.Daemon.Implementations)",
+            "label": "build (Omnius.Xeus.Service.Daemon.Implementations)",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/src/Omnius.Xeus.Daemon.Implementations/Omnius.Xeus.Daemon.Implementations.csproj",
+                "${workspaceFolder}/src/Omnius.Xeus.Service.Daemon.Implementations/Omnius.Xeus.Service.Daemon.Implementations.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],

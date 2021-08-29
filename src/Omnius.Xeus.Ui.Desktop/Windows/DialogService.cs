@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Omnius.Core.Avalonia;
-using Omnius.Xeus.Engines.Models;
+using Omnius.Xeus.Service.Engines.Models;
 using Omnius.Xeus.Ui.Desktop.Windows.AddNodes;
 
 namespace Omnius.Xeus.Ui.Desktop.Windows

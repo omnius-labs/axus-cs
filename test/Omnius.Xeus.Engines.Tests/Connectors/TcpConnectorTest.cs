@@ -11,10 +11,10 @@ using Omnius.Core.Net.Connections;
 using Omnius.Core.Net.Proxies;
 using Omnius.Core.Net.Upnp;
 using Omnius.Core.RocketPack;
-using Omnius.Xeus.Engines.Models;
+using Omnius.Xeus.Service.Engines.Models;
 using Xunit;
 
-namespace Omnius.Xeus.Engines.Connectors
+namespace Omnius.Xeus.Service.Engines.Connectors
 {
     public class TcpConnectorTest
     {

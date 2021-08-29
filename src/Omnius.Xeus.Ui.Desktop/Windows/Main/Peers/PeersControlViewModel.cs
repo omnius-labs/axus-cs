@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Avalonia.Threading;
 using Omnius.Core;
 using Omnius.Core.Net;
-using Omnius.Xeus.Services;
+using Omnius.Xeus.Intaractors;
 using Omnius.Xeus.Ui.Desktop.Models.Peers;
 using Omnius.Xeus.Ui.Desktop.Models.Primitives;
 using Reactive.Bindings;
