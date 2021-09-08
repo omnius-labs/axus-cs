@@ -245,7 +245,7 @@ namespace Omnius.Xeus.Service.Models
             }
         }
     }
-    public sealed partial class Shout : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Service.Models.Shout>, global::System.IDisposable
+    public sealed partial class Shout : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Service.Models.Shout>
     {
         public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Service.Models.Shout> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Service.Models.Shout>.Formatter;
         public static global::Omnius.Xeus.Service.Models.Shout Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Service.Models.Shout>.Empty;
@@ -265,7 +265,7 @@ namespace Omnius.Xeus.Service.Models
             if (value is null) throw new global::System.ArgumentNullException("value");
             if (value.Memory.Length > 33554432) throw new global::System.ArgumentOutOfRangeException("value");
             this.CreationTime = creationTime;
-            _value = value;
+            this.Value = value;
             this.Certificate = certificate;
 
             ___hashCode = new global::System.Lazy<int>(() =>
@@ -279,8 +279,7 @@ namespace Omnius.Xeus.Service.Models
         }
 
         public global::Omnius.Core.RocketPack.Timestamp CreationTime { get; }
-        private readonly global::System.Buffers.IMemoryOwner<byte> _value;
-        public global::System.ReadOnlyMemory<byte> Value => _value.Memory;
+        public global::System.Buffers.IMemoryOwner<byte> Value { get; }
         public global::Omnius.Core.Cryptography.OmniCertificate? Certificate { get; }
 
         public static global::Omnius.Xeus.Service.Models.Shout Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -312,18 +311,13 @@ namespace Omnius.Xeus.Service.Models
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.CreationTime != target.CreationTime) return false;
-            if (!global::Omnius.Core.BytesOperations.Equals(this.Value.Span, target.Value.Span)) return false;
+            if (!global::Omnius.Core.BytesOperations.Equals(this.Value.Memory.Span, target.Value.Memory.Span)) return false;
             if ((this.Certificate is null) != (target.Certificate is null)) return false;
             if ((this.Certificate is not null) && (target.Certificate is not null) && this.Certificate != target.Certificate) return false;
 
             return true;
         }
         public override int GetHashCode() => ___hashCode.Value;
-
-        public void Dispose()
-        {
-            _value?.Dispose();
-        }
 
         private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Service.Models.Shout>
         {
@@ -336,10 +330,10 @@ namespace Omnius.Xeus.Service.Models
                     w.Write((uint)1);
                     w.Write(value.CreationTime);
                 }
-                if (!value.Value.IsEmpty)
+                if (!value.Value.Memory.IsEmpty)
                 {
                     w.Write((uint)2);
-                    w.Write(value.Value.Span);
+                    w.Write(value.Value.Memory.Span);
                 }
                 if (value.Certificate != null)
                 {

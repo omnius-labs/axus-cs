@@ -9,6 +9,7 @@ using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Storages;
+using Omnius.Xeus.Intaractors.Internal.Repositories.Entities;
 using Omnius.Xeus.Intaractors.Models;
 
 namespace Omnius.Xeus.Intaractors
@@ -17,10 +18,10 @@ namespace Omnius.Xeus.Intaractors
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly UserProfileFinderOptions _options;
         private readonly IUserProfileDownloader _userProfileDownloader;
         private readonly IBytesStorageFactory _bytesStorageFactory;
         private readonly IBytesPool _bytesPool;
+        private readonly UserProfileFinderOptions _options;
 
         private readonly IBytesStorage<string> _optionsStorage;
         private readonly IBytesStorage<OmniSignatureEntity> _cachedUserProfileStorage;
@@ -30,22 +31,7 @@ namespace Omnius.Xeus.Intaractors
 
         private readonly AsyncReaderWriterLock _asyncLock = new();
 
-        internal sealed class UserProfileFinderFactory : IUserProfileFinderFactory
-        {
-            public async ValueTask<IUserProfileFinder> CreateAsync(UserProfileFinderOptions options, IUserProfileDownloader userProfileDownloader,
-                IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, CancellationToken cancellationToken = default)
-            {
-                var result = new UserProfileFinder(options, userProfileDownloader, bytesStorageFactory, bytesPool);
-                await result.InitAsync(cancellationToken);
-
-                return result;
-            }
-        }
-
-        public static IUserProfileFinderFactory Factory { get; } = new UserProfileFinderFactory();
-
-        public UserProfileFinder(UserProfileFinderOptions options, IUserProfileDownloader userProfileDownloader,
-            IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool)
+        public UserProfileFinder(UserProfileFinderOptions options, IUserProfileDownloader userProfileDownloader, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool)
         {
             _options = options;
             _userProfileDownloader = userProfileDownloader;
@@ -104,27 +90,34 @@ namespace Omnius.Xeus.Intaractors
 
                 await foreach (var profile in this.InternalRecursiveFindProfilesAsync(searchOptions.TrustedSignatures, searchOptions.BlockedSignatures, (int)searchOptions.SearchDepth, (int)searchOptions.MaxUserProfileCount, cancellationToken))
                 {
-                    allTargetSignatures.Add(profile.Signature);
+                    _ = allTargetSignatures.Add(profile.Signature);
                 }
 
                 var removedSignature = new HashSet<OmniSignature>();
                 await foreach (var signatureEntity in _cachedUserProfileStorage.GetKeysAsync(cancellationToken))
                 {
                     var signature = signatureEntity.Export();
-                    if (allTargetSignatures.Contains(signature)) continue;
-                    removedSignature.Add(signature);
+                    if (allTargetSignatures.Contains(signature))
+                    {
+                        continue;
+                    }
+
+                    _ = removedSignature.Add(signature);
                 }
 
                 foreach (var signature in removedSignature)
                 {
-                    await _cachedUserProfileStorage.TryDeleteAsync(OmniSignatureEntity.Import(signature), cancellationToken);
+                    _ = await _cachedUserProfileStorage.TryDeleteAsync(OmniSignatureEntity.Import(signature), cancellationToken);
                 }
             }
         }
 
         private async IAsyncEnumerable<UserProfile> InternalRecursiveFindProfilesAsync(IEnumerable<OmniSignature> rootSignatures, IEnumerable<OmniSignature> ignoreSignatures, int depth, int maxCount, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            if (maxCount == 0) yield break;
+            if (maxCount == 0)
+            {
+                yield break;
+            }
 
             var targetSignatures = new HashSet<OmniSignature>();
             var checkedSignatures = new HashSet<OmniSignature>();
@@ -136,19 +129,25 @@ namespace Omnius.Xeus.Intaractors
 
             foreach (int rank in Enumerable.Range(0, depth))
             {
-                if (targetSignatures.Count == 0) break;
+                if (targetSignatures.Count == 0)
+                {
+                    break;
+                }
 
                 var nextTargetSignatures = new HashSet<OmniSignature>();
 
                 await foreach (var profile in this.InternalFindProfilesAsync(targetSignatures, cancellationToken))
                 {
-                    checkedSignatures.Add(profile.Signature);
+                    _ = checkedSignatures.Add(profile.Signature);
                     checkedSignatures.UnionWith(profile.Content.BlockedSignatures);
                     nextTargetSignatures.UnionWith(profile.Content.TrustedSignatures);
 
                     yield return profile;
 
-                    if (++count >= maxCount) yield break;
+                    if (++count >= maxCount)
+                    {
+                        yield break;
+                    }
                 }
 
                 nextTargetSignatures.ExceptWith(checkedSignatures);
@@ -167,21 +166,9 @@ namespace Omnius.Xeus.Intaractors
 
                 if (cachedProfile is not null)
                 {
-                    if (downloadedProfile is not null)
-                    {
-                        if (cachedProfile.CreationTime <= downloadedProfile.CreationTime)
-                        {
-                            yield return downloadedProfile;
-                        }
-                        else
-                        {
-                            yield return cachedProfile;
-                        }
-                    }
-                    else
-                    {
-                        yield return cachedProfile;
-                    }
+                    yield return downloadedProfile is not null
+                        ? cachedProfile.CreationTime <= downloadedProfile.CreationTime ? downloadedProfile : cachedProfile
+                        : cachedProfile;
                 }
                 else if (downloadedProfile is not null)
                 {

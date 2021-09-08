@@ -30,3 +30,10 @@ message Seed {
     Name: string(capacity: 256),
     Size: uint64,
 }
+
+message UserProfileFinderSearchOptions {
+    TrustedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
+    BlockedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
+    SearchDepth: uint32,
+    MaxUserProfileCount: uint32,
+}

@@ -22,7 +22,7 @@ namespace Omnius.Xeus.Service.Models
         public bool Verify()
         {
             using var bytesPipe = new BytesPipe();
-            var target = new Shout(this.CreationTime, _value, null);
+            var target = new Shout(this.CreationTime, this.Value, null);
             target.Export(bytesPipe.Writer, BytesPool.Shared);
 
             return this.Certificate?.Verify(bytesPipe.Reader.GetSequence()) ?? false;

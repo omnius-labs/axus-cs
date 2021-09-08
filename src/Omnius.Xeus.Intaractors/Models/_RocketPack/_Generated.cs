@@ -658,4 +658,186 @@ namespace Omnius.Xeus.Intaractors.Models
             }
         }
     }
+    public sealed partial class UserProfileFinderSearchOptions : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Intaractors.Models.UserProfileFinderSearchOptions>
+    {
+        public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Intaractors.Models.UserProfileFinderSearchOptions> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Intaractors.Models.UserProfileFinderSearchOptions>.Formatter;
+        public static global::Omnius.Xeus.Intaractors.Models.UserProfileFinderSearchOptions Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Intaractors.Models.UserProfileFinderSearchOptions>.Empty;
+
+        static UserProfileFinderSearchOptions()
+        {
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Intaractors.Models.UserProfileFinderSearchOptions>.Formatter = new ___CustomFormatter();
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Intaractors.Models.UserProfileFinderSearchOptions>.Empty = new global::Omnius.Xeus.Intaractors.Models.UserProfileFinderSearchOptions(global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>(), global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>(), 0, 0);
+        }
+
+        private readonly global::System.Lazy<int> ___hashCode;
+
+        public static readonly int MaxTrustedSignaturesCount = 32768;
+        public static readonly int MaxBlockedSignaturesCount = 32768;
+
+        public UserProfileFinderSearchOptions(global::Omnius.Core.Cryptography.OmniSignature[] trustedSignatures, global::Omnius.Core.Cryptography.OmniSignature[] blockedSignatures, uint searchDepth, uint maxUserProfileCount)
+        {
+            if (trustedSignatures is null) throw new global::System.ArgumentNullException("trustedSignatures");
+            if (trustedSignatures.Length > 32768) throw new global::System.ArgumentOutOfRangeException("trustedSignatures");
+            foreach (var n in trustedSignatures)
+            {
+                if (n is null) throw new global::System.ArgumentNullException("n");
+            }
+            if (blockedSignatures is null) throw new global::System.ArgumentNullException("blockedSignatures");
+            if (blockedSignatures.Length > 32768) throw new global::System.ArgumentOutOfRangeException("blockedSignatures");
+            foreach (var n in blockedSignatures)
+            {
+                if (n is null) throw new global::System.ArgumentNullException("n");
+            }
+            this.TrustedSignatures = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Cryptography.OmniSignature>(trustedSignatures);
+            this.BlockedSignatures = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Cryptography.OmniSignature>(blockedSignatures);
+            this.SearchDepth = searchDepth;
+            this.MaxUserProfileCount = maxUserProfileCount;
+
+            ___hashCode = new global::System.Lazy<int>(() =>
+            {
+                var ___h = new global::System.HashCode();
+                foreach (var n in trustedSignatures)
+                {
+                    if (n != default) ___h.Add(n.GetHashCode());
+                }
+                foreach (var n in blockedSignatures)
+                {
+                    if (n != default) ___h.Add(n.GetHashCode());
+                }
+                if (searchDepth != default) ___h.Add(searchDepth.GetHashCode());
+                if (maxUserProfileCount != default) ___h.Add(maxUserProfileCount.GetHashCode());
+                return ___h.ToHashCode();
+            });
+        }
+
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Cryptography.OmniSignature> TrustedSignatures { get; }
+        public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Cryptography.OmniSignature> BlockedSignatures { get; }
+        public uint SearchDepth { get; }
+        public uint MaxUserProfileCount { get; }
+
+        public static global::Omnius.Xeus.Intaractors.Models.UserProfileFinderSearchOptions Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
+            return Formatter.Deserialize(ref reader, 0);
+        }
+        public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+        {
+            var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
+            Formatter.Serialize(ref writer, this, 0);
+        }
+
+        public static bool operator ==(global::Omnius.Xeus.Intaractors.Models.UserProfileFinderSearchOptions? left, global::Omnius.Xeus.Intaractors.Models.UserProfileFinderSearchOptions? right)
+        {
+            return (right is null) ? (left is null) : right.Equals(left);
+        }
+        public static bool operator !=(global::Omnius.Xeus.Intaractors.Models.UserProfileFinderSearchOptions? left, global::Omnius.Xeus.Intaractors.Models.UserProfileFinderSearchOptions? right)
+        {
+            return !(left == right);
+        }
+        public override bool Equals(object? other)
+        {
+            if (other is not global::Omnius.Xeus.Intaractors.Models.UserProfileFinderSearchOptions) return false;
+            return this.Equals((global::Omnius.Xeus.Intaractors.Models.UserProfileFinderSearchOptions)other);
+        }
+        public bool Equals(global::Omnius.Xeus.Intaractors.Models.UserProfileFinderSearchOptions? target)
+        {
+            if (target is null) return false;
+            if (object.ReferenceEquals(this, target)) return true;
+            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.TrustedSignatures, target.TrustedSignatures)) return false;
+            if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.BlockedSignatures, target.BlockedSignatures)) return false;
+            if (this.SearchDepth != target.SearchDepth) return false;
+            if (this.MaxUserProfileCount != target.MaxUserProfileCount) return false;
+
+            return true;
+        }
+        public override int GetHashCode() => ___hashCode.Value;
+
+        private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Intaractors.Models.UserProfileFinderSearchOptions>
+        {
+            public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Xeus.Intaractors.Models.UserProfileFinderSearchOptions value, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                if (value.TrustedSignatures.Count != 0)
+                {
+                    w.Write((uint)1);
+                    w.Write((uint)value.TrustedSignatures.Count);
+                    foreach (var n in value.TrustedSignatures)
+                    {
+                        global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, n, rank + 1);
+                    }
+                }
+                if (value.BlockedSignatures.Count != 0)
+                {
+                    w.Write((uint)2);
+                    w.Write((uint)value.BlockedSignatures.Count);
+                    foreach (var n in value.BlockedSignatures)
+                    {
+                        global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, n, rank + 1);
+                    }
+                }
+                if (value.SearchDepth != 0)
+                {
+                    w.Write((uint)3);
+                    w.Write(value.SearchDepth);
+                }
+                if (value.MaxUserProfileCount != 0)
+                {
+                    w.Write((uint)4);
+                    w.Write(value.MaxUserProfileCount);
+                }
+                w.Write((uint)0);
+            }
+            public global::Omnius.Xeus.Intaractors.Models.UserProfileFinderSearchOptions Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+            {
+                if (rank > 256) throw new global::System.FormatException();
+
+                global::Omnius.Core.Cryptography.OmniSignature[] p_trustedSignatures = global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>();
+                global::Omnius.Core.Cryptography.OmniSignature[] p_blockedSignatures = global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>();
+                uint p_searchDepth = 0;
+                uint p_maxUserProfileCount = 0;
+
+                for (; ; )
+                {
+                    uint id = r.GetUInt32();
+                    if (id == 0) break;
+                    switch (id)
+                    {
+                        case 1:
+                            {
+                                var length = r.GetUInt32();
+                                p_trustedSignatures = new global::Omnius.Core.Cryptography.OmniSignature[length];
+                                for (int i = 0; i < p_trustedSignatures.Length; i++)
+                                {
+                                    p_trustedSignatures[i] = global::Omnius.Core.Cryptography.OmniSignature.Formatter.Deserialize(ref r, rank + 1);
+                                }
+                                break;
+                            }
+                        case 2:
+                            {
+                                var length = r.GetUInt32();
+                                p_blockedSignatures = new global::Omnius.Core.Cryptography.OmniSignature[length];
+                                for (int i = 0; i < p_blockedSignatures.Length; i++)
+                                {
+                                    p_blockedSignatures[i] = global::Omnius.Core.Cryptography.OmniSignature.Formatter.Deserialize(ref r, rank + 1);
+                                }
+                                break;
+                            }
+                        case 3:
+                            {
+                                p_searchDepth = r.GetUInt32();
+                                break;
+                            }
+                        case 4:
+                            {
+                                p_maxUserProfileCount = r.GetUInt32();
+                                break;
+                            }
+                    }
+                }
+
+                return new global::Omnius.Xeus.Intaractors.Models.UserProfileFinderSearchOptions(p_trustedSignatures, p_blockedSignatures, p_searchDepth, p_maxUserProfileCount);
+            }
+        }
+    }
 }

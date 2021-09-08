@@ -32,6 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Net.Connections\Omnius.Core.Net.Connections.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Avalonia\Omnius.Core.Avalonia.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Utils\Omnius.Core.Utils.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core\Omnius.Core.csproj" />

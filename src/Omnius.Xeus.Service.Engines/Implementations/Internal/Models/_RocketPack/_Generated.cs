@@ -43,7 +43,7 @@ namespace Omnius.Xeus.Service.Engines.Internal.Models
         NotFound = 3,
         Same = 4,
     }
-    internal sealed partial class Block : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Service.Engines.Internal.Models.Block>, global::System.IDisposable
+    internal sealed partial class Block : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Service.Engines.Internal.Models.Block>
     {
         public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Service.Engines.Internal.Models.Block> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Service.Engines.Internal.Models.Block>.Formatter;
         public static global::Omnius.Xeus.Service.Engines.Internal.Models.Block Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Service.Engines.Internal.Models.Block>.Empty;
@@ -64,7 +64,7 @@ namespace Omnius.Xeus.Service.Engines.Internal.Models
             if (value.Memory.Length > 4194304) throw new global::System.ArgumentOutOfRangeException("value");
 
             this.Hash = hash;
-            _value = value;
+            this.Value = value;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -76,8 +76,7 @@ namespace Omnius.Xeus.Service.Engines.Internal.Models
         }
 
         public global::Omnius.Core.Cryptography.OmniHash Hash { get; }
-        private readonly global::System.Buffers.IMemoryOwner<byte> _value;
-        public global::System.ReadOnlyMemory<byte> Value => _value.Memory;
+        public global::System.Buffers.IMemoryOwner<byte> Value { get; }
 
         public static global::Omnius.Xeus.Service.Engines.Internal.Models.Block Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -108,16 +107,11 @@ namespace Omnius.Xeus.Service.Engines.Internal.Models
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.Hash != target.Hash) return false;
-            if (!global::Omnius.Core.BytesOperations.Equals(this.Value.Span, target.Value.Span)) return false;
+            if (!global::Omnius.Core.BytesOperations.Equals(this.Value.Memory.Span, target.Value.Memory.Span)) return false;
 
             return true;
         }
         public override int GetHashCode() => ___hashCode.Value;
-
-        public void Dispose()
-        {
-            _value?.Dispose();
-        }
 
         private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Service.Engines.Internal.Models.Block>
         {
@@ -130,10 +124,10 @@ namespace Omnius.Xeus.Service.Engines.Internal.Models
                     w.Write((uint)1);
                     global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.Hash, rank + 1);
                 }
-                if (!value.Value.IsEmpty)
+                if (!value.Value.Memory.IsEmpty)
                 {
                     w.Write((uint)2);
-                    w.Write(value.Value.Span);
+                    w.Write(value.Value.Memory.Span);
                 }
                 w.Write((uint)0);
             }

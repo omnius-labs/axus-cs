@@ -11,10 +11,12 @@ using Omnius.Core.Cryptography;
 using Omnius.Core.Pipelines;
 using Omnius.Core.RocketPack;
 using Omnius.Core.Storages;
+using Omnius.Xeus.Intaractors.Internal;
 using Omnius.Xeus.Intaractors.Internal.Models;
 using Omnius.Xeus.Intaractors.Internal.Repositories;
 using Omnius.Xeus.Intaractors.Models;
 using Omnius.Xeus.Service.Models;
+using Omnius.Xeus.Service.Remoting;
 
 namespace Omnius.Xeus.Intaractors
 {
@@ -35,7 +37,7 @@ namespace Omnius.Xeus.Intaractors
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly IXeusApi _xeusApi;
+        private readonly XeusServiceAdapter _service;
         private readonly IBytesStorageFactory _bytesStorageFactory;
         private readonly IBytesPool _bytesPool;
         private readonly UserProfileUploaderOptions _options;
@@ -43,20 +45,21 @@ namespace Omnius.Xeus.Intaractors
         private readonly UserProfileUploaderRepository _userProfileUploaderRepo;
 
         private readonly Task _watchLoopTask;
+
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
         private readonly AsyncReaderWriterLock _asyncLock = new();
 
         private const string Registrant = "Omnius.Xeus.Intaractors.UserProfileUploader";
 
-        public UserProfileUploader(IXeusApi xeusApi, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, UserProfileUploaderOptions options)
+        public UserProfileUploader(IXeusService xeusService, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, UserProfileUploaderOptions options)
         {
-            _xeusApi = xeusApi;
+            _service = new XeusServiceAdapter(xeusService);
             _bytesStorageFactory = bytesStorageFactory;
             _bytesPool = bytesPool;
             _options = options;
 
-            _userProfileUploaderRepo = new UserProfileUploaderRepository(Path.Combine(options.ConfigDirectoryPath, "state"));
+            _userProfileUploaderRepo = new UserProfileUploaderRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
             _watchLoopTask = this.WatchLoopAsync(_cancellationTokenSource.Token);
         }
 
@@ -79,8 +82,8 @@ namespace Omnius.Xeus.Intaractors
                 {
                     await Task.Delay(1000 * 30, cancellationToken);
 
-                    await this.SyncPublishedDeclaredMessage(cancellationToken);
-                    await this.SyncPublishedFileStorage(cancellationToken);
+                    await this.SyncPublishedShouts(cancellationToken);
+                    await this.SyncPublishedFiles(cancellationToken);
                 }
             }
             catch (OperationCanceledException e)
@@ -93,45 +96,45 @@ namespace Omnius.Xeus.Intaractors
             }
         }
 
-        private async Task SyncPublishedDeclaredMessage(CancellationToken cancellationToken = default)
+        private async Task SyncPublishedShouts(CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                var publishedItems = await this.InternalGetPublishedDeclaredMessageReportsAsync(cancellationToken);
-                var set = new HashSet<OmniSignature>();
-                set.UnionWith(publishedItems.Where(n => n.Registrant == Registrant).Select(n => n.Signature));
+                var publishedShoutReports = await _service.GetPublishedShoutReportsAsync(cancellationToken);
+                var signatures = new HashSet<OmniSignature>();
+                signatures.UnionWith(publishedShoutReports.Where(n => n.Registrant == Registrant).Select(n => n.Signature));
 
-                foreach (var signature in set)
+                foreach (var signature in signatures)
                 {
                     if (_userProfileUploaderRepo.Items.Exists(signature)) continue;
-                    await this.InternalUnpublishDeclaredMessageAsync(signature, cancellationToken);
+                    await _service.UnpublishShoutAsync(signature, Registrant, cancellationToken);
                 }
 
-                foreach (var signature in _userProfileUploaderRepo.Items.FindAll().Select(n => n.Signature))
+                foreach (var item in _userProfileUploaderRepo.Items.FindAll())
                 {
-                    if (set.Contains(signature)) continue;
-                    _userProfileUploaderRepo.Items.Delete(signature);
+                    if (signatures.Contains(item.Signature)) continue;
+                    _userProfileUploaderRepo.Items.Delete(item.Signature);
                 }
             }
         }
 
-        private async Task SyncPublishedFileStorage(CancellationToken cancellationToken = default)
+        private async Task SyncPublishedFiles(CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                var publishedItems = await this.InternalGetPublishedContentReportsAsync(cancellationToken);
-                var set = new HashSet<OmniHash>();
-                set.UnionWith(publishedItems.Where(n => n.Registrant == Registrant).Select(n => n.RootHash).Where(n => n.HasValue).Select(n => n!.Value));
+                var publishedFileReports = await _service.GetPublishedFileReportsAsync(cancellationToken);
+                var rootHashes = new HashSet<OmniHash>();
+                rootHashes.UnionWith(publishedFileReports.Where(n => n.Registrant == Registrant).Select(n => n.RootHash).Where(n => n.HasValue).Select(n => n!.Value));
 
-                foreach (var rootHash in set)
+                foreach (var rootHash in rootHashes)
                 {
                     if (_userProfileUploaderRepo.Items.Exists(rootHash)) continue;
-                    await this.InternalUnpublishContentAsync(rootHash, cancellationToken);
+                    await _service.UnpublishFileFromMemoryAsync(rootHash, Registrant, cancellationToken);
                 }
 
                 foreach (var rootHash in _userProfileUploaderRepo.Items.FindAll().Select(n => n.RootHash))
                 {
-                    if (set.Contains(rootHash)) continue;
+                    if (rootHashes.Contains(rootHash)) continue;
                     _userProfileUploaderRepo.Items.Delete(rootHash);
                 }
             }
@@ -145,7 +148,7 @@ namespace Omnius.Xeus.Intaractors
 
                 foreach (var item in _userProfileUploaderRepo.Items.FindAll())
                 {
-                    reports.Add(new UploadingUserProfileReport(item.CreationTime, item.Signature));
+                    reports.Add(new UploadingUserProfileReport(item.CreationTime.ToDateTime(), item.Signature));
                 }
 
                 return reports;
@@ -156,10 +159,15 @@ namespace Omnius.Xeus.Intaractors
         {
             using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
-                var rootHash = await this.PublishContentAsync(content, cancellationToken);
-                await this.InternalPublishDeclaredMessageAsync(rootHash, digitalSignature, cancellationToken);
+                using var contentBytes = RocketMessage.ToBytes(content);
 
-                var item = new UploadingUserProfileItem(digitalSignature.GetOmniSignature(), rootHash, Timestamp.FromDateTime(DateTime.UtcNow));
+                var contentRootHash = await _service.PublishFileFromMemoryAsync(contentBytes.Memory, Registrant, cancellationToken);
+
+                var shout = Shout.Create(Timestamp.FromDateTime(DateTime.UtcNow), RocketMessage.ToBytes(contentRootHash), digitalSignature);
+                await _service.PublishShoutAsync(shout, Registrant, cancellationToken);
+                shout.Value.Dispose();
+
+                var item = new UploadingUserProfileItem(digitalSignature.GetOmniSignature(), contentRootHash, Timestamp.FromDateTime(DateTime.UtcNow));
                 _userProfileUploaderRepo.Items.Upsert(item);
             }
         }
@@ -171,47 +179,11 @@ namespace Omnius.Xeus.Intaractors
                 var item = _userProfileUploaderRepo.Items.FindOne(signature);
                 if (item is null) return;
 
-                await this.InternalUnpublishDeclaredMessageAsync(item.Signature, cancellationToken);
-                await this.InternalUnpublishContentAsync(item.RootHash, cancellationToken);
+                await _service.UnpublishShoutAsync(item.Signature, Registrant, cancellationToken);
+                await _service.UnpublishFileFromMemoryAsync(item.RootHash, Registrant, cancellationToken);
 
                 _userProfileUploaderRepo.Items.Delete(item.Signature);
             }
-        }
-
-        private async ValueTask<OmniHash> PublishContentAsync(UserProfileContent content, OmniDigitalSignature digitalSignature, CancellationToken cancellationToken = default)
-        {
-            using var contentBytes = RocketMessage.ToBytes(content);
-            var rootHash = await _xeusApi.PublishFileFromMemoryAsync(contentBytes.Memory, Registrant, cancellationToken);
-
-            using var rootHashBytes = RocketMessage.ToBytes(rootHash);
-            using var shout = Shout.Create(Timestamp.FromDateTime(DateTime.UtcNow), rootHashBytes, digitalSignature);
-            await _xeusApi.PublishShoutAsync(shout, Registrant, cancellationToken);
-        }
-
-        private async ValueTask InternalPublishDeclaredMessageAsync(OmniHash rootHash, OmniDigitalSignature digitalSignature, CancellationToken cancellationToken = default)
-        {
-            using var hub = new BytesPipe();
-            rootHash.Export(hub.Writer, _bytesPool);
-
-            var sequence = hub.Reader.GetSequence();
-            var memoryOwner = _bytesPool.Memory.Rent((int)sequence.Length).Shrink((int)sequence.Length);
-            sequence.CopyTo(memoryOwner.Memory.Span);
-
-            using var declaredMessage = Shout.Create(Timestamp.FromDateTime(DateTime.UtcNow), memoryOwner, digitalSignature);
-            var input = new PublishedDeclaredMessage_PublishMessage_Input(declaredMessage, Registrant);
-            await _xeusApi.PublishedDeclaredMessage_PublishMessageAsync(input, cancellationToken);
-        }
-
-        private async ValueTask InternalUnpublishDeclaredMessageAsync(OmniSignature signature, CancellationToken cancellationToken = default)
-        {
-            var input = new PublishedDeclaredMessage_UnpublishMessage_Input(signature, Registrant);
-            await _xeusApi.PublishedDeclaredMessage_UnpublishMessageAsync(input, cancellationToken);
-        }
-
-        private async ValueTask InternalUnpublishContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
-        {
-            var input = new PublishedFileStorage_UnpublishContent_Memory_Input(rootHash, Registrant);
-            await _xeusApi.PublishedFileStorage_UnpublishContentAsync(input, cancellationToken);
         }
     }
 }

@@ -2,7 +2,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
-using Omnius.Xeus.Ui.Desktop.Windows.Main;
+using Omnius.Xeus.Ui.Desktop.Windows;
 
 namespace Omnius.Xeus.Ui.Desktop
 {
@@ -21,10 +21,21 @@ namespace Omnius.Xeus.Ui.Desktop
         {
             if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                desktop.MainWindow = new MainWindow()
+                string stateDirectoryPath = desktop.Args[0];
+
+                try
                 {
-                    ViewModel = Bootstrapper.ServiceProvider?.GetRequiredService<MainWindowViewModel>(),
-                };
+                    await Bootstrapper.Instance.BuildAsync(stateDirectoryPath);
+
+                    desktop.MainWindow = new MainWindow()
+                    {
+                        ViewModel = Bootstrapper.Instance.ServiceProvider?.GetRequiredService<MainWindowViewModel>(),
+                    };
+                }
+                finally
+                {
+                    await Bootstrapper.Instance.DisposeAsync();
+                }
             }
 
             base.OnFrameworkInitializationCompleted();

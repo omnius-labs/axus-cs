@@ -306,7 +306,7 @@ namespace Omnius.Xeus.Service.Engines
                                     {
                                         foreach (var block in dataMessage.GiveBlocks)
                                         {
-                                            block.Dispose();
+                                            block.Value.Dispose();
                                         }
 
                                         sessionStatus.SendingDataMessage = null;
@@ -365,14 +365,14 @@ namespace Omnius.Xeus.Service.Engines
 
                                     foreach (var block in dataMessage.GiveBlocks)
                                     {
-                                        await _subscribedFileStorage.WriteBlockAsync(connectionStatus.ContentHash, block.Hash, block.Value, cancellationToken);
+                                        await _subscribedFileStorage.WriteBlockAsync(connectionStatus.ContentHash, block.Hash, block.Value.Memory, cancellationToken);
                                     }
                                 }
                                 finally
                                 {
                                     foreach (var block in dataMessage.GiveBlocks)
                                     {
-                                        block.Dispose();
+                                        block.Value.Dispose();
                                     }
                                 }
                             }

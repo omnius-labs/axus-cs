@@ -1805,7 +1805,7 @@ namespace Omnius.Xeus.Service.Remoting
             }
         }
     }
-    public sealed partial class TryExportFileToMemoryResult : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Service.Remoting.TryExportFileToMemoryResult>, global::System.IDisposable
+    public sealed partial class TryExportFileToMemoryResult : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Service.Remoting.TryExportFileToMemoryResult>
     {
         public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Service.Remoting.TryExportFileToMemoryResult> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Service.Remoting.TryExportFileToMemoryResult>.Formatter;
         public static global::Omnius.Xeus.Service.Remoting.TryExportFileToMemoryResult Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Service.Remoting.TryExportFileToMemoryResult>.Empty;
@@ -1824,7 +1824,7 @@ namespace Omnius.Xeus.Service.Remoting
         {
             if (memory is not null && memory.Memory.Length > 33554432) throw new global::System.ArgumentOutOfRangeException("memory");
 
-            _memory = memory;
+            this.Memory = memory;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
@@ -1834,8 +1834,7 @@ namespace Omnius.Xeus.Service.Remoting
             });
         }
 
-        private readonly global::System.Buffers.IMemoryOwner<byte>? _memory;
-        public global::System.ReadOnlyMemory<byte>? Memory => _memory?.Memory;
+        public global::System.Buffers.IMemoryOwner<byte>? Memory { get; }
 
         public static global::Omnius.Xeus.Service.Remoting.TryExportFileToMemoryResult Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -1866,16 +1865,11 @@ namespace Omnius.Xeus.Service.Remoting
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if ((this.Memory is null) != (target.Memory is null)) return false;
-            if ((this.Memory is not null) && (target.Memory is not null) && !global::Omnius.Core.BytesOperations.Equals(this.Memory.Value.Span, target.Memory.Value.Span)) return false;
+            if ((this.Memory is not null) && (target.Memory is not null) && !global::Omnius.Core.BytesOperations.Equals(this.Memory.Memory.Span, target.Memory.Memory.Span)) return false;
 
             return true;
         }
         public override int GetHashCode() => ___hashCode.Value;
-
-        public void Dispose()
-        {
-            _memory?.Dispose();
-        }
 
         private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Service.Remoting.TryExportFileToMemoryResult>
         {
@@ -1886,7 +1880,7 @@ namespace Omnius.Xeus.Service.Remoting
                 if (value.Memory != null)
                 {
                     w.Write((uint)1);
-                    w.Write(value.Memory.Value.Span);
+                    w.Write(value.Memory.Memory.Span);
                 }
                 w.Write((uint)0);
             }
