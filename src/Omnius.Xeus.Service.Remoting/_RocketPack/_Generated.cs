@@ -1820,21 +1820,21 @@ namespace Omnius.Xeus.Service.Remoting
 
         public static readonly int MaxMemoryLength = 33554432;
 
-        public TryExportFileToMemoryResult(global::System.Buffers.IMemoryOwner<byte>? memory)
+        public TryExportFileToMemoryResult(global::System.ReadOnlyMemory<byte>? memory)
         {
-            if (memory is not null && memory.Memory.Length > 33554432) throw new global::System.ArgumentOutOfRangeException("memory");
+            if (memory is not null && memory.Value.Length > 33554432) throw new global::System.ArgumentOutOfRangeException("memory");
 
             this.Memory = memory;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (memory is not null && !memory.Memory.IsEmpty) ___h.Add(global::Omnius.Core.Helpers.ObjectHelper.GetHashCode(memory.Memory.Span));
+                if (memory is not null && !memory.Value.IsEmpty) ___h.Add(global::Omnius.Core.Helpers.ObjectHelper.GetHashCode(memory.Value.Span));
                 return ___h.ToHashCode();
             });
         }
 
-        public global::System.Buffers.IMemoryOwner<byte>? Memory { get; }
+        public global::System.ReadOnlyMemory<byte>? Memory { get; }
 
         public static global::Omnius.Xeus.Service.Remoting.TryExportFileToMemoryResult Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -1865,7 +1865,7 @@ namespace Omnius.Xeus.Service.Remoting
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if ((this.Memory is null) != (target.Memory is null)) return false;
-            if ((this.Memory is not null) && (target.Memory is not null) && !global::Omnius.Core.BytesOperations.Equals(this.Memory.Memory.Span, target.Memory.Memory.Span)) return false;
+            if ((this.Memory is not null) && (target.Memory is not null) && !global::Omnius.Core.BytesOperations.Equals(this.Memory.Value.Span, target.Memory.Value.Span)) return false;
 
             return true;
         }
@@ -1880,7 +1880,7 @@ namespace Omnius.Xeus.Service.Remoting
                 if (value.Memory != null)
                 {
                     w.Write((uint)1);
-                    w.Write(value.Memory.Memory.Span);
+                    w.Write(value.Memory.Value.Span);
                 }
                 w.Write((uint)0);
             }
@@ -1888,7 +1888,7 @@ namespace Omnius.Xeus.Service.Remoting
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                global::System.Buffers.IMemoryOwner<byte>? p_memory = null;
+                global::System.ReadOnlyMemory<byte>? p_memory = null;
 
                 for (; ; )
                 {
@@ -1898,7 +1898,7 @@ namespace Omnius.Xeus.Service.Remoting
                     {
                         case 1:
                             {
-                                p_memory = r.GetRecyclableMemory(33554432);
+                                p_memory = r.GetMemory(33554432);
                                 break;
                             }
                     }
@@ -2042,25 +2042,25 @@ namespace Omnius.Xeus.Service.Remoting
 
         public static readonly int MaxRegistrantLength = 2147483647;
 
-        public PublishShoutRequest(global::Omnius.Xeus.Service.Models.Shout message, string registrant)
+        public PublishShoutRequest(global::Omnius.Xeus.Service.Models.Shout shout, string registrant)
         {
-            if (message is null) throw new global::System.ArgumentNullException("message");
+            if (shout is null) throw new global::System.ArgumentNullException("shout");
             if (registrant is null) throw new global::System.ArgumentNullException("registrant");
             if (registrant.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("registrant");
 
-            this.Message = message;
+            this.Shout = shout;
             this.Registrant = registrant;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (message != default) ___h.Add(message.GetHashCode());
+                if (shout != default) ___h.Add(shout.GetHashCode());
                 if (registrant != default) ___h.Add(registrant.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public global::Omnius.Xeus.Service.Models.Shout Message { get; }
+        public global::Omnius.Xeus.Service.Models.Shout Shout { get; }
         public string Registrant { get; }
 
         public static global::Omnius.Xeus.Service.Remoting.PublishShoutRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -2091,7 +2091,7 @@ namespace Omnius.Xeus.Service.Remoting
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if (this.Message != target.Message) return false;
+            if (this.Shout != target.Shout) return false;
             if (this.Registrant != target.Registrant) return false;
 
             return true;
@@ -2104,10 +2104,10 @@ namespace Omnius.Xeus.Service.Remoting
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.Message != global::Omnius.Xeus.Service.Models.Shout.Empty)
+                if (value.Shout != global::Omnius.Xeus.Service.Models.Shout.Empty)
                 {
                     w.Write((uint)1);
-                    global::Omnius.Xeus.Service.Models.Shout.Formatter.Serialize(ref w, value.Message, rank + 1);
+                    global::Omnius.Xeus.Service.Models.Shout.Formatter.Serialize(ref w, value.Shout, rank + 1);
                 }
                 if (value.Registrant != string.Empty)
                 {
@@ -2120,7 +2120,7 @@ namespace Omnius.Xeus.Service.Remoting
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                global::Omnius.Xeus.Service.Models.Shout p_message = global::Omnius.Xeus.Service.Models.Shout.Empty;
+                global::Omnius.Xeus.Service.Models.Shout p_shout = global::Omnius.Xeus.Service.Models.Shout.Empty;
                 string p_registrant = string.Empty;
 
                 for (; ; )
@@ -2131,7 +2131,7 @@ namespace Omnius.Xeus.Service.Remoting
                     {
                         case 1:
                             {
-                                p_message = global::Omnius.Xeus.Service.Models.Shout.Formatter.Deserialize(ref r, rank + 1);
+                                p_shout = global::Omnius.Xeus.Service.Models.Shout.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 2:
@@ -2142,7 +2142,7 @@ namespace Omnius.Xeus.Service.Remoting
                     }
                 }
 
-                return new global::Omnius.Xeus.Service.Remoting.PublishShoutRequest(p_message, p_registrant);
+                return new global::Omnius.Xeus.Service.Remoting.PublishShoutRequest(p_shout, p_registrant);
             }
         }
     }

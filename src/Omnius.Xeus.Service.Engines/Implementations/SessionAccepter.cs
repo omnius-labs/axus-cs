@@ -1,18 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Helpers;
 using Omnius.Core.Net;
-using Omnius.Core.Net.Caps;
 using Omnius.Core.Net.Connections;
 using Omnius.Core.Net.Connections.Secure;
 using Omnius.Core.Net.Connections.Secure.V1;
-using Omnius.Core.Net.Proxies;
-using Omnius.Core.Net.Upnp;
 using Omnius.Core.Tasks;
 using Omnius.Xeus.Service.Engines.Internal.Models;
 using Omnius.Xeus.Service.Models;
@@ -105,7 +101,7 @@ namespace Omnius.Xeus.Service.Engines
                 linkedTokenSource.CancelAfter(TimeSpan.FromSeconds(20));
 
                 var session = await this.CreateSessionAsync(acceptedResult.Connection, acceptedResult.Address, linkedTokenSource.Token);
-                if (session is null) continue;
+                if (session is not null) return session;
             }
 
             return null;
@@ -126,10 +122,10 @@ namespace Omnius.Xeus.Service.Engines
                 await secureConnection.HandshakeAsync(cancellationToken);
                 if (secureConnection.Signature is null) return null;
 
-                var receivedMessage = await connection.Receiver.ReceiveAsync<SessionManagerSessionRequestMessage>(cancellationToken);
+                var receivedMessage = await secureConnection.Receiver.ReceiveAsync<SessionManagerSessionRequestMessage>(cancellationToken);
                 var sendingMessage = new SessionManagerSessionResultMessage(_sessionChannels.Contains(receivedMessage.Scheme) ? SessionManagerSessionResultType.Accepted : SessionManagerSessionResultType.Rejected);
 
-                await connection.Sender.SendAsync(sendingMessage, cancellationToken);
+                await secureConnection.Sender.SendAsync(sendingMessage, cancellationToken);
 
                 var session = new Session(secureConnection, address, SessionHandshakeType.Accepted, secureConnection.Signature, receivedMessage.Scheme);
                 return session;

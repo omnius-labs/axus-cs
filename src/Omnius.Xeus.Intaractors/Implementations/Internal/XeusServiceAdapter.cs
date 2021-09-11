@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Xeus.Service.Models;
 using Omnius.Xeus.Service.Remoting;
@@ -95,7 +94,7 @@ namespace Omnius.Xeus.Intaractors.Internal
             return output.Success;
         }
 
-        public async ValueTask<IMemoryOwner<byte>?> TryExportFileToMemoryAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+        public async ValueTask<ReadOnlyMemory<byte>?> TryExportFileToMemoryAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
             var input = new TryExportFileToMemoryRequest(rootHash);
             var output = await _xeusService.TryExportFileToMemoryAsync(input, cancellationToken);

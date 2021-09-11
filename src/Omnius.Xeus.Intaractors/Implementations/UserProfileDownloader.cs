@@ -230,7 +230,7 @@ namespace Omnius.Xeus.Intaractors
                     return null;
                 }
 
-                var content = RocketMessage.FromBytes<UserProfileContent>(contentBytes.Memory);
+                var content = RocketMessage.FromBytes<UserProfileContent>(contentBytes.Value);
 
                 return new UserProfile(signature, shout.CreationTime, content);
             }

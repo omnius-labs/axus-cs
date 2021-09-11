@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Avalonia.Markup.Xaml;
+using Microsoft.Extensions.DependencyInjection;
 using Omnius.Xeus.Ui.Desktop.Windows.Primitives;
 
 namespace Omnius.Xeus.Ui.Desktop.Windows
@@ -19,6 +20,9 @@ namespace Omnius.Xeus.Ui.Desktop.Windows
 
         protected override async ValueTask OnInitializeAsync()
         {
+            string stateDirectoryPath = App.Current.Lifetime!.Args[0];
+            await Bootstrapper.Instance.BuildAsync(stateDirectoryPath);
+            this.ViewModel = Bootstrapper.Instance.ServiceProvider?.GetRequiredService<MainWindowViewModel>();
         }
 
         protected override async ValueTask OnDisposeAsync()

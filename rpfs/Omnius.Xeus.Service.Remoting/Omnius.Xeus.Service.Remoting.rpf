@@ -102,7 +102,7 @@ message TryExportFileToMemoryRequest {
 }
 
 message TryExportFileToMemoryResult {
-    Memory: bytes?(capacity: 32 * 1024 * 1024, recyclable: true),
+    Memory: bytes?(capacity: 32 * 1024 * 1024),
 }
 
 message GetPublishedShoutsReportResult {
@@ -110,7 +110,7 @@ message GetPublishedShoutsReportResult {
 }
 
 message PublishShoutRequest {
-    Message: Shout,
+    Shout: Shout,
     Registrant: string,
 }
 

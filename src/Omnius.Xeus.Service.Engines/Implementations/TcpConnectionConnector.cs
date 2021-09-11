@@ -1,22 +1,15 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Caps;
 using Omnius.Core.Net.Connections;
 using Omnius.Core.Net.Connections.Bridge;
-using Omnius.Core.Net.Connections.Multiplexer;
-using Omnius.Core.Net.Connections.Multiplexer.V1;
-using Omnius.Core.Net.Connections.Secure;
-using Omnius.Core.Net.Connections.Secure.V1;
 using Omnius.Core.Net.Proxies;
-using Omnius.Core.Net.Upnp;
 using Omnius.Core.Tasks;
 
 namespace Omnius.Xeus.Service.Engines
@@ -74,10 +67,8 @@ namespace Omnius.Xeus.Service.Engines
                 if (!IsGlobalIpAddress(ipAddress)) return null;
 #endif
 
-                if (_options.Proxy?.Address is not null)
+                if (_options.Proxy?.Address is not null && _options.Proxy.Address.TryGetTcpEndpoint(out var proxyAddress, out ushort proxyPort, true))
                 {
-                    if (!_options.Proxy.Address.TryGetTcpEndpoint(out var proxyAddress, out ushort proxyPort, true)) return null;
-
                     if (_socks5ProxyClientFactory is not null && _options.Proxy.Type == TcpProxyType.Socks5Proxy)
                     {
                         var socket = await ConnectSocketAsync(new IPEndPoint(proxyAddress, proxyPort), cancellationToken);

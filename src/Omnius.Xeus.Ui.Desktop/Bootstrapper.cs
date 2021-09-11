@@ -11,6 +11,7 @@ using Omnius.Xeus.Ui.Desktop.Configuration;
 using Omnius.Xeus.Ui.Desktop.Internal;
 using Omnius.Xeus.Ui.Desktop.Windows;
 using Omnius.Xeus.Ui.Desktop.Windows.Controls;
+using Omnius.Xeus.Ui.Desktop.Windows.Dialogs;
 
 namespace Omnius.Xeus.Ui.Desktop
 {
@@ -54,8 +55,10 @@ namespace Omnius.Xeus.Ui.Desktop
             _ = serviceCollection.AddSingleton<IApplicationDispatcher, ApplicationDispatcher>();
             _ = serviceCollection.AddSingleton<IMainWindowProvider, MainWindowProvider>();
             _ = serviceCollection.AddSingleton<IClipboardService, ClipboardService>();
+            _ = serviceCollection.AddSingleton<IDialogService, DialogService>();
 
             _ = serviceCollection.AddSingleton<MainWindowViewModel>();
+            _ = serviceCollection.AddSingleton<AddNodesWindowViewModel>();
             _ = serviceCollection.AddSingleton<StatusControlViewModel>();
             _ = serviceCollection.AddSingleton<PeersControlViewModel>();
 

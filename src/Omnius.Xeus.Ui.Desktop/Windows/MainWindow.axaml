@@ -18,22 +18,22 @@
 
     <Grid>
         <TabControl TabStripPlacement="Left" SelectedIndex="-1">
-            <TabItem Header="Status" IsSelected="{Binding SelectedTabState.Status.Value}">
+            <TabItem Header="Status" IsSelected="{Binding SelectedTab.Status.Value}">
                 <controls:StatusControl DataContext="{Binding StatusControlViewModel}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             </TabItem>
-            <TabItem Header="Peers" IsSelected="{Binding SelectedTabState.Peers.Value}">
+            <TabItem Header="Peers" IsSelected="{Binding SelectedTab.Peers.Value}">
                 <controls:PeersControl DataContext="{Binding PeersControlViewModel}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             </TabItem>
-            <TabItem Header="Search" IsSelected="{Binding SelectedTabState.Search.Value}">
+            <TabItem Header="Search" IsSelected="{Binding SelectedTab.Search.Value}">
                 <controls:SearchControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             </TabItem>
-            <TabItem Header="Download" IsSelected="{Binding SelectedTabState.Download.Value}">
+            <TabItem Header="Download" IsSelected="{Binding SelectedTab.Download.Value}">
                 <controls:DownloadControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             </TabItem>
-            <TabItem Header="Upload" IsSelected="{Binding SelectedTabState.Upload.Value}">
+            <TabItem Header="Upload" IsSelected="{Binding SelectedTab.Upload.Value}">
                 <controls:UploadControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             </TabItem>
-            <TabItem Header="Settings" IsSelected="{Binding SelectedTabState.Settings.Value}">
+            <TabItem Header="Settings" IsSelected="{Binding SelectedTab.Settings.Value}">
                 <controls:SettingsControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             </TabItem>
         </TabControl>

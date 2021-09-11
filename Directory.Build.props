@@ -49,17 +49,21 @@
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(BuildTargetName)' == '' ">
+    <BuildTargetName>normal</BuildTargetName>
+  </PropertyGroup>
+
   <PropertyGroup Condition=" '$(NativeDepsPlatform)' == 'Windows' ">
-    <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\obj\win\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
-    <BaseOutputPath Condition=" '$(BaseOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\bin\win\$(MSBuildProjectName)\</BaseOutputPath>
+    <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\obj\win-$(BuildTargetName)\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <BaseOutputPath Condition=" '$(BaseOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\bin\win-$(BuildTargetName)\$(MSBuildProjectName)\</BaseOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(NativeDepsPlatform)' == 'Mac' ">
-    <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\obj\mac\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
-    <BaseOutputPath Condition=" '$(BaseOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\bin\mac\$(MSBuildProjectName)\</BaseOutputPath>
+    <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\obj\mac-$(BuildTargetName)\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <BaseOutputPath Condition=" '$(BaseOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\bin\mac-$(BuildTargetName)\$(MSBuildProjectName)\</BaseOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(NativeDepsPlatform)' == 'Linux' ">
-    <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\obj\linux\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
-    <BaseOutputPath Condition=" '$(BaseOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\bin\linux\$(MSBuildProjectName)\</BaseOutputPath>
+    <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\obj\linux-$(BuildTargetName)\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <BaseOutputPath Condition=" '$(BaseOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\bin\linux-$(BuildTargetName)\$(MSBuildProjectName)\</BaseOutputPath>
   </PropertyGroup>
 
   <!-- <PropertyGroup>

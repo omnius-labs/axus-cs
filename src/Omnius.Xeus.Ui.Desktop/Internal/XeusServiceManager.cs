@@ -47,6 +47,8 @@ namespace Omnius.Xeus.Ui.Desktop.Internal
             var multiplexerOptions = new MultiplexerV1.OmniConnectionMultiplexerOptions(OmniConnectionMultiplexerType.Connected, TimeSpan.FromMilliseconds(1000 * 10), 10, uint.MaxValue, 10);
             _multiplexer = OmniConnectionMultiplexer.CreateV1(_bridgeConnection, _batchActionDispatcher, bytesPool, multiplexerOptions);
 
+            await _multiplexer.HandshakeAsync(cancellationToken);
+
             var rocketRemotingCallerFactory = new RocketRemotingCallerFactory<DefaultErrorMessage>(_multiplexer, bytesPool);
             _xeusServiceRemotingClient = new XeusServiceRemoting.Client<DefaultErrorMessage>(rocketRemotingCallerFactory, bytesPool);
         }

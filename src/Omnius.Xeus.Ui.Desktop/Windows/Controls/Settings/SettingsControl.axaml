@@ -5,7 +5,7 @@
     xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
-    xmlns:model="clr-namespace:Omnius.Xeus.Ui.Desktop.Models.Settings;assembly=Omnius.Xeus.Ui.Desktop"
+    xmlns:model="clr-namespace:Omnius.Xeus.Ui.Desktop.Models;assembly=Omnius.Xeus.Ui.Desktop"
     xmlns:local="clr-namespace:Omnius.Xeus.Ui.Desktop.Windows.Controls;assembly=Omnius.Xeus.Ui.Desktop"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"

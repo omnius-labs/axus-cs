@@ -23,7 +23,7 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             CanUserResizeColumns="True"
-            Items="{Binding ConnectionReports}">
+            Items="{Binding SessionReports}">
             <dg:DataGrid.Columns>
                 <dg:DataGridTextColumn
                     Header="EngineName"

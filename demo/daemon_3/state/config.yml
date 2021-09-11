@@ -1,21 +1,19 @@
 Version: 1
 ListenAddress: tcp(ip4(127.0.0.1),42001)
 Engines:
-  Connectors:
-    TcpConnector:
-      Bandwidth:
-        MaxSendBytesPerSeconds: 33554432
-        MaxReceiveBytesPerSeconds: 33554432
-      Connecting:
-        Enabled: true
-        Proxy: 
-      Accepting:
-        Enabled: true
-        ListenAddresses:
-        - tcp(ip4(127.0.0.1),42000)
-        UseUpnp: true
-  Exchangers:
-    ContentExchanger:
-      MaxConnectionCount: 32
-    DeclaredMessageExchanger:
-      MaxConnectionCount: 32
+  Bandwidth:
+    MaxSendBytesPerSeconds: 33554432
+    MaxReceiveBytesPerSeconds: 33554432
+  SessionConnector:
+    TcpConnectors:
+    - Proxy:
+  SessionAccepter:
+    TcpAccepters:
+    - UseUpnp: true
+      ListenAddress: tcp(ip4(127.0.0.1),42000)
+  NodeFinder:
+    MaxSessionCount: 128
+  FileExchanger:
+    MaxSessionCount: 128
+  ShoutExchanger:
+    MaxSessionCount: 128

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -9,14 +8,12 @@ using Omnius.Core;
 using Omnius.Core.Helpers;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Caps;
-using Omnius.Core.Net.Connections;
 using Omnius.Core.Net.Connections.Bridge;
 using Omnius.Core.Net.Connections.Multiplexer;
 using Omnius.Core.Net.Connections.Multiplexer.V1;
 using Omnius.Core.RocketPack.Remoting;
 using Omnius.Core.Tasks;
 using Omnius.Xeus.Service.Daemon.Configuration;
-using Omnius.Xeus.Service.Engines;
 using Omnius.Xeus.Service.Remoting;
 
 namespace Omnius.Xeus.Service.Daemon
@@ -27,7 +24,7 @@ namespace Omnius.Xeus.Service.Daemon
 
         public static async ValueTask EventLoopAsync(string stateDirectoryPath, CancellationToken cancellationToken = default)
         {
-            DirectoryHelper.CreateDirectory(stateDirectoryPath);
+            _ = DirectoryHelper.CreateDirectory(stateDirectoryPath);
 
             var config = await LoadConfigAsync(Path.Combine(stateDirectoryPath, "config.yml"), cancellationToken);
             var service = new XeusService(stateDirectoryPath, config);
@@ -37,7 +34,10 @@ namespace Omnius.Xeus.Service.Daemon
         private static async ValueTask<AppConfig> LoadConfigAsync(string configPath, CancellationToken cancellationToken = default)
         {
             var appConfig = await AppConfig.LoadAsync(configPath);
-            if (appConfig is not null) return appConfig;
+            if (appConfig is not null)
+            {
+                return appConfig;
+            }
 
             appConfig = new AppConfig()
             {
@@ -93,15 +93,15 @@ namespace Omnius.Xeus.Service.Daemon
 
         private static async ValueTask ListenAsync(XeusService service, AppConfig config, CancellationToken cancellationToken = default)
         {
-            if (config.ListenAddress is null) throw new Exception($"{nameof(config.ListenAddress)} is not found");
+            if (config.ListenAddress is null)
+            {
+                throw new Exception($"{nameof(config.ListenAddress)} is not found");
+            }
 
             using var tcpListenerManager = TcpListenerManager.Create(config.ListenAddress, cancellationToken);
 
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                var socket = await tcpListenerManager.AcceptSocketAsync();
-                await ServiceEventLoopAsync(service, socket, cancellationToken);
-            }
+            var socket = await tcpListenerManager.AcceptSocketAsync();
+            await ServiceEventLoopAsync(service, socket, cancellationToken);
         }
 
         private static async ValueTask ServiceEventLoopAsync(XeusService service, Socket socket, CancellationToken cancellationToken = default)
@@ -117,6 +117,8 @@ namespace Omnius.Xeus.Service.Daemon
             var multiplexerOption = new OmniConnectionMultiplexerOptions(OmniConnectionMultiplexerType.Accepted, TimeSpan.FromMinutes(1), 3, 1024 * 1024 * 4, 3);
             await using var multiplexer = OmniConnectionMultiplexer.CreateV1(bridgeConnection, batchActionDispatcher, bytesPool, multiplexerOption);
 
+            await multiplexer.HandshakeAsync(cancellationToken);
+
             var errorMessageFactory = new DefaultErrorMessageFactory();
             var listenerFactory = new RocketRemotingListenerFactory<DefaultErrorMessage>(multiplexer, errorMessageFactory, bytesPool);
 
@@ -125,7 +127,11 @@ namespace Omnius.Xeus.Service.Daemon
                 _logger.Info("event loop start");
 
                 var server = new XeusServiceRemoting.Server<DefaultErrorMessage>(service, listenerFactory, bytesPool);
-                await server.EventLoopAsync(cancellationToken);
+
+                var linkedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                using var onClose = bridgeConnection.Events.OnClosed.Subscribe(() => linkedCancellationTokenSource.Cancel());
+
+                await server.EventLoopAsync(linkedCancellationTokenSource.Token);
             }
             catch (Exception e)
             {
