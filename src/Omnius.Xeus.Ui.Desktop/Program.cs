@@ -20,13 +20,12 @@ namespace Omnius.Xeus.Ui.Desktop
             DirectoryHelper.CreateDirectory(logsDirectoryPath);
 
             SetLogsDirectory(logsDirectoryPath);
+
 #if DEBUG
             ChangeLogLevel(NLog.LogLevel.Trace);
 #endif
 
             _logger.Info("desktop-ui start");
-
-            await Bootstrapper.RegisterAsync(stateDirectoryPath);
 
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args, ShutdownMode.OnMainWindowClose);
         }

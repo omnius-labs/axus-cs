@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Omnius.Core.Extensions;
+using Omnius.Core;
 
 namespace Omnius.Xeus.Ui.Desktop.Models.Primitives
 {
@@ -33,7 +33,10 @@ namespace Omnius.Xeus.Ui.Desktop.Models.Primitives
             for (int i = 0; i < list.Count; i++)
             {
                 int o = _collection.IndexOf(list[i]);
-                if (i != o) _collection.Move(o, i);
+                if (i != o)
+                {
+                    _collection.Move(o, i);
+                }
             }
         }
 
@@ -48,7 +51,7 @@ namespace Omnius.Xeus.Ui.Desktop.Models.Primitives
             {
                 if (_dict.TryGetValue(key, out var oldValue))
                 {
-                    _collection.Remove(oldValue);
+                    _ = _collection.Remove(oldValue);
                 }
 
                 _dict[key] = value;
@@ -127,7 +130,7 @@ namespace Omnius.Xeus.Ui.Desktop.Models.Primitives
         {
             if (_dict.TryRemove(key, out var oldValue) && oldValue is not null)
             {
-                _collection.Remove(oldValue);
+                _ = _collection.Remove(oldValue);
                 return true;
             }
 
@@ -138,7 +141,7 @@ namespace Omnius.Xeus.Ui.Desktop.Models.Primitives
         {
             if (((ICollection<KeyValuePair<TKey, TValue>>)_dict).Remove(item))
             {
-                _collection.Remove(item.Value);
+                _ = _collection.Remove(item.Value);
                 return true;
             }
 

@@ -1,6 +1,6 @@
 using LiteDB;
 
-namespace Omnius.Xeus.Utils.Extentions
+namespace Omnius.Xeus.Utils
 {
     public static class LiteDatabaseExtentions
     {
