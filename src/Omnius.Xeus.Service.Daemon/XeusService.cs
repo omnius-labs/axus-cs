@@ -85,7 +85,7 @@ namespace Omnius.Xeus.Service.Daemon
             _publishedFileStorage = new PublishedFileStorage(LiteDatabaseBytesStorage.Factory, bytesPool, publishedFileStorageOptions);
 
             var subscribedFileStorageOptions = new SubscribedFileStorageOptions(Path.Combine(workingDirectoryPath, "subscribed_file_storage"));
-            _subscribedFileStorage = new SubscribedFileStorage(LiteDatabaseBytesStorage.Factory, bytesPool, subscribedFileStorageOptions);
+            _subscribedFileStorage = await SubscribedFileStorage.CreateAsync(LiteDatabaseBytesStorage.Factory, bytesPool, subscribedFileStorageOptions, cancellationToken);
 
             var fileExchangerOptions = new FileExchangerOptions(appConfig.Engines?.FileExchanger?.MaxSessionCount ?? int.MaxValue);
             _fileExchanger = new FileExchanger(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedFileStorage, _subscribedFileStorage, bytesPool, fileExchangerOptions);

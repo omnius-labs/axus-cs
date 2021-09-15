@@ -12,7 +12,6 @@ using Omnius.Core.Cryptography;
 using Omnius.Core.Pipelines;
 using Omnius.Core.Storages;
 using Omnius.Core.Streams;
-using Omnius.Core.Tasks;
 using Omnius.Xeus.Service.Engines.Internal;
 using Omnius.Xeus.Service.Engines.Internal.Models;
 using Omnius.Xeus.Service.Engines.Internal.Repositories;
@@ -37,7 +36,14 @@ namespace Omnius.Xeus.Service.Engines
 
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-        public SubscribedFileStorage(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, SubscribedFileStorageOptions options)
+        public static async ValueTask<SubscribedFileStorage> CreateAsync(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, SubscribedFileStorageOptions options, CancellationToken cancellationToken = default)
+        {
+            var subscribedFileStorage = new SubscribedFileStorage(bytesStorageFactory, bytesPool, options);
+            await subscribedFileStorage.InitAsync(cancellationToken);
+            return subscribedFileStorage;
+        }
+
+        private SubscribedFileStorage(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, SubscribedFileStorageOptions options)
         {
             _bytesStorageFactory = bytesStorageFactory;
             _bytesPool = bytesPool;

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -19,17 +18,17 @@ namespace Omnius.Xeus.Service.Engines
 
             private TcpListener? _tcpListener;
 
-            public TcpListenerManager(bool useUpnp, IUpnpClientFactory upnpClientFactory)
-            {
-                _useUpnp = useUpnp;
-                _upnpClientFactory = upnpClientFactory;
-            }
-
             public static async ValueTask<TcpListenerManager> CreateAsync(OmniAddress listenAddress, bool useUpnp, IUpnpClientFactory upnpClientFactory, CancellationToken cancellationToken = default)
             {
                 var tcpListenerManager = new TcpListenerManager(useUpnp, upnpClientFactory);
                 await tcpListenerManager.InitAsync(listenAddress, cancellationToken);
                 return tcpListenerManager;
+            }
+
+            private TcpListenerManager(bool useUpnp, IUpnpClientFactory upnpClientFactory)
+            {
+                _useUpnp = useUpnp;
+                _upnpClientFactory = upnpClientFactory;
             }
 
             private async ValueTask InitAsync(OmniAddress listenAddress, CancellationToken cancellationToken = default)
