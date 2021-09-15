@@ -100,8 +100,11 @@ namespace Omnius.Xeus.Service.Daemon
 
             using var tcpListenerManager = TcpListenerManager.Create(config.ListenAddress, cancellationToken);
 
-            var socket = await tcpListenerManager.AcceptSocketAsync();
-            await ServiceEventLoopAsync(service, socket, cancellationToken);
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                using var socket = await tcpListenerManager.AcceptSocketAsync();
+                await ServiceEventLoopAsync(service, socket, cancellationToken);
+            }
         }
 
         private static async ValueTask ServiceEventLoopAsync(XeusService service, Socket socket, CancellationToken cancellationToken = default)

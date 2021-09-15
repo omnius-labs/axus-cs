@@ -10,8 +10,8 @@ using Omnius.Xeus.Intaractors;
 using Omnius.Xeus.Ui.Desktop.Configuration;
 using Omnius.Xeus.Ui.Desktop.Internal;
 using Omnius.Xeus.Ui.Desktop.Windows;
-using Omnius.Xeus.Ui.Desktop.Windows.Controls;
-using Omnius.Xeus.Ui.Desktop.Windows.Dialogs;
+using Omnius.Xeus.Ui.Desktop.Controls;
+using Omnius.Core.Storages;
 
 namespace Omnius.Xeus.Ui.Desktop
 {
@@ -31,26 +31,29 @@ namespace Omnius.Xeus.Ui.Desktop
 
         public async ValueTask BuildAsync(string stateDirectoryPath, CancellationToken cancellationToken = default)
         {
-            _bytesPool = BytesPool.Shared;
-
             _appConfig = await LoadAppConfigAsync(stateDirectoryPath, cancellationToken);
             _appSettings = await LoadAppSettingsAsync(stateDirectoryPath, cancellationToken);
             _uiState = await LoadUiStateAsync(stateDirectoryPath, cancellationToken);
+
+            _bytesPool = BytesPool.Shared;
 
             _xeusServiceManager = new XeusServiceManager();
             await _xeusServiceManager.BuildAsync(OmniAddress.Parse(_appConfig.DaemonAddress), _bytesPool, cancellationToken);
 
             var serviceCollection = new ServiceCollection();
 
-            _ = serviceCollection.AddSingleton<IBytesPool>(_bytesPool);
-
             _ = serviceCollection.AddSingleton(_appConfig);
             _ = serviceCollection.AddSingleton(_appSettings);
             _ = serviceCollection.AddSingleton(_uiState);
 
+            _ = serviceCollection.AddSingleton<IBytesPool>(_bytesPool);
+
             _ = serviceCollection.AddSingleton(_xeusServiceManager.XeusService);
 
+            _ = serviceCollection.AddSingleton<IBytesStorageFactory>(LiteDatabaseBytesStorage.Factory);
+            _ = serviceCollection.AddSingleton<FileUploaderOptions>(new FileUploaderOptions(Path.Combine(stateDirectoryPath, "file_uploader")));
             _ = serviceCollection.AddSingleton<IDashboard, Dashboard>();
+            _ = serviceCollection.AddSingleton<IFileUploader, FileUploader>();
 
             _ = serviceCollection.AddSingleton<IApplicationDispatcher, ApplicationDispatcher>();
             _ = serviceCollection.AddSingleton<IMainWindowProvider, MainWindowProvider>();
@@ -58,9 +61,10 @@ namespace Omnius.Xeus.Ui.Desktop
             _ = serviceCollection.AddSingleton<IDialogService, DialogService>();
 
             _ = serviceCollection.AddSingleton<MainWindowViewModel>();
-            _ = serviceCollection.AddSingleton<AddNodesWindowViewModel>();
+            _ = serviceCollection.AddSingleton<NodesWindowViewModel>();
             _ = serviceCollection.AddSingleton<StatusControlViewModel>();
             _ = serviceCollection.AddSingleton<PeersControlViewModel>();
+            _ = serviceCollection.AddSingleton<UploadControlViewModel>();
 
             this.ServiceProvider = serviceCollection.BuildServiceProvider();
         }

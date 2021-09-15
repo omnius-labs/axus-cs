@@ -1,0 +1,27 @@
+<Window x:Class="Omnius.Xeus.Ui.Desktop.Windows.NodesWindow"
+        Title="Omnius.Xeus.Ui.Desktop"
+        xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+        xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+        xmlns:vm="clr-namespace:Omnius.Xeus.Ui.Desktop.Windows;assembly=Omnius.Xeus.Ui.Desktop"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        x:CompileBindings="True"
+        x:DataType="vm:NodesWindowViewModel"
+        Width="800"
+        Height="500"
+        FontFamily="Meiryo UI, Lucida Grande, Ubuntu"
+        mc:Ignorable="d"
+        d:DesignWidth="800"
+        d:DesignHeight="450" >
+
+    <Grid RowDefinitions="*, Auto">
+        <TextBox Grid.Row="0" Text="{Binding Text.Value, Mode=TwoWay}" />
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="8">
+            <Button Height="32" Width="120" Margin="8" Content="Ok" Command="{Binding OkCommand}" CommandParameter="{Binding $parent[Window]}" />
+            <Button Height="32" Width="120" Margin="8" Content="Cancel" Command="{Binding CancelCommand}" CommandParameter="{Binding $parent[Window]}" />
+        </StackPanel>
+    </Grid>
+
+</Window>

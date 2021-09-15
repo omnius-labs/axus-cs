@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -24,6 +23,8 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
             DirectoryHelper.CreateDirectory(dirPath);
 
             _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
+            _database.UtcDate = true;
+
             this.Items = new UploadingUserProfileItemRepository(_database);
         }
 
@@ -41,7 +42,7 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
 
         public sealed class UploadingUserProfileItemRepository
         {
-            private const string CollectionName = "uploading_items";
+            private const string CollectionName = "uploading_user_profile_items";
 
             private readonly LiteDatabase _database;
 

@@ -18,3 +18,8 @@ message UploadingUserProfileItem {
     RootHash: OmniHash,
     CreationTime: timestamp,
 }
+
+message UploadingFileItem {
+    FilePath: string,
+    CreationTime: timestamp,
+}

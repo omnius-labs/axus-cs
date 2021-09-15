@@ -23,6 +23,8 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
             DirectoryHelper.CreateDirectory(dirPath);
 
             _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
+            _database.UtcDate = true;
+
             this.Items = new DownloadingUserProfileItemRepository(_database);
         }
 
@@ -40,7 +42,7 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
 
         public sealed class DownloadingUserProfileItemRepository
         {
-            private const string CollectionName = "downloading_items";
+            private const string CollectionName = "downloading_user_profile_items";
 
             private readonly LiteDatabase _database;
 

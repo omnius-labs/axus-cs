@@ -23,6 +23,8 @@ namespace Omnius.Xeus.Service.Engines.Internal.Repositories
             DirectoryHelper.CreateDirectory(dirPath);
 
             _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
+            _database.UtcDate = true;
+
             this.Items = new SubscribedShoutItemRepository(_database);
             this.WrittenItems = new WrittenShoutItemRepository(_database);
         }

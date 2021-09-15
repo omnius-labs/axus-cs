@@ -8,7 +8,7 @@ namespace Omnius.Xeus.Utils
         {
             var col = database.GetCollection<DocumentStatusEntity>("_document_status");
 
-            var entry = col.FindOne(n => n.Name == name);
+            var entry = col.FindById(name);
             if (entry is null) return 0;
 
             return entry.Version;
