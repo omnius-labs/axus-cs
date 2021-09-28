@@ -51,7 +51,13 @@ namespace Omnius.Xeus.Service.Engines
         private const int MaxBucketLength = 20;
         private const string ServiceName = "node_finder";
 
-        public NodeFinder(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, IBytesPool bytesPool, NodeFinderOptions options)
+        public static async ValueTask<NodeFinder> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, IBytesPool bytesPool, NodeFinderOptions options, CancellationToken cancellationToken = default)
+        {
+            var nodeFinder = new NodeFinder(sessionConnector, sessionAccepter, bytesPool, options);
+            return nodeFinder;
+        }
+
+        private NodeFinder(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, IBytesPool bytesPool, NodeFinderOptions options)
         {
             _sessionConnector = sessionConnector;
             _sessionAccepter = sessionAccepter;

@@ -1320,14 +1320,14 @@ namespace Omnius.Xeus.Service.Models
         static SubscribedFileReport()
         {
             global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Service.Models.SubscribedFileReport>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Service.Models.SubscribedFileReport>.Empty = new global::Omnius.Xeus.Service.Models.SubscribedFileReport(null, string.Empty);
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Service.Models.SubscribedFileReport>.Empty = new global::Omnius.Xeus.Service.Models.SubscribedFileReport(global::Omnius.Core.Cryptography.OmniHash.Empty, string.Empty);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxRegistrantLength = 2147483647;
 
-        public SubscribedFileReport(global::Omnius.Core.Cryptography.OmniHash? rootHash, string registrant)
+        public SubscribedFileReport(global::Omnius.Core.Cryptography.OmniHash rootHash, string registrant)
         {
             if (registrant is null) throw new global::System.ArgumentNullException("registrant");
             if (registrant.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("registrant");
@@ -1338,13 +1338,13 @@ namespace Omnius.Xeus.Service.Models
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
-                if (rootHash is not null) ___h.Add(rootHash.Value.GetHashCode());
+                if (rootHash != default) ___h.Add(rootHash.GetHashCode());
                 if (registrant != default) ___h.Add(registrant.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
-        public global::Omnius.Core.Cryptography.OmniHash? RootHash { get; }
+        public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
         public string Registrant { get; }
 
         public static global::Omnius.Xeus.Service.Models.SubscribedFileReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -1375,8 +1375,7 @@ namespace Omnius.Xeus.Service.Models
         {
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
-            if ((this.RootHash is null) != (target.RootHash is null)) return false;
-            if ((this.RootHash is not null) && (target.RootHash is not null) && this.RootHash != target.RootHash) return false;
+            if (this.RootHash != target.RootHash) return false;
             if (this.Registrant != target.Registrant) return false;
 
             return true;
@@ -1389,10 +1388,10 @@ namespace Omnius.Xeus.Service.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                if (value.RootHash != null)
+                if (value.RootHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
                 {
                     w.Write((uint)1);
-                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.RootHash.Value, rank + 1);
+                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.RootHash, rank + 1);
                 }
                 if (value.Registrant != string.Empty)
                 {
@@ -1405,7 +1404,7 @@ namespace Omnius.Xeus.Service.Models
             {
                 if (rank > 256) throw new global::System.FormatException();
 
-                global::Omnius.Core.Cryptography.OmniHash? p_rootHash = null;
+                global::Omnius.Core.Cryptography.OmniHash p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
                 string p_registrant = string.Empty;
 
                 for (; ; )

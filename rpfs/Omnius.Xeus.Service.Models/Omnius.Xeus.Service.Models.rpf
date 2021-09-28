@@ -75,7 +75,7 @@ message SubscribedFileStorageReport {
 }
 
 message SubscribedFileReport {
-    RootHash: OmniHash?,
+    RootHash: OmniHash,
     Registrant: string,
 }
 

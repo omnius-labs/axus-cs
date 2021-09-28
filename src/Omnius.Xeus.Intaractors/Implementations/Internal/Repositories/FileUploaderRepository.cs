@@ -7,8 +7,8 @@ using LiteDB;
 using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Helpers;
+using Omnius.Xeus.Intaractors.Internal.Entities;
 using Omnius.Xeus.Intaractors.Internal.Models;
-using Omnius.Xeus.Intaractors.Internal.Repositories.Entities;
 using Omnius.Xeus.Utils;
 
 namespace Omnius.Xeus.Intaractors.Internal.Repositories
@@ -76,6 +76,7 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
                 using (_asyncLock.ReaderLock())
                 {
                     var col = this.GetCollection();
+
                     return col.Exists(n => n.FilePath == filePath);
                 }
             }
@@ -85,7 +86,9 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
                 using (_asyncLock.ReaderLock())
                 {
                     var col = this.GetCollection();
-                    return col.FindAll().Select(n => n.Export()).ToArray();
+
+                    var itemEntities = col.FindAll();
+                    return itemEntities.Select(n => ObjectMapper.Map<UploadingFileItemEntity, UploadingFileItem>(n)).ToArray();
                 }
             }
 
@@ -94,7 +97,9 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
                 using (_asyncLock.ReaderLock())
                 {
                     var col = this.GetCollection();
-                    return col.FindById(filePath).Export();
+
+                    var itemEntity = col.FindById(filePath);
+                    return ObjectMapper.Map<UploadingFileItemEntity, UploadingFileItem>(itemEntity);
                 }
             }
 
@@ -102,10 +107,11 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
             {
                 using (_asyncLock.WriterLock())
                 {
+                    var itemEntity = ObjectMapper.Map<UploadingFileItem, UploadingFileItemEntity>(item);
+
                     var col = this.GetCollection();
 
-                    var entry = UploadingFileItemEntity.Import(item);
-                    col.Upsert(entry);
+                    col.Upsert(itemEntity);
                 }
             }
 

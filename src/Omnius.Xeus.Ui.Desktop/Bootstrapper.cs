@@ -17,11 +17,13 @@ namespace Omnius.Xeus.Ui.Desktop
 {
     public partial class Bootstrapper : AsyncDisposableBase
     {
-        private BytesPool? _bytesPool;
         private AppConfig? _appConfig;
         private AppSettings? _appSettings;
         private UiState? _uiState;
+        private BytesPool? _bytesPool;
         private XeusServiceManager? _xeusServiceManager;
+        private Dashboard? _dashboard;
+        private FileUploader? _fileUploader;
 
         public static Bootstrapper Instance { get; } = new Bootstrapper();
 
@@ -38,33 +40,37 @@ namespace Omnius.Xeus.Ui.Desktop
             _bytesPool = BytesPool.Shared;
 
             _xeusServiceManager = new XeusServiceManager();
-            await _xeusServiceManager.BuildAsync(OmniAddress.Parse(_appConfig.DaemonAddress), _bytesPool, cancellationToken);
+            await _xeusServiceManager.ConnectAsync(OmniAddress.Parse(_appConfig.DaemonAddress), _bytesPool, cancellationToken);
+
+            var xeusService = _xeusServiceManager.GetService();
+
+            _dashboard = await Dashboard.CreateAsync(xeusService, _bytesPool, cancellationToken);
+            var fileUploaderOptions = new FileUploaderOptions(Path.Combine(stateDirectoryPath, "file_uploader"));
+            _fileUploader = await FileUploader.CreateAsync(xeusService, LiteDatabaseBytesStorage.Factory, _bytesPool, fileUploaderOptions, cancellationToken);
 
             var serviceCollection = new ServiceCollection();
 
-            _ = serviceCollection.AddSingleton(_appConfig);
-            _ = serviceCollection.AddSingleton(_appSettings);
-            _ = serviceCollection.AddSingleton(_uiState);
+            serviceCollection.AddSingleton(_appConfig);
+            serviceCollection.AddSingleton(_appSettings);
+            serviceCollection.AddSingleton(_uiState);
 
-            _ = serviceCollection.AddSingleton<IBytesPool>(_bytesPool);
+            serviceCollection.AddSingleton<IBytesPool>(_bytesPool);
 
-            _ = serviceCollection.AddSingleton(_xeusServiceManager.XeusService);
+            serviceCollection.AddSingleton(xeusService);
 
-            _ = serviceCollection.AddSingleton<IBytesStorageFactory>(LiteDatabaseBytesStorage.Factory);
-            _ = serviceCollection.AddSingleton<FileUploaderOptions>(new FileUploaderOptions(Path.Combine(stateDirectoryPath, "file_uploader")));
-            _ = serviceCollection.AddSingleton<IDashboard, Dashboard>();
-            _ = serviceCollection.AddSingleton<IFileUploader, FileUploader>();
+            serviceCollection.AddSingleton<IDashboard>(_dashboard);
+            serviceCollection.AddSingleton<IFileUploader>(_fileUploader);
 
-            _ = serviceCollection.AddSingleton<IApplicationDispatcher, ApplicationDispatcher>();
-            _ = serviceCollection.AddSingleton<IMainWindowProvider, MainWindowProvider>();
-            _ = serviceCollection.AddSingleton<IClipboardService, ClipboardService>();
-            _ = serviceCollection.AddSingleton<IDialogService, DialogService>();
+            serviceCollection.AddSingleton<IApplicationDispatcher, ApplicationDispatcher>();
+            serviceCollection.AddSingleton<IMainWindowProvider, MainWindowProvider>();
+            serviceCollection.AddSingleton<IClipboardService, ClipboardService>();
+            serviceCollection.AddSingleton<IDialogService, DialogService>();
 
-            _ = serviceCollection.AddSingleton<MainWindowViewModel>();
-            _ = serviceCollection.AddSingleton<NodesWindowViewModel>();
-            _ = serviceCollection.AddSingleton<StatusControlViewModel>();
-            _ = serviceCollection.AddSingleton<PeersControlViewModel>();
-            _ = serviceCollection.AddSingleton<UploadControlViewModel>();
+            serviceCollection.AddSingleton<MainWindowViewModel>();
+            serviceCollection.AddSingleton<NodesWindowViewModel>();
+            serviceCollection.AddSingleton<StatusControlViewModel>();
+            serviceCollection.AddSingleton<PeersControlViewModel>();
+            serviceCollection.AddSingleton<UploadControlViewModel>();
 
             this.ServiceProvider = serviceCollection.BuildServiceProvider();
         }

@@ -53,7 +53,7 @@ namespace Omnius.Xeus.Service.Engines
             _blockStorage = _bytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
         }
 
-        internal async ValueTask InitAsync(CancellationToken cancellationToken = default)
+        private async ValueTask InitAsync(CancellationToken cancellationToken = default)
         {
             await _subscriberRepo.MigrateAsync(cancellationToken);
             await _blockStorage.MigrateAsync(cancellationToken);

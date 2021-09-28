@@ -8,24 +8,25 @@ using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Helpers;
+using Omnius.Xeus.Intaractors.Internal.Entities;
 using Omnius.Xeus.Intaractors.Internal.Models;
-using Omnius.Xeus.Intaractors.Internal.Repositories.Entities;
+using Omnius.Xeus.Intaractors.Models;
 using Omnius.Xeus.Utils;
 
 namespace Omnius.Xeus.Intaractors.Internal.Repositories
 {
-    internal sealed class UserProfileUploaderRepository : DisposableBase
+    internal sealed class FileDownloaderRepository : DisposableBase
     {
         private readonly LiteDatabase _database;
 
-        public UserProfileUploaderRepository(string dirPath)
+        public FileDownloaderRepository(string dirPath)
         {
             DirectoryHelper.CreateDirectory(dirPath);
 
             _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
             _database.UtcDate = true;
 
-            this.Items = new UploadingUserProfileItemRepository(_database);
+            this.Items = new DownloadingFileItemRepository(_database);
         }
 
         protected override void OnDispose(bool disposing)
@@ -38,17 +39,17 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
             await this.Items.MigrateAsync(cancellationToken);
         }
 
-        public UploadingUserProfileItemRepository Items { get; }
+        public DownloadingFileItemRepository Items { get; }
 
-        public sealed class UploadingUserProfileItemRepository
+        public sealed class DownloadingFileItemRepository
         {
-            private const string CollectionName = "uploading_user_profile_items";
+            private const string CollectionName = "downloading_box_items";
 
             private readonly LiteDatabase _database;
 
             private readonly AsyncReaderWriterLock _asyncLock = new();
 
-            public UploadingUserProfileItemRepository(LiteDatabase database)
+            public DownloadingFileItemRepository(LiteDatabase database)
             {
                 _database = database;
             }
@@ -60,28 +61,26 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
                     if (_database.GetDocumentVersion(CollectionName) <= 0)
                     {
                         var col = this.GetCollection();
-                        col.EnsureIndex(x => x.Signature, false);
-                        col.EnsureIndex(x => x.RootHash, false);
                     }
 
                     _database.SetDocumentVersion(CollectionName, 1);
                 }
             }
 
-            private ILiteCollection<UploadingUserProfileItemEntity> GetCollection()
+            private ILiteCollection<DownloadingFileItemEntity> GetCollection()
             {
-                var col = _database.GetCollection<UploadingUserProfileItemEntity>(CollectionName);
+                var col = _database.GetCollection<DownloadingFileItemEntity>(CollectionName);
                 return col;
             }
 
-            public bool Exists(OmniSignature signature)
+            public bool Exists(Seed seed)
             {
                 using (_asyncLock.ReaderLock())
                 {
-                    var signatureEntity = OmniSignatureEntity.Import(signature);
+                    var seedEntity = ObjectMapper.Map<Seed, SeedEntity>(seed);
 
                     var col = this.GetCollection();
-                    return col.Exists(n => n.Signature == signatureEntity);
+                    return col.Exists(n => n.Seed == seedEntity);
                 }
             }
 
@@ -89,65 +88,59 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
             {
                 using (_asyncLock.ReaderLock())
                 {
-                    var rootHashEntity = OmniHashEntity.Import(rootHash);
+                    var rootHashEntity = ObjectMapper.Map<OmniHash, OmniHashEntity>(rootHash);
 
                     var col = this.GetCollection();
-                    return col.Exists(n => n.RootHash == rootHashEntity);
+                    return col.Exists(n => n.Seed.RootHash == rootHashEntity);
                 }
             }
 
-            public IEnumerable<UploadingUserProfileItem> FindAll()
+            public IEnumerable<DownloadingFileItem> FindAll()
             {
                 using (_asyncLock.ReaderLock())
                 {
                     var col = this.GetCollection();
-                    return col.FindAll().Select(n => n.Export()).ToArray();
+
+                    var itemEntities = col.FindAll();
+                    return itemEntities.Select(n => ObjectMapper.Map<DownloadingFileItemEntity, DownloadingFileItem>(n)).ToArray();
                 }
             }
 
-            public UploadingUserProfileItem? FindOne(OmniSignature signature)
+            public DownloadingFileItem? FindOne(Seed seed)
             {
                 using (_asyncLock.ReaderLock())
                 {
-                    var signatureEntity = OmniSignatureEntity.Import(signature);
+                    var seedEntity = ObjectMapper.Map<Seed, SeedEntity>(seed);
 
                     var col = this.GetCollection();
-                    return col.FindOne(n => n.Signature == signatureEntity).Export();
+
+                    var itemEntity = col.FindOne(n => n.Seed == seedEntity);
+                    return ObjectMapper.Map<DownloadingFileItemEntity, DownloadingFileItem>(itemEntity);
                 }
             }
 
-            public void Upsert(UploadingUserProfileItem item)
+            public void Upsert(DownloadingFileItem item)
             {
                 using (_asyncLock.WriterLock())
                 {
-                    var itemEntity = UploadingUserProfileItemEntity.Import(item);
+                    var itemEntity = ObjectMapper.Map<DownloadingFileItem, DownloadingFileItemEntity>(item);
 
                     var col = this.GetCollection();
 
-                    col.DeleteMany(n => n.Signature == itemEntity.Signature && n.RootHash == itemEntity.RootHash);
+                    col.DeleteMany(n => n.Seed == itemEntity.Seed);
                     col.Insert(itemEntity);
                 }
             }
 
-            public void Delete(OmniSignature signature)
+            public void Delete(Seed seed)
             {
                 using (_asyncLock.WriterLock())
                 {
-                    var signatureEntity = OmniSignatureEntity.Import(signature);
+                    var seedEntity = ObjectMapper.Map<Seed, SeedEntity>(seed);
 
                     var col = this.GetCollection();
-                    col.DeleteMany(n => n.Signature == signatureEntity);
-                }
-            }
 
-            public void Delete(OmniHash rootHash)
-            {
-                using (_asyncLock.WriterLock())
-                {
-                    var rootHashEntity = OmniHashEntity.Import(rootHash);
-
-                    var col = this.GetCollection();
-                    col.DeleteMany(n => n.RootHash == rootHashEntity);
+                    col.DeleteMany(n => n.Seed == seedEntity);
                 }
             }
         }

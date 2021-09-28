@@ -15,7 +15,13 @@ namespace Omnius.Xeus.Intaractors
         private readonly XeusServiceAdapter _service;
         private readonly IBytesPool _bytesPool;
 
-        public Dashboard(IXeusService xeusService, IBytesPool bytesPool)
+        public static async ValueTask<Dashboard> CreateAsync(IXeusService xeusService, IBytesPool bytesPool, CancellationToken cancellationToken = default)
+        {
+            var dashboard = new Dashboard(xeusService, bytesPool);
+            return dashboard;
+        }
+
+        private Dashboard(IXeusService xeusService, IBytesPool bytesPool)
         {
             _service = new XeusServiceAdapter(xeusService);
             _bytesPool = bytesPool;

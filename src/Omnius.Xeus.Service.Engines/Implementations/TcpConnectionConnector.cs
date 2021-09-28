@@ -28,7 +28,13 @@ namespace Omnius.Xeus.Service.Engines
 
         private const int MaxReceiveByteCount = 1024 * 1024 * 8;
 
-        public TcpConnectionConnector(IBandwidthLimiter senderBandwidthLimiter, IBandwidthLimiter receiverBandwidthLimiter, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, TcpConnectionConnectorOptions options)
+        public static async ValueTask<TcpConnectionConnector> CreateAsync(IBandwidthLimiter senderBandwidthLimiter, IBandwidthLimiter receiverBandwidthLimiter, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, TcpConnectionConnectorOptions options, CancellationToken cancellationToken = default)
+        {
+            var tcpConnectionConnector = new TcpConnectionConnector(senderBandwidthLimiter, receiverBandwidthLimiter, socks5ProxyClientFactory, httpProxyClientFactory, batchActionDispatcher, bytesPool, options);
+            return tcpConnectionConnector;
+        }
+
+        private TcpConnectionConnector(IBandwidthLimiter senderBandwidthLimiter, IBandwidthLimiter receiverBandwidthLimiter, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, TcpConnectionConnectorOptions options)
         {
             _senderBandwidthLimiter = senderBandwidthLimiter;
             _receiverBandwidthLimiter = receiverBandwidthLimiter;

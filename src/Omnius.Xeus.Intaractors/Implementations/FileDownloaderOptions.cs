@@ -1,8 +1,8 @@
 namespace Omnius.Xeus.Intaractors
 {
-    public record UserProfileFinderOptions
+    public record FileDownloaderOptions
     {
-        public UserProfileFinderOptions(string configDirectoryPath)
+        public FileDownloaderOptions(string configDirectoryPath)
         {
             this.ConfigDirectoryPath = configDirectoryPath;
         }

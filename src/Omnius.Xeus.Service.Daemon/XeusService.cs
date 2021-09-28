@@ -23,17 +23,28 @@ namespace Omnius.Xeus.Service.Daemon
 {
     public class XeusService : AsyncDisposableBase, IXeusService
     {
-        private readonly ISessionConnector _sessionConnector;
-        private readonly ISessionAccepter _sessionAccepter;
-        private readonly INodeFinder _nodeFinder;
-        private readonly IPublishedFileStorage _publishedFileStorage;
-        private readonly ISubscribedFileStorage _subscribedFileStorage;
-        private readonly IFileExchanger _fileExchanger;
-        private readonly IPublishedShoutStorage _publishedShoutStorage;
-        private readonly ISubscribedShoutStorage _subscribedShoutStorage;
-        private readonly IShoutExchanger _shoutExchanger;
+        private ISessionConnector _sessionConnector = null!;
+        private ISessionAccepter _sessionAccepter = null!;
+        private INodeFinder _nodeFinder = null!;
+        private IPublishedFileStorage _publishedFileStorage = null!;
+        private ISubscribedFileStorage _subscribedFileStorage = null!;
+        private IFileExchanger _fileExchanger = null!;
+        private IPublishedShoutStorage _publishedShoutStorage = null!;
+        private ISubscribedShoutStorage _subscribedShoutStorage = null!;
+        private IShoutExchanger _shoutExchanger = null!;
 
-        public XeusService(string workingDirectoryPath, AppConfig appConfig)
+        public static async ValueTask<XeusService> CreateAsync(string workingDirectoryPath, AppConfig appConfig, CancellationToken cancellationToken = default)
+        {
+            var xeusService = new XeusService();
+            await xeusService.InitAsync(workingDirectoryPath, appConfig, cancellationToken);
+            return xeusService;
+        }
+
+        private XeusService()
+        {
+        }
+
+        private async ValueTask InitAsync(string workingDirectoryPath, AppConfig appConfig, CancellationToken cancellationToken = default)
         {
             var digitalSignature = OmniDigitalSignature.Create("", OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256);
 
@@ -57,12 +68,12 @@ namespace Omnius.Xeus.Service.Daemon
                 var tcpProxyAddress = OmniAddress.Parse(tcpConnectorConfig.Proxy?.Address);
                 var tcpProxyOptions = new TcpProxyOptions(tcpProxyType, tcpProxyAddress);
                 var tcpConnectionConnectorOptions = new TcpConnectionConnectorOptions(tcpProxyOptions);
-                var tcpConnectionConnector = new TcpConnectionConnector(senderBandwidthLimiter, receiverBandwidthLimiter, Socks5ProxyClient.Factory, HttpProxyClient.Factory, batchActionDispatcher, bytesPool, tcpConnectionConnectorOptions);
+                var tcpConnectionConnector = await TcpConnectionConnector.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, Socks5ProxyClient.Factory, HttpProxyClient.Factory, batchActionDispatcher, bytesPool, tcpConnectionConnectorOptions, cancellationToken);
                 connectionConnectors.Add(tcpConnectionConnector);
             }
 
             var sessionConnectorOptions = new SessionConnectorOptions(digitalSignature);
-            _sessionConnector = new SessionConnector(connectionConnectors, batchActionDispatcher, bytesPool, sessionConnectorOptions);
+            _sessionConnector = await SessionConnector.CreateAsync(connectionConnectors, batchActionDispatcher, bytesPool, sessionConnectorOptions, cancellationToken);
 
             var connectionAccepters = new List<IConnectionAccepter>();
 
@@ -71,33 +82,33 @@ namespace Omnius.Xeus.Service.Daemon
                 var useUpnp = tcpConnectionAccepterConfig.UseUpnp;
                 var listenAddress = OmniAddress.Parse(tcpConnectionAccepterConfig.ListenAddress);
                 var tcpConnectionAccepterOption = new TcpConnectionAccepterOptions(useUpnp, listenAddress);
-                var tcpConnectionAccepter = new TcpConnectionAccepter(senderBandwidthLimiter, receiverBandwidthLimiter, UpnpClient.Factory, batchActionDispatcher, bytesPool, tcpConnectionAccepterOption);
+                var tcpConnectionAccepter = await TcpConnectionAccepter.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, UpnpClient.Factory, batchActionDispatcher, bytesPool, tcpConnectionAccepterOption, cancellationToken);
                 connectionAccepters.Add(tcpConnectionAccepter);
             }
 
             var sessionAccepterOptions = new SessionAccepterOptions(digitalSignature);
-            _sessionAccepter = new SessionAccepter(connectionAccepters, batchActionDispatcher, bytesPool, sessionAccepterOptions);
+            _sessionAccepter = await SessionAccepter.CreateAsync(connectionAccepters, batchActionDispatcher, bytesPool, sessionAccepterOptions, cancellationToken);
 
             var nodeFinderOptions = new NodeFinderOptions(Path.Combine(workingDirectoryPath, "node_finder"), appConfig.Engines?.NodeFinder?.MaxSessionCount ?? int.MaxValue);
-            _nodeFinder = new NodeFinder(_sessionConnector, _sessionAccepter, bytesPool, nodeFinderOptions);
+            _nodeFinder = await NodeFinder.CreateAsync(_sessionConnector, _sessionAccepter, bytesPool, nodeFinderOptions, cancellationToken);
 
             var publishedFileStorageOptions = new PublishedFileStorageOptions(Path.Combine(workingDirectoryPath, "published_file_storage"));
-            _publishedFileStorage = new PublishedFileStorage(LiteDatabaseBytesStorage.Factory, bytesPool, publishedFileStorageOptions);
+            _publishedFileStorage = await PublishedFileStorage.CreateAsync(LiteDatabaseBytesStorage.Factory, bytesPool, publishedFileStorageOptions, cancellationToken);
 
             var subscribedFileStorageOptions = new SubscribedFileStorageOptions(Path.Combine(workingDirectoryPath, "subscribed_file_storage"));
             _subscribedFileStorage = await SubscribedFileStorage.CreateAsync(LiteDatabaseBytesStorage.Factory, bytesPool, subscribedFileStorageOptions, cancellationToken);
 
             var fileExchangerOptions = new FileExchangerOptions(appConfig.Engines?.FileExchanger?.MaxSessionCount ?? int.MaxValue);
-            _fileExchanger = new FileExchanger(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedFileStorage, _subscribedFileStorage, bytesPool, fileExchangerOptions);
+            _fileExchanger = await FileExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedFileStorage, _subscribedFileStorage, bytesPool, fileExchangerOptions, cancellationToken);
 
             var publishedShoutStorageOptions = new PublishedShoutStorageOptions(Path.Combine(workingDirectoryPath, "published_shout_storage"));
-            _publishedShoutStorage = new PublishedShoutStorage(LiteDatabaseBytesStorage.Factory, bytesPool, publishedShoutStorageOptions);
+            _publishedShoutStorage = await PublishedShoutStorage.CreateAsync(LiteDatabaseBytesStorage.Factory, bytesPool, publishedShoutStorageOptions, cancellationToken);
 
             var subscribedShoutStorageOptions = new SubscribedShoutStorageOptions(Path.Combine(workingDirectoryPath, "subscribed_shout_storage"));
-            _subscribedShoutStorage = new SubscribedShoutStorage(LiteDatabaseBytesStorage.Factory, bytesPool, subscribedShoutStorageOptions);
+            _subscribedShoutStorage = await SubscribedShoutStorage.CreateAsync(LiteDatabaseBytesStorage.Factory, bytesPool, subscribedShoutStorageOptions, cancellationToken);
 
             var shoutExchangerOptions = new ShoutExchangerOptions(appConfig.Engines?.ShoutExchanger?.MaxSessionCount ?? int.MaxValue);
-            _shoutExchanger = new ShoutExchanger(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedShoutStorage, _subscribedShoutStorage, bytesPool, shoutExchangerOptions);
+            _shoutExchanger = await ShoutExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedShoutStorage, _subscribedShoutStorage, bytesPool, shoutExchangerOptions, cancellationToken);
         }
 
         protected override async ValueTask OnDisposeAsync()

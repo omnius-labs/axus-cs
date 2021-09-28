@@ -28,7 +28,7 @@ namespace Omnius.Xeus.Ui.Desktop.Internal
         {
         }
 
-        public async ValueTask BuildAsync(OmniAddress address, IBytesPool bytesPool, CancellationToken cancellationToken = default)
+        public async ValueTask ConnectAsync(OmniAddress address, IBytesPool bytesPool, CancellationToken cancellationToken = default)
         {
             if (!address.TryGetTcpEndpoint(out var ipAddress, out var port))
             {
@@ -55,25 +55,13 @@ namespace Omnius.Xeus.Ui.Desktop.Internal
 
         protected override async ValueTask OnDisposeAsync()
         {
-            if (_multiplexer is not null)
-            {
-                await _multiplexer.DisposeAsync();
-            }
-
-            if (_bridgeConnection is not null)
-            {
-                await _bridgeConnection.DisposeAsync();
-            }
-
-            if (_batchActionDispatcher is not null)
-            {
-                await _batchActionDispatcher.DisposeAsync();
-            }
-
+            if (_multiplexer is not null) await _multiplexer.DisposeAsync();
+            if (_bridgeConnection is not null) await _bridgeConnection.DisposeAsync();
+            if (_batchActionDispatcher is not null) await _batchActionDispatcher.DisposeAsync();
             _cap?.Dispose();
             _socket?.Dispose();
         }
 
-        public IXeusService XeusService => _xeusServiceRemotingClient ?? throw new NullReferenceException();
+        public IXeusService GetService() => _xeusServiceRemotingClient ?? throw new NullReferenceException();
     }
 }

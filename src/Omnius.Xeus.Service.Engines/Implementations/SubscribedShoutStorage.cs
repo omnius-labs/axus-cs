@@ -30,7 +30,14 @@ namespace Omnius.Xeus.Service.Engines
 
         private readonly AsyncReaderWriterLock _asyncLock = new();
 
-        public SubscribedShoutStorage(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, SubscribedShoutStorageOptions options)
+        public static async ValueTask<SubscribedShoutStorage> CreateAsync(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, SubscribedShoutStorageOptions options, CancellationToken cancellationToken = default)
+        {
+            var subscribedShoutStorage = new SubscribedShoutStorage(bytesStorageFactory, bytesPool, options);
+            await subscribedShoutStorage.InitAsync(cancellationToken);
+            return subscribedShoutStorage;
+        }
+
+        private SubscribedShoutStorage(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, SubscribedShoutStorageOptions options)
         {
             _bytesStorageFactory = bytesStorageFactory;
             _bytesPool = bytesPool;
@@ -40,16 +47,16 @@ namespace Omnius.Xeus.Service.Engines
             _blockStorage = _bytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
         }
 
+        private async ValueTask InitAsync(CancellationToken cancellationToken = default)
+        {
+            await _subscriberRepo.MigrateAsync(cancellationToken);
+            await _blockStorage.MigrateAsync(cancellationToken);
+        }
+
         protected override async ValueTask OnDisposeAsync()
         {
             _subscriberRepo.Dispose();
             _blockStorage.Dispose();
-        }
-
-        public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
-        {
-            await _subscriberRepo.MigrateAsync(cancellationToken);
-            await _blockStorage.MigrateAsync(cancellationToken);
         }
 
         public async ValueTask<SubscribedShoutStorageReport> GetReportAsync(CancellationToken cancellationToken = default)

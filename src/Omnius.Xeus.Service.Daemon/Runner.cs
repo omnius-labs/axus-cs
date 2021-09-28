@@ -27,7 +27,8 @@ namespace Omnius.Xeus.Service.Daemon
             _ = DirectoryHelper.CreateDirectory(stateDirectoryPath);
 
             var config = await LoadConfigAsync(Path.Combine(stateDirectoryPath, "config.yml"), cancellationToken);
-            var service = new XeusService(stateDirectoryPath, config);
+            var service = await XeusService.CreateAsync(stateDirectoryPath, config, cancellationToken);
+
             await ListenAsync(service, config, cancellationToken);
         }
 
@@ -93,12 +94,9 @@ namespace Omnius.Xeus.Service.Daemon
 
         private static async ValueTask ListenAsync(XeusService service, AppConfig config, CancellationToken cancellationToken = default)
         {
-            if (config.ListenAddress is null)
-            {
-                throw new Exception($"{nameof(config.ListenAddress)} is not found");
-            }
+            if (config.ListenAddress is null) throw new Exception($"{nameof(config.ListenAddress)} is not found");
 
-            using var tcpListenerManager = TcpListenerManager.Create(config.ListenAddress, cancellationToken);
+            using var tcpListenerManager = new TcpListenerManager(config.ListenAddress, cancellationToken);
 
             while (!cancellationToken.IsCancellationRequested)
             {

@@ -46,7 +46,14 @@ namespace Omnius.Xeus.Service.Engines
 
         private const string ServiceName = "shout_exchanger";
 
-        public ShoutExchanger(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
+        public static async ValueTask<ShoutExchanger> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
+            IPublishedShoutStorage publishedShoutStorage, ISubscribedShoutStorage subscribedShoutStorage, IBytesPool bytesPool, ShoutExchangerOptions options, CancellationToken cancellationToken = default)
+        {
+            var shoutExchanger = new ShoutExchanger(sessionConnector, sessionAccepter, nodeFinder, publishedShoutStorage, subscribedShoutStorage, bytesPool, options);
+            return shoutExchanger;
+        }
+
+        private ShoutExchanger(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
             IPublishedShoutStorage publishedShoutStorage, ISubscribedShoutStorage subscribedShoutStorage, IBytesPool bytesPool, ShoutExchangerOptions options)
         {
             _sessionConnector = sessionConnector;

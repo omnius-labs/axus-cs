@@ -1,14 +1,10 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Helpers;
 using Omnius.Core.Net;
-using Omnius.Core.Net.Caps;
 using Omnius.Core.Net.Connections;
 using Omnius.Core.Net.Connections.Secure;
 using Omnius.Core.Net.Connections.Secure.V1;
@@ -31,7 +27,13 @@ namespace Omnius.Xeus.Service.Engines
 
         private const int MaxReceiveByteCount = 1024 * 1024 * 8;
 
-        public SessionConnector(IEnumerable<IConnectionConnector> connectionConnectors, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, SessionConnectorOptions options)
+        public static async ValueTask<SessionConnector> CreateAsync(IEnumerable<IConnectionConnector> connectionConnectors, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, SessionConnectorOptions options, CancellationToken cancellationToken = default)
+        {
+            var sessionConnector = new SessionConnector(connectionConnectors, batchActionDispatcher, bytesPool, options);
+            return sessionConnector;
+        }
+
+        private SessionConnector(IEnumerable<IConnectionConnector> connectionConnectors, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, SessionConnectorOptions options)
         {
             _connectionConnectors = connectionConnectors;
             _batchActionDispatcher = batchActionDispatcher;

@@ -31,7 +31,13 @@ namespace Omnius.Xeus.Service.Engines
 
         private const int MaxReceiveByteCount = 1024 * 1024 * 8;
 
-        public SessionAccepter(IEnumerable<IConnectionAccepter> connectionAccepters, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, SessionAccepterOptions options)
+        public static async ValueTask<SessionAccepter> CreateAsync(IEnumerable<IConnectionAccepter> connectionAccepters, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, SessionAccepterOptions options, CancellationToken cancellationToken = default)
+        {
+            var sessionAccepter = new SessionAccepter(connectionAccepters, batchActionDispatcher, bytesPool, options);
+            return sessionAccepter;
+        }
+
+        private SessionAccepter(IEnumerable<IConnectionAccepter> connectionAccepters, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, SessionAccepterOptions options)
         {
             _connectionAccepters = connectionAccepters.ToImmutableArray();
             _batchActionDispatcher = batchActionDispatcher;

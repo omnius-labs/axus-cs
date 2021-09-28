@@ -70,7 +70,7 @@ namespace Omnius.Xeus.Ui.Desktop.Controls
                 {
                     await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
 
-                    var uploadedFileReports = await _fileUploader.GetUploadedFileReportsAsync(cancellationToken);
+                    var uploadedFileReports = await _fileUploader.GetUploadingFileReportsAsync(cancellationToken);
                     var elements = uploadedFileReports.Select(n => new UploadedFileElement(n))
                         .ToDictionary(n => n.FilePath);
 

@@ -33,7 +33,13 @@ namespace Omnius.Xeus.Service.Engines
 
         private const int MaxReceiveByteCount = 1024 * 1024 * 8;
 
-        public TcpConnectionAccepter(IBandwidthLimiter senderBandwidthLimiter, IBandwidthLimiter receiverBandwidthLimiter, IUpnpClientFactory upnpClientFactory, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, TcpConnectionAccepterOptions options)
+        public static async ValueTask<TcpConnectionAccepter> CreateAsync(IBandwidthLimiter senderBandwidthLimiter, IBandwidthLimiter receiverBandwidthLimiter, IUpnpClientFactory upnpClientFactory, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, TcpConnectionAccepterOptions options, CancellationToken cancellationToken = default)
+        {
+            var tcpConnectionAccepter = new TcpConnectionAccepter(senderBandwidthLimiter, receiverBandwidthLimiter, upnpClientFactory, batchActionDispatcher, bytesPool, options);
+            return tcpConnectionAccepter;
+        }
+
+        private TcpConnectionAccepter(IBandwidthLimiter senderBandwidthLimiter, IBandwidthLimiter receiverBandwidthLimiter, IUpnpClientFactory upnpClientFactory, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, TcpConnectionAccepterOptions options)
         {
             _senderBandwidthLimiter = senderBandwidthLimiter;
             _receiverBandwidthLimiter = receiverBandwidthLimiter;

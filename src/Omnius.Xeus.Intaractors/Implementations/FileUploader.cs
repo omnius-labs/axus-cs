@@ -11,23 +11,11 @@ using Omnius.Core.Storages;
 using Omnius.Xeus.Intaractors.Internal;
 using Omnius.Xeus.Intaractors.Internal.Models;
 using Omnius.Xeus.Intaractors.Internal.Repositories;
+using Omnius.Xeus.Intaractors.Models;
 using Omnius.Xeus.Service.Remoting;
 
 namespace Omnius.Xeus.Intaractors
 {
-    public record UploadedFileReport
-    {
-        public UploadedFileReport(DateTime creationTime, string filePath)
-        {
-            this.CreationTime = creationTime;
-            this.FilePath = filePath;
-        }
-
-        public DateTime CreationTime { get; }
-
-        public string FilePath { get; }
-    }
-
     public sealed class FileUploader : AsyncDisposableBase, IFileUploader
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
@@ -39,7 +27,7 @@ namespace Omnius.Xeus.Intaractors
 
         private readonly FileUploaderRepository _fileUploaderRepo;
 
-        private readonly Task _watchLoopTask;
+        private Task _watchLoopTask = null!;
 
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
@@ -47,7 +35,14 @@ namespace Omnius.Xeus.Intaractors
 
         private const string Registrant = "Omnius.Xeus.Intaractors.FileUploader";
 
-        public FileUploader(IXeusService xeusService, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, FileUploaderOptions options)
+        public static async ValueTask<FileUploader> CreateAsync(IXeusService xeusService, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, FileUploaderOptions options, CancellationToken cancellationToken = default)
+        {
+            var fileUploader = new FileUploader(xeusService, bytesStorageFactory, bytesPool, options);
+            await fileUploader.InitAsync(cancellationToken);
+            return fileUploader;
+        }
+
+        private FileUploader(IXeusService xeusService, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, FileUploaderOptions options)
         {
             _service = new XeusServiceAdapter(xeusService);
             _bytesStorageFactory = bytesStorageFactory;
@@ -55,6 +50,12 @@ namespace Omnius.Xeus.Intaractors
             _options = options;
 
             _fileUploaderRepo = new FileUploaderRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
+        }
+
+        private async ValueTask InitAsync(CancellationToken cancellationToken = default)
+        {
+            await _fileUploaderRepo.MigrateAsync(cancellationToken);
+
             _watchLoopTask = this.WatchLoopAsync(_cancellationTokenSource.Token);
         }
 
@@ -112,28 +113,29 @@ namespace Omnius.Xeus.Intaractors
             }
         }
 
-        public async ValueTask<IEnumerable<UploadedFileReport>> GetUploadedFileReportsAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<IEnumerable<UploadingFileReport>> GetUploadingFileReportsAsync(CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                var reports = new List<UploadedFileReport>();
+                var reports = new List<UploadingFileReport>();
 
                 foreach (var item in _fileUploaderRepo.Items.FindAll())
                 {
-                    reports.Add(new UploadedFileReport(item.CreationTime.ToDateTime(), item.FilePath));
+                    reports.Add(new UploadingFileReport(item.FilePath, item.Seed, item.CreationTime.ToDateTime()));
                 }
 
                 return reports;
             }
         }
 
-        public async ValueTask RegisterAsync(string filePath, CancellationToken cancellationToken = default)
+        public async ValueTask RegisterAsync(string filePath, string name, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
-                await _service.PublishFileFromStorageAsync(filePath, Registrant, cancellationToken);
+                var rootHash = await _service.PublishFileFromStorageAsync(filePath, Registrant, cancellationToken);
 
-                var item = new UploadingFileItem(filePath, Timestamp.FromDateTime(DateTime.UtcNow));
+                var seed = new Seed(rootHash, Path.GetFileName(filePath), (ulong)new FileInfo(filePath).Length, Timestamp.FromDateTime(DateTime.UtcNow));
+                var item = new UploadingFileItem(filePath, seed, Timestamp.FromDateTime(DateTime.UtcNow));
                 _fileUploaderRepo.Items.Upsert(item);
             }
         }

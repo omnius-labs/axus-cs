@@ -14,12 +14,7 @@ namespace Omnius.Xeus.Service.Daemon
             private readonly TcpListener _tcpListener;
             private readonly CancellationTokenRegistration _registration;
 
-            public static TcpListenerManager Create(string listenAddress, CancellationToken cancellationToken = default)
-            {
-                return new TcpListenerManager(listenAddress, cancellationToken);
-            }
-
-            private TcpListenerManager(string listenAddress, CancellationToken cancellationToken = default)
+            public TcpListenerManager(string listenAddress, CancellationToken cancellationToken = default)
             {
                 var listenOmniAddress = new OmniAddress(listenAddress);
                 if (!listenOmniAddress.TryGetTcpEndpoint(out var ipAddress, out var port)) throw new Exception("listenAddress is invalid format.");

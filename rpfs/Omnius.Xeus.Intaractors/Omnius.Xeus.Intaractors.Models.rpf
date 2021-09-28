@@ -6,34 +6,36 @@ using "Omnius.Xeus.Service.Models";
 
 namespace "Omnius.Xeus.Intaractors.Models";
 
-message UserProfile {
-    Signature: OmniSignature,
-    CreationTime: timestamp,
-    Content: UserProfileContent,
-}
-
-message UserProfileContent {
-    TrustedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
-    BlockedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
-    Boxes: vector<Box>(capacity: 32 * 1024 * 1024),
-}
-
-message Box {
-    Name: string?(capacity: 256),
-    Tags: vector<string(capacity: 256)>(capacity: 8),
-    Seeds: vector<Seed>(capacity: 32 * 1024 * 1024),
-    Boxes: vector<Box>(capacity: 32 * 1024 * 1024),
-}
-
 message Seed {
     RootHash: OmniHash,
     Name: string(capacity: 256),
     Size: uint64,
+    CreationTime: timestamp,
 }
 
-message UserProfileFinderSearchOptions {
-    TrustedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
-    BlockedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
-    SearchDepth: uint32,
-    MaxUserProfileCount: uint32,
+message UploadingFileReport {
+    FilePath: string(capacity: 8192),
+    Seed: Seed,
+    CreationTime: timestamp,
+    State: UploadingFileState,
+}
+
+enum UploadingFileState : uint8 {
+    Unknown = 0,
+    Waiting = 1,
+    Encoding = 2,
+    Completed = 3,
+}
+
+message DownloadingFileReport {
+    Seed: Seed,
+    CreationTime: timestamp,
+    State: DownloadingFileState,
+}
+
+enum DownloadingFileState : uint8 {
+    Unknown = 0,
+    Downloading = 1,
+    Decoding = 2,
+    Completed = 3,
 }

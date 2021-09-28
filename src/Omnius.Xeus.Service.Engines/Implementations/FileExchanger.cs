@@ -34,11 +34,11 @@ namespace Omnius.Xeus.Service.Engines
         private ImmutableHashSet<ContentClue> _pushContentClues = ImmutableHashSet<ContentClue>.Empty;
         private ImmutableHashSet<ContentClue> _wantContentClues = ImmutableHashSet<ContentClue>.Empty;
 
-        private Task _connectLoopTask = null!;
-        private Task _acceptLoopTask = null!;
-        private Task _sendLoopTask = null!;
-        private Task _receiveLoopTask = null!;
-        private Task _computeLoopTask = null!;
+        private readonly Task _connectLoopTask;
+        private readonly Task _acceptLoopTask;
+        private readonly Task _sendLoopTask;
+        private readonly Task _receiveLoopTask;
+        private readonly Task _computeLoopTask;
 
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
@@ -46,7 +46,14 @@ namespace Omnius.Xeus.Service.Engines
 
         private const string ServiceName = "file_exchanger";
 
-        public FileExchanger(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
+        public static async ValueTask<FileExchanger> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
+            IPublishedFileStorage publishedFileStorage, ISubscribedFileStorage subscribedFileStorage, IBytesPool bytesPool, FileExchangerOptions options, CancellationToken cancellationToken = default)
+        {
+            var fileExchanger = new FileExchanger(sessionConnector, sessionAccepter, nodeFinder, publishedFileStorage, subscribedFileStorage, bytesPool, options);
+            return fileExchanger;
+        }
+
+        private FileExchanger(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
             IPublishedFileStorage publishedFileStorage, ISubscribedFileStorage subscribedFileStorage, IBytesPool bytesPool, FileExchangerOptions options)
         {
             _sessionConnector = sessionConnector;

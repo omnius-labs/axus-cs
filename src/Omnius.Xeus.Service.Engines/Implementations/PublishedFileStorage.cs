@@ -34,7 +34,14 @@ namespace Omnius.Xeus.Service.Engines
 
         private const int MaxBlockLength = 8 * 1024 * 1024;
 
-        public PublishedFileStorage(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, PublishedFileStorageOptions options)
+        public static async ValueTask<PublishedFileStorage> CreateAsync(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, PublishedFileStorageOptions options, CancellationToken cancellationToken = default)
+        {
+            var publishedFileStorage = new PublishedFileStorage(bytesStorageFactory, bytesPool, options);
+            await publishedFileStorage.InitAsync(cancellationToken);
+            return publishedFileStorage;
+        }
+
+        private PublishedFileStorage(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, PublishedFileStorageOptions options)
         {
             _bytesStorageFactory = bytesStorageFactory;
             _bytesPool = bytesPool;
@@ -44,16 +51,16 @@ namespace Omnius.Xeus.Service.Engines
             _blockStorage = _bytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
         }
 
+        private async ValueTask InitAsync(CancellationToken cancellationToken = default)
+        {
+            await _publisherRepo.MigrateAsync(cancellationToken);
+            await _blockStorage.MigrateAsync(cancellationToken);
+        }
+
         protected override async ValueTask OnDisposeAsync()
         {
             _publisherRepo.Dispose();
             _blockStorage.Dispose();
-        }
-
-        public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
-        {
-            await _publisherRepo.MigrateAsync(cancellationToken);
-            await _blockStorage.MigrateAsync(cancellationToken);
         }
 
         public async ValueTask<PublishedFileStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
