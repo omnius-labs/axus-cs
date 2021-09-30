@@ -9,27 +9,13 @@ namespace "Omnius.Xeus.Intaractors.Internal.Models";
 
 message UploadingFileItem {
     FilePath: string(capacity: 8192),
-    Seed: Seed,
     CreationTime: timestamp,
+    Seed: Seed?,
     State: UploadingFileState,
-}
-
-enum UploadingFileState : uint8 {
-    Unknown = 0,
-    Waiting = 1,
-    Encoding = 2,
-    Completed = 3,
 }
 
 message DownloadingFileItem {
     Seed: Seed,
     CreationTime: timestamp,
     State: DownloadingFileState,
-}
-
-enum DownloadingFileState : uint8 {
-    Unknown = 0,
-    Downloading = 1,
-    Decoding = 2,
-    Completed = 3,
 }

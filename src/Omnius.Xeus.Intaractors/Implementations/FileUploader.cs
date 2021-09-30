@@ -132,10 +132,7 @@ namespace Omnius.Xeus.Intaractors
         {
             using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
-                var rootHash = await _service.PublishFileFromStorageAsync(filePath, Registrant, cancellationToken);
-
-                var seed = new Seed(rootHash, Path.GetFileName(filePath), (ulong)new FileInfo(filePath).Length, Timestamp.FromDateTime(DateTime.UtcNow));
-                var item = new UploadingFileItem(filePath, seed, Timestamp.FromDateTime(DateTime.UtcNow));
+                var item = new UploadingFileItem(filePath, Timestamp.FromDateTime(DateTime.UtcNow), null, UploadingFileState.Waiting);
                 _fileUploaderRepo.Items.Upsert(item);
             }
         }

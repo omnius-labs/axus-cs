@@ -13,24 +13,11 @@ message Seed {
     CreationTime: timestamp,
 }
 
-message UploadingFileReport {
-    FilePath: string(capacity: 8192),
-    Seed: Seed,
-    CreationTime: timestamp,
-    State: UploadingFileState,
-}
-
 enum UploadingFileState : uint8 {
     Unknown = 0,
     Waiting = 1,
     Encoding = 2,
     Completed = 3,
-}
-
-message DownloadingFileReport {
-    Seed: Seed,
-    CreationTime: timestamp,
-    State: DownloadingFileState,
 }
 
 enum DownloadingFileState : uint8 {
