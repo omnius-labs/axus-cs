@@ -23,11 +23,11 @@
     <PackageReference Include="Avalonia.Xaml.Interactivity" Version="0.10.7.1" />
     <PackageReference Include="Avalonia" Version="0.10.7" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
-    <PackageReference Include="Nito.AsyncEx" Version="5.1.0" />
+    <PackageReference Include="Nito.AsyncEx" Version="5.1.2" />
     <PackageReference Include="NLog.Config" Version="4.7.11" />
     <PackageReference Include="NLog" Version="4.7.11" />
     <PackageReference Include="ReactiveProperty" Version="7.12.0" />
-    <PackageReference Include="Nito.AsyncEx" Version="5.1.0" />
+    <PackageReference Include="Nito.AsyncEx" Version="5.1.2" />
     <PackageReference Include="YamlDotNet" Version="11.2.1" />
   </ItemGroup>
 
