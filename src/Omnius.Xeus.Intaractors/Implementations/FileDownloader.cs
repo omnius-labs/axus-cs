@@ -116,30 +116,22 @@ namespace Omnius.Xeus.Intaractors
 
         private async ValueTask TryExportSubscribedFiles(CancellationToken cancellationToken = default)
         {
-            var downloadedSeeds = new HashSet<Seed>();
-
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
-                foreach (var seed in _fileDownloaderRepo.Items.FindAll())
+                foreach (var item in _fileDownloaderRepo.Items.FindAll())
                 {
-                    if (seed.SeedState == SeedState.Downloaded) continue;
-                    downloadedSeeds.Add(seed);
-                }
+                    if (item.State == DownloadingFileState.Completed) continue;
 
-                var subscribedFileReports = await _service.GetSubscribedFileReportsAsync(cancellationToken);
-                var hashes = new HashSet<OmniHash>();
-                hashes.UnionWith(subscribedFileReports.Where(n => n.Registrant == Registrant).Select(n => n.RootHash));
+                    var basePath = Directory.GetCurrentDirectory();
+                    var filePath = Path.Combine(basePath, item.Seed.Name);
 
-                foreach (var hash in hashes)
-                {
-                    if (_fileDownloaderRepo.Items.Exists(hash)) continue;
-                    await _service.UnsubscribeFileAsync(hash, Registrant, cancellationToken);
-                }
+                    var newItem = new DownloadingFileItem(item.Seed, filePath, item.CreationTime, DownloadingFileState.Decoding);
+                    _fileDownloaderRepo.Items.Upsert(newItem);
 
-                foreach (var seed in _fileDownloaderRepo.Items.FindAll().Select(n => n.Seed))
-                {
-                    if (hashes.Contains(seed.RootHash)) continue;
-                    _fileDownloaderRepo.Items.Delete(seed);
+                    await _service.TryExportFileToStorageAsync(item.Seed.RootHash, filePath, cancellationToken);
+
+                    newItem = new DownloadingFileItem(item.Seed, filePath, item.CreationTime, DownloadingFileState.Completed);
+                    _fileDownloaderRepo.Items.Upsert(newItem);
                 }
             }
         }
@@ -152,7 +144,7 @@ namespace Omnius.Xeus.Intaractors
 
                 foreach (var item in _fileDownloaderRepo.Items.FindAll())
                 {
-                    reports.Add(new DownloadingFileReport(item.Seed, item.CreationTime.ToDateTime()));
+                    reports.Add(new DownloadingFileReport(item.Seed, item.FilePath, item.CreationTime.ToDateTime(), item.State));
                 }
 
                 return reports;
@@ -163,7 +155,8 @@ namespace Omnius.Xeus.Intaractors
         {
             using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
-                var item = new DownloadingFileItem(seed, Timestamp.FromDateTime(DateTime.UtcNow));
+                var now = Timestamp.FromDateTime(DateTime.UtcNow);
+                var item = new DownloadingFileItem(seed, null, now, DownloadingFileState.Downloading);
                 _fileDownloaderRepo.Items.Upsert(item);
             }
         }

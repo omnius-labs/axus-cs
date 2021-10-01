@@ -1,22 +1,31 @@
 using System;
-using LiteDB;
+using Omnius.Core.Cryptography;
+using Omnius.Core.RocketPack;
+using Omnius.Xeus.Intaractors.Models;
 
 namespace Omnius.Xeus.Intaractors.Internal.Entities
 {
     internal record SeedEntity
     {
-        [BsonCtor]
-        public SeedEntity(OmniHashEntity rootHash, string name, DateTime creationTime, ulong size)
+        public OmniHashEntity? RootHash { get; set; }
+        public string? Name { get; set; }
+        public DateTime CreationTime { get; set; }
+        public ulong Size { get; set; }
+
+        public static SeedEntity Import(Seed value)
         {
-            this.RootHash = rootHash;
-            this.Name = name;
-            this.CreationTime = creationTime;
-            this.Size = size;
+            return new SeedEntity()
+            {
+                RootHash = OmniHashEntity.Import(value.RootHash),
+                Name = value.Name,
+                Size = value.Size,
+                CreationTime = value.CreationTime.ToDateTime(),
+            };
         }
 
-        public OmniHashEntity RootHash { get; }
-        public string Name { get; }
-        public DateTime CreationTime { get; }
-        public ulong Size { get; }
+        public Seed Export()
+        {
+            return new Seed(this.RootHash?.Export() ?? OmniHash.Empty, this.Name ?? string.Empty, this.Size, Timestamp.FromDateTime(this.CreationTime));
+        }
     }
 }

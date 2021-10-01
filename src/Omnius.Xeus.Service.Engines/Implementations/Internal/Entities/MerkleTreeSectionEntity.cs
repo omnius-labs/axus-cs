@@ -3,7 +3,7 @@ using System.Linq;
 using Omnius.Core.Cryptography;
 using Omnius.Xeus.Service.Engines.Internal.Models;
 
-namespace Omnius.Xeus.Service.Engines.Internal.Repositories.Entities
+namespace Omnius.Xeus.Service.Engines.Internal.Entities
 {
     internal record MerkleTreeSectionEntity
     {
@@ -17,7 +17,12 @@ namespace Omnius.Xeus.Service.Engines.Internal.Repositories.Entities
 
         public static MerkleTreeSectionEntity Import(MerkleTreeSection value)
         {
-            return new MerkleTreeSectionEntity() { Depth = value.Depth, Length = value.Length, Hashes = value.Hashes.Select(n => OmniHashEntity.Import(n)).ToArray() };
+            return new MerkleTreeSectionEntity()
+            {
+                Depth = value.Depth,
+                Length = value.Length,
+                Hashes = value.Hashes.Select(n => OmniHashEntity.Import(n)).ToArray(),
+            };
         }
 
         public MerkleTreeSection Export()

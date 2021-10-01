@@ -3,7 +3,7 @@
 
 namespace Omnius.Xeus.Intaractors.Internal.Models
 {
-    public sealed partial class UploadingFileItem : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Intaractors.Internal.Models.UploadingFileItem>
+    internal sealed partial class UploadingFileItem : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Intaractors.Internal.Models.UploadingFileItem>
     {
         public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Intaractors.Internal.Models.UploadingFileItem> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Intaractors.Internal.Models.UploadingFileItem>.Formatter;
         public static global::Omnius.Xeus.Intaractors.Internal.Models.UploadingFileItem Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Intaractors.Internal.Models.UploadingFileItem>.Empty;
@@ -11,36 +11,37 @@ namespace Omnius.Xeus.Intaractors.Internal.Models
         static UploadingFileItem()
         {
             global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Intaractors.Internal.Models.UploadingFileItem>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Intaractors.Internal.Models.UploadingFileItem>.Empty = new global::Omnius.Xeus.Intaractors.Internal.Models.UploadingFileItem(string.Empty, global::Omnius.Core.RocketPack.Timestamp.Zero, null, (global::Omnius.Xeus.Intaractors.Models.UploadingFileState)0);
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Intaractors.Internal.Models.UploadingFileItem>.Empty = new global::Omnius.Xeus.Intaractors.Internal.Models.UploadingFileItem(string.Empty, global::Omnius.Xeus.Intaractors.Models.Seed.Empty, global::Omnius.Core.RocketPack.Timestamp.Zero, (global::Omnius.Xeus.Intaractors.Models.UploadingFileState)0);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
         public static readonly int MaxFilePathLength = 8192;
 
-        public UploadingFileItem(string filePath, global::Omnius.Core.RocketPack.Timestamp creationTime, global::Omnius.Xeus.Intaractors.Models.Seed? seed, global::Omnius.Xeus.Intaractors.Models.UploadingFileState state)
+        public UploadingFileItem(string filePath, global::Omnius.Xeus.Intaractors.Models.Seed seed, global::Omnius.Core.RocketPack.Timestamp creationTime, global::Omnius.Xeus.Intaractors.Models.UploadingFileState state)
         {
             if (filePath is null) throw new global::System.ArgumentNullException("filePath");
             if (filePath.Length > 8192) throw new global::System.ArgumentOutOfRangeException("filePath");
+            if (seed is null) throw new global::System.ArgumentNullException("seed");
             this.FilePath = filePath;
-            this.CreationTime = creationTime;
             this.Seed = seed;
+            this.CreationTime = creationTime;
             this.State = state;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
                 if (filePath != default) ___h.Add(filePath.GetHashCode());
-                if (creationTime != default) ___h.Add(creationTime.GetHashCode());
                 if (seed != default) ___h.Add(seed.GetHashCode());
+                if (creationTime != default) ___h.Add(creationTime.GetHashCode());
                 if (state != default) ___h.Add(state.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
         public string FilePath { get; }
+        public global::Omnius.Xeus.Intaractors.Models.Seed Seed { get; }
         public global::Omnius.Core.RocketPack.Timestamp CreationTime { get; }
-        public global::Omnius.Xeus.Intaractors.Models.Seed? Seed { get; }
         public global::Omnius.Xeus.Intaractors.Models.UploadingFileState State { get; }
 
         public static global::Omnius.Xeus.Intaractors.Internal.Models.UploadingFileItem Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -72,9 +73,8 @@ namespace Omnius.Xeus.Intaractors.Internal.Models
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.FilePath != target.FilePath) return false;
+            if (this.Seed != target.Seed) return false;
             if (this.CreationTime != target.CreationTime) return false;
-            if ((this.Seed is null) != (target.Seed is null)) return false;
-            if ((this.Seed is not null) && (target.Seed is not null) && this.Seed != target.Seed) return false;
             if (this.State != target.State) return false;
 
             return true;
@@ -92,15 +92,15 @@ namespace Omnius.Xeus.Intaractors.Internal.Models
                     w.Write((uint)1);
                     w.Write(value.FilePath);
                 }
-                if (value.CreationTime != global::Omnius.Core.RocketPack.Timestamp.Zero)
+                if (value.Seed != global::Omnius.Xeus.Intaractors.Models.Seed.Empty)
                 {
                     w.Write((uint)2);
-                    w.Write(value.CreationTime);
+                    global::Omnius.Xeus.Intaractors.Models.Seed.Formatter.Serialize(ref w, value.Seed, rank + 1);
                 }
-                if (value.Seed != null)
+                if (value.CreationTime != global::Omnius.Core.RocketPack.Timestamp.Zero)
                 {
                     w.Write((uint)3);
-                    global::Omnius.Xeus.Intaractors.Models.Seed.Formatter.Serialize(ref w, value.Seed, rank + 1);
+                    w.Write(value.CreationTime);
                 }
                 if (value.State != (global::Omnius.Xeus.Intaractors.Models.UploadingFileState)0)
                 {
@@ -114,8 +114,8 @@ namespace Omnius.Xeus.Intaractors.Internal.Models
                 if (rank > 256) throw new global::System.FormatException();
 
                 string p_filePath = string.Empty;
+                global::Omnius.Xeus.Intaractors.Models.Seed p_seed = global::Omnius.Xeus.Intaractors.Models.Seed.Empty;
                 global::Omnius.Core.RocketPack.Timestamp p_creationTime = global::Omnius.Core.RocketPack.Timestamp.Zero;
-                global::Omnius.Xeus.Intaractors.Models.Seed? p_seed = null;
                 global::Omnius.Xeus.Intaractors.Models.UploadingFileState p_state = (global::Omnius.Xeus.Intaractors.Models.UploadingFileState)0;
 
                 for (; ; )
@@ -131,12 +131,12 @@ namespace Omnius.Xeus.Intaractors.Internal.Models
                             }
                         case 2:
                             {
-                                p_creationTime = r.GetTimestamp();
+                                p_seed = global::Omnius.Xeus.Intaractors.Models.Seed.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                         case 3:
                             {
-                                p_seed = global::Omnius.Xeus.Intaractors.Models.Seed.Formatter.Deserialize(ref r, rank + 1);
+                                p_creationTime = r.GetTimestamp();
                                 break;
                             }
                         case 4:
@@ -147,11 +147,11 @@ namespace Omnius.Xeus.Intaractors.Internal.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Intaractors.Internal.Models.UploadingFileItem(p_filePath, p_creationTime, p_seed, p_state);
+                return new global::Omnius.Xeus.Intaractors.Internal.Models.UploadingFileItem(p_filePath, p_seed, p_creationTime, p_state);
             }
         }
     }
-    public sealed partial class DownloadingFileItem : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Intaractors.Internal.Models.DownloadingFileItem>
+    internal sealed partial class DownloadingFileItem : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Intaractors.Internal.Models.DownloadingFileItem>
     {
         public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Intaractors.Internal.Models.DownloadingFileItem> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Intaractors.Internal.Models.DownloadingFileItem>.Formatter;
         public static global::Omnius.Xeus.Intaractors.Internal.Models.DownloadingFileItem Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Intaractors.Internal.Models.DownloadingFileItem>.Empty;
@@ -159,15 +159,19 @@ namespace Omnius.Xeus.Intaractors.Internal.Models
         static DownloadingFileItem()
         {
             global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Intaractors.Internal.Models.DownloadingFileItem>.Formatter = new ___CustomFormatter();
-            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Intaractors.Internal.Models.DownloadingFileItem>.Empty = new global::Omnius.Xeus.Intaractors.Internal.Models.DownloadingFileItem(global::Omnius.Xeus.Intaractors.Models.Seed.Empty, global::Omnius.Core.RocketPack.Timestamp.Zero, (global::Omnius.Xeus.Intaractors.Models.DownloadingFileState)0);
+            global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Intaractors.Internal.Models.DownloadingFileItem>.Empty = new global::Omnius.Xeus.Intaractors.Internal.Models.DownloadingFileItem(global::Omnius.Xeus.Intaractors.Models.Seed.Empty, null, global::Omnius.Core.RocketPack.Timestamp.Zero, (global::Omnius.Xeus.Intaractors.Models.DownloadingFileState)0);
         }
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public DownloadingFileItem(global::Omnius.Xeus.Intaractors.Models.Seed seed, global::Omnius.Core.RocketPack.Timestamp creationTime, global::Omnius.Xeus.Intaractors.Models.DownloadingFileState state)
+        public static readonly int MaxFilePathLength = 8192;
+
+        public DownloadingFileItem(global::Omnius.Xeus.Intaractors.Models.Seed seed, string? filePath, global::Omnius.Core.RocketPack.Timestamp creationTime, global::Omnius.Xeus.Intaractors.Models.DownloadingFileState state)
         {
             if (seed is null) throw new global::System.ArgumentNullException("seed");
+            if (filePath is not null && filePath.Length > 8192) throw new global::System.ArgumentOutOfRangeException("filePath");
             this.Seed = seed;
+            this.FilePath = filePath;
             this.CreationTime = creationTime;
             this.State = state;
 
@@ -175,6 +179,7 @@ namespace Omnius.Xeus.Intaractors.Internal.Models
             {
                 var ___h = new global::System.HashCode();
                 if (seed != default) ___h.Add(seed.GetHashCode());
+                if (filePath != default) ___h.Add(filePath.GetHashCode());
                 if (creationTime != default) ___h.Add(creationTime.GetHashCode());
                 if (state != default) ___h.Add(state.GetHashCode());
                 return ___h.ToHashCode();
@@ -182,6 +187,7 @@ namespace Omnius.Xeus.Intaractors.Internal.Models
         }
 
         public global::Omnius.Xeus.Intaractors.Models.Seed Seed { get; }
+        public string? FilePath { get; }
         public global::Omnius.Core.RocketPack.Timestamp CreationTime { get; }
         public global::Omnius.Xeus.Intaractors.Models.DownloadingFileState State { get; }
 
@@ -214,6 +220,7 @@ namespace Omnius.Xeus.Intaractors.Internal.Models
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.Seed != target.Seed) return false;
+            if (this.FilePath != target.FilePath) return false;
             if (this.CreationTime != target.CreationTime) return false;
             if (this.State != target.State) return false;
 
@@ -232,14 +239,19 @@ namespace Omnius.Xeus.Intaractors.Internal.Models
                     w.Write((uint)1);
                     global::Omnius.Xeus.Intaractors.Models.Seed.Formatter.Serialize(ref w, value.Seed, rank + 1);
                 }
-                if (value.CreationTime != global::Omnius.Core.RocketPack.Timestamp.Zero)
+                if (value.FilePath != null)
                 {
                     w.Write((uint)2);
+                    w.Write(value.FilePath);
+                }
+                if (value.CreationTime != global::Omnius.Core.RocketPack.Timestamp.Zero)
+                {
+                    w.Write((uint)3);
                     w.Write(value.CreationTime);
                 }
                 if (value.State != (global::Omnius.Xeus.Intaractors.Models.DownloadingFileState)0)
                 {
-                    w.Write((uint)3);
+                    w.Write((uint)4);
                     w.Write((ulong)value.State);
                 }
                 w.Write((uint)0);
@@ -249,6 +261,7 @@ namespace Omnius.Xeus.Intaractors.Internal.Models
                 if (rank > 256) throw new global::System.FormatException();
 
                 global::Omnius.Xeus.Intaractors.Models.Seed p_seed = global::Omnius.Xeus.Intaractors.Models.Seed.Empty;
+                string? p_filePath = null;
                 global::Omnius.Core.RocketPack.Timestamp p_creationTime = global::Omnius.Core.RocketPack.Timestamp.Zero;
                 global::Omnius.Xeus.Intaractors.Models.DownloadingFileState p_state = (global::Omnius.Xeus.Intaractors.Models.DownloadingFileState)0;
 
@@ -265,10 +278,15 @@ namespace Omnius.Xeus.Intaractors.Internal.Models
                             }
                         case 2:
                             {
-                                p_creationTime = r.GetTimestamp();
+                                p_filePath = r.GetString(8192);
                                 break;
                             }
                         case 3:
+                            {
+                                p_creationTime = r.GetTimestamp();
+                                break;
+                            }
+                        case 4:
                             {
                                 p_state = (global::Omnius.Xeus.Intaractors.Models.DownloadingFileState)r.GetUInt64();
                                 break;
@@ -276,7 +294,7 @@ namespace Omnius.Xeus.Intaractors.Internal.Models
                     }
                 }
 
-                return new global::Omnius.Xeus.Intaractors.Internal.Models.DownloadingFileItem(p_seed, p_creationTime, p_state);
+                return new global::Omnius.Xeus.Intaractors.Internal.Models.DownloadingFileItem(p_seed, p_filePath, p_creationTime, p_state);
             }
         }
     }

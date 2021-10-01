@@ -1,12 +1,10 @@
 using System;
 using Omnius.Xeus.Service.Engines.Internal.Models;
 
-namespace Omnius.Xeus.Service.Engines.Internal.Repositories.Entities
+namespace Omnius.Xeus.Service.Engines.Internal.Entities
 {
     internal record PublishedShoutItemEntity
     {
-        public int Id { get; set; }
-
         public OmniSignatureEntity? Signature { get; set; }
 
         public DateTime CreationTime { get; set; }
@@ -15,7 +13,11 @@ namespace Omnius.Xeus.Service.Engines.Internal.Repositories.Entities
 
         public static PublishedShoutItemEntity Import(PublishedShoutItem value)
         {
-            return new PublishedShoutItemEntity() { Signature = OmniSignatureEntity.Import(value.Signature), Registrant = value.Registrant };
+            return new PublishedShoutItemEntity()
+            {
+                Signature = OmniSignatureEntity.Import(value.Signature),
+                Registrant = value.Registrant,
+            };
         }
 
         public PublishedShoutItem Export()

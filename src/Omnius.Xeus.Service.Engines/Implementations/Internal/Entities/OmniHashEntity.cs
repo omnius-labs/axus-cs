@@ -1,6 +1,6 @@
 using Omnius.Core.Cryptography;
 
-namespace Omnius.Xeus.Service.Engines.Internal.Repositories.Entities
+namespace Omnius.Xeus.Service.Engines.Internal.Entities
 {
     internal record OmniHashEntity
     {
@@ -10,7 +10,11 @@ namespace Omnius.Xeus.Service.Engines.Internal.Repositories.Entities
 
         public static OmniHashEntity Import(OmniHash value)
         {
-            return new OmniHashEntity() { AlgorithmType = (int)value.AlgorithmType, Value = value.Value.ToArray() };
+            return new OmniHashEntity()
+            {
+                AlgorithmType = (int)value.AlgorithmType,
+                Value = value.Value.ToArray(),
+            };
         }
 
         public OmniHash Export()

@@ -3,12 +3,10 @@ using System.Linq;
 using Omnius.Core.Cryptography;
 using Omnius.Xeus.Service.Engines.Internal.Models;
 
-namespace Omnius.Xeus.Service.Engines.Internal.Repositories.Entities
+namespace Omnius.Xeus.Service.Engines.Internal.Entities
 {
     internal record DecodedFileItemEntity
     {
-        public int Id { get; set; }
-
         public OmniHashEntity? RootHash { get; set; }
 
         public MerkleTreeSectionEntity[]? MerkleTreeSections { get; set; }

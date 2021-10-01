@@ -12,6 +12,9 @@ demo/ui-desktop_*/state/*
 # Environment
 .env
 
+# Mono
+mono_crash.*
+
 # Visual Studio Code
 .vscode/*
 !.vscode/tasks.json

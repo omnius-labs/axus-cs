@@ -61,6 +61,7 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
                     if (_database.GetDocumentVersion(CollectionName) <= 0)
                     {
                         var col = this.GetCollection();
+                        col.EnsureIndex(x => x.Seed!.RootHash, true);
                     }
 
                     _database.SetDocumentVersion(CollectionName, 1);
@@ -77,7 +78,7 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
             {
                 using (_asyncLock.ReaderLock())
                 {
-                    var seedEntity = ObjectMapper.Map<Seed, SeedEntity>(seed);
+                    var seedEntity = SeedEntity.Import(seed);
 
                     var col = this.GetCollection();
                     return col.Exists(n => n.Seed == seedEntity);
@@ -88,10 +89,10 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
             {
                 using (_asyncLock.ReaderLock())
                 {
-                    var rootHashEntity = ObjectMapper.Map<OmniHash, OmniHashEntity>(rootHash);
+                    var rootHashEntity = OmniHashEntity.Import(rootHash);
 
                     var col = this.GetCollection();
-                    return col.Exists(n => n.Seed.RootHash == rootHashEntity);
+                    return col.Exists(n => n.Seed != null && n.Seed.RootHash == rootHashEntity);
                 }
             }
 
@@ -100,9 +101,7 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
                 using (_asyncLock.ReaderLock())
                 {
                     var col = this.GetCollection();
-
-                    var itemEntities = col.FindAll();
-                    return itemEntities.Select(n => ObjectMapper.Map<DownloadingFileItemEntity, DownloadingFileItem>(n)).ToArray();
+                    return col.FindAll().Select(n => n.Export()).ToArray();
                 }
             }
 
@@ -110,12 +109,10 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
             {
                 using (_asyncLock.ReaderLock())
                 {
-                    var seedEntity = ObjectMapper.Map<Seed, SeedEntity>(seed);
+                    var seedEntity = SeedEntity.Import(seed);
 
                     var col = this.GetCollection();
-
-                    var itemEntity = col.FindOne(n => n.Seed == seedEntity);
-                    return ObjectMapper.Map<DownloadingFileItemEntity, DownloadingFileItem>(itemEntity);
+                    return col.FindOne(n => n.Seed == seedEntity).Export();
                 }
             }
 
@@ -123,10 +120,9 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
             {
                 using (_asyncLock.WriterLock())
                 {
-                    var itemEntity = ObjectMapper.Map<DownloadingFileItem, DownloadingFileItemEntity>(item);
+                    var itemEntity = DownloadingFileItemEntity.Import(item);
 
                     var col = this.GetCollection();
-
                     col.DeleteMany(n => n.Seed == itemEntity.Seed);
                     col.Insert(itemEntity);
                 }
@@ -136,10 +132,9 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
             {
                 using (_asyncLock.WriterLock())
                 {
-                    var seedEntity = ObjectMapper.Map<Seed, SeedEntity>(seed);
+                    var seedEntity = SeedEntity.Import(seed);
 
                     var col = this.GetCollection();
-
                     col.DeleteMany(n => n.Seed == seedEntity);
                 }
             }

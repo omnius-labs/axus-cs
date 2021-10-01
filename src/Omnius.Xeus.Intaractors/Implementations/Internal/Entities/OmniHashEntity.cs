@@ -1,18 +1,25 @@
-using LiteDB;
+using Omnius.Core.Cryptography;
 
 namespace Omnius.Xeus.Intaractors.Internal.Entities
 {
     internal record OmniHashEntity
     {
-        [BsonCtor]
-        public OmniHashEntity(int algorithmType, byte[] value)
+        public int AlgorithmType { get; set; }
+
+        public byte[]? Value { get; set; }
+
+        public static OmniHashEntity Import(OmniHash value)
         {
-            this.AlgorithmType = algorithmType;
-            this.Value = value;
+            return new OmniHashEntity()
+            {
+                AlgorithmType = (int)value.AlgorithmType,
+                Value = value.Value.ToArray(),
+            };
         }
 
-        public int AlgorithmType { get; }
-
-        public byte[] Value { get; }
+        public OmniHash Export()
+        {
+            return new OmniHash((OmniHashAlgorithmType)this.AlgorithmType, this.Value);
+        }
     }
 }

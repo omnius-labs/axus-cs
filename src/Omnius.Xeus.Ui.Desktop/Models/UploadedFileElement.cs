@@ -1,18 +1,19 @@
 using System.IO;
+using Omnius.Xeus.Intaractors.Models;
 using Omnius.Xeus.Ui.Desktop.Models.Primitives;
 
 namespace Omnius.Xeus.Ui.Desktop.Models
 {
-    public class UploadedFileElement : BindableBase
+    public class UploadingFileElement : BindableBase
     {
-        private UploadingBoxItem _model = null!;
+        private UploadingFileReport _model = null!;
 
-        public UploadedFileElement(UploadingBoxItem model)
+        public UploadingFileElement(UploadingFileReport model)
         {
             this.Model = model;
         }
 
-        public UploadingBoxItem Model
+        public UploadingFileReport Model
         {
             get => _model;
             set

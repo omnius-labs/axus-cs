@@ -1,6 +1,6 @@
 using Omnius.Core.Cryptography;
 
-namespace Omnius.Xeus.Service.Engines.Internal.Repositories.Entities
+namespace Omnius.Xeus.Service.Engines.Internal.Entities
 {
     internal record OmniSignatureEntity
     {
@@ -10,7 +10,11 @@ namespace Omnius.Xeus.Service.Engines.Internal.Repositories.Entities
 
         public static OmniSignatureEntity Import(OmniSignature value)
         {
-            return new OmniSignatureEntity() { Name = value.Name, Hash = OmniHashEntity.Import(value.Hash) };
+            return new OmniSignatureEntity()
+            {
+                Name = value.Name,
+                Hash = OmniHashEntity.Import(value.Hash),
+            };
         }
 
         public OmniSignature Export()

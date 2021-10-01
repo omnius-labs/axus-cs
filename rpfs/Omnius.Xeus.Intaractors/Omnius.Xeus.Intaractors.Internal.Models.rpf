@@ -6,16 +6,18 @@ using "Omnius.Xeus.Service.Models";
 using "Omnius.Xeus.Intaractors.Models";
 
 namespace "Omnius.Xeus.Intaractors.Internal.Models";
+option csharp_access_level "internal";
 
 message UploadingFileItem {
     FilePath: string(capacity: 8192),
+    Seed: Seed,
     CreationTime: timestamp,
-    Seed: Seed?,
     State: UploadingFileState,
 }
 
 message DownloadingFileItem {
     Seed: Seed,
+    FilePath: string?(capacity: 8192),
     CreationTime: timestamp,
     State: DownloadingFileState,
 }

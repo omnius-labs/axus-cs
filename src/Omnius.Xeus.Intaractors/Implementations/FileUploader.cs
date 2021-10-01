@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
 using Omnius.Core;
+using Omnius.Core.Cryptography;
 using Omnius.Core.RocketPack;
 using Omnius.Core.Storages;
 using Omnius.Xeus.Intaractors.Internal;
@@ -105,10 +106,15 @@ namespace Omnius.Xeus.Intaractors
                     await _service.UnpublishFileFromStorageAsync(filePath, Registrant, cancellationToken);
                 }
 
-                foreach (var filePath in _fileUploaderRepo.Items.FindAll().Select(n => n.FilePath))
+                foreach (var item in _fileUploaderRepo.Items.FindAll())
                 {
-                    if (filePaths.Contains(filePath)) continue;
-                    _fileUploaderRepo.Items.Delete(filePath);
+                    if (filePaths.Contains(item.FilePath)) continue;
+                    var rootHash = await _service.PublishFileFromStorageAsync(item.FilePath, Registrant, cancellationToken);
+
+                    var seed = new Seed(rootHash, item.Seed.Name, item.Seed.Size, item.Seed.CreationTime);
+                    var newItem = new UploadingFileItem(item.FilePath, seed, item.CreationTime, UploadingFileState.Completed);
+
+                    _fileUploaderRepo.Items.Upsert(newItem);
                 }
             }
         }
@@ -121,7 +127,8 @@ namespace Omnius.Xeus.Intaractors
 
                 foreach (var item in _fileUploaderRepo.Items.FindAll())
                 {
-                    reports.Add(new UploadingFileReport(item.FilePath, item.Seed, item.CreationTime.ToDateTime()));
+                    var seed = (item.State == UploadingFileState.Completed) ? item.Seed : null;
+                    reports.Add(new UploadingFileReport(item.FilePath, seed, item.CreationTime.ToDateTime(), item.State));
                 }
 
                 return reports;
@@ -132,7 +139,9 @@ namespace Omnius.Xeus.Intaractors
         {
             using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
-                var item = new UploadingFileItem(filePath, Timestamp.FromDateTime(DateTime.UtcNow), null, UploadingFileState.Waiting);
+                var now = Timestamp.FromDateTime(DateTime.UtcNow);
+                var seed = new Seed(OmniHash.Empty, name, (ulong)new FileInfo(filePath).Length, now);
+                var item = new UploadingFileItem(filePath, seed, now, UploadingFileState.Waiting);
                 _fileUploaderRepo.Items.Upsert(item);
             }
         }

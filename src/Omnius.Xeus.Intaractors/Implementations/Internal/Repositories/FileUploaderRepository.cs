@@ -59,6 +59,7 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
                     if (_database.GetDocumentVersion(CollectionName) <= 0)
                     {
                         var col = this.GetCollection();
+                        col.EnsureIndex(x => x.FilePath, true);
                     }
 
                     _database.SetDocumentVersion(CollectionName, 1);
@@ -76,7 +77,6 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
                 using (_asyncLock.ReaderLock())
                 {
                     var col = this.GetCollection();
-
                     return col.Exists(n => n.FilePath == filePath);
                 }
             }
@@ -86,9 +86,7 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
                 using (_asyncLock.ReaderLock())
                 {
                     var col = this.GetCollection();
-
-                    var itemEntities = col.FindAll();
-                    return itemEntities.Select(n => ObjectMapper.Map<UploadingFileItemEntity, UploadingFileItem>(n)).ToArray();
+                    return col.FindAll().Select(n => n.Export()).ToArray();
                 }
             }
 
@@ -97,9 +95,7 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
                 using (_asyncLock.ReaderLock())
                 {
                     var col = this.GetCollection();
-
-                    var itemEntity = col.FindById(filePath);
-                    return ObjectMapper.Map<UploadingFileItemEntity, UploadingFileItem>(itemEntity);
+                    return col.FindById(filePath).Export();
                 }
             }
 
@@ -107,11 +103,11 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
             {
                 using (_asyncLock.WriterLock())
                 {
-                    var itemEntity = ObjectMapper.Map<UploadingFileItem, UploadingFileItemEntity>(item);
+                    var itemEntity = UploadingFileItemEntity.Import(item);
 
                     var col = this.GetCollection();
-
-                    col.Upsert(itemEntity);
+                    col.DeleteMany(n => n.FilePath == item.FilePath);
+                    col.Insert(itemEntity);
                 }
             }
 
@@ -120,8 +116,7 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
                 using (_asyncLock.WriterLock())
                 {
                     var col = this.GetCollection();
-
-                    col.Delete(filePath);
+                    col.DeleteMany(n => n.FilePath == filePath);
                 }
             }
         }

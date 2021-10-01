@@ -23,7 +23,13 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             CanUserResizeColumns="True"
-            Items="{Binding UploadedFiles}">
+            Items="{Binding UploadedFiles}"
+            SelectedItem="{Binding SelectedItem.Value, Mode=TwoWay}">
+            <dg:DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Command="{Binding CopyCommand}" Header="Copy"/>
+                </ContextMenu>
+            </dg:DataGrid.ContextMenu>
             <dg:DataGrid.Columns>
                 <dg:DataGridTextColumn
                     Header="FileName"
