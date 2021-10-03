@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using Omnius.Xeus.Intaractors.Models;
 using Omnius.Xeus.Ui.Desktop.Models.Primitives;
@@ -26,5 +27,9 @@ namespace Omnius.Xeus.Ui.Desktop.Models
         public string FilePath => this.Model?.FilePath ?? "";
 
         public string Name => Path.GetFileName(this.FilePath);
+
+        public DateTime CreationTime => this.Model.CreationTime;
+
+        public UploadingFileState State => this.Model.State;
     }
 }

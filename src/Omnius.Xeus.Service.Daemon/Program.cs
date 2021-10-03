@@ -15,24 +15,27 @@ namespace Omnius.Xeus.Service.Daemon
             CoconaLiteApp.Run<Program>(args);
         }
 
-        public async ValueTask RunAsync([Argument("state")] string stateDirectoryPath = "../daemon/state", [Argument("logs")] string logsDirectoryPath = "../daemon/logs")
+        public async ValueTask RunAsync([Argument("state")] string stateDirectoryPath = "../daemon/state", [Argument("logs")] string logsDirectoryPath = "../daemon/logs", [Option("verbose", new[] { 'v' })] bool verbose = false)
         {
             DirectoryHelper.CreateDirectory(stateDirectoryPath);
             DirectoryHelper.CreateDirectory(logsDirectoryPath);
 
             SetLogsDirectory(logsDirectoryPath);
-#if DEBUG
-            ChangeLogLevel(NLog.LogLevel.Trace);
-#endif
+
+            if (verbose)
+            {
+                ChangeLogLevel(NLog.LogLevel.Trace);
+                _logger.Debug("Log level changed to Trace.");
+            }
 
             try
             {
-                _logger.Info("daemon start");
+                _logger.Info("Starting...");
                 await Runner.EventLoopAsync(stateDirectoryPath, this.Context.CancellationToken);
             }
             finally
             {
-                _logger.Info("daemon stop");
+                _logger.Info("Stopping...");
                 NLog.LogManager.Shutdown();
             }
         }
@@ -45,10 +48,11 @@ namespace Omnius.Xeus.Service.Daemon
             NLog.LogManager.ReconfigExistingLoggers();
         }
 
-        private static void ChangeLogLevel(NLog.LogLevel logLevel)
+        private static void ChangeLogLevel(NLog.LogLevel minLevel)
         {
             var rootLoggingRule = NLog.LogManager.Configuration.LoggingRules.First(n => n.NameMatches("*"));
-            rootLoggingRule.EnableLoggingForLevel(logLevel);
+            rootLoggingRule.EnableLoggingForLevels(minLevel, NLog.LogLevel.Fatal);
+            NLog.LogManager.ReconfigExistingLoggers();
         }
     }
 }

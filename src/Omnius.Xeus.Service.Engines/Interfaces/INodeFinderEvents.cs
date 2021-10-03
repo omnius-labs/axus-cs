@@ -5,6 +5,6 @@ namespace Omnius.Xeus.Service.Engines
 {
     public interface INodeFinderEvents
     {
-        IEventSubscriber<IContentExchanger> GetContentExchanger { get; }
+        IEventSubscriber<IContentExchanger> GetContentExchangers { get; }
     }
 }

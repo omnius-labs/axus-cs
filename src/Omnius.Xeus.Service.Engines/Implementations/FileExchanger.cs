@@ -117,9 +117,9 @@ namespace Omnius.Xeus.Service.Engines
                     int connectionCount = _sessionStatusSet.Select(n => n.Session.HandshakeType == SessionHandshakeType.Connected).Count();
                     if (_sessionStatusSet.Count > (_options.MaxSessionCount / 2)) continue;
 
-                    foreach (var contentHash in await _subscribedFileStorage.GetRootHashesAsync(cancellationToken))
+                    foreach (var rootHash in await _subscribedFileStorage.GetRootHashesAsync(cancellationToken))
                     {
-                        var contentClue = HashToContentClue(contentHash);
+                        var contentClue = RootHashToContentClue(rootHash);
 
                         NodeLocation? targetNodeLocation = null;
                         {
@@ -142,12 +142,16 @@ namespace Omnius.Xeus.Service.Engines
 
                         foreach (var targetAddress in targetNodeLocation.Addresses)
                         {
+                            _logger.Debug("Connecting to {0}", targetAddress);
+
                             var session = await _sessionConnector.ConnectAsync(targetAddress, ServiceName, cancellationToken);
                             if (session is null) continue;
 
+                            _logger.Debug("Connected to {0}", targetAddress);
+
                             _connectedAddressSet.Add(targetAddress);
 
-                            if (await this.TryAddConnectedSessionAsync(session, contentHash, cancellationToken))
+                            if (await this.TryAddConnectedSessionAsync(session, rootHash, cancellationToken))
                             {
                                 goto End;
                             }
@@ -189,6 +193,8 @@ namespace Omnius.Xeus.Service.Engines
                     var session = await _sessionAccepter.AcceptAsync(ServiceName, cancellationToken);
                     if (session is null) continue;
 
+                    _logger.Debug("Accepted from {0}", session.Address);
+
                     await this.TryAddAcceptedSessionAsync(session, cancellationToken);
                 }
             }
@@ -210,6 +216,8 @@ namespace Omnius.Xeus.Service.Engines
             {
                 var version = await this.HandshakeVersionAsync(session.Connection, cancellationToken);
                 if (version is null) return false;
+
+                _logger.Debug("Handshake version: {0}", version);
 
                 if (version == FileExchangerVersion.Version1)
                 {
@@ -246,6 +254,8 @@ namespace Omnius.Xeus.Service.Engines
             {
                 var version = await this.HandshakeVersionAsync(session.Connection, cancellationToken);
                 if (version is null) return false;
+
+                _logger.Debug("Handshake version: {0}", version);
 
                 if (version == FileExchangerVersion.Version1)
                 {
@@ -296,7 +306,7 @@ namespace Omnius.Xeus.Service.Engines
         {
             try
             {
-                while (cancellationToken.IsCancellationRequested)
+                while (!cancellationToken.IsCancellationRequested)
                 {
                     await Task.Delay(1, cancellationToken);
 
@@ -347,7 +357,7 @@ namespace Omnius.Xeus.Service.Engines
         {
             try
             {
-                while (cancellationToken.IsCancellationRequested)
+                while (!cancellationToken.IsCancellationRequested)
                 {
                     await Task.Delay(1, cancellationToken);
 
@@ -372,7 +382,7 @@ namespace Omnius.Xeus.Service.Engines
 
                                     foreach (var block in dataMessage.GiveBlocks)
                                     {
-                                        await _subscribedFileStorage.WriteBlockAsync(connectionStatus.ContentHash, block.Hash, block.Value.Memory, cancellationToken);
+                                        await _subscribedFileStorage.WriteBlockAsync(connectionStatus.RootHash, block.Hash, block.Value.Memory, cancellationToken);
                                     }
                                 }
                                 finally
@@ -412,7 +422,7 @@ namespace Omnius.Xeus.Service.Engines
             {
                 var random = new Random();
 
-                while (cancellationToken.IsCancellationRequested)
+                while (!cancellationToken.IsCancellationRequested)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken).ConfigureAwait(false);
 
@@ -429,7 +439,7 @@ namespace Omnius.Xeus.Service.Engines
                     {
                         OmniHash[] wantBlockHashes;
                         {
-                            wantBlockHashes = (await _subscribedFileStorage.GetBlockHashesAsync(connectionStatus.ContentHash, false, cancellationToken))
+                            wantBlockHashes = (await _subscribedFileStorage.GetBlockHashesAsync(connectionStatus.RootHash, false, cancellationToken))
                                 .Randomize()
                                 .Take(FileExchangerDataMessage.MaxWantBlockHashesCount)
                                 .ToArray();
@@ -445,9 +455,9 @@ namespace Omnius.Xeus.Service.Engines
 
                             foreach (var contentStorage in new IReadOnlyFileStorage[] { _publishedFileStorage, _subscribedFileStorage })
                             {
-                                foreach (var hash in (await contentStorage.GetBlockHashesAsync(connectionStatus.ContentHash, true, cancellationToken)).Randomize())
+                                foreach (var hash in (await contentStorage.GetBlockHashesAsync(connectionStatus.RootHash, true, cancellationToken)).Randomize())
                                 {
-                                    var memoryOwner = await contentStorage.ReadBlockAsync(connectionStatus.ContentHash, hash, cancellationToken);
+                                    var memoryOwner = await contentStorage.ReadBlockAsync(connectionStatus.RootHash, hash, cancellationToken);
                                     if (memoryOwner is null) continue;
 
                                     giveBlocks.Add(new Block(hash, memoryOwner));
@@ -484,9 +494,9 @@ namespace Omnius.Xeus.Service.Engines
         {
             var builder = ImmutableHashSet.CreateBuilder<ContentClue>();
 
-            foreach (var contentHash in await _publishedFileStorage.GetRootHashesAsync(cancellationToken))
+            foreach (var rootHash in await _publishedFileStorage.GetRootHashesAsync(cancellationToken))
             {
-                var contentClue = HashToContentClue(contentHash);
+                var contentClue = RootHashToContentClue(rootHash);
                 builder.Add(contentClue);
             }
 
@@ -497,18 +507,18 @@ namespace Omnius.Xeus.Service.Engines
         {
             var builder = ImmutableHashSet.CreateBuilder<ContentClue>();
 
-            foreach (var contentHash in await _subscribedFileStorage.GetRootHashesAsync(cancellationToken))
+            foreach (var rootHash in await _subscribedFileStorage.GetRootHashesAsync(cancellationToken))
             {
-                var contentClue = HashToContentClue(contentHash);
+                var contentClue = RootHashToContentClue(rootHash);
                 builder.Add(contentClue);
             }
 
             _wantContentClues = builder.ToImmutable();
         }
 
-        private static ContentClue HashToContentClue(OmniHash hash)
+        private static ContentClue RootHashToContentClue(OmniHash rootHash)
         {
-            return new ContentClue(ServiceName, hash);
+            return new ContentClue(ServiceName, rootHash);
         }
     }
 }

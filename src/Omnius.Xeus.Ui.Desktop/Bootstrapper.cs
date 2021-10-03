@@ -6,12 +6,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Omnius.Core;
 using Omnius.Core.Avalonia;
 using Omnius.Core.Net;
+using Omnius.Core.Storages;
 using Omnius.Xeus.Intaractors;
 using Omnius.Xeus.Ui.Desktop.Configuration;
+using Omnius.Xeus.Ui.Desktop.Controls;
 using Omnius.Xeus.Ui.Desktop.Internal;
 using Omnius.Xeus.Ui.Desktop.Windows;
-using Omnius.Xeus.Ui.Desktop.Controls;
-using Omnius.Core.Storages;
 
 namespace Omnius.Xeus.Ui.Desktop
 {
@@ -23,6 +23,7 @@ namespace Omnius.Xeus.Ui.Desktop
         private BytesPool? _bytesPool;
         private XeusServiceManager? _xeusServiceManager;
         private Dashboard? _dashboard;
+        private FileDownloader _fileDownloader;
         private FileUploader? _fileUploader;
 
         public static Bootstrapper Instance { get; } = new Bootstrapper();
@@ -45,8 +46,12 @@ namespace Omnius.Xeus.Ui.Desktop
             var xeusService = _xeusServiceManager.GetService();
 
             _dashboard = await Dashboard.CreateAsync(xeusService, _bytesPool, cancellationToken);
+
             var fileUploaderOptions = new FileUploaderOptions(Path.Combine(stateDirectoryPath, "file_uploader"));
             _fileUploader = await FileUploader.CreateAsync(xeusService, LiteDatabaseBytesStorage.Factory, _bytesPool, fileUploaderOptions, cancellationToken);
+
+            var fileDownloaderOptions = new FileDownloaderOptions(Path.Combine(stateDirectoryPath, "file_downloader"));
+            _fileDownloader = await FileDownloader.CreateAsync(xeusService, LiteDatabaseBytesStorage.Factory, _bytesPool, fileDownloaderOptions, cancellationToken);
 
             var serviceCollection = new ServiceCollection();
 
@@ -60,17 +65,19 @@ namespace Omnius.Xeus.Ui.Desktop
 
             serviceCollection.AddSingleton<IDashboard>(_dashboard);
             serviceCollection.AddSingleton<IFileUploader>(_fileUploader);
+            serviceCollection.AddSingleton<IFileDownloader>(_fileDownloader);
 
             serviceCollection.AddSingleton<IApplicationDispatcher, ApplicationDispatcher>();
             serviceCollection.AddSingleton<IMainWindowProvider, MainWindowProvider>();
             serviceCollection.AddSingleton<IClipboardService, ClipboardService>();
             serviceCollection.AddSingleton<IDialogService, DialogService>();
 
-            serviceCollection.AddSingleton<MainWindowViewModel>();
-            serviceCollection.AddSingleton<NodesWindowViewModel>();
-            serviceCollection.AddSingleton<StatusControlViewModel>();
-            serviceCollection.AddSingleton<PeersControlViewModel>();
-            serviceCollection.AddSingleton<UploadControlViewModel>();
+            serviceCollection.AddTransient<MainWindowViewModel>();
+            serviceCollection.AddTransient<TextWindowViewModel>();
+            serviceCollection.AddTransient<StatusControlViewModel>();
+            serviceCollection.AddTransient<PeersControlViewModel>();
+            serviceCollection.AddTransient<DownloadControlViewModel>();
+            serviceCollection.AddTransient<UploadControlViewModel>();
 
             this.ServiceProvider = serviceCollection.BuildServiceProvider();
         }

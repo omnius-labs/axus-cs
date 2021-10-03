@@ -108,7 +108,7 @@ namespace Omnius.Xeus.Intaractors
 
                 foreach (var item in _fileUploaderRepo.Items.FindAll())
                 {
-                    if (filePaths.Contains(item.FilePath)) continue;
+                    if (item.State == UploadingFileState.Completed) continue;
                     var rootHash = await _service.PublishFileFromStorageAsync(item.FilePath, Registrant, cancellationToken);
 
                     var seed = new Seed(rootHash, item.Seed.Name, item.Seed.Size, item.Seed.CreationTime);

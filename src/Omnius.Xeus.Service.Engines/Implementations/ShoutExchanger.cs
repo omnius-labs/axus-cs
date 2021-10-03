@@ -349,7 +349,7 @@ namespace Omnius.Xeus.Service.Engines
             {
                 var random = new Random();
 
-                while (cancellationToken.IsCancellationRequested)
+                while (!cancellationToken.IsCancellationRequested)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken).ConfigureAwait(false);
 
@@ -373,9 +373,9 @@ namespace Omnius.Xeus.Service.Engines
         {
             var builder = ImmutableHashSet.CreateBuilder<ContentClue>();
 
-            foreach (var contentHash in await _publishedShoutStorage.GetSignaturesAsync(cancellationToken))
+            foreach (var rootHash in await _publishedShoutStorage.GetSignaturesAsync(cancellationToken))
             {
-                var contentClue = SignatureToContentClue(contentHash);
+                var contentClue = SignatureToContentClue(rootHash);
                 builder.Add(contentClue);
             }
 
@@ -386,9 +386,9 @@ namespace Omnius.Xeus.Service.Engines
         {
             var builder = ImmutableHashSet.CreateBuilder<ContentClue>();
 
-            foreach (var contentHash in await _subscribedShoutStorage.GetSignaturesAsync(cancellationToken))
+            foreach (var rootHash in await _subscribedShoutStorage.GetSignaturesAsync(cancellationToken))
             {
-                var contentClue = SignatureToContentClue(contentHash);
+                var contentClue = SignatureToContentClue(rootHash);
                 builder.Add(contentClue);
             }
 

@@ -1,7 +1,9 @@
 using System;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
@@ -25,7 +27,8 @@ namespace Omnius.Xeus.Ui.Desktop.Controls
         private readonly IClipboardService _clipboardService;
         private readonly Task _refreshTask;
 
-        private readonly ObservableDictionary<string, UploadingFileElement> _uploadedFileMap = new();
+        private readonly ObservableDictionary<string, UploadingFileElement> _uploadingFileMap = new();
+        private readonly ObservableCollection<UploadingFileElement> _selectedFiles = new();
 
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
@@ -37,16 +40,13 @@ namespace Omnius.Xeus.Ui.Desktop.Controls
             _dialogService = dialogService;
             _clipboardService = clipboardService;
 
-            this.AddFileCommand = new ReactiveCommand().AddTo(_disposable);
-            this.AddFileCommand.Subscribe(() => this.AddFile()).AddTo(_disposable);
+            this.RegisterCommand = new ReactiveCommand().AddTo(_disposable);
+            this.RegisterCommand.Subscribe(() => this.Register()).AddTo(_disposable);
 
-            this.UploadedFiles = _uploadedFileMap.Values.ToReadOnlyReactiveCollection().AddTo(_disposable);
+            this.UploadingFiles = _uploadingFileMap.Values.ToReadOnlyReactiveCollection().AddTo(_disposable);
 
-            this.SelectedItem = new ReactiveProperty<UploadingFileElement>().AddTo(_disposable);
-
-            this.CopyCommand = new ReactiveCommand().AddTo(_disposable);
-            this.CopyCommand.Subscribe(() => this.Copy()).AddTo(_disposable);
-
+            this.ItemCopySeedCommand = new ReactiveCommand().AddTo(_disposable);
+            this.ItemCopySeedCommand.Subscribe(() => this.ItemCopySeed()).AddTo(_disposable);
 
             _refreshTask = this.RefreshAsync(_cancellationTokenSource.Token);
         }
@@ -60,15 +60,15 @@ namespace Omnius.Xeus.Ui.Desktop.Controls
             _disposable.Dispose();
         }
 
-        public ReactiveCommand AddFileCommand { get; }
+        public ReactiveCommand RegisterCommand { get; }
 
-        public ReadOnlyReactiveCollection<UploadingFileElement> UploadedFiles { get; }
+        public ReadOnlyReactiveCollection<UploadingFileElement> UploadingFiles { get; }
 
-        public ReactiveProperty<UploadingFileElement> SelectedItem { get; }
+        public ObservableCollection<UploadingFileElement> SelectedFiles => _selectedFiles;
 
-        public ReactiveCommand CopyCommand { get; }
+        public ReactiveCommand ItemCopySeedCommand { get; }
 
-        private async void AddFile()
+        private async void Register()
         {
             foreach (var filePath in await _dialogService.ShowOpenFileWindowAsync())
             {
@@ -76,16 +76,19 @@ namespace Omnius.Xeus.Ui.Desktop.Controls
             }
         }
 
-        private async void Copy()
+        private async void ItemCopySeed()
         {
-            var selectedItem = this.SelectedItem.Value;
-            if (selectedItem == null) return;
+            var selectedFiles = this.SelectedFiles.ToArray();
+            if (selectedFiles.Length == 0) return;
 
-            var seed = selectedItem.Model.Seed;
-            if (seed == null) return;
+            var sb = new StringBuilder();
+            foreach (var file in selectedFiles)
+            {
+                if (file.Model.Seed is null) continue;
+                sb.AppendLine(XeusMessage.SeedToString(file.Model.Seed));
+            }
 
-            var text = XeusMessage.SeedToString(seed);
-            await _clipboardService.SetTextAsync(text);
+            await _clipboardService.SetTextAsync(sb.ToString());
         }
 
         private async Task RefreshAsync(CancellationToken cancellationToken = default)
@@ -102,21 +105,21 @@ namespace Omnius.Xeus.Ui.Desktop.Controls
 
                     await Dispatcher.UIThread.InvokeAsync(() =>
                     {
-                        foreach (var key in _uploadedFileMap.Keys.ToArray())
+                        foreach (var key in _uploadingFileMap.Keys.ToArray())
                         {
                             if (elements.ContainsKey(key))
                             {
                                 continue;
                             }
 
-                            _ = _uploadedFileMap.Remove(key);
+                            _uploadingFileMap.Remove(key);
                         }
 
                         foreach (var (key, element) in elements)
                         {
-                            if (!_uploadedFileMap.TryGetValue(key, out var viewModel))
+                            if (!_uploadingFileMap.TryGetValue(key, out var viewModel))
                             {
-                                _uploadedFileMap.Add(key, element);
+                                _uploadingFileMap.Add(key, element);
                             }
                             else
                             {

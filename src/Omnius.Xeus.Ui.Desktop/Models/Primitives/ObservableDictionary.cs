@@ -51,7 +51,7 @@ namespace Omnius.Xeus.Ui.Desktop.Models.Primitives
             {
                 if (_dict.TryGetValue(key, out var oldValue))
                 {
-                    _ = _collection.Remove(oldValue);
+                    _collection.Remove(oldValue);
                 }
 
                 _dict[key] = value;
@@ -130,7 +130,7 @@ namespace Omnius.Xeus.Ui.Desktop.Models.Primitives
         {
             if (_dict.TryRemove(key, out var oldValue) && oldValue is not null)
             {
-                _ = _collection.Remove(oldValue);
+                _collection.Remove(oldValue);
                 return true;
             }
 
@@ -141,7 +141,7 @@ namespace Omnius.Xeus.Ui.Desktop.Models.Primitives
         {
             if (((ICollection<KeyValuePair<TKey, TValue>>)_dict).Remove(item))
             {
-                _ = _collection.Remove(item.Value);
+                _collection.Remove(item.Value);
                 return true;
             }
 

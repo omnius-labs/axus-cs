@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Threading;
@@ -7,6 +8,7 @@ using Avalonia.Threading;
 using Omnius.Core;
 using Omnius.Core.Net;
 using Omnius.Xeus.Intaractors;
+using Omnius.Xeus.Service.Models;
 using Omnius.Xeus.Ui.Desktop.Models;
 using Omnius.Xeus.Ui.Desktop.Models.Primitives;
 using Omnius.Xeus.Ui.Desktop.Windows;
@@ -36,7 +38,7 @@ namespace Omnius.Xeus.Ui.Desktop.Controls
             _dialogService = dialogService;
 
             this.AddNodeCommand = new ReactiveCommand().AddTo(_disposable);
-            _ = this.AddNodeCommand.Subscribe(() => this.AddNodeLocations()).AddTo(_disposable);
+            this.AddNodeCommand.Subscribe(() => this.AddNodeLocations()).AddTo(_disposable);
             this.SessionReports = _sessionReportMap.Values.ToReadOnlyReactiveCollection().AddTo(_disposable);
 
             _refreshTask = this.RefreshAsync(_cancellationTokenSource.Token);
@@ -57,8 +59,21 @@ namespace Omnius.Xeus.Ui.Desktop.Controls
 
         private async void AddNodeLocations()
         {
-            var nodeLocations = await _dialogService.ShowNodesWindowAsync();
-            await _dashboard.AddCloudNodeLocationsAsync(nodeLocations);
+            var text = await _dialogService.GetTextWindowAsync();
+            await _dashboard.AddCloudNodeLocationsAsync(ParseNodeLocations(text));
+        }
+
+        private static IEnumerable<NodeLocation> ParseNodeLocations(string text)
+        {
+            var results = new List<NodeLocation>();
+
+            foreach (var line in text.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries).Select(n => n.Trim()))
+            {
+                if (!XeusMessage.TryStringToNodeLocation(line, out var nodeLocation)) continue;
+                results.Add(nodeLocation);
+            }
+
+            return results;
         }
 
         private async Task RefreshAsync(CancellationToken cancellationToken = default)
@@ -82,7 +97,7 @@ namespace Omnius.Xeus.Ui.Desktop.Controls
                                 continue;
                             }
 
-                            _ = _sessionReportMap.Remove(key);
+                            _sessionReportMap.Remove(key);
                         }
 
                         foreach (var (key, element) in elements)

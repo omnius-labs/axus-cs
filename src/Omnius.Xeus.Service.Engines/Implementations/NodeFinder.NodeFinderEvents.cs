@@ -9,10 +9,10 @@ namespace Omnius.Xeus.Service.Engines
         {
             public NodeFinderEvents(IEventSubscriber<IContentExchanger> getContentExchanger)
             {
-                this.GetContentExchanger = getContentExchanger;
+                this.GetContentExchangers = getContentExchanger;
             }
 
-            public IEventSubscriber<IContentExchanger> GetContentExchanger { get; }
+            public IEventSubscriber<IContentExchanger> GetContentExchangers { get; }
         }
     }
 }

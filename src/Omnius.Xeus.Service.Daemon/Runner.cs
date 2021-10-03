@@ -24,7 +24,7 @@ namespace Omnius.Xeus.Service.Daemon
 
         public static async ValueTask EventLoopAsync(string stateDirectoryPath, CancellationToken cancellationToken = default)
         {
-            _ = DirectoryHelper.CreateDirectory(stateDirectoryPath);
+            DirectoryHelper.CreateDirectory(stateDirectoryPath);
 
             var config = await LoadConfigAsync(Path.Combine(stateDirectoryPath, "config.yml"), cancellationToken);
             var service = await XeusService.CreateAsync(stateDirectoryPath, config, cancellationToken);
@@ -125,7 +125,7 @@ namespace Omnius.Xeus.Service.Daemon
 
             try
             {
-                _logger.Info("event loop start");
+                _logger.Debug("ServiceEventLoopAsync: Start");
 
                 var server = new XeusServiceRemoting.Server<DefaultErrorMessage>(service, listenerFactory, bytesPool);
 
@@ -140,7 +140,7 @@ namespace Omnius.Xeus.Service.Daemon
             }
             finally
             {
-                _logger.Info("event loop stop");
+                _logger.Debug("ServiceEventLoopAsync: End");
             }
         }
     }

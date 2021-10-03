@@ -17,7 +17,7 @@ using Omnius.Xeus.Service.Remoting;
 
 namespace Omnius.Xeus.Intaractors
 {
-    public sealed class FileDownloader : AsyncDisposableBase
+    public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -109,7 +109,7 @@ namespace Omnius.Xeus.Intaractors
                 foreach (var seed in _fileDownloaderRepo.Items.FindAll().Select(n => n.Seed))
                 {
                     if (hashes.Contains(seed.RootHash)) continue;
-                    _fileDownloaderRepo.Items.Delete(seed);
+                    await _service.SubscribeFileAsync(seed.RootHash, Registrant, cancellationToken);
                 }
             }
         }

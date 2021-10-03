@@ -13,7 +13,7 @@ message NodeLocation {
 
 message ContentClue {
     Scheme: string(capacity: 256),
-    ContentHash: OmniHash,
+    RootHash: OmniHash,
 }
 
 message Shout {

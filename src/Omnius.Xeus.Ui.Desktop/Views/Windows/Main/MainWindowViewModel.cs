@@ -14,11 +14,12 @@ namespace Omnius.Xeus.Ui.Desktop.Windows
 
         private readonly CompositeDisposable _disposable = new();
 
-        public MainWindowViewModel(UiState uiState, StatusControlViewModel statusControlViewModel, PeersControlViewModel peersControlViewModel, UploadControlViewModel uploadControlViewModel)
+        public MainWindowViewModel(UiState uiState, StatusControlViewModel statusControlViewModel, PeersControlViewModel peersControlViewModel, DownloadControlViewModel downloadControlViewModel, UploadControlViewModel uploadControlViewModel)
         {
             _uiState = uiState;
             this.StatusControlViewModel = statusControlViewModel;
             this.PeersControlViewModel = peersControlViewModel;
+            this.DownloadControlViewModel = downloadControlViewModel;
             this.UploadControlViewModel = uploadControlViewModel;
 
             this.SelectedTab.Status = uiState.ToReactivePropertySlimAsSynchronized(n => n.MainWindowModel_SelectedTabState_Status).AddTo(_disposable);
@@ -39,6 +40,8 @@ namespace Omnius.Xeus.Ui.Desktop.Windows
         public StatusControlViewModel StatusControlViewModel { get; }
 
         public PeersControlViewModel PeersControlViewModel { get; }
+
+        public DownloadControlViewModel DownloadControlViewModel { get; }
 
         public UploadControlViewModel UploadControlViewModel { get; }
 

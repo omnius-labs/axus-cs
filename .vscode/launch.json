@@ -7,7 +7,7 @@
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Service.Daemon)",
             "program": "${workspaceFolder}/tmp/bin/win-normal/Omnius.Xeus.Service.Daemon/Debug/net5.0/Omnius.Xeus.Service.Daemon.dll",
-            "args": ["./demo/daemon_1/state", "./demo/daemon_1/logs"],
+            "args": ["./demo/daemon_1/state", "./demo/daemon_1/logs", "-v"],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "stopAtEntry": false
@@ -29,7 +29,7 @@
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Service.Daemon)",
             "program": "${workspaceFolder}/tmp/bin/linux-normal/Omnius.Xeus.Service.Daemon/Debug/net5.0/Omnius.Xeus.Service.Daemon.dll",
-            "args": ["./demo/daemon_1/state", "./demo/daemon_1/logs"],
+            "args": ["./demo/daemon_1/state", "./demo/daemon_1/logs", "-v"],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "stopAtEntry": false
@@ -51,7 +51,7 @@
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Service.Daemon)",
             "program": "${workspaceFolder}/tmp/bin/mac-normal/Omnius.Xeus.Service.Daemon/Debug/net5.0/Omnius.Xeus.Service.Daemon.dll",
-            "args": ["./demo/daemon_1/state", "./demo/daemon_1/logs"],
+            "args": ["./demo/daemon_1/state", "./demo/daemon_1/logs", "-v"],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "stopAtEntry": false

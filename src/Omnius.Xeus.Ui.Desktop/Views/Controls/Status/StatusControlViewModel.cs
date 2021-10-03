@@ -31,7 +31,7 @@ namespace Omnius.Xeus.Ui.Desktop.Controls
 
             this.MyNodeLocation = new ReactiveProperty<string>().AddTo(_disposable);
             this.CopyMyNodeLocationCommand = new ReactiveCommand().AddTo(_disposable);
-            _ = this.CopyMyNodeLocationCommand.Subscribe(() => this.CopyMyNodeLocation()).AddTo(_disposable);
+            this.CopyMyNodeLocationCommand.Subscribe(() => this.CopyMyNodeLocation()).AddTo(_disposable);
 
             _refreshTask = this.RefreshAsync(_cancellationTokenSource.Token);
         }

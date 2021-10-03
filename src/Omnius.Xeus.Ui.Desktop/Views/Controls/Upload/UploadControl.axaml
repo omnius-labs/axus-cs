@@ -6,6 +6,7 @@
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
     xmlns:local="clr-namespace:Omnius.Xeus.Ui.Desktop.Controls;assembly=Omnius.Xeus.Ui.Desktop"
+    xmlns:bs="clr-namespace:Omnius.Core.Avalonia.Behaviors;assembly=Omnius.Core.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:CompileBindings="True"
@@ -16,28 +17,36 @@
 
     <Grid RowDefinitions="Auto, *">
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="8">
-            <Button Height="32" Width="120" Margin="8" Content="Add file" Command="{Binding AddFileCommand}"/>
+            <Button Height="32" Width="120" Margin="8" Content="Add file" Command="{Binding RegisterCommand}"/>
         </StackPanel>
         <dg:DataGrid
             Grid.Row="1"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             CanUserResizeColumns="True"
-            Items="{Binding UploadedFiles}"
-            SelectedItem="{Binding SelectedItem.Value, Mode=TwoWay}">
+            Items="{Binding UploadingFiles}" >
+            <i:Interaction.Behaviors>
+                <bs:DataGridBindSelectedItemsBehavior SelectedItems="{Binding SelectedFiles}" />
+            </i:Interaction.Behaviors>
             <dg:DataGrid.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Command="{Binding CopyCommand}" Header="Copy"/>
+                    <MenuItem Header="Copy As">
+                        <MenuItem Command="{Binding ItemCopySeedCommand}" Header="Copy Seed"/>
+                    </MenuItem>
                 </ContextMenu>
             </dg:DataGrid.ContextMenu>
             <dg:DataGrid.Columns>
                 <dg:DataGridTextColumn
-                    Header="FileName"
-                    Binding="{ReflectionBinding FileName}"
+                    Header="Name"
+                    Binding="{ReflectionBinding Name}"
                     Width="Auto" />
                 <dg:DataGridTextColumn
-                    Header="FilePath"
-                    Binding="{ReflectionBinding FilePath}"
+                    Header="Creation Time"
+                    Binding="{ReflectionBinding CreationTime}"
+                    Width="Auto" />
+                <dg:DataGridTextColumn
+                    Header="State"
+                    Binding="{ReflectionBinding State}"
                     Width="Auto" />
             </dg:DataGrid.Columns>
         </dg:DataGrid>

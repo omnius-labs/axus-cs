@@ -28,7 +28,7 @@
                 <controls:SearchControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             </TabItem>
             <TabItem Header="Download" IsSelected="{Binding SelectedTab.Download.Value}">
-                <controls:DownloadControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                <controls:DownloadControl DataContext="{Binding DownloadControlViewModel}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             </TabItem>
             <TabItem Header="Upload" IsSelected="{Binding SelectedTab.Upload.Value}">
                 <controls:UploadControl DataContext="{Binding UploadControlViewModel}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />

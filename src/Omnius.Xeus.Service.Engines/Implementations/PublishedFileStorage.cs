@@ -80,7 +80,6 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask CheckConsistencyAsync(Action<ConsistencyReport> callback, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
         }
 
         public async ValueTask<IEnumerable<OmniHash>> GetRootHashesAsync(CancellationToken cancellationToken = default)
@@ -107,7 +106,7 @@ namespace Omnius.Xeus.Service.Engines
                 var item = _publisherRepo.Items.Find(rootHash).FirstOrDefault();
                 if (item is null) return Enumerable.Empty<OmniHash>();
 
-                return item.MerkleTreeSections.SelectMany(n => n.Hashes);
+                return new[] { item.RootHash }.Union(item.MerkleTreeSections.SelectMany(n => n.Hashes));
             }
         }
 
@@ -128,7 +127,7 @@ namespace Omnius.Xeus.Service.Engines
                 var item = _publisherRepo.Items.Find(rootHash).FirstOrDefault();
                 if (item is null) return false;
 
-                return item.MerkleTreeSections.Any(n => n.Contains(rootHash));
+                return item.RootHash == blockHash || item.MerkleTreeSections.Any(n => n.Contains(rootHash));
             }
         }
 
@@ -141,7 +140,7 @@ namespace Omnius.Xeus.Service.Engines
             }
 
             {
-                var tempPrefix = "_temp_" + this.GenUniqueId();
+                var tempPrefix = "_temp_" + Guid.NewGuid().ToString("N");
 
                 var lastMerkleTreeSection = await this.EncodeFileAsync(filePath, cancellationToken);
                 var (rootHash, middleMerkleTreeSections) = await this.EncodeMerkleTreeSectionsAsync(lastMerkleTreeSection, tempPrefix, cancellationToken);
@@ -164,7 +163,7 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask<OmniHash> PublishFileAsync(ReadOnlySequence<byte> sequence, string registrant, CancellationToken cancellationToken = default)
         {
-            var tempPrefix = "_temp_" + this.GenUniqueId();
+            var tempPrefix = "_temp_" + Guid.NewGuid().ToString("N");
 
             var lastMerkleTreeSection = await this.EncodeMemoryAsync(sequence, tempPrefix, cancellationToken);
             var (rootHash, middleMerkleTreeSections) = await this.EncodeMerkleTreeSectionsAsync(lastMerkleTreeSection, tempPrefix, cancellationToken);
@@ -188,8 +187,8 @@ namespace Omnius.Xeus.Service.Engines
         {
             foreach (var blockHash in blockHashes.ToHashSet())
             {
-                var oldName = ComputeBlockName(oldPrefix, blockHash);
-                var newName = ComputeBlockName(newPrefix, blockHash);
+                var oldName = ComputeKey(oldPrefix, blockHash);
+                var newName = ComputeKey(newPrefix, blockHash);
                 await _blockStorage.ChangeKeyAsync(oldName, newName, cancellationToken);
             }
         }
@@ -223,7 +222,7 @@ namespace Omnius.Xeus.Service.Engines
             return new MerkleTreeSection(0, MaxBlockLength, (ulong)inStream.Length, blockHashes.ToArray());
         }
 
-        private async ValueTask<MerkleTreeSection> EncodeMemoryAsync(ReadOnlySequence<byte> sequence, string blockNamePrefix, CancellationToken cancellationToken = default)
+        private async ValueTask<MerkleTreeSection> EncodeMemoryAsync(ReadOnlySequence<byte> sequence, string prefix, CancellationToken cancellationToken = default)
         {
             var blockHashes = new List<OmniHash>();
             var sequenceLength = sequence.Length;
@@ -241,14 +240,14 @@ namespace Omnius.Xeus.Service.Engines
                 sequence = sequence.Slice(blockLength);
 
                 var blockHash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(memory.Span));
-                await this.WriteBlockAsync(blockNamePrefix, blockHash, memory);
+                await this.WriteBlockAsync(prefix, blockHash, memory);
                 blockHashes.Add(blockHash);
             }
 
             return new MerkleTreeSection(0, MaxBlockLength, (ulong)sequenceLength, blockHashes.ToArray());
         }
 
-        private async ValueTask<(OmniHash, IEnumerable<MerkleTreeSection>)> EncodeMerkleTreeSectionsAsync(MerkleTreeSection lastMerkleTreeSection, string blockNamePrefix, CancellationToken cancellationToken = default)
+        private async ValueTask<(OmniHash, IEnumerable<MerkleTreeSection>)> EncodeMerkleTreeSectionsAsync(MerkleTreeSection lastMerkleTreeSection, string prefix, CancellationToken cancellationToken = default)
         {
             var resultMerkleTreeSections = new Stack<MerkleTreeSection>();
 
@@ -279,7 +278,7 @@ namespace Omnius.Xeus.Service.Engines
                             var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(memory.Span));
                             hashList.Add(hash);
 
-                            await this.WriteBlockAsync(blockNamePrefix, hash, memory);
+                            await this.WriteBlockAsync(prefix, hash, memory);
 
                             sequence = sequence.Slice(blockLength);
                         }
@@ -299,17 +298,17 @@ namespace Omnius.Xeus.Service.Engines
 
                     var rootHash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(memory.Span));
 
-                    await this.WriteBlockAsync(blockNamePrefix, rootHash, memory);
+                    await this.WriteBlockAsync(prefix, rootHash, memory);
 
                     return (rootHash, resultMerkleTreeSections.ToArray());
                 }
             }
         }
 
-        private async ValueTask WriteBlockAsync(string blockNamePrefix, OmniHash blockHash, ReadOnlyMemory<byte> memory)
+        private async ValueTask WriteBlockAsync(string prefix, OmniHash blockHash, ReadOnlyMemory<byte> memory)
         {
-            var blockName = ComputeBlockName(blockNamePrefix, blockHash);
-            await _blockStorage.WriteAsync(blockName, memory);
+            var key = ComputeKey(prefix, blockHash);
+            await _blockStorage.WriteAsync(key, memory);
         }
 
         public async ValueTask UnpublishFileAsync(string filePath, string registrant, CancellationToken cancellationToken = default)
@@ -346,8 +345,8 @@ namespace Omnius.Xeus.Service.Engines
         {
             foreach (var blockHash in blockHashes)
             {
-                var blockName = ComputeBlockName(StringConverter.HashToString(rootHash), blockHash);
-                await _blockStorage.TryDeleteAsync(blockName);
+                var key = ComputeKey(StringConverter.HashToString(rootHash), blockHash);
+                await _blockStorage.TryDeleteAsync(key);
             }
         }
 
@@ -356,7 +355,8 @@ namespace Omnius.Xeus.Service.Engines
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
                 var item = _publisherRepo.Items.Find(rootHash).FirstOrDefault();
-                if (item is null || item.MerkleTreeSections.Any(n => !n.Contains(blockHash))) return null;
+                if (item is null) return null;
+                if (item.RootHash != blockHash && !item.MerkleTreeSections.Any(n => n.Contains(blockHash))) return null;
 
                 if (item.FilePath is not null)
                 {
@@ -377,19 +377,12 @@ namespace Omnius.Xeus.Service.Engines
                     }
                 }
 
-                var blockName = ComputeBlockName(StringConverter.HashToString(rootHash), blockHash);
-                return await _blockStorage.TryReadAsync(blockName, cancellationToken);
+                var key = ComputeKey(StringConverter.HashToString(rootHash), blockHash);
+                return await _blockStorage.TryReadAsync(key, cancellationToken);
             }
         }
 
-        private ulong _uniqueId = 0;
-
-        private string GenUniqueId()
-        {
-            return Interlocked.Increment(ref _uniqueId).ToString();
-        }
-
-        private static string ComputeBlockName(string prefix, OmniHash blockHash)
+        private static string ComputeKey(string prefix, OmniHash blockHash)
         {
             return prefix + "/" + StringConverter.HashToString(blockHash);
         }

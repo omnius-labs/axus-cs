@@ -4,13 +4,12 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Omnius.Core.Avalonia;
-using Omnius.Xeus.Service.Models;
 
 namespace Omnius.Xeus.Ui.Desktop.Windows
 {
     public interface IDialogService
     {
-        ValueTask<IEnumerable<NodeLocation>> ShowNodesWindowAsync();
+        ValueTask<string> GetTextWindowAsync();
         ValueTask<IEnumerable<string>> ShowOpenFileWindowAsync();
     }
 
@@ -25,17 +24,17 @@ namespace Omnius.Xeus.Ui.Desktop.Windows
             _mainWindowProvider = mainWindowProvider;
         }
 
-        public async ValueTask<IEnumerable<NodeLocation>> ShowNodesWindowAsync()
+        public async ValueTask<string> GetTextWindowAsync()
         {
             return await _applicationDispatcher.InvokeAsync(async () =>
             {
-                var window = new NodesWindow
+                var window = new TextWindow
                 {
-                    ViewModel = Bootstrapper.Instance.ServiceProvider?.GetRequiredService<NodesWindowViewModel>() ?? throw new NullReferenceException(),
+                    ViewModel = Bootstrapper.Instance.ServiceProvider?.GetRequiredService<TextWindowViewModel>() ?? throw new NullReferenceException(),
                 };
 
                 await window.ShowDialog(_mainWindowProvider.GetMainWindow());
-                return window.ViewModel.GetNodeLocations();
+                return window.ViewModel.Text.Value;
             });
         }
 

@@ -119,16 +119,14 @@ namespace Omnius.Xeus.Service.Engines.Internal.Repositories
                 }
             }
 
-            public void Insert(SubscribedFileItem item)
+            public void Upsert(SubscribedFileItem item)
             {
                 using (_asyncLock.WriterLock())
                 {
                     var itemEntity = SubscribedFileItemEntity.Import(item);
 
                     var col = this.GetCollection();
-
-                    if (col.Exists(n => n.RootHash == itemEntity.RootHash && n.Registrant == itemEntity.Registrant)) return;
-
+                    col.DeleteMany(n => n.RootHash == itemEntity.RootHash && n.Registrant == itemEntity.Registrant);
                     col.Insert(itemEntity);
                 }
             }
@@ -209,16 +207,14 @@ namespace Omnius.Xeus.Service.Engines.Internal.Repositories
                 }
             }
 
-            public void Insert(DecodedFileItem item)
+            public void Upsert(DecodedFileItem item)
             {
                 using (_asyncLock.WriterLock())
                 {
                     var itemEntity = DecodedFileItemEntity.Import(item);
 
                     var col = this.GetCollection();
-
-                    if (col.Exists(n => n.RootHash == itemEntity.RootHash)) return;
-
+                    col.DeleteMany(n => n.RootHash == itemEntity.RootHash);
                     col.Insert(itemEntity);
                 }
             }

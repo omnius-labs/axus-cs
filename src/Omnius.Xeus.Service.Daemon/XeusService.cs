@@ -33,6 +33,8 @@ namespace Omnius.Xeus.Service.Daemon
         private ISubscribedShoutStorage _subscribedShoutStorage = null!;
         private IShoutExchanger _shoutExchanger = null!;
 
+        private List<IDisposable> _disposables = new();
+
         public static async ValueTask<XeusService> CreateAsync(string workingDirectoryPath, AppConfig appConfig, CancellationToken cancellationToken = default)
         {
             var xeusService = new XeusService();
@@ -100,6 +102,7 @@ namespace Omnius.Xeus.Service.Daemon
 
             var fileExchangerOptions = new FileExchangerOptions(appConfig.Engines?.FileExchanger?.MaxSessionCount ?? int.MaxValue);
             _fileExchanger = await FileExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedFileStorage, _subscribedFileStorage, bytesPool, fileExchangerOptions, cancellationToken);
+            _nodeFinder.Events.GetContentExchangers.Subscribe(() => _fileExchanger).ToAdd(_disposables);
 
             var publishedShoutStorageOptions = new PublishedShoutStorageOptions(Path.Combine(workingDirectoryPath, "published_shout_storage"));
             _publishedShoutStorage = await PublishedShoutStorage.CreateAsync(LiteDatabaseBytesStorage.Factory, bytesPool, publishedShoutStorageOptions, cancellationToken);
@@ -109,6 +112,7 @@ namespace Omnius.Xeus.Service.Daemon
 
             var shoutExchangerOptions = new ShoutExchangerOptions(appConfig.Engines?.ShoutExchanger?.MaxSessionCount ?? int.MaxValue);
             _shoutExchanger = await ShoutExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedShoutStorage, _subscribedShoutStorage, bytesPool, shoutExchangerOptions, cancellationToken);
+            _nodeFinder.Events.GetContentExchangers.Subscribe(() => _shoutExchanger).ToAdd(_disposables);
         }
 
         protected override async ValueTask OnDisposeAsync()
@@ -122,6 +126,11 @@ namespace Omnius.Xeus.Service.Daemon
             await _publishedShoutStorage.DisposeAsync();
             await _subscribedShoutStorage.DisposeAsync();
             await _shoutExchanger.DisposeAsync();
+
+            foreach (var disposable in _disposables)
+            {
+                disposable.Dispose();
+            }
         }
 
         public async ValueTask<GetSessionsReportResult> GetSessionsReportAsync(CancellationToken cancellationToken = default)

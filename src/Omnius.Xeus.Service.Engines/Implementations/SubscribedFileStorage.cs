@@ -102,18 +102,34 @@ namespace Omnius.Xeus.Service.Engines
 
             foreach (var decodedItem in decodedItems)
             {
-                var lastMerkleTreeSection = decodedItem.MerkleTreeSections[^1];
-                if (lastMerkleTreeSection.Depth == 0) continue;
-
-                var completed = await this.ValidateDecodingCompletedAsync(decodedItem.RootHash, lastMerkleTreeSection.Hashes, cancellationToken);
-                if (!completed) continue;
-
-                var nextMerkleTreeSection = await this.DecodeMerkleTreeSectionAsync(decodedItem.RootHash, lastMerkleTreeSection.Hashes, cancellationToken);
-                if (nextMerkleTreeSection is null) continue;
-
-                lock (await _asyncLock.WriterLockAsync(cancellationToken))
+                if (decodedItem.MerkleTreeSections.Count == 0)
                 {
-                    _subscriberRepo.DecodedItems.Insert(new DecodedFileItem(decodedItem.RootHash, decodedItem.MerkleTreeSections.Append(nextMerkleTreeSection).ToArray()));
+                    var completed = await this.ValidateDecodingCompletedAsync(decodedItem.RootHash, new[] { decodedItem.RootHash }, cancellationToken);
+                    if (!completed) continue;
+
+                    var nextMerkleTreeSection = await this.DecodeMerkleTreeSectionAsync(decodedItem.RootHash, new[] { decodedItem.RootHash }, cancellationToken);
+                    if (nextMerkleTreeSection is null) continue;
+
+                    lock (await _asyncLock.WriterLockAsync(cancellationToken))
+                    {
+                        _subscriberRepo.DecodedItems.Upsert(new DecodedFileItem(decodedItem.RootHash, new[] { nextMerkleTreeSection }));
+                    }
+                }
+                else
+                {
+                    var lastMerkleTreeSection = decodedItem.MerkleTreeSections[^1];
+                    if (lastMerkleTreeSection.Depth == 0) continue;
+
+                    var completed = await this.ValidateDecodingCompletedAsync(decodedItem.RootHash, lastMerkleTreeSection.Hashes, cancellationToken);
+                    if (!completed) continue;
+
+                    var nextMerkleTreeSection = await this.DecodeMerkleTreeSectionAsync(decodedItem.RootHash, lastMerkleTreeSection.Hashes, cancellationToken);
+                    if (nextMerkleTreeSection is null) continue;
+
+                    lock (await _asyncLock.WriterLockAsync(cancellationToken))
+                    {
+                        _subscriberRepo.DecodedItems.Upsert(new DecodedFileItem(decodedItem.RootHash, decodedItem.MerkleTreeSections.Append(nextMerkleTreeSection).ToArray()));
+                    }
                 }
             }
         }
@@ -122,8 +138,8 @@ namespace Omnius.Xeus.Service.Engines
         {
             foreach (var blockHash in blockHashes)
             {
-                var blockName = ComputeBlockName(StringConverter.HashToString(rootHash), blockHash);
-                var exists = await _blockStorage.ContainsKeyAsync(blockName, cancellationToken);
+                var key = ComputeKey(StringConverter.HashToString(rootHash), blockHash);
+                var exists = await _blockStorage.ContainsKeyAsync(key, cancellationToken);
                 if (!exists) return false;
             }
 
@@ -136,7 +152,7 @@ namespace Omnius.Xeus.Service.Engines
 
             foreach (var blockHash in blockHashes)
             {
-                var blockName = ComputeBlockName(StringConverter.HashToString(rootHash), blockHash);
+                var blockName = ComputeKey(StringConverter.HashToString(rootHash), blockHash);
                 using var memoryOwner = await _blockStorage.TryReadAsync(blockName, cancellationToken);
                 if (memoryOwner is null) return null;
 
@@ -191,7 +207,7 @@ namespace Omnius.Xeus.Service.Engines
                 var decodedItem = _subscriberRepo.DecodedItems.FindOne(rootHash);
                 if (decodedItem is null) return Enumerable.Empty<OmniHash>();
 
-                var blockHashes = decodedItem.MerkleTreeSections.SelectMany(n => n.Hashes).ToArray();
+                var blockHashes = new[] { decodedItem.RootHash }.Union(decodedItem.MerkleTreeSections.SelectMany(n => n.Hashes)).ToArray();
 
                 if (exists is null)
                 {
@@ -203,8 +219,8 @@ namespace Omnius.Xeus.Service.Engines
 
                     foreach (var blockHash in blockHashes)
                     {
-                        var blockName = ComputeBlockName(StringConverter.HashToString(rootHash), blockHash);
-                        if (await _blockStorage.ContainsKeyAsync(blockName, cancellationToken) != exists.Value) continue;
+                        var key = ComputeKey(StringConverter.HashToString(rootHash), blockHash);
+                        if (await _blockStorage.ContainsKeyAsync(key, cancellationToken) != exists.Value) continue;
 
                         filteredHashes.Add(blockHash);
                     }
@@ -231,7 +247,7 @@ namespace Omnius.Xeus.Service.Engines
                 var decodedItem = _subscriberRepo.DecodedItems.FindOne(rootHash);
                 if (decodedItem is null) return false;
 
-                return decodedItem.MerkleTreeSections.Any(n => n.Hashes.Contains(blockHash));
+                return decodedItem.RootHash == blockHash || decodedItem.MerkleTreeSections.Any(n => n.Contains(blockHash));
             }
         }
 
@@ -239,7 +255,8 @@ namespace Omnius.Xeus.Service.Engines
         {
             using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
-                _subscriberRepo.Items.Insert(new SubscribedFileItem(rootHash, registrant));
+                _subscriberRepo.Items.Upsert(new SubscribedFileItem(rootHash, registrant));
+                _subscriberRepo.DecodedItems.Upsert(new DecodedFileItem(rootHash, Array.Empty<MerkleTreeSection>()));
             }
         }
 
@@ -256,8 +273,8 @@ namespace Omnius.Xeus.Service.Engines
 
                 foreach (var blockHash in decodedItem.MerkleTreeSections.SelectMany(n => n.Hashes))
                 {
-                    var blockName = ComputeBlockName(StringConverter.HashToString(rootHash), blockHash);
-                    await _blockStorage.TryDeleteAsync(blockName, cancellationToken);
+                    var key = ComputeKey(StringConverter.HashToString(rootHash), blockHash);
+                    await _blockStorage.TryDeleteAsync(key, cancellationToken);
                 }
 
                 _subscriberRepo.DecodedItems.Delete(rootHash);
@@ -268,19 +285,16 @@ namespace Omnius.Xeus.Service.Engines
         {
             bool result = false;
 
-            try
+            using (var fileStream = new UnbufferedFileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, FileOptions.None, _bytesPool))
             {
-                using var fileStream = new UnbufferedFileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, FileOptions.None, _bytesPool);
                 var writer = PipeWriter.Create(fileStream);
                 result = await this.ExportFileAsync(rootHash, writer, cancellationToken);
                 await writer.CompleteAsync();
             }
-            finally
+
+            if (!result && File.Exists(filePath))
             {
-                if (File.Exists(filePath))
-                {
-                    File.Delete(filePath);
-                }
+                File.Delete(filePath);
             }
 
             return result;
@@ -291,21 +305,15 @@ namespace Omnius.Xeus.Service.Engines
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
                 var decodedItem = _subscriberRepo.DecodedItems.FindOne(rootHash);
-                if (decodedItem is null)
-                {
-                    return false;
-                }
+                if (decodedItem is null) return false;
 
                 var lastMerkleTreeSection = decodedItem.MerkleTreeSections[^1];
-                if (lastMerkleTreeSection.Depth != 0)
-                {
-                    return false;
-                }
+                if (lastMerkleTreeSection.Depth != 0) return false;
 
                 foreach (var blockHash in lastMerkleTreeSection.Hashes)
                 {
-                    var blockName = ComputeBlockName(StringConverter.HashToString(rootHash), blockHash);
-                    var exists = await _blockStorage.ContainsKeyAsync(blockName, cancellationToken);
+                    var key = ComputeKey(StringConverter.HashToString(rootHash), blockHash);
+                    var exists = await _blockStorage.ContainsKeyAsync(key, cancellationToken);
                     if (!exists) return false;
                 }
 
@@ -313,13 +321,13 @@ namespace Omnius.Xeus.Service.Engines
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    var blockName = ComputeBlockName(StringConverter.HashToString(rootHash), blockHash);
-                    using var memoryOwner = await _blockStorage.TryReadAsync(blockName, cancellationToken);
+                    var key = ComputeKey(StringConverter.HashToString(rootHash), blockHash);
+                    using var memoryOwner = await _blockStorage.TryReadAsync(key, cancellationToken);
                     if (memoryOwner is null) return false;
 
-                    if (rootHash.Validate(memoryOwner.Memory.Span))
+                    if (!blockHash.Validate(memoryOwner.Memory.Span))
                     {
-                        await _blockStorage.TryDeleteAsync(blockName, cancellationToken);
+                        await _blockStorage.TryDeleteAsync(key, cancellationToken);
                         return false;
                     }
 
@@ -336,10 +344,11 @@ namespace Omnius.Xeus.Service.Engines
             using (await _asyncLock.ReaderLockAsync(cancellationToken))
             {
                 var decodedItem = _subscriberRepo.DecodedItems.FindOne(rootHash);
-                if (decodedItem is null || decodedItem.MerkleTreeSections.Any(n => !n.Contains(blockHash))) return null;
+                if (decodedItem is null) return null;
+                if (decodedItem.RootHash != blockHash && !decodedItem.MerkleTreeSections.Any(n => n.Contains(blockHash))) return null;
 
-                var blockName = ComputeBlockName(StringConverter.HashToString(rootHash), blockHash);
-                return await _blockStorage.TryReadAsync(blockName, cancellationToken);
+                var key = ComputeKey(StringConverter.HashToString(rootHash), blockHash);
+                return await _blockStorage.TryReadAsync(key, cancellationToken);
             }
         }
 
@@ -348,14 +357,15 @@ namespace Omnius.Xeus.Service.Engines
             using (await _asyncLock.WriterLockAsync(cancellationToken))
             {
                 var decodedItem = _subscriberRepo.DecodedItems.FindOne(rootHash);
-                if (decodedItem is null || decodedItem.MerkleTreeSections.Any(n => !n.Contains(blockHash))) return;
+                if (decodedItem is null) return;
+                if (decodedItem.RootHash != blockHash && !decodedItem.MerkleTreeSections.Any(n => n.Contains(blockHash))) return;
 
-                var blockName = ComputeBlockName(StringConverter.HashToString(rootHash), blockHash);
-                await _blockStorage.WriteAsync(blockName, memory, cancellationToken);
+                var key = ComputeKey(StringConverter.HashToString(rootHash), blockHash);
+                await _blockStorage.WriteAsync(key, memory, cancellationToken);
             }
         }
 
-        private static string ComputeBlockName(string prefix, OmniHash blockHash)
+        private static string ComputeKey(string prefix, OmniHash blockHash)
         {
             return prefix + "/" + StringConverter.HashToString(blockHash);
         }

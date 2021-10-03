@@ -13,6 +13,7 @@ namespace Omnius.Xeus.Intaractors
     {
         private static readonly string _schema = "xeus";
         private static readonly string _nodeLocationPath = "node-location";
+        private static readonly string _seedPath = "seed";
 
         public static string NodeLocationToString(NodeLocation message)
         {
@@ -27,13 +28,13 @@ namespace Omnius.Xeus.Intaractors
 
         public static string SeedToString(Seed message)
         {
-            return MessageToString<Seed>(_nodeLocationPath, message);
+            return MessageToString<Seed>(_seedPath, message);
         }
 
         public static bool TryStringToSeed(string text, [NotNullWhen(true)] out Seed? message)
         {
             message = null;
-            return TryStringToMessage<Seed>(_nodeLocationPath, text, out message);
+            return TryStringToMessage<Seed>(_seedPath, text, out message);
         }
 
         private static string MessageToString<T>(string path, T message)
@@ -53,7 +54,7 @@ namespace Omnius.Xeus.Intaractors
         private static bool TryStringToMessage<T>(string path, string text, [NotNullWhen(true)] out T? message)
             where T : IRocketMessage<T>
         {
-            if (!TryRemoveSchemaAndPath(text, _nodeLocationPath, out var value))
+            if (!TryRemoveSchemaAndPath(text, path, out var value))
             {
                 message = default!;
                 return false;

@@ -143,24 +143,24 @@ namespace Omnius.Xeus.Service.Models
 
         public static readonly int MaxSchemeLength = 256;
 
-        public ContentClue(string scheme, global::Omnius.Core.Cryptography.OmniHash contentHash)
+        public ContentClue(string scheme, global::Omnius.Core.Cryptography.OmniHash rootHash)
         {
             if (scheme is null) throw new global::System.ArgumentNullException("scheme");
             if (scheme.Length > 256) throw new global::System.ArgumentOutOfRangeException("scheme");
             this.Scheme = scheme;
-            this.ContentHash = contentHash;
+            this.RootHash = rootHash;
 
             ___hashCode = new global::System.Lazy<int>(() =>
             {
                 var ___h = new global::System.HashCode();
                 if (scheme != default) ___h.Add(scheme.GetHashCode());
-                if (contentHash != default) ___h.Add(contentHash.GetHashCode());
+                if (rootHash != default) ___h.Add(rootHash.GetHashCode());
                 return ___h.ToHashCode();
             });
         }
 
         public string Scheme { get; }
-        public global::Omnius.Core.Cryptography.OmniHash ContentHash { get; }
+        public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
 
         public static global::Omnius.Xeus.Service.Models.ContentClue Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
         {
@@ -191,7 +191,7 @@ namespace Omnius.Xeus.Service.Models
             if (target is null) return false;
             if (object.ReferenceEquals(this, target)) return true;
             if (this.Scheme != target.Scheme) return false;
-            if (this.ContentHash != target.ContentHash) return false;
+            if (this.RootHash != target.RootHash) return false;
 
             return true;
         }
@@ -208,10 +208,10 @@ namespace Omnius.Xeus.Service.Models
                     w.Write((uint)1);
                     w.Write(value.Scheme);
                 }
-                if (value.ContentHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
+                if (value.RootHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
                 {
                     w.Write((uint)2);
-                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.ContentHash, rank + 1);
+                    global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.RootHash, rank + 1);
                 }
                 w.Write((uint)0);
             }
@@ -220,7 +220,7 @@ namespace Omnius.Xeus.Service.Models
                 if (rank > 256) throw new global::System.FormatException();
 
                 string p_scheme = string.Empty;
-                global::Omnius.Core.Cryptography.OmniHash p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
+                global::Omnius.Core.Cryptography.OmniHash p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
 
                 for (; ; )
                 {
@@ -235,13 +235,13 @@ namespace Omnius.Xeus.Service.Models
                             }
                         case 2:
                             {
-                                p_contentHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                                p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                                 break;
                             }
                     }
                 }
 
-                return new global::Omnius.Xeus.Service.Models.ContentClue(p_scheme, p_contentHash);
+                return new global::Omnius.Xeus.Service.Models.ContentClue(p_scheme, p_rootHash);
             }
         }
     }

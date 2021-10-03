@@ -8,17 +8,17 @@ namespace Omnius.Xeus.Service.Engines
     {
         private sealed class SessionStatus : ISynchronized
         {
-            public SessionStatus(ISession session, OmniHash contentHash)
+            public SessionStatus(ISession session, OmniHash rootHash)
             {
                 this.Session = session;
-                this.ContentHash = contentHash;
+                this.RootHash = rootHash;
             }
 
             public object LockObject { get; } = new object();
 
             public ISession Session { get; }
 
-            public OmniHash ContentHash { get; }
+            public OmniHash RootHash { get; }
 
             public FileExchangerDataMessage? SendingDataMessage { get; set; }
 
