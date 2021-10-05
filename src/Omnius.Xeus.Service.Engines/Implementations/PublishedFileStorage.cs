@@ -106,7 +106,7 @@ namespace Omnius.Xeus.Service.Engines
                 var item = _publisherRepo.Items.Find(rootHash).FirstOrDefault();
                 if (item is null) return Enumerable.Empty<OmniHash>();
 
-                return new[] { item.RootHash }.Union(item.MerkleTreeSections.SelectMany(n => n.Hashes));
+                return item.MerkleTreeSections.SelectMany(n => n.Hashes).ToArray();
             }
         }
 
@@ -127,7 +127,7 @@ namespace Omnius.Xeus.Service.Engines
                 var item = _publisherRepo.Items.Find(rootHash).FirstOrDefault();
                 if (item is null) return false;
 
-                return item.RootHash == blockHash || item.MerkleTreeSections.Any(n => n.Contains(rootHash));
+                return item.MerkleTreeSections.Any(n => n.Contains(rootHash));
             }
         }
 
@@ -175,7 +175,7 @@ namespace Omnius.Xeus.Service.Engines
             {
                 // FIXME
                 // 途中で処理が中断された場合に残骸となったブロックを除去する処理が必要
-                await this.RenameBlocksAsync(tempPrefix, StringConverter.HashToString(rootHash), mergedMerkleTreeSections.SelectMany(n => n.Hashes), cancellationToken);
+                await this.RenameBlocksAsync(tempPrefix, StringConverter.HashToString(rootHash), middleMerkleTreeSections.SelectMany(n => n.Hashes).ToArray(), cancellationToken);
 
                 _publisherRepo.Items.Upsert(item);
             }
@@ -255,52 +255,51 @@ namespace Omnius.Xeus.Service.Engines
             for (; ; )
             {
                 using var bytesPool = new BytesPipe(_bytesPool);
-
                 lastMerkleTreeSection.Export(bytesPool.Writer, _bytesPool);
 
-                if (bytesPool.Writer.WrittenBytes > MaxBlockLength)
+                var hashList = new List<OmniHash>();
+
+                using (var memoryOwner = _bytesPool.Memory.Rent(MaxBlockLength))
                 {
-                    var hashList = new List<OmniHash>();
+                    var sequence = bytesPool.Reader.GetSequence();
+                    var remain = sequence.Length;
 
-                    using (var memoryOwner = _bytesPool.Memory.Rent(MaxBlockLength))
+                    while (remain > 0)
                     {
-                        var sequence = bytesPool.Reader.GetSequence();
-                        var remain = sequence.Length;
+                        var blockLength = (int)Math.Min(remain, MaxBlockLength);
+                        remain -= blockLength;
 
-                        while (remain > 0)
-                        {
-                            var blockLength = (int)Math.Min(remain, MaxBlockLength);
-                            remain -= blockLength;
+                        var memory = memoryOwner.Memory.Slice(0, blockLength);
+                        sequence.CopyTo(memory.Span);
 
-                            var memory = memoryOwner.Memory.Slice(0, blockLength);
-                            sequence.CopyTo(memory.Span);
+                        var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(memory.Span));
+                        hashList.Add(hash);
 
-                            var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(memory.Span));
-                            hashList.Add(hash);
+                        await this.WriteBlockAsync(prefix, hash, memory);
 
-                            await this.WriteBlockAsync(prefix, hash, memory);
-
-                            sequence = sequence.Slice(blockLength);
-                        }
+                        sequence = sequence.Slice(blockLength);
                     }
+                }
 
-                    var newMerkleTreeSection = new MerkleTreeSection(lastMerkleTreeSection.Depth + 1, MaxBlockLength, (ulong)bytesPool.Writer.WrittenBytes, hashList.ToArray());
-                    lastMerkleTreeSection = newMerkleTreeSection;
-                    resultMerkleTreeSections.Push(newMerkleTreeSection);
+                if (hashList.Count > 1)
+                {
+                    int depth = lastMerkleTreeSection.Depth + 1;
+                    ulong length = (ulong)bytesPool.Writer.WrittenBytes;
+                    uint blockLength = (uint)Math.Min(length, MaxBlockLength);
+
+                    lastMerkleTreeSection = new MerkleTreeSection(depth, blockLength, length, hashList.ToArray());
+                    resultMerkleTreeSections.Push(lastMerkleTreeSection);
                 }
                 else
                 {
-                    using var memoryOwner = _bytesPool.Memory.Rent(MaxBlockLength);
-                    var sequence = bytesPool.Reader.GetSequence();
+                    int depth = -1;
+                    ulong length = 0;
+                    uint blockLength = 0;
 
-                    var memory = memoryOwner.Memory.Slice(0, (int)sequence.Length);
-                    sequence.CopyTo(memory.Span);
+                    lastMerkleTreeSection = new MerkleTreeSection(depth, blockLength, length, hashList.ToArray());
+                    resultMerkleTreeSections.Push(lastMerkleTreeSection);
 
-                    var rootHash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(memory.Span));
-
-                    await this.WriteBlockAsync(prefix, rootHash, memory);
-
-                    return (rootHash, resultMerkleTreeSections.ToArray());
+                    return (lastMerkleTreeSection.Hashes.First(), resultMerkleTreeSections.ToArray());
                 }
             }
         }
@@ -356,7 +355,7 @@ namespace Omnius.Xeus.Service.Engines
             {
                 var item = _publisherRepo.Items.Find(rootHash).FirstOrDefault();
                 if (item is null) return null;
-                if (item.RootHash != blockHash && !item.MerkleTreeSections.Any(n => n.Contains(blockHash))) return null;
+                if (!item.MerkleTreeSections.Any(n => n.Contains(blockHash))) return null;
 
                 if (item.FilePath is not null)
                 {

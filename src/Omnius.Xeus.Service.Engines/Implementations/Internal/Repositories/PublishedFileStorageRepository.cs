@@ -142,6 +142,8 @@ namespace Omnius.Xeus.Service.Engines.Internal.Repositories
 
                     var col = this.GetCollection();
 
+                    _database.BeginTrans();
+
                     if (item.FilePath is not null)
                     {
                         col.DeleteMany(n => n.FilePath == item.FilePath && n.Registrant == item.Registrant);
@@ -152,6 +154,8 @@ namespace Omnius.Xeus.Service.Engines.Internal.Repositories
                     }
 
                     col.Insert(itemEntity);
+
+                    _database.Commit();
                 }
             }
 

@@ -93,7 +93,7 @@ namespace Omnius.Xeus.Service.Engines.Internal.Repositories
                 using (_asyncLock.ReaderLock())
                 {
                     var col = this.GetCollection();
-                    return col.FindAll().Select(n => n.Export());
+                    return col.FindAll().Select(n => n.Export()).ToArray();
                 }
             }
 
@@ -126,8 +126,13 @@ namespace Omnius.Xeus.Service.Engines.Internal.Repositories
                     var itemEntity = SubscribedFileItemEntity.Import(item);
 
                     var col = this.GetCollection();
+
+                    _database.BeginTrans();
+
                     col.DeleteMany(n => n.RootHash == itemEntity.RootHash && n.Registrant == itemEntity.Registrant);
                     col.Insert(itemEntity);
+
+                    _database.Commit();
                 }
             }
 
@@ -192,7 +197,7 @@ namespace Omnius.Xeus.Service.Engines.Internal.Repositories
                 using (_asyncLock.ReaderLock())
                 {
                     var col = this.GetCollection();
-                    return col.FindAll().Select(n => n.Export());
+                    return col.FindAll().Select(n => n.Export()).ToArray();
                 }
             }
 
@@ -214,8 +219,13 @@ namespace Omnius.Xeus.Service.Engines.Internal.Repositories
                     var itemEntity = DecodedFileItemEntity.Import(item);
 
                     var col = this.GetCollection();
+
+                    _database.BeginTrans();
+
                     col.DeleteMany(n => n.RootHash == itemEntity.RootHash);
                     col.Insert(itemEntity);
+
+                    _database.Commit();
                 }
             }
 

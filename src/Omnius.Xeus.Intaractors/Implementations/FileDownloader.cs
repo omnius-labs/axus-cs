@@ -80,6 +80,7 @@ namespace Omnius.Xeus.Intaractors
                     await Task.Delay(1000 * 30, cancellationToken);
 
                     await this.SyncSubscribedFiles(cancellationToken);
+                    await this.TryExportSubscribedFiles(cancellationToken);
                 }
             }
             catch (OperationCanceledException e)
@@ -123,15 +124,13 @@ namespace Omnius.Xeus.Intaractors
                     if (item.State == DownloadingFileState.Completed) continue;
 
                     var basePath = Directory.GetCurrentDirectory();
-                    var filePath = Path.Combine(basePath, item.Seed.Name);
+                    var filePath = Path.Combine(basePath, "_test_", item.Seed.Name);
 
-                    var newItem = new DownloadingFileItem(item.Seed, filePath, item.CreationTime, DownloadingFileState.Decoding);
-                    _fileDownloaderRepo.Items.Upsert(newItem);
-
-                    await _service.TryExportFileToStorageAsync(item.Seed.RootHash, filePath, cancellationToken);
-
-                    newItem = new DownloadingFileItem(item.Seed, filePath, item.CreationTime, DownloadingFileState.Completed);
-                    _fileDownloaderRepo.Items.Upsert(newItem);
+                    if (await _service.TryExportFileToStorageAsync(item.Seed.RootHash, filePath, cancellationToken))
+                    {
+                        var newItem = new DownloadingFileItem(item.Seed, filePath, item.CreationTime, DownloadingFileState.Completed);
+                        _fileDownloaderRepo.Items.Upsert(newItem);
+                    }
                 }
             }
         }

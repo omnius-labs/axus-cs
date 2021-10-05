@@ -142,12 +142,12 @@ namespace Omnius.Xeus.Service.Engines
 
                         foreach (var targetAddress in targetNodeLocation.Addresses)
                         {
-                            _logger.Debug("Connecting to {0}", targetAddress);
+                            _logger.Debug("Connecting: {0}", targetAddress);
 
                             var session = await _sessionConnector.ConnectAsync(targetAddress, ServiceName, cancellationToken);
                             if (session is null) continue;
 
-                            _logger.Debug("Connected to {0}", targetAddress);
+                            _logger.Debug("Connected: {0}", targetAddress);
 
                             _connectedAddressSet.Add(targetAddress);
 
@@ -190,10 +190,12 @@ namespace Omnius.Xeus.Service.Engines
                         if (_sessionStatusSet.Count > (_options.MaxSessionCount / 2)) continue;
                     }
 
+                    _logger.Debug("Accepting");
+
                     var session = await _sessionAccepter.AcceptAsync(ServiceName, cancellationToken);
                     if (session is null) continue;
 
-                    _logger.Debug("Accepted from {0}", session.Address);
+                    _logger.Debug("Accepted: {0}", session.Address);
 
                     await this.TryAddAcceptedSessionAsync(session, cancellationToken);
                 }
@@ -224,10 +226,14 @@ namespace Omnius.Xeus.Service.Engines
                     var requestMessage = new FileExchangerHandshakeRequestMessage(rootHash);
                     var resultMessage = await session.Connection.SendAndReceiveAsync<FileExchangerHandshakeRequestMessage, FileExchangerHandshakeResultMessage>(requestMessage, cancellationToken);
 
+                    _logger.Debug("Handshake send request and receive result: {0}", resultMessage.Type);
+
                     if (resultMessage.Type != FileExchangerHandshakeResultType.Accepted) return false;
 
                     var status = new SessionStatus(session, rootHash);
                     _sessionStatusSet = _sessionStatusSet.Add(status);
+
+                    _logger.Debug("Added session");
 
                     return true;
                 }
@@ -262,6 +268,8 @@ namespace Omnius.Xeus.Service.Engines
                     var requestMessage = await session.Connection.Receiver.ReceiveAsync<FileExchangerHandshakeRequestMessage>(cancellationToken);
                     var rootHash = requestMessage.RootHash;
 
+                    _logger.Debug("Handshake receive request: {0}", rootHash.ToString());
+
                     bool accepted = false;
                     accepted |= await _publishedFileStorage.ContainsFileAsync(rootHash, cancellationToken);
                     accepted |= await _subscribedFileStorage.ContainsFileAsync(rootHash, cancellationToken);
@@ -269,10 +277,14 @@ namespace Omnius.Xeus.Service.Engines
                     var resultMessage = new FileExchangerHandshakeResultMessage(accepted ? FileExchangerHandshakeResultType.Accepted : FileExchangerHandshakeResultType.Rejected);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
 
+                    _logger.Debug("Handshake send result: {0}", resultMessage.Type);
+
                     if (!accepted) return false;
 
                     var status = new SessionStatus(session, rootHash);
                     _sessionStatusSet = _sessionStatusSet.Add(status);
+
+                    _logger.Debug("Added session");
 
                     return true;
                 }
@@ -321,6 +333,8 @@ namespace Omnius.Xeus.Service.Engines
                                 {
                                     if (sessionStatus.Session.Connection.Sender.TrySend(dataMessage))
                                     {
+                                        _logger.Debug($"Send data message: {sessionStatus.Session.Address}");
+
                                         foreach (var block in dataMessage.GiveBlocks)
                                         {
                                             block.Value.Dispose();
@@ -361,28 +375,24 @@ namespace Omnius.Xeus.Service.Engines
                 {
                     await Task.Delay(1, cancellationToken);
 
-                    SessionStatus[] connectionStatuses;
-                    lock (_lockObject)
-                    {
-                        connectionStatuses = _sessionStatusSet.ToArray();
-                    }
-
-                    foreach (var connectionStatus in connectionStatuses)
+                    foreach (var sessionStatus in _sessionStatusSet)
                     {
                         try
                         {
-                            if (connectionStatus.Session.Connection.Receiver.TryReceive<FileExchangerDataMessage>(out var dataMessage))
+                            if (sessionStatus.Session.Connection.Receiver.TryReceive<FileExchangerDataMessage>(out var dataMessage))
                             {
+                                _logger.Debug($"Received data message: {sessionStatus.Session.Address}");
+
                                 try
                                 {
-                                    lock (connectionStatus.LockObject)
+                                    lock (sessionStatus.LockObject)
                                     {
-                                        connectionStatus.ReceivedWantBlockHashes = dataMessage.WantBlockHashes.ToArray();
+                                        sessionStatus.ReceivedWantBlockHashes = dataMessage.WantBlockHashes.ToArray();
                                     }
 
                                     foreach (var block in dataMessage.GiveBlocks)
                                     {
-                                        await _subscribedFileStorage.WriteBlockAsync(connectionStatus.RootHash, block.Hash, block.Value.Memory, cancellationToken);
+                                        await _subscribedFileStorage.WriteBlockAsync(sessionStatus.RootHash, block.Hash, block.Value.Memory, cancellationToken);
                                     }
                                 }
                                 finally
@@ -398,7 +408,7 @@ namespace Omnius.Xeus.Service.Engines
                         {
                             lock (_lockObject)
                             {
-                                _sessionStatusSet.Remove(connectionStatus);
+                                _sessionStatusSet.Remove(sessionStatus);
                             }
                         }
                     }
@@ -429,17 +439,11 @@ namespace Omnius.Xeus.Service.Engines
                     await this.UpdatePushContentCluesAsync(cancellationToken);
                     await this.UpdateWantContentCluesAsync(cancellationToken);
 
-                    SessionStatus[] connectionStatuses;
-                    lock (_lockObject)
-                    {
-                        connectionStatuses = _sessionStatusSet.ToArray();
-                    }
-
-                    foreach (var connectionStatus in connectionStatuses)
+                    foreach (var sessionStatus in _sessionStatusSet)
                     {
                         OmniHash[] wantBlockHashes;
                         {
-                            wantBlockHashes = (await _subscribedFileStorage.GetBlockHashesAsync(connectionStatus.RootHash, false, cancellationToken))
+                            wantBlockHashes = (await _subscribedFileStorage.GetBlockHashesAsync(sessionStatus.RootHash, false, cancellationToken))
                                 .Randomize()
                                 .Take(FileExchangerDataMessage.MaxWantBlockHashesCount)
                                 .ToArray();
@@ -448,16 +452,18 @@ namespace Omnius.Xeus.Service.Engines
                         var giveBlocks = new List<Block>();
                         {
                             var receivedWantBlockHashSet = new HashSet<OmniHash>();
-                            lock (connectionStatus.LockObject)
+                            lock (sessionStatus.LockObject)
                             {
-                                receivedWantBlockHashSet.UnionWith(connectionStatus.ReceivedWantBlockHashes ?? Array.Empty<OmniHash>());
+                                receivedWantBlockHashSet.UnionWith(sessionStatus.ReceivedWantBlockHashes ?? Array.Empty<OmniHash>());
                             }
 
                             foreach (var contentStorage in new IReadOnlyFileStorage[] { _publishedFileStorage, _subscribedFileStorage })
                             {
-                                foreach (var hash in (await contentStorage.GetBlockHashesAsync(connectionStatus.RootHash, true, cancellationToken)).Randomize())
+                                foreach (var hash in (await contentStorage.GetBlockHashesAsync(sessionStatus.RootHash, true, cancellationToken)).Randomize())
                                 {
-                                    var memoryOwner = await contentStorage.ReadBlockAsync(connectionStatus.RootHash, hash, cancellationToken);
+                                    if (!receivedWantBlockHashSet.Contains(hash)) continue;
+
+                                    var memoryOwner = await contentStorage.ReadBlockAsync(sessionStatus.RootHash, hash, cancellationToken);
                                     if (memoryOwner is null) continue;
 
                                     giveBlocks.Add(new Block(hash, memoryOwner));
@@ -471,9 +477,9 @@ namespace Omnius.Xeus.Service.Engines
                         End:;
                         }
 
-                        lock (connectionStatus.LockObject)
+                        lock (sessionStatus.LockObject)
                         {
-                            connectionStatus.SendingDataMessage = new FileExchangerDataMessage(wantBlockHashes, giveBlocks.ToArray());
+                            sessionStatus.SendingDataMessage = new FileExchangerDataMessage(wantBlockHashes, giveBlocks.ToArray());
                         }
                     }
                 }

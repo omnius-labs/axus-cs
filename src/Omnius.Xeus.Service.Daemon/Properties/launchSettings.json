@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Omnius.Xeus.Service.Daemon": {
+      "commandName": "Project",
+      "commandLineArgs": "\"./demo/daemon_1/state\" \"./demo/daemon_1/logs\" \"-v\"",
+      "workingDirectory": "C:\\home\\repos\\omnius-labs\\xeus",
+      "nativeDebugging": true
+    }
+  }
+}

@@ -123,8 +123,13 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
                     var itemEntity = DownloadingFileItemEntity.Import(item);
 
                     var col = this.GetCollection();
+
+                    _database.BeginTrans();
+
                     col.DeleteMany(n => n.Seed == itemEntity.Seed);
                     col.Insert(itemEntity);
+
+                    _database.Commit();
                 }
             }
 

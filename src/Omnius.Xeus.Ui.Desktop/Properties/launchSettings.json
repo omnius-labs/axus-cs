@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Omnius.Xeus.Ui.Desktop": {
+      "commandName": "Project",
+      "commandLineArgs": "\"./demo/ui-desktop_1/state\" \"./demo/ui-desktop_1/logs\"",
+      "workingDirectory": "C:\\home\\repos\\omnius-labs\\xeus",
+      "nativeDebugging": true
+    }
+  }
+}

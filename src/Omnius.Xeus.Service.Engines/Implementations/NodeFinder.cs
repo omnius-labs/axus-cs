@@ -11,7 +11,6 @@ using Omnius.Core.Helpers;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Connections;
 using Omnius.Core.Pipelines;
-using Omnius.Core.Serialization;
 using Omnius.Xeus.Service.Engines.Internal;
 using Omnius.Xeus.Service.Engines.Internal.Models;
 using Omnius.Xeus.Service.Engines.Primitives;
@@ -209,12 +208,12 @@ namespace Omnius.Xeus.Service.Engines
 
                     foreach (var targetAddress in targetNodeLocation.Addresses)
                     {
-                        _logger.Debug("Connecting to {0}", targetAddress);
+                        _logger.Debug("Connecting: {0}", targetAddress);
 
                         var session = await _sessionConnector.ConnectAsync(targetAddress, ServiceName, cancellationToken);
                         if (session is null) continue;
 
-                        _logger.Debug("Connected to {0}", targetAddress);
+                        _logger.Debug("Connected: {0}", targetAddress);
 
                         _connectedAddressSet.Add(targetAddress);
 
@@ -264,10 +263,12 @@ namespace Omnius.Xeus.Service.Engines
                         if (_sessionStatusSet.Count > (_options.MaxSessionCount / 2)) continue;
                     }
 
+                    _logger.Debug("Accepting");
+
                     var session = await _sessionAccepter.AcceptAsync(ServiceName, cancellationToken);
                     if (session is null) continue;
 
-                    _logger.Debug("Accepted from {0}", session.Address);
+                    _logger.Debug("Accepted: {0}", session.Address);
 
                     await this.TryAddSessionAsync(session, cancellationToken);
                 }
@@ -302,7 +303,6 @@ namespace Omnius.Xeus.Service.Engines
                     if (this.TryAddSessionStatus(sessionStatus)) return false;
 
                     _logger.Debug("Added session");
-
                     return true;
                 }
 
@@ -379,7 +379,7 @@ namespace Omnius.Xeus.Service.Engines
 
                     await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
 
-                    foreach (var sessionStatus in _sessionStatusSet.ToArray())
+                    foreach (var sessionStatus in _sessionStatusSet)
                     {
                         try
                         {
@@ -389,7 +389,7 @@ namespace Omnius.Xeus.Service.Engines
                                 {
                                     if (sessionStatus.Session.Connection.Sender.TrySend(sessionStatus.SendingDataMessage))
                                     {
-                                        _logger.Debug($"Send data message ({OmniBase.Encode(sessionStatus.Id, ConvertStringType.Base16)})");
+                                        _logger.Debug($"Send data message: {sessionStatus.Session.Address}");
 
                                         sessionStatus.SendingDataMessage = null;
                                     }
@@ -430,13 +430,13 @@ namespace Omnius.Xeus.Service.Engines
 
                     await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
 
-                    foreach (var sessionStatus in _sessionStatusSet.ToArray())
+                    foreach (var sessionStatus in _sessionStatusSet)
                     {
                         try
                         {
                             if (sessionStatus.Session.Connection.Receiver.TryReceive<NodeFinderDataMessage>(out var dataMessage))
                             {
-                                _logger.Debug($"Received data message ({OmniBase.Encode(sessionStatus.Id, ConvertStringType.Base16)})");
+                                _logger.Debug($"Received data message: {sessionStatus.Session.Address}");
 
                                 await this.AddCloudNodeLocationsAsync(dataMessage.PushCloudNodeLocations, cancellationToken);
 

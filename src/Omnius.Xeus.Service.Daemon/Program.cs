@@ -25,7 +25,6 @@ namespace Omnius.Xeus.Service.Daemon
             if (verbose)
             {
                 ChangeLogLevel(NLog.LogLevel.Trace);
-                _logger.Debug("Log level changed to Trace.");
             }
 
             try
@@ -50,6 +49,8 @@ namespace Omnius.Xeus.Service.Daemon
 
         private static void ChangeLogLevel(NLog.LogLevel minLevel)
         {
+            _logger.Debug("Log level changed: {0}", minLevel);
+
             var rootLoggingRule = NLog.LogManager.Configuration.LoggingRules.First(n => n.NameMatches("*"));
             rootLoggingRule.EnableLoggingForLevels(minLevel, NLog.LogLevel.Fatal);
             NLog.LogManager.ReconfigExistingLoggers();

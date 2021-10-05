@@ -106,8 +106,13 @@ namespace Omnius.Xeus.Intaractors.Internal.Repositories
                     var itemEntity = UploadingFileItemEntity.Import(item);
 
                     var col = this.GetCollection();
+
+                    _database.BeginTrans();
+
                     col.DeleteMany(n => n.FilePath == item.FilePath);
                     col.Insert(itemEntity);
+
+                    _database.Commit();
                 }
             }
 
