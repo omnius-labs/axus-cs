@@ -23,7 +23,7 @@ namespace Omnius.Xeus.Ui.Desktop
         private BytesPool? _bytesPool;
         private XeusServiceManager? _xeusServiceManager;
         private Dashboard? _dashboard;
-        private FileDownloader _fileDownloader;
+        private FileDownloader? _fileDownloader;
         private FileUploader? _fileUploader;
 
         public static Bootstrapper Instance { get; } = new Bootstrapper();

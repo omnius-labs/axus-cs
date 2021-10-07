@@ -10,6 +10,7 @@ namespace Omnius.Xeus.Ui.Desktop.Windows
     public interface IDialogService
     {
         ValueTask<string> GetTextWindowAsync();
+
         ValueTask<IEnumerable<string>> ShowOpenFileWindowAsync();
     }
 
