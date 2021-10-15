@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,7 +13,13 @@ namespace Omnius.Xeus.Service.Daemon
 
         public static void Main(string[] args)
         {
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(Program.UnhandledException);
             CoconaLiteApp.Run<Program>(args);
+        }
+
+        private static void UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            _logger.Error(e);
         }
 
         public async ValueTask RunAsync([Argument("state")] string stateDirectoryPath = "../daemon/state", [Argument("logs")] string logsDirectoryPath = "../daemon/logs", [Option("verbose", new[] { 'v' })] bool verbose = false)

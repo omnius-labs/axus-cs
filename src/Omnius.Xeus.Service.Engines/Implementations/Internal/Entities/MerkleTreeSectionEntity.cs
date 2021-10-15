@@ -20,6 +20,7 @@ namespace Omnius.Xeus.Service.Engines.Internal.Entities
             return new MerkleTreeSectionEntity()
             {
                 Depth = value.Depth,
+                BlockLength = value.BlockLength,
                 Length = value.Length,
                 Hashes = value.Hashes.Select(n => OmniHashEntity.Import(n)).ToArray(),
             };

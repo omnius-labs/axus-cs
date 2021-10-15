@@ -32,7 +32,7 @@ namespace Omnius.Xeus.Service.Engines
 
         private readonly byte[] _myId;
 
-        private readonly HashSet<SessionStatus> _sessionStatusSet = new();
+        private ImmutableHashSet<SessionStatus> _sessionStatusSet = ImmutableHashSet<SessionStatus>.Empty;
         private readonly LinkedList<NodeLocation> _cloudNodeLocations = new();
 
         private readonly VolatileListDictionary<ContentClue, NodeLocation> _receivedPushContentLocationMap = new(TimeSpan.FromMinutes(30));
@@ -45,6 +45,8 @@ namespace Omnius.Xeus.Service.Engines
         private readonly Task _computeLoopTask;
 
         private readonly CancellationTokenSource _cancellationTokenSource = new();
+
+        private readonly Random _random = new();
 
         private readonly object _lockObject = new();
 
@@ -173,40 +175,21 @@ namespace Omnius.Xeus.Service.Engines
         {
             try
             {
-                var random = new Random();
-
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    await Task.Delay(1000, cancellationToken);
+                    await Task.Delay(1000, cancellationToken).ConfigureAwait(false);
 
-                    lock (_lockObject)
-                    {
-                        int connectionCount = _sessionStatusSet.Select(n => n.Session.HandshakeType == SessionHandshakeType.Connected).Count();
+                    _connectedAddressSet.Refresh();
 
-                        if (_sessionStatusSet.Count > (_options.MaxSessionCount / 2)) continue;
-                    }
+                    int connectionCount = _sessionStatusSet.Select(n => n.Session.HandshakeType == SessionHandshakeType.Connected).Count();
+                    if (_sessionStatusSet.Count > (_options.MaxSessionCount / 2)) continue;
 
-                    NodeLocation? targetNodeLocation = null;
-
-                    lock (_lockObject)
-                    {
-                        var nodeLocations = _cloudNodeLocations.ToArray();
-                        random.Shuffle(nodeLocations);
-
-                        var ignoreAddressSet = new HashSet<OmniAddress>();
-                        ignoreAddressSet.UnionWith(_sessionStatusSet.Select(n => n.Session.Address));
-                        ignoreAddressSet.UnionWith(_connectedAddressSet);
-
-                        targetNodeLocation = nodeLocations
-                            .Where(n => !n.Addresses.Any(n => ignoreAddressSet.Contains(n)))
-                            .FirstOrDefault();
-                    }
-
-                    if (targetNodeLocation == null) continue;
+                    var nodeLocation = this.FindNodeLocationToConnecting();
+                    if (nodeLocation == null) continue;
 
                     bool succeeded = false;
 
-                    foreach (var targetAddress in targetNodeLocation.Addresses)
+                    foreach (var targetAddress in nodeLocation.Addresses)
                     {
                         _logger.Debug("Connecting: {0}", targetAddress);
 
@@ -220,19 +203,17 @@ namespace Omnius.Xeus.Service.Engines
                         if (await this.TryAddSessionAsync(session, cancellationToken))
                         {
                             succeeded = true;
-                            goto End;
+                            break;
                         }
                     }
 
-                End:
-
                     if (succeeded)
                     {
-                        this.RefreshCloudNodeLocation(targetNodeLocation);
+                        this.RefreshCloudNodeLocation(nodeLocation);
                     }
                     else
                     {
-                        this.RemoveCloudNodeLocation(targetNodeLocation);
+                        this.RemoveCloudNodeLocation(nodeLocation);
                     }
                 }
             }
@@ -246,22 +227,33 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
+        private NodeLocation? FindNodeLocationToConnecting()
+        {
+            lock (_lockObject)
+            {
+                var nodeLocations = _cloudNodeLocations.ToArray();
+                _random.Shuffle(nodeLocations);
+
+                var ignoreAddressSet = new HashSet<OmniAddress>();
+                ignoreAddressSet.UnionWith(_sessionStatusSet.Select(n => n.Session.Address));
+                ignoreAddressSet.UnionWith(_connectedAddressSet);
+
+                return nodeLocations
+                    .Where(n => !n.Addresses.Any(n => ignoreAddressSet.Contains(n)))
+                    .FirstOrDefault();
+            }
+        }
+
         private async Task AcceptLoopAsync(CancellationToken cancellationToken)
         {
             try
             {
-                var random = new Random();
-
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    await Task.Delay(1000, cancellationToken);
+                    await Task.Delay(1000, cancellationToken).ConfigureAwait(false);
 
-                    lock (_lockObject)
-                    {
-                        int connectionCount = _sessionStatusSet.Select(n => n.Session.HandshakeType == SessionHandshakeType.Accepted).Count();
-
-                        if (_sessionStatusSet.Count > (_options.MaxSessionCount / 2)) continue;
-                    }
+                    int connectionCount = _sessionStatusSet.Select(n => n.Session.HandshakeType == SessionHandshakeType.Accepted).Count();
+                    if (_sessionStatusSet.Count > (_options.MaxSessionCount / 2)) continue;
 
                     _logger.Debug("Accepting");
 
@@ -300,7 +292,7 @@ namespace Omnius.Xeus.Service.Engines
                     _logger.Debug("Handshake profile");
 
                     var sessionStatus = new SessionStatus(session, profile.Id, profile.NodeLocation);
-                    if (this.TryAddSessionStatus(sessionStatus)) return false;
+                    if (!this.TryAddSessionStatus(sessionStatus)) return false;
 
                     _logger.Debug("Added session");
                     return true;
@@ -363,7 +355,7 @@ namespace Omnius.Xeus.Service.Engines
                 countMap.TryGetValue(targetNodeDistance, out int count);
                 if (count > MaxBucketLength) return false;
 
-                _sessionStatusSet.Add(sessionStatus);
+                _sessionStatusSet = _sessionStatusSet.Add(sessionStatus);
 
                 return true;
             }
@@ -385,25 +377,19 @@ namespace Omnius.Xeus.Service.Engines
                         {
                             lock (sessionStatus.LockObject)
                             {
-                                if (sessionStatus.SendingDataMessage != null)
-                                {
-                                    if (sessionStatus.Session.Connection.Sender.TrySend(sessionStatus.SendingDataMessage))
-                                    {
-                                        _logger.Debug($"Send data message: {sessionStatus.Session.Address}");
+                                var dataMessage = sessionStatus.SendingDataMessage;
+                                if (dataMessage is null || !sessionStatus.Session.Connection.Sender.TrySend(dataMessage)) continue;
 
-                                        sessionStatus.SendingDataMessage = null;
-                                    }
-                                }
+                                _logger.Debug($"Send data message: {sessionStatus.Session.Address}");
+
+                                sessionStatus.SendingDataMessage = null;
                             }
                         }
-                        catch (ConnectionException e)
+                        catch (Exception e)
                         {
                             _logger.Debug(e);
 
-                            lock (_lockObject)
-                            {
-                                _sessionStatusSet.Remove(sessionStatus);
-                            }
+                            _sessionStatusSet = _sessionStatusSet.Remove(sessionStatus);
                         }
                     }
                 }
@@ -434,39 +420,35 @@ namespace Omnius.Xeus.Service.Engines
                     {
                         try
                         {
-                            if (sessionStatus.Session.Connection.Receiver.TryReceive<NodeFinderDataMessage>(out var dataMessage))
+                            if (!sessionStatus.Session.Connection.Receiver.TryReceive<NodeFinderDataMessage>(out var dataMessage)) continue;
+
+                            _logger.Debug($"Received data message: {sessionStatus.Session.Address}");
+
+                            await this.AddCloudNodeLocationsAsync(dataMessage.PushCloudNodeLocations, cancellationToken);
+
+                            lock (sessionStatus.LockObject)
                             {
-                                _logger.Debug($"Received data message: {sessionStatus.Session.Address}");
-
-                                await this.AddCloudNodeLocationsAsync(dataMessage.PushCloudNodeLocations, cancellationToken);
-
-                                lock (sessionStatus.LockObject)
-                                {
-                                    sessionStatus.ReceivedWantContentClues.UnionWith(dataMessage.WantContentClues);
-                                }
-
-                                lock (_lockObject)
-                                {
-                                    foreach (var contentLocation in dataMessage.PushContentLocations)
-                                    {
-                                        _receivedPushContentLocationMap.AddRange(contentLocation.ContentClue, contentLocation.NodeLocations);
-                                    }
-
-                                    foreach (var contentLocation in dataMessage.GiveContentLocations)
-                                    {
-                                        _receivedGiveContentLocationMap.AddRange(contentLocation.ContentClue, contentLocation.NodeLocations);
-                                    }
-                                }
+                                sessionStatus.ReceivedWantContentClues.UnionWith(dataMessage.WantContentClues);
                             }
-                        }
-                        catch (ConnectionException e)
-                        {
-                            _logger.Debug(e);
 
                             lock (_lockObject)
                             {
-                                _sessionStatusSet.Remove(sessionStatus);
+                                foreach (var contentLocation in dataMessage.PushContentLocations)
+                                {
+                                    _receivedPushContentLocationMap.AddRange(contentLocation.ContentClue, contentLocation.NodeLocations);
+                                }
+
+                                foreach (var contentLocation in dataMessage.GiveContentLocations)
+                                {
+                                    _receivedGiveContentLocationMap.AddRange(contentLocation.ContentClue, contentLocation.NodeLocations);
+                                }
                             }
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.Debug(e);
+
+                            _sessionStatusSet = _sessionStatusSet.Remove(sessionStatus);
                         }
                     }
                 }
@@ -491,17 +473,19 @@ namespace Omnius.Xeus.Service.Engines
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+                    await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken).ConfigureAwait(false);
 
                     lock (_lockObject)
                     {
-                        _connectedAddressSet.Refresh();
                         _receivedPushContentLocationMap.Refresh();
                         _receivedGiveContentLocationMap.Refresh();
 
-                        foreach (var connectionStatus in _sessionStatusSet)
+                        foreach (var sessionStatus in _sessionStatusSet)
                         {
-                            connectionStatus.Refresh();
+                            lock (sessionStatus.LockObject)
+                            {
+                                sessionStatus.Refresh();
+                            }
                         }
                     }
 
