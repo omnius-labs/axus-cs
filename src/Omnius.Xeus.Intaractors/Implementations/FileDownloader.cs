@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
+using Omnius.Core.Helpers;
 using Omnius.Core.RocketPack;
 using Omnius.Core.Storages;
 using Omnius.Xeus.Intaractors.Internal;
@@ -32,7 +33,7 @@ namespace Omnius.Xeus.Intaractors
 
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-        private readonly AsyncReaderWriterLock _asyncLock = new();
+        private readonly AsyncLock _asyncLock = new();
 
         private const string Registrant = "Omnius.Xeus.Intaractors.FileDownloader";
 
@@ -63,10 +64,10 @@ namespace Omnius.Xeus.Intaractors
         protected override async ValueTask OnDisposeAsync()
         {
             _cancellationTokenSource.Cancel();
-
             await _watchLoopTask;
-
             _cancellationTokenSource.Dispose();
+
+            _fileDownloaderRepo.Dispose();
         }
 
         private async Task WatchLoopAsync(CancellationToken cancellationToken = default)
@@ -95,7 +96,7 @@ namespace Omnius.Xeus.Intaractors
 
         private async ValueTask SyncSubscribedFiles(CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 var subscribedFileReports = await _service.GetSubscribedFileReportsAsync(cancellationToken);
                 var hashes = new HashSet<OmniHash>();
@@ -117,7 +118,7 @@ namespace Omnius.Xeus.Intaractors
 
         private async ValueTask TryExportSubscribedFiles(CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 foreach (var item in _fileDownloaderRepo.Items.FindAll())
                 {
@@ -125,6 +126,7 @@ namespace Omnius.Xeus.Intaractors
 
                     var basePath = Directory.GetCurrentDirectory();
                     var filePath = Path.Combine(basePath, "_test_", item.Seed.Name);
+                    DirectoryHelper.CreateDirectory(Path.GetDirectoryName(filePath)!);
 
                     if (await _service.TryExportFileToStorageAsync(item.Seed.RootHash, filePath, cancellationToken))
                     {
@@ -137,7 +139,7 @@ namespace Omnius.Xeus.Intaractors
 
         public async ValueTask<IEnumerable<DownloadingFileReport>> GetDownloadingFileReportsAsync(CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 var reports = new List<DownloadingFileReport>();
 
@@ -152,7 +154,7 @@ namespace Omnius.Xeus.Intaractors
 
         public async ValueTask RegisterAsync(Seed seed, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 var now = Timestamp.FromDateTime(DateTime.UtcNow);
                 var item = new DownloadingFileItem(seed, null, now, DownloadingFileState.Downloading);
@@ -162,7 +164,7 @@ namespace Omnius.Xeus.Intaractors
 
         public async ValueTask UnregisterAsync(Seed seed, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 _fileDownloaderRepo.Items.Delete(seed);
             }

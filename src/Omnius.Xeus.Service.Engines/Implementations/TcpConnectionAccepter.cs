@@ -31,7 +31,7 @@ namespace Omnius.Xeus.Service.Engines
         private TcpListenerManager? _tcpListenerManager;
         private readonly AsyncLock _asyncLock = new();
 
-        private const int MaxReceiveByteCount = 1024 * 1024 * 8;
+        private const int MaxReceiveByteCount = 1024 * 1024 * 256;
 
         public static async ValueTask<TcpConnectionAccepter> CreateAsync(IBandwidthLimiter senderBandwidthLimiter, IBandwidthLimiter receiverBandwidthLimiter, IUpnpClientFactory upnpClientFactory, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, TcpConnectionAccepterOptions options, CancellationToken cancellationToken = default)
         {

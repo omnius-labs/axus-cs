@@ -22,7 +22,7 @@ namespace Omnius.Xeus.Service.Daemon.Configuration
             }
             catch (Exception e)
             {
-                _logger.Debug(e);
+                _logger.Error(e);
                 return null;
             }
         }

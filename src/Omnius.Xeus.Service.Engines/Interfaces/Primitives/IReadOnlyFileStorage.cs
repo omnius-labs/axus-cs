@@ -12,7 +12,7 @@ namespace Omnius.Xeus.Service.Engines.Primitives
     {
         ValueTask CheckConsistencyAsync(Action<ConsistencyReport> callback, CancellationToken cancellationToken = default);
 
-        ValueTask<IEnumerable<OmniHash>> GetRootHashesAsync(CancellationToken cancellationToken = default);
+        ValueTask<IEnumerable<OmniHash>> GetRootHashesAsync(bool? exists = null, CancellationToken cancellationToken = default);
 
         ValueTask<IEnumerable<OmniHash>> GetBlockHashesAsync(OmniHash rootHash, bool? exists = null, CancellationToken cancellationToken = default);
 
