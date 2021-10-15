@@ -69,10 +69,6 @@ namespace Omnius.Xeus.Service.Engines
 
             try
             {
-#if !DEBUG
-                if (!IsGlobalIpAddress(ipAddress)) return null;
-#endif
-
                 if (_options.Proxy?.Address is not null && _options.Proxy.Address.TryGetTcpEndpoint(out var proxyAddress, out ushort proxyPort, true))
                 {
                     if (_socks5ProxyClientFactory is not null && _options.Proxy.Type == TcpProxyType.Socks5Proxy)
