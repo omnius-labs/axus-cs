@@ -28,7 +28,7 @@ namespace Omnius.Xeus.Service.Engines
         private readonly PublishedShoutStorageRepository _publisherRepo;
         private readonly IBytesStorage<string> _blockStorage;
 
-        private readonly AsyncReaderWriterLock _asyncLock = new();
+        private readonly AsyncLock _asyncLock = new();
 
         public static async ValueTask<PublishedShoutStorage> CreateAsync(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, PublishedShoutStorageOptions options, CancellationToken cancellationToken = default)
         {
@@ -61,7 +61,7 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask<PublishedShoutStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 var shoutReports = new List<PublishedShoutReport>();
 
@@ -80,7 +80,7 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask<IEnumerable<OmniSignature>> GetSignaturesAsync(CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 var results = new List<OmniSignature>();
 
@@ -95,7 +95,7 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask<bool> ContainsShoutAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 var item = _publisherRepo.Items.Find(signature).FirstOrDefault();
                 if (item == null) return false;
@@ -106,7 +106,7 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask PublishShoutAsync(Shout message, string registrant, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 var signature = message.Certificate?.GetOmniSignature();
                 if (signature is null) throw new ArgumentNullException(nameof(message.Certificate));
@@ -117,13 +117,13 @@ namespace Omnius.Xeus.Service.Engines
                 _publisherRepo.Items.Insert(new PublishedShoutItem(signature, message.CreationTime.ToDateTime(), registrant));
 
                 var blockName = ComputeBlockName(signature);
-                await _blockStorage.WriteAsync(blockName, bytesPipe.Reader.GetSequence(), cancellationToken);
+                await _blockStorage.TryWriteAsync(blockName, bytesPipe.Reader.GetSequence(), cancellationToken);
             }
         }
 
         public async ValueTask UnpublishShoutAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 _publisherRepo.Items.Delete(signature, registrant);
             }
@@ -131,7 +131,7 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask<DateTime?> ReadShoutCreationTimeAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 var item = _publisherRepo.Items.Find(signature).FirstOrDefault();
                 if (item == null) return null;
@@ -142,7 +142,7 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask<Shout?> ReadShoutAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 var item = _publisherRepo.Items.Find(signature).FirstOrDefault();
                 if (item == null) return null;

@@ -26,8 +26,8 @@
             Items="{Binding SessionReports}">
             <dg:DataGrid.Columns>
                 <dg:DataGridTextColumn
-                    Header="EngineName"
-                    Binding="{ReflectionBinding EngineName}"
+                    Header="ServiceName"
+                    Binding="{ReflectionBinding ServiceName}"
                     Width="Auto" />
                 <dg:DataGridTextColumn
                     Header="HandshakeType"

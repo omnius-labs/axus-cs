@@ -56,12 +56,12 @@ namespace Omnius.Xeus.Service.Engines.Internal.Models
 
         private readonly global::System.Lazy<int> ___hashCode;
 
-        public static readonly int MaxValueLength = 4194304;
+        public static readonly int MaxValueLength = 33554432;
 
         public Block(global::Omnius.Core.Cryptography.OmniHash hash, global::System.Buffers.IMemoryOwner<byte> value)
         {
             if (value is null) throw new global::System.ArgumentNullException("value");
-            if (value.Memory.Length > 4194304) throw new global::System.ArgumentOutOfRangeException("value");
+            if (value.Memory.Length > 33554432) throw new global::System.ArgumentOutOfRangeException("value");
 
             this.Hash = hash;
             this.Value = value;
@@ -151,7 +151,7 @@ namespace Omnius.Xeus.Service.Engines.Internal.Models
                             }
                         case 2:
                             {
-                                p_value = r.GetRecyclableMemory(4194304);
+                                p_value = r.GetRecyclableMemory(33554432);
                                 break;
                             }
                     }

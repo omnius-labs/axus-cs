@@ -28,7 +28,7 @@ namespace Omnius.Xeus.Service.Engines
         private readonly SubscribedShoutStorageRepository _subscriberRepo;
         private readonly IBytesStorage<string> _blockStorage;
 
-        private readonly AsyncReaderWriterLock _asyncLock = new();
+        private readonly AsyncLock _asyncLock = new();
 
         public static async ValueTask<SubscribedShoutStorage> CreateAsync(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, SubscribedShoutStorageOptions options, CancellationToken cancellationToken = default)
         {
@@ -61,7 +61,7 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask<SubscribedShoutStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 var shoutReports = new List<SubscribedShoutReport>();
 
@@ -80,7 +80,7 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask<IEnumerable<OmniSignature>> GetSignaturesAsync(CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 var results = new List<OmniSignature>();
 
@@ -95,7 +95,7 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask<bool> ContainsShoutAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 if (_subscriberRepo.Items.Exists(signature)) return false;
 
@@ -105,7 +105,7 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask SubscribeShoutAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 _subscriberRepo.Items.Insert(new SubscribedShoutItem(signature, registrant));
             }
@@ -113,7 +113,7 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask UnsubscribeShoutAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 _subscriberRepo.Items.Delete(signature, registrant);
             }
@@ -121,7 +121,7 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask<DateTime?> ReadShoutCreationTimeAsync(OmniSignature signature, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 var writtenItem = _subscriberRepo.WrittenItems.FindOne(signature);
                 if (writtenItem == null) return null;
@@ -164,7 +164,7 @@ namespace Omnius.Xeus.Service.Engines
             _subscriberRepo.WrittenItems.Insert(new WrittenShoutItem(signature, message.CreationTime.ToDateTime()));
 
             var blockName = ComputeBlockName(signature);
-            await _blockStorage.WriteAsync(blockName, bytesPise.Reader.GetSequence(), cancellationToken);
+            await _blockStorage.TryWriteAsync(blockName, bytesPise.Reader.GetSequence(), cancellationToken);
         }
 
         private static string ComputeBlockName(OmniSignature signature)

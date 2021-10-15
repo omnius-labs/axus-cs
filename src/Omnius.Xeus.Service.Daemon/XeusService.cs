@@ -140,6 +140,9 @@ namespace Omnius.Xeus.Service.Daemon
             var nodeFinderReport = await _nodeFinder.GetReportAsync(cancellationToken);
             sessionReports.AddRange(nodeFinderReport.Sessions);
 
+            var fileExchangerReport = await _fileExchanger.GetReportAsync(cancellationToken);
+            sessionReports.AddRange(fileExchangerReport.Sessions);
+
             return new GetSessionsReportResult(sessionReports.ToArray());
         }
 

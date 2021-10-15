@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,6 +14,8 @@ namespace Omnius.Xeus.Ui.Desktop
 
         public static async Task Main(string[] args)
         {
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(Program.UnhandledException);
+
             string stateDirectoryPath = args[0];
             string logsDirectoryPath = args[1];
 
@@ -28,6 +31,11 @@ namespace Omnius.Xeus.Ui.Desktop
             _logger.Info("desktop-ui start");
 
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args, ShutdownMode.OnMainWindowClose);
+        }
+
+        private static void UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            _logger.Error(e);
         }
 
         private static void SetLogsDirectory(string logsDirectoryPath)
