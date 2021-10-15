@@ -25,7 +25,7 @@ namespace Omnius.Xeus.Service.Engines
 
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-        private const int MaxReceiveByteCount = 1024 * 1024 * 8;
+        private const int MaxReceiveByteCount = 1024 * 1024 * 256;
 
         public static async ValueTask<SessionConnector> CreateAsync(IEnumerable<IConnectionConnector> connectionConnectors, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, SessionConnectorOptions options, CancellationToken cancellationToken = default)
         {
@@ -54,7 +54,10 @@ namespace Omnius.Xeus.Service.Engines
                 var connection = await connectionConnector.ConnectAsync(address, cancellationToken);
                 if (connection is null) continue;
 
-                var session = await this.CreateSessionAsync(connection, address, scheme, cancellationToken);
+                using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                linkedTokenSource.CancelAfter(TimeSpan.FromSeconds(20));
+
+                var session = await this.CreateSessionAsync(connection, address, scheme, linkedTokenSource.Token);
                 return session;
             }
 
@@ -63,9 +66,6 @@ namespace Omnius.Xeus.Service.Engines
 
         private async ValueTask<ISession?> CreateSessionAsync(IConnection connection, OmniAddress address, string scheme, CancellationToken cancellationToken)
         {
-            using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            linkedTokenSource.CancelAfter(TimeSpan.FromSeconds(20));
-
             var sendHelloMessage = new SessionManagerHelloMessage(new[] { SessionManagerVersion.Version1 });
             var receiveHelloMessage = await connection.ExchangeAsync(sendHelloMessage, cancellationToken);
 
@@ -74,13 +74,15 @@ namespace Omnius.Xeus.Service.Engines
             if (version == SessionManagerVersion.Version1)
             {
                 var secureConnectionOptions = new OmniSecureConnectionOptions(OmniSecureConnectionType.Connected, _options.DigitalSignature, MaxReceiveByteCount);
-                var secureConnection = OmniSecureConnection.CreateV1(connection, _batchActionDispatcher, _bytesPool, secureConnectionOptions);
+                var secureConnection = OmniSecureConnection.CreateV1(connection, _bytesPool, secureConnectionOptions);
 
-                await secureConnection.HandshakeAsync(linkedTokenSource.Token);
+                await secureConnection.HandshakeAsync(cancellationToken);
                 if (secureConnection.Signature is null) return null;
 
                 var sessionRequestMessage = new SessionManagerSessionRequestMessage(scheme);
-                var sessionResultMessage = secureConnection.SendAndReceiveAsync<SessionManagerSessionRequestMessage, SessionManagerSessionResultMessage>(sessionRequestMessage, linkedTokenSource.Token);
+                var sessionResultMessage = await secureConnection.SendAndReceiveAsync<SessionManagerSessionRequestMessage, SessionManagerSessionResultMessage>(sessionRequestMessage, cancellationToken);
+
+                if (sessionResultMessage.Type != SessionManagerSessionResultType.Accepted) return null;
 
                 var session = new Session(secureConnection, address, SessionHandshakeType.Connected, secureConnection.Signature, scheme);
                 return session;

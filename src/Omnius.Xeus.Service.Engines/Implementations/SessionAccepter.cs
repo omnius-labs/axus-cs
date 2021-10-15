@@ -29,7 +29,7 @@ namespace Omnius.Xeus.Service.Engines
 
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-        private const int MaxReceiveByteCount = 1024 * 1024 * 8;
+        private const int MaxReceiveByteCount = 1024 * 1024 * 256;
 
         public static async ValueTask<SessionAccepter> CreateAsync(IEnumerable<IConnectionAccepter> connectionAccepters, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, SessionAccepterOptions options, CancellationToken cancellationToken = default)
         {
@@ -123,15 +123,16 @@ namespace Omnius.Xeus.Service.Engines
             if (version == SessionManagerVersion.Version1)
             {
                 var secureConnectionOptions = new OmniSecureConnectionOptions(OmniSecureConnectionType.Accepted, _options.DigitalSignature, MaxReceiveByteCount);
-                var secureConnection = OmniSecureConnection.CreateV1(connection, _batchActionDispatcher, _bytesPool, secureConnectionOptions);
+                var secureConnection = OmniSecureConnection.CreateV1(connection, _bytesPool, secureConnectionOptions);
 
                 await secureConnection.HandshakeAsync(cancellationToken);
                 if (secureConnection.Signature is null) return null;
 
                 var receivedMessage = await secureConnection.Receiver.ReceiveAsync<SessionManagerSessionRequestMessage>(cancellationToken);
                 var sendingMessage = new SessionManagerSessionResultMessage(_sessionChannels.Contains(receivedMessage.Scheme) ? SessionManagerSessionResultType.Accepted : SessionManagerSessionResultType.Rejected);
-
                 await secureConnection.Sender.SendAsync(sendingMessage, cancellationToken);
+
+                if (sendingMessage.Type != SessionManagerSessionResultType.Accepted) return null;
 
                 var session = new Session(secureConnection, address, SessionHandshakeType.Accepted, secureConnection.Signature, receivedMessage.Scheme);
                 return session;
