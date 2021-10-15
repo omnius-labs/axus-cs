@@ -11,7 +11,7 @@ option csharp_access_level "internal";
 
 message Block {
     Hash: OmniHash,
-    Value: bytes(capacity: 4 * 1024 * 1024, recyclable: true),
+    Value: bytes(capacity: 1024 * 1024 * 32, recyclable: true),
 }
 
 message MerkleTreeSection {

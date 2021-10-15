@@ -136,7 +136,7 @@ namespace Omnius.Xeus.Service.Daemon
             }
             catch (Exception e)
             {
-                _logger.Debug(e);
+                _logger.Error(e);
             }
             finally
             {

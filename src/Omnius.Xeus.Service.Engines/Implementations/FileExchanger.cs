@@ -17,6 +17,8 @@ using Omnius.Xeus.Service.Models;
 
 namespace Omnius.Xeus.Service.Engines
 {
+    // MEMO: MerkleTreeSectionにBlockLengthもLengthも不要
+    // MEMO: wantBlockHashesは加算されるようにする
     public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
@@ -41,6 +43,8 @@ namespace Omnius.Xeus.Service.Engines
         private readonly Task _computeLoopTask;
 
         private readonly CancellationTokenSource _cancellationTokenSource = new();
+
+        private readonly Random _random = new();
 
         private readonly object _lockObject = new();
 
@@ -100,7 +104,7 @@ namespace Omnius.Xeus.Service.Engines
             return _wantContentClues;
         }
 
-        private readonly VolatileHashSet<OmniAddress> _connectedAddressSet = new(TimeSpan.FromMinutes(30));
+        private readonly VolatileHashSet<OmniAddress> _connectedAddressSet = new(TimeSpan.FromMinutes(3));
 
         private async Task ConnectLoopAsync(CancellationToken cancellationToken)
         {
@@ -110,54 +114,34 @@ namespace Omnius.Xeus.Service.Engines
 
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    await Task.Delay(1000, cancellationToken);
+                    await Task.Delay(1000, cancellationToken).ConfigureAwait(false);
 
                     _connectedAddressSet.Refresh();
 
                     int connectionCount = _sessionStatusSet.Select(n => n.Session.HandshakeType == SessionHandshakeType.Connected).Count();
                     if (_sessionStatusSet.Count > (_options.MaxSessionCount / 2)) continue;
 
-                    foreach (var rootHash in await _subscribedFileStorage.GetRootHashesAsync(cancellationToken))
+                    var rootHash = (await _subscribedFileStorage.GetRootHashesAsync(false, cancellationToken)).Randomize().FirstOrDefault();
+                    if (rootHash == default) continue;
+
+                    var nodeLocation = await this.FindNodeLocationToConnecting(rootHash, cancellationToken);
+                    if (nodeLocation == null) continue;
+
+                    foreach (var targetAddress in nodeLocation.Addresses)
                     {
-                        var contentClue = RootHashToContentClue(rootHash);
+                        _logger.Debug("Connecting: {0}", targetAddress);
 
-                        NodeLocation? targetNodeLocation = null;
+                        var session = await _sessionConnector.ConnectAsync(targetAddress, ServiceName, cancellationToken);
+                        if (session is null) continue;
+
+                        _logger.Debug("Connected: {0}", targetAddress);
+
+                        _connectedAddressSet.Add(targetAddress);
+
+                        if (await this.TryAddConnectedSessionAsync(session, rootHash, cancellationToken))
                         {
-                            var nodeLocations = await _nodeFinder.FindNodeLocationsAsync(contentClue, cancellationToken);
-                            random.Shuffle(nodeLocations);
-
-                            var ignoreAddressSet = new HashSet<OmniAddress>();
-                            lock (_lockObject)
-                            {
-                                ignoreAddressSet.UnionWith(_sessionStatusSet.Select(n => n.Session.Address));
-                                ignoreAddressSet.UnionWith(_connectedAddressSet);
-                            }
-
-                            targetNodeLocation = nodeLocations
-                                .Where(n => !n.Addresses.Any(n => ignoreAddressSet.Contains(n)))
-                                .FirstOrDefault();
+                            break;
                         }
-
-                        if (targetNodeLocation == null) continue;
-
-                        foreach (var targetAddress in targetNodeLocation.Addresses)
-                        {
-                            _logger.Debug("Connecting: {0}", targetAddress);
-
-                            var session = await _sessionConnector.ConnectAsync(targetAddress, ServiceName, cancellationToken);
-                            if (session is null) continue;
-
-                            _logger.Debug("Connected: {0}", targetAddress);
-
-                            _connectedAddressSet.Add(targetAddress);
-
-                            if (await this.TryAddConnectedSessionAsync(session, rootHash, cancellationToken))
-                            {
-                                goto End;
-                            }
-                        }
-
-                    End:;
                     }
                 }
             }
@@ -173,22 +157,35 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
+        private async ValueTask<NodeLocation?> FindNodeLocationToConnecting(OmniHash rootHash, CancellationToken cancellationToken)
+        {
+            var contentClue = RootHashToContentClue(rootHash);
+
+            var nodeLocations = await _nodeFinder.FindNodeLocationsAsync(contentClue, cancellationToken);
+            _random.Shuffle(nodeLocations);
+
+            var ignoreAddressSet = new HashSet<OmniAddress>();
+            lock (_lockObject)
+            {
+                ignoreAddressSet.UnionWith(_sessionStatusSet.Select(n => n.Session.Address));
+                ignoreAddressSet.UnionWith(_connectedAddressSet);
+            }
+
+            return nodeLocations
+                .Where(n => !n.Addresses.Any(n => ignoreAddressSet.Contains(n)))
+                .FirstOrDefault();
+        }
+
         private async Task AcceptLoopAsync(CancellationToken cancellationToken)
         {
             try
             {
-                var random = new Random();
-
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    await Task.Delay(1000, cancellationToken);
+                    await Task.Delay(1000, cancellationToken).ConfigureAwait(false);
 
-                    lock (_lockObject)
-                    {
-                        int connectionCount = _sessionStatusSet.Select(n => n.Session.HandshakeType == SessionHandshakeType.Accepted).Count();
-
-                        if (_sessionStatusSet.Count > (_options.MaxSessionCount / 2)) continue;
-                    }
+                    int connectionCount = _sessionStatusSet.Select(n => n.Session.HandshakeType == SessionHandshakeType.Accepted).Count();
+                    if (_sessionStatusSet.Count > (_options.MaxSessionCount / 2)) continue;
 
                     _logger.Debug("Accepting");
 
@@ -268,7 +265,7 @@ namespace Omnius.Xeus.Service.Engines
                     var requestMessage = await session.Connection.Receiver.ReceiveAsync<FileExchangerHandshakeRequestMessage>(cancellationToken);
                     var rootHash = requestMessage.RootHash;
 
-                    _logger.Debug("Handshake receive request: {0}", rootHash.ToString());
+                    _logger.Debug("Handshake receive request: {0}", rootHash);
 
                     bool accepted = false;
                     accepted |= await _publishedFileStorage.ContainsFileAsync(rootHash, cancellationToken);
@@ -318,9 +315,11 @@ namespace Omnius.Xeus.Service.Engines
         {
             try
             {
-                while (!cancellationToken.IsCancellationRequested)
+                for (; ; )
                 {
-                    await Task.Delay(1, cancellationToken);
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
 
                     foreach (var sessionStatus in _sessionStatusSet)
                     {
@@ -329,28 +328,23 @@ namespace Omnius.Xeus.Service.Engines
                             lock (sessionStatus.LockObject)
                             {
                                 var dataMessage = sessionStatus.SendingDataMessage;
-                                if (dataMessage is not null)
+                                if (dataMessage is null || !sessionStatus.Session.Connection.Sender.TrySend(dataMessage)) continue;
+
+                                _logger.Debug($"Send data message: {sessionStatus.Session.Address}");
+
+                                foreach (var block in dataMessage.GiveBlocks)
                                 {
-                                    if (sessionStatus.Session.Connection.Sender.TrySend(dataMessage))
-                                    {
-                                        _logger.Debug($"Send data message: {sessionStatus.Session.Address}");
-
-                                        foreach (var block in dataMessage.GiveBlocks)
-                                        {
-                                            block.Value.Dispose();
-                                        }
-
-                                        sessionStatus.SendingDataMessage = null;
-                                    }
+                                    block.Value.Dispose();
                                 }
+
+                                sessionStatus.SendingDataMessage = null;
                             }
                         }
-                        catch (ObjectDisposedException)
+                        catch (Exception e)
                         {
-                            lock (_lockObject)
-                            {
-                                _sessionStatusSet.Remove(sessionStatus);
-                            }
+                            _logger.Debug(e);
+
+                            _sessionStatusSet = _sessionStatusSet.Remove(sessionStatus);
                         }
                     }
                 }
@@ -371,45 +365,45 @@ namespace Omnius.Xeus.Service.Engines
         {
             try
             {
-                while (!cancellationToken.IsCancellationRequested)
+                for (; ; )
                 {
-                    await Task.Delay(1, cancellationToken);
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
 
                     foreach (var sessionStatus in _sessionStatusSet)
                     {
                         try
                         {
-                            if (sessionStatus.Session.Connection.Receiver.TryReceive<FileExchangerDataMessage>(out var dataMessage))
+                            if (!sessionStatus.Session.Connection.Receiver.TryReceive<FileExchangerDataMessage>(out var dataMessage)) continue;
+
+                            _logger.Debug($"Received data message: {sessionStatus.Session.Address}");
+
+                            try
                             {
-                                _logger.Debug($"Received data message: {sessionStatus.Session.Address}");
-
-                                try
+                                lock (sessionStatus.LockObject)
                                 {
-                                    lock (sessionStatus.LockObject)
-                                    {
-                                        sessionStatus.ReceivedWantBlockHashes = dataMessage.WantBlockHashes.ToArray();
-                                    }
-
-                                    foreach (var block in dataMessage.GiveBlocks)
-                                    {
-                                        await _subscribedFileStorage.WriteBlockAsync(sessionStatus.RootHash, block.Hash, block.Value.Memory, cancellationToken);
-                                    }
+                                    sessionStatus.ReceivedWantBlockHashes = dataMessage.WantBlockHashes.ToArray();
                                 }
-                                finally
+
+                                foreach (var block in dataMessage.GiveBlocks)
                                 {
-                                    foreach (var block in dataMessage.GiveBlocks)
-                                    {
-                                        block.Value.Dispose();
-                                    }
+                                    await _subscribedFileStorage.WriteBlockAsync(sessionStatus.RootHash, block.Hash, block.Value.Memory, cancellationToken);
+                                }
+                            }
+                            finally
+                            {
+                                foreach (var block in dataMessage.GiveBlocks)
+                                {
+                                    block.Value.Dispose();
                                 }
                             }
                         }
-                        catch (ObjectDisposedException)
+                        catch (Exception e)
                         {
-                            lock (_lockObject)
-                            {
-                                _sessionStatusSet.Remove(sessionStatus);
-                            }
+                            _logger.Debug(e);
+
+                            _sessionStatusSet = _sessionStatusSet.Remove(sessionStatus);
                         }
                     }
                 }
@@ -430,58 +424,15 @@ namespace Omnius.Xeus.Service.Engines
         {
             try
             {
-                var random = new Random();
-
-                while (!cancellationToken.IsCancellationRequested)
+                for (; ; )
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken).ConfigureAwait(false);
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken).ConfigureAwait(false);
 
                     await this.UpdatePushContentCluesAsync(cancellationToken);
                     await this.UpdateWantContentCluesAsync(cancellationToken);
-
-                    foreach (var sessionStatus in _sessionStatusSet)
-                    {
-                        OmniHash[] wantBlockHashes;
-                        {
-                            wantBlockHashes = (await _subscribedFileStorage.GetBlockHashesAsync(sessionStatus.RootHash, false, cancellationToken))
-                                .Randomize()
-                                .Take(FileExchangerDataMessage.MaxWantBlockHashesCount)
-                                .ToArray();
-                        }
-
-                        var giveBlocks = new List<Block>();
-                        {
-                            var receivedWantBlockHashSet = new HashSet<OmniHash>();
-                            lock (sessionStatus.LockObject)
-                            {
-                                receivedWantBlockHashSet.UnionWith(sessionStatus.ReceivedWantBlockHashes ?? Array.Empty<OmniHash>());
-                            }
-
-                            foreach (var contentStorage in new IReadOnlyFileStorage[] { _publishedFileStorage, _subscribedFileStorage })
-                            {
-                                foreach (var hash in (await contentStorage.GetBlockHashesAsync(sessionStatus.RootHash, true, cancellationToken)).Randomize())
-                                {
-                                    if (!receivedWantBlockHashSet.Contains(hash)) continue;
-
-                                    var memoryOwner = await contentStorage.ReadBlockAsync(sessionStatus.RootHash, hash, cancellationToken);
-                                    if (memoryOwner is null) continue;
-
-                                    giveBlocks.Add(new Block(hash, memoryOwner));
-                                    if (giveBlocks.Count >= FileExchangerDataMessage.MaxGiveBlocksCount)
-                                    {
-                                        goto End;
-                                    }
-                                }
-                            }
-
-                        End:;
-                        }
-
-                        lock (sessionStatus.LockObject)
-                        {
-                            sessionStatus.SendingDataMessage = new FileExchangerDataMessage(wantBlockHashes, giveBlocks.ToArray());
-                        }
-                    }
+                    await this.UpdateSendingDataMessage(cancellationToken);
                 }
             }
             catch (OperationCanceledException e)
@@ -500,7 +451,7 @@ namespace Omnius.Xeus.Service.Engines
         {
             var builder = ImmutableHashSet.CreateBuilder<ContentClue>();
 
-            foreach (var rootHash in await _publishedFileStorage.GetRootHashesAsync(cancellationToken))
+            foreach (var rootHash in await _publishedFileStorage.GetRootHashesAsync(true, cancellationToken))
             {
                 var contentClue = RootHashToContentClue(rootHash);
                 builder.Add(contentClue);
@@ -513,13 +464,56 @@ namespace Omnius.Xeus.Service.Engines
         {
             var builder = ImmutableHashSet.CreateBuilder<ContentClue>();
 
-            foreach (var rootHash in await _subscribedFileStorage.GetRootHashesAsync(cancellationToken))
+            foreach (var rootHash in await _subscribedFileStorage.GetRootHashesAsync(false, cancellationToken))
             {
                 var contentClue = RootHashToContentClue(rootHash);
                 builder.Add(contentClue);
             }
 
             _wantContentClues = builder.ToImmutable();
+        }
+
+        private async ValueTask UpdateSendingDataMessage(CancellationToken cancellationToken = default)
+        {
+            foreach (var sessionStatus in _sessionStatusSet)
+            {
+                var wantBlockHashes = (await _subscribedFileStorage.GetBlockHashesAsync(sessionStatus.RootHash, false, cancellationToken)).ToArray();
+                wantBlockHashes = wantBlockHashes.Randomize().Take(FileExchangerDataMessage.MaxWantBlockHashesCount).ToArray();
+
+                var giveBlocks = new List<Block>();
+                {
+                    var receivedWantBlockHashSet = new HashSet<OmniHash>();
+                    lock (sessionStatus.LockObject)
+                    {
+                        receivedWantBlockHashSet.UnionWith(sessionStatus.ReceivedWantBlockHashes ?? Array.Empty<OmniHash>());
+                    }
+
+                    foreach (var contentStorage in new IReadOnlyFileStorage[] { _publishedFileStorage, _subscribedFileStorage })
+                    {
+                        foreach (var blockHash in (await contentStorage.GetBlockHashesAsync(sessionStatus.RootHash, true, cancellationToken)).Randomize())
+                        {
+                            if (!receivedWantBlockHashSet.Contains(blockHash)) continue;
+
+                            var memoryOwner = await contentStorage.ReadBlockAsync(sessionStatus.RootHash, blockHash, cancellationToken);
+                            if (memoryOwner is null) continue;
+
+                            giveBlocks.Add(new Block(blockHash, memoryOwner));
+
+                            if (giveBlocks.Count >= FileExchangerDataMessage.MaxGiveBlocksCount)
+                            {
+                                goto End;
+                            }
+                        }
+                    }
+
+                End:;
+                }
+
+                lock (sessionStatus.LockObject)
+                {
+                    sessionStatus.SendingDataMessage = new FileExchangerDataMessage(wantBlockHashes, giveBlocks.ToArray());
+                }
+            }
         }
 
         private static ContentClue RootHashToContentClue(OmniHash rootHash)

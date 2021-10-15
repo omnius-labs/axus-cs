@@ -26,7 +26,7 @@ namespace Omnius.Xeus.Service.Engines
         private readonly IBytesPool _bytesPool;
         private readonly TcpConnectionConnectorOptions _options;
 
-        private const int MaxReceiveByteCount = 1024 * 1024 * 8;
+        private const int MaxReceiveByteCount = 1024 * 1024 * 256;
 
         public static async ValueTask<TcpConnectionConnector> CreateAsync(IBandwidthLimiter senderBandwidthLimiter, IBandwidthLimiter receiverBandwidthLimiter, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, TcpConnectionConnectorOptions options, CancellationToken cancellationToken = default)
         {

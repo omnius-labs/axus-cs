@@ -32,7 +32,7 @@ namespace Omnius.Xeus.Intaractors
 
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-        private readonly AsyncReaderWriterLock _asyncLock = new();
+        private readonly AsyncLock _asyncLock = new();
 
         private const string Registrant = "Omnius.Xeus.Intaractors.FileUploader";
 
@@ -63,10 +63,10 @@ namespace Omnius.Xeus.Intaractors
         protected override async ValueTask OnDisposeAsync()
         {
             _cancellationTokenSource.Cancel();
-
             await _watchLoopTask;
-
             _cancellationTokenSource.Dispose();
+
+            _fileUploaderRepo.Dispose();
         }
 
         private async Task WatchLoopAsync(CancellationToken cancellationToken = default)
@@ -94,7 +94,7 @@ namespace Omnius.Xeus.Intaractors
 
         private async Task SyncPublishedFiles(CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 var publishedFileReports = await _service.GetPublishedFileReportsAsync(cancellationToken);
                 var filePaths = new HashSet<string>();
@@ -108,7 +108,7 @@ namespace Omnius.Xeus.Intaractors
 
                 foreach (var item in _fileUploaderRepo.Items.FindAll())
                 {
-                    if (item.State == UploadingFileState.Completed) continue;
+                    if (filePaths.Contains(item.FilePath)) continue;
                     var rootHash = await _service.PublishFileFromStorageAsync(item.FilePath, Registrant, cancellationToken);
 
                     var seed = new Seed(rootHash, item.Seed.Name, item.Seed.Size, item.Seed.CreationTime);
@@ -121,7 +121,7 @@ namespace Omnius.Xeus.Intaractors
 
         public async ValueTask<IEnumerable<UploadingFileReport>> GetUploadingFileReportsAsync(CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 var reports = new List<UploadingFileReport>();
 
@@ -137,7 +137,7 @@ namespace Omnius.Xeus.Intaractors
 
         public async ValueTask RegisterAsync(string filePath, string name, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 var now = Timestamp.FromDateTime(DateTime.UtcNow);
                 var seed = new Seed(OmniHash.Empty, name, (ulong)new FileInfo(filePath).Length, now);
@@ -148,7 +148,7 @@ namespace Omnius.Xeus.Intaractors
 
         public async ValueTask UnregisterAsync(string filePath, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 await _service.UnpublishFileFromStorageAsync(filePath, Registrant, cancellationToken);
 

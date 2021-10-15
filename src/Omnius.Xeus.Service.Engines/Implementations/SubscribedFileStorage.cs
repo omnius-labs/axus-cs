@@ -11,7 +11,6 @@ using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Pipelines;
 using Omnius.Core.Storages;
-using Omnius.Core.Streams;
 using Omnius.Xeus.Service.Engines.Internal;
 using Omnius.Xeus.Service.Engines.Internal.Models;
 using Omnius.Xeus.Service.Engines.Internal.Repositories;
@@ -32,7 +31,7 @@ namespace Omnius.Xeus.Service.Engines
 
         private Task _computeLoopTask = null!;
 
-        private readonly AsyncReaderWriterLock _asyncLock = new();
+        private readonly AsyncLock _asyncLock = new();
 
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
@@ -111,7 +110,7 @@ namespace Omnius.Xeus.Service.Engines
                 var nextMerkleTreeSection = await this.DecodeMerkleTreeSectionAsync(decodedItem.RootHash, lastMerkleTreeSection.Hashes, cancellationToken);
                 if (nextMerkleTreeSection is null) continue;
 
-                lock (await _asyncLock.WriterLockAsync(cancellationToken))
+                lock (await _asyncLock.LockAsync(cancellationToken))
                 {
                     _subscriberRepo.DecodedItems.Upsert(new DecodedFileItem(decodedItem.RootHash, decodedItem.MerkleTreeSections.Append(nextMerkleTreeSection).ToArray()));
                 }
@@ -148,7 +147,7 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask<SubscribedFileStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 var fileReports = new List<SubscribedFileReport>();
 
@@ -165,15 +164,15 @@ namespace Omnius.Xeus.Service.Engines
         {
         }
 
-        public async ValueTask<IEnumerable<OmniHash>> GetRootHashesAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<IEnumerable<OmniHash>> GetRootHashesAsync(bool? exists = null, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 var results = new List<OmniHash>();
 
-                foreach (var status in _subscriberRepo.Items.FindAll())
+                foreach (var item in _subscriberRepo.DecodedItems.FindAll())
                 {
-                    results.Add(status.RootHash);
+                    results.Add(item.RootHash);
                 }
 
                 return results;
@@ -182,7 +181,7 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask<IEnumerable<OmniHash>> GetBlockHashesAsync(OmniHash rootHash, bool? exists = null, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 var decodedItem = _subscriberRepo.DecodedItems.FindOne(rootHash);
                 if (decodedItem is null) return Enumerable.Empty<OmniHash>();
@@ -212,7 +211,7 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask<bool> ContainsFileAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 if (!_subscriberRepo.Items.Exists(rootHash)) return false;
 
@@ -222,7 +221,7 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask<bool> ContainsBlockAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 var decodedItem = _subscriberRepo.DecodedItems.FindOne(rootHash);
                 if (decodedItem is null) return false;
@@ -233,16 +232,18 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask SubscribeFileAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 _subscriberRepo.Items.Upsert(new SubscribedFileItem(rootHash, registrant));
+
+                if (_subscriberRepo.DecodedItems.Exists(rootHash)) return;
                 _subscriberRepo.DecodedItems.Upsert(new DecodedFileItem(rootHash, new[] { new MerkleTreeSection(-1, 0, 0, new[] { rootHash }) }));
             }
         }
 
         public async ValueTask UnsubscribeFileAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 _subscriberRepo.Items.Delete(rootHash, registrant);
 
@@ -265,16 +266,11 @@ namespace Omnius.Xeus.Service.Engines
         {
             bool result = false;
 
-            using (var fileStream = new UnbufferedFileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, FileOptions.None, _bytesPool))
+            using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
             {
                 var writer = PipeWriter.Create(fileStream);
                 result = await this.ExportFileAsync(rootHash, writer, cancellationToken);
                 await writer.CompleteAsync();
-            }
-
-            if (!result && File.Exists(filePath))
-            {
-                File.Delete(filePath);
             }
 
             return result;
@@ -282,7 +278,7 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask<bool> ExportFileAsync(OmniHash rootHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 var decodedItem = _subscriberRepo.DecodedItems.FindOne(rootHash);
                 if (decodedItem is null) return false;
@@ -312,7 +308,6 @@ namespace Omnius.Xeus.Service.Engines
                     }
 
                     bufferWriter.Write(memoryOwner.Memory.Span);
-                    bufferWriter.Advance(memoryOwner.Memory.Length);
                 }
 
                 return true;
@@ -321,10 +316,11 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask<IMemoryOwner<byte>?> ReadBlockAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.ReaderLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 var decodedItem = _subscriberRepo.DecodedItems.FindOne(rootHash);
                 if (decodedItem is null) return null;
+
                 if (!decodedItem.MerkleTreeSections.Any(n => n.Contains(blockHash))) return null;
 
                 var key = ComputeKey(StringConverter.HashToString(rootHash), blockHash);
@@ -334,14 +330,15 @@ namespace Omnius.Xeus.Service.Engines
 
         public async ValueTask WriteBlockAsync(OmniHash rootHash, OmniHash blockHash, ReadOnlyMemory<byte> memory, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 var decodedItem = _subscriberRepo.DecodedItems.FindOne(rootHash);
                 if (decodedItem is null) return;
+
                 if (!decodedItem.MerkleTreeSections.Any(n => n.Contains(blockHash))) return;
 
                 var key = ComputeKey(StringConverter.HashToString(rootHash), blockHash);
-                await _blockStorage.WriteAsync(key, memory, cancellationToken);
+                await _blockStorage.TryWriteAsync(key, memory, cancellationToken);
             }
         }
 
