@@ -26,7 +26,7 @@
             CanUserResizeColumns="True"
             Items="{Binding DownloadingFiles}" >
             <i:Interaction.Behaviors>
-                <bs:DataGridBindSelectedItemsBehavior SelectedItems="{Binding SelectedFiles}" />
+                <bs:DataGridBindSelectedItemsBehavior SelectedItems="{Binding SelectedFiles, Mode=OneWay}" />
             </i:Interaction.Behaviors>
             <dg:DataGrid.ContextMenu>
                 <ContextMenu>

@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Net;
 using System.Threading;
@@ -17,7 +18,9 @@ namespace Omnius.Xeus.Ui.Desktop
 {
     public partial class Bootstrapper : AsyncDisposableBase
     {
-        private AppConfig? _appConfig;
+        private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
+
+        private AppConfig? _config;
         private AppSettings? _appSettings;
         private UiState? _uiState;
         private BytesPool? _bytesPool;
@@ -28,74 +31,103 @@ namespace Omnius.Xeus.Ui.Desktop
 
         public static Bootstrapper Instance { get; } = new Bootstrapper();
 
+        private Task<ServiceProvider?>? _buildTask;
+        private CancellationTokenSource _cancellationTokenSource = new();
+
         public Bootstrapper()
         {
         }
 
-        public async ValueTask BuildAsync(string stateDirectoryPath, CancellationToken cancellationToken = default)
+        public void Build(string configPath, string storageDirectoryPath)
         {
-            _appConfig = await LoadAppConfigAsync(stateDirectoryPath, cancellationToken);
-            _appSettings = await LoadAppSettingsAsync(stateDirectoryPath, cancellationToken);
-            _uiState = await LoadUiStateAsync(stateDirectoryPath, cancellationToken);
+            _buildTask = this.BuildAsync(configPath, storageDirectoryPath);
+        }
 
-            _bytesPool = BytesPool.Shared;
+        private async Task<ServiceProvider?> BuildAsync(string configPath, string storageDirectoryPath, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                _config = await LoadConfigAsync(configPath, cancellationToken);
+                _appSettings = await LoadAppSettingsAsync(storageDirectoryPath, cancellationToken);
+                _uiState = await LoadUiStateAsync(storageDirectoryPath, cancellationToken);
 
-            _xeusServiceManager = new XeusServiceManager();
-            await _xeusServiceManager.ConnectAsync(OmniAddress.Parse(_appConfig.DaemonAddress), _bytesPool, cancellationToken);
+                _bytesPool = BytesPool.Shared;
 
-            var xeusService = _xeusServiceManager.GetService();
+                _xeusServiceManager = new XeusServiceManager();
+                await _xeusServiceManager.ConnectAsync(OmniAddress.Parse(_config.DaemonAddress), _bytesPool, cancellationToken);
 
-            _dashboard = await Dashboard.CreateAsync(xeusService, _bytesPool, cancellationToken);
+                var xeusService = _xeusServiceManager.GetService();
 
-            var fileUploaderOptions = new FileUploaderOptions(Path.Combine(stateDirectoryPath, "file_uploader"));
-            _fileUploader = await FileUploader.CreateAsync(xeusService, LiteDatabaseBytesStorage.Factory, _bytesPool, fileUploaderOptions, cancellationToken);
+                _dashboard = await Dashboard.CreateAsync(xeusService, _bytesPool, cancellationToken);
 
-            var fileDownloaderOptions = new FileDownloaderOptions(Path.Combine(stateDirectoryPath, "file_downloader"));
-            _fileDownloader = await FileDownloader.CreateAsync(xeusService, LiteDatabaseBytesStorage.Factory, _bytesPool, fileDownloaderOptions, cancellationToken);
+                var fileUploaderOptions = new FileUploaderOptions(Path.Combine(storageDirectoryPath, "file_uploader"));
+                _fileUploader = await FileUploader.CreateAsync(xeusService, LiteDatabaseBytesStorage.Factory, _bytesPool, fileUploaderOptions, cancellationToken);
 
-            var serviceCollection = new ServiceCollection();
+                var fileDownloaderOptions = new FileDownloaderOptions(Path.Combine(storageDirectoryPath, "file_downloader"));
+                _fileDownloader = await FileDownloader.CreateAsync(xeusService, LiteDatabaseBytesStorage.Factory, _bytesPool, fileDownloaderOptions, cancellationToken);
 
-            serviceCollection.AddSingleton(_appConfig);
-            serviceCollection.AddSingleton(_appSettings);
-            serviceCollection.AddSingleton(_uiState);
+                var serviceCollection = new ServiceCollection();
 
-            serviceCollection.AddSingleton<IBytesPool>(_bytesPool);
+                serviceCollection.AddSingleton(_config);
+                serviceCollection.AddSingleton(_appSettings);
+                serviceCollection.AddSingleton(_uiState);
 
-            serviceCollection.AddSingleton(xeusService);
+                serviceCollection.AddSingleton<IBytesPool>(_bytesPool);
 
-            serviceCollection.AddSingleton<IDashboard>(_dashboard);
-            serviceCollection.AddSingleton<IFileUploader>(_fileUploader);
-            serviceCollection.AddSingleton<IFileDownloader>(_fileDownloader);
+                serviceCollection.AddSingleton(xeusService);
 
-            serviceCollection.AddSingleton<IApplicationDispatcher, ApplicationDispatcher>();
-            serviceCollection.AddSingleton<IMainWindowProvider, MainWindowProvider>();
-            serviceCollection.AddSingleton<IClipboardService, ClipboardService>();
-            serviceCollection.AddSingleton<IDialogService, DialogService>();
+                serviceCollection.AddSingleton<IDashboard>(_dashboard);
+                serviceCollection.AddSingleton<IFileUploader>(_fileUploader);
+                serviceCollection.AddSingleton<IFileDownloader>(_fileDownloader);
 
-            serviceCollection.AddTransient<MainWindowViewModel>();
-            serviceCollection.AddTransient<TextWindowViewModel>();
-            serviceCollection.AddTransient<StatusControlViewModel>();
-            serviceCollection.AddTransient<PeersControlViewModel>();
-            serviceCollection.AddTransient<DownloadControlViewModel>();
-            serviceCollection.AddTransient<UploadControlViewModel>();
+                serviceCollection.AddSingleton<IApplicationDispatcher, ApplicationDispatcher>();
+                serviceCollection.AddSingleton<IMainWindowProvider, MainWindowProvider>();
+                serviceCollection.AddSingleton<IClipboardService, ClipboardService>();
+                serviceCollection.AddSingleton<IDialogService, DialogService>();
 
-            this.ServiceProvider = serviceCollection.BuildServiceProvider();
+                serviceCollection.AddTransient<MainWindowViewModel>();
+                serviceCollection.AddTransient<TextWindowViewModel>();
+                serviceCollection.AddTransient<StatusControlViewModel>();
+                serviceCollection.AddTransient<PeersControlViewModel>();
+                serviceCollection.AddTransient<DownloadControlViewModel>();
+                serviceCollection.AddTransient<UploadControlViewModel>();
+
+                return serviceCollection.BuildServiceProvider();
+            }
+            catch (OperationCanceledException e)
+            {
+                _logger.Debug(e);
+
+                return null;
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e);
+
+                throw;
+            }
         }
 
         protected override async ValueTask OnDisposeAsync()
         {
+            _cancellationTokenSource.Cancel();
+            await _buildTask!;
+            _cancellationTokenSource.Dispose();
+
             if (_xeusServiceManager is not null)
             {
                 await _xeusServiceManager.DisposeAsync();
             }
         }
 
-        public ServiceProvider? ServiceProvider { get; private set; }
-
-        private static async ValueTask<AppConfig> LoadAppConfigAsync(string stateDirectoryPath, CancellationToken cancellationToken = default)
+        public async ValueTask<ServiceProvider?> GetServiceProvider()
         {
-            var filePath = Path.Combine(stateDirectoryPath, "config.yml");
-            var appConfig = await AppConfig.LoadAsync(filePath);
+            return await _buildTask!;
+        }
+
+        private static async ValueTask<AppConfig> LoadConfigAsync(string configPath, CancellationToken cancellationToken = default)
+        {
+            var appConfig = await AppConfig.LoadAsync(configPath);
             if (appConfig is not null)
             {
                 return appConfig;
@@ -103,17 +135,18 @@ namespace Omnius.Xeus.Ui.Desktop
 
             appConfig = new AppConfig()
             {
+                Version = 1,
                 DaemonAddress = OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 32321).ToString(),
             };
 
-            await appConfig.SaveAsync(filePath);
+            await appConfig.SaveAsync(configPath);
 
             return appConfig;
         }
 
-        private static async ValueTask<AppSettings> LoadAppSettingsAsync(string stateDirectoryPath, CancellationToken cancellationToken = default)
+        private static async ValueTask<AppSettings> LoadAppSettingsAsync(string storageDirectoryPath, CancellationToken cancellationToken = default)
         {
-            var filePath = Path.Combine(stateDirectoryPath, "app_settings.json");
+            var filePath = Path.Combine(storageDirectoryPath, "app_settings.json");
             var appSettings = await AppSettings.LoadAsync(filePath);
             if (appSettings is not null)
             {
@@ -129,9 +162,9 @@ namespace Omnius.Xeus.Ui.Desktop
             return appSettings;
         }
 
-        private static async ValueTask<UiState> LoadUiStateAsync(string stateDirectoryPath, CancellationToken cancellationToken = default)
+        private static async ValueTask<UiState> LoadUiStateAsync(string storageDirectoryPath, CancellationToken cancellationToken = default)
         {
-            var filePath = Path.Combine(stateDirectoryPath, "ui_state.json");
+            var filePath = Path.Combine(storageDirectoryPath, "ui_state.json");
             var uiState = await UiState.LoadAsync(filePath);
             if (uiState is not null)
             {

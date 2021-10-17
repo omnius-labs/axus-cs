@@ -1,9 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
+using CommandLine;
 using Omnius.Core.Helpers;
 
 namespace Omnius.Xeus.Ui.Desktop
@@ -12,30 +13,36 @@ namespace Omnius.Xeus.Ui.Desktop
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        public static async Task Main(string[] args)
+        private static void Main(string[] args)
         {
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(Program.UnhandledException);
 
-            string stateDirectoryPath = args[0];
-            string logsDirectoryPath = args[1];
-
-            DirectoryHelper.CreateDirectory(stateDirectoryPath);
-            DirectoryHelper.CreateDirectory(logsDirectoryPath);
-
-            SetLogsDirectory(logsDirectoryPath);
-
-#if DEBUG
-            ChangeLogLevel(NLog.LogLevel.Trace);
-#endif
-
-            _logger.Info("desktop-ui start");
-
-            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args, ShutdownMode.OnMainWindowClose);
+            CommandLine.Parser.Default.ParseArguments<Options>(args)
+              .WithParsed(Run)
+              .WithNotParsed(HandleParseError);
         }
 
         private static void UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             _logger.Error(e);
+        }
+
+        private static void Run(Options o)
+        {
+            DirectoryHelper.CreateDirectory(o.StorageDirectoryPath);
+            DirectoryHelper.CreateDirectory(o.LogsDirectoryPath);
+
+            SetLogsDirectory(o.LogsDirectoryPath);
+
+            if (o.Verbose)
+            {
+                ChangeLogLevel(NLog.LogLevel.Trace);
+            }
+
+            Bootstrapper.Instance.Build(o.ConfigPath, o.StorageDirectoryPath);
+
+            _logger.Info("Starting...");
+            BuildAvaloniaApp().StartWithClassicDesktopLifetime(Environment.GetCommandLineArgs(), ShutdownMode.OnMainWindowClose);
         }
 
         private static void SetLogsDirectory(string logsDirectoryPath)
@@ -46,15 +53,26 @@ namespace Omnius.Xeus.Ui.Desktop
             NLog.LogManager.ReconfigExistingLoggers();
         }
 
-        private static void ChangeLogLevel(NLog.LogLevel logLevel)
+        private static void ChangeLogLevel(NLog.LogLevel minLevel)
         {
+            _logger.Debug("Log level changed: {0}", minLevel);
+
             var rootLoggingRule = NLog.LogManager.Configuration.LoggingRules.First(n => n.NameMatches("*"));
-            rootLoggingRule.EnableLoggingForLevel(logLevel);
+            rootLoggingRule.EnableLoggingForLevels(minLevel, NLog.LogLevel.Fatal);
+            NLog.LogManager.ReconfigExistingLoggers();
         }
 
         public static AppBuilder BuildAvaloniaApp()
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
                 .LogToTrace();
+
+        private static void HandleParseError(IEnumerable<Error> errs)
+        {
+            foreach (var err in errs)
+            {
+                _logger.Error(err);
+            }
+        }
     }
 }

@@ -29,9 +29,12 @@ namespace Omnius.Xeus.Ui.Desktop.Windows
         {
             return await _applicationDispatcher.InvokeAsync(async () =>
             {
+                var serviceProvider = await Bootstrapper.Instance.GetServiceProvider();
+                if (serviceProvider is null) throw new NullReferenceException();
+
                 var window = new TextWindow
                 {
-                    ViewModel = Bootstrapper.Instance.ServiceProvider?.GetRequiredService<TextWindowViewModel>() ?? throw new NullReferenceException(),
+                    ViewModel = serviceProvider.GetRequiredService<TextWindowViewModel>(),
                 };
 
                 await window.ShowDialog(_mainWindowProvider.GetMainWindow());
@@ -41,8 +44,11 @@ namespace Omnius.Xeus.Ui.Desktop.Windows
 
         public async ValueTask<IEnumerable<string>> ShowOpenFileWindowAsync()
         {
-            var dialog = new OpenFileDialog();
-            return await dialog.ShowAsync(_mainWindowProvider.GetMainWindow());
+            return await _applicationDispatcher.InvokeAsync(async () =>
+            {
+                var dialog = new OpenFileDialog();
+                return await dialog.ShowAsync(_mainWindowProvider.GetMainWindow());
+            });
         }
     }
 }

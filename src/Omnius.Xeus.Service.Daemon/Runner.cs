@@ -1,11 +1,9 @@
 using System;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
-using Omnius.Core.Helpers;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Caps;
 using Omnius.Core.Net.Connections.Bridge;
@@ -22,11 +20,9 @@ namespace Omnius.Xeus.Service.Daemon
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        public static async ValueTask EventLoopAsync(string stateDirectoryPath, CancellationToken cancellationToken = default)
+        public static async ValueTask EventLoopAsync(string configPath, string stateDirectoryPath, CancellationToken cancellationToken = default)
         {
-            DirectoryHelper.CreateDirectory(stateDirectoryPath);
-
-            var config = await LoadConfigAsync(Path.Combine(stateDirectoryPath, "config.yml"), cancellationToken);
+            var config = await LoadConfigAsync(configPath, cancellationToken);
             var service = await XeusService.CreateAsync(stateDirectoryPath, config, cancellationToken);
 
             await ListenAsync(service, config, cancellationToken);

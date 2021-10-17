@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using Omnius.Core.Utils;
-using Omnius.Xeus.Utils;
 
 namespace Omnius.Xeus.Ui.Desktop.Configuration
 {
@@ -9,7 +8,11 @@ namespace Omnius.Xeus.Ui.Desktop.Configuration
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
+        public int Version { get; init; }
+
         public string? DaemonAddress { get; init; }
+
+        public string? DownloadDirectory { get; init; }
 
         public static async ValueTask<AppConfig?> LoadAsync(string configPath)
         {

@@ -3,11 +3,9 @@ tmp/
 pub/
 patch.txt
 demo/daemon_*/logs/
-demo/daemon_*/state/*
-!demo/daemon_*/state/config.yml
+demo/daemon_*/storage/
 demo/ui-desktop_*/logs/
-demo/ui-desktop_*/state/*
-!demo/ui-desktop_*/state/config.yml
+demo/ui-desktop_*/storage/
 
 # Environment
 .env

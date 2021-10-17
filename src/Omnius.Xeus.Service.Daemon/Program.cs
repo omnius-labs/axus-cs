@@ -22,9 +22,9 @@ namespace Omnius.Xeus.Service.Daemon
             _logger.Error(e);
         }
 
-        public async ValueTask RunAsync([Argument("state")] string stateDirectoryPath = "../daemon/state", [Argument("logs")] string logsDirectoryPath = "../daemon/logs", [Option("verbose", new[] { 'v' })] bool verbose = false)
+        public async ValueTask RunAsync([Option("config")] string configPath, [Option("storage")] string storageDirectoryPath, [Option("logs")] string logsDirectoryPath, [Option("verbose", new[] { 'v' })] bool verbose = false)
         {
-            DirectoryHelper.CreateDirectory(stateDirectoryPath);
+            DirectoryHelper.CreateDirectory(storageDirectoryPath);
             DirectoryHelper.CreateDirectory(logsDirectoryPath);
 
             SetLogsDirectory(logsDirectoryPath);
@@ -37,7 +37,7 @@ namespace Omnius.Xeus.Service.Daemon
             try
             {
                 _logger.Info("Starting...");
-                await Runner.EventLoopAsync(stateDirectoryPath, this.Context.CancellationToken);
+                await Runner.EventLoopAsync(configPath, storageDirectoryPath, this.Context.CancellationToken);
             }
             finally
             {

@@ -2,7 +2,7 @@
   "profiles": {
     "Omnius.Xeus.Ui.Desktop": {
       "commandName": "Project",
-      "commandLineArgs": "\"./demo/ui-desktop_1/state\" \"./demo/ui-desktop_1/logs\"",
+      "commandLineArgs": "--config \"./demo/ui-desktop_1/config.yml\" --storage \"./demo/ui-desktop_1/storage\" --logs \"./demo/ui-desktop_1/logs\" -v",
       "workingDirectory": "C:\\home\\repos\\omnius-labs\\xeus",
       "nativeDebugging": true
     }
