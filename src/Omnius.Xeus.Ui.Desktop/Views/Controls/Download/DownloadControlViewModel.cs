@@ -11,6 +11,7 @@ using Omnius.Core;
 using Omnius.Core.Avalonia;
 using Omnius.Xeus.Intaractors;
 using Omnius.Xeus.Intaractors.Models;
+using Omnius.Xeus.Ui.Desktop.Configuration;
 using Omnius.Xeus.Ui.Desktop.Models;
 using Omnius.Xeus.Ui.Desktop.Models.Primitives;
 using Omnius.Xeus.Ui.Desktop.Windows;
@@ -22,7 +23,7 @@ namespace Omnius.Xeus.Ui.Desktop.Controls
     public class DownloadControlViewModel : AsyncDisposableBase
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
-
+        private readonly UiState _uiState;
         private readonly IFileDownloader _fileDownloader;
         private readonly IDialogService _dialogService;
         private readonly IClipboardService _clipboardService;
@@ -35,8 +36,9 @@ namespace Omnius.Xeus.Ui.Desktop.Controls
 
         private readonly CompositeDisposable _disposable = new();
 
-        public DownloadControlViewModel(IFileDownloader fileDownloader, IDialogService dialogService, IClipboardService clipboardService)
+        public DownloadControlViewModel(UiState uiState, IFileDownloader fileDownloader, IDialogService dialogService, IClipboardService clipboardService)
         {
+            _uiState = uiState;
             _fileDownloader = fileDownloader;
             _dialogService = dialogService;
             _clipboardService = clipboardService;
@@ -60,6 +62,10 @@ namespace Omnius.Xeus.Ui.Desktop.Controls
 
             _disposable.Dispose();
         }
+
+        public ReactiveProperty<long> Width { get; }
+
+        public DynamicState DynamicState => _uiState.DownloadControl.Dynamic;
 
         public ReactiveCommand RegisterCommand { get; }
 
@@ -98,6 +104,7 @@ namespace Omnius.Xeus.Ui.Desktop.Controls
             if (selectedFiles.Length == 0) return;
 
             var sb = new StringBuilder();
+
             foreach (var file in selectedFiles)
             {
                 if (file.Model.Seed is null) continue;

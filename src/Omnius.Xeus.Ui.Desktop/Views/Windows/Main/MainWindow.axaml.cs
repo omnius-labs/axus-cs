@@ -33,6 +33,8 @@ namespace Omnius.Xeus.Ui.Desktop.Windows
             {
                 await viewModel.DisposeAsync();
             }
+
+            await Bootstrapper.Instance.DisposeAsync();
         }
 
         public MainWindowViewModel? ViewModel
