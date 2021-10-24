@@ -6,7 +6,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Service.Daemon)",
-            "program": "${workspaceFolder}/tmp/bin/win-normal/Omnius.Xeus.Service.Daemon/Debug/net5.0/Omnius.Xeus.Service.Daemon.dll",
+            "program": "${workspaceFolder}/tmp/bin/win-vscode/Omnius.Xeus.Service.Daemon/Debug/net5.0/Omnius.Xeus.Service.Daemon.dll",
             "args": [
                 "--config",
                 "./demo/daemon_1/config.yml",
@@ -25,7 +25,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Ui.Desktop)",
-            "program": "${workspaceFolder}/tmp/bin/win-normal/Omnius.Xeus.Ui.Desktop/Debug/net5.0/Omnius.Xeus.Ui.Desktop.dll",
+            "program": "${workspaceFolder}/tmp/bin/win-vscode/Omnius.Xeus.Ui.Desktop/Debug/net5.0/Omnius.Xeus.Ui.Desktop.dll",
             "args": [
                 "--config",
                 "./demo/ui-desktop_1/config.yml",
@@ -43,7 +43,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Service.Daemon)",
-            "program": "${workspaceFolder}/tmp/bin/linux-normal/Omnius.Xeus.Service.Daemon/Debug/net5.0/Omnius.Xeus.Service.Daemon.dll",
+            "program": "${workspaceFolder}/tmp/bin/linux-vscode/Omnius.Xeus.Service.Daemon/Debug/net5.0/Omnius.Xeus.Service.Daemon.dll",
             "args": [
                 "--config",
                 "./demo/daemon_1/config.yml",
@@ -62,7 +62,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Ui.Desktop)",
-            "program": "${workspaceFolder}/tmp/bin/linux-normal/Omnius.Xeus.Ui.Desktop/Debug/net5.0/Omnius.Xeus.Ui.Desktop.dll",
+            "program": "${workspaceFolder}/tmp/bin/linux-vscode/Omnius.Xeus.Ui.Desktop/Debug/net5.0/Omnius.Xeus.Ui.Desktop.dll",
             "args": [
                 "--config",
                 "./demo/ui-desktop_1/config.yml",
@@ -80,7 +80,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Service.Daemon)",
-            "program": "${workspaceFolder}/tmp/bin/mac-normal/Omnius.Xeus.Service.Daemon/Debug/net5.0/Omnius.Xeus.Service.Daemon.dll",
+            "program": "${workspaceFolder}/tmp/bin/mac-vscode/Omnius.Xeus.Service.Daemon/Debug/net5.0/Omnius.Xeus.Service.Daemon.dll",
             "args": [
                 "--config",
                 "./demo/daemon_1/config.yml",
@@ -99,7 +99,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Ui.Desktop)",
-            "program": "${workspaceFolder}/tmp/bin/mac-normal/Omnius.Xeus.Ui.Desktop/Debug/net5.0/Omnius.Xeus.Ui.Desktop.dll",
+            "program": "${workspaceFolder}/tmp/bin/mac-vscode/Omnius.Xeus.Ui.Desktop/Debug/net5.0/Omnius.Xeus.Ui.Desktop.dll",
             "args": [
                 "--config",
                 "./demo/ui-desktop_1/config.yml",

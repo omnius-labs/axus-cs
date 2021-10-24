@@ -5,7 +5,7 @@
     xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
-    xmlns:model="clr-namespace:Omnius.Xeus.Ui.Desktop.Models;assembly=Omnius.Xeus.Ui.Desktop"
+    xmlns:vm="clr-namespace:Omnius.Xeus.Ui.Desktop.ViewModels;assembly=Omnius.Xeus.Ui.Desktop"
     xmlns:local="clr-namespace:Omnius.Xeus.Ui.Desktop.Controls;assembly=Omnius.Xeus.Ui.Desktop"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -16,7 +16,7 @@
     d:DesignHeight="500" >
 
     <UserControl.DataTemplates>
-        <DataTemplate DataType="{x:Type model:CheckBoxElement}">
+        <DataTemplate DataType="{x:Type vm:CheckBoxSettingViewModel}">
             <Grid RowDefinitions="Auto,Auto">
                 <TextBlock Grid.Row="0" Text="{Binding Title}"/>
                 <CheckBox Grid.Row="1" Content="{Binding Description}" IsChecked="{Binding Value}"/>
@@ -25,7 +25,7 @@
     </UserControl.DataTemplates>
 
     <ItemsControl>
-        <model:CheckBoxElement Title="title" />
+        <vm:CheckBoxSettingViewModel Title="title" />
     </ItemsControl>
 
 </UserControl>

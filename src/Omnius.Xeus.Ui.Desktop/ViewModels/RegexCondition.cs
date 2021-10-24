@@ -1,8 +1,9 @@
 using System;
+
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace Omnius.Xeus.Ui.Desktop.Models
+namespace Omnius.Xeus.Ui.Desktop.ViewModels
 {
     public class RegexCondition : IFileSearchCondition<string>, IEquatable<RegexCondition>
     {

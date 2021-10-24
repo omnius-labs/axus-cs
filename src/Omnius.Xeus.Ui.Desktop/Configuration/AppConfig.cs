@@ -12,8 +12,6 @@ namespace Omnius.Xeus.Ui.Desktop.Configuration
 
         public string? DaemonAddress { get; init; }
 
-        public string? DownloadDirectory { get; init; }
-
         public static async ValueTask<AppConfig?> LoadAsync(string configPath)
         {
             try

@@ -7,10 +7,12 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
+using Omnius.Core.Collections;
 using Omnius.Core.Helpers;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Connections;
 using Omnius.Core.Pipelines;
+using Omnius.Core.Tasks;
 using Omnius.Xeus.Service.Engines.Internal;
 using Omnius.Xeus.Service.Engines.Internal.Models;
 using Omnius.Xeus.Service.Engines.Primitives;
@@ -24,19 +26,21 @@ namespace Omnius.Xeus.Service.Engines
 
         private readonly ISessionConnector _sessionConnector;
         private readonly ISessionAccepter _sessionAccepter;
+        private readonly IBatchActionDispatcher _batchActionDispatcher;
         private readonly IBytesPool _bytesPool;
         private readonly NodeFinderOptions _options;
 
         private readonly EventPipe<IContentExchanger> _contentExchangerEventPipe = new();
-        private readonly NodeFinderEvents _events;
+        private readonly Events _events;
 
         private readonly byte[] _myId;
 
-        private ImmutableHashSet<SessionStatus> _sessionStatusSet = ImmutableHashSet<SessionStatus>.Empty;
         private readonly LinkedList<NodeLocation> _cloudNodeLocations = new();
+        private readonly VolatileHashSet<OmniAddress> _connectedAddressSet;
+        private ImmutableHashSet<SessionStatus> _sessionStatusSet = ImmutableHashSet<SessionStatus>.Empty;
 
-        private readonly VolatileListDictionary<ContentClue, NodeLocation> _receivedPushContentLocationMap = new(TimeSpan.FromMinutes(30));
-        private readonly VolatileListDictionary<ContentClue, NodeLocation> _receivedGiveContentLocationMap = new(TimeSpan.FromMinutes(30));
+        private readonly VolatileListDictionary<ContentClue, NodeLocation> _receivedPushContentLocationMap;
+        private readonly VolatileListDictionary<ContentClue, NodeLocation> _receivedGiveContentLocationMap;
 
         private readonly Task _connectLoopTask;
         private readonly Task _acceptLoopTask;
@@ -53,21 +57,29 @@ namespace Omnius.Xeus.Service.Engines
         private const int MaxBucketLength = 20;
         private const string ServiceName = "node_finder";
 
-        public static async ValueTask<NodeFinder> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, IBytesPool bytesPool, NodeFinderOptions options, CancellationToken cancellationToken = default)
+        public static async ValueTask<NodeFinder> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, IBatchActionDispatcher batchActionDispatcher,
+            IBytesPool bytesPool, NodeFinderOptions options, CancellationToken cancellationToken = default)
         {
-            var nodeFinder = new NodeFinder(sessionConnector, sessionAccepter, bytesPool, options);
+            var nodeFinder = new NodeFinder(sessionConnector, sessionAccepter, batchActionDispatcher, bytesPool, options);
             return nodeFinder;
         }
 
-        private NodeFinder(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, IBytesPool bytesPool, NodeFinderOptions options)
+        private NodeFinder(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, IBatchActionDispatcher batchActionDispatcher,
+            IBytesPool bytesPool, NodeFinderOptions options)
         {
             _sessionConnector = sessionConnector;
             _sessionAccepter = sessionAccepter;
+            _batchActionDispatcher = batchActionDispatcher;
             _bytesPool = bytesPool;
             _options = options;
             _myId = GenId();
 
-            _events = new NodeFinderEvents(_contentExchangerEventPipe.Subscriber);
+            _events = new Events(_contentExchangerEventPipe.Subscriber);
+
+            _connectedAddressSet = new VolatileHashSet<OmniAddress>(TimeSpan.FromMinutes(3), _batchActionDispatcher);
+
+            _receivedPushContentLocationMap = new VolatileListDictionary<ContentClue, NodeLocation>(TimeSpan.FromMinutes(30), _batchActionDispatcher);
+            _receivedGiveContentLocationMap = new VolatileListDictionary<ContentClue, NodeLocation>(TimeSpan.FromMinutes(30), _batchActionDispatcher);
 
             _connectLoopTask = this.ConnectLoopAsync(_cancellationTokenSource.Token);
             _acceptLoopTask = this.AcceptLoopAsync(_cancellationTokenSource.Token);
@@ -89,9 +101,13 @@ namespace Omnius.Xeus.Service.Engines
             _cancellationTokenSource.Cancel();
             await Task.WhenAll(_connectLoopTask, _acceptLoopTask, _sendLoopTask, _receiveLoopTask, _computeLoopTask);
             _cancellationTokenSource.Dispose();
+
+            _connectedAddressSet.Dispose();
+            _receivedPushContentLocationMap.Dispose();
+            _receivedGiveContentLocationMap.Dispose();
         }
 
-        public INodeFinderEvents Events => _events;
+        public INodeFinderEvents GetEvents() => _events;
 
         public async ValueTask<NodeFinderReport> GetReportAsync(CancellationToken cancellationToken = default)
         {
@@ -169,8 +185,6 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        private readonly VolatileHashSet<OmniAddress> _connectedAddressSet = new(TimeSpan.FromMinutes(3));
-
         private async Task ConnectLoopAsync(CancellationToken cancellationToken)
         {
             try
@@ -178,8 +192,6 @@ namespace Omnius.Xeus.Service.Engines
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     await Task.Delay(1000, cancellationToken).ConfigureAwait(false);
-
-                    _connectedAddressSet.Refresh();
 
                     int connectionCount = _sessionStatusSet.Select(n => n.Session.HandshakeType == SessionHandshakeType.Connected).Count();
                     if (_sessionStatusSet.Count > (_options.MaxSessionCount / 2)) continue;
@@ -291,7 +303,7 @@ namespace Omnius.Xeus.Service.Engines
 
                     _logger.Debug("Handshake profile");
 
-                    var sessionStatus = new SessionStatus(session, profile.Id, profile.NodeLocation);
+                    var sessionStatus = new SessionStatus(session, profile.Id, profile.NodeLocation, _batchActionDispatcher);
                     if (!this.TryAddSessionStatus(sessionStatus)) return false;
 
                     _logger.Debug("Added session");
@@ -375,15 +387,12 @@ namespace Omnius.Xeus.Service.Engines
                     {
                         try
                         {
-                            lock (sessionStatus.LockObject)
-                            {
-                                var dataMessage = sessionStatus.SendingDataMessage;
-                                if (dataMessage is null || !sessionStatus.Session.Connection.Sender.TrySend(dataMessage)) continue;
+                            var dataMessage = sessionStatus.SendingDataMessage;
+                            if (dataMessage is null || !sessionStatus.Session.Connection.Sender.TrySend(dataMessage)) continue;
 
-                                _logger.Debug($"Send data message: {sessionStatus.Session.Address}");
+                            _logger.Debug($"Send data message: {sessionStatus.Session.Address}");
 
-                                sessionStatus.SendingDataMessage = null;
-                            }
+                            sessionStatus.SendingDataMessage = null;
                         }
                         catch (Exception e)
                         {
@@ -426,10 +435,7 @@ namespace Omnius.Xeus.Service.Engines
 
                             await this.AddCloudNodeLocationsAsync(dataMessage.PushCloudNodeLocations, cancellationToken);
 
-                            lock (sessionStatus.LockObject)
-                            {
-                                sessionStatus.ReceivedWantContentClues.UnionWith(dataMessage.WantContentClues);
-                            }
+                            sessionStatus.ReceivedWantContentClues.UnionWith(dataMessage.WantContentClues);
 
                             lock (_lockObject)
                             {
@@ -474,20 +480,6 @@ namespace Omnius.Xeus.Service.Engines
                     cancellationToken.ThrowIfCancellationRequested();
 
                     await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken).ConfigureAwait(false);
-
-                    lock (_lockObject)
-                    {
-                        _receivedPushContentLocationMap.Refresh();
-                        _receivedGiveContentLocationMap.Refresh();
-
-                        foreach (var sessionStatus in _sessionStatusSet)
-                        {
-                            lock (sessionStatus.LockObject)
-                            {
-                                sessionStatus.Refresh();
-                            }
-                        }
-                    }
 
                     // 自分のノードプロファイル
                     var myNodeLocation = await this.GetMyNodeLocationAsync(cancellationToken);
@@ -563,12 +555,9 @@ namespace Omnius.Xeus.Service.Engines
 
                     foreach (var nodeElement in nodeElements)
                     {
-                        lock (nodeElement.Value.SessionStatus.LockObject)
+                        foreach (var tag in nodeElement.Value.SessionStatus.ReceivedWantContentClues)
                         {
-                            foreach (var tag in nodeElement.Value.SessionStatus.ReceivedWantContentClues)
-                            {
-                                sendingWantContentClueSet.Add(tag);
-                            }
+                            sendingWantContentClueSet.Add(tag);
                         }
                     }
 
@@ -599,28 +588,22 @@ namespace Omnius.Xeus.Service.Engines
                     // Compute GiveLocations
                     foreach (var nodeElement in nodeElements)
                     {
-                        lock (nodeElement.Value.SessionStatus.LockObject)
+                        foreach (var contentClue in nodeElement.Value.SessionStatus.ReceivedWantContentClues)
                         {
-                            foreach (var contentClue in nodeElement.Value.SessionStatus.ReceivedWantContentClues)
-                            {
-                                if (!contentLocationMap.TryGetValue(contentClue, out var nodeLocations)) continue;
+                            if (!contentLocationMap.TryGetValue(contentClue, out var nodeLocations)) continue;
 
-                                nodeElement.Value.SendingGiveContentLocations[contentClue] = nodeLocations.ToList();
-                            }
+                            nodeElement.Value.SendingGiveContentLocations[contentClue] = nodeLocations.ToList();
                         }
                     }
 
                     foreach (var element in nodeElements)
                     {
-                        lock (element.Value.SessionStatus.LockObject)
-                        {
-                            element.Value.SessionStatus.SendingDataMessage =
-                                new NodeFinderDataMessage(
-                                    element.Value.SendingPushCloudNodeLocations.Take(NodeFinderDataMessage.MaxPushCloudNodeLocationsCount).ToArray(),
-                                    element.Value.SendingWantContentClues.Take(NodeFinderDataMessage.MaxWantContentCluesCount).ToArray(),
-                                    element.Value.SendingPushContentLocations.Select(n => new ContentLocation(n.Key, n.Value.Take(ContentLocation.MaxNodeLocationsCount).ToArray())).Take(NodeFinderDataMessage.MaxPushContentLocationsCount).ToArray(),
-                                    element.Value.SendingGiveContentLocations.Select(n => new ContentLocation(n.Key, n.Value.Take(ContentLocation.MaxNodeLocationsCount).ToArray())).Take(NodeFinderDataMessage.MaxGiveContentLocationsCount).ToArray());
-                        }
+                        element.Value.SessionStatus.SendingDataMessage =
+                            new NodeFinderDataMessage(
+                                element.Value.SendingPushCloudNodeLocations.Take(NodeFinderDataMessage.MaxPushCloudNodeLocationsCount).ToArray(),
+                                element.Value.SendingWantContentClues.Take(NodeFinderDataMessage.MaxWantContentCluesCount).ToArray(),
+                                element.Value.SendingPushContentLocations.Select(n => new ContentLocation(n.Key, n.Value.Take(ContentLocation.MaxNodeLocationsCount).ToArray())).Take(NodeFinderDataMessage.MaxPushContentLocationsCount).ToArray(),
+                                element.Value.SendingGiveContentLocations.Select(n => new ContentLocation(n.Key, n.Value.Take(ContentLocation.MaxNodeLocationsCount).ToArray())).Take(NodeFinderDataMessage.MaxGiveContentLocationsCount).ToArray());
                     }
                 }
             }

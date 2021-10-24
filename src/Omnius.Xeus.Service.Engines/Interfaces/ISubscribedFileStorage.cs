@@ -16,8 +16,8 @@ namespace Omnius.Xeus.Service.Engines
 
         ValueTask UnsubscribeFileAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default);
 
-        ValueTask<bool> ExportFileAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default);
+        ValueTask<bool> TryExportFileAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default);
 
-        ValueTask<bool> ExportFileAsync(OmniHash rootHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default);
+        ValueTask<bool> TryExportFileAsync(OmniHash rootHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default);
     }
 }

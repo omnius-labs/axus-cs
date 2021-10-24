@@ -2,14 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Omnius.Core.Cryptography;
 using Omnius.Xeus.Service.Models;
 
 namespace Omnius.Xeus.Service.Engines
 {
     public interface INodeFinder : IAsyncDisposable
     {
-        INodeFinderEvents Events { get; }
+        INodeFinderEvents GetEvents();
 
         ValueTask<NodeFinderReport> GetReportAsync(CancellationToken cancellationToken = default);
 

@@ -11,6 +11,11 @@
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
+            "options": {
+                "env": {
+                    "BuildTargetName": "vscode"
+                }
+            },
             "problemMatcher": "$msCompile"
         },
         {
@@ -23,6 +28,11 @@
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
+            "options": {
+                "env": {
+                    "BuildTargetName": "vscode"
+                }
+            },
             "problemMatcher": "$msCompile"
         }
     ]

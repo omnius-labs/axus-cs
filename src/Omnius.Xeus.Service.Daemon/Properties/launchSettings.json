@@ -2,7 +2,7 @@
   "profiles": {
     "Omnius.Xeus.Service.Daemon": {
       "commandName": "Project",
-      "commandLineArgs": "--config \"./demo/daemon_1/config.yml\" --storage \"./demo/daemon_1/storage\" --logs \"./demo/daemon_1/logs\" -v",
+      "commandLineArgs": "--config \"./demo/daemon_2/config.yml\" --storage \"./demo/daemon_2/storage\" --logs \"./demo/daemon_2/logs\" -v",
       "workingDirectory": "C:\\home\\repos\\omnius-labs\\xeus",
       "nativeDebugging": true
     }

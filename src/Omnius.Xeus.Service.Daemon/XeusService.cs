@@ -92,7 +92,7 @@ namespace Omnius.Xeus.Service.Daemon
             _sessionAccepter = await SessionAccepter.CreateAsync(connectionAccepters, batchActionDispatcher, bytesPool, sessionAccepterOptions, cancellationToken);
 
             var nodeFinderOptions = new NodeFinderOptions(Path.Combine(workingDirectoryPath, "node_finder"), appConfig.Engines?.NodeFinder?.MaxSessionCount ?? int.MaxValue);
-            _nodeFinder = await NodeFinder.CreateAsync(_sessionConnector, _sessionAccepter, bytesPool, nodeFinderOptions, cancellationToken);
+            _nodeFinder = await NodeFinder.CreateAsync(_sessionConnector, _sessionAccepter, batchActionDispatcher, bytesPool, nodeFinderOptions, cancellationToken);
 
             var publishedFileStorageOptions = new PublishedFileStorageOptions(Path.Combine(workingDirectoryPath, "published_file_storage"));
             _publishedFileStorage = await PublishedFileStorage.CreateAsync(LiteDatabaseBytesStorage.Factory, bytesPool, publishedFileStorageOptions, cancellationToken);
@@ -101,8 +101,8 @@ namespace Omnius.Xeus.Service.Daemon
             _subscribedFileStorage = await SubscribedFileStorage.CreateAsync(LiteDatabaseBytesStorage.Factory, bytesPool, subscribedFileStorageOptions, cancellationToken);
 
             var fileExchangerOptions = new FileExchangerOptions(appConfig.Engines?.FileExchanger?.MaxSessionCount ?? int.MaxValue);
-            _fileExchanger = await FileExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedFileStorage, _subscribedFileStorage, bytesPool, fileExchangerOptions, cancellationToken);
-            _nodeFinder.Events.GetContentExchangers.Subscribe(() => _fileExchanger).ToAdd(_disposables);
+            _fileExchanger = await FileExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedFileStorage, _subscribedFileStorage, batchActionDispatcher, bytesPool, fileExchangerOptions, cancellationToken);
+            _nodeFinder.GetEvents().GetContentExchangers.Subscribe(() => _fileExchanger).ToAdd(_disposables);
 
             var publishedShoutStorageOptions = new PublishedShoutStorageOptions(Path.Combine(workingDirectoryPath, "published_shout_storage"));
             _publishedShoutStorage = await PublishedShoutStorage.CreateAsync(LiteDatabaseBytesStorage.Factory, bytesPool, publishedShoutStorageOptions, cancellationToken);
@@ -111,8 +111,8 @@ namespace Omnius.Xeus.Service.Daemon
             _subscribedShoutStorage = await SubscribedShoutStorage.CreateAsync(LiteDatabaseBytesStorage.Factory, bytesPool, subscribedShoutStorageOptions, cancellationToken);
 
             var shoutExchangerOptions = new ShoutExchangerOptions(appConfig.Engines?.ShoutExchanger?.MaxSessionCount ?? int.MaxValue);
-            _shoutExchanger = await ShoutExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedShoutStorage, _subscribedShoutStorage, bytesPool, shoutExchangerOptions, cancellationToken);
-            _nodeFinder.Events.GetContentExchangers.Subscribe(() => _shoutExchanger).ToAdd(_disposables);
+            _shoutExchanger = await ShoutExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedShoutStorage, _subscribedShoutStorage, batchActionDispatcher, bytesPool, shoutExchangerOptions, cancellationToken);
+            _nodeFinder.GetEvents().GetContentExchangers.Subscribe(() => _shoutExchanger).ToAdd(_disposables);
         }
 
         protected override async ValueTask OnDisposeAsync()
@@ -231,7 +231,7 @@ namespace Omnius.Xeus.Service.Daemon
 
         public async ValueTask<TryExportFileToStorageResult> TryExportFileToStorageAsync(TryExportFileToStorageRequest param, CancellationToken cancellationToken = default)
         {
-            var success = await _subscribedFileStorage.ExportFileAsync(param.RootHash, param.FilePath, cancellationToken);
+            var success = await _subscribedFileStorage.TryExportFileAsync(param.RootHash, param.FilePath, cancellationToken);
             return new TryExportFileToStorageResult(success);
         }
 
@@ -239,7 +239,7 @@ namespace Omnius.Xeus.Service.Daemon
         {
             var bytesPool = BytesPool.Shared;
             using var bytesPipe = new BytesPipe(bytesPool);
-            var success = await _subscribedFileStorage.ExportFileAsync(param.RootHash, bytesPipe.Writer, cancellationToken);
+            var success = await _subscribedFileStorage.TryExportFileAsync(param.RootHash, bytesPipe.Writer, cancellationToken);
             return new TryExportFileToMemoryResult(bytesPipe.Reader.GetSequence().ToMemory(bytesPool));
         }
 

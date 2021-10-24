@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using System.Text.Json;
 using System.Threading.Tasks;
+using Omnius.Core.Avalonia;
 using Omnius.Core.Helpers;
 using Omnius.Core.Utils;
 
@@ -9,6 +9,10 @@ namespace Omnius.Xeus.Ui.Desktop.Configuration
 {
     public sealed partial class UiState
     {
+        public DynamicState DownloadControlDynamicState { get; } = new();
+
+        public DynamicState UploadControlDynamicState { get; } = new();
+
         public static async ValueTask<UiState?> LoadAsync(string configPath)
         {
             try

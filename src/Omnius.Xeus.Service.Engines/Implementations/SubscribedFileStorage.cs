@@ -164,7 +164,7 @@ namespace Omnius.Xeus.Service.Engines
         {
         }
 
-        public async ValueTask<IEnumerable<OmniHash>> GetRootHashesAsync(bool? exists = null, CancellationToken cancellationToken = default)
+        public async ValueTask<IEnumerable<OmniHash>> GetRootHashesAsync(CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync(cancellationToken))
             {
@@ -237,7 +237,7 @@ namespace Omnius.Xeus.Service.Engines
                 _subscriberRepo.Items.Upsert(new SubscribedFileItem(rootHash, registrant));
 
                 if (_subscriberRepo.DecodedItems.Exists(rootHash)) return;
-                _subscriberRepo.DecodedItems.Upsert(new DecodedFileItem(rootHash, new[] { new MerkleTreeSection(-1, 0, 0, new[] { rootHash }) }));
+                _subscriberRepo.DecodedItems.Upsert(new DecodedFileItem(rootHash, new[] { new MerkleTreeSection(-1, new[] { rootHash }) }));
             }
         }
 
@@ -262,21 +262,21 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        public async ValueTask<bool> ExportFileAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default)
+        public async ValueTask<bool> TryExportFileAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default)
         {
             bool result = false;
 
             using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
             {
                 var writer = PipeWriter.Create(fileStream);
-                result = await this.ExportFileAsync(rootHash, writer, cancellationToken);
+                result = await this.TryExportFileAsync(rootHash, writer, cancellationToken);
                 await writer.CompleteAsync();
             }
 
             return result;
         }
 
-        public async ValueTask<bool> ExportFileAsync(OmniHash rootHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default)
+        public async ValueTask<bool> TryExportFileAsync(OmniHash rootHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync(cancellationToken))
             {

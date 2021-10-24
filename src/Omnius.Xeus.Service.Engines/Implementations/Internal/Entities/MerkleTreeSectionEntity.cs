@@ -20,15 +20,13 @@ namespace Omnius.Xeus.Service.Engines.Internal.Entities
             return new MerkleTreeSectionEntity()
             {
                 Depth = value.Depth,
-                BlockLength = value.BlockLength,
-                Length = value.Length,
                 Hashes = value.Hashes.Select(n => OmniHashEntity.Import(n)).ToArray(),
             };
         }
 
         public MerkleTreeSection Export()
         {
-            return new MerkleTreeSection(this.Depth, this.BlockLength, this.Length, this.Hashes?.Select(n => n.Export())?.ToArray() ?? Array.Empty<OmniHash>());
+            return new MerkleTreeSection(this.Depth, this.Hashes?.Select(n => n.Export())?.ToArray() ?? Array.Empty<OmniHash>());
         }
     }
 }

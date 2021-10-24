@@ -5,12 +5,13 @@ namespace Omnius.Xeus.Service.Engines.Internal.Models
 {
     internal record PublishedFileItem
     {
-        public PublishedFileItem(OmniHash rootHash, string? filePath, string registrant, MerkleTreeSection[] merkleTreeSections)
+        public PublishedFileItem(OmniHash rootHash, string? filePath, string registrant, MerkleTreeSection[] merkleTreeSections, int maxBlockLength)
         {
             this.RootHash = rootHash;
             this.FilePath = filePath;
             this.Registrant = registrant;
             this.MerkleTreeSections = new ReadOnlyListSlim<MerkleTreeSection>(merkleTreeSections);
+            this.MaxBlockLength = maxBlockLength;
         }
 
         public OmniHash RootHash { get; }
@@ -20,5 +21,7 @@ namespace Omnius.Xeus.Service.Engines.Internal.Models
         public string Registrant { get; }
 
         public ReadOnlyListSlim<MerkleTreeSection> MerkleTreeSections { get; }
+
+        public int MaxBlockLength { get; }
     }
 }

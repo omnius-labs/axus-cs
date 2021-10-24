@@ -17,6 +17,8 @@ namespace Omnius.Xeus.Service.Engines.Internal.Entities
 
         public MerkleTreeSectionEntity[]? MerkleTreeSections { get; set; }
 
+        public int MaxBlockLength { get; set; }
+
         public static PublishedFileItemEntity Import(PublishedFileItem value)
         {
             return new PublishedFileItemEntity()
@@ -25,12 +27,13 @@ namespace Omnius.Xeus.Service.Engines.Internal.Entities
                 FilePath = value.FilePath,
                 Registrant = value.Registrant,
                 MerkleTreeSections = value.MerkleTreeSections?.Select(n => MerkleTreeSectionEntity.Import(n))?.ToArray() ?? Array.Empty<MerkleTreeSectionEntity>(),
+                MaxBlockLength = value.MaxBlockLength,
             };
         }
 
         public PublishedFileItem Export()
         {
-            return new PublishedFileItem(this.RootHash?.Export() ?? OmniHash.Empty, this.FilePath ?? string.Empty, this.Registrant ?? string.Empty, this.MerkleTreeSections?.Select(n => n.Export())?.ToArray() ?? Array.Empty<MerkleTreeSection>());
+            return new PublishedFileItem(this.RootHash?.Export() ?? OmniHash.Empty, this.FilePath ?? string.Empty, this.Registrant ?? string.Empty, this.MerkleTreeSections?.Select(n => n.Export())?.ToArray() ?? Array.Empty<MerkleTreeSection>(), this.MaxBlockLength);
         }
     }
 }

@@ -5,9 +5,9 @@ namespace Omnius.Xeus.Service.Engines
 {
     public sealed partial class NodeFinder
     {
-        private sealed class NodeFinderEvents : INodeFinderEvents
+        private sealed class Events : INodeFinderEvents
         {
-            public NodeFinderEvents(IEventSubscriber<IContentExchanger> getContentExchanger)
+            public Events(IEventSubscriber<IContentExchanger> getContentExchanger)
             {
                 this.GetContentExchangers = getContentExchanger;
             }

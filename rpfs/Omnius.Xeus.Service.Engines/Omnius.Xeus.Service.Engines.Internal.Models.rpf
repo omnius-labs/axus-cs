@@ -16,8 +16,6 @@ message Block {
 
 message MerkleTreeSection {
     Depth: int32,
-    BlockLength: uint32,
-    Length: uint64,
     Hashes: vector<OmniHash>(capacity: 1024 * 1024 * 1024),
 }
 

@@ -81,7 +81,7 @@ namespace Omnius.Xeus.Service.Engines
         {
         }
 
-        public async ValueTask<IEnumerable<OmniHash>> GetRootHashesAsync(bool? exists = null, CancellationToken cancellationToken = default)
+        public async ValueTask<IEnumerable<OmniHash>> GetRootHashesAsync(CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync(cancellationToken))
             {
@@ -143,11 +143,11 @@ namespace Omnius.Xeus.Service.Engines
             var tempPrefix = "_temp_" + Guid.NewGuid().ToString("N");
 
             using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var blockHashes = await this.ImportStreamAsync(fileStream, cancellationToken);
-            var lastMerkleTreeSection = new MerkleTreeSection(0, MaxBlockLength, (ulong)fileStream.Length, blockHashes.ToArray());
+            var blockHashes = await this.ImportStreamAsync(fileStream, MaxBlockLength, cancellationToken);
+            var lastMerkleTreeSection = new MerkleTreeSection(0, blockHashes.ToArray());
 
-            var (rootHash, merkleTreeSections) = await this.GenMerkleTreeSectionsAsync(tempPrefix, lastMerkleTreeSection, cancellationToken);
-            item = new PublishedFileItem(rootHash, filePath, registrant, merkleTreeSections.ToArray());
+            var (rootHash, merkleTreeSections) = await this.GenMerkleTreeSectionsAsync(tempPrefix, lastMerkleTreeSection, MaxBlockLength, cancellationToken);
+            item = new PublishedFileItem(rootHash, filePath, registrant, merkleTreeSections.ToArray(), MaxBlockLength);
 
             using (await _asyncLock.LockAsync(cancellationToken))
             {
@@ -166,11 +166,11 @@ namespace Omnius.Xeus.Service.Engines
         {
             var tempPrefix = "_temp_" + Guid.NewGuid().ToString("N");
 
-            var blockHashes = await this.ImportBytesAsync(tempPrefix, sequence, cancellationToken);
-            var lastMerkleTreeSection = new MerkleTreeSection(0, MaxBlockLength, (ulong)sequence.Length, blockHashes.ToArray());
+            var blockHashes = await this.ImportBytesAsync(tempPrefix, sequence, MaxBlockLength, cancellationToken);
+            var lastMerkleTreeSection = new MerkleTreeSection(0, blockHashes.ToArray());
 
-            var (rootHash, merkleTreeSections) = await this.GenMerkleTreeSectionsAsync(tempPrefix, lastMerkleTreeSection, cancellationToken);
-            var item = new PublishedFileItem(rootHash, null, registrant, merkleTreeSections.ToArray());
+            var (rootHash, merkleTreeSections) = await this.GenMerkleTreeSectionsAsync(tempPrefix, lastMerkleTreeSection, MaxBlockLength, cancellationToken);
+            var item = new PublishedFileItem(rootHash, null, registrant, merkleTreeSections.ToArray(), MaxBlockLength);
 
             using (await _asyncLock.LockAsync(cancellationToken))
             {
@@ -194,7 +194,7 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        private async ValueTask<(OmniHash, IEnumerable<MerkleTreeSection>)> GenMerkleTreeSectionsAsync(string prefix, MerkleTreeSection merkleTreeSection, CancellationToken cancellationToken = default)
+        private async ValueTask<(OmniHash, IEnumerable<MerkleTreeSection>)> GenMerkleTreeSectionsAsync(string prefix, MerkleTreeSection merkleTreeSection, int maxBlockLength, CancellationToken cancellationToken = default)
         {
             var results = new Stack<MerkleTreeSection>();
             results.Push(merkleTreeSection);
@@ -204,25 +204,25 @@ namespace Omnius.Xeus.Service.Engines
                 using var bytesPool = new BytesPipe(_bytesPool);
                 merkleTreeSection.Export(bytesPool.Writer, _bytesPool);
 
-                var blockHashes = await ImportBytesAsync(prefix, bytesPool.Reader.GetSequence(), cancellationToken);
-                merkleTreeSection = new MerkleTreeSection(merkleTreeSection.Depth + 1, MaxBlockLength, (ulong)bytesPool.Writer.WrittenBytes, blockHashes.ToArray());
+                var blockHashes = await ImportBytesAsync(prefix, bytesPool.Reader.GetSequence(), maxBlockLength, cancellationToken);
+                merkleTreeSection = new MerkleTreeSection(merkleTreeSection.Depth + 1, blockHashes.ToArray());
                 results.Push(merkleTreeSection);
 
                 if (merkleTreeSection.Hashes.Count == 1) return (merkleTreeSection.Hashes.Single(), results.ToArray());
             }
         }
 
-        private async ValueTask<IEnumerable<OmniHash>> ImportBytesAsync(string prefix, ReadOnlySequence<byte> sequence, CancellationToken cancellationToken = default)
+        private async ValueTask<IEnumerable<OmniHash>> ImportBytesAsync(string prefix, ReadOnlySequence<byte> sequence, int maxBlockLength, CancellationToken cancellationToken = default)
         {
             var blockHashes = new List<OmniHash>();
 
-            using var memoryOwner = _bytesPool.Memory.Rent(MaxBlockLength).Shrink(MaxBlockLength);
+            using var memoryOwner = _bytesPool.Memory.Rent(maxBlockLength).Shrink(maxBlockLength);
 
             while (sequence.Length > 0)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var blockLength = (int)Math.Min(sequence.Length, MaxBlockLength);
+                var blockLength = (int)Math.Min(sequence.Length, maxBlockLength);
                 var memory = memoryOwner.Memory.Slice(0, blockLength);
                 sequence.CopyTo(memory.Span);
 
@@ -237,17 +237,17 @@ namespace Omnius.Xeus.Service.Engines
             return blockHashes;
         }
 
-        private async ValueTask<IEnumerable<OmniHash>> ImportStreamAsync(Stream stream, CancellationToken cancellationToken = default)
+        private async ValueTask<IEnumerable<OmniHash>> ImportStreamAsync(Stream stream, int maxBlockLength, CancellationToken cancellationToken = default)
         {
             var blockHashes = new List<OmniHash>();
 
-            using var memoryOwner = _bytesPool.Memory.Rent(MaxBlockLength).Shrink(MaxBlockLength);
+            using var memoryOwner = _bytesPool.Memory.Rent(maxBlockLength).Shrink(maxBlockLength);
 
             while (stream.Position < stream.Length)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var blockLength = (int)Math.Min(MaxBlockLength, stream.Length - stream.Position);
+                var blockLength = (int)Math.Min(maxBlockLength, stream.Length - stream.Position);
                 var memory = memoryOwner.Memory.Slice(0, blockLength);
 
                 for (int start = 0; start < blockLength;)
@@ -320,7 +320,7 @@ namespace Omnius.Xeus.Service.Engines
                 {
                     var lastMerkleTreeSection = item.MerkleTreeSections[^1];
 
-                    var result = await this.ReadBlockFromFileAsync(item.FilePath, lastMerkleTreeSection, blockHash, cancellationToken);
+                    var result = await this.ReadBlockFromFileAsync(item.FilePath, lastMerkleTreeSection, blockHash, item.MaxBlockLength, cancellationToken);
                     if (result is not null) return result;
                 }
 
@@ -329,17 +329,17 @@ namespace Omnius.Xeus.Service.Engines
             }
         }
 
-        private async ValueTask<IMemoryOwner<byte>?> ReadBlockFromFileAsync(string filePath, MerkleTreeSection merkleTreeSection, OmniHash blockHash, CancellationToken cancellationToken = default)
+        private async ValueTask<IMemoryOwner<byte>?> ReadBlockFromFileAsync(string filePath, MerkleTreeSection merkleTreeSection, OmniHash blockHash, int maxBlockLength, CancellationToken cancellationToken = default)
         {
             if (!File.Exists(filePath)) return null;
             if (!merkleTreeSection.TryGetIndex(blockHash, out var index)) return null;
 
-            var position = merkleTreeSection.BlockLength * index;
-            var blockLength = (int)Math.Min(merkleTreeSection.BlockLength, merkleTreeSection.Length - (ulong)position);
-
             using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None);
+
+            var position = maxBlockLength * index;
             fileStream.Seek(position, SeekOrigin.Begin);
 
+            var blockLength = (int)Math.Min(maxBlockLength, fileStream.Length - position);
             var memoryOwner = _bytesPool.Memory.Rent(blockLength).Shrink(blockLength);
 
             for (int start = 0; start < blockLength;)

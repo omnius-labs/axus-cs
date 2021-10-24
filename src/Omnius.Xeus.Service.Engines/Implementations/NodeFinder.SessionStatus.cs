@@ -1,6 +1,7 @@
 using System;
 using Omnius.Core;
-using Omnius.Xeus.Service.Engines.Internal;
+using Omnius.Core.Collections;
+using Omnius.Core.Tasks;
 using Omnius.Xeus.Service.Engines.Internal.Models;
 using Omnius.Xeus.Service.Models;
 
@@ -8,16 +9,25 @@ namespace Omnius.Xeus.Service.Engines
 {
     public sealed partial class NodeFinder
     {
-        private sealed class SessionStatus : ISynchronized
+        private sealed class SessionStatus : DisposableBase
         {
-            public SessionStatus(ISession session, ReadOnlyMemory<byte> id, NodeLocation nodeLocation)
+            public SessionStatus(ISession session, ReadOnlyMemory<byte> id, NodeLocation nodeLocation, IBatchActionDispatcher batchActionDispatcher)
             {
                 this.Session = session;
                 this.Id = id;
                 this.NodeLocation = nodeLocation;
+
+                _volatileReceivedWantContentClues = new VolatileHashSet<ContentClue>(TimeSpan.FromMinutes(3), batchActionDispatcher);
+                this.ReceivedWantContentClues = new(_volatileReceivedWantContentClues);
             }
 
-            public object LockObject { get; } = new object();
+            protected override void OnDispose(bool disposing)
+            {
+                if (disposing)
+                {
+                    _volatileReceivedWantContentClues.Dispose();
+                }
+            }
 
             public ISession Session { get; }
 
@@ -27,12 +37,8 @@ namespace Omnius.Xeus.Service.Engines
 
             public NodeFinderDataMessage? SendingDataMessage { get; set; } = null;
 
-            public VolatileHashSet<ContentClue> ReceivedWantContentClues { get; } = new VolatileHashSet<ContentClue>(TimeSpan.FromMinutes(30));
-
-            public void Refresh()
-            {
-                this.ReceivedWantContentClues.Refresh();
-            }
+            private readonly VolatileHashSet<ContentClue> _volatileReceivedWantContentClues;
+            public LockedSet<ContentClue> ReceivedWantContentClues { get; }
         }
     }
 }

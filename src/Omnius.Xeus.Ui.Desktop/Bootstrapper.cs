@@ -20,61 +20,70 @@ namespace Omnius.Xeus.Ui.Desktop
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private AppConfig? _config;
+        private string? _configPath;
+        private string? _storageDirectoryPath;
+
+        private AppConfig? _appConfig;
         private AppSettings? _appSettings;
         private UiState? _uiState;
         private BytesPool? _bytesPool;
-        private XeusServiceManager? _xeusServiceManager;
+        private ServiceManager? _serviceManager;
         private Dashboard? _dashboard;
         private FileDownloader? _fileDownloader;
         private FileUploader? _fileUploader;
 
-        public static Bootstrapper Instance { get; } = new Bootstrapper();
-
         private Task<ServiceProvider?>? _buildTask;
         private CancellationTokenSource _cancellationTokenSource = new();
 
-        public Bootstrapper()
+        public static Bootstrapper Instance { get; } = new Bootstrapper();
+
+        private Bootstrapper()
         {
         }
 
         public void Build(string configPath, string storageDirectoryPath)
         {
-            _buildTask = this.BuildAsync(configPath, storageDirectoryPath);
+            _configPath = configPath;
+            _storageDirectoryPath = storageDirectoryPath;
+
+            _buildTask = this.BuildAsync(_cancellationTokenSource.Token);
         }
 
-        private async Task<ServiceProvider?> BuildAsync(string configPath, string storageDirectoryPath, CancellationToken cancellationToken = default)
+        private async Task<ServiceProvider?> BuildAsync(CancellationToken cancellationToken = default)
         {
+            if (_configPath is null) throw new NullReferenceException(nameof(_configPath));
+            if (_storageDirectoryPath is null) throw new NullReferenceException(nameof(_storageDirectoryPath));
+
             try
             {
-                _config = await LoadConfigAsync(configPath, cancellationToken);
-                _appSettings = await LoadAppSettingsAsync(storageDirectoryPath, cancellationToken);
-                _uiState = await LoadUiStateAsync(storageDirectoryPath, cancellationToken);
+                _appConfig = await LoadAppConfigAsync(_configPath, cancellationToken);
+                _appSettings = await LoadAppSettingsAsync(_storageDirectoryPath, cancellationToken);
+                _uiState = await LoadUiStateAsync(_storageDirectoryPath, cancellationToken);
 
                 _bytesPool = BytesPool.Shared;
 
-                _xeusServiceManager = new XeusServiceManager();
-                await _xeusServiceManager.ConnectAsync(OmniAddress.Parse(_config.DaemonAddress), _bytesPool, cancellationToken);
+                _serviceManager = new ServiceManager();
+                await _serviceManager.ConnectAsync(OmniAddress.Parse(_appConfig.DaemonAddress), _bytesPool, cancellationToken);
 
-                var xeusService = _xeusServiceManager.GetService();
+                var service = _serviceManager.GetService();
 
-                _dashboard = await Dashboard.CreateAsync(xeusService, _bytesPool, cancellationToken);
+                _dashboard = await Dashboard.CreateAsync(service, _bytesPool, cancellationToken);
 
-                var fileUploaderOptions = new FileUploaderOptions(Path.Combine(storageDirectoryPath, "file_uploader"));
-                _fileUploader = await FileUploader.CreateAsync(xeusService, LiteDatabaseBytesStorage.Factory, _bytesPool, fileUploaderOptions, cancellationToken);
+                var fileUploaderOptions = new FileUploaderOptions(Path.Combine(_storageDirectoryPath, "file_uploader"));
+                _fileUploader = await FileUploader.CreateAsync(service, LiteDatabaseBytesStorage.Factory, _bytesPool, fileUploaderOptions, cancellationToken);
 
-                var fileDownloaderOptions = new FileDownloaderOptions(Path.Combine(storageDirectoryPath, "file_downloader"));
-                _fileDownloader = await FileDownloader.CreateAsync(xeusService, LiteDatabaseBytesStorage.Factory, _bytesPool, fileDownloaderOptions, cancellationToken);
+                var fileDownloaderOptions = new FileDownloaderOptions(Path.Combine(_storageDirectoryPath, "file_downloader"));
+                _fileDownloader = await FileDownloader.CreateAsync(service, LiteDatabaseBytesStorage.Factory, _bytesPool, fileDownloaderOptions, cancellationToken);
 
                 var serviceCollection = new ServiceCollection();
 
-                serviceCollection.AddSingleton(_config);
+                serviceCollection.AddSingleton(_appConfig);
                 serviceCollection.AddSingleton(_appSettings);
                 serviceCollection.AddSingleton(_uiState);
 
                 serviceCollection.AddSingleton<IBytesPool>(_bytesPool);
 
-                serviceCollection.AddSingleton(xeusService);
+                serviceCollection.AddSingleton(service);
 
                 serviceCollection.AddSingleton<IDashboard>(_dashboard);
                 serviceCollection.AddSingleton<IFileUploader>(_fileUploader);
@@ -114,10 +123,12 @@ namespace Omnius.Xeus.Ui.Desktop
             await _buildTask!;
             _cancellationTokenSource.Dispose();
 
-            if (_xeusServiceManager is not null)
+            if (_serviceManager is not null)
             {
-                await _xeusServiceManager.DisposeAsync();
+                await _serviceManager.DisposeAsync();
             }
+
+            await this.SaveAsync();
         }
 
         public async ValueTask<ServiceProvider?> GetServiceProvider()
@@ -125,7 +136,17 @@ namespace Omnius.Xeus.Ui.Desktop
             return await _buildTask!;
         }
 
-        private static async ValueTask<AppConfig> LoadConfigAsync(string configPath, CancellationToken cancellationToken = default)
+        public async ValueTask SaveAsync(CancellationToken cancellationToken = default)
+        {
+            if (_storageDirectoryPath is null) throw new NullReferenceException(nameof(_storageDirectoryPath));
+            if (_appSettings is null) throw new NullReferenceException(nameof(_appSettings));
+            if (_uiState is null) throw new NullReferenceException(nameof(_uiState));
+
+            await SaveAppSettingsAsync(_storageDirectoryPath, _appSettings, cancellationToken);
+            await SaveUiStateAsync(_storageDirectoryPath, _uiState, cancellationToken);
+        }
+
+        private static async ValueTask<AppConfig> LoadAppConfigAsync(string configPath, CancellationToken cancellationToken = default)
         {
             var appConfig = await AppConfig.LoadAsync(configPath);
             if (appConfig is not null)
@@ -162,6 +183,12 @@ namespace Omnius.Xeus.Ui.Desktop
             return appSettings;
         }
 
+        private static async ValueTask SaveAppSettingsAsync(string storageDirectoryPath, AppSettings appSettings, CancellationToken cancellationToken = default)
+        {
+            var filePath = Path.Combine(storageDirectoryPath, "app_settings.json");
+            await appSettings.SaveAsync(filePath);
+        }
+
         private static async ValueTask<UiState> LoadUiStateAsync(string storageDirectoryPath, CancellationToken cancellationToken = default)
         {
             var filePath = Path.Combine(storageDirectoryPath, "ui_state.json");
@@ -178,6 +205,12 @@ namespace Omnius.Xeus.Ui.Desktop
             await uiState.SaveAsync(filePath);
 
             return uiState;
+        }
+
+        private static async ValueTask SaveUiStateAsync(string storageDirectoryPath, UiState uiState, CancellationToken cancellationToken = default)
+        {
+            var filePath = Path.Combine(storageDirectoryPath, "ui_state.json");
+            await uiState.SaveAsync(filePath);
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Core;
+using Omnius.Core.Collections;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Cryptography.Functions;
 using Omnius.Core.Helpers;
@@ -13,7 +14,7 @@ using Omnius.Core.Net;
 using Omnius.Core.Net.Connections;
 using Omnius.Core.Pipelines;
 using Omnius.Core.RocketPack;
-using Omnius.Xeus.Service.Engines.Internal;
+using Omnius.Core.Tasks;
 using Omnius.Xeus.Service.Engines.Internal.Models;
 using Omnius.Xeus.Service.Models;
 
@@ -28,8 +29,11 @@ namespace Omnius.Xeus.Service.Engines
         private readonly INodeFinder _nodeFinder;
         private readonly IPublishedShoutStorage _publishedShoutStorage;
         private readonly ISubscribedShoutStorage _subscribedShoutStorage;
+        private readonly IBatchActionDispatcher _batchActionDispatcher;
         private readonly IBytesPool _bytesPool;
         private readonly ShoutExchangerOptions _options;
+
+        private readonly VolatileHashSet<OmniAddress> _connectedAddressSet;
 
         private ImmutableHashSet<SessionStatus> _sessionStatusSet = ImmutableHashSet<SessionStatus>.Empty;
 
@@ -47,22 +51,27 @@ namespace Omnius.Xeus.Service.Engines
         private const string ServiceName = "shout_exchanger";
 
         public static async ValueTask<ShoutExchanger> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
-            IPublishedShoutStorage publishedShoutStorage, ISubscribedShoutStorage subscribedShoutStorage, IBytesPool bytesPool, ShoutExchangerOptions options, CancellationToken cancellationToken = default)
+            IPublishedShoutStorage publishedShoutStorage, ISubscribedShoutStorage subscribedShoutStorage, IBatchActionDispatcher batchActionDispatcher,
+            IBytesPool bytesPool, ShoutExchangerOptions options, CancellationToken cancellationToken = default)
         {
-            var shoutExchanger = new ShoutExchanger(sessionConnector, sessionAccepter, nodeFinder, publishedShoutStorage, subscribedShoutStorage, bytesPool, options);
+            var shoutExchanger = new ShoutExchanger(sessionConnector, sessionAccepter, nodeFinder, publishedShoutStorage, subscribedShoutStorage, batchActionDispatcher, bytesPool, options);
             return shoutExchanger;
         }
 
         private ShoutExchanger(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
-            IPublishedShoutStorage publishedShoutStorage, ISubscribedShoutStorage subscribedShoutStorage, IBytesPool bytesPool, ShoutExchangerOptions options)
+            IPublishedShoutStorage publishedShoutStorage, ISubscribedShoutStorage subscribedShoutStorage, IBatchActionDispatcher batchActionDispatcher,
+            IBytesPool bytesPool, ShoutExchangerOptions options)
         {
             _sessionConnector = sessionConnector;
             _sessionAccepter = sessionAccepter;
             _nodeFinder = nodeFinder;
             _publishedShoutStorage = publishedShoutStorage;
             _subscribedShoutStorage = subscribedShoutStorage;
+            _batchActionDispatcher = batchActionDispatcher;
             _bytesPool = bytesPool;
             _options = options;
+
+            _connectedAddressSet = new VolatileHashSet<OmniAddress>(TimeSpan.FromMinutes(3), _batchActionDispatcher);
 
             _connectLoopTask = this.ConnectLoopAsync(_cancellationTokenSource.Token);
             _acceptLoopTask = this.AcceptLoopAsync(_cancellationTokenSource.Token);
@@ -74,6 +83,8 @@ namespace Omnius.Xeus.Service.Engines
             _cancellationTokenSource.Cancel();
             await Task.WhenAll(_connectLoopTask!, _acceptLoopTask!);
             _cancellationTokenSource.Dispose();
+
+            _connectedAddressSet.Dispose();
         }
 
         public async ValueTask<ShoutExchangerReport> GetReportAsync(CancellationToken cancellationToken = default)
@@ -97,8 +108,6 @@ namespace Omnius.Xeus.Service.Engines
         {
             return _wantContentClues;
         }
-
-        private readonly VolatileHashSet<OmniAddress> _connectedAddressSet = new(TimeSpan.FromMinutes(30));
 
         private async Task ConnectLoopAsync(CancellationToken cancellationToken)
         {

@@ -22,13 +22,13 @@ namespace Omnius.Xeus.Service.Daemon
 
         public static async ValueTask EventLoopAsync(string configPath, string stateDirectoryPath, CancellationToken cancellationToken = default)
         {
-            var config = await LoadConfigAsync(configPath, cancellationToken);
-            var service = await XeusService.CreateAsync(stateDirectoryPath, config, cancellationToken);
+            var appConfig = await LoadAppConfigAsync(configPath, cancellationToken);
+            var service = await XeusService.CreateAsync(stateDirectoryPath, appConfig, cancellationToken);
 
-            await ListenAsync(service, config, cancellationToken);
+            await ListenAsync(service, appConfig, cancellationToken);
         }
 
-        private static async ValueTask<AppConfig> LoadConfigAsync(string configPath, CancellationToken cancellationToken = default)
+        private static async ValueTask<AppConfig> LoadAppConfigAsync(string configPath, CancellationToken cancellationToken = default)
         {
             var appConfig = await AppConfig.LoadAsync(configPath);
             if (appConfig is not null)

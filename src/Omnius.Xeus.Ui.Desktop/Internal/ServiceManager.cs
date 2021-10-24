@@ -15,7 +15,7 @@ using MultiplexerV1 = Omnius.Core.Net.Connections.Multiplexer.V1;
 
 namespace Omnius.Xeus.Ui.Desktop.Internal
 {
-    internal class XeusServiceManager : AsyncDisposableBase
+    internal class ServiceManager : AsyncDisposableBase
     {
         private Socket? _socket;
         private SocketCap? _cap;
@@ -24,7 +24,7 @@ namespace Omnius.Xeus.Ui.Desktop.Internal
         private OmniConnectionMultiplexer? _multiplexer;
         private XeusServiceRemoting.Client<DefaultErrorMessage>? _xeusServiceRemotingClient;
 
-        public XeusServiceManager()
+        public ServiceManager()
         {
         }
 
