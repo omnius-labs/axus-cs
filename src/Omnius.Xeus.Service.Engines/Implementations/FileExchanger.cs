@@ -518,7 +518,7 @@ namespace Omnius.Xeus.Service.Engines
                 }
             }
 
-        End:;
+        End:
 
             receivedWantBlockHashSet.ExceptWith(results.Select(n => n.Hash));
 

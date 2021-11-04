@@ -19,8 +19,8 @@ jobs:
           include-prerelease: true
       - name: Setup dotnet tool
         run: dotnet tool restore
-      - name: format-check
-        run: dotnet format --check
+      - name: format check
+        run: dotnet format --verify-no-changes
       - name: Install dependencies
         run: dotnet restore
       - name: Build

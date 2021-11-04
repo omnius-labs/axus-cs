@@ -38,6 +38,7 @@ namespace Omnius.Xeus.Service.Engines
             public NodeFinderDataMessage? SendingDataMessage { get; set; } = null;
 
             private readonly VolatileHashSet<ContentClue> _volatileReceivedWantContentClues;
+
             public LockedSet<ContentClue> ReceivedWantContentClues { get; }
         }
     }
