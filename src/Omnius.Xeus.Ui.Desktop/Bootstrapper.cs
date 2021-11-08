@@ -70,10 +70,10 @@ namespace Omnius.Xeus.Ui.Desktop
                 _dashboard = await Dashboard.CreateAsync(service, _bytesPool, cancellationToken);
 
                 var fileUploaderOptions = new FileUploaderOptions(Path.Combine(_storageDirectoryPath, "file_uploader"));
-                _fileUploader = await FileUploader.CreateAsync(service, LiteDatabaseBytesStorage.Factory, _bytesPool, fileUploaderOptions, cancellationToken);
+                _fileUploader = await FileUploader.CreateAsync(service, KeyValueLiteDatabaseStorage.Factory, _bytesPool, fileUploaderOptions, cancellationToken);
 
                 var fileDownloaderOptions = new FileDownloaderOptions(Path.Combine(_storageDirectoryPath, "file_downloader"));
-                _fileDownloader = await FileDownloader.CreateAsync(service, LiteDatabaseBytesStorage.Factory, _bytesPool, fileDownloaderOptions, cancellationToken);
+                _fileDownloader = await FileDownloader.CreateAsync(service, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, fileDownloaderOptions, cancellationToken);
 
                 var serviceCollection = new ServiceCollection();
 

@@ -1,5 +1,4 @@
 using System;
-using Omnius.Core.RocketPack;
 using Omnius.Xeus.Intaractors.Internal.Models;
 using Omnius.Xeus.Intaractors.Models;
 
@@ -21,14 +20,14 @@ namespace Omnius.Xeus.Intaractors.Internal.Entities
             {
                 Seed = SeedEntity.Import(value.Seed),
                 FilePath = value.FilePath,
-                CreationTime = value.CreationTime.ToDateTime(),
+                CreationTime = value.CreationTime,
                 State = (int)value.State,
             };
         }
 
         public UploadingFileItem Export()
         {
-            return new UploadingFileItem(this.FilePath ?? string.Empty, this.Seed?.Export() ?? Intaractors.Models.Seed.Empty, Timestamp.FromDateTime(this.CreationTime), (UploadingFileState)this.State);
+            return new UploadingFileItem(this.FilePath ?? string.Empty, this.Seed?.Export() ?? Intaractors.Models.Seed.Empty, this.CreationTime, (UploadingFileState)this.State);
         }
     }
 }

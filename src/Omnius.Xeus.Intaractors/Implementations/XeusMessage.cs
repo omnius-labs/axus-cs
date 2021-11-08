@@ -12,18 +12,18 @@ namespace Omnius.Xeus.Intaractors
     public static class XeusMessage
     {
         private static readonly string _schema = "xeus";
-        private static readonly string _nodeLocationPath = "node-location";
+        private static readonly string _nodePath = "node";
         private static readonly string _seedPath = "seed";
 
         public static string NodeLocationToString(NodeLocation message)
         {
-            return MessageToString<NodeLocation>(_nodeLocationPath, message);
+            return MessageToString<NodeLocation>(_nodePath, message);
         }
 
         public static bool TryStringToNodeLocation(string text, [NotNullWhen(true)] out NodeLocation? message)
         {
             message = null;
-            return TryStringToMessage<NodeLocation>(_nodeLocationPath, text, out message);
+            return TryStringToMessage<NodeLocation>(_nodePath, text, out message);
         }
 
         public static string SeedToString(Seed message)

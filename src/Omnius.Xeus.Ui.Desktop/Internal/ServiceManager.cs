@@ -30,10 +30,7 @@ namespace Omnius.Xeus.Ui.Desktop.Internal
 
         public async ValueTask ConnectAsync(OmniAddress address, IBytesPool bytesPool, CancellationToken cancellationToken = default)
         {
-            if (!address.TryGetTcpEndpoint(out var ipAddress, out var port))
-            {
-                throw new Exception("address is invalid format.");
-            }
+            if (!address.TryGetTcpEndpoint(out var ipAddress, out var port)) throw new Exception("address is invalid format.");
 
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             await _socket.ConnectAsync(new IPEndPoint(ipAddress, port), TimeSpan.FromSeconds(3), cancellationToken);

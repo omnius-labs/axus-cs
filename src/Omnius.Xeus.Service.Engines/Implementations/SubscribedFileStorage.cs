@@ -22,12 +22,12 @@ namespace Omnius.Xeus.Service.Engines
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly IBytesStorageFactory _bytesStorageFactory;
+        private readonly IKeyValueStorageFactory _keyValueStorageFactory;
         private readonly IBytesPool _bytesPool;
         private readonly SubscribedFileStorageOptions _options;
 
         private readonly SubscribedFileStorageRepository _subscriberRepo;
-        private readonly IBytesStorage<string> _blockStorage;
+        private readonly IKeyValueStorage<string> _blockStorage;
 
         private Task _computeLoopTask = null!;
 
@@ -35,21 +35,21 @@ namespace Omnius.Xeus.Service.Engines
 
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-        public static async ValueTask<SubscribedFileStorage> CreateAsync(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, SubscribedFileStorageOptions options, CancellationToken cancellationToken = default)
+        public static async ValueTask<SubscribedFileStorage> CreateAsync(IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, SubscribedFileStorageOptions options, CancellationToken cancellationToken = default)
         {
-            var subscribedFileStorage = new SubscribedFileStorage(bytesStorageFactory, bytesPool, options);
+            var subscribedFileStorage = new SubscribedFileStorage(keyValueStorageFactory, bytesPool, options);
             await subscribedFileStorage.InitAsync(cancellationToken);
             return subscribedFileStorage;
         }
 
-        private SubscribedFileStorage(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, SubscribedFileStorageOptions options)
+        private SubscribedFileStorage(IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, SubscribedFileStorageOptions options)
         {
-            _bytesStorageFactory = bytesStorageFactory;
+            _keyValueStorageFactory = keyValueStorageFactory;
             _bytesPool = bytesPool;
             _options = options;
 
             _subscriberRepo = new SubscribedFileStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
-            _blockStorage = _bytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
+            _blockStorage = _keyValueStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
         }
 
         private async ValueTask InitAsync(CancellationToken cancellationToken = default)

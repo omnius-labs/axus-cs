@@ -8,4 +8,4 @@ dotnet tool run t4 ./src/Omnius.Xeus.Ui.Desktop/Configuration/UiState.tt -o ./sr
 
 # *.rpf
 RPFC_PATH="$PWD/refs/core/src/Omnius.Core.RocketPack.DefinitionCompiler"
-dotnet run -p $RPFC_PATH -- -c "$PWD/rpfs/config.yml"
+dotnet run --project $RPFC_PATH -- -c "$PWD/rpfs/config.yml"

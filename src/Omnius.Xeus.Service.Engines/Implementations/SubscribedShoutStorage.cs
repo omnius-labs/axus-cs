@@ -21,30 +21,30 @@ namespace Omnius.Xeus.Service.Engines
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly IBytesStorageFactory _bytesStorageFactory;
+        private readonly IKeyValueStorageFactory _keyValueStorageFactory;
         private readonly IBytesPool _bytesPool;
         private readonly SubscribedShoutStorageOptions _options;
 
         private readonly SubscribedShoutStorageRepository _subscriberRepo;
-        private readonly IBytesStorage<string> _blockStorage;
+        private readonly IKeyValueStorage<string> _blockStorage;
 
         private readonly AsyncLock _asyncLock = new();
 
-        public static async ValueTask<SubscribedShoutStorage> CreateAsync(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, SubscribedShoutStorageOptions options, CancellationToken cancellationToken = default)
+        public static async ValueTask<SubscribedShoutStorage> CreateAsync(IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, SubscribedShoutStorageOptions options, CancellationToken cancellationToken = default)
         {
-            var subscribedShoutStorage = new SubscribedShoutStorage(bytesStorageFactory, bytesPool, options);
+            var subscribedShoutStorage = new SubscribedShoutStorage(keyValueStorageFactory, bytesPool, options);
             await subscribedShoutStorage.InitAsync(cancellationToken);
             return subscribedShoutStorage;
         }
 
-        private SubscribedShoutStorage(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, SubscribedShoutStorageOptions options)
+        private SubscribedShoutStorage(IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, SubscribedShoutStorageOptions options)
         {
-            _bytesStorageFactory = bytesStorageFactory;
+            _keyValueStorageFactory = keyValueStorageFactory;
             _bytesPool = bytesPool;
             _options = options;
 
             _subscriberRepo = new SubscribedShoutStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
-            _blockStorage = _bytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
+            _blockStorage = _keyValueStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
         }
 
         private async ValueTask InitAsync(CancellationToken cancellationToken = default)

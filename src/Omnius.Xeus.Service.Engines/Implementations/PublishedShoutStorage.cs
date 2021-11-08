@@ -21,30 +21,30 @@ namespace Omnius.Xeus.Service.Engines
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly IBytesStorageFactory _bytesStorageFactory;
+        private readonly IKeyValueStorageFactory _keyValueStorageFactory;
         private readonly IBytesPool _bytesPool;
         private readonly PublishedShoutStorageOptions _options;
 
         private readonly PublishedShoutStorageRepository _publisherRepo;
-        private readonly IBytesStorage<string> _blockStorage;
+        private readonly IKeyValueStorage<string> _blockStorage;
 
         private readonly AsyncLock _asyncLock = new();
 
-        public static async ValueTask<PublishedShoutStorage> CreateAsync(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, PublishedShoutStorageOptions options, CancellationToken cancellationToken = default)
+        public static async ValueTask<PublishedShoutStorage> CreateAsync(IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, PublishedShoutStorageOptions options, CancellationToken cancellationToken = default)
         {
-            var publishedShoutStorage = new PublishedShoutStorage(bytesStorageFactory, bytesPool, options);
+            var publishedShoutStorage = new PublishedShoutStorage(keyValueStorageFactory, bytesPool, options);
             await publishedShoutStorage.InitAsync(cancellationToken);
             return publishedShoutStorage;
         }
 
-        private PublishedShoutStorage(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, PublishedShoutStorageOptions options)
+        private PublishedShoutStorage(IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, PublishedShoutStorageOptions options)
         {
-            _bytesStorageFactory = bytesStorageFactory;
+            _keyValueStorageFactory = keyValueStorageFactory;
             _bytesPool = bytesPool;
             _options = options;
 
             _publisherRepo = new PublishedShoutStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
-            _blockStorage = _bytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
+            _blockStorage = _keyValueStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
         }
 
         private async ValueTask InitAsync(CancellationToken cancellationToken = default)

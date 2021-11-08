@@ -8,7 +8,6 @@ using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Helpers;
-using Omnius.Core.RocketPack;
 using Omnius.Core.Storages;
 using Omnius.Xeus.Intaractors.Internal;
 using Omnius.Xeus.Intaractors.Internal.Models;
@@ -23,10 +22,11 @@ namespace Omnius.Xeus.Intaractors
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         private readonly XeusServiceAdapter _service;
-        private readonly IBytesStorageFactory _bytesStorageFactory;
+        private readonly IKeyValueStorageFactory _keyValueStorageFactory;
         private readonly IBytesPool _bytesPool;
         private readonly FileDownloaderOptions _options;
 
+        private readonly ISingleValueStorage _configStorage;
         private readonly FileDownloaderRepository _fileDownloaderRepo;
 
         private Task _watchLoopTask = null!;
@@ -37,20 +37,21 @@ namespace Omnius.Xeus.Intaractors
 
         private const string Registrant = "Omnius.Xeus.Intaractors.FileDownloader";
 
-        public static async ValueTask<FileDownloader> CreateAsync(IXeusService xeusService, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options, CancellationToken cancellationToken = default)
+        public static async ValueTask<FileDownloader> CreateAsync(IXeusService xeusService, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options, CancellationToken cancellationToken = default)
         {
-            var fileDownloader = new FileDownloader(xeusService, bytesStorageFactory, bytesPool, options);
+            var fileDownloader = new FileDownloader(xeusService, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
             await fileDownloader.InitAsync(cancellationToken);
             return fileDownloader;
         }
 
-        private FileDownloader(IXeusService xeusService, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options)
+        private FileDownloader(IXeusService xeusService, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options)
         {
             _service = new XeusServiceAdapter(xeusService);
-            _bytesStorageFactory = bytesStorageFactory;
+            _keyValueStorageFactory = keyValueStorageFactory;
             _bytesPool = bytesPool;
             _options = options;
 
+            _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
             _fileDownloaderRepo = new FileDownloaderRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
         }
 
@@ -120,13 +121,15 @@ namespace Omnius.Xeus.Intaractors
         {
             using (await _asyncLock.LockAsync(cancellationToken))
             {
+                var config = await this.GetConfigAsync(cancellationToken);
+                var basePath = config.DestinationDirectory;
+                DirectoryHelper.CreateDirectory(basePath);
+
                 foreach (var item in _fileDownloaderRepo.Items.FindAll())
                 {
                     if (item.State == DownloadingFileState.Completed) continue;
 
-                    var basePath = Directory.GetCurrentDirectory();
-                    var filePath = Path.Combine(basePath, "_test_", item.Seed.Name);
-                    DirectoryHelper.CreateDirectory(Path.GetDirectoryName(filePath)!);
+                    var filePath = Path.Combine(basePath, item.Seed.Name);
 
                     if (await _service.TryExportFileToStorageAsync(item.Seed.RootHash, filePath, cancellationToken))
                     {
@@ -145,7 +148,7 @@ namespace Omnius.Xeus.Intaractors
 
                 foreach (var item in _fileDownloaderRepo.Items.FindAll())
                 {
-                    reports.Add(new DownloadingFileReport(item.Seed, item.FilePath, item.CreationTime.ToDateTime(), item.State));
+                    reports.Add(new DownloadingFileReport(item.Seed, item.FilePath, item.CreationTime, item.State));
                 }
 
                 return reports;
@@ -156,7 +159,7 @@ namespace Omnius.Xeus.Intaractors
         {
             using (await _asyncLock.LockAsync(cancellationToken))
             {
-                var now = Timestamp.FromDateTime(DateTime.UtcNow);
+                var now = DateTime.UtcNow;
                 var item = new DownloadingFileItem(seed, null, now, DownloadingFileState.Downloading);
                 _fileDownloaderRepo.Items.Upsert(item);
             }
@@ -167,6 +170,25 @@ namespace Omnius.Xeus.Intaractors
             using (await _asyncLock.LockAsync(cancellationToken))
             {
                 _fileDownloaderRepo.Items.Delete(seed);
+            }
+        }
+
+        public async ValueTask<FileDownloaderConfig> GetConfigAsync(CancellationToken cancellationToken = default)
+        {
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+                var config = await _configStorage.TryGetValueAsync<FileDownloaderConfig>(cancellationToken);
+                if (config is null) return FileDownloaderConfig.Empty;
+
+                return config;
+            }
+        }
+
+        public async ValueTask SetConfigAsync(FileDownloaderConfig config, CancellationToken cancellationToken = default)
+        {
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+                await _configStorage.TrySetValueAsync(config, cancellationToken);
             }
         }
     }

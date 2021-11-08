@@ -22,7 +22,7 @@ namespace Omnius.Xeus.Intaractors
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         private readonly XeusServiceAdapter _service;
-        private readonly IBytesStorageFactory _bytesStorageFactory;
+        private readonly IKeyValueStorageFactory _keyValueStorageFactory;
         private readonly IBytesPool _bytesPool;
         private readonly FileUploaderOptions _options;
 
@@ -36,17 +36,17 @@ namespace Omnius.Xeus.Intaractors
 
         private const string Registrant = "Omnius.Xeus.Intaractors.FileUploader";
 
-        public static async ValueTask<FileUploader> CreateAsync(IXeusService xeusService, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, FileUploaderOptions options, CancellationToken cancellationToken = default)
+        public static async ValueTask<FileUploader> CreateAsync(IXeusService xeusService, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, FileUploaderOptions options, CancellationToken cancellationToken = default)
         {
-            var fileUploader = new FileUploader(xeusService, bytesStorageFactory, bytesPool, options);
+            var fileUploader = new FileUploader(xeusService, keyValueStorageFactory, bytesPool, options);
             await fileUploader.InitAsync(cancellationToken);
             return fileUploader;
         }
 
-        private FileUploader(IXeusService xeusService, IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, FileUploaderOptions options)
+        private FileUploader(IXeusService xeusService, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, FileUploaderOptions options)
         {
             _service = new XeusServiceAdapter(xeusService);
-            _bytesStorageFactory = bytesStorageFactory;
+            _keyValueStorageFactory = keyValueStorageFactory;
             _bytesPool = bytesPool;
             _options = options;
 
@@ -128,7 +128,7 @@ namespace Omnius.Xeus.Intaractors
                 foreach (var item in _fileUploaderRepo.Items.FindAll())
                 {
                     var seed = (item.State == UploadingFileState.Completed) ? item.Seed : null;
-                    reports.Add(new UploadingFileReport(item.FilePath, seed, item.CreationTime.ToDateTime(), item.State));
+                    reports.Add(new UploadingFileReport(item.FilePath, seed, item.CreationTime, item.State));
                 }
 
                 return reports;
@@ -139,8 +139,8 @@ namespace Omnius.Xeus.Intaractors
         {
             using (await _asyncLock.LockAsync(cancellationToken))
             {
-                var now = Timestamp.FromDateTime(DateTime.UtcNow);
-                var seed = new Seed(OmniHash.Empty, name, (ulong)new FileInfo(filePath).Length, now);
+                var now = DateTime.UtcNow;
+                var seed = new Seed(OmniHash.Empty, name, (ulong)new FileInfo(filePath).Length, Timestamp.FromDateTime(now));
                 var item = new UploadingFileItem(filePath, seed, now, UploadingFileState.Waiting);
                 _fileUploaderRepo.Items.Upsert(item);
             }

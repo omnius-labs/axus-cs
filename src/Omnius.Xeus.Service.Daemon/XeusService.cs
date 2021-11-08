@@ -95,20 +95,20 @@ namespace Omnius.Xeus.Service.Daemon
             _nodeFinder = await NodeFinder.CreateAsync(_sessionConnector, _sessionAccepter, batchActionDispatcher, bytesPool, nodeFinderOptions, cancellationToken);
 
             var publishedFileStorageOptions = new PublishedFileStorageOptions(Path.Combine(workingDirectoryPath, "published_file_storage"));
-            _publishedFileStorage = await PublishedFileStorage.CreateAsync(LiteDatabaseBytesStorage.Factory, bytesPool, publishedFileStorageOptions, cancellationToken);
+            _publishedFileStorage = await PublishedFileStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, publishedFileStorageOptions, cancellationToken);
 
             var subscribedFileStorageOptions = new SubscribedFileStorageOptions(Path.Combine(workingDirectoryPath, "subscribed_file_storage"));
-            _subscribedFileStorage = await SubscribedFileStorage.CreateAsync(LiteDatabaseBytesStorage.Factory, bytesPool, subscribedFileStorageOptions, cancellationToken);
+            _subscribedFileStorage = await SubscribedFileStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, subscribedFileStorageOptions, cancellationToken);
 
             var fileExchangerOptions = new FileExchangerOptions(appConfig.Engines?.FileExchanger?.MaxSessionCount ?? int.MaxValue);
             _fileExchanger = await FileExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedFileStorage, _subscribedFileStorage, batchActionDispatcher, bytesPool, fileExchangerOptions, cancellationToken);
             _nodeFinder.GetEvents().GetContentExchangers.Subscribe(() => _fileExchanger).ToAdd(_disposables);
 
             var publishedShoutStorageOptions = new PublishedShoutStorageOptions(Path.Combine(workingDirectoryPath, "published_shout_storage"));
-            _publishedShoutStorage = await PublishedShoutStorage.CreateAsync(LiteDatabaseBytesStorage.Factory, bytesPool, publishedShoutStorageOptions, cancellationToken);
+            _publishedShoutStorage = await PublishedShoutStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, publishedShoutStorageOptions, cancellationToken);
 
             var subscribedShoutStorageOptions = new SubscribedShoutStorageOptions(Path.Combine(workingDirectoryPath, "subscribed_shout_storage"));
-            _subscribedShoutStorage = await SubscribedShoutStorage.CreateAsync(LiteDatabaseBytesStorage.Factory, bytesPool, subscribedShoutStorageOptions, cancellationToken);
+            _subscribedShoutStorage = await SubscribedShoutStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, subscribedShoutStorageOptions, cancellationToken);
 
             var shoutExchangerOptions = new ShoutExchangerOptions(appConfig.Engines?.ShoutExchanger?.MaxSessionCount ?? int.MaxValue);
             _shoutExchanger = await ShoutExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedShoutStorage, _subscribedShoutStorage, batchActionDispatcher, bytesPool, shoutExchangerOptions, cancellationToken);

@@ -22,32 +22,32 @@ namespace Omnius.Xeus.Service.Engines
     {
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly IBytesStorageFactory _bytesStorageFactory;
+        private readonly IKeyValueStorageFactory _keyValueStorageFactory;
         private readonly IBytesPool _bytesPool;
         private readonly PublishedFileStorageOptions _options;
 
         private readonly PublishedFileStorageRepository _publisherRepo;
-        private readonly IBytesStorage<string> _blockStorage;
+        private readonly IKeyValueStorage<string> _blockStorage;
 
         private readonly AsyncLock _asyncLock = new();
 
         private const int MaxBlockLength = 8 * 1024 * 1024;
 
-        public static async ValueTask<PublishedFileStorage> CreateAsync(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, PublishedFileStorageOptions options, CancellationToken cancellationToken = default)
+        public static async ValueTask<PublishedFileStorage> CreateAsync(IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, PublishedFileStorageOptions options, CancellationToken cancellationToken = default)
         {
-            var publishedFileStorage = new PublishedFileStorage(bytesStorageFactory, bytesPool, options);
+            var publishedFileStorage = new PublishedFileStorage(keyValueStorageFactory, bytesPool, options);
             await publishedFileStorage.InitAsync(cancellationToken);
             return publishedFileStorage;
         }
 
-        private PublishedFileStorage(IBytesStorageFactory bytesStorageFactory, IBytesPool bytesPool, PublishedFileStorageOptions options)
+        private PublishedFileStorage(IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, PublishedFileStorageOptions options)
         {
-            _bytesStorageFactory = bytesStorageFactory;
+            _keyValueStorageFactory = keyValueStorageFactory;
             _bytesPool = bytesPool;
             _options = options;
 
             _publisherRepo = new PublishedFileStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
-            _blockStorage = _bytesStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
+            _blockStorage = _keyValueStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
         }
 
         private async ValueTask InitAsync(CancellationToken cancellationToken = default)

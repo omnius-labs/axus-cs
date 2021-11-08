@@ -9,9 +9,9 @@ namespace Omnius.Xeus.Ui.Desktop.Configuration
 {
     public sealed partial class UiState
     {
-        public DynamicState DownloadControlDynamicState { get; } = new();
+        public DynamicState DownloadControl_DynamicState { get; } = new();
 
-        public DynamicState UploadControlDynamicState { get; } = new();
+        public DynamicState UploadControl_DynamicState { get; } = new();
 
         public static async ValueTask<UiState?> LoadAsync(string configPath)
         {
