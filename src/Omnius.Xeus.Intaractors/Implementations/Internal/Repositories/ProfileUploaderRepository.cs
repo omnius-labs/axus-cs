@@ -12,143 +12,142 @@ using Omnius.Xeus.Intaractors.Internal.Entities;
 using Omnius.Xeus.Intaractors.Internal.Models;
 using Omnius.Xeus.Utils;
 
-namespace Omnius.Xeus.Intaractors.Internal.Repositories
+namespace Omnius.Xeus.Intaractors.Internal.Repositories;
+
+internal sealed class ProfilePublisherRepository : DisposableBase
 {
-    internal sealed class ProfilePublisherRepository : DisposableBase
+    private readonly LiteDatabase _database;
+
+    public ProfilePublisherRepository(string dirPath)
     {
+        DirectoryHelper.CreateDirectory(dirPath);
+
+        _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
+        _database.UtcDate = true;
+
+        this.Items = new PublishedProfileItemRepository(_database);
+    }
+
+    protected override void OnDispose(bool disposing)
+    {
+        _database.Dispose();
+    }
+
+    public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
+    {
+        await this.Items.MigrateAsync(cancellationToken);
+    }
+
+    public PublishedProfileItemRepository Items { get; }
+
+    public sealed class PublishedProfileItemRepository
+    {
+        private const string CollectionName = "published_profile_items";
+
         private readonly LiteDatabase _database;
 
-        public ProfilePublisherRepository(string dirPath)
+        private readonly AsyncReaderWriterLock _asyncLock = new();
+
+        public PublishedProfileItemRepository(LiteDatabase database)
         {
-            DirectoryHelper.CreateDirectory(dirPath);
-
-            _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
-            _database.UtcDate = true;
-
-            this.Items = new PublishedProfileItemRepository(_database);
+            _database = database;
         }
 
-        protected override void OnDispose(bool disposing)
+        internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
         {
-            _database.Dispose();
+            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            {
+                if (_database.GetDocumentVersion(CollectionName) <= 0)
+                {
+                    var col = this.GetCollection();
+                    col.EnsureIndex(x => x.Signature, false);
+                    col.EnsureIndex(x => x.RootHash, false);
+                }
+
+                _database.SetDocumentVersion(CollectionName, 1);
+            }
         }
 
-        public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
+        private ILiteCollection<PublishedProfileItemEntity> GetCollection()
         {
-            await this.Items.MigrateAsync(cancellationToken);
+            var col = _database.GetCollection<PublishedProfileItemEntity>(CollectionName);
+            return col;
         }
 
-        public PublishedProfileItemRepository Items { get; }
-
-        public sealed class PublishedProfileItemRepository
+        public bool Exists(OmniSignature signature)
         {
-            private const string CollectionName = "published_profile_items";
-
-            private readonly LiteDatabase _database;
-
-            private readonly AsyncReaderWriterLock _asyncLock = new();
-
-            public PublishedProfileItemRepository(LiteDatabase database)
+            using (_asyncLock.ReaderLock())
             {
-                _database = database;
+                var signatureEntity = OmniSignatureEntity.Import(signature);
+
+                var col = this.GetCollection();
+                return col.Exists(n => n.Signature == signatureEntity);
             }
+        }
 
-            internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
+        public bool Exists(OmniHash rootHash)
+        {
+            using (_asyncLock.ReaderLock())
             {
-                using (await _asyncLock.WriterLockAsync(cancellationToken))
-                {
-                    if (_database.GetDocumentVersion(CollectionName) <= 0)
-                    {
-                        var col = this.GetCollection();
-                        col.EnsureIndex(x => x.Signature, false);
-                        col.EnsureIndex(x => x.RootHash, false);
-                    }
+                var rootHashEntity = OmniHashEntity.Import(rootHash);
 
-                    _database.SetDocumentVersion(CollectionName, 1);
-                }
+                var col = this.GetCollection();
+                return col.Exists(n => n.RootHash == rootHashEntity);
             }
+        }
 
-            private ILiteCollection<PublishedProfileItemEntity> GetCollection()
+        public IEnumerable<PublishedProfileItem> FindAll()
+        {
+            using (_asyncLock.ReaderLock())
             {
-                var col = _database.GetCollection<PublishedProfileItemEntity>(CollectionName);
-                return col;
+                var col = this.GetCollection();
+                return col.FindAll().Select(n => n.Export()).ToArray();
             }
+        }
 
-            public bool Exists(OmniSignature signature)
+        public PublishedProfileItem? FindOne(OmniSignature signature)
+        {
+            using (_asyncLock.ReaderLock())
             {
-                using (_asyncLock.ReaderLock())
-                {
-                    var signatureEntity = OmniSignatureEntity.Import(signature);
+                var signatureEntity = OmniSignatureEntity.Import(signature);
 
-                    var col = this.GetCollection();
-                    return col.Exists(n => n.Signature == signatureEntity);
-                }
+                var col = this.GetCollection();
+                return col.FindOne(n => n.Signature == signatureEntity).Export();
             }
+        }
 
-            public bool Exists(OmniHash rootHash)
+        public void Upsert(PublishedProfileItem item)
+        {
+            using (_asyncLock.WriterLock())
             {
-                using (_asyncLock.ReaderLock())
-                {
-                    var rootHashEntity = OmniHashEntity.Import(rootHash);
+                var itemEntity = PublishedProfileItemEntity.Import(item);
 
-                    var col = this.GetCollection();
-                    return col.Exists(n => n.RootHash == rootHashEntity);
-                }
+                var col = this.GetCollection();
+
+                col.DeleteMany(n => n.Signature == itemEntity.Signature && n.RootHash == itemEntity.RootHash);
+                col.Insert(itemEntity);
             }
+        }
 
-            public IEnumerable<PublishedProfileItem> FindAll()
+        public void Delete(OmniSignature signature)
+        {
+            using (_asyncLock.WriterLock())
             {
-                using (_asyncLock.ReaderLock())
-                {
-                    var col = this.GetCollection();
-                    return col.FindAll().Select(n => n.Export()).ToArray();
-                }
+                var signatureEntity = OmniSignatureEntity.Import(signature);
+
+                var col = this.GetCollection();
+                col.DeleteMany(n => n.Signature == signatureEntity);
             }
+        }
 
-            public PublishedProfileItem? FindOne(OmniSignature signature)
+        public void Delete(OmniHash rootHash)
+        {
+            using (_asyncLock.WriterLock())
             {
-                using (_asyncLock.ReaderLock())
-                {
-                    var signatureEntity = OmniSignatureEntity.Import(signature);
+                var rootHashEntity = OmniHashEntity.Import(rootHash);
 
-                    var col = this.GetCollection();
-                    return col.FindOne(n => n.Signature == signatureEntity).Export();
-                }
-            }
-
-            public void Upsert(PublishedProfileItem item)
-            {
-                using (_asyncLock.WriterLock())
-                {
-                    var itemEntity = PublishedProfileItemEntity.Import(item);
-
-                    var col = this.GetCollection();
-
-                    col.DeleteMany(n => n.Signature == itemEntity.Signature && n.RootHash == itemEntity.RootHash);
-                    col.Insert(itemEntity);
-                }
-            }
-
-            public void Delete(OmniSignature signature)
-            {
-                using (_asyncLock.WriterLock())
-                {
-                    var signatureEntity = OmniSignatureEntity.Import(signature);
-
-                    var col = this.GetCollection();
-                    col.DeleteMany(n => n.Signature == signatureEntity);
-                }
-            }
-
-            public void Delete(OmniHash rootHash)
-            {
-                using (_asyncLock.WriterLock())
-                {
-                    var rootHashEntity = OmniHashEntity.Import(rootHash);
-
-                    var col = this.GetCollection();
-                    col.DeleteMany(n => n.RootHash == rootHashEntity);
-                }
+                var col = this.GetCollection();
+                col.DeleteMany(n => n.RootHash == rootHashEntity);
             }
         }
     }

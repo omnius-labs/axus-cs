@@ -1,15 +1,14 @@
-namespace Omnius.Xeus.Ui.Desktop.ViewModels
+namespace Omnius.Xeus.Ui.Desktop.ViewModels;
+
+public enum FileSearchConditionType
 {
-    public enum FileSearchConditionType
-    {
-        Allow,
-        Deny,
-    }
+    Allow,
+    Deny,
+}
 
-    public interface IFileSearchCondition<T>
-    {
-        FileSearchConditionType Type { get; }
+public interface IFileSearchCondition<T>
+{
+    FileSearchConditionType Type { get; }
 
-        bool IsMatch(T value);
-    }
+    bool IsMatch(T value);
 }

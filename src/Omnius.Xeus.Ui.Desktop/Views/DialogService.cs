@@ -5,50 +5,49 @@ using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Omnius.Core.Avalonia;
 
-namespace Omnius.Xeus.Ui.Desktop.Windows
-{
-    public interface IDialogService
-    {
-        ValueTask<string> GetTextWindowAsync();
+namespace Omnius.Xeus.Ui.Desktop.Windows;
 
-        ValueTask<IEnumerable<string>> ShowOpenFileWindowAsync();
+public interface IDialogService
+{
+    ValueTask<string> GetTextWindowAsync();
+
+    ValueTask<IEnumerable<string>> ShowOpenFileWindowAsync();
+}
+
+public class DialogService : IDialogService
+{
+    private readonly IApplicationDispatcher _applicationDispatcher;
+    private readonly IMainWindowProvider _mainWindowProvider;
+
+    public DialogService(IApplicationDispatcher applicationDispatcher, IMainWindowProvider mainWindowProvider)
+    {
+        _applicationDispatcher = applicationDispatcher;
+        _mainWindowProvider = mainWindowProvider;
     }
 
-    public class DialogService : IDialogService
+    public async ValueTask<string> GetTextWindowAsync()
     {
-        private readonly IApplicationDispatcher _applicationDispatcher;
-        private readonly IMainWindowProvider _mainWindowProvider;
-
-        public DialogService(IApplicationDispatcher applicationDispatcher, IMainWindowProvider mainWindowProvider)
+        return await _applicationDispatcher.InvokeAsync(async () =>
         {
-            _applicationDispatcher = applicationDispatcher;
-            _mainWindowProvider = mainWindowProvider;
-        }
+            var serviceProvider = await Bootstrapper.Instance.GetServiceProvider();
+            if (serviceProvider is null) throw new NullReferenceException();
 
-        public async ValueTask<string> GetTextWindowAsync()
-        {
-            return await _applicationDispatcher.InvokeAsync(async () =>
+            var window = new TextWindow
             {
-                var serviceProvider = await Bootstrapper.Instance.GetServiceProvider();
-                if (serviceProvider is null) throw new NullReferenceException();
+                ViewModel = serviceProvider.GetRequiredService<TextWindowViewModel>(),
+            };
 
-                var window = new TextWindow
-                {
-                    ViewModel = serviceProvider.GetRequiredService<TextWindowViewModel>(),
-                };
+            await window.ShowDialog(_mainWindowProvider.GetMainWindow());
+            return window.ViewModel.Text.Value;
+        });
+    }
 
-                await window.ShowDialog(_mainWindowProvider.GetMainWindow());
-                return window.ViewModel.Text.Value;
-            });
-        }
-
-        public async ValueTask<IEnumerable<string>> ShowOpenFileWindowAsync()
+    public async ValueTask<IEnumerable<string>> ShowOpenFileWindowAsync()
+    {
+        return await _applicationDispatcher.InvokeAsync(async () =>
         {
-            return await _applicationDispatcher.InvokeAsync(async () =>
-            {
-                var dialog = new OpenFileDialog();
-                return await dialog.ShowAsync(_mainWindowProvider.GetMainWindow());
-            });
-        }
+            var dialog = new OpenFileDialog();
+            return await dialog.ShowAsync(_mainWindowProvider.GetMainWindow());
+        });
     }
 }

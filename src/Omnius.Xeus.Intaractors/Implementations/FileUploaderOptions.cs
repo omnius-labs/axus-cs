@@ -1,12 +1,11 @@
-namespace Omnius.Xeus.Intaractors
-{
-    public record FileUploaderOptions
-    {
-        public FileUploaderOptions(string configDirectoryPath)
-        {
-            this.ConfigDirectoryPath = configDirectoryPath;
-        }
+namespace Omnius.Xeus.Intaractors;
 
-        public string ConfigDirectoryPath { get; }
+public record FileUploaderOptions
+{
+    public FileUploaderOptions(string configDirectoryPath)
+    {
+        this.ConfigDirectoryPath = configDirectoryPath;
     }
+
+    public string ConfigDirectoryPath { get; }
 }

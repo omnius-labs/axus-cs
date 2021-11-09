@@ -2,41 +2,40 @@ using System.Threading.Tasks;
 using Avalonia.Markup.Xaml;
 using Omnius.Xeus.Ui.Desktop.Windows.Primitives;
 
-namespace Omnius.Xeus.Ui.Desktop.Windows
+namespace Omnius.Xeus.Ui.Desktop.Windows;
+
+public class TextWindow : StatefulWindowBase
 {
-    public class TextWindow : StatefulWindowBase
+    public TextWindow()
+        : base()
     {
-        public TextWindow()
-            : base()
-        {
-            this.InitializeComponent();
-        }
+        this.InitializeComponent();
+    }
 
-        private void InitializeComponent()
-        {
-            AvaloniaXamlLoader.Load(this);
-        }
+    private void InitializeComponent()
+    {
+        AvaloniaXamlLoader.Load(this);
+    }
 
-        protected override async ValueTask OnInitializeAsync()
+    protected override async ValueTask OnInitializeAsync()
+    {
+        if (this.ViewModel is TextWindowViewModel viewModel)
         {
-            if (this.ViewModel is TextWindowViewModel viewModel)
-            {
-                await viewModel.InitializeAsync();
-            }
+            await viewModel.InitializeAsync();
         }
+    }
 
-        protected override async ValueTask OnDisposeAsync()
+    protected override async ValueTask OnDisposeAsync()
+    {
+        if (this.ViewModel is TextWindowViewModel viewModel)
         {
-            if (this.ViewModel is TextWindowViewModel viewModel)
-            {
-                await viewModel.DisposeAsync();
-            }
+            await viewModel.DisposeAsync();
         }
+    }
 
-        public TextWindowViewModel? ViewModel
-        {
-            get => this.DataContext as TextWindowViewModel;
-            set => this.DataContext = value;
-        }
+    public TextWindowViewModel? ViewModel
+    {
+        get => this.DataContext as TextWindowViewModel;
+        set => this.DataContext = value;
     }
 }

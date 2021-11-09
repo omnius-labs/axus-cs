@@ -8,55 +8,54 @@ using Omnius.Xeus.Ui.Desktop.Configuration;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 
-namespace Omnius.Xeus.Ui.Desktop.Windows
+namespace Omnius.Xeus.Ui.Desktop.Windows;
+
+public class TextWindowViewModel : AsyncDisposableBase
 {
-    public class TextWindowViewModel : AsyncDisposableBase
+    private readonly UiState _uiState;
+    private readonly IClipboardService _clipboardService;
+
+    private readonly CompositeDisposable _disposable = new();
+
+    public TextWindowViewModel(UiState uiState, IClipboardService clipboardService)
     {
-        private readonly UiState _uiState;
-        private readonly IClipboardService _clipboardService;
+        _uiState = uiState;
+        _clipboardService = clipboardService;
 
-        private readonly CompositeDisposable _disposable = new();
+        this.Text = new ReactivePropertySlim<string>().AddTo(_disposable);
+        this.OkCommand = new ReactiveCommand().AddTo(_disposable);
+        this.OkCommand.Subscribe((state) => this.Ok(state)).AddTo(_disposable);
+        this.CancelCommand = new ReactiveCommand().AddTo(_disposable);
+        this.CancelCommand.Subscribe((state) => this.Cancel(state)).AddTo(_disposable);
+    }
 
-        public TextWindowViewModel(UiState uiState, IClipboardService clipboardService)
-        {
-            _uiState = uiState;
-            _clipboardService = clipboardService;
+    public async ValueTask InitializeAsync()
+    {
+        this.Text.Value = await _clipboardService.GetTextAsync();
+    }
 
-            this.Text = new ReactivePropertySlim<string>().AddTo(_disposable);
-            this.OkCommand = new ReactiveCommand().AddTo(_disposable);
-            this.OkCommand.Subscribe((state) => this.Ok(state)).AddTo(_disposable);
-            this.CancelCommand = new ReactiveCommand().AddTo(_disposable);
-            this.CancelCommand.Subscribe((state) => this.Cancel(state)).AddTo(_disposable);
-        }
+    protected override async ValueTask OnDisposeAsync()
+    {
+        _disposable.Dispose();
+    }
 
-        public async ValueTask InitializeAsync()
-        {
-            this.Text.Value = await _clipboardService.GetTextAsync();
-        }
+    public ReactivePropertySlim<string> Text { get; }
 
-        protected override async ValueTask OnDisposeAsync()
-        {
-            _disposable.Dispose();
-        }
+    public ReactiveCommand OkCommand { get; }
 
-        public ReactivePropertySlim<string> Text { get; }
+    public ReactiveCommand CancelCommand { get; }
 
-        public ReactiveCommand OkCommand { get; }
+    private async void Ok(object state)
+    {
+        var window = (Window)state;
+        window.Close();
+    }
 
-        public ReactiveCommand CancelCommand { get; }
+    private async void Cancel(object state)
+    {
+        this.Text.Value = string.Empty;
 
-        private async void Ok(object state)
-        {
-            var window = (Window)state;
-            window.Close();
-        }
-
-        private async void Cancel(object state)
-        {
-            this.Text.Value = string.Empty;
-
-            var window = (Window)state;
-            window.Close();
-        }
+        var window = (Window)state;
+        window.Close();
     }
 }

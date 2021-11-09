@@ -15,181 +15,180 @@ using Omnius.Xeus.Intaractors.Internal.Repositories;
 using Omnius.Xeus.Intaractors.Models;
 using Omnius.Xeus.Service.Remoting;
 
-namespace Omnius.Xeus.Intaractors
+namespace Omnius.Xeus.Intaractors;
+
+public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
 {
-    public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
+    private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
+
+    private readonly XeusServiceAdapter _service;
+    private readonly IKeyValueStorageFactory _keyValueStorageFactory;
+    private readonly IBytesPool _bytesPool;
+    private readonly FileDownloaderOptions _options;
+
+    private readonly ISingleValueStorage _configStorage;
+    private readonly FileDownloaderRepository _fileDownloaderRepo;
+
+    private Task _watchLoopTask = null!;
+
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+
+    private readonly AsyncLock _asyncLock = new();
+
+    private const string Registrant = "Omnius.Xeus.Intaractors.FileDownloader";
+
+    public static async ValueTask<FileDownloader> CreateAsync(IXeusService xeusService, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options, CancellationToken cancellationToken = default)
     {
-        private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
+        var fileDownloader = new FileDownloader(xeusService, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
+        await fileDownloader.InitAsync(cancellationToken);
+        return fileDownloader;
+    }
 
-        private readonly XeusServiceAdapter _service;
-        private readonly IKeyValueStorageFactory _keyValueStorageFactory;
-        private readonly IBytesPool _bytesPool;
-        private readonly FileDownloaderOptions _options;
+    private FileDownloader(IXeusService xeusService, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options)
+    {
+        _service = new XeusServiceAdapter(xeusService);
+        _keyValueStorageFactory = keyValueStorageFactory;
+        _bytesPool = bytesPool;
+        _options = options;
 
-        private readonly ISingleValueStorage _configStorage;
-        private readonly FileDownloaderRepository _fileDownloaderRepo;
+        _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
+        _fileDownloaderRepo = new FileDownloaderRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
+    }
 
-        private Task _watchLoopTask = null!;
+    private async ValueTask InitAsync(CancellationToken cancellationToken = default)
+    {
+        await _fileDownloaderRepo.MigrateAsync(cancellationToken);
 
-        private readonly CancellationTokenSource _cancellationTokenSource = new();
+        _watchLoopTask = this.WatchLoopAsync(_cancellationTokenSource.Token);
+    }
 
-        private readonly AsyncLock _asyncLock = new();
+    protected override async ValueTask OnDisposeAsync()
+    {
+        _cancellationTokenSource.Cancel();
+        await _watchLoopTask;
+        _cancellationTokenSource.Dispose();
 
-        private const string Registrant = "Omnius.Xeus.Intaractors.FileDownloader";
+        _fileDownloaderRepo.Dispose();
+    }
 
-        public static async ValueTask<FileDownloader> CreateAsync(IXeusService xeusService, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options, CancellationToken cancellationToken = default)
+    private async Task WatchLoopAsync(CancellationToken cancellationToken = default)
+    {
+        try
         {
-            var fileDownloader = new FileDownloader(xeusService, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
-            await fileDownloader.InitAsync(cancellationToken);
-            return fileDownloader;
-        }
+            await Task.Delay(1, cancellationToken).ConfigureAwait(false);
 
-        private FileDownloader(IXeusService xeusService, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options)
-        {
-            _service = new XeusServiceAdapter(xeusService);
-            _keyValueStorageFactory = keyValueStorageFactory;
-            _bytesPool = bytesPool;
-            _options = options;
-
-            _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
-            _fileDownloaderRepo = new FileDownloaderRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
-        }
-
-        private async ValueTask InitAsync(CancellationToken cancellationToken = default)
-        {
-            await _fileDownloaderRepo.MigrateAsync(cancellationToken);
-
-            _watchLoopTask = this.WatchLoopAsync(_cancellationTokenSource.Token);
-        }
-
-        protected override async ValueTask OnDisposeAsync()
-        {
-            _cancellationTokenSource.Cancel();
-            await _watchLoopTask;
-            _cancellationTokenSource.Dispose();
-
-            _fileDownloaderRepo.Dispose();
-        }
-
-        private async Task WatchLoopAsync(CancellationToken cancellationToken = default)
-        {
-            try
+            for (; ; )
             {
-                await Task.Delay(1, cancellationToken).ConfigureAwait(false);
+                await Task.Delay(1000 * 30, cancellationToken);
 
-                for (; ; )
-                {
-                    await Task.Delay(1000 * 30, cancellationToken);
-
-                    await this.SyncSubscribedFiles(cancellationToken);
-                    await this.TryExportSubscribedFiles(cancellationToken);
-                }
-            }
-            catch (OperationCanceledException e)
-            {
-                _logger.Debug(e);
-            }
-            catch (Exception e)
-            {
-                _logger.Error(e);
+                await this.SyncSubscribedFiles(cancellationToken);
+                await this.TryExportSubscribedFiles(cancellationToken);
             }
         }
-
-        private async ValueTask SyncSubscribedFiles(CancellationToken cancellationToken = default)
+        catch (OperationCanceledException e)
         {
-            using (await _asyncLock.LockAsync(cancellationToken))
+            _logger.Debug(e);
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e);
+        }
+    }
+
+    private async ValueTask SyncSubscribedFiles(CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
+            var subscribedFileReports = await _service.GetSubscribedFileReportsAsync(cancellationToken);
+            var hashes = new HashSet<OmniHash>();
+            hashes.UnionWith(subscribedFileReports.Where(n => n.Registrant == Registrant).Select(n => n.RootHash));
+
+            foreach (var hash in hashes)
             {
-                var subscribedFileReports = await _service.GetSubscribedFileReportsAsync(cancellationToken);
-                var hashes = new HashSet<OmniHash>();
-                hashes.UnionWith(subscribedFileReports.Where(n => n.Registrant == Registrant).Select(n => n.RootHash));
+                if (_fileDownloaderRepo.Items.Exists(hash)) continue;
+                await _service.UnsubscribeFileAsync(hash, Registrant, cancellationToken);
+            }
 
-                foreach (var hash in hashes)
-                {
-                    if (_fileDownloaderRepo.Items.Exists(hash)) continue;
-                    await _service.UnsubscribeFileAsync(hash, Registrant, cancellationToken);
-                }
-
-                foreach (var seed in _fileDownloaderRepo.Items.FindAll().Select(n => n.Seed))
-                {
-                    if (hashes.Contains(seed.RootHash)) continue;
-                    await _service.SubscribeFileAsync(seed.RootHash, Registrant, cancellationToken);
-                }
+            foreach (var seed in _fileDownloaderRepo.Items.FindAll().Select(n => n.Seed))
+            {
+                if (hashes.Contains(seed.RootHash)) continue;
+                await _service.SubscribeFileAsync(seed.RootHash, Registrant, cancellationToken);
             }
         }
+    }
 
-        private async ValueTask TryExportSubscribedFiles(CancellationToken cancellationToken = default)
+    private async ValueTask TryExportSubscribedFiles(CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
-            using (await _asyncLock.LockAsync(cancellationToken))
+            var config = await this.GetConfigAsync(cancellationToken);
+            var basePath = config.DestinationDirectory;
+            DirectoryHelper.CreateDirectory(basePath);
+
+            foreach (var item in _fileDownloaderRepo.Items.FindAll())
             {
-                var config = await this.GetConfigAsync(cancellationToken);
-                var basePath = config.DestinationDirectory;
-                DirectoryHelper.CreateDirectory(basePath);
+                if (item.State == DownloadingFileState.Completed) continue;
 
-                foreach (var item in _fileDownloaderRepo.Items.FindAll())
+                var filePath = Path.Combine(basePath, item.Seed.Name);
+
+                if (await _service.TryExportFileToStorageAsync(item.Seed.RootHash, filePath, cancellationToken))
                 {
-                    if (item.State == DownloadingFileState.Completed) continue;
-
-                    var filePath = Path.Combine(basePath, item.Seed.Name);
-
-                    if (await _service.TryExportFileToStorageAsync(item.Seed.RootHash, filePath, cancellationToken))
-                    {
-                        var newItem = new DownloadingFileItem(item.Seed, filePath, item.CreationTime, DownloadingFileState.Completed);
-                        _fileDownloaderRepo.Items.Upsert(newItem);
-                    }
+                    var newItem = new DownloadingFileItem(item.Seed, filePath, item.CreationTime, DownloadingFileState.Completed);
+                    _fileDownloaderRepo.Items.Upsert(newItem);
                 }
             }
         }
+    }
 
-        public async ValueTask<IEnumerable<DownloadingFileReport>> GetDownloadingFileReportsAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<DownloadingFileReport>> GetDownloadingFileReportsAsync(CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
-            using (await _asyncLock.LockAsync(cancellationToken))
+            var reports = new List<DownloadingFileReport>();
+
+            foreach (var item in _fileDownloaderRepo.Items.FindAll())
             {
-                var reports = new List<DownloadingFileReport>();
-
-                foreach (var item in _fileDownloaderRepo.Items.FindAll())
-                {
-                    reports.Add(new DownloadingFileReport(item.Seed, item.FilePath, item.CreationTime, item.State));
-                }
-
-                return reports;
+                reports.Add(new DownloadingFileReport(item.Seed, item.FilePath, item.CreationTime, item.State));
             }
+
+            return reports;
         }
+    }
 
-        public async ValueTask RegisterAsync(Seed seed, CancellationToken cancellationToken = default)
+    public async ValueTask RegisterAsync(Seed seed, CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
-            using (await _asyncLock.LockAsync(cancellationToken))
-            {
-                var now = DateTime.UtcNow;
-                var item = new DownloadingFileItem(seed, null, now, DownloadingFileState.Downloading);
-                _fileDownloaderRepo.Items.Upsert(item);
-            }
+            var now = DateTime.UtcNow;
+            var item = new DownloadingFileItem(seed, null, now, DownloadingFileState.Downloading);
+            _fileDownloaderRepo.Items.Upsert(item);
         }
+    }
 
-        public async ValueTask UnregisterAsync(Seed seed, CancellationToken cancellationToken = default)
+    public async ValueTask UnregisterAsync(Seed seed, CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
-            using (await _asyncLock.LockAsync(cancellationToken))
-            {
-                _fileDownloaderRepo.Items.Delete(seed);
-            }
+            _fileDownloaderRepo.Items.Delete(seed);
         }
+    }
 
-        public async ValueTask<FileDownloaderConfig> GetConfigAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<FileDownloaderConfig> GetConfigAsync(CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
-            using (await _asyncLock.LockAsync(cancellationToken))
-            {
-                var config = await _configStorage.TryGetValueAsync<FileDownloaderConfig>(cancellationToken);
-                if (config is null) return FileDownloaderConfig.Empty;
+            var config = await _configStorage.TryGetValueAsync<FileDownloaderConfig>(cancellationToken);
+            if (config is null) return FileDownloaderConfig.Empty;
 
-                return config;
-            }
+            return config;
         }
+    }
 
-        public async ValueTask SetConfigAsync(FileDownloaderConfig config, CancellationToken cancellationToken = default)
+    public async ValueTask SetConfigAsync(FileDownloaderConfig config, CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
-            using (await _asyncLock.LockAsync(cancellationToken))
-            {
-                await _configStorage.TrySetValueAsync(config, cancellationToken);
-            }
+            await _configStorage.TrySetValueAsync(config, cancellationToken);
         }
     }
 }

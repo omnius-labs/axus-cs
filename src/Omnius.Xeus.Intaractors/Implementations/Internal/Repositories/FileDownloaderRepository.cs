@@ -13,135 +13,134 @@ using Omnius.Xeus.Intaractors.Internal.Models;
 using Omnius.Xeus.Intaractors.Models;
 using Omnius.Xeus.Utils;
 
-namespace Omnius.Xeus.Intaractors.Internal.Repositories
+namespace Omnius.Xeus.Intaractors.Internal.Repositories;
+
+internal sealed class FileDownloaderRepository : DisposableBase
 {
-    internal sealed class FileDownloaderRepository : DisposableBase
+    private readonly LiteDatabase _database;
+
+    public FileDownloaderRepository(string dirPath)
     {
+        DirectoryHelper.CreateDirectory(dirPath);
+
+        _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
+        _database.UtcDate = true;
+
+        this.Items = new DownloadingFileItemRepository(_database);
+    }
+
+    protected override void OnDispose(bool disposing)
+    {
+        _database.Dispose();
+    }
+
+    public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
+    {
+        await this.Items.MigrateAsync(cancellationToken);
+    }
+
+    public DownloadingFileItemRepository Items { get; }
+
+    public sealed class DownloadingFileItemRepository
+    {
+        private const string CollectionName = "downloading_box_items";
+
         private readonly LiteDatabase _database;
 
-        public FileDownloaderRepository(string dirPath)
+        private readonly AsyncReaderWriterLock _asyncLock = new();
+
+        public DownloadingFileItemRepository(LiteDatabase database)
         {
-            DirectoryHelper.CreateDirectory(dirPath);
-
-            _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
-            _database.UtcDate = true;
-
-            this.Items = new DownloadingFileItemRepository(_database);
+            _database = database;
         }
 
-        protected override void OnDispose(bool disposing)
+        internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
         {
-            _database.Dispose();
+            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            {
+                if (_database.GetDocumentVersion(CollectionName) <= 0)
+                {
+                    var col = this.GetCollection();
+                    col.EnsureIndex(x => x.Seed!.RootHash, true);
+                }
+
+                _database.SetDocumentVersion(CollectionName, 1);
+            }
         }
 
-        public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
+        private ILiteCollection<DownloadingFileItemEntity> GetCollection()
         {
-            await this.Items.MigrateAsync(cancellationToken);
+            var col = _database.GetCollection<DownloadingFileItemEntity>(CollectionName);
+            return col;
         }
 
-        public DownloadingFileItemRepository Items { get; }
-
-        public sealed class DownloadingFileItemRepository
+        public bool Exists(Seed seed)
         {
-            private const string CollectionName = "downloading_box_items";
-
-            private readonly LiteDatabase _database;
-
-            private readonly AsyncReaderWriterLock _asyncLock = new();
-
-            public DownloadingFileItemRepository(LiteDatabase database)
+            using (_asyncLock.ReaderLock())
             {
-                _database = database;
+                var seedEntity = SeedEntity.Import(seed);
+
+                var col = this.GetCollection();
+                return col.Exists(n => n.Seed == seedEntity);
             }
+        }
 
-            internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
+        public bool Exists(OmniHash rootHash)
+        {
+            using (_asyncLock.ReaderLock())
             {
-                using (await _asyncLock.WriterLockAsync(cancellationToken))
-                {
-                    if (_database.GetDocumentVersion(CollectionName) <= 0)
-                    {
-                        var col = this.GetCollection();
-                        col.EnsureIndex(x => x.Seed!.RootHash, true);
-                    }
+                var rootHashEntity = OmniHashEntity.Import(rootHash);
 
-                    _database.SetDocumentVersion(CollectionName, 1);
-                }
+                var col = this.GetCollection();
+                return col.Exists(n => n.Seed != null && n.Seed.RootHash == rootHashEntity);
             }
+        }
 
-            private ILiteCollection<DownloadingFileItemEntity> GetCollection()
+        public IEnumerable<DownloadingFileItem> FindAll()
+        {
+            using (_asyncLock.ReaderLock())
             {
-                var col = _database.GetCollection<DownloadingFileItemEntity>(CollectionName);
-                return col;
+                var col = this.GetCollection();
+                return col.FindAll().Select(n => n.Export()).ToArray();
             }
+        }
 
-            public bool Exists(Seed seed)
+        public DownloadingFileItem? FindOne(Seed seed)
+        {
+            using (_asyncLock.ReaderLock())
             {
-                using (_asyncLock.ReaderLock())
-                {
-                    var seedEntity = SeedEntity.Import(seed);
+                var seedEntity = SeedEntity.Import(seed);
 
-                    var col = this.GetCollection();
-                    return col.Exists(n => n.Seed == seedEntity);
-                }
+                var col = this.GetCollection();
+                return col.FindOne(n => n.Seed == seedEntity).Export();
             }
+        }
 
-            public bool Exists(OmniHash rootHash)
+        public void Upsert(DownloadingFileItem item)
+        {
+            using (_asyncLock.WriterLock())
             {
-                using (_asyncLock.ReaderLock())
-                {
-                    var rootHashEntity = OmniHashEntity.Import(rootHash);
+                var itemEntity = DownloadingFileItemEntity.Import(item);
 
-                    var col = this.GetCollection();
-                    return col.Exists(n => n.Seed != null && n.Seed.RootHash == rootHashEntity);
-                }
+                var col = this.GetCollection();
+
+                _database.BeginTrans();
+
+                col.DeleteMany(n => n.Seed == itemEntity.Seed);
+                col.Insert(itemEntity);
+
+                _database.Commit();
             }
+        }
 
-            public IEnumerable<DownloadingFileItem> FindAll()
+        public void Delete(Seed seed)
+        {
+            using (_asyncLock.WriterLock())
             {
-                using (_asyncLock.ReaderLock())
-                {
-                    var col = this.GetCollection();
-                    return col.FindAll().Select(n => n.Export()).ToArray();
-                }
-            }
+                var seedEntity = SeedEntity.Import(seed);
 
-            public DownloadingFileItem? FindOne(Seed seed)
-            {
-                using (_asyncLock.ReaderLock())
-                {
-                    var seedEntity = SeedEntity.Import(seed);
-
-                    var col = this.GetCollection();
-                    return col.FindOne(n => n.Seed == seedEntity).Export();
-                }
-            }
-
-            public void Upsert(DownloadingFileItem item)
-            {
-                using (_asyncLock.WriterLock())
-                {
-                    var itemEntity = DownloadingFileItemEntity.Import(item);
-
-                    var col = this.GetCollection();
-
-                    _database.BeginTrans();
-
-                    col.DeleteMany(n => n.Seed == itemEntity.Seed);
-                    col.Insert(itemEntity);
-
-                    _database.Commit();
-                }
-            }
-
-            public void Delete(Seed seed)
-            {
-                using (_asyncLock.WriterLock())
-                {
-                    var seedEntity = SeedEntity.Import(seed);
-
-                    var col = this.GetCollection();
-                    col.DeleteMany(n => n.Seed == seedEntity);
-                }
+                var col = this.GetCollection();
+                col.DeleteMany(n => n.Seed == seedEntity);
             }
         }
     }

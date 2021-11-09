@@ -15,150 +15,149 @@ using Omnius.Xeus.Service.Engines.Internal.Models;
 using Omnius.Xeus.Service.Engines.Internal.Repositories;
 using Omnius.Xeus.Service.Models;
 
-namespace Omnius.Xeus.Service.Engines
+namespace Omnius.Xeus.Service.Engines;
+
+public sealed partial class PublishedShoutStorage : AsyncDisposableBase, IPublishedShoutStorage
 {
-    public sealed partial class PublishedShoutStorage : AsyncDisposableBase, IPublishedShoutStorage
+    private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
+
+    private readonly IKeyValueStorageFactory _keyValueStorageFactory;
+    private readonly IBytesPool _bytesPool;
+    private readonly PublishedShoutStorageOptions _options;
+
+    private readonly PublishedShoutStorageRepository _publisherRepo;
+    private readonly IKeyValueStorage<string> _blockStorage;
+
+    private readonly AsyncLock _asyncLock = new();
+
+    public static async ValueTask<PublishedShoutStorage> CreateAsync(IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, PublishedShoutStorageOptions options, CancellationToken cancellationToken = default)
     {
-        private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
+        var publishedShoutStorage = new PublishedShoutStorage(keyValueStorageFactory, bytesPool, options);
+        await publishedShoutStorage.InitAsync(cancellationToken);
+        return publishedShoutStorage;
+    }
 
-        private readonly IKeyValueStorageFactory _keyValueStorageFactory;
-        private readonly IBytesPool _bytesPool;
-        private readonly PublishedShoutStorageOptions _options;
+    private PublishedShoutStorage(IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, PublishedShoutStorageOptions options)
+    {
+        _keyValueStorageFactory = keyValueStorageFactory;
+        _bytesPool = bytesPool;
+        _options = options;
 
-        private readonly PublishedShoutStorageRepository _publisherRepo;
-        private readonly IKeyValueStorage<string> _blockStorage;
+        _publisherRepo = new PublishedShoutStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
+        _blockStorage = _keyValueStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
+    }
 
-        private readonly AsyncLock _asyncLock = new();
+    private async ValueTask InitAsync(CancellationToken cancellationToken = default)
+    {
+        await _publisherRepo.MigrateAsync(cancellationToken);
+        await _blockStorage.MigrateAsync(cancellationToken);
+    }
 
-        public static async ValueTask<PublishedShoutStorage> CreateAsync(IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, PublishedShoutStorageOptions options, CancellationToken cancellationToken = default)
+    protected override async ValueTask OnDisposeAsync()
+    {
+        _publisherRepo.Dispose();
+        _blockStorage.Dispose();
+    }
+
+    public async ValueTask<PublishedShoutStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var publishedShoutStorage = new PublishedShoutStorage(keyValueStorageFactory, bytesPool, options);
-            await publishedShoutStorage.InitAsync(cancellationToken);
-            return publishedShoutStorage;
-        }
+            var shoutReports = new List<PublishedShoutReport>();
 
-        private PublishedShoutStorage(IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, PublishedShoutStorageOptions options)
-        {
-            _keyValueStorageFactory = keyValueStorageFactory;
-            _bytesPool = bytesPool;
-            _options = options;
-
-            _publisherRepo = new PublishedShoutStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
-            _blockStorage = _keyValueStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
-        }
-
-        private async ValueTask InitAsync(CancellationToken cancellationToken = default)
-        {
-            await _publisherRepo.MigrateAsync(cancellationToken);
-            await _blockStorage.MigrateAsync(cancellationToken);
-        }
-
-        protected override async ValueTask OnDisposeAsync()
-        {
-            _publisherRepo.Dispose();
-            _blockStorage.Dispose();
-        }
-
-        public async ValueTask<PublishedShoutStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
-        {
-            using (await _asyncLock.LockAsync(cancellationToken))
+            foreach (var item in _publisherRepo.Items.FindAll())
             {
-                var shoutReports = new List<PublishedShoutReport>();
-
-                foreach (var item in _publisherRepo.Items.FindAll())
-                {
-                    shoutReports.Add(new PublishedShoutReport(item.Signature, item.Registrant));
-                }
-
-                return new PublishedShoutStorageReport(shoutReports.ToArray());
+                shoutReports.Add(new PublishedShoutReport(item.Signature, item.Registrant));
             }
-        }
 
-        public async ValueTask CheckConsistencyAsync(Action<ConsistencyReport> callback, CancellationToken cancellationToken = default)
-        {
+            return new PublishedShoutStorageReport(shoutReports.ToArray());
         }
+    }
 
-        public async ValueTask<IEnumerable<OmniSignature>> GetSignaturesAsync(CancellationToken cancellationToken = default)
+    public async ValueTask CheckConsistencyAsync(Action<ConsistencyReport> callback, CancellationToken cancellationToken = default)
+    {
+    }
+
+    public async ValueTask<IEnumerable<OmniSignature>> GetSignaturesAsync(CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
-            using (await _asyncLock.LockAsync(cancellationToken))
+            var results = new List<OmniSignature>();
+
+            foreach (var status in _publisherRepo.Items.FindAll())
             {
-                var results = new List<OmniSignature>();
-
-                foreach (var status in _publisherRepo.Items.FindAll())
-                {
-                    results.Add(status.Signature);
-                }
-
-                return results;
+                results.Add(status.Signature);
             }
-        }
 
-        public async ValueTask<bool> ContainsShoutAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+            return results;
+        }
+    }
+
+    public async ValueTask<bool> ContainsShoutAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
-            using (await _asyncLock.LockAsync(cancellationToken))
-            {
-                var item = _publisherRepo.Items.Find(signature).FirstOrDefault();
-                if (item == null) return false;
+            var item = _publisherRepo.Items.Find(signature).FirstOrDefault();
+            if (item == null) return false;
 
-                return true;
-            }
+            return true;
         }
+    }
 
-        public async ValueTask PublishShoutAsync(Shout message, string registrant, CancellationToken cancellationToken = default)
+    public async ValueTask PublishShoutAsync(Shout message, string registrant, CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
-            using (await _asyncLock.LockAsync(cancellationToken))
-            {
-                var signature = message.Certificate?.GetOmniSignature();
-                if (signature is null) throw new ArgumentNullException(nameof(message.Certificate));
+            var signature = message.Certificate?.GetOmniSignature();
+            if (signature is null) throw new ArgumentNullException(nameof(message.Certificate));
 
-                using var bytesPipe = new BytesPipe(_bytesPool);
-                message.Export(bytesPipe.Writer, _bytesPool);
+            using var bytesPipe = new BytesPipe(_bytesPool);
+            message.Export(bytesPipe.Writer, _bytesPool);
 
-                _publisherRepo.Items.Insert(new PublishedShoutItem(signature, message.CreationTime.ToDateTime(), registrant));
+            _publisherRepo.Items.Insert(new PublishedShoutItem(signature, message.CreationTime.ToDateTime(), registrant));
 
-                var blockName = ComputeBlockName(signature);
-                await _blockStorage.TryWriteAsync(blockName, bytesPipe.Reader.GetSequence(), cancellationToken);
-            }
+            var blockName = ComputeBlockName(signature);
+            await _blockStorage.TryWriteAsync(blockName, bytesPipe.Reader.GetSequence(), cancellationToken);
         }
+    }
 
-        public async ValueTask UnpublishShoutAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default)
+    public async ValueTask UnpublishShoutAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
-            using (await _asyncLock.LockAsync(cancellationToken))
-            {
-                _publisherRepo.Items.Delete(signature, registrant);
-            }
+            _publisherRepo.Items.Delete(signature, registrant);
         }
+    }
 
-        public async ValueTask<DateTime?> ReadShoutCreationTimeAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+    public async ValueTask<DateTime?> ReadShoutCreationTimeAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
-            using (await _asyncLock.LockAsync(cancellationToken))
-            {
-                var item = _publisherRepo.Items.Find(signature).FirstOrDefault();
-                if (item == null) return null;
+            var item = _publisherRepo.Items.Find(signature).FirstOrDefault();
+            if (item == null) return null;
 
-                return item.CreationTime;
-            }
+            return item.CreationTime;
         }
+    }
 
-        public async ValueTask<Shout?> ReadShoutAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+    public async ValueTask<Shout?> ReadShoutAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
-            using (await _asyncLock.LockAsync(cancellationToken))
-            {
-                var item = _publisherRepo.Items.Find(signature).FirstOrDefault();
-                if (item == null) return null;
+            var item = _publisherRepo.Items.Find(signature).FirstOrDefault();
+            if (item == null) return null;
 
-                var blockName = ComputeBlockName(signature);
-                var memoryOwner = await _blockStorage.TryReadAsync(blockName, cancellationToken);
-                if (memoryOwner is null) return null;
+            var blockName = ComputeBlockName(signature);
+            var memoryOwner = await _blockStorage.TryReadAsync(blockName, cancellationToken);
+            if (memoryOwner is null) return null;
 
-                var message = Shout.Import(new ReadOnlySequence<byte>(memoryOwner.Memory), _bytesPool);
-                return message;
-            }
+            var message = Shout.Import(new ReadOnlySequence<byte>(memoryOwner.Memory), _bytesPool);
+            return message;
         }
+    }
 
-        private static string ComputeBlockName(OmniSignature signature)
-        {
-            return StringConverter.SignatureToString(signature);
-        }
+    private static string ComputeBlockName(OmniSignature signature)
+    {
+        return StringConverter.SignatureToString(signature);
     }
 }

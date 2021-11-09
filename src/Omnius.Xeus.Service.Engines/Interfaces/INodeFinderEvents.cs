@@ -1,10 +1,9 @@
 using Omnius.Core.Pipelines;
 using Omnius.Xeus.Service.Engines.Primitives;
 
-namespace Omnius.Xeus.Service.Engines
+namespace Omnius.Xeus.Service.Engines;
+
+public interface INodeFinderEvents
 {
-    public interface INodeFinderEvents
-    {
-        IEventSubscriber<IContentExchanger> GetContentExchangers { get; }
-    }
+    IEventSubscriber<IContentExchanger> GetContentExchangers { get; }
 }

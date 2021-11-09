@@ -5,35 +5,34 @@ using Omnius.Core.Net.Proxies;
 using Omnius.Core.Net.Upnp;
 using Omnius.Core.Tasks;
 
-namespace Omnius.Xeus.Service.Engines
+namespace Omnius.Xeus.Service.Engines;
+
+public record TcpConnectionConnectorOptions
 {
-    public record TcpConnectionConnectorOptions
+    public TcpConnectionConnectorOptions(TcpProxyOptions proxy)
     {
-        public TcpConnectionConnectorOptions(TcpProxyOptions proxy)
-        {
-            this.Proxy = proxy;
-        }
-
-        public TcpProxyOptions Proxy { get; }
+        this.Proxy = proxy;
     }
 
-    public record TcpProxyOptions
+    public TcpProxyOptions Proxy { get; }
+}
+
+public record TcpProxyOptions
+{
+    public TcpProxyOptions(TcpProxyType type, OmniAddress address)
     {
-        public TcpProxyOptions(TcpProxyType type, OmniAddress address)
-        {
-            this.Type = type;
-            this.Address = address;
-        }
-
-        public TcpProxyType Type { get; }
-
-        public OmniAddress Address { get; }
+        this.Type = type;
+        this.Address = address;
     }
 
-    public enum TcpProxyType : byte
-    {
-        Unknown = 0,
-        HttpProxy = 1,
-        Socks5Proxy = 2,
-    }
+    public TcpProxyType Type { get; }
+
+    public OmniAddress Address { get; }
+}
+
+public enum TcpProxyType : byte
+{
+    Unknown = 0,
+    HttpProxy = 1,
+    Socks5Proxy = 2,
 }

@@ -1,13 +1,12 @@
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Omnius.Xeus.Service.Engines
+namespace Omnius.Xeus.Service.Engines;
+
+public class TcpConnectionTest
 {
-    public class TcpConnectionTest
+    [Fact]
+    public async Task ConnectAsyncAndAcceptAsyncSuccessTest()
     {
-        [Fact]
-        public async Task ConnectAsyncAndAcceptAsyncSuccessTest()
-        {
-        }
     }
 }

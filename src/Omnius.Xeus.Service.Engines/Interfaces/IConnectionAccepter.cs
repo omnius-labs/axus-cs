@@ -3,25 +3,24 @@ using System.Threading.Tasks;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Connections;
 
-namespace Omnius.Xeus.Service.Engines
+namespace Omnius.Xeus.Service.Engines;
+
+public record ConnectionAcceptedResult
 {
-    public record ConnectionAcceptedResult
+    public ConnectionAcceptedResult(IConnection connection, OmniAddress address)
     {
-        public ConnectionAcceptedResult(IConnection connection, OmniAddress address)
-        {
-            this.Connection = connection;
-            this.Address = address;
-        }
-
-        public IConnection Connection { get; }
-
-        public OmniAddress Address { get; }
+        this.Connection = connection;
+        this.Address = address;
     }
 
-    public interface IConnectionAccepter
-    {
-        ValueTask<ConnectionAcceptedResult?> AcceptAsync(CancellationToken cancellationToken = default);
+    public IConnection Connection { get; }
 
-        ValueTask<OmniAddress[]> GetListenEndpointsAsync(CancellationToken cancellationToken = default);
-    }
+    public OmniAddress Address { get; }
+}
+
+public interface IConnectionAccepter
+{
+    ValueTask<ConnectionAcceptedResult?> AcceptAsync(CancellationToken cancellationToken = default);
+
+    ValueTask<OmniAddress[]> GetListenEndpointsAsync(CancellationToken cancellationToken = default);
 }

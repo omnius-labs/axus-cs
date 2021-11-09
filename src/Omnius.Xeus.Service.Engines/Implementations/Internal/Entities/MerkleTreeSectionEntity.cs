@@ -3,30 +3,29 @@ using System.Linq;
 using Omnius.Core.Cryptography;
 using Omnius.Xeus.Service.Engines.Internal.Models;
 
-namespace Omnius.Xeus.Service.Engines.Internal.Entities
+namespace Omnius.Xeus.Service.Engines.Internal.Entities;
+
+internal record MerkleTreeSectionEntity
 {
-    internal record MerkleTreeSectionEntity
+    public int Depth { get; set; }
+
+    public uint BlockLength { get; set; }
+
+    public ulong Length { get; set; }
+
+    public OmniHashEntity[]? Hashes { get; set; }
+
+    public static MerkleTreeSectionEntity Import(MerkleTreeSection value)
     {
-        public int Depth { get; set; }
-
-        public uint BlockLength { get; set; }
-
-        public ulong Length { get; set; }
-
-        public OmniHashEntity[]? Hashes { get; set; }
-
-        public static MerkleTreeSectionEntity Import(MerkleTreeSection value)
+        return new MerkleTreeSectionEntity()
         {
-            return new MerkleTreeSectionEntity()
-            {
-                Depth = value.Depth,
-                Hashes = value.Hashes.Select(n => OmniHashEntity.Import(n)).ToArray(),
-            };
-        }
+            Depth = value.Depth,
+            Hashes = value.Hashes.Select(n => OmniHashEntity.Import(n)).ToArray(),
+        };
+    }
 
-        public MerkleTreeSection Export()
-        {
-            return new MerkleTreeSection(this.Depth, this.Hashes?.Select(n => n.Export())?.ToArray() ?? Array.Empty<OmniHash>());
-        }
+    public MerkleTreeSection Export()
+    {
+        return new MerkleTreeSection(this.Depth, this.Hashes?.Select(n => n.Export())?.ToArray() ?? Array.Empty<OmniHash>());
     }
 }

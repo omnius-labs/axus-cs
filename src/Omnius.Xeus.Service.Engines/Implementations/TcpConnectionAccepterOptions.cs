@@ -4,18 +4,17 @@ using Omnius.Core.Net.Connections;
 using Omnius.Core.Net.Upnp;
 using Omnius.Core.Tasks;
 
-namespace Omnius.Xeus.Service.Engines
+namespace Omnius.Xeus.Service.Engines;
+
+public record TcpConnectionAccepterOptions
 {
-    public record TcpConnectionAccepterOptions
+    public TcpConnectionAccepterOptions(bool useUpnp, OmniAddress listenAddress)
     {
-        public TcpConnectionAccepterOptions(bool useUpnp, OmniAddress listenAddress)
-        {
-            this.UseUpnp = useUpnp;
-            this.ListenAddress = listenAddress;
-        }
-
-        public bool UseUpnp { get; }
-
-        public OmniAddress ListenAddress { get; }
+        this.UseUpnp = useUpnp;
+        this.ListenAddress = listenAddress;
     }
+
+    public bool UseUpnp { get; }
+
+    public OmniAddress ListenAddress { get; }
 }

@@ -11,118 +11,117 @@ using Omnius.Xeus.Intaractors.Internal.Entities;
 using Omnius.Xeus.Intaractors.Internal.Models;
 using Omnius.Xeus.Utils;
 
-namespace Omnius.Xeus.Intaractors.Internal.Repositories
+namespace Omnius.Xeus.Intaractors.Internal.Repositories;
+
+internal sealed class FileUploaderRepository : DisposableBase
 {
-    internal sealed class FileUploaderRepository : DisposableBase
+    private readonly LiteDatabase _database;
+
+    public FileUploaderRepository(string dirPath)
     {
+        DirectoryHelper.CreateDirectory(dirPath);
+
+        _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
+        _database.UtcDate = true;
+
+        this.Items = new UploadingFileItemRepository(_database);
+    }
+
+    protected override void OnDispose(bool disposing)
+    {
+        _database.Dispose();
+    }
+
+    public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
+    {
+        await this.Items.MigrateAsync(cancellationToken);
+    }
+
+    public UploadingFileItemRepository Items { get; }
+
+    public sealed class UploadingFileItemRepository
+    {
+        private const string CollectionName = "uploading_file_items";
+
         private readonly LiteDatabase _database;
 
-        public FileUploaderRepository(string dirPath)
+        private readonly AsyncReaderWriterLock _asyncLock = new();
+
+        public UploadingFileItemRepository(LiteDatabase database)
         {
-            DirectoryHelper.CreateDirectory(dirPath);
-
-            _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
-            _database.UtcDate = true;
-
-            this.Items = new UploadingFileItemRepository(_database);
+            _database = database;
         }
 
-        protected override void OnDispose(bool disposing)
+        internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
         {
-            _database.Dispose();
+            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            {
+                if (_database.GetDocumentVersion(CollectionName) <= 0)
+                {
+                    var col = this.GetCollection();
+                    col.EnsureIndex(x => x.FilePath, true);
+                }
+
+                _database.SetDocumentVersion(CollectionName, 1);
+            }
         }
 
-        public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
+        private ILiteCollection<UploadingFileItemEntity> GetCollection()
         {
-            await this.Items.MigrateAsync(cancellationToken);
+            var col = _database.GetCollection<UploadingFileItemEntity>(CollectionName);
+            return col;
         }
 
-        public UploadingFileItemRepository Items { get; }
-
-        public sealed class UploadingFileItemRepository
+        public bool Exists(string filePath)
         {
-            private const string CollectionName = "uploading_file_items";
-
-            private readonly LiteDatabase _database;
-
-            private readonly AsyncReaderWriterLock _asyncLock = new();
-
-            public UploadingFileItemRepository(LiteDatabase database)
+            using (_asyncLock.ReaderLock())
             {
-                _database = database;
+                var col = this.GetCollection();
+                return col.Exists(n => n.FilePath == filePath);
             }
+        }
 
-            internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
+        public IEnumerable<UploadingFileItem> FindAll()
+        {
+            using (_asyncLock.ReaderLock())
             {
-                using (await _asyncLock.WriterLockAsync(cancellationToken))
-                {
-                    if (_database.GetDocumentVersion(CollectionName) <= 0)
-                    {
-                        var col = this.GetCollection();
-                        col.EnsureIndex(x => x.FilePath, true);
-                    }
-
-                    _database.SetDocumentVersion(CollectionName, 1);
-                }
+                var col = this.GetCollection();
+                return col.FindAll().Select(n => n.Export()).ToArray();
             }
+        }
 
-            private ILiteCollection<UploadingFileItemEntity> GetCollection()
+        public UploadingFileItem? FindOne(string filePath)
+        {
+            using (_asyncLock.ReaderLock())
             {
-                var col = _database.GetCollection<UploadingFileItemEntity>(CollectionName);
-                return col;
+                var col = this.GetCollection();
+                return col.FindById(filePath).Export();
             }
+        }
 
-            public bool Exists(string filePath)
+        public void Upsert(UploadingFileItem item)
+        {
+            using (_asyncLock.WriterLock())
             {
-                using (_asyncLock.ReaderLock())
-                {
-                    var col = this.GetCollection();
-                    return col.Exists(n => n.FilePath == filePath);
-                }
+                var itemEntity = UploadingFileItemEntity.Import(item);
+
+                var col = this.GetCollection();
+
+                _database.BeginTrans();
+
+                col.DeleteMany(n => n.FilePath == item.FilePath);
+                col.Insert(itemEntity);
+
+                _database.Commit();
             }
+        }
 
-            public IEnumerable<UploadingFileItem> FindAll()
+        public void Delete(string filePath)
+        {
+            using (_asyncLock.WriterLock())
             {
-                using (_asyncLock.ReaderLock())
-                {
-                    var col = this.GetCollection();
-                    return col.FindAll().Select(n => n.Export()).ToArray();
-                }
-            }
-
-            public UploadingFileItem? FindOne(string filePath)
-            {
-                using (_asyncLock.ReaderLock())
-                {
-                    var col = this.GetCollection();
-                    return col.FindById(filePath).Export();
-                }
-            }
-
-            public void Upsert(UploadingFileItem item)
-            {
-                using (_asyncLock.WriterLock())
-                {
-                    var itemEntity = UploadingFileItemEntity.Import(item);
-
-                    var col = this.GetCollection();
-
-                    _database.BeginTrans();
-
-                    col.DeleteMany(n => n.FilePath == item.FilePath);
-                    col.Insert(itemEntity);
-
-                    _database.Commit();
-                }
-            }
-
-            public void Delete(string filePath)
-            {
-                using (_asyncLock.WriterLock())
-                {
-                    var col = this.GetCollection();
-                    col.DeleteMany(n => n.FilePath == filePath);
-                }
+                var col = this.GetCollection();
+                col.DeleteMany(n => n.FilePath == filePath);
             }
         }
     }

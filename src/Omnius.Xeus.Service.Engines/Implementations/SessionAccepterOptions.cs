@@ -3,15 +3,14 @@ using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Tasks;
 
-namespace Omnius.Xeus.Service.Engines
-{
-    public record SessionAccepterOptions
-    {
-        public SessionAccepterOptions(OmniDigitalSignature digitalSignature)
-        {
-            this.DigitalSignature = digitalSignature;
-        }
+namespace Omnius.Xeus.Service.Engines;
 
-        public OmniDigitalSignature DigitalSignature { get; }
+public record SessionAccepterOptions
+{
+    public SessionAccepterOptions(OmniDigitalSignature digitalSignature)
+    {
+        this.DigitalSignature = digitalSignature;
     }
+
+    public OmniDigitalSignature DigitalSignature { get; }
 }

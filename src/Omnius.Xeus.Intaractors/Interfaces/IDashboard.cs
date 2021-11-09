@@ -3,14 +3,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Xeus.Service.Models;
 
-namespace Omnius.Xeus.Intaractors
+namespace Omnius.Xeus.Intaractors;
+
+public interface IDashboard
 {
-    public interface IDashboard
-    {
-        ValueTask AddCloudNodeLocationsAsync(IEnumerable<NodeLocation> nodeLocations, CancellationToken cancellationToken = default);
+    ValueTask AddCloudNodeLocationsAsync(IEnumerable<NodeLocation> nodeLocations, CancellationToken cancellationToken = default);
 
-        ValueTask<NodeLocation> GetMyNodeLocationAsync(CancellationToken cancellationToken = default);
+    ValueTask<NodeLocation> GetMyNodeLocationAsync(CancellationToken cancellationToken = default);
 
-        ValueTask<IEnumerable<SessionReport>> GetSessionsReportAsync(CancellationToken cancellationToken = default);
-    }
+    ValueTask<IEnumerable<SessionReport>> GetSessionsReportAsync(CancellationToken cancellationToken = default);
 }

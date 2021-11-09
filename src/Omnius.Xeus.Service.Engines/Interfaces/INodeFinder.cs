@@ -4,18 +4,17 @@ using System.Threading;
 using System.Threading.Tasks;
 using Omnius.Xeus.Service.Models;
 
-namespace Omnius.Xeus.Service.Engines
+namespace Omnius.Xeus.Service.Engines;
+
+public interface INodeFinder : IAsyncDisposable
 {
-    public interface INodeFinder : IAsyncDisposable
-    {
-        INodeFinderEvents GetEvents();
+    INodeFinderEvents GetEvents();
 
-        ValueTask<NodeFinderReport> GetReportAsync(CancellationToken cancellationToken = default);
+    ValueTask<NodeFinderReport> GetReportAsync(CancellationToken cancellationToken = default);
 
-        ValueTask<NodeLocation> GetMyNodeLocationAsync(CancellationToken cancellationToken = default);
+    ValueTask<NodeLocation> GetMyNodeLocationAsync(CancellationToken cancellationToken = default);
 
-        ValueTask AddCloudNodeLocationsAsync(IEnumerable<NodeLocation> nodeLocations, CancellationToken cancellationToken = default);
+    ValueTask AddCloudNodeLocationsAsync(IEnumerable<NodeLocation> nodeLocations, CancellationToken cancellationToken = default);
 
-        ValueTask<NodeLocation[]> FindNodeLocationsAsync(ContentClue contentClue, CancellationToken cancellationToken = default);
-    }
+    ValueTask<NodeLocation[]> FindNodeLocationsAsync(ContentClue contentClue, CancellationToken cancellationToken = default);
 }

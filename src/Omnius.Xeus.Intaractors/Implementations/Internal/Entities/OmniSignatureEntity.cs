@@ -1,21 +1,20 @@
 using Omnius.Core.Cryptography;
 
-namespace Omnius.Xeus.Intaractors.Internal.Entities
+namespace Omnius.Xeus.Intaractors.Internal.Entities;
+
+internal record OmniSignatureEntity
 {
-    internal record OmniSignatureEntity
+    public string? Name { get; set; }
+
+    public OmniHashEntity? Hash { get; set; }
+
+    public static OmniSignatureEntity Import(OmniSignature value)
     {
-        public string? Name { get; set; }
+        return new OmniSignatureEntity() { Name = value.Name, Hash = OmniHashEntity.Import(value.Hash) };
+    }
 
-        public OmniHashEntity? Hash { get; set; }
-
-        public static OmniSignatureEntity Import(OmniSignature value)
-        {
-            return new OmniSignatureEntity() { Name = value.Name, Hash = OmniHashEntity.Import(value.Hash) };
-        }
-
-        public OmniSignature Export()
-        {
-            return new OmniSignature(this.Name!, this.Hash!.Export());
-        }
+    public OmniSignature Export()
+    {
+        return new OmniSignature(this.Name!, this.Hash!.Export());
     }
 }

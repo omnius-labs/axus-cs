@@ -1,32 +1,31 @@
 using LiteDB;
 
-namespace Omnius.Xeus.Utils
+namespace Omnius.Xeus.Utils;
+
+public static class LiteDatabaseExtentions
 {
-    public static class LiteDatabaseExtentions
+    public static int GetDocumentVersion(this ILiteDatabase database, string name)
     {
-        public static int GetDocumentVersion(this ILiteDatabase database, string name)
-        {
-            var col = database.GetCollection<DocumentStatusEntity>("_document_status");
+        var col = database.GetCollection<DocumentStatusEntity>("_document_status");
 
-            var entry = col.FindById(name);
-            if (entry is null) return 0;
+        var entry = col.FindById(name);
+        if (entry is null) return 0;
 
-            return entry.Version;
-        }
+        return entry.Version;
+    }
 
-        public static void SetDocumentVersion(this ILiteDatabase database, string name, int version)
-        {
-            var col = database.GetCollection<DocumentStatusEntity>("_document_status");
+    public static void SetDocumentVersion(this ILiteDatabase database, string name, int version)
+    {
+        var col = database.GetCollection<DocumentStatusEntity>("_document_status");
 
-            col.Upsert(new DocumentStatusEntity() { Name = name, Version = version });
-        }
+        col.Upsert(new DocumentStatusEntity() { Name = name, Version = version });
+    }
 
-        private sealed class DocumentStatusEntity
-        {
-            [BsonId]
-            public string? Name { get; set; }
+    private sealed class DocumentStatusEntity
+    {
+        [BsonId]
+        public string? Name { get; set; }
 
-            public int Version { get; set; }
-        }
+        public int Version { get; set; }
     }
 }

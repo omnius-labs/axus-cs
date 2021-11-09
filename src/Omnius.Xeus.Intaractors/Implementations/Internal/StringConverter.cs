@@ -4,16 +4,15 @@ using Omnius.Core.Cryptography.Functions;
 using Omnius.Core.Pipelines;
 using Omnius.Core.Serialization;
 
-namespace Omnius.Xeus.Intaractors.Internal
+namespace Omnius.Xeus.Intaractors.Internal;
+
+internal static class StringConverter
 {
-    internal static class StringConverter
+    public static string SignatureToString(OmniSignature signature)
     {
-        public static string SignatureToString(OmniSignature signature)
-        {
-            using var bytesPipe = new BytesPipe(BytesPool.Shared);
-            signature.Export(bytesPipe.Writer, BytesPool.Shared);
-            var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(bytesPipe.Reader.GetSequence()));
-            return hash.ToString(ConvertStringType.Base16);
-        }
+        using var bytesPipe = new BytesPipe(BytesPool.Shared);
+        signature.Export(bytesPipe.Writer, BytesPool.Shared);
+        var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(bytesPipe.Reader.GetSequence()));
+        return hash.ToString(ConvertStringType.Base16);
     }
 }

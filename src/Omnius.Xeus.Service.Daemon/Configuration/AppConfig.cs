@@ -2,107 +2,106 @@ using System;
 using System.Threading.Tasks;
 using Omnius.Core.Utils;
 
-namespace Omnius.Xeus.Service.Daemon.Configuration
+namespace Omnius.Xeus.Service.Daemon.Configuration;
+
+public class AppConfig
 {
-    public class AppConfig
+    private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
+
+    public int Version { get; init; }
+
+    public string? ListenAddress { get; init; }
+
+    public EnginesConfig? Engines { get; init; }
+
+    public static async ValueTask<AppConfig?> LoadAsync(string configPath)
     {
-        private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
-
-        public int Version { get; init; }
-
-        public string? ListenAddress { get; init; }
-
-        public EnginesConfig? Engines { get; init; }
-
-        public static async ValueTask<AppConfig?> LoadAsync(string configPath)
+        try
         {
-            try
-            {
-                return YamlHelper.ReadFile<AppConfig>(configPath);
-            }
-            catch (Exception e)
-            {
-                _logger.Error(e);
-                return null;
-            }
+            return YamlHelper.ReadFile<AppConfig>(configPath);
         }
-
-        public async ValueTask SaveAsync(string configPath)
+        catch (Exception e)
         {
-            YamlHelper.WriteFile(configPath, this);
+            _logger.Error(e);
+            return null;
         }
     }
 
-    public class EnginesConfig
+    public async ValueTask SaveAsync(string configPath)
     {
-        public BandwidthConfig? Bandwidth { get; init; }
-
-        public SessionConnectorConfig? SessionConnector { get; init; }
-
-        public SessionAccepterConfig? SessionAccepter { get; init; }
-
-        public NodeFinderConfig? NodeFinder { get; init; }
-
-        public FileExchangerConfig? FileExchanger { get; init; }
-
-        public ShoutExchangerConfig? ShoutExchanger { get; init; }
+        YamlHelper.WriteFile(configPath, this);
     }
+}
 
-    public class BandwidthConfig
-    {
-        public int MaxSendBytesPerSeconds { get; init; }
+public class EnginesConfig
+{
+    public BandwidthConfig? Bandwidth { get; init; }
 
-        public int MaxReceiveBytesPerSeconds { get; init; }
-    }
+    public SessionConnectorConfig? SessionConnector { get; init; }
 
-    public class SessionConnectorConfig
-    {
-        public TcpConnectorConfig[]? TcpConnectors { get; init; }
-    }
+    public SessionAccepterConfig? SessionAccepter { get; init; }
 
-    public class SessionAccepterConfig
-    {
-        public TcpAccepterConfig[]? TcpAccepters { get; init; }
-    }
+    public NodeFinderConfig? NodeFinder { get; init; }
 
-    public class TcpConnectorConfig
-    {
-        public TcpProxyConfig? Proxy { get; init; }
-    }
+    public FileExchangerConfig? FileExchanger { get; init; }
 
-    public class TcpProxyConfig
-    {
-        public TcpProxyType Type { get; init; }
+    public ShoutExchangerConfig? ShoutExchanger { get; init; }
+}
 
-        public string? Address { get; init; }
-    }
+public class BandwidthConfig
+{
+    public int MaxSendBytesPerSeconds { get; init; }
 
-    public enum TcpProxyType : byte
-    {
-        Unknown = 0,
-        HttpProxy = 1,
-        Socks5Proxy = 2,
-    }
+    public int MaxReceiveBytesPerSeconds { get; init; }
+}
 
-    public class TcpAccepterConfig
-    {
-        public bool UseUpnp { get; init; }
+public class SessionConnectorConfig
+{
+    public TcpConnectorConfig[]? TcpConnectors { get; init; }
+}
 
-        public string? ListenAddress { get; init; }
-    }
+public class SessionAccepterConfig
+{
+    public TcpAccepterConfig[]? TcpAccepters { get; init; }
+}
 
-    public class NodeFinderConfig
-    {
-        public uint MaxSessionCount { get; init; }
-    }
+public class TcpConnectorConfig
+{
+    public TcpProxyConfig? Proxy { get; init; }
+}
 
-    public class FileExchangerConfig
-    {
-        public uint MaxSessionCount { get; init; }
-    }
+public class TcpProxyConfig
+{
+    public TcpProxyType Type { get; init; }
 
-    public class ShoutExchangerConfig
-    {
-        public uint MaxSessionCount { get; init; }
-    }
+    public string? Address { get; init; }
+}
+
+public enum TcpProxyType : byte
+{
+    Unknown = 0,
+    HttpProxy = 1,
+    Socks5Proxy = 2,
+}
+
+public class TcpAccepterConfig
+{
+    public bool UseUpnp { get; init; }
+
+    public string? ListenAddress { get; init; }
+}
+
+public class NodeFinderConfig
+{
+    public uint MaxSessionCount { get; init; }
+}
+
+public class FileExchangerConfig
+{
+    public uint MaxSessionCount { get; init; }
+}
+
+public class ShoutExchangerConfig
+{
+    public uint MaxSessionCount { get; init; }
 }
