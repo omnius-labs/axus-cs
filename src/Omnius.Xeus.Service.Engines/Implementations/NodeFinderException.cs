@@ -1,5 +1,3 @@
-using System;
-
 public sealed class NodeFinderException : Exception
 {
     public NodeFinderException()

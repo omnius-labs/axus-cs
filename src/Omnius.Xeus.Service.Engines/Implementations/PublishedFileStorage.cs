@@ -1,10 +1,4 @@
-using System;
 using System.Buffers;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
@@ -223,7 +217,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
             cancellationToken.ThrowIfCancellationRequested();
 
             var blockLength = (int)Math.Min(sequence.Length, maxBlockLength);
-            var memory = memoryOwner.Memory.Slice(0, blockLength);
+            var memory = memoryOwner.Memory[..blockLength];
             sequence.CopyTo(memory.Span);
 
             var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(memory.Span));
@@ -248,11 +242,11 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
             cancellationToken.ThrowIfCancellationRequested();
 
             var blockLength = (int)Math.Min(maxBlockLength, stream.Length - stream.Position);
-            var memory = memoryOwner.Memory.Slice(0, blockLength);
+            var memory = memoryOwner.Memory[..blockLength];
 
             for (int start = 0; start < blockLength;)
             {
-                start += await stream.ReadAsync(memory.Slice(start), cancellationToken);
+                start += await stream.ReadAsync(memory[start..], cancellationToken);
             }
 
             var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(memory.Span));
@@ -344,7 +338,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
 
         for (int start = 0; start < blockLength;)
         {
-            start += await fileStream.ReadAsync(memoryOwner.Memory.Slice(start), cancellationToken);
+            start += await fileStream.ReadAsync(memoryOwner.Memory[start..], cancellationToken);
         }
 
         return memoryOwner;

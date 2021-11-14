@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Avalonia.Markup.Xaml;
 using Omnius.Xeus.Ui.Desktop.Windows.Primitives;
 

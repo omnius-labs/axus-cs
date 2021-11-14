@@ -1,5 +1,3 @@
-using System.Threading;
-using System.Threading.Tasks;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Connections;
 

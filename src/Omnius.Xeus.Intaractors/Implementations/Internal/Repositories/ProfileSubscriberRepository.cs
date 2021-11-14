@@ -1,8 +1,3 @@
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using LiteDB;
 using Nito.AsyncEx;
 using Omnius.Core;
@@ -14,11 +9,11 @@ using Omnius.Xeus.Utils;
 
 namespace Omnius.Xeus.Intaractors.Internal.Repositories;
 
-internal sealed class ProfileDownloaderRepository : DisposableBase
+internal sealed class ProfileSubscriberRepository : DisposableBase
 {
     private readonly LiteDatabase _database;
 
-    public ProfileDownloaderRepository(string dirPath)
+    public ProfileSubscriberRepository(string dirPath)
     {
         DirectoryHelper.CreateDirectory(dirPath);
 
@@ -96,7 +91,7 @@ internal sealed class ProfileDownloaderRepository : DisposableBase
             }
         }
 
-        public IEnumerable<DownloadingProfileItem> FindAll()
+        public IEnumerable<SubscribedProfileItem> FindAll()
         {
             using (_asyncLock.ReaderLock())
             {
@@ -105,7 +100,7 @@ internal sealed class ProfileDownloaderRepository : DisposableBase
             }
         }
 
-        public DownloadingProfileItem? FindOne(OmniSignature signature)
+        public SubscribedProfileItem? FindOne(OmniSignature signature)
         {
             using (_asyncLock.ReaderLock())
             {
@@ -116,7 +111,7 @@ internal sealed class ProfileDownloaderRepository : DisposableBase
             }
         }
 
-        public void Upsert(DownloadingProfileItem item)
+        public void Upsert(SubscribedProfileItem item)
         {
             using (_asyncLock.WriterLock())
             {

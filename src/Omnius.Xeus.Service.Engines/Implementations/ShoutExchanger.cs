@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Data;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Collections;
 using Omnius.Core.Cryptography;
@@ -158,7 +153,7 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
                         }
                     }
 
-                    End:;
+                End:;
                 }
             }
         }

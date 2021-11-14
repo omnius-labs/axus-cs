@@ -1,6 +1,4 @@
-using System;
 using System.Reactive.Disposables;
-using System.Threading.Tasks;
 using Avalonia.Controls;
 using Omnius.Core;
 using Omnius.Core.Avalonia;

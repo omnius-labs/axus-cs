@@ -1,11 +1,10 @@
-using System;
 using Omnius.Core.Cryptography;
 
 namespace Omnius.Xeus.Intaractors.Internal.Models;
 
-internal record DownloadingProfileItem
+internal record SubscribedProfileItem
 {
-    public DownloadingProfileItem(OmniSignature signature, OmniHash rootHash, DateTime creationTime)
+    public SubscribedProfileItem(OmniSignature signature, OmniHash rootHash, DateTime creationTime)
     {
         this.Signature = signature;
         this.RootHash = rootHash;

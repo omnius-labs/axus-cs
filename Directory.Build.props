@@ -5,6 +5,7 @@
     <LangVersion>preview</LangVersion>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <NoWarn>CS1591,CS1998,NU5105,NU1603,NU1605</NoWarn>

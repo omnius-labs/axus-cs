@@ -1,5 +1,3 @@
-using System;
-
 namespace Omnius.Xeus.Intaractors.Models;
 
 public record DownloadingFileReport

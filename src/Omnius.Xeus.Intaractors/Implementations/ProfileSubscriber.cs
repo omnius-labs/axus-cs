@@ -1,15 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
+using Omnius.Core.RocketPack;
 using Omnius.Core.Storages;
 using Omnius.Xeus.Intaractors.Internal;
+using Omnius.Xeus.Intaractors.Internal.Models;
+using Omnius.Xeus.Intaractors.Internal.Repositories;
 using Omnius.Xeus.Intaractors.Models;
 using Omnius.Xeus.Service.Remoting;
 
@@ -20,13 +18,11 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
     private readonly XeusServiceAdapter _service;
-    private readonly IKeyValueStorageFactory _keyValueStorageFactory;
     private readonly IBytesPool _bytesPool;
     private readonly ProfileSubscriberOptions _options;
 
-    private ProfileDownloader _profileDownloader = null!;
+    private readonly ProfileSubscriberRepository _profileSubscriberRepo;
     private readonly ISingleValueStorage _configStorage;
-
     private readonly IKeyValueStorage<string> _cachedProfileStorage;
 
     private Task _watchLoopTask = null!;
@@ -47,19 +43,18 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase
     private ProfileSubscriber(IXeusService xeusService, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ProfileSubscriberOptions options)
     {
         _service = new XeusServiceAdapter(xeusService);
-        _keyValueStorageFactory = keyValueStorageFactory;
         _bytesPool = bytesPool;
         _options = options;
 
+        _profileSubscriberRepo = new ProfileSubscriberRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
         _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
         _cachedProfileStorage = keyValueStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "profiles"), _bytesPool);
     }
 
     internal async ValueTask InitAsync(CancellationToken cancellationToken = default)
     {
+        await _profileSubscriberRepo.MigrateAsync(cancellationToken);
         await _cachedProfileStorage.MigrateAsync(cancellationToken);
-
-        _profileDownloader = await ProfileDownloader.CreateAsync(_service, _keyValueStorageFactory, _bytesPool, Path.Combine(_options.ConfigDirectoryPath, "downloader"), cancellationToken);
 
         _watchLoopTask = this.WatchLoopAsync(_cancellationTokenSource.Token);
     }
@@ -81,6 +76,8 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase
             {
                 await Task.Delay(1000 * 30, cancellationToken);
 
+                await this.SyncSubscribedShouts(cancellationToken);
+                await this.SyncSubscribedFiles(cancellationToken);
                 await this.UpdateProfilesAsync(cancellationToken);
             }
         }
@@ -94,31 +91,82 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase
         }
     }
 
+    private async Task SyncSubscribedShouts(CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.ReaderLockAsync(cancellationToken))
+        {
+            var subscribedShoutReports = await _service.GetSubscribedShoutReportsAsync(cancellationToken);
+            var signatures = new HashSet<OmniSignature>();
+            signatures.UnionWith(subscribedShoutReports.Where(n => n.Registrant == Registrant).Select(n => n.Signature));
+
+            foreach (var signature in signatures)
+            {
+                if (_profileSubscriberRepo.Items.Exists(signature)) continue;
+
+                await _service.UnsubscribeShoutAsync(signature, Registrant, cancellationToken);
+            }
+
+            foreach (var item in _profileSubscriberRepo.Items.FindAll())
+            {
+                if (signatures.Contains(item.Signature)) continue;
+
+                await _service.SubscribeShoutAsync(item.Signature, Registrant, cancellationToken);
+            }
+
+            foreach (var item in _profileSubscriberRepo.Items.FindAll())
+            {
+                var shout = await _service.TryExportShoutAsync(item.Signature, cancellationToken);
+                if (shout is null) continue;
+
+                var contentRootHash = RocketMessage.FromBytes<OmniHash>(shout.Value.Memory);
+                shout.Value.Dispose();
+
+                var newItem = new SubscribedProfileItem(item.Signature, contentRootHash, shout.CreationTime.ToDateTime());
+                _profileSubscriberRepo.Items.Upsert(newItem);
+            }
+        }
+    }
+
+    private async Task SyncSubscribedFiles(CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.ReaderLockAsync(cancellationToken))
+        {
+            var subscribedFileReports = await _service.GetSubscribedFileReportsAsync(cancellationToken);
+            var rootHashes = new HashSet<OmniHash>();
+            rootHashes.UnionWith(subscribedFileReports.Where(n => n.Registrant == Registrant).Select(n => n.RootHash));
+
+            foreach (var rootHash in rootHashes)
+            {
+                if (_profileSubscriberRepo.Items.Exists(rootHash)) continue;
+
+                await _service.UnpublishFileFromMemoryAsync(rootHash, Registrant, cancellationToken);
+            }
+
+            foreach (var rootHash in _profileSubscriberRepo.Items.FindAll().Select(n => n.RootHash))
+            {
+                if (rootHashes.Contains(rootHash)) continue;
+
+                await _service.SubscribeFileAsync(rootHash, Registrant, cancellationToken);
+            }
+        }
+    }
+
     private async ValueTask UpdateProfilesAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.WriterLockAsync(cancellationToken))
         {
             var config = await this.GetConfigAsync(cancellationToken);
 
-            var allTargetSignatures = new HashSet<OmniSignature>();
+            var allTargetSignaturesBuilder = ImmutableHashSet.CreateBuilder<OmniSignature>();
 
             await foreach (var profile in this.InternalRecursiveFindProfilesAsync(config.TrustedSignatures, config.BlockedSignatures, (int)config.SearchDepth, (int)config.MaxProfileCount, cancellationToken))
             {
-                allTargetSignatures.Add(profile.Signature);
+                allTargetSignaturesBuilder.Add(profile.Signature);
             }
 
-            var removedKeys = new HashSet<string>();
-            await foreach (var key in _cachedProfileStorage.GetKeysAsync(cancellationToken))
-            {
-                if (allTargetSignatures.Contains(key)) continue;
-
-                removedKeys.Add(key);
-            }
-
-            foreach (var key in removedKeys)
-            {
-                await _cachedProfileStorage.TryDeleteAsync(key, cancellationToken);
-            }
+            var allTargetSignatures = allTargetSignaturesBuilder.ToImmutableHashSet();
+            await this.ShrinkCachedProfileStorage(allTargetSignatures, cancellationToken);
+            await this.ShrinkProfileSubscriberRepo(allTargetSignatures, cancellationToken);
         }
     }
 
@@ -163,7 +211,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase
             cancellationToken.ThrowIfCancellationRequested();
 
             var cachedProfile = await _cachedProfileStorage.TryGetValueAsync<Profile>(StringConverter.SignatureToString(signature), cancellationToken);
-            var downloadedProfile = await _profileDownloader.ExportAsync(signature, cancellationToken);
+            var downloadedProfile = await this.InternalExportAsync(signature, cancellationToken);
 
             if (cachedProfile is not null)
             {
@@ -180,6 +228,118 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase
             {
                 yield return downloadedProfile;
             }
+        }
+    }
+
+    private async ValueTask<Profile?> InternalExportAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.WriterLockAsync(cancellationToken))
+        {
+            await Task.Delay(0, cancellationToken).ConfigureAwait(false);
+
+            var shout = await _service.TryExportShoutAsync(signature, cancellationToken);
+            if (shout is null) return null;
+
+            var contentRootHash = RocketMessage.FromBytes<OmniHash>(shout.Value.Memory);
+            shout.Value.Dispose();
+
+            var contentBytes = await _service.TryExportFileToMemoryAsync(contentRootHash, cancellationToken);
+            if (contentBytes is null) return null;
+
+            var content = RocketMessage.FromBytes<ProfileContent>(contentBytes.Value);
+
+            return new Profile(signature, shout.CreationTime, content);
+        }
+    }
+
+    private async ValueTask ShrinkCachedProfileStorage(IEnumerable<OmniSignature> allTargetSignatures, CancellationToken cancellationToken = default)
+    {
+        var hashSet = allTargetSignatures.Select(n => StringConverter.SignatureToString(n)).ToImmutableHashSet();
+
+        var removedKeys = new HashSet<string>();
+        await foreach (var key in _cachedProfileStorage.GetKeysAsync(cancellationToken))
+        {
+            if (hashSet.Contains(key)) continue;
+
+            removedKeys.Add(key);
+        }
+
+        foreach (var key in removedKeys)
+        {
+            await _cachedProfileStorage.TryDeleteAsync(key, cancellationToken);
+        }
+    }
+
+    private async ValueTask ShrinkProfileSubscriberRepo(ImmutableHashSet<OmniSignature> allTargetSignatures, CancellationToken cancellationToken = default)
+    {
+        var removedSignatures = new HashSet<OmniSignature>();
+        foreach (var item in _profileSubscriberRepo.Items.FindAll())
+        {
+            if (allTargetSignatures.Contains(item.Signature)) continue;
+
+            removedSignatures.Add(item.Signature);
+        }
+
+        foreach (var key in removedSignatures)
+        {
+            _profileSubscriberRepo.Items.Delete(key);
+        }
+    }
+
+    public async ValueTask RegisterAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.WriterLockAsync(cancellationToken))
+        {
+            await Task.Delay(0, cancellationToken).ConfigureAwait(false);
+
+            if (_profileSubscriberRepo.Items.Exists(signature)) return;
+
+            var item = new SubscribedProfileItem(signature, OmniHash.Empty, DateTime.UtcNow);
+            _profileSubscriberRepo.Items.Upsert(item);
+        }
+    }
+
+    public async ValueTask UnregisterAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.WriterLockAsync(cancellationToken))
+        {
+            await Task.Delay(0, cancellationToken).ConfigureAwait(false);
+
+            _profileSubscriberRepo.Items.Delete(signature);
+        }
+    }
+
+    public async ValueTask<IEnumerable<OmniSignature>> GetDownloadingProfileSignaturesAsync(CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.ReaderLockAsync(cancellationToken))
+        {
+            var results = new List<OmniSignature>();
+
+            foreach (var item in _profileSubscriberRepo.Items.FindAll())
+            {
+                results.Add(item.Signature);
+            }
+
+            return results;
+        }
+    }
+
+    public async ValueTask<ProfileSubscriberConfig> GetConfigAsync(CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.ReaderLockAsync(cancellationToken))
+        {
+            var config = await _configStorage.TryGetValueAsync<ProfileSubscriberConfig>(cancellationToken);
+            if (config is null) return ProfileSubscriberConfig.Empty;
+
+            return config;
+        }
+    }
+
+    public async ValueTask SetConfigAsync(ProfileSubscriberConfig config, CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.WriterLockAsync(cancellationToken))
+        {
+            await _configStorage.TrySetValueAsync(config, cancellationToken);
         }
     }
 
@@ -200,25 +360,6 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase
                 cancellationToken.ThrowIfCancellationRequested();
                 yield return value;
             }
-        }
-    }
-
-    public async ValueTask<ProfileSubscriberConfig> GetConfigAsync(CancellationToken cancellationToken = default)
-    {
-        using (await _asyncLock.ReaderLockAsync(cancellationToken))
-        {
-            var config = await _configStorage.TryGetValueAsync<ProfileSubscriberConfig>(cancellationToken);
-            if (config is null) return ProfileSubscriberConfig.Empty;
-
-            return config;
-        }
-    }
-
-    public async ValueTask SetConfigAsync(ProfileSubscriberConfig config, CancellationToken cancellationToken = default)
-    {
-        using (await _asyncLock.WriterLockAsync(cancellationToken))
-        {
-            await _configStorage.TrySetValueAsync(config, cancellationToken);
         }
     }
 }

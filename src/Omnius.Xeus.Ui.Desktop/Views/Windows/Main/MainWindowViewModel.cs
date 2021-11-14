@@ -1,5 +1,4 @@
 using System.Reactive.Disposables;
-using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Xeus.Ui.Desktop.Configuration;
 using Omnius.Xeus.Ui.Desktop.Controls;

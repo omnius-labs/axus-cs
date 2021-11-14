@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
@@ -53,6 +47,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase
 
         _profilePublisherRepo = new ProfilePublisherRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
     }
+
     private async ValueTask InitAsync(CancellationToken cancellationToken = default)
     {
         await _profilePublisherRepo.MigrateAsync(cancellationToken);

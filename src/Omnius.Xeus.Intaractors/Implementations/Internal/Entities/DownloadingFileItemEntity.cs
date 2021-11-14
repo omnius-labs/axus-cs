@@ -1,4 +1,3 @@
-using System;
 using Omnius.Xeus.Intaractors.Internal.Models;
 using Omnius.Xeus.Intaractors.Models;
 

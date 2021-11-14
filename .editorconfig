@@ -132,6 +132,7 @@ csharp_space_between_square_brackets = false
 
 # Custom
 dotnet_code_quality.CA1822.api_surface = private
+csharp_style_namespace_declarations = file_scoped:suggestion
 
 # Xml files
 [*.{xml}]

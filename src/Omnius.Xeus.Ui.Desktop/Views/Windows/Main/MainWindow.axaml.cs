@@ -1,5 +1,3 @@
-using System;
-using System.Threading.Tasks;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using Omnius.Xeus.Ui.Desktop.Windows.Primitives;

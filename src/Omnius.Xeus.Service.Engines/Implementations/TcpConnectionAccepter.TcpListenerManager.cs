@@ -1,8 +1,5 @@
-using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
 using Omnius.Core;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Upnp;

@@ -1,4 +1,3 @@
-using System;
 using Generator.Equals;
 using Omnius.Core.Avalonia;
 using Omnius.Xeus.Intaractors.Models;

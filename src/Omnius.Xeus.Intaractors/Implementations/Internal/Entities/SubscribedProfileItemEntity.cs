@@ -1,4 +1,3 @@
-using System;
 using Omnius.Core.Cryptography;
 using Omnius.Xeus.Intaractors.Internal.Models;
 
@@ -12,7 +11,7 @@ internal record SubscribedProfileItemEntity
 
     public DateTime CreationTime { get; set; }
 
-    public static SubscribedProfileItemEntity Import(DownloadingProfileItem value)
+    public static SubscribedProfileItemEntity Import(SubscribedProfileItem value)
     {
         return new SubscribedProfileItemEntity()
         {
@@ -22,8 +21,8 @@ internal record SubscribedProfileItemEntity
         };
     }
 
-    public DownloadingProfileItem Export()
+    public SubscribedProfileItem Export()
     {
-        return new DownloadingProfileItem(this.Signature?.Export() ?? OmniSignature.Empty, this.RootHash?.Export() ?? OmniHash.Empty, this.CreationTime);
+        return new SubscribedProfileItem(this.Signature?.Export() ?? OmniSignature.Empty, this.RootHash?.Export() ?? OmniHash.Empty, this.CreationTime);
     }
 }
