@@ -13,7 +13,7 @@ using Omnius.Xeus.Remoting;
 
 namespace Omnius.Xeus.Intaractors;
 
-public sealed partial class ProfileSubscriber : AsyncDisposableBase
+public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSubscriber
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -286,41 +286,18 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase
         }
     }
 
-    public async ValueTask RegisterAsync(OmniSignature signature, CancellationToken cancellationToken = default)
-    {
-        using (await _asyncLock.WriterLockAsync(cancellationToken))
-        {
-            await Task.Delay(0, cancellationToken).ConfigureAwait(false);
-
-            if (_profileSubscriberRepo.Items.Exists(signature)) return;
-
-            var item = new SubscribedProfileItem(signature, OmniHash.Empty, DateTime.UtcNow);
-            _profileSubscriberRepo.Items.Upsert(item);
-        }
-    }
-
-    public async ValueTask UnregisterAsync(OmniSignature signature, CancellationToken cancellationToken = default)
-    {
-        using (await _asyncLock.WriterLockAsync(cancellationToken))
-        {
-            await Task.Delay(0, cancellationToken).ConfigureAwait(false);
-
-            _profileSubscriberRepo.Items.Delete(signature);
-        }
-    }
-
-    public async ValueTask<IEnumerable<OmniSignature>> GetDownloadingProfileSignaturesAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<SubscribedProfileReport>> GetSubscribedProfileReportsAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.ReaderLockAsync(cancellationToken))
         {
-            var results = new List<OmniSignature>();
+            var reports = new List<SubscribedProfileReport>();
 
             foreach (var item in _profileSubscriberRepo.Items.FindAll())
             {
-                results.Add(item.Signature);
+                reports.Add(new SubscribedProfileReport(item.CreationTime, item.Signature));
             }
 
-            return results;
+            return reports;
         }
     }
 

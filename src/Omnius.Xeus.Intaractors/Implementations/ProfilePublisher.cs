@@ -12,7 +12,7 @@ using Omnius.Xeus.Remoting;
 
 namespace Omnius.Xeus.Intaractors;
 
-public sealed class ProfilePublisher : AsyncDisposableBase
+public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -130,7 +130,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase
         }
     }
 
-    public async ValueTask<IEnumerable<PublishedProfileReport>> GetUploadingProfileReportsAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<PublishedProfileReport>> GetPublishedProfileReportsAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.ReaderLockAsync(cancellationToken))
         {

@@ -37,45 +37,27 @@ public static partial class Runner
         {
             Version = 1,
             ListenAddress = OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 32321).ToString(),
-            Engines = new EnginesConfig()
+            Bandwidth = new BandwidthConfig()
             {
-                Bandwidth = new BandwidthConfig()
+                MaxSendBytesPerSeconds = 1024 * 1024 * 32,
+                MaxReceiveBytesPerSeconds = 1024 * 1024 * 32,
+            },
+            SessionConnector = new SessionConnectorConfig()
+            {
+                TcpConnector = new TcpConnectorConfig()
                 {
-                    MaxSendBytesPerSeconds = 1024 * 1024 * 32,
-                    MaxReceiveBytesPerSeconds = 1024 * 1024 * 32,
-                },
-                SessionConnector = new SessionConnectorConfig()
-                {
-                    TcpConnectors = new[]
+                    Proxy = new TcpProxyConfig()
                     {
-                        new TcpConnectorConfig()
-                        {
-                            Proxy = null,
-                        },
+                        Type = TcpProxyType.None,
                     },
                 },
-                SessionAccepter = new SessionAccepterConfig()
+            },
+            SessionAccepter = new SessionAccepterConfig()
+            {
+                TcpAccepter = new TcpAccepterConfig()
                 {
-                    TcpAccepters = new[]
-                    {
-                        new TcpAccepterConfig()
-                        {
-                            UseUpnp = true,
-                            ListenAddress = OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 32320).ToString(),
-                        },
-                    },
-                },
-                NodeFinder = new NodeFinderConfig()
-                {
-                    MaxSessionCount = 128,
-                },
-                FileExchanger = new FileExchangerConfig()
-                {
-                    MaxSessionCount = 128,
-                },
-                ShoutExchanger = new ShoutExchangerConfig()
-                {
-                    MaxSessionCount = 128,
+                    UseUpnp = true,
+                    ListenAddress = OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 32320).ToString(),
                 },
             },
         };

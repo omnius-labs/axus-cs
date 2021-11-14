@@ -48,16 +48,16 @@ public class XeusService : AsyncDisposableBase, IXeusService
         var bytesPool = BytesPool.Shared;
         var batchActionDispatcher = new BatchActionDispatcher(TimeSpan.FromMilliseconds(10));
 
-        var senderBandwidthLimiter = new BandwidthLimiter(appConfig.Engines?.Bandwidth?.MaxSendBytesPerSeconds ?? int.MaxValue);
-        var receiverBandwidthLimiter = new BandwidthLimiter(appConfig.Engines?.Bandwidth?.MaxReceiveBytesPerSeconds ?? int.MaxValue);
+        var senderBandwidthLimiter = new BandwidthLimiter(appConfig.Bandwidth?.MaxSendBytesPerSeconds ?? int.MaxValue);
+        var receiverBandwidthLimiter = new BandwidthLimiter(appConfig.Bandwidth?.MaxReceiveBytesPerSeconds ?? int.MaxValue);
 
         var connectionConnectors = new List<IConnectionConnector>();
 
-        foreach (var tcpConnectorConfig in appConfig.Engines?.SessionConnector?.TcpConnectors ?? Array.Empty<TcpConnectorConfig>())
+        if (appConfig.SessionConnector?.TcpConnector is TcpConnectorConfig tcpConnectorConfig)
         {
             var tcpProxyType = tcpConnectorConfig.Proxy?.Type switch
             {
-                Configuration.TcpProxyType.Unknown => EnginesModels.TcpProxyType.Unknown,
+                Configuration.TcpProxyType.None => EnginesModels.TcpProxyType.Unknown,
                 Configuration.TcpProxyType.HttpProxy => EnginesModels.TcpProxyType.HttpProxy,
                 Configuration.TcpProxyType.Socks5Proxy => EnginesModels.TcpProxyType.Socks5Proxy,
                 _ => EnginesModels.TcpProxyType.Unknown,
@@ -74,10 +74,10 @@ public class XeusService : AsyncDisposableBase, IXeusService
 
         var connectionAccepters = new List<IConnectionAccepter>();
 
-        foreach (var tcpConnectionAccepterConfig in appConfig.Engines?.SessionAccepter?.TcpAccepters ?? Array.Empty<TcpAccepterConfig>())
+        if (appConfig.SessionAccepter?.TcpAccepter is TcpAccepterConfig tcpAccepterConfig)
         {
-            var useUpnp = tcpConnectionAccepterConfig.UseUpnp;
-            var listenAddress = OmniAddress.Parse(tcpConnectionAccepterConfig.ListenAddress);
+            var useUpnp = tcpAccepterConfig.UseUpnp;
+            var listenAddress = OmniAddress.Parse(tcpAccepterConfig.ListenAddress);
             var tcpConnectionAccepterOption = new TcpConnectionAccepterOptions(useUpnp, listenAddress);
             var tcpConnectionAccepter = await TcpConnectionAccepter.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, UpnpClient.Factory, batchActionDispatcher, bytesPool, tcpConnectionAccepterOption, cancellationToken);
             connectionAccepters.Add(tcpConnectionAccepter);
@@ -86,7 +86,7 @@ public class XeusService : AsyncDisposableBase, IXeusService
         var sessionAccepterOptions = new SessionAccepterOptions(digitalSignature);
         _sessionAccepter = await SessionAccepter.CreateAsync(connectionAccepters, batchActionDispatcher, bytesPool, sessionAccepterOptions, cancellationToken);
 
-        var nodeFinderOptions = new NodeFinderOptions(Path.Combine(workingDirectoryPath, "node_finder"), appConfig.Engines?.NodeFinder?.MaxSessionCount ?? int.MaxValue);
+        var nodeFinderOptions = new NodeFinderOptions(Path.Combine(workingDirectoryPath, "node_finder"), 128);
         _nodeFinder = await NodeFinder.CreateAsync(_sessionConnector, _sessionAccepter, batchActionDispatcher, bytesPool, nodeFinderOptions, cancellationToken);
 
         var publishedFileStorageOptions = new PublishedFileStorageOptions(Path.Combine(workingDirectoryPath, "published_file_storage"));
@@ -95,7 +95,7 @@ public class XeusService : AsyncDisposableBase, IXeusService
         var subscribedFileStorageOptions = new SubscribedFileStorageOptions(Path.Combine(workingDirectoryPath, "subscribed_file_storage"));
         _subscribedFileStorage = await SubscribedFileStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, subscribedFileStorageOptions, cancellationToken);
 
-        var fileExchangerOptions = new FileExchangerOptions(appConfig.Engines?.FileExchanger?.MaxSessionCount ?? int.MaxValue);
+        var fileExchangerOptions = new FileExchangerOptions(128);
         _fileExchanger = await FileExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedFileStorage, _subscribedFileStorage, batchActionDispatcher, bytesPool, fileExchangerOptions, cancellationToken);
         _nodeFinder.GetEvents().GetContentExchangers.Subscribe(() => _fileExchanger).ToAdd(_disposables);
 
@@ -105,7 +105,7 @@ public class XeusService : AsyncDisposableBase, IXeusService
         var subscribedShoutStorageOptions = new SubscribedShoutStorageOptions(Path.Combine(workingDirectoryPath, "subscribed_shout_storage"));
         _subscribedShoutStorage = await SubscribedShoutStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, subscribedShoutStorageOptions, cancellationToken);
 
-        var shoutExchangerOptions = new ShoutExchangerOptions(appConfig.Engines?.ShoutExchanger?.MaxSessionCount ?? int.MaxValue);
+        var shoutExchangerOptions = new ShoutExchangerOptions(128);
         _shoutExchanger = await ShoutExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedShoutStorage, _subscribedShoutStorage, batchActionDispatcher, bytesPool, shoutExchangerOptions, cancellationToken);
         _nodeFinder.GetEvents().GetContentExchangers.Subscribe(() => _shoutExchanger).ToAdd(_disposables);
     }

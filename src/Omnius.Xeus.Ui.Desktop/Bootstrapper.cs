@@ -27,6 +27,8 @@ public partial class Bootstrapper : AsyncDisposableBase
     private Dashboard? _dashboard;
     private FileDownloader? _fileDownloader;
     private FileUploader? _fileUploader;
+    private ProfilePublisher? _profilePublisher;
+    private ProfileSubscriber? _profileSubscriber;
 
     private Task<ServiceProvider?>? _buildTask;
     private CancellationTokenSource _cancellationTokenSource = new();
@@ -71,6 +73,12 @@ public partial class Bootstrapper : AsyncDisposableBase
             var fileDownloaderOptions = new FileDownloaderOptions(Path.Combine(_storageDirectoryPath, "file_downloader"));
             _fileDownloader = await FileDownloader.CreateAsync(service, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, fileDownloaderOptions, cancellationToken);
 
+            var profilePublisherOptions = new ProfilePublisherOptions(Path.Combine(_storageDirectoryPath, "profile_publisher"));
+            _profilePublisher = await ProfilePublisher.CreateAsync(service, KeyValueLiteDatabaseStorage.Factory, _bytesPool, profilePublisherOptions);
+
+            var profileSubscriberOptions = new ProfileSubscriberOptions(Path.Combine(_storageDirectoryPath, "profile_subscriber"));
+            _profileSubscriber = await ProfileSubscriber.CreateAsync(service, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, profileSubscriberOptions);
+
             var serviceCollection = new ServiceCollection();
 
             serviceCollection.AddSingleton(_appConfig);
@@ -84,6 +92,8 @@ public partial class Bootstrapper : AsyncDisposableBase
             serviceCollection.AddSingleton<IDashboard>(_dashboard);
             serviceCollection.AddSingleton<IFileUploader>(_fileUploader);
             serviceCollection.AddSingleton<IFileDownloader>(_fileDownloader);
+            serviceCollection.AddSingleton<IProfilePublisher>(_profilePublisher);
+            serviceCollection.AddSingleton<IProfileSubscriber>(_profileSubscriber);
 
             serviceCollection.AddSingleton<IApplicationDispatcher, ApplicationDispatcher>();
             serviceCollection.AddSingleton<IMainWindowProvider, MainWindowProvider>();

@@ -10,7 +10,11 @@ public class AppConfig
 
     public string? ListenAddress { get; init; }
 
-    public EnginesConfig? Engines { get; init; }
+    public BandwidthConfig? Bandwidth { get; init; }
+
+    public SessionConnectorConfig? SessionConnector { get; init; }
+
+    public SessionAccepterConfig? SessionAccepter { get; init; }
 
     public static async ValueTask<AppConfig?> LoadAsync(string configPath)
     {
@@ -31,21 +35,6 @@ public class AppConfig
     }
 }
 
-public class EnginesConfig
-{
-    public BandwidthConfig? Bandwidth { get; init; }
-
-    public SessionConnectorConfig? SessionConnector { get; init; }
-
-    public SessionAccepterConfig? SessionAccepter { get; init; }
-
-    public NodeFinderConfig? NodeFinder { get; init; }
-
-    public FileExchangerConfig? FileExchanger { get; init; }
-
-    public ShoutExchangerConfig? ShoutExchanger { get; init; }
-}
-
 public class BandwidthConfig
 {
     public int MaxSendBytesPerSeconds { get; init; }
@@ -55,12 +44,12 @@ public class BandwidthConfig
 
 public class SessionConnectorConfig
 {
-    public TcpConnectorConfig[]? TcpConnectors { get; init; }
+    public TcpConnectorConfig? TcpConnector { get; init; }
 }
 
 public class SessionAccepterConfig
 {
-    public TcpAccepterConfig[]? TcpAccepters { get; init; }
+    public TcpAccepterConfig? TcpAccepter { get; init; }
 }
 
 public class TcpConnectorConfig
@@ -77,7 +66,7 @@ public class TcpProxyConfig
 
 public enum TcpProxyType : byte
 {
-    Unknown = 0,
+    None = 0,
     HttpProxy = 1,
     Socks5Proxy = 2,
 }
@@ -87,19 +76,4 @@ public class TcpAccepterConfig
     public bool UseUpnp { get; init; }
 
     public string? ListenAddress { get; init; }
-}
-
-public class NodeFinderConfig
-{
-    public uint MaxSessionCount { get; init; }
-}
-
-public class FileExchangerConfig
-{
-    public uint MaxSessionCount { get; init; }
-}
-
-public class ShoutExchangerConfig
-{
-    public uint MaxSessionCount { get; init; }
 }
