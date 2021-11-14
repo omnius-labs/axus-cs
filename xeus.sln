@@ -7,13 +7,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F1452782-46C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Xeus.Intaractors", "src\Omnius.Xeus.Intaractors\Omnius.Xeus.Intaractors.csproj", "{1F1FF130-530F-454C-AB99-77FE08B32EF9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Xeus.Service.Daemon", "src\Omnius.Xeus.Service.Daemon\Omnius.Xeus.Service.Daemon.csproj", "{0DD5E9F7-AA91-4A0B-AC50-E8F58F963ADB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Xeus.Daemon", "src\Omnius.Xeus.Daemon\Omnius.Xeus.Daemon.csproj", "{0DD5E9F7-AA91-4A0B-AC50-E8F58F963ADB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Xeus.Service.Engines", "src\Omnius.Xeus.Service.Engines\Omnius.Xeus.Service.Engines.csproj", "{7D10F878-743D-48D0-B052-7C5F2AA4B7E0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Xeus.Engines", "src\Omnius.Xeus.Engines\Omnius.Xeus.Engines.csproj", "{7D10F878-743D-48D0-B052-7C5F2AA4B7E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Xeus.Service.Models", "src\Omnius.Xeus.Service.Models\Omnius.Xeus.Service.Models.csproj", "{FC877CD4-F549-4340-9E58-3A5F174CA233}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Xeus.Models", "src\Omnius.Xeus.Models\Omnius.Xeus.Models.csproj", "{FC877CD4-F549-4340-9E58-3A5F174CA233}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Xeus.Service.Remoting", "src\Omnius.Xeus.Service.Remoting\Omnius.Xeus.Service.Remoting.csproj", "{9B992514-49D5-43C6-95FF-B5EFD878E0B4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Xeus.Remoting", "src\Omnius.Xeus.Remoting\Omnius.Xeus.Remoting.csproj", "{9B992514-49D5-43C6-95FF-B5EFD878E0B4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Xeus.Ui.Desktop", "src\Omnius.Xeus.Ui.Desktop\Omnius.Xeus.Ui.Desktop.csproj", "{3CC4E2F5-6B7C-42F7-B1D3-5918673006C8}"
 EndProject
@@ -21,7 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Xeus.Utils", "src\Om
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{6CDA78EC-46B6-4D8F-8198-E5678D01BE61}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Xeus.Service.Engines.Tests", "test\Omnius.Xeus.Service.Engines.Tests\Omnius.Xeus.Service.Engines.Tests.csproj", "{8433E9CD-E09E-40EA-AE51-39AB619573CD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Xeus.Engines.Tests", "test\Omnius.Xeus.Engines.Tests\Omnius.Xeus.Engines.Tests.csproj", "{8433E9CD-E09E-40EA-AE51-39AB619573CD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "refs", "refs", "{6F52D43D-BC1E-43C3-A5A6-06004EFF2768}"
 EndProject

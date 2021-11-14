@@ -4,7 +4,7 @@ using System.Reactive.Disposables;
 using Omnius.Core;
 using Omnius.Core.Avalonia;
 using Omnius.Xeus.Intaractors;
-using Omnius.Xeus.Service.Models;
+using Omnius.Xeus.Models;
 using Omnius.Xeus.Ui.Desktop.ViewModels;
 using Omnius.Xeus.Ui.Desktop.Windows;
 using Reactive.Bindings;

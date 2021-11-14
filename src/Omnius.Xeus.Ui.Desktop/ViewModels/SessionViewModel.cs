@@ -1,6 +1,6 @@
 using Generator.Equals;
 using Omnius.Core.Avalonia;
-using Omnius.Xeus.Service.Models;
+using Omnius.Xeus.Models;
 
 namespace Omnius.Xeus.Ui.Desktop.ViewModels;
 

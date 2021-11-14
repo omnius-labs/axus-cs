@@ -7,7 +7,7 @@ using Omnius.Core.Net.Connections.Bridge;
 using Omnius.Core.Net.Connections.Multiplexer;
 using Omnius.Core.RocketPack.Remoting;
 using Omnius.Core.Tasks;
-using Omnius.Xeus.Service.Remoting;
+using Omnius.Xeus.Remoting;
 using MultiplexerV1 = Omnius.Core.Net.Connections.Multiplexer.V1;
 
 namespace Omnius.Xeus.Ui.Desktop.Internal;

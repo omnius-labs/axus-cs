@@ -1,7 +1,7 @@
 using System.Buffers;
 using Omnius.Core.Cryptography;
-using Omnius.Xeus.Service.Models;
-using Omnius.Xeus.Service.Remoting;
+using Omnius.Xeus.Models;
+using Omnius.Xeus.Remoting;
 
 namespace Omnius.Xeus.Intaractors.Internal;
 

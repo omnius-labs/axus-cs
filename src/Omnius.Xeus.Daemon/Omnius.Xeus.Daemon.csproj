@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Collections\Omnius.Core.Collections.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Storages\Omnius.Core.Storages.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Cryptography\Omnius.Core.Cryptography.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Streams\Omnius.Core.Streams.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Net.Proxies\Omnius.Core.Net.Proxies.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Net.Upnp\Omnius.Core.Net.Upnp.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Net\Omnius.Core.Net.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.RocketPack\Omnius.Core.RocketPack.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Serialization\Omnius.Core.Serialization.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core\Omnius.Core.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Utils\Omnius.Core.Utils.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Pipelines\Omnius.Core.Pipelines.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Tasks\Omnius.Core.Tasks.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Remoting\Omnius.Xeus.Remoting.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Models\Omnius.Xeus.Models.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Engines\Omnius.Xeus.Engines.csproj" />
+    <ProjectReference Include="..\Omnius.Xeus.Utils\Omnius.Xeus.Utils.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Cocona.Lite" Version="1.6.0" />
+    <PackageReference Include="NLog" Version="4.7.11" />
+    <PackageReference Include="NLog.Config" Version="4.7.11" />
+    <PackageReference Include="YamlDotNet" Version="11.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

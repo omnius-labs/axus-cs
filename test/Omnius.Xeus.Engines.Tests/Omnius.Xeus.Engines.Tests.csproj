@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Omnius.Xeus.Engines</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Omnius.Xeus.Engines\Omnius.Xeus.Engines.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Net.Proxies\Omnius.Core.Net.Proxies.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Net.Upnp\Omnius.Core.Net.Upnp.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.UnitTestToolkit\Omnius.Core.UnitTestToolkit.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Moq" Version="4.16.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="coverlet.msbuild" Version="3.1.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Update="Microsoft.NET.Test.Sdk" Version="16.11.0" />
+    <PackageReference Update="xunit" Version="2.4.1" />
+    <PackageReference Update="xunit.runner.visualstudio" Version="2.4.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

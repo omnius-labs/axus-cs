@@ -4,7 +4,7 @@ using Omnius.Core.Pipelines;
 using Omnius.Core.RocketPack;
 using Omnius.Core.Serialization;
 using Omnius.Xeus.Intaractors.Models;
-using Omnius.Xeus.Service.Models;
+using Omnius.Xeus.Models;
 
 namespace Omnius.Xeus.Intaractors;
 

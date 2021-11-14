@@ -7,8 +7,8 @@ using Omnius.Xeus.Intaractors.Internal;
 using Omnius.Xeus.Intaractors.Internal.Models;
 using Omnius.Xeus.Intaractors.Internal.Repositories;
 using Omnius.Xeus.Intaractors.Models;
-using Omnius.Xeus.Service.Models;
-using Omnius.Xeus.Service.Remoting;
+using Omnius.Xeus.Models;
+using Omnius.Xeus.Remoting;
 
 namespace Omnius.Xeus.Intaractors;
 

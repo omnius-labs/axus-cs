@@ -776,12 +776,12 @@
           "Omnius.Core.RocketPack.Remoting": "0.0.1-alpha.1",
           "Omnius.Core.Serialization": "0.0.1-alpha.1",
           "Omnius.Core.Storages": "0.0.1-alpha.1",
-          "Omnius.Xeus.Service.Models": "0.0.1-alpha.1",
-          "Omnius.Xeus.Service.Remoting": "0.0.1-alpha.1",
+          "Omnius.Xeus.Models": "0.0.1-alpha.1",
+          "Omnius.Xeus.Remoting": "0.0.1-alpha.1",
           "Omnius.Xeus.Utils": "0.0.1-alpha.1"
         }
       },
-      "omnius.xeus.service.models": {
+      "omnius.xeus.models": {
         "type": "Project",
         "dependencies": {
           "LiteDB": "5.0.11",
@@ -795,7 +795,7 @@
           "Omnius.Core.RocketPack.Remoting": "0.0.1-alpha.1"
         }
       },
-      "omnius.xeus.service.remoting": {
+      "omnius.xeus.remoting": {
         "type": "Project",
         "dependencies": {
           "NLog": "4.7.11",
@@ -805,7 +805,7 @@
           "Omnius.Core.Net": "0.0.1-alpha.1",
           "Omnius.Core.RocketPack": "0.0.1-alpha.1",
           "Omnius.Core.RocketPack.Remoting": "0.0.1-alpha.1",
-          "Omnius.Xeus.Service.Models": "0.0.1-alpha.1"
+          "Omnius.Xeus.Models": "0.0.1-alpha.1"
         }
       },
       "omnius.xeus.utils": {

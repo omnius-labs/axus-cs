@@ -1,4 +1,4 @@
-using Omnius.Xeus.Service.Models;
+using Omnius.Xeus.Models;
 
 namespace Omnius.Xeus.Intaractors;
 

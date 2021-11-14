@@ -3,7 +3,7 @@
 using "Omnius.Core.Cryptography";
 using "Omnius.Core.Net";
 
-namespace "Omnius.Xeus.Service.Models";
+namespace "Omnius.Xeus.Models";
 
 // Common
 

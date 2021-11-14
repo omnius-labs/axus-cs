@@ -2,12 +2,12 @@
     - ./refs/core/rpfs/**/*.rpf
     - ./rpfs/**/*.rpf
   CompileTargets:
-    - Input: ./rpfs/Omnius.Xeus.Service.Models/Omnius.Xeus.Service.Models.rpf
-      Output: ./src/Omnius.Xeus.Service.Models/_RocketPack/_Generated.cs
-    - Input: ./rpfs/Omnius.Xeus.Service.Engines/Omnius.Xeus.Service.Engines.Internal.Models.rpf
-      Output: ./src/Omnius.Xeus.Service.Engines/Implementations/Internal/Models/_RocketPack/_Generated.cs
-    - Input: ./rpfs/Omnius.Xeus.Service.Remoting/Omnius.Xeus.Service.Remoting.rpf
-      Output: ./src/Omnius.Xeus.Service.Remoting/_RocketPack/_Generated.cs
+    - Input: ./rpfs/Omnius.Xeus.Models/Omnius.Xeus.Models.rpf
+      Output: ./src/Omnius.Xeus.Models/_RocketPack/_Generated.cs
+    - Input: ./rpfs/Omnius.Xeus.Engines/Omnius.Xeus.Engines.Internal.Models.rpf
+      Output: ./src/Omnius.Xeus.Engines/Implementations/Internal/Models/_RocketPack/_Generated.cs
+    - Input: ./rpfs/Omnius.Xeus.Remoting/Omnius.Xeus.Remoting.rpf
+      Output: ./src/Omnius.Xeus.Remoting/_RocketPack/_Generated.cs
     - Input: ./rpfs/Omnius.Xeus.Intaractors/Omnius.Xeus.Intaractors.Models.rpf
       Output: ./src/Omnius.Xeus.Intaractors/Models/_RocketPack/_Generated.cs
     - Input: ./rpfs/Omnius.Xeus.Intaractors/Omnius.Xeus.Intaractors.Internal.Models.rpf

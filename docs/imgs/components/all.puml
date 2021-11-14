@@ -22,12 +22,12 @@ package Omnius.Xeus.Intaractors {
     rectangle UserProfileSubscriber <<$component>><<behavior>>
 }
 
-package Omnius.Xeus.Service.Daemon {
+package Omnius.Xeus.Daemon {
     rectangle XeusService.Client <<$component>><<behavior>>
     rectangle XeusService.Server <<$component>><<behavior>>
 }
 
-package Omnius.Xeus.Service.Daemon {
+package Omnius.Xeus.Daemon {
     rectangle XeusServiceImpl <<$component>><<behavior>>
 }
 

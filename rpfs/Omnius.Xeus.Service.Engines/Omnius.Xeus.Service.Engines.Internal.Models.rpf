@@ -2,9 +2,9 @@ syntax v1.0;
 
 using "Omnius.Core.Cryptography";
 using "Omnius.Core.Net";
-using "Omnius.Xeus.Service.Models";
+using "Omnius.Xeus.Models";
 
-namespace "Omnius.Xeus.Service.Engines.Internal.Models";
+namespace "Omnius.Xeus.Engines.Internal.Models";
 option csharp_access_level "internal";
 
 // Common
