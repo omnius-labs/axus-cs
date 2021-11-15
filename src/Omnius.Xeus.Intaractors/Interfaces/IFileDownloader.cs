@@ -9,4 +9,8 @@ public interface IFileDownloader
     ValueTask RegisterAsync(Seed seed, CancellationToken cancellationToken = default);
 
     ValueTask UnregisterAsync(Seed seed, CancellationToken cancellationToken = default);
+
+    ValueTask<FileDownloaderConfig> GetConfigAsync(CancellationToken cancellationToken = default);
+
+    ValueTask SetConfigAsync(FileDownloaderConfig config, CancellationToken cancellationToken = default);
 }
