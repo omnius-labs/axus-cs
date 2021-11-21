@@ -1,5 +1,4 @@
 using LiteDB;
-using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Helpers;
@@ -41,7 +40,7 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
 
         private readonly LiteDatabase _database;
 
-        private readonly AsyncReaderWriterLock _asyncLock = new();
+        private readonly object _lockObject = new();
 
         public DownloadingProfileItemRepository(LiteDatabase database)
         {
@@ -50,7 +49,7 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
 
         internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            lock (_lockObject)
             {
                 if (_database.GetDocumentVersion(CollectionName) <= 0)
                 {
@@ -71,7 +70,7 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
 
         public bool Exists(OmniSignature signature)
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
@@ -82,7 +81,7 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
 
         public bool Exists(OmniHash rootHash)
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var rootHashEntity = OmniHashEntity.Import(rootHash);
 
@@ -93,7 +92,7 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
 
         public IEnumerable<SubscribedProfileItem> FindAll()
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var col = this.GetCollection();
                 return col.FindAll().Select(n => n.Export()).ToArray();
@@ -102,7 +101,7 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
 
         public SubscribedProfileItem? FindOne(OmniSignature signature)
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
@@ -113,7 +112,7 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
 
         public void Upsert(SubscribedProfileItem item)
         {
-            using (_asyncLock.WriterLock())
+            lock (_lockObject)
             {
                 var itemEntity = SubscribedProfileItemEntity.Import(item);
 
@@ -126,7 +125,7 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
 
         public void Delete(OmniSignature signature)
         {
-            using (_asyncLock.WriterLock())
+            lock (_lockObject)
             {
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
@@ -137,7 +136,7 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
 
         public void Delete(OmniHash rootHash)
         {
-            using (_asyncLock.WriterLock())
+            lock (_lockObject)
             {
                 var rootHashEntity = OmniHashEntity.Import(rootHash);
 

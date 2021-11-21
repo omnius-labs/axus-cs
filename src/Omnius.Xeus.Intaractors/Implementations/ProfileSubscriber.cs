@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
-using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.RocketPack;
@@ -29,7 +28,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-    private readonly AsyncReaderWriterLock _asyncLock = new();
+    private readonly AsyncLock _asyncLock = new();
 
     private const string Registrant = "Omnius.Xeus.Intaractors.ProfileSubscriber";
 
@@ -93,7 +92,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
 
     private async Task SyncSubscribedShouts(CancellationToken cancellationToken = default)
     {
-        using (await _asyncLock.ReaderLockAsync(cancellationToken))
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
             var subscribedShoutReports = await _service.GetSubscribedShoutReportsAsync(cancellationToken);
             var signatures = new HashSet<OmniSignature>();
@@ -129,7 +128,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
 
     private async Task SyncSubscribedFiles(CancellationToken cancellationToken = default)
     {
-        using (await _asyncLock.ReaderLockAsync(cancellationToken))
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
             var subscribedFileReports = await _service.GetSubscribedFileReportsAsync(cancellationToken);
             var rootHashes = new HashSet<OmniHash>();
@@ -153,7 +152,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
 
     private async ValueTask UpdateProfilesAsync(CancellationToken cancellationToken = default)
     {
-        using (await _asyncLock.WriterLockAsync(cancellationToken))
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
             var config = await this.GetConfigAsync(cancellationToken);
 
@@ -233,7 +232,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
 
     private async ValueTask<Profile?> InternalExportAsync(OmniSignature signature, CancellationToken cancellationToken = default)
     {
-        using (await _asyncLock.WriterLockAsync(cancellationToken))
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
             await Task.Delay(0, cancellationToken).ConfigureAwait(false);
 
@@ -288,7 +287,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
 
     public async ValueTask<IEnumerable<SubscribedProfileReport>> GetSubscribedProfileReportsAsync(CancellationToken cancellationToken = default)
     {
-        using (await _asyncLock.ReaderLockAsync(cancellationToken))
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
             var reports = new List<SubscribedProfileReport>();
 
@@ -303,7 +302,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
 
     public async ValueTask<ProfileSubscriberConfig> GetConfigAsync(CancellationToken cancellationToken = default)
     {
-        using (await _asyncLock.ReaderLockAsync(cancellationToken))
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
             var config = await _configStorage.TryGetValueAsync<ProfileSubscriberConfig>(cancellationToken);
             if (config is null) return ProfileSubscriberConfig.Empty;
@@ -314,7 +313,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
 
     public async ValueTask SetConfigAsync(ProfileSubscriberConfig config, CancellationToken cancellationToken = default)
     {
-        using (await _asyncLock.WriterLockAsync(cancellationToken))
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
             await _configStorage.TrySetValueAsync(config, cancellationToken);
         }
@@ -322,7 +321,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
 
     public async ValueTask<Profile?> FindOneAsync(OmniSignature signature, CancellationToken cancellationToken = default)
     {
-        using (await _asyncLock.ReaderLockAsync(cancellationToken))
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
             return await _cachedProfileStorage.TryGetValueAsync<Profile>(StringConverter.SignatureToString(signature), cancellationToken);
         }
@@ -330,7 +329,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
 
     public async IAsyncEnumerable<Profile> FindAllAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        using (await _asyncLock.ReaderLockAsync(cancellationToken))
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
             await foreach (var value in _cachedProfileStorage.GetValuesAsync<Profile>(cancellationToken))
             {

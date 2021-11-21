@@ -3,9 +3,9 @@ using Omnius.Xeus.Ui.Desktop.Windows.Primitives;
 
 namespace Omnius.Xeus.Ui.Desktop.Windows;
 
-public class TextWindow : StatefulWindowBase
+public class SettingsWindow : StatefulWindowBase
 {
-    public TextWindow()
+    public SettingsWindow()
         : base()
     {
         this.InitializeComponent();
@@ -22,15 +22,15 @@ public class TextWindow : StatefulWindowBase
 
     protected override async ValueTask OnDisposeAsync()
     {
-        if (this.ViewModel is TextWindowViewModel viewModel)
+        if (this.ViewModel is SettingsWindowViewModel viewModel)
         {
             await viewModel.DisposeAsync();
         }
     }
 
-    public TextWindowViewModel? ViewModel
+    public SettingsWindowViewModel? ViewModel
     {
-        get => this.DataContext as TextWindowViewModel;
+        get => this.DataContext as SettingsWindowViewModel;
         set => this.DataContext = value;
     }
 }

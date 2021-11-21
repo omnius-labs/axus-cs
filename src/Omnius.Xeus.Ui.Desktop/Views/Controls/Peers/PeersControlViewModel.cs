@@ -68,7 +68,7 @@ public class PeersControlViewModel : AsyncDisposableBase
 
     private async void AddNodeLocations()
     {
-        var text = await _dialogService.GetTextWindowAsync();
+        var text = await _dialogService.ShowTextWindowAsync();
         await _dashboard.AddCloudNodeLocationsAsync(ParseNodeLocations(text));
     }
 

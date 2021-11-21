@@ -67,7 +67,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
         _bytesPool = bytesPool;
         _options = options;
 
-        _connectedAddressSet = new VolatileHashSet<OmniAddress>(TimeSpan.FromMinutes(3), _batchActionDispatcher);
+        _connectedAddressSet = new VolatileHashSet<OmniAddress>(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), _batchActionDispatcher);
 
         _connectLoopTask = this.ConnectLoopAsync(_cancellationTokenSource.Token);
         _acceptLoopTask = this.AcceptLoopAsync(_cancellationTokenSource.Token);
@@ -226,7 +226,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
                 if (resultMessage.Type != FileExchangerHandshakeResultType.Accepted) return false;
 
-                var status = new SessionStatus(session, rootHash);
+                var status = new SessionStatus(session, rootHash, _batchActionDispatcher);
                 _sessionStatusSet = _sessionStatusSet.Add(status);
 
                 _logger.Debug("Added session");
@@ -277,7 +277,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
                 if (!accepted) return false;
 
-                var status = new SessionStatus(session, rootHash);
+                var status = new SessionStatus(session, rootHash, _batchActionDispatcher);
                 _sessionStatusSet = _sessionStatusSet.Add(status);
 
                 _logger.Debug("Added session");
@@ -318,7 +318,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
 
                 foreach (var sessionStatus in _sessionStatusSet)
                 {
@@ -341,7 +341,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                     {
                         _logger.Debug(e);
 
-                        _sessionStatusSet = _sessionStatusSet.Remove(sessionStatus);
+                        await this.RemoveSessionStatusAsync(sessionStatus);
                     }
                 }
             }
@@ -366,7 +366,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
 
                 foreach (var sessionStatus in _sessionStatusSet)
                 {
@@ -376,9 +376,11 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
                         _logger.Debug($"Received data message: {sessionStatus.Session.Address}");
 
+                        sessionStatus.LastReceivedTime = DateTime.UtcNow;
+
                         try
                         {
-                            sessionStatus.ReceivedWantBlockHashes = new LockedSet<OmniHash>(dataMessage.WantBlockHashes.ToHashSet());
+                            sessionStatus.ReceivedWantBlockHashes.UnionWith(dataMessage.WantBlockHashes);
 
                             foreach (var block in dataMessage.GiveBlocks)
                             {
@@ -397,7 +399,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                     {
                         _logger.Debug(e);
 
-                        _sessionStatusSet = _sessionStatusSet.Remove(sessionStatus);
+                        await this.RemoveSessionStatusAsync(sessionStatus);
                     }
                 }
             }
@@ -424,9 +426,10 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
                 await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken).ConfigureAwait(false);
 
-                await this.UpdatePushContentCluesAsync(cancellationToken);
-                await this.UpdateWantContentCluesAsync(cancellationToken);
-                await this.UpdateSendingDataMessage(cancellationToken);
+                await this.RemoveDeadSessionsAsync(cancellationToken);
+                await this.ComputePushContentCluesAsync(cancellationToken);
+                await this.ComputeWantContentCluesAsync(cancellationToken);
+                await this.ComputeSendingDataMessage(cancellationToken);
             }
         }
         catch (OperationCanceledException e)
@@ -441,7 +444,24 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
         }
     }
 
-    private async ValueTask UpdatePushContentCluesAsync(CancellationToken cancellationToken = default)
+    private async ValueTask RemoveDeadSessionsAsync(CancellationToken cancellationToken = default)
+    {
+        foreach (var sessionStatus in _sessionStatusSet)
+        {
+            var elapsed = (DateTime.UtcNow - sessionStatus.LastReceivedTime);
+            if (elapsed.TotalSeconds < 30) continue;
+
+            await this.RemoveSessionStatusAsync(sessionStatus);
+        }
+    }
+
+    private async ValueTask RemoveSessionStatusAsync(SessionStatus sessionStatus)
+    {
+        _sessionStatusSet = _sessionStatusSet.Remove(sessionStatus);
+        await sessionStatus.DisposeAsync();
+    }
+
+    private async ValueTask ComputePushContentCluesAsync(CancellationToken cancellationToken = default)
     {
         var builder = ImmutableHashSet.CreateBuilder<ContentClue>();
 
@@ -454,7 +474,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
         _pushContentClues = builder.ToImmutable();
     }
 
-    private async ValueTask UpdateWantContentCluesAsync(CancellationToken cancellationToken = default)
+    private async ValueTask ComputeWantContentCluesAsync(CancellationToken cancellationToken = default)
     {
         var builder = ImmutableHashSet.CreateBuilder<ContentClue>();
 
@@ -467,7 +487,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
         _wantContentClues = builder.ToImmutable();
     }
 
-    private async ValueTask UpdateSendingDataMessage(CancellationToken cancellationToken = default)
+    private async ValueTask ComputeSendingDataMessage(CancellationToken cancellationToken = default)
     {
         foreach (var sessionStatus in _sessionStatusSet)
         {

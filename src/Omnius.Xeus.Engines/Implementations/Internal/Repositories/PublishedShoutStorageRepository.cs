@@ -1,5 +1,4 @@
 using LiteDB;
-using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Helpers;
@@ -41,7 +40,7 @@ internal sealed partial class PublishedShoutStorageRepository : DisposableBase
 
         private readonly LiteDatabase _database;
 
-        private readonly AsyncReaderWriterLock _asyncLock = new();
+        private readonly object _lockObject = new();
 
         public PublishedShoutItemRepository(LiteDatabase database)
         {
@@ -50,7 +49,7 @@ internal sealed partial class PublishedShoutStorageRepository : DisposableBase
 
         internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            lock (_lockObject)
             {
                 if (_database.GetDocumentVersion(CollectionName) <= 0)
                 {
@@ -70,7 +69,7 @@ internal sealed partial class PublishedShoutStorageRepository : DisposableBase
 
         public bool Exists(OmniSignature signature)
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
@@ -81,7 +80,7 @@ internal sealed partial class PublishedShoutStorageRepository : DisposableBase
 
         public IEnumerable<PublishedShoutItem> FindAll()
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var col = this.GetCollection();
                 return col.FindAll().Select(n => n.Export());
@@ -90,7 +89,7 @@ internal sealed partial class PublishedShoutStorageRepository : DisposableBase
 
         public IEnumerable<PublishedShoutItem> Find(OmniSignature signature)
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
@@ -101,7 +100,7 @@ internal sealed partial class PublishedShoutStorageRepository : DisposableBase
 
         public PublishedShoutItem? FindOne(OmniSignature signature, string registrant)
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
@@ -112,7 +111,7 @@ internal sealed partial class PublishedShoutStorageRepository : DisposableBase
 
         public void Insert(PublishedShoutItem item)
         {
-            using (_asyncLock.WriterLock())
+            lock (_lockObject)
             {
                 var itemEntity = PublishedShoutItemEntity.Import(item);
 
@@ -126,7 +125,7 @@ internal sealed partial class PublishedShoutStorageRepository : DisposableBase
 
         public void Delete(OmniSignature signature, string registrant)
         {
-            using (_asyncLock.WriterLock())
+            lock (_lockObject)
             {
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 

@@ -8,24 +8,22 @@ namespace Omnius.Xeus.Engines;
 
 public sealed partial class NodeFinder
 {
-    private sealed class SessionStatus : DisposableBase
+    private sealed class SessionStatus : AsyncDisposableBase
     {
         public SessionStatus(ISession session, ReadOnlyMemory<byte> id, NodeLocation nodeLocation, IBatchActionDispatcher batchActionDispatcher)
         {
             this.Session = session;
             this.Id = id;
             this.NodeLocation = nodeLocation;
+            this.LastReceivedTime = DateTime.UtcNow;
 
-            _volatileReceivedWantContentClues = new VolatileHashSet<ContentClue>(TimeSpan.FromMinutes(3), batchActionDispatcher);
-            this.ReceivedWantContentClues = new(_volatileReceivedWantContentClues);
+            this.ReceivedWantContentClues = new VolatileHashSet<ContentClue>(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), batchActionDispatcher);
         }
 
-        protected override void OnDispose(bool disposing)
+        protected override async ValueTask OnDisposeAsync()
         {
-            if (disposing)
-            {
-                _volatileReceivedWantContentClues.Dispose();
-            }
+            await this.Session.Connection.DisposeAsync();
+            this.ReceivedWantContentClues.Dispose();
         }
 
         public ISession Session { get; }
@@ -34,10 +32,10 @@ public sealed partial class NodeFinder
 
         public NodeLocation NodeLocation { get; }
 
+        public DateTime LastReceivedTime { get; set; }
+
         public NodeFinderDataMessage? SendingDataMessage { get; set; } = null;
 
-        private readonly VolatileHashSet<ContentClue> _volatileReceivedWantContentClues;
-
-        public LockedSet<ContentClue> ReceivedWantContentClues { get; }
+        public VolatileHashSet<ContentClue> ReceivedWantContentClues { get; }
     }
 }

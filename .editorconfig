@@ -137,6 +137,10 @@ csharp_style_namespace_declarations = file_scoped:suggestion
 # Xml files
 [*.{xml}]
 indent_size = 2
+indent_style = space
+[*.{axaml}]
+indent_size = 2
+indent_style = space
 
 # Xml project files
 [*.csproj]

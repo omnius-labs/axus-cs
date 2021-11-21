@@ -101,6 +101,7 @@ public partial class Bootstrapper : AsyncDisposableBase
             serviceCollection.AddSingleton<IDialogService, DialogService>();
 
             serviceCollection.AddTransient<MainWindowViewModel>();
+            serviceCollection.AddTransient<SettingsWindowViewModel>();
             serviceCollection.AddTransient<TextWindowViewModel>();
             serviceCollection.AddTransient<StatusControlViewModel>();
             serviceCollection.AddTransient<PeersControlViewModel>();

@@ -1,4 +1,3 @@
-using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.RocketPack;
@@ -27,7 +26,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-    private readonly AsyncReaderWriterLock _asyncLock = new();
+    private readonly AsyncLock _asyncLock = new();
 
     private const string Registrant = "Omnius.Xeus.Intaractors.ProfilePublisher";
 
@@ -88,7 +87,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
 
     private async Task SyncPublishedShouts(CancellationToken cancellationToken = default)
     {
-        using (await _asyncLock.ReaderLockAsync(cancellationToken))
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
             var publishedShoutReports = await _service.GetPublishedShoutReportsAsync(cancellationToken);
             var signatures = new HashSet<OmniSignature>();
@@ -110,7 +109,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
 
     private async Task SyncPublishedFiles(CancellationToken cancellationToken = default)
     {
-        using (await _asyncLock.ReaderLockAsync(cancellationToken))
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
             var publishedFileReports = await _service.GetPublishedFileReportsAsync(cancellationToken);
             var rootHashes = new HashSet<OmniHash>();
@@ -132,7 +131,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
 
     public async ValueTask<IEnumerable<PublishedProfileReport>> GetPublishedProfileReportsAsync(CancellationToken cancellationToken = default)
     {
-        using (await _asyncLock.ReaderLockAsync(cancellationToken))
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
             var reports = new List<PublishedProfileReport>();
 
@@ -147,7 +146,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
 
     public async ValueTask RegisterAsync(ProfileContent content, OmniDigitalSignature digitalSignature, CancellationToken cancellationToken = default)
     {
-        using (await _asyncLock.WriterLockAsync(cancellationToken))
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
             using var contentBytes = RocketMessage.ToBytes(content);
 
@@ -166,7 +165,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
 
     public async ValueTask UnregisterAsync(OmniSignature signature, CancellationToken cancellationToken = default)
     {
-        using (await _asyncLock.WriterLockAsync(cancellationToken))
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
             var item = _profilePublisherRepo.Items.FindOne(signature);
             if (item is null) return;

@@ -15,9 +15,9 @@
     d:DesignWidth="800"
     d:DesignHeight="500" >
 
-    <Grid RowDefinitions="Auto, *">
-        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="8">
-            <Button Height="32" Width="120" Margin="8" Content="Add file" Command="{Binding RegisterCommand}"/>
+    <Grid RowDefinitions="Auto,*">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="12">
+            <Button Content="Register" Command="{Binding RegisterCommand}"/>
         </StackPanel>
         <dg:DataGrid
             Grid.Row="1"
@@ -30,6 +30,7 @@
             </i:Interaction.Behaviors>
             <dg:DataGrid.ContextMenu>
                 <ContextMenu>
+                    <MenuItem Command="{Binding ItemDeleteCommand}" Header="Delete"/>
                     <MenuItem Header="Copy As">
                         <MenuItem Command="{Binding ItemCopySeedCommand}" Header="Copy Seed"/>
                     </MenuItem>

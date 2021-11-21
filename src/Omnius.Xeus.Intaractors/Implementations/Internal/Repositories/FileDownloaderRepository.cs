@@ -1,5 +1,4 @@
 using LiteDB;
-using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Helpers;
@@ -42,7 +41,7 @@ internal sealed class FileDownloaderRepository : DisposableBase
 
         private readonly LiteDatabase _database;
 
-        private readonly AsyncReaderWriterLock _asyncLock = new();
+        private readonly object _lockObject = new();
 
         public DownloadingFileItemRepository(LiteDatabase database)
         {
@@ -51,7 +50,7 @@ internal sealed class FileDownloaderRepository : DisposableBase
 
         internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            lock (_lockObject)
             {
                 if (_database.GetDocumentVersion(CollectionName) <= 0)
                 {
@@ -71,7 +70,7 @@ internal sealed class FileDownloaderRepository : DisposableBase
 
         public bool Exists(Seed seed)
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var seedEntity = SeedEntity.Import(seed);
 
@@ -82,7 +81,7 @@ internal sealed class FileDownloaderRepository : DisposableBase
 
         public bool Exists(OmniHash rootHash)
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var rootHashEntity = OmniHashEntity.Import(rootHash);
 
@@ -93,7 +92,7 @@ internal sealed class FileDownloaderRepository : DisposableBase
 
         public IEnumerable<DownloadingFileItem> FindAll()
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var col = this.GetCollection();
                 return col.FindAll().Select(n => n.Export()).ToArray();
@@ -102,7 +101,7 @@ internal sealed class FileDownloaderRepository : DisposableBase
 
         public DownloadingFileItem? FindOne(Seed seed)
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var seedEntity = SeedEntity.Import(seed);
 
@@ -113,7 +112,7 @@ internal sealed class FileDownloaderRepository : DisposableBase
 
         public void Upsert(DownloadingFileItem item)
         {
-            using (_asyncLock.WriterLock())
+            lock (_lockObject)
             {
                 var itemEntity = DownloadingFileItemEntity.Import(item);
 
@@ -130,7 +129,7 @@ internal sealed class FileDownloaderRepository : DisposableBase
 
         public void Delete(Seed seed)
         {
-            using (_asyncLock.WriterLock())
+            lock (_lockObject)
             {
                 var seedEntity = SeedEntity.Import(seed);
 

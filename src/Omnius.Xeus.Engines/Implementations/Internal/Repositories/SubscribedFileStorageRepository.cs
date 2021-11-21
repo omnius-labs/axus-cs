@@ -1,5 +1,4 @@
 using LiteDB;
-using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Helpers;
@@ -45,7 +44,7 @@ internal sealed partial class SubscribedFileStorageRepository : DisposableBase
 
         private readonly LiteDatabase _database;
 
-        private readonly AsyncReaderWriterLock _asyncLock = new();
+        private readonly object _lockObject = new();
 
         public SubscribedFileItemRepository(LiteDatabase database)
         {
@@ -54,7 +53,7 @@ internal sealed partial class SubscribedFileStorageRepository : DisposableBase
 
         internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            lock (_lockObject)
             {
                 if (_database.GetDocumentVersion(CollectionName) <= 0)
                 {
@@ -74,7 +73,7 @@ internal sealed partial class SubscribedFileStorageRepository : DisposableBase
 
         public bool Exists(OmniHash rootHash)
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var rootHashEntity = OmniHashEntity.Import(rootHash);
 
@@ -85,7 +84,7 @@ internal sealed partial class SubscribedFileStorageRepository : DisposableBase
 
         public IEnumerable<SubscribedFileItem> FindAll()
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var col = this.GetCollection();
                 return col.FindAll().Select(n => n.Export()).ToArray();
@@ -94,7 +93,7 @@ internal sealed partial class SubscribedFileStorageRepository : DisposableBase
 
         public IEnumerable<SubscribedFileItem> Find(OmniHash rootHash)
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var rootHashEntity = OmniHashEntity.Import(rootHash);
 
@@ -105,7 +104,7 @@ internal sealed partial class SubscribedFileStorageRepository : DisposableBase
 
         public SubscribedFileItem? FindOne(OmniHash rootHash, string registrant)
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var rootHashEntity = OmniHashEntity.Import(rootHash);
 
@@ -116,7 +115,7 @@ internal sealed partial class SubscribedFileStorageRepository : DisposableBase
 
         public void Upsert(SubscribedFileItem item)
         {
-            using (_asyncLock.WriterLock())
+            lock (_lockObject)
             {
                 var itemEntity = SubscribedFileItemEntity.Import(item);
 
@@ -133,7 +132,7 @@ internal sealed partial class SubscribedFileStorageRepository : DisposableBase
 
         public void Delete(OmniHash rootHash, string registrant)
         {
-            using (_asyncLock.WriterLock())
+            lock (_lockObject)
             {
                 var rootHashEntity = OmniHashEntity.Import(rootHash);
 
@@ -149,7 +148,7 @@ internal sealed partial class SubscribedFileStorageRepository : DisposableBase
 
         private readonly LiteDatabase _database;
 
-        private readonly AsyncReaderWriterLock _asyncLock = new();
+        private readonly object _lockObject = new();
 
         public DecodedFileItemRepository(LiteDatabase database)
         {
@@ -158,7 +157,7 @@ internal sealed partial class SubscribedFileStorageRepository : DisposableBase
 
         internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            lock (_lockObject)
             {
                 if (_database.GetDocumentVersion(CollectionName) <= 0)
                 {
@@ -178,7 +177,7 @@ internal sealed partial class SubscribedFileStorageRepository : DisposableBase
 
         public bool Exists(OmniHash rootHash)
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var rootHashEntity = OmniHashEntity.Import(rootHash);
 
@@ -189,7 +188,7 @@ internal sealed partial class SubscribedFileStorageRepository : DisposableBase
 
         public IEnumerable<DecodedFileItem> FindAll()
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var col = this.GetCollection();
                 return col.FindAll().Select(n => n.Export()).ToArray();
@@ -198,7 +197,7 @@ internal sealed partial class SubscribedFileStorageRepository : DisposableBase
 
         public DecodedFileItem? FindOne(OmniHash rootHash)
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var rootHashEntity = OmniHashEntity.Import(rootHash);
 
@@ -209,7 +208,7 @@ internal sealed partial class SubscribedFileStorageRepository : DisposableBase
 
         public void Upsert(DecodedFileItem item)
         {
-            using (_asyncLock.WriterLock())
+            lock (_lockObject)
             {
                 var itemEntity = DecodedFileItemEntity.Import(item);
 
@@ -226,7 +225,7 @@ internal sealed partial class SubscribedFileStorageRepository : DisposableBase
 
         public void Delete(OmniHash rootHash)
         {
-            using (_asyncLock.WriterLock())
+            lock (_lockObject)
             {
                 var rootHashEntity = OmniHashEntity.Import(rootHash);
 

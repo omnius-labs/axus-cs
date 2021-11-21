@@ -40,6 +40,9 @@ public class DownloadControlViewModel : AsyncDisposableBase
         this.RegisterCommand = new ReactiveCommand().AddTo(_disposable);
         this.RegisterCommand.Subscribe(() => this.Register()).AddTo(_disposable);
 
+        this.ItemDeleteCommand = new ReactiveCommand().AddTo(_disposable);
+        this.ItemDeleteCommand.Subscribe(() => this.ItemDelete()).AddTo(_disposable);
+
         this.ItemCopySeedCommand = new ReactiveCommand().AddTo(_disposable);
         this.ItemCopySeedCommand.Subscribe(() => this.ItemCopySeed()).AddTo(_disposable);
     }
@@ -76,11 +79,13 @@ public class DownloadControlViewModel : AsyncDisposableBase
 
     public ObservableCollection<DownloadingFileViewModel> SelectedFiles { get; } = new();
 
+    public ReactiveCommand ItemDeleteCommand { get; }
+
     public ReactiveCommand? ItemCopySeedCommand { get; }
 
     private async void Register()
     {
-        var text = await _dialogService.GetTextWindowAsync();
+        var text = await _dialogService.ShowTextWindowAsync();
 
         foreach (var seed in ParseSeeds(text))
         {
@@ -99,6 +104,20 @@ public class DownloadControlViewModel : AsyncDisposableBase
         }
 
         return results;
+    }
+
+    private async void ItemDelete()
+    {
+        var selectedFiles = this.SelectedFiles.ToArray();
+        if (selectedFiles.Length == 0) return;
+
+        foreach (var viewModel in selectedFiles)
+        {
+            if (viewModel.Model?.Seed is Seed seed)
+            {
+                await _fileDownloader.UnregisterAsync(seed);
+            }
+        }
     }
 
     private async void ItemCopySeed()

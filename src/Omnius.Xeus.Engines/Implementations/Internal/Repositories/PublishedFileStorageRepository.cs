@@ -1,5 +1,4 @@
 using LiteDB;
-using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Helpers;
@@ -41,7 +40,7 @@ internal sealed class PublishedFileStorageRepository : DisposableBase
 
         private readonly LiteDatabase _database;
 
-        private readonly AsyncReaderWriterLock _asyncLock = new();
+        private readonly object _lockObject = new();
 
         public PublishedFileItemRepository(LiteDatabase database)
         {
@@ -50,7 +49,7 @@ internal sealed class PublishedFileStorageRepository : DisposableBase
 
         internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.WriterLockAsync(cancellationToken))
+            lock (_lockObject)
             {
                 if (_database.GetDocumentVersion(CollectionName) <= 0)
                 {
@@ -71,7 +70,7 @@ internal sealed class PublishedFileStorageRepository : DisposableBase
 
         public bool Exists(OmniHash rootHash)
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var rootHashEntity = OmniHashEntity.Import(rootHash);
 
@@ -82,7 +81,7 @@ internal sealed class PublishedFileStorageRepository : DisposableBase
 
         public bool Exists(string filePath)
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var col = this.GetCollection();
                 return col.Exists(n => n.FilePath == filePath);
@@ -91,7 +90,7 @@ internal sealed class PublishedFileStorageRepository : DisposableBase
 
         public IEnumerable<PublishedFileItem> FindAll()
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var col = this.GetCollection();
                 return col.FindAll().Select(n => n.Export()).ToArray();
@@ -100,7 +99,7 @@ internal sealed class PublishedFileStorageRepository : DisposableBase
 
         public IEnumerable<PublishedFileItem> Find(OmniHash rootHash)
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var rootHashEntity = OmniHashEntity.Import(rootHash);
 
@@ -111,7 +110,7 @@ internal sealed class PublishedFileStorageRepository : DisposableBase
 
         public PublishedFileItem? FindOne(string filePath, string registrant)
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var col = this.GetCollection();
                 return col.FindOne(n => n.FilePath == filePath && n.Registrant == registrant)?.Export();
@@ -120,7 +119,7 @@ internal sealed class PublishedFileStorageRepository : DisposableBase
 
         public PublishedFileItem? FindOne(OmniHash rootHash, string registrant)
         {
-            using (_asyncLock.ReaderLock())
+            lock (_lockObject)
             {
                 var rootHashEntity = OmniHashEntity.Import(rootHash);
 
@@ -131,7 +130,7 @@ internal sealed class PublishedFileStorageRepository : DisposableBase
 
         public void Upsert(PublishedFileItem item)
         {
-            using (_asyncLock.WriterLock())
+            lock (_lockObject)
             {
                 var itemEntity = PublishedFileItemEntity.Import(item);
 
@@ -156,7 +155,7 @@ internal sealed class PublishedFileStorageRepository : DisposableBase
 
         public void Delete(OmniHash rootHash, string registrant)
         {
-            using (_asyncLock.WriterLock())
+            lock (_lockObject)
             {
                 var rootHashEntity = OmniHashEntity.Import(rootHash);
 
@@ -167,7 +166,7 @@ internal sealed class PublishedFileStorageRepository : DisposableBase
 
         public void Delete(string filePath, string registrant)
         {
-            using (_asyncLock.WriterLock())
+            lock (_lockObject)
             {
                 var col = this.GetCollection();
                 col.DeleteMany(n => n.FilePath == filePath && n.Registrant == registrant);

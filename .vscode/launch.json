@@ -32,7 +32,8 @@
                 "--storage",
                 "./demo/ui-desktop_1/storage",
                 "--logs",
-                "./demo/ui-desktop_1/logs"
+                "./demo/ui-desktop_1/logs",
+                "-v"
             ],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
@@ -69,7 +70,8 @@
                 "--storage",
                 "./demo/ui-desktop_1/storage",
                 "--logs",
-                "./demo/ui-desktop_1/logs"
+                "./demo/ui-desktop_1/logs",
+                "-v"
             ],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
@@ -106,7 +108,8 @@
                 "--storage",
                 "./demo/ui-desktop_1/storage",
                 "--logs",
-                "./demo/ui-desktop_1/logs"
+                "./demo/ui-desktop_1/logs",
+                "-v"
             ],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",

@@ -1,4 +1,3 @@
-using Nito.AsyncEx;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Helpers;
@@ -115,14 +114,14 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var config = await this.GetConfigAsync(cancellationToken);
+            var config = await this.InternalGetConfigAsync(cancellationToken);
             var basePath = config.DestinationDirectory;
-            DirectoryHelper.CreateDirectory(basePath);
 
             foreach (var item in _fileDownloaderRepo.Items.FindAll())
             {
                 if (item.State == DownloadingFileState.Completed) continue;
 
+                DirectoryHelper.CreateDirectory(basePath);
                 var filePath = Path.Combine(basePath, item.Seed.Name);
 
                 if (await _service.TryExportFileToStorageAsync(item.Seed.RootHash, filePath, cancellationToken))
@@ -171,11 +170,16 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var config = await _configStorage.TryGetValueAsync<FileDownloaderConfig>(cancellationToken);
-            if (config is null) return FileDownloaderConfig.Empty;
-
-            return config;
+            return await this.InternalGetConfigAsync(cancellationToken);
         }
+    }
+
+    internal async ValueTask<FileDownloaderConfig> InternalGetConfigAsync(CancellationToken cancellationToken = default)
+    {
+        var config = await _configStorage.TryGetValueAsync<FileDownloaderConfig>(cancellationToken);
+        if (config is null) return FileDownloaderConfig.Empty;
+
+        return config;
     }
 
     public async ValueTask SetConfigAsync(FileDownloaderConfig config, CancellationToken cancellationToken = default)
