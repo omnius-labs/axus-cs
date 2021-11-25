@@ -45,10 +45,7 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
 
     protected override async ValueTask OnDisposeAsync()
     {
-        using (await _asyncLock.LockAsync())
-        {
-            if (_tcpListenerManager is not null) await _tcpListenerManager.DisposeAsync();
-        }
+        if (_tcpListenerManager is not null) await _tcpListenerManager.DisposeAsync();
     }
 
     public async ValueTask<ConnectionAcceptedResult?> AcceptAsync(CancellationToken cancellationToken = default)

@@ -22,7 +22,9 @@ public sealed partial class FileExchanger
 
         protected override async ValueTask OnDisposeAsync()
         {
-            await this.Session.Connection.DisposeAsync();
+            await this.Session.DisposeAsync();
+
+            this.SentBlockHashes.Dispose();
             this.ReceivedWantBlockHashes.Dispose();
         }
 

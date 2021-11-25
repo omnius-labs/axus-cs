@@ -49,6 +49,14 @@
                     Header="State"
                     Binding="{ReflectionBinding State}"
                     Width="Auto" />
+                <dg:DataGridTextColumn
+                    Header="Rate"
+                    Binding="{ReflectionBinding Rate}"
+                    Width="Auto" />
+                <dg:DataGridTextColumn
+                    Header="Depth"
+                    Binding="{ReflectionBinding Depth}"
+                    Width="Auto" />
             </dg:DataGrid.Columns>
         </dg:DataGrid>
     </Grid>

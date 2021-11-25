@@ -67,11 +67,13 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
     {
         try
         {
+            await Task.Delay(1, cancellationToken).ConfigureAwait(false);
+
             for (; ; )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
 
                 await this.UpdateDecodedFileItemAsync(_cancellationTokenSource.Token);
             }
@@ -90,36 +92,27 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
 
     private async ValueTask UpdateDecodedFileItemAsync(CancellationToken cancellationToken = default)
     {
-        var decodedItems = _subscriberRepo.DecodedItems.FindAll();
-
-        foreach (var decodedItem in decodedItems)
+        foreach (var decodedItem in _subscriberRepo.DecodedItems.FindAll())
         {
-            var lastMerkleTreeSection = decodedItem.MerkleTreeSections[^1];
-            if (lastMerkleTreeSection.Depth == 0) continue;
+            if (decodedItem.State == SubscribedFileState.Downloaded) continue;
 
-            var completed = await this.ValidateDecodingCompletedAsync(decodedItem.RootHash, lastMerkleTreeSection.Hashes, cancellationToken);
+            var lastMerkleTreeSection = decodedItem.MerkleTreeSections[^1];
+
+            var completed = await this.IsDownloadCompletedAsync(decodedItem.RootHash, lastMerkleTreeSection.Hashes, cancellationToken);
             if (!completed) continue;
 
-            var nextMerkleTreeSection = await this.DecodeMerkleTreeSectionAsync(decodedItem.RootHash, lastMerkleTreeSection.Hashes, cancellationToken);
-            if (nextMerkleTreeSection is null) continue;
-
-            lock (await _asyncLock.LockAsync(cancellationToken))
+            if (lastMerkleTreeSection.Depth == 0) // 最後のMerkleTreeSectionまで展開済み
             {
-                _subscriberRepo.DecodedItems.Upsert(new DecodedFileItem(decodedItem.RootHash, decodedItem.MerkleTreeSections.Append(nextMerkleTreeSection).ToArray()));
+                _subscriberRepo.DecodedItems.Upsert(new DecodedFileItem(decodedItem.RootHash, decodedItem.MerkleTreeSections.ToArray(), SubscribedFileState.Downloaded));
+            }
+            else // 最後のMerkleTreeSectionまで未展開
+            {
+                var nextMerkleTreeSection = await this.DecodeMerkleTreeSectionAsync(decodedItem.RootHash, lastMerkleTreeSection.Hashes, cancellationToken);
+                if (nextMerkleTreeSection is null) continue;
+
+                _subscriberRepo.DecodedItems.Upsert(new DecodedFileItem(decodedItem.RootHash, decodedItem.MerkleTreeSections.Append(nextMerkleTreeSection).ToArray(), SubscribedFileState.Downloading));
             }
         }
-    }
-
-    private async ValueTask<bool> ValidateDecodingCompletedAsync(OmniHash rootHash, IEnumerable<OmniHash> blockHashes, CancellationToken cancellationToken = default)
-    {
-        foreach (var blockHash in blockHashes)
-        {
-            var key = ComputeKey(StringConverter.HashToString(rootHash), blockHash);
-            var exists = await _blockStorage.ContainsKeyAsync(key, cancellationToken);
-            if (!exists) return false;
-        }
-
-        return true;
     }
 
     private async ValueTask<MerkleTreeSection?> DecodeMerkleTreeSectionAsync(OmniHash rootHash, IEnumerable<OmniHash> blockHashes, CancellationToken cancellationToken = default)
@@ -128,8 +121,8 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
 
         foreach (var blockHash in blockHashes)
         {
-            var blockName = ComputeKey(StringConverter.HashToString(rootHash), blockHash);
-            using var memoryOwner = await _blockStorage.TryReadAsync(blockName, cancellationToken);
+            var key = GenKey(rootHash, blockHash);
+            using var memoryOwner = await _blockStorage.TryReadAsync(key, cancellationToken);
             if (memoryOwner is null) return null;
 
             bytesPipe.Writer.Write(memoryOwner.Memory.Span);
@@ -144,15 +137,55 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
         {
             var fileReports = new List<SubscribedFileReport>();
 
-            foreach (var item in _subscriberRepo.Items.FindAll())
+            foreach (var decodedItem in _subscriberRepo.Items.FindAll())
             {
-                fileReports.Add(new SubscribedFileReport(item.RootHash, item.Registrant));
+                var downloadingStatus = await this.ComputeDownloadingStatusAsync(decodedItem.RootHash, cancellationToken);
+                var report = new SubscribedFileReport(decodedItem.RootHash, decodedItem.Registrant, downloadingStatus);
+                fileReports.Add(report);
             }
 
             return new SubscribedFileStorageReport(fileReports.ToArray());
         }
     }
 
+    private async ValueTask<SubscribedFileStatus> ComputeDownloadingStatusAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+    {
+        var decodedItem = _subscriberRepo.DecodedItems.FindOne(rootHash);
+        if (decodedItem is null) return new SubscribedFileStatus(-1, 0, 0, SubscribedFileState.Unknown);
+
+        var lastMerkleTreeSection = decodedItem.MerkleTreeSections[^1];
+
+        int downloadedBlockCount = await this.GetDownloadedBlockCountAsync(rootHash, lastMerkleTreeSection.Hashes, cancellationToken);
+        return new SubscribedFileStatus(lastMerkleTreeSection.Depth, (uint)downloadedBlockCount, (uint)lastMerkleTreeSection.Hashes.Count(), decodedItem.State);
+    }
+
+    private async ValueTask<bool> IsDownloadCompletedAsync(OmniHash rootHash, IEnumerable<OmniHash> blockHashes, CancellationToken cancellationToken = default)
+    {
+        foreach (var blockHash in blockHashes)
+        {
+            var key = GenKey(rootHash, blockHash);
+            var exists = await _blockStorage.ContainsKeyAsync(key, cancellationToken);
+            if (!exists) return false;
+        }
+
+        return true;
+    }
+
+    private async ValueTask<int> GetDownloadedBlockCountAsync(OmniHash rootHash, IEnumerable<OmniHash> blockHashes, CancellationToken cancellationToken = default)
+    {
+        int result = 0;
+
+        foreach (var blockHash in blockHashes)
+        {
+            var key = GenKey(rootHash, blockHash);
+            var exists = await _blockStorage.ContainsKeyAsync(key, cancellationToken);
+            if (exists) result++;
+        }
+
+        return result;
+    }
+
+    // TODO: 実装する
     public async ValueTask CheckConsistencyAsync(Action<ConsistencyReport> callback, CancellationToken cancellationToken = default)
     {
     }
@@ -165,6 +198,7 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
 
             foreach (var item in _subscriberRepo.DecodedItems.FindAll())
             {
+                if (item.State == SubscribedFileState.Downloaded) continue;
                 results.Add(item.RootHash);
             }
 
@@ -177,27 +211,27 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var decodedItem = _subscriberRepo.DecodedItems.FindOne(rootHash);
-            if (decodedItem is null) return Enumerable.Empty<OmniHash>();
+            if (decodedItem is null || decodedItem.State == SubscribedFileState.Downloaded) return Enumerable.Empty<OmniHash>();
 
-            var blockHashes = decodedItem.MerkleTreeSections.SelectMany(n => n.Hashes).ToArray();
+            var lastMerkleTreeSection = decodedItem.MerkleTreeSections[^1];
 
             if (exists is null)
             {
-                return blockHashes;
+                return lastMerkleTreeSection.Hashes;
             }
             else
             {
-                var filteredHashes = new List<OmniHash>();
+                var results = new List<OmniHash>();
 
-                foreach (var blockHash in blockHashes)
+                foreach (var blockHash in lastMerkleTreeSection.Hashes)
                 {
-                    var key = ComputeKey(StringConverter.HashToString(rootHash), blockHash);
-                    if (await _blockStorage.ContainsKeyAsync(key, cancellationToken) != exists.Value) continue;
+                    var key = GenKey(rootHash, blockHash);
+                    if (exists.Value != await _blockStorage.ContainsKeyAsync(key, cancellationToken)) continue;
 
-                    filteredHashes.Add(blockHash);
+                    results.Add(blockHash);
                 }
 
-                return filteredHashes;
+                return results;
             }
         }
     }
@@ -206,7 +240,8 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            if (!_subscriberRepo.Items.Exists(rootHash)) return false;
+            var decodedItem = _subscriberRepo.DecodedItems.FindOne(rootHash);
+            if (decodedItem is null || decodedItem.State == SubscribedFileState.Downloaded) return false;
 
             return true;
         }
@@ -217,7 +252,7 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var decodedItem = _subscriberRepo.DecodedItems.FindOne(rootHash);
-            if (decodedItem is null) return false;
+            if (decodedItem is null || decodedItem.State == SubscribedFileState.Downloaded) return false;
 
             return decodedItem.MerkleTreeSections.Any(n => n.Contains(blockHash));
         }
@@ -230,7 +265,7 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
             _subscriberRepo.Items.Upsert(new SubscribedFileItem(rootHash, registrant));
 
             if (_subscriberRepo.DecodedItems.Exists(rootHash)) return;
-            _subscriberRepo.DecodedItems.Upsert(new DecodedFileItem(rootHash, new[] { new MerkleTreeSection(-1, new[] { rootHash }) }));
+            _subscriberRepo.DecodedItems.Upsert(new DecodedFileItem(rootHash, new[] { new MerkleTreeSection(-1, new[] { rootHash }) }, SubscribedFileState.Downloading));
         }
     }
 
@@ -247,7 +282,7 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
 
             foreach (var blockHash in decodedItem.MerkleTreeSections.SelectMany(n => n.Hashes))
             {
-                var key = ComputeKey(StringConverter.HashToString(rootHash), blockHash);
+                var key = GenKey(rootHash, blockHash);
                 await _blockStorage.TryDeleteAsync(key, cancellationToken);
             }
 
@@ -277,11 +312,11 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
             if (decodedItem is null) return false;
 
             var lastMerkleTreeSection = decodedItem.MerkleTreeSections[^1];
-            if (lastMerkleTreeSection.Depth != 0) return false;
+            if (lastMerkleTreeSection.Depth != 0) return false; // 最後のMerkleTreeSectionまで未展開
 
             foreach (var blockHash in lastMerkleTreeSection.Hashes)
             {
-                var key = ComputeKey(StringConverter.HashToString(rootHash), blockHash);
+                var key = GenKey(rootHash, blockHash);
                 var exists = await _blockStorage.ContainsKeyAsync(key, cancellationToken);
                 if (!exists) return false;
             }
@@ -290,7 +325,7 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var key = ComputeKey(StringConverter.HashToString(rootHash), blockHash);
+                var key = GenKey(rootHash, blockHash);
                 using var memoryOwner = await _blockStorage.TryReadAsync(key, cancellationToken);
                 if (memoryOwner is null) return false;
 
@@ -312,11 +347,11 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var decodedItem = _subscriberRepo.DecodedItems.FindOne(rootHash);
-            if (decodedItem is null) return null;
+            if (decodedItem is null || decodedItem.State == SubscribedFileState.Downloaded) return null;
 
             if (!decodedItem.MerkleTreeSections.Any(n => n.Contains(blockHash))) return null;
 
-            var key = ComputeKey(StringConverter.HashToString(rootHash), blockHash);
+            var key = GenKey(rootHash, blockHash);
             return await _blockStorage.TryReadAsync(key, cancellationToken);
         }
     }
@@ -326,17 +361,17 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var decodedItem = _subscriberRepo.DecodedItems.FindOne(rootHash);
-            if (decodedItem is null) return;
+            if (decodedItem is null || decodedItem.State == SubscribedFileState.Downloaded) return;
 
             if (!decodedItem.MerkleTreeSections.Any(n => n.Contains(blockHash))) return;
 
-            var key = ComputeKey(StringConverter.HashToString(rootHash), blockHash);
+            var key = GenKey(rootHash, blockHash);
             await _blockStorage.TryWriteAsync(key, memory, cancellationToken);
         }
     }
 
-    private static string ComputeKey(string prefix, OmniHash blockHash)
+    private static string GenKey(OmniHash rootHash, OmniHash blockHash)
     {
-        return prefix + "/" + StringConverter.HashToString(blockHash);
+        return StringConverter.HashToString(rootHash) + "/" + StringConverter.HashToString(blockHash);
     }
 }

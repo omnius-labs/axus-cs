@@ -189,38 +189,29 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
                 await Task.Delay(1000, cancellationToken).ConfigureAwait(false);
 
                 int connectionCount = _sessionStatusSet.Select(n => n.Session.HandshakeType == SessionHandshakeType.Connected).Count();
-                if (_sessionStatusSet.Count > (_options.MaxSessionCount / 2)) continue;
+                if (connectionCount > (_options.MaxSessionCount / 2)) continue;
 
                 var nodeLocation = this.FindNodeLocationToConnecting();
                 if (nodeLocation == null) continue;
 
-                bool succeeded = false;
-
                 foreach (var targetAddress in nodeLocation.Addresses)
                 {
-                    _logger.Debug("Connecting: {0}", targetAddress);
+                    _connectedAddressSet.Add(targetAddress);
 
                     var session = await _sessionConnector.ConnectAsync(targetAddress, ServiceName, cancellationToken);
                     if (session is null) continue;
 
-                    _logger.Debug("Connected: {0}", targetAddress);
-
-                    _connectedAddressSet.Add(targetAddress);
-
                     if (await this.TryAddSessionAsync(session, cancellationToken))
                     {
-                        succeeded = true;
-                        break;
+                        _logger.Debug("Connected: {0}", targetAddress);
+                        this.RefreshCloudNodeLocation(nodeLocation);
                     }
-                }
+                    else
+                    {
+                        this.RemoveCloudNodeLocation(nodeLocation);
+                    }
 
-                if (succeeded)
-                {
-                    this.RefreshCloudNodeLocation(nodeLocation);
-                }
-                else
-                {
-                    this.RemoveCloudNodeLocation(nodeLocation);
+                    break;
                 }
             }
         }
@@ -260,16 +251,15 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
                 await Task.Delay(1000, cancellationToken).ConfigureAwait(false);
 
                 int connectionCount = _sessionStatusSet.Select(n => n.Session.HandshakeType == SessionHandshakeType.Accepted).Count();
-                if (_sessionStatusSet.Count > (_options.MaxSessionCount / 2)) continue;
-
-                _logger.Debug("Accepting");
+                if (connectionCount > (_options.MaxSessionCount / 2)) continue;
 
                 var session = await _sessionAccepter.AcceptAsync(ServiceName, cancellationToken);
                 if (session is null) continue;
 
-                _logger.Debug("Accepted: {0}", session.Address);
-
-                await this.TryAddSessionAsync(session, cancellationToken);
+                if (await this.TryAddSessionAsync(session, cancellationToken))
+                {
+                    _logger.Debug("Accepted: {0}", session.Address);
+                }
             }
         }
         catch (OperationCanceledException e)
@@ -287,21 +277,16 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         try
         {
             var version = await this.HandshakeVersionAsync(session.Connection, cancellationToken);
-            if (version is null) return false;
-
-            _logger.Debug("Handshake version: {0}", version);
+            if (version is null) throw new Exception("Handshake failed.");
 
             if (version == NodeFinderVersion.Version1)
             {
                 var profile = await this.HandshakeProfileAsync(session.Connection, cancellationToken);
-                if (profile is null) return false;
-
-                _logger.Debug("Handshake profile");
+                if (profile is null) throw new Exception("Handshake failed.");
 
                 var sessionStatus = new SessionStatus(session, profile.Id, profile.NodeLocation, _batchActionDispatcher);
-                if (!this.TryAddSessionStatus(sessionStatus)) return false;
+                if (!this.TryAddSessionStatus(sessionStatus)) throw new Exception("Handshake failed.");
 
-                _logger.Debug("Added session");
                 return true;
             }
 
@@ -310,10 +295,14 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         catch (OperationCanceledException e)
         {
             _logger.Debug(e);
+
+            await session.DisposeAsync();
         }
         catch (Exception e)
         {
             _logger.Warn(e);
+
+            await session.DisposeAsync();
         }
 
         return false;
@@ -346,7 +335,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
             if (BytesOperations.Equals(_myId.AsSpan(), sessionStatus.Id.Span)) return false;
 
             // 既に接続済みの場合は接続しない
-            if (_sessionStatusSet.Any(n => BytesOperations.Equals(n.Id.Span, sessionStatus.Id.Span))) return false;
+            if (_sessionStatusSet.Any(n => n.Session.Signature == sessionStatus.Session.Signature)) return false;
 
             // k-bucketに空きがある場合は追加する
             // kademliaのk-bucketの距離毎のノード数は最大20とする。(k=20)
@@ -376,7 +365,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken).ConfigureAwait(false);
 
                 foreach (var sessionStatus in _sessionStatusSet)
                 {
@@ -418,7 +407,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken).ConfigureAwait(false);
 
                 foreach (var sessionStatus in _sessionStatusSet)
                 {
@@ -509,7 +498,11 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
     private async ValueTask RemoveSessionStatusAsync(SessionStatus sessionStatus)
     {
-        _sessionStatusSet = _sessionStatusSet.Remove(sessionStatus);
+        lock (_lockObject)
+        {
+            _sessionStatusSet = _sessionStatusSet.Remove(sessionStatus);
+        }
+
         await sessionStatus.DisposeAsync();
     }
 

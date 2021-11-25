@@ -70,6 +70,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
         }
     }
 
+    // 実装する
     public async ValueTask CheckConsistencyAsync(Action<ConsistencyReport> callback, CancellationToken cancellationToken = default)
     {
     }
@@ -181,8 +182,8 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
     {
         foreach (var blockHash in blockHashes.ToHashSet())
         {
-            var oldName = ComputeKey(oldPrefix, blockHash);
-            var newName = ComputeKey(newPrefix, blockHash);
+            var oldName = GenKey(oldPrefix, blockHash);
+            var newName = GenKey(newPrefix, blockHash);
             await _blockStorage.TryChangeKeyAsync(oldName, newName, cancellationToken);
         }
     }
@@ -257,7 +258,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
 
     private async ValueTask WriteBlockAsync(string prefix, OmniHash blockHash, ReadOnlyMemory<byte> memory)
     {
-        var key = ComputeKey(prefix, blockHash);
+        var key = GenKey(prefix, blockHash);
         await _blockStorage.TryWriteAsync(key, memory);
     }
 
@@ -295,7 +296,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
     {
         foreach (var blockHash in blockHashes)
         {
-            var key = ComputeKey(StringConverter.HashToString(rootHash), blockHash);
+            var key = GenKey(rootHash, blockHash);
             await _blockStorage.TryDeleteAsync(key);
         }
     }
@@ -317,7 +318,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
                 if (result is not null) return result;
             }
 
-            var key = ComputeKey(StringConverter.HashToString(rootHash), blockHash);
+            var key = GenKey(rootHash, blockHash);
             return await _blockStorage.TryReadAsync(key, cancellationToken);
         }
     }
@@ -343,8 +344,13 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
         return memoryOwner;
     }
 
-    private static string ComputeKey(string prefix, OmniHash blockHash)
+    private static string GenKey(string prefix, OmniHash blockHash)
     {
         return prefix + "/" + StringConverter.HashToString(blockHash);
+    }
+
+    private static string GenKey(OmniHash rootHash, OmniHash blockHash)
+    {
+        return StringConverter.HashToString(rootHash) + "/" + StringConverter.HashToString(blockHash);
     }
 }

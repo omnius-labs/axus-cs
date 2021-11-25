@@ -86,7 +86,7 @@ internal sealed class FileDownloaderRepository : DisposableBase
                 var rootHashEntity = OmniHashEntity.Import(rootHash);
 
                 var col = this.GetCollection();
-                return col.Exists(n => n.Seed != null && n.Seed.RootHash == rootHashEntity);
+                return col.Exists(n => n.Seed!.RootHash == rootHashEntity);
             }
         }
 
@@ -120,7 +120,7 @@ internal sealed class FileDownloaderRepository : DisposableBase
 
                 _database.BeginTrans();
 
-                col.DeleteMany(n => n.Seed == itemEntity.Seed);
+                col.DeleteMany(n => n.Seed!.RootHash == itemEntity.Seed!.RootHash);
                 col.Insert(itemEntity);
 
                 _database.Commit();
@@ -134,7 +134,7 @@ internal sealed class FileDownloaderRepository : DisposableBase
                 var seedEntity = SeedEntity.Import(seed);
 
                 var col = this.GetCollection();
-                col.DeleteMany(n => n.Seed == seedEntity);
+                col.DeleteMany(n => n.Seed!.RootHash == seedEntity.RootHash);
             }
         }
     }

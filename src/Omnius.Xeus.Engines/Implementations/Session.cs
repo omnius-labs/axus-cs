@@ -1,3 +1,4 @@
+using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Connections;
@@ -5,7 +6,7 @@ using Omnius.Xeus.Models;
 
 namespace Omnius.Xeus.Engines;
 
-public record Session : ISession
+public class Session : AsyncDisposableBase, ISession
 {
     public Session(IConnection connection, OmniAddress address, SessionHandshakeType handshakeType, OmniSignature signature, string scheme)
     {
@@ -14,6 +15,11 @@ public record Session : ISession
         this.HandshakeType = handshakeType;
         this.Signature = signature;
         this.Scheme = scheme;
+    }
+
+    protected override async ValueTask OnDisposeAsync()
+    {
+        await this.Connection.DisposeAsync();
     }
 
     public IConnection Connection { get; }

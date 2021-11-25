@@ -77,6 +77,21 @@ message SubscribedFileStorageReport {
 message SubscribedFileReport {
     RootHash: OmniHash,
     Registrant: string,
+    Status: SubscribedFileStatus,
+}
+
+message SubscribedFileStatus {
+    CurrentDepth: int32,
+    DownloadedBlockCount: uint32,
+    TotalBlockCount: uint32,
+    State: SubscribedFileState,
+}
+
+enum SubscribedFileState : uint8 {
+    Unknown = 0,
+    Downloading = 1,
+    Downloaded = 2,
+    Failed = 3,
 }
 
 // ShoutExchanger

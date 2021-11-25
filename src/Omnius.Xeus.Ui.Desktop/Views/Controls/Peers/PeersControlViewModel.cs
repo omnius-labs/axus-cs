@@ -53,7 +53,7 @@ public class PeersControlViewModel : AsyncDisposableBase
 
         public bool Equals(SessionReport? x, SessionReport? y)
         {
-            return (x?.Address == y?.Address);
+            return (x?.ServiceName == y?.ServiceName) && (x?.HandshakeType == y?.HandshakeType) && (x?.Address == y?.Address);
         }
 
         public int GetHashCode([DisallowNull] SessionReport obj)

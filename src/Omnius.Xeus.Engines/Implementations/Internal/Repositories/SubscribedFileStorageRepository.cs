@@ -98,7 +98,7 @@ internal sealed partial class SubscribedFileStorageRepository : DisposableBase
                 var rootHashEntity = OmniHashEntity.Import(rootHash);
 
                 var col = this.GetCollection();
-                return col.Find(n => n.RootHash == rootHashEntity).Select(n => n.Export());
+                return col.Find(n => n.RootHash == rootHashEntity).Select(n => n.Export()).ToArray();
             }
         }
 

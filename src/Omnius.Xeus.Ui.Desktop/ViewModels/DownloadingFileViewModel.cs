@@ -35,5 +35,9 @@ public partial class DownloadingFileViewModel : BindableBase, ICollectionViewMod
 
     public DateTime CreationTime => this.Model?.CreationTime ?? DateTime.MinValue;
 
-    public DownloadingFileState State => this.Model?.State ?? DownloadingFileState.Unknown;
+    public DownloadingFileState State => this.Model?.Status.State ?? DownloadingFileState.Unknown;
+
+    public double Depth => this.Model?.Status?.CurrentDepth ?? -1;
+
+    public double Rate => Math.Round(((double)(this.Model?.Status?.DownloadedBlockCount ?? 0) / this.Model?.Status?.TotalBlockCount ?? 1) * 100 * 100) / 100;
 }

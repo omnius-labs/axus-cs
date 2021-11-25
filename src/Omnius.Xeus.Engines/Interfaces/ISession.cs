@@ -5,7 +5,7 @@ using Omnius.Xeus.Models;
 
 namespace Omnius.Xeus.Engines;
 
-public interface ISession
+public interface ISession : IAsyncDisposable
 {
     IConnection Connection { get; }
 

@@ -138,6 +138,11 @@
           "System.Runtime": "4.3.0"
         }
       },
+      "NeoSmart.AsyncLock": {
+        "type": "Transitive",
+        "resolved": "3.1.0",
+        "contentHash": "EYNPz9ZIHdoLSL4hK/86zjBZzHhvZoRdsSWhifEgCoBmKnVa7G+O5iAFbPFkxs1ZXD8d2dzewMs6x2jyxBdU4Q=="
+      },
       "NETStandard.Library": {
         "type": "Transitive",
         "resolved": "1.6.1",
@@ -1265,6 +1270,7 @@
         "type": "Project",
         "dependencies": {
           "NLog": "4.7.11",
+          "NeoSmart.AsyncLock": "3.1.0",
           "System.IO.Pipelines": "5.0.1"
         }
       },

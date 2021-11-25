@@ -99,17 +99,25 @@ public sealed partial class SessionAccepter : AsyncDisposableBase, ISessionAccep
             var acceptedResult = await accepter.AcceptAsync(cancellationToken);
             if (acceptedResult is null) continue;
 
-            using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            linkedTokenSource.CancelAfter(TimeSpan.FromSeconds(20));
+            try
+            {
+                using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                linkedTokenSource.CancelAfter(TimeSpan.FromSeconds(20));
 
-            var session = await this.CreateSessionAsync(acceptedResult.Connection, acceptedResult.Address, linkedTokenSource.Token);
-            if (session is not null) return session;
+                var session = await this.CreateSessionAsync(acceptedResult.Connection, acceptedResult.Address, linkedTokenSource.Token);
+                return session;
+            }
+            catch (Exception e)
+            {
+                _logger.Debug(e);
+                await acceptedResult.Connection.DisposeAsync();
+            }
         }
 
         return null;
     }
 
-    private async ValueTask<ISession?> CreateSessionAsync(IConnection connection, OmniAddress address, CancellationToken cancellationToken)
+    private async ValueTask<ISession> CreateSessionAsync(IConnection connection, OmniAddress address, CancellationToken cancellationToken)
     {
         var sendHelloMessage = new SessionManagerHelloMessage(new[] { SessionManagerVersion.Version1 });
         var receiveHelloMessage = await connection.ExchangeAsync(sendHelloMessage, cancellationToken);
@@ -122,13 +130,16 @@ public sealed partial class SessionAccepter : AsyncDisposableBase, ISessionAccep
             var secureConnection = OmniSecureConnection.CreateV1(connection, _bytesPool, secureConnectionOptions);
 
             await secureConnection.HandshakeAsync(cancellationToken);
-            if (secureConnection.Signature is null) return null;
+            if (secureConnection.Signature is null) throw new Exception("Signature is null");
+
+            // 自分自身の場合は接続しない
+            if (secureConnection.Signature == _options.DigitalSignature.GetOmniSignature()) throw new Exception("Signature is same as myself");
 
             var receivedMessage = await secureConnection.Receiver.ReceiveAsync<SessionManagerSessionRequestMessage>(cancellationToken);
             var sendingMessage = new SessionManagerSessionResultMessage(_sessionChannels.Contains(receivedMessage.Scheme) ? SessionManagerSessionResultType.Accepted : SessionManagerSessionResultType.Rejected);
             await secureConnection.Sender.SendAsync(sendingMessage, cancellationToken);
 
-            if (sendingMessage.Type != SessionManagerSessionResultType.Accepted) return null;
+            if (sendingMessage.Type != SessionManagerSessionResultType.Accepted) throw new Exception("Session is not accepted");
 
             var session = new Session(secureConnection, address, SessionHandshakeType.Accepted, secureConnection.Signature, receivedMessage.Scheme);
             return session;

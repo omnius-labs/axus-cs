@@ -232,23 +232,20 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
 
     private async ValueTask<Profile?> InternalExportAsync(OmniSignature signature, CancellationToken cancellationToken = default)
     {
-        using (await _asyncLock.LockAsync(cancellationToken))
-        {
-            await Task.Delay(0, cancellationToken).ConfigureAwait(false);
+        await Task.Delay(0, cancellationToken).ConfigureAwait(false);
 
-            var shout = await _service.TryExportShoutAsync(signature, cancellationToken);
-            if (shout is null) return null;
+        var shout = await _service.TryExportShoutAsync(signature, cancellationToken);
+        if (shout is null) return null;
 
-            var contentRootHash = RocketMessage.FromBytes<OmniHash>(shout.Value.Memory);
-            shout.Value.Dispose();
+        var contentRootHash = RocketMessage.FromBytes<OmniHash>(shout.Value.Memory);
+        shout.Value.Dispose();
 
-            var contentBytes = await _service.TryExportFileToMemoryAsync(contentRootHash, cancellationToken);
-            if (contentBytes is null) return null;
+        var contentBytes = await _service.TryExportFileToMemoryAsync(contentRootHash, cancellationToken);
+        if (contentBytes is null) return null;
 
-            var content = RocketMessage.FromBytes<ProfileContent>(contentBytes.Value);
+        var content = RocketMessage.FromBytes<ProfileContent>(contentBytes.Value);
 
-            return new Profile(signature, shout.CreationTime, content);
-        }
+        return new Profile(signature, shout.CreationTime, content);
     }
 
     private async ValueTask ShrinkCachedProfileStorage(IEnumerable<OmniSignature> allTargetSignatures, CancellationToken cancellationToken = default)
@@ -300,25 +297,6 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
         }
     }
 
-    public async ValueTask<ProfileSubscriberConfig> GetConfigAsync(CancellationToken cancellationToken = default)
-    {
-        using (await _asyncLock.LockAsync(cancellationToken))
-        {
-            var config = await _configStorage.TryGetValueAsync<ProfileSubscriberConfig>(cancellationToken);
-            if (config is null) return ProfileSubscriberConfig.Empty;
-
-            return config;
-        }
-    }
-
-    public async ValueTask SetConfigAsync(ProfileSubscriberConfig config, CancellationToken cancellationToken = default)
-    {
-        using (await _asyncLock.LockAsync(cancellationToken))
-        {
-            await _configStorage.TrySetValueAsync(config, cancellationToken);
-        }
-    }
-
     public async ValueTask<Profile?> FindOneAsync(OmniSignature signature, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
@@ -336,6 +314,25 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
                 cancellationToken.ThrowIfCancellationRequested();
                 yield return value;
             }
+        }
+    }
+
+    public async ValueTask<ProfileSubscriberConfig> GetConfigAsync(CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
+            var config = await _configStorage.TryGetValueAsync<ProfileSubscriberConfig>(cancellationToken);
+            if (config is null) return ProfileSubscriberConfig.Empty;
+
+            return config;
+        }
+    }
+
+    public async ValueTask SetConfigAsync(ProfileSubscriberConfig config, CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
+            await _configStorage.TrySetValueAsync(config, cancellationToken);
         }
     }
 }

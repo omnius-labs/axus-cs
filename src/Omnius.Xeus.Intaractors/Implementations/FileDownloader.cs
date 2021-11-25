@@ -1,11 +1,11 @@
 using Omnius.Core;
-using Omnius.Core.Cryptography;
 using Omnius.Core.Helpers;
 using Omnius.Core.Storages;
 using Omnius.Xeus.Intaractors.Internal;
 using Omnius.Xeus.Intaractors.Internal.Models;
 using Omnius.Xeus.Intaractors.Internal.Repositories;
 using Omnius.Xeus.Intaractors.Models;
+using Omnius.Xeus.Models;
 using Omnius.Xeus.Remoting;
 
 namespace Omnius.Xeus.Intaractors;
@@ -72,7 +72,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
 
             for (; ; )
             {
-                await Task.Delay(1000 * 30, cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
 
                 await this.SyncSubscribedFiles(cancellationToken);
                 await this.TryExportSubscribedFiles(cancellationToken);
@@ -92,9 +92,8 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var subscribedFileReports = await _service.GetSubscribedFileReportsAsync(cancellationToken);
-            var hashes = new HashSet<OmniHash>();
-            hashes.UnionWith(subscribedFileReports.Where(n => n.Registrant == Registrant).Select(n => n.RootHash));
+            var reports = await _service.GetSubscribedFileReportsAsync(cancellationToken);
+            var hashes = reports.Where(n => n.Registrant == Registrant).Select(n => n.RootHash).ToHashSet();
 
             foreach (var hash in hashes)
             {
@@ -114,11 +113,18 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var config = await this.InternalGetConfigAsync(cancellationToken);
+            var config = await this.GetConfigAsync(cancellationToken);
             var basePath = config.DestinationDirectory;
+
+            var reports = (await _service.GetSubscribedFileReportsAsync(cancellationToken))
+                .Where(n => n.Registrant == Registrant)
+                .ToDictionary(n => n.RootHash);
 
             foreach (var item in _fileDownloaderRepo.Items.FindAll())
             {
+                if (!reports.TryGetValue(item.Seed.RootHash, out var report)) continue;
+                if (report.Status.State != SubscribedFileState.Downloaded) continue;
+
                 if (item.State == DownloadingFileState.Completed) continue;
 
                 DirectoryHelper.CreateDirectory(basePath);
@@ -137,14 +143,22 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = new List<DownloadingFileReport>();
+            var results = new List<DownloadingFileReport>();
+
+            var reports = (await _service.GetSubscribedFileReportsAsync(cancellationToken))
+                .Where(n => n.Registrant == Registrant)
+                .ToDictionary(n => n.RootHash);
 
             foreach (var item in _fileDownloaderRepo.Items.FindAll())
             {
-                reports.Add(new DownloadingFileReport(item.Seed, item.FilePath, item.CreationTime, item.State));
+                if (!reports.TryGetValue(item.Seed.RootHash, out var report)) continue;
+
+                var status = new DownloadingFileStatus(report.Status.CurrentDepth, report.Status.DownloadedBlockCount,
+                    report.Status.TotalBlockCount, item.State);
+                results.Add(new DownloadingFileReport(item.Seed, item.FilePath, item.CreationTime, status));
             }
 
-            return reports;
+            return results;
         }
     }
 
@@ -170,16 +184,11 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            return await this.InternalGetConfigAsync(cancellationToken);
+            var config = await _configStorage.TryGetValueAsync<FileDownloaderConfig>(cancellationToken);
+            if (config is null) return FileDownloaderConfig.Empty;
+
+            return config;
         }
-    }
-
-    internal async ValueTask<FileDownloaderConfig> InternalGetConfigAsync(CancellationToken cancellationToken = default)
-    {
-        var config = await _configStorage.TryGetValueAsync<FileDownloaderConfig>(cancellationToken);
-        if (config is null) return FileDownloaderConfig.Empty;
-
-        return config;
     }
 
     public async ValueTask SetConfigAsync(FileDownloaderConfig config, CancellationToken cancellationToken = default)

@@ -8,6 +8,13 @@ public enum SessionHandshakeType : byte
     Connected = 1,
     Accepted = 2,
 }
+public enum SubscribedFileState : byte
+{
+    Unknown = 0,
+    Downloading = 1,
+    Downloaded = 2,
+    Failed = 3,
+}
 public sealed partial class NodeLocation : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Models.NodeLocation>
 {
     public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Models.NodeLocation> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Models.NodeLocation>.Formatter;
@@ -1319,32 +1326,36 @@ public sealed partial class SubscribedFileReport : global::Omnius.Core.RocketPac
     static SubscribedFileReport()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Models.SubscribedFileReport>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Models.SubscribedFileReport>.Empty = new global::Omnius.Xeus.Models.SubscribedFileReport(global::Omnius.Core.Cryptography.OmniHash.Empty, string.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Models.SubscribedFileReport>.Empty = new global::Omnius.Xeus.Models.SubscribedFileReport(global::Omnius.Core.Cryptography.OmniHash.Empty, string.Empty, global::Omnius.Xeus.Models.SubscribedFileStatus.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxRegistrantLength = 2147483647;
 
-    public SubscribedFileReport(global::Omnius.Core.Cryptography.OmniHash rootHash, string registrant)
+    public SubscribedFileReport(global::Omnius.Core.Cryptography.OmniHash rootHash, string registrant, global::Omnius.Xeus.Models.SubscribedFileStatus status)
     {
         if (registrant is null) throw new global::System.ArgumentNullException("registrant");
         if (registrant.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("registrant");
+        if (status is null) throw new global::System.ArgumentNullException("status");
 
         this.RootHash = rootHash;
         this.Registrant = registrant;
+        this.Status = status;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (rootHash != default) ___h.Add(rootHash.GetHashCode());
             if (registrant != default) ___h.Add(registrant.GetHashCode());
+            if (status != default) ___h.Add(status.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
     public string Registrant { get; }
+    public global::Omnius.Xeus.Models.SubscribedFileStatus Status { get; }
 
     public static global::Omnius.Xeus.Models.SubscribedFileReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -1376,6 +1387,7 @@ public sealed partial class SubscribedFileReport : global::Omnius.Core.RocketPac
         if (object.ReferenceEquals(this, target)) return true;
         if (this.RootHash != target.RootHash) return false;
         if (this.Registrant != target.Registrant) return false;
+        if (this.Status != target.Status) return false;
 
         return true;
     }
@@ -1397,6 +1409,11 @@ public sealed partial class SubscribedFileReport : global::Omnius.Core.RocketPac
                 w.Write((uint)2);
                 w.Write(value.Registrant);
             }
+            if (value.Status != global::Omnius.Xeus.Models.SubscribedFileStatus.Empty)
+            {
+                w.Write((uint)3);
+                global::Omnius.Xeus.Models.SubscribedFileStatus.Formatter.Serialize(ref w, value.Status, rank + 1);
+            }
             w.Write((uint)0);
         }
         public global::Omnius.Xeus.Models.SubscribedFileReport Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
@@ -1405,6 +1422,7 @@ public sealed partial class SubscribedFileReport : global::Omnius.Core.RocketPac
 
             global::Omnius.Core.Cryptography.OmniHash p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
             string p_registrant = string.Empty;
+            global::Omnius.Xeus.Models.SubscribedFileStatus p_status = global::Omnius.Xeus.Models.SubscribedFileStatus.Empty;
 
             for (; ; )
             {
@@ -1422,10 +1440,158 @@ public sealed partial class SubscribedFileReport : global::Omnius.Core.RocketPac
                             p_registrant = r.GetString(2147483647);
                             break;
                         }
+                    case 3:
+                        {
+                            p_status = global::Omnius.Xeus.Models.SubscribedFileStatus.Formatter.Deserialize(ref r, rank + 1);
+                            break;
+                        }
                 }
             }
 
-            return new global::Omnius.Xeus.Models.SubscribedFileReport(p_rootHash, p_registrant);
+            return new global::Omnius.Xeus.Models.SubscribedFileReport(p_rootHash, p_registrant, p_status);
+        }
+    }
+}
+public sealed partial class SubscribedFileStatus : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Models.SubscribedFileStatus>
+{
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Models.SubscribedFileStatus> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Models.SubscribedFileStatus>.Formatter;
+    public static global::Omnius.Xeus.Models.SubscribedFileStatus Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Models.SubscribedFileStatus>.Empty;
+
+    static SubscribedFileStatus()
+    {
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Models.SubscribedFileStatus>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Xeus.Models.SubscribedFileStatus>.Empty = new global::Omnius.Xeus.Models.SubscribedFileStatus(0, 0, 0, (global::Omnius.Xeus.Models.SubscribedFileState)0);
+    }
+
+    private readonly global::System.Lazy<int> ___hashCode;
+
+    public SubscribedFileStatus(int currentDepth, uint downloadedBlockCount, uint totalBlockCount, global::Omnius.Xeus.Models.SubscribedFileState state)
+    {
+        this.CurrentDepth = currentDepth;
+        this.DownloadedBlockCount = downloadedBlockCount;
+        this.TotalBlockCount = totalBlockCount;
+        this.State = state;
+
+        ___hashCode = new global::System.Lazy<int>(() =>
+        {
+            var ___h = new global::System.HashCode();
+            if (currentDepth != default) ___h.Add(currentDepth.GetHashCode());
+            if (downloadedBlockCount != default) ___h.Add(downloadedBlockCount.GetHashCode());
+            if (totalBlockCount != default) ___h.Add(totalBlockCount.GetHashCode());
+            if (state != default) ___h.Add(state.GetHashCode());
+            return ___h.ToHashCode();
+        });
+    }
+
+    public int CurrentDepth { get; }
+    public uint DownloadedBlockCount { get; }
+    public uint TotalBlockCount { get; }
+    public global::Omnius.Xeus.Models.SubscribedFileState State { get; }
+
+    public static global::Omnius.Xeus.Models.SubscribedFileStatus Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
+        return Formatter.Deserialize(ref reader, 0);
+    }
+    public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
+        Formatter.Serialize(ref writer, this, 0);
+    }
+
+    public static bool operator ==(global::Omnius.Xeus.Models.SubscribedFileStatus? left, global::Omnius.Xeus.Models.SubscribedFileStatus? right)
+    {
+        return (right is null) ? (left is null) : right.Equals(left);
+    }
+    public static bool operator !=(global::Omnius.Xeus.Models.SubscribedFileStatus? left, global::Omnius.Xeus.Models.SubscribedFileStatus? right)
+    {
+        return !(left == right);
+    }
+    public override bool Equals(object? other)
+    {
+        if (other is not global::Omnius.Xeus.Models.SubscribedFileStatus) return false;
+        return this.Equals((global::Omnius.Xeus.Models.SubscribedFileStatus)other);
+    }
+    public bool Equals(global::Omnius.Xeus.Models.SubscribedFileStatus? target)
+    {
+        if (target is null) return false;
+        if (object.ReferenceEquals(this, target)) return true;
+        if (this.CurrentDepth != target.CurrentDepth) return false;
+        if (this.DownloadedBlockCount != target.DownloadedBlockCount) return false;
+        if (this.TotalBlockCount != target.TotalBlockCount) return false;
+        if (this.State != target.State) return false;
+
+        return true;
+    }
+    public override int GetHashCode() => ___hashCode.Value;
+
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Xeus.Models.SubscribedFileStatus>
+    {
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Xeus.Models.SubscribedFileStatus value, in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            if (value.CurrentDepth != 0)
+            {
+                w.Write((uint)1);
+                w.Write(value.CurrentDepth);
+            }
+            if (value.DownloadedBlockCount != 0)
+            {
+                w.Write((uint)2);
+                w.Write(value.DownloadedBlockCount);
+            }
+            if (value.TotalBlockCount != 0)
+            {
+                w.Write((uint)3);
+                w.Write(value.TotalBlockCount);
+            }
+            if (value.State != (global::Omnius.Xeus.Models.SubscribedFileState)0)
+            {
+                w.Write((uint)4);
+                w.Write((ulong)value.State);
+            }
+            w.Write((uint)0);
+        }
+        public global::Omnius.Xeus.Models.SubscribedFileStatus Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            int p_currentDepth = 0;
+            uint p_downloadedBlockCount = 0;
+            uint p_totalBlockCount = 0;
+            global::Omnius.Xeus.Models.SubscribedFileState p_state = (global::Omnius.Xeus.Models.SubscribedFileState)0;
+
+            for (; ; )
+            {
+                uint id = r.GetUInt32();
+                if (id == 0) break;
+                switch (id)
+                {
+                    case 1:
+                        {
+                            p_currentDepth = r.GetInt32();
+                            break;
+                        }
+                    case 2:
+                        {
+                            p_downloadedBlockCount = r.GetUInt32();
+                            break;
+                        }
+                    case 3:
+                        {
+                            p_totalBlockCount = r.GetUInt32();
+                            break;
+                        }
+                    case 4:
+                        {
+                            p_state = (global::Omnius.Xeus.Models.SubscribedFileState)r.GetUInt64();
+                            break;
+                        }
+                }
+            }
+
+            return new global::Omnius.Xeus.Models.SubscribedFileStatus(p_currentDepth, p_downloadedBlockCount, p_totalBlockCount, p_state);
         }
     }
 }

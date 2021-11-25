@@ -22,7 +22,8 @@ public sealed partial class NodeFinder
 
         protected override async ValueTask OnDisposeAsync()
         {
-            await this.Session.Connection.DisposeAsync();
+            await this.Session.DisposeAsync();
+
             this.ReceivedWantContentClues.Dispose();
         }
 

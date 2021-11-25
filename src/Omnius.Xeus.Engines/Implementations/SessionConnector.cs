@@ -45,22 +45,30 @@ public sealed class SessionConnector : AsyncDisposableBase, ISessionConnector
 
     public async ValueTask<ISession?> ConnectAsync(OmniAddress address, string scheme, CancellationToken cancellationToken = default)
     {
-        foreach (var connectionConnector in _connectionConnectors)
+        foreach (var connector in _connectionConnectors)
         {
-            var connection = await connectionConnector.ConnectAsync(address, cancellationToken);
+            var connection = await connector.ConnectAsync(address, cancellationToken);
             if (connection is null) continue;
 
-            using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            linkedTokenSource.CancelAfter(TimeSpan.FromSeconds(20));
+            try
+            {
+                using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                linkedTokenSource.CancelAfter(TimeSpan.FromSeconds(20));
 
-            var session = await this.CreateSessionAsync(connection, address, scheme, linkedTokenSource.Token);
-            return session;
+                var session = await this.CreateSessionAsync(connection, address, scheme, linkedTokenSource.Token);
+                return session;
+            }
+            catch (Exception e)
+            {
+                _logger.Debug(e);
+                await connection.DisposeAsync();
+            }
         }
 
         return null;
     }
 
-    private async ValueTask<ISession?> CreateSessionAsync(IConnection connection, OmniAddress address, string scheme, CancellationToken cancellationToken)
+    private async ValueTask<ISession> CreateSessionAsync(IConnection connection, OmniAddress address, string scheme, CancellationToken cancellationToken)
     {
         var sendHelloMessage = new SessionManagerHelloMessage(new[] { SessionManagerVersion.Version1 });
         var receiveHelloMessage = await connection.ExchangeAsync(sendHelloMessage, cancellationToken);
@@ -73,12 +81,15 @@ public sealed class SessionConnector : AsyncDisposableBase, ISessionConnector
             var secureConnection = OmniSecureConnection.CreateV1(connection, _bytesPool, secureConnectionOptions);
 
             await secureConnection.HandshakeAsync(cancellationToken);
-            if (secureConnection.Signature is null) return null;
+            if (secureConnection.Signature is null) throw new Exception("Signature is null");
+
+            // 自分自身の場合は接続しない
+            if (secureConnection.Signature == _options.DigitalSignature.GetOmniSignature()) throw new Exception("Signature is same as myself");
 
             var sessionRequestMessage = new SessionManagerSessionRequestMessage(scheme);
             var sessionResultMessage = await secureConnection.SendAndReceiveAsync<SessionManagerSessionRequestMessage, SessionManagerSessionResultMessage>(sessionRequestMessage, cancellationToken);
 
-            if (sessionResultMessage.Type != SessionManagerSessionResultType.Accepted) return null;
+            if (sessionResultMessage.Type != SessionManagerSessionResultType.Accepted) throw new Exception("Session is not accepted");
 
             var session = new Session(secureConnection, address, SessionHandshakeType.Connected, secureConnection.Signature, scheme);
             return session;
