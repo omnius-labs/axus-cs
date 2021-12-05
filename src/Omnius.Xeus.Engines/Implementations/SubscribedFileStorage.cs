@@ -190,7 +190,7 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
     {
     }
 
-    public async ValueTask<IEnumerable<OmniHash>> GetRootHashesAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<OmniHash>> GetWantContentHashesAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -206,7 +206,7 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
         }
     }
 
-    public async ValueTask<IEnumerable<OmniHash>> GetBlockHashesAsync(OmniHash rootHash, bool? exists = null, CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<OmniHash>> GetWantBlockHashesAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -215,28 +215,21 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
 
             var lastMerkleTreeSection = decodedItem.MerkleTreeSections[^1];
 
-            if (exists is null)
+            var results = new List<OmniHash>();
+
+            foreach (var blockHash in lastMerkleTreeSection.Hashes)
             {
-                return lastMerkleTreeSection.Hashes;
+                var key = GenKey(rootHash, blockHash);
+                if (await _blockStorage.ContainsKeyAsync(key, cancellationToken)) continue;
+
+                results.Add(blockHash);
             }
-            else
-            {
-                var results = new List<OmniHash>();
 
-                foreach (var blockHash in lastMerkleTreeSection.Hashes)
-                {
-                    var key = GenKey(rootHash, blockHash);
-                    if (exists.Value != await _blockStorage.ContainsKeyAsync(key, cancellationToken)) continue;
-
-                    results.Add(blockHash);
-                }
-
-                return results;
-            }
+            return results;
         }
     }
 
-    public async ValueTask<bool> ContainsFileAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+    public async ValueTask<bool> ContainsWantContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -247,14 +240,17 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
         }
     }
 
-    public async ValueTask<bool> ContainsBlockAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
+    public async ValueTask<bool> ContainsWantBlockAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var decodedItem = _subscriberRepo.DecodedItems.FindOne(rootHash);
             if (decodedItem is null || decodedItem.State == SubscribedFileState.Downloaded) return false;
 
-            return decodedItem.MerkleTreeSections.Any(n => n.Contains(blockHash));
+            if (!decodedItem.MerkleTreeSections.Any(n => n.Contains(blockHash))) return false;
+
+            var key = GenKey(rootHash, blockHash);
+            return await _blockStorage.ContainsKeyAsync(key, cancellationToken);
         }
     }
 

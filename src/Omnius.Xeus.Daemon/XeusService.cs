@@ -30,10 +30,10 @@ public class XeusService : AsyncDisposableBase, IXeusService
 
     private List<IDisposable> _disposables = new();
 
-    public static async ValueTask<XeusService> CreateAsync(string workingDirectoryPath, AppConfig appConfig, CancellationToken cancellationToken = default)
+    public static async ValueTask<XeusService> CreateAsync(AppConfig appConfig, CancellationToken cancellationToken = default)
     {
         var xeusService = new XeusService();
-        await xeusService.InitAsync(workingDirectoryPath, appConfig, cancellationToken);
+        await xeusService.InitAsync(appConfig, cancellationToken);
         return xeusService;
     }
 
@@ -41,7 +41,7 @@ public class XeusService : AsyncDisposableBase, IXeusService
     {
     }
 
-    private async ValueTask InitAsync(string workingDirectoryPath, AppConfig appConfig, CancellationToken cancellationToken = default)
+    private async ValueTask InitAsync(AppConfig appConfig, CancellationToken cancellationToken = default)
     {
         var digitalSignature = OmniDigitalSignature.Create("", OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256);
 
@@ -86,23 +86,23 @@ public class XeusService : AsyncDisposableBase, IXeusService
         var sessionAccepterOptions = new SessionAccepterOptions(digitalSignature);
         _sessionAccepter = await SessionAccepter.CreateAsync(connectionAccepters, batchActionDispatcher, bytesPool, sessionAccepterOptions, cancellationToken);
 
-        var nodeFinderOptions = new NodeFinderOptions(Path.Combine(workingDirectoryPath, "node_finder"), 128);
+        var nodeFinderOptions = new NodeFinderOptions(Path.Combine(appConfig.StorageDirectoryPath!, "node_finder"), 128);
         _nodeFinder = await NodeFinder.CreateAsync(_sessionConnector, _sessionAccepter, batchActionDispatcher, bytesPool, nodeFinderOptions, cancellationToken);
 
-        var publishedFileStorageOptions = new PublishedFileStorageOptions(Path.Combine(workingDirectoryPath, "published_file_storage"));
+        var publishedFileStorageOptions = new PublishedFileStorageOptions(Path.Combine(appConfig.StorageDirectoryPath!, "published_file_storage"));
         _publishedFileStorage = await PublishedFileStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, publishedFileStorageOptions, cancellationToken);
 
-        var subscribedFileStorageOptions = new SubscribedFileStorageOptions(Path.Combine(workingDirectoryPath, "subscribed_file_storage"));
+        var subscribedFileStorageOptions = new SubscribedFileStorageOptions(Path.Combine(appConfig.StorageDirectoryPath!, "subscribed_file_storage"));
         _subscribedFileStorage = await SubscribedFileStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, subscribedFileStorageOptions, cancellationToken);
 
         var fileExchangerOptions = new FileExchangerOptions(128);
         _fileExchanger = await FileExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedFileStorage, _subscribedFileStorage, batchActionDispatcher, bytesPool, fileExchangerOptions, cancellationToken);
         _nodeFinder.GetEvents().GetContentExchangers.Subscribe(() => _fileExchanger).ToAdd(_disposables);
 
-        var publishedShoutStorageOptions = new PublishedShoutStorageOptions(Path.Combine(workingDirectoryPath, "published_shout_storage"));
+        var publishedShoutStorageOptions = new PublishedShoutStorageOptions(Path.Combine(appConfig.StorageDirectoryPath!, "published_shout_storage"));
         _publishedShoutStorage = await PublishedShoutStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, publishedShoutStorageOptions, cancellationToken);
 
-        var subscribedShoutStorageOptions = new SubscribedShoutStorageOptions(Path.Combine(workingDirectoryPath, "subscribed_shout_storage"));
+        var subscribedShoutStorageOptions = new SubscribedShoutStorageOptions(Path.Combine(appConfig.StorageDirectoryPath!, "subscribed_shout_storage"));
         _subscribedShoutStorage = await SubscribedShoutStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, subscribedShoutStorageOptions, cancellationToken);
 
         var shoutExchangerOptions = new ShoutExchangerOptions(128);

@@ -7,16 +7,8 @@
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Daemon)",
             "program": "${workspaceFolder}/tmp/bin/win-vscode/Omnius.Xeus.Daemon/Debug/net6.0/Omnius.Xeus.Daemon.dll",
-            "args": [
-                "--config",
-                "./demo/daemon_1/config.yml",
-                "--storage",
-                "./demo/daemon_1/storage",
-                "--logs",
-                "./demo/daemon_1/logs",
-                "-v"
-            ],
-            "cwd": "${workspaceFolder}",
+            "args": ["--config", "./config.yml"],
+            "cwd": "${workspaceFolder}/demo/daemon_1",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -26,16 +18,8 @@
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Ui.Desktop)",
             "program": "${workspaceFolder}/tmp/bin/win-vscode/Omnius.Xeus.Ui.Desktop/Debug/net6.0/Omnius.Xeus.Ui.Desktop.dll",
-            "args": [
-                "--config",
-                "./demo/ui-desktop_1/config.yml",
-                "--storage",
-                "./demo/ui-desktop_1/storage",
-                "--logs",
-                "./demo/ui-desktop_1/logs",
-                "-v"
-            ],
-            "cwd": "${workspaceFolder}",
+            "args": ["--config", "./config.yml"],
+            "cwd": "${workspaceFolder}/demo/ui-desktop_1",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -45,16 +29,8 @@
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Daemon)",
             "program": "${workspaceFolder}/tmp/bin/linux-vscode/Omnius.Xeus.Daemon/Debug/net6.0/Omnius.Xeus.Daemon.dll",
-            "args": [
-                "--config",
-                "./demo/daemon_1/config.yml",
-                "--storage",
-                "./demo/daemon_1/storage",
-                "--logs",
-                "./demo/daemon_1/logs",
-                "-v"
-            ],
-            "cwd": "${workspaceFolder}",
+            "args": ["--config", "./config.yml"],
+            "cwd": "${workspaceFolder}/demo/daemon_1",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -64,16 +40,8 @@
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Ui.Desktop)",
             "program": "${workspaceFolder}/tmp/bin/linux-vscode/Omnius.Xeus.Ui.Desktop/Debug/net6.0/Omnius.Xeus.Ui.Desktop.dll",
-            "args": [
-                "--config",
-                "./demo/ui-desktop_1/config.yml",
-                "--storage",
-                "./demo/ui-desktop_1/storage",
-                "--logs",
-                "./demo/ui-desktop_1/logs",
-                "-v"
-            ],
-            "cwd": "${workspaceFolder}",
+            "args": ["--config", "./config.yml"],
+            "cwd": "${workspaceFolder}/demo/ui-desktop_1",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -83,16 +51,8 @@
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Daemon)",
             "program": "${workspaceFolder}/tmp/bin/mac-vscode/Omnius.Xeus.Daemon/Debug/net6.0/Omnius.Xeus.Daemon.dll",
-            "args": [
-                "--config",
-                "./demo/daemon_1/config.yml",
-                "--storage",
-                "./demo/daemon_1/storage",
-                "--logs",
-                "./demo/daemon_1/logs",
-                "-v"
-            ],
-            "cwd": "${workspaceFolder}",
+            "args": ["--config", "./config.yml"],
+            "cwd": "${workspaceFolder}/demo/daemon_1",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -102,16 +62,8 @@
             "request": "launch",
             "preLaunchTask": "build (Omnius.Xeus.Ui.Desktop)",
             "program": "${workspaceFolder}/tmp/bin/mac-vscode/Omnius.Xeus.Ui.Desktop/Debug/net6.0/Omnius.Xeus.Ui.Desktop.dll",
-            "args": [
-                "--config",
-                "./demo/ui-desktop_1/config.yml",
-                "--storage",
-                "./demo/ui-desktop_1/storage",
-                "--logs",
-                "./demo/ui-desktop_1/logs",
-                "-v"
-            ],
-            "cwd": "${workspaceFolder}",
+            "args": ["--config", "./config.yml"],
+            "cwd": "${workspaceFolder}/demo/ui-desktop_1",
             "console": "internalConsole",
             "stopAtEntry": false
         }

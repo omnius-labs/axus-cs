@@ -9,12 +9,12 @@ namespace Omnius.Xeus.Ui.Desktop.Windows;
 
 public class MainWindowViewModel : AsyncDisposableBase
 {
-    private readonly UiState _uiState;
+    private readonly UiStatus _uiState;
     private readonly IDialogService _dialogService;
 
     private readonly CompositeDisposable _disposable = new();
 
-    public MainWindowViewModel(UiState uiState, IDialogService dialogService,
+    public MainWindowViewModel(UiStatus uiState, IDialogService dialogService,
         StatusControlViewModel statusControlViewModel, PeersControlViewModel peersControlViewModel,
         DownloadControlViewModel downloadControlViewModel, UploadControlViewModel uploadControlViewModel)
     {
@@ -34,6 +34,8 @@ public class MainWindowViewModel : AsyncDisposableBase
     {
         _disposable.Dispose();
     }
+
+    public MainWindowStatus Status => _uiState.MainWindow ??= new MainWindowStatus();
 
     public StatusControlViewModel StatusControlViewModel { get; }
 

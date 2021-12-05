@@ -1,5 +1,6 @@
 using Cocona;
 using Omnius.Core.Helpers;
+using Omnius.Xeus.Daemon.Configuration;
 
 namespace Omnius.Xeus.Daemon;
 
@@ -18,22 +19,21 @@ public class Program : CoconaLiteConsoleAppBase
         _logger.Error(e);
     }
 
-    public async ValueTask RunAsync([Option("config")] string configPath, [Option("storage")] string storageDirectoryPath, [Option("logs")] string logsDirectoryPath, [Option("verbose", new[] { 'v' })] bool verbose = false)
+    public async ValueTask RunAsync([Option("config")] string configPath)
     {
-        DirectoryHelper.CreateDirectory(storageDirectoryPath);
-        DirectoryHelper.CreateDirectory(logsDirectoryPath);
+        var appConfig = await AppConfig.LoadAsync(configPath);
 
-        SetLogsDirectory(logsDirectoryPath);
+        DirectoryHelper.CreateDirectory(appConfig.StorageDirectoryPath!);
+        DirectoryHelper.CreateDirectory(appConfig.LogsDirectoryPath!);
 
-        if (verbose)
-        {
-            ChangeLogLevel(NLog.LogLevel.Trace);
-        }
+        SetLogsDirectory(appConfig.LogsDirectoryPath!);
+
+        if (appConfig.Verbose) ChangeLogLevel(NLog.LogLevel.Trace);
 
         try
         {
             _logger.Info("Starting...");
-            await Runner.EventLoopAsync(configPath, storageDirectoryPath, this.Context.CancellationToken);
+            await Runner.EventLoopAsync(appConfig, this.Context.CancellationToken);
         }
         finally
         {

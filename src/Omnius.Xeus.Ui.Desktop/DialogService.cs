@@ -1,8 +1,8 @@
 using Avalonia.Controls;
-using Microsoft.Extensions.DependencyInjection;
 using Omnius.Core.Avalonia;
+using Omnius.Xeus.Ui.Desktop.Windows;
 
-namespace Omnius.Xeus.Ui.Desktop.Windows;
+namespace Omnius.Xeus.Ui.Desktop;
 
 public interface IDialogService
 {
@@ -30,16 +30,10 @@ public class DialogService : IDialogService
     {
         return await _applicationDispatcher.InvokeAsync(async () =>
         {
-            var serviceProvider = await Bootstrapper.Instance.GetServiceProvider();
-            if (serviceProvider is null) throw new NullReferenceException();
-
-            var viewModel = serviceProvider.GetRequiredService<TextWindowViewModel>();
-            await viewModel.InitializeAsync();
-
-            var window = new TextWindow { ViewModel = viewModel, };
+            var window = new TextWindow();
             await window.ShowDialog(_mainWindowProvider.GetMainWindow());
 
-            return window.ViewModel.Text.Value;
+            return window.ViewModel?.GetResult() ?? string.Empty;
         });
     }
 
@@ -47,13 +41,7 @@ public class DialogService : IDialogService
     {
         await _applicationDispatcher.InvokeAsync(async () =>
         {
-            var serviceProvider = await Bootstrapper.Instance.GetServiceProvider();
-            if (serviceProvider is null) throw new NullReferenceException();
-
-            var viewModel = serviceProvider.GetRequiredService<SettingsWindowViewModel>();
-            await viewModel.InitializeAsync();
-
-            var window = new SettingsWindow { ViewModel = viewModel };
+            var window = new SettingsWindow();
             await window.ShowDialog(_mainWindowProvider.GetMainWindow());
         });
     }
@@ -63,6 +51,8 @@ public class DialogService : IDialogService
         return await _applicationDispatcher.InvokeAsync(async () =>
         {
             var dialog = new OpenFileDialog();
+            dialog.AllowMultiple = true;
+
             return await dialog.ShowAsync(_mainWindowProvider.GetMainWindow());
         });
     }

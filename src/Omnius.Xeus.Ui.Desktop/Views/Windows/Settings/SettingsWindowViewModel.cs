@@ -1,7 +1,6 @@
 using System.Reactive.Disposables;
 using Avalonia.Controls;
 using Omnius.Core;
-using Omnius.Xeus.Intaractors;
 using Omnius.Xeus.Intaractors.Models;
 using Omnius.Xeus.Ui.Desktop.Configuration;
 using Reactive.Bindings;
@@ -11,15 +10,15 @@ namespace Omnius.Xeus.Ui.Desktop.Windows;
 
 public class SettingsWindowViewModel : AsyncDisposableBase
 {
-    private readonly UiState _uiState;
-    private readonly IFileDownloader _fileDownloader;
+    private readonly UiStatus _uiState;
+    private readonly IIntaractorProvider _intaractorAdapter;
 
     private readonly CompositeDisposable _disposable = new();
 
-    public SettingsWindowViewModel(UiState uiState, IFileDownloader fileDownloader)
+    public SettingsWindowViewModel(UiStatus uiState, IIntaractorProvider intaractorAdapter)
     {
         _uiState = uiState;
-        _fileDownloader = fileDownloader;
+        _intaractorAdapter = intaractorAdapter;
 
         this.DownloadDirectory = new ReactiveProperty<string>().AddTo(_disposable);
 
@@ -30,9 +29,11 @@ public class SettingsWindowViewModel : AsyncDisposableBase
         this.OkCommand.Subscribe((state) => this.Ok(state)).AddTo(_disposable);
         this.CancelCommand = new ReactiveCommand().AddTo(_disposable);
         this.CancelCommand.Subscribe((state) => this.Cancel(state)).AddTo(_disposable);
+
+        this.Initialize();
     }
 
-    public async ValueTask InitializeAsync()
+    private async void Initialize()
     {
         await this.LoadAsync();
     }
@@ -41,6 +42,8 @@ public class SettingsWindowViewModel : AsyncDisposableBase
     {
         _disposable.Dispose();
     }
+
+    public SettingsWindowStatus Status => _uiState.SettingsWindow ??= new SettingsWindowStatus();
 
     public ReactiveProperty<string> DownloadDirectory { get; }
 
@@ -70,13 +73,15 @@ public class SettingsWindowViewModel : AsyncDisposableBase
 
     private async ValueTask LoadAsync(CancellationToken cancellationToken = default)
     {
-        var config = await _fileDownloader.GetConfigAsync();
+        var fileDownloader = await _intaractorAdapter.GetFileDownloaderAsync(cancellationToken);
+        var config = await fileDownloader.GetConfigAsync();
         this.DownloadDirectory.Value = config?.DestinationDirectory ?? string.Empty;
     }
 
     private async ValueTask SaveAsync(CancellationToken cancellationToken = default)
     {
         var config = new FileDownloaderConfig(this.DownloadDirectory.Value);
-        await _fileDownloader.SetConfigAsync(config);
+        var fileDownloader = await _intaractorAdapter.GetFileDownloaderAsync(cancellationToken);
+        await fileDownloader.SetConfigAsync(config);
     }
 }

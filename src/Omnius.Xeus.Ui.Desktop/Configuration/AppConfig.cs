@@ -1,3 +1,5 @@
+using System.Net;
+using Omnius.Core.Net;
 using Omnius.Core.Utils;
 
 namespace Omnius.Xeus.Ui.Desktop.Configuration;
@@ -8,19 +10,37 @@ public class AppConfig
 
     public int Version { get; init; }
 
+    public bool Verbose { get; init; }
+
+    public string? StorageDirectoryPath { get; init; }
+
+    public string? LogsDirectoryPath { get; init; }
+
     public string? DaemonAddress { get; init; }
 
-    public static async ValueTask<AppConfig?> LoadAsync(string configPath)
+    public static async ValueTask<AppConfig> LoadAsync(string configPath)
     {
+        AppConfig? result = null;
+
         try
         {
-            return YamlHelper.ReadFile<AppConfig>(configPath);
+            result = YamlHelper.ReadFile<AppConfig>(configPath);
         }
         catch (Exception e)
         {
             _logger.Debug(e);
-            return null;
         }
+
+        result ??= new AppConfig()
+        {
+            Version = 1,
+            StorageDirectoryPath = "storage",
+            LogsDirectoryPath = "logs",
+            Verbose = false,
+            DaemonAddress = OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 32321).ToString(),
+        };
+
+        return result;
     }
 
     public async ValueTask SaveAsync(string configPath)

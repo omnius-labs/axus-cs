@@ -23,13 +23,19 @@ public partial class MainWindow : StatefulWindowBase
         if (serviceProvider is null) throw new NullReferenceException();
 
         this.ViewModel = serviceProvider.GetRequiredService<MainWindowViewModel>();
+        this.SetWindowStatus(this.ViewModel.Status?.Window);
+    }
+
+    protected override async ValueTask OnActivatedAsync()
+    {
     }
 
     protected override async ValueTask OnDisposeAsync()
     {
-        if (this.ViewModel is MainWindowViewModel viewModel)
+        if (this.ViewModel is not null)
         {
-            await viewModel.DisposeAsync();
+            this.ViewModel.Status.Window = this.GetWindowStatus();
+            await this.ViewModel.DisposeAsync();
         }
 
         await Bootstrapper.Instance.DisposeAsync();

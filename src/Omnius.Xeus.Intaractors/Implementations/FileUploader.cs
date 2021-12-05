@@ -132,6 +132,8 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
+            if (_fileUploaderRepo.Items.Exists(filePath)) return;
+
             var now = DateTime.UtcNow;
             var seed = new Seed(OmniHash.Empty, name, (ulong)new FileInfo(filePath).Length, Timestamp.FromDateTime(now));
             var item = new UploadingFileItem(filePath, seed, now, UploadingFileState.Waiting);
@@ -143,6 +145,8 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
+            if (!_fileUploaderRepo.Items.Exists(filePath)) return;
+
             await _service.UnpublishFileFromStorageAsync(filePath, Registrant, cancellationToken);
 
             _fileUploaderRepo.Items.Delete(filePath);

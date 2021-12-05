@@ -12,7 +12,7 @@ public class StatusControlViewModel : AsyncDisposableBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IDashboard _dashboard;
+    private readonly IIntaractorProvider _intaractorAdapter;
     private readonly IClipboardService _clipboardService;
 
     private readonly Task _refreshTask;
@@ -21,9 +21,9 @@ public class StatusControlViewModel : AsyncDisposableBase
 
     private readonly CompositeDisposable _disposable = new();
 
-    public StatusControlViewModel(IDashboard dashboard, IClipboardService clipboardService)
+    public StatusControlViewModel(IIntaractorProvider intaractorAdapter, IClipboardService clipboardService)
     {
-        _dashboard = dashboard;
+        _intaractorAdapter = intaractorAdapter;
         _clipboardService = clipboardService;
 
         this.MyNodeLocation = new ReactiveProperty<string>().AddTo(_disposable);
@@ -57,9 +57,11 @@ public class StatusControlViewModel : AsyncDisposableBase
         {
             for (; ; )
             {
-                await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken).ConfigureAwait(false);
 
-                var myNodeLocation = await _dashboard.GetMyNodeLocationAsync(cancellationToken);
+                var dashboard = await _intaractorAdapter.GetDashboardAsync();
+
+                var myNodeLocation = await dashboard.GetMyNodeLocationAsync(cancellationToken);
 
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {

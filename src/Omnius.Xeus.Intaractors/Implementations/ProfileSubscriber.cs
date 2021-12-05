@@ -63,6 +63,10 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
         _cancellationTokenSource.Cancel();
         await _watchLoopTask;
         _cancellationTokenSource.Dispose();
+
+        _profileSubscriberRepo.Dispose();
+        _configStorage.Dispose();
+        _cachedProfileStorage.Dispose();
     }
 
     private async Task WatchLoopAsync(CancellationToken cancellationToken = default)

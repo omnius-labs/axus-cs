@@ -1,4 +1,7 @@
 Version: 1
+Verbose: true
+StorageDirectoryPath: storage
+LogsDirectoryPath: logs
 ListenAddress: tcp(ip4(127.0.0.1),40001)
 Bandwidth:
   MaxSendBytesPerSeconds: 33554432

@@ -1,7 +1,5 @@
-using System.Net;
 using System.Net.Sockets;
 using Omnius.Core;
-using Omnius.Core.Net;
 using Omnius.Core.Net.Caps;
 using Omnius.Core.Net.Connections.Bridge;
 using Omnius.Core.Net.Connections.Multiplexer;
@@ -17,70 +15,28 @@ public static partial class Runner
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    public static async ValueTask EventLoopAsync(string configPath, string stateDirectoryPath, CancellationToken cancellationToken = default)
+    public static async ValueTask EventLoopAsync(AppConfig appConfig, CancellationToken cancellationToken = default)
     {
-        var appConfig = await LoadAppConfigAsync(configPath, cancellationToken);
-        var service = await XeusService.CreateAsync(stateDirectoryPath, appConfig, cancellationToken);
+        var service = await XeusService.CreateAsync(appConfig, cancellationToken);
 
         await ListenAsync(service, appConfig, cancellationToken);
     }
 
-    private static async ValueTask<AppConfig> LoadAppConfigAsync(string configPath, CancellationToken cancellationToken = default)
+    private static async ValueTask ListenAsync(XeusService service, AppConfig appConfig, CancellationToken cancellationToken = default)
     {
-        var appConfig = await AppConfig.LoadAsync(configPath);
-        if (appConfig is not null)
-        {
-            return appConfig;
-        }
+        if (appConfig.ListenAddress is null) throw new Exception($"{nameof(appConfig.ListenAddress)} is not found");
 
-        appConfig = new AppConfig()
-        {
-            Version = 1,
-            ListenAddress = OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 32321).ToString(),
-            Bandwidth = new BandwidthConfig()
-            {
-                MaxSendBytesPerSeconds = 1024 * 1024 * 32,
-                MaxReceiveBytesPerSeconds = 1024 * 1024 * 32,
-            },
-            SessionConnector = new SessionConnectorConfig()
-            {
-                TcpConnector = new TcpConnectorConfig()
-                {
-                    Proxy = new TcpProxyConfig()
-                    {
-                        Type = TcpProxyType.None,
-                    },
-                },
-            },
-            SessionAccepter = new SessionAccepterConfig()
-            {
-                TcpAccepter = new TcpAccepterConfig()
-                {
-                    UseUpnp = true,
-                    ListenAddress = OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 32320).ToString(),
-                },
-            },
-        };
-
-        await appConfig.SaveAsync(configPath);
-
-        return appConfig;
-    }
-
-    private static async ValueTask ListenAsync(XeusService service, AppConfig config, CancellationToken cancellationToken = default)
-    {
-        if (config.ListenAddress is null) throw new Exception($"{nameof(config.ListenAddress)} is not found");
-
-        using var tcpListenerManager = new TcpListenerManager(config.ListenAddress, cancellationToken);
+        using var tcpListenerManager = new TcpListenerManager(appConfig.ListenAddress, cancellationToken);
 
         while (!cancellationToken.IsCancellationRequested)
         {
             using var socket = await tcpListenerManager.AcceptSocketAsync();
-            await ServiceEventLoopAsync(service, socket, cancellationToken);
+
+            await InternalEventLoopAsync(service, socket, cancellationToken);
         }
     }
 
-    private static async ValueTask ServiceEventLoopAsync(XeusService service, Socket socket, CancellationToken cancellationToken = default)
+    private static async ValueTask InternalEventLoopAsync(XeusService service, Socket socket, CancellationToken cancellationToken = default)
     {
         using var socketCap = new SocketCap(socket);
 
@@ -100,7 +56,7 @@ public static partial class Runner
 
         try
         {
-            _logger.Debug("ServiceEventLoopAsync: Start");
+            _logger.Debug("InternalEventLoopAsync: Start");
 
             var server = new XeusServiceRemoting.Server<DefaultErrorMessage>(service, listenerFactory, bytesPool);
 
@@ -115,7 +71,7 @@ public static partial class Runner
         }
         finally
         {
-            _logger.Debug("ServiceEventLoopAsync: End");
+            _logger.Debug("InternalEventLoopAsync: End");
         }
     }
 }

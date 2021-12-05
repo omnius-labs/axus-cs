@@ -23,6 +23,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
     private readonly IKeyValueStorage<string> _blockStorage;
 
     private readonly AsyncLock _asyncLock = new();
+    private readonly AsyncLock _publishAsyncLock = new();
 
     private const int MaxBlockLength = 8 * 1024 * 1024;
 
@@ -75,7 +76,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
     {
     }
 
-    public async ValueTask<IEnumerable<OmniHash>> GetRootHashesAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<OmniHash>> GetPushContentHashesAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -90,12 +91,10 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
         }
     }
 
-    public async ValueTask<IEnumerable<OmniHash>> GetBlockHashesAsync(OmniHash rootHash, bool? exists = null, CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<OmniHash>> GetPushBlockHashesAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            if (exists.HasValue && !exists.Value) return Enumerable.Empty<OmniHash>();
-
             var item = _publisherRepo.Items.Find(rootHash).FirstOrDefault();
             if (item is null) return Enumerable.Empty<OmniHash>();
 
@@ -103,7 +102,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
         }
     }
 
-    public async ValueTask<bool> ContainsFileAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+    public async ValueTask<bool> ContainsPushContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -113,7 +112,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
         }
     }
 
-    public async ValueTask<bool> ContainsBlockAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
+    public async ValueTask<bool> ContainsPushBlockAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -126,56 +125,62 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
 
     public async ValueTask<OmniHash> PublishFileAsync(string filePath, string registrant, CancellationToken cancellationToken = default)
     {
-        PublishedFileItem? item;
-
-        using (await _asyncLock.LockAsync(cancellationToken))
+        using (await _publishAsyncLock.LockAsync(cancellationToken))
         {
-            item = _publisherRepo.Items.FindOne(filePath, registrant);
-            if (item is not null) return item.RootHash;
+            PublishedFileItem? item;
+
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+                item = _publisherRepo.Items.FindOne(filePath, registrant);
+                if (item is not null) return item.RootHash;
+            }
+
+            var tempPrefix = "_temp_" + Guid.NewGuid().ToString("N");
+
+            using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var blockHashes = await this.ImportStreamAsync(fileStream, MaxBlockLength, cancellationToken);
+            var lastMerkleTreeSection = new MerkleTreeSection(0, blockHashes.ToArray());
+
+            var (rootHash, merkleTreeSections) = await this.GenMerkleTreeSectionsAsync(tempPrefix, lastMerkleTreeSection, MaxBlockLength, cancellationToken);
+            item = new PublishedFileItem(rootHash, filePath, registrant, merkleTreeSections.ToArray(), MaxBlockLength);
+
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+                // FIXME: 途中で処理が中断された場合に残骸となったブロックを除去する処理が必要
+                var newPrefix = StringConverter.HashToString(rootHash);
+                var targetBlockHashes = merkleTreeSections.SkipLast(1).SelectMany(n => n.Hashes).ToArray();
+                await this.RenameBlocksAsync(tempPrefix, newPrefix, targetBlockHashes, cancellationToken);
+
+                _publisherRepo.Items.Upsert(item);
+            }
+
+            return rootHash;
         }
-
-        var tempPrefix = "_temp_" + Guid.NewGuid().ToString("N");
-
-        using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-        var blockHashes = await this.ImportStreamAsync(fileStream, MaxBlockLength, cancellationToken);
-        var lastMerkleTreeSection = new MerkleTreeSection(0, blockHashes.ToArray());
-
-        var (rootHash, merkleTreeSections) = await this.GenMerkleTreeSectionsAsync(tempPrefix, lastMerkleTreeSection, MaxBlockLength, cancellationToken);
-        item = new PublishedFileItem(rootHash, filePath, registrant, merkleTreeSections.ToArray(), MaxBlockLength);
-
-        using (await _asyncLock.LockAsync(cancellationToken))
-        {
-            // FIXME: 途中で処理が中断された場合に残骸となったブロックを除去する処理が必要
-            var newPrefix = StringConverter.HashToString(rootHash);
-            var targetBlockHashes = merkleTreeSections.SkipLast(1).SelectMany(n => n.Hashes).ToArray();
-            await this.RenameBlocksAsync(tempPrefix, newPrefix, targetBlockHashes, cancellationToken);
-
-            _publisherRepo.Items.Upsert(item);
-        }
-
-        return rootHash;
     }
 
     public async ValueTask<OmniHash> PublishFileAsync(ReadOnlySequence<byte> sequence, string registrant, CancellationToken cancellationToken = default)
     {
-        var tempPrefix = "_temp_" + Guid.NewGuid().ToString("N");
-
-        var blockHashes = await this.ImportBytesAsync(tempPrefix, sequence, MaxBlockLength, cancellationToken);
-        var lastMerkleTreeSection = new MerkleTreeSection(0, blockHashes.ToArray());
-
-        var (rootHash, merkleTreeSections) = await this.GenMerkleTreeSectionsAsync(tempPrefix, lastMerkleTreeSection, MaxBlockLength, cancellationToken);
-        var item = new PublishedFileItem(rootHash, null, registrant, merkleTreeSections.ToArray(), MaxBlockLength);
-
-        using (await _asyncLock.LockAsync(cancellationToken))
+        using (await _publishAsyncLock.LockAsync(cancellationToken))
         {
-            var newPrefix = StringConverter.HashToString(rootHash);
-            var targetBlockHashes = merkleTreeSections.SelectMany(n => n.Hashes).ToArray();
-            await this.RenameBlocksAsync(tempPrefix, newPrefix, targetBlockHashes, cancellationToken);
+            var tempPrefix = "_temp_" + Guid.NewGuid().ToString("N");
 
-            _publisherRepo.Items.Upsert(item);
+            var blockHashes = await this.ImportBytesAsync(tempPrefix, sequence, MaxBlockLength, cancellationToken);
+            var lastMerkleTreeSection = new MerkleTreeSection(0, blockHashes.ToArray());
+
+            var (rootHash, merkleTreeSections) = await this.GenMerkleTreeSectionsAsync(tempPrefix, lastMerkleTreeSection, MaxBlockLength, cancellationToken);
+            var item = new PublishedFileItem(rootHash, null, registrant, merkleTreeSections.ToArray(), MaxBlockLength);
+
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+                var newPrefix = StringConverter.HashToString(rootHash);
+                var targetBlockHashes = merkleTreeSections.SelectMany(n => n.Hashes).ToArray();
+                await this.RenameBlocksAsync(tempPrefix, newPrefix, targetBlockHashes, cancellationToken);
+
+                _publisherRepo.Items.Upsert(item);
+            }
+
+            return rootHash;
         }
-
-        return rootHash;
     }
 
     private async ValueTask RenameBlocksAsync(string oldPrefix, string newPrefix, IEnumerable<OmniHash> blockHashes, CancellationToken cancellationToken = default)

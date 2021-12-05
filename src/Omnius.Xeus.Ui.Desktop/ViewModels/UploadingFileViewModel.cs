@@ -9,13 +9,6 @@ public partial class UploadingFileViewModel : BindableBase, ICollectionViewModel
 {
     private UploadingFileReport? _model;
 
-    public UploadingFileViewModel() { }
-
-    public UploadingFileViewModel(UploadingFileReport? model)
-    {
-        this.Model = model;
-    }
-
     public void Update(UploadingFileReport? model)
     {
         this.Model = model;

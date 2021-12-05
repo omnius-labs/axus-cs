@@ -10,12 +10,12 @@ namespace Omnius.Xeus.Ui.Desktop.Windows;
 
 public class TextWindowViewModel : AsyncDisposableBase
 {
-    private readonly UiState _uiState;
+    private readonly UiStatus _uiState;
     private readonly IClipboardService _clipboardService;
 
     private readonly CompositeDisposable _disposable = new();
 
-    public TextWindowViewModel(UiState uiState, IClipboardService clipboardService)
+    public TextWindowViewModel(UiStatus uiState, IClipboardService clipboardService)
     {
         _uiState = uiState;
         _clipboardService = clipboardService;
@@ -25,9 +25,11 @@ public class TextWindowViewModel : AsyncDisposableBase
         this.OkCommand.Subscribe((state) => this.Ok(state)).AddTo(_disposable);
         this.CancelCommand = new ReactiveCommand().AddTo(_disposable);
         this.CancelCommand.Subscribe((state) => this.Cancel(state)).AddTo(_disposable);
+
+        this.Initialize();
     }
 
-    public async ValueTask InitializeAsync()
+    public async void Initialize()
     {
         this.Text.Value = await _clipboardService.GetTextAsync();
     }
@@ -37,11 +39,15 @@ public class TextWindowViewModel : AsyncDisposableBase
         _disposable.Dispose();
     }
 
+    public TextWindowStatus Status => _uiState.TextWindow ??= new TextWindowStatus();
+
     public ReactivePropertySlim<string> Text { get; }
 
     public ReactiveCommand OkCommand { get; }
 
     public ReactiveCommand CancelCommand { get; }
+
+    public string GetResult() => this.Text.Value;
 
     private async void Ok(object state)
     {

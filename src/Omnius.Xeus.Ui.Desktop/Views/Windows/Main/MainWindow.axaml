@@ -9,39 +9,31 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     FontFamily="Meiryo UI, Lucida Grande, Ubuntu"
-    TransparencyLevelHint="AcrylicBlur"
-    Background="Transparent"
-    ExtendClientAreaToDecorationsHint="True"
-    ExtendClientAreaChromeHints="PreferSystemChrome"
-    WindowStartupLocation="CenterScreen"
-    x:CompileBindings="True"
+    x:CompileBindings="false"
     x:DataType="local:MainWindowViewModel"
     mc:Ignorable="d"
     d:DesignWidth="300"
     d:DesignHeight="300" >
 
-    <DockPanel>
-        <TextBlock DockPanel.Dock="Top" HorizontalAlignment="Center" Text="Xeus" Padding="8" />
-        <Grid ColumnDefinitions="Auto,*" Background="{DynamicResource ThemeControlLowColor}">
-            <Grid RowDefinitions="*,Auto">
-                <ListBox Name="TabListBox" Background="Transparent">
-                    <ListBoxItem Name="StatusListBoxItem" Content="Status" />
-                    <ListBoxItem Name="PeersListBoxItem" Content="Peers" />
-                    <ListBoxItem Name="SearchListBoxItem" Content="Search" />
-                    <ListBoxItem Name="DownloadListBoxItem" Content="Download" />
-                    <ListBoxItem Name="UploadListBoxItem" Content="Upload" />
-                </ListBox>
-                <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="8" Spacing="8">
-                    <Button Content="Settings" Command="{Binding SettingsCommand}" />
-                </StackPanel>
-            </Grid>
-            <Grid Grid.Column="1">
-                <controls:StatusControl IsVisible="{Binding #StatusListBoxItem.IsSelected}" DataContext="{Binding StatusControlViewModel}" />
-                <controls:PeersControl IsVisible="{Binding #PeersListBoxItem.IsSelected}" DataContext="{Binding PeersControlViewModel}" />
-                <controls:SearchControl IsVisible="{Binding #SearchListBoxItem.IsSelected}" />
-                <controls:DownloadControl IsVisible="{Binding #DownloadListBoxItem.IsSelected}" DataContext="{Binding DownloadControlViewModel}" />
-                <controls:UploadControl IsVisible="{Binding #UploadListBoxItem.IsSelected}" DataContext="{Binding UploadControlViewModel}" />
-            </Grid>
+    <Grid ColumnDefinitions="Auto,*" Background="{DynamicResource ThemeControlLowColor}">
+        <Grid RowDefinitions="*,Auto">
+            <ListBox Name="TabListBox" Background="Transparent">
+                <ListBoxItem Name="StatusListBoxItem" Content="Status" />
+                <ListBoxItem Name="PeersListBoxItem" Content="Peers" />
+                <ListBoxItem Name="SearchListBoxItem" Content="Search" />
+                <ListBoxItem Name="DownloadListBoxItem" Content="Download" />
+                <ListBoxItem Name="UploadListBoxItem" Content="Upload" />
+            </ListBox>
+            <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="8" Spacing="8">
+                <Button Content="Settings" Command="{Binding SettingsCommand}" />
+            </StackPanel>
         </Grid>
-    </DockPanel>
+        <Grid Grid.Column="1">
+            <controls:StatusControl IsVisible="{Binding #StatusListBoxItem.IsSelected}" DataContext="{Binding StatusControlViewModel}" />
+            <controls:PeersControl IsVisible="{Binding #PeersListBoxItem.IsSelected}" DataContext="{Binding PeersControlViewModel}" />
+            <controls:SearchControl IsVisible="{Binding #SearchListBoxItem.IsSelected}" />
+            <controls:DownloadControl IsVisible="{Binding #DownloadListBoxItem.IsSelected}" DataContext="{Binding DownloadControlViewModel}" />
+            <controls:UploadControl IsVisible="{Binding #UploadListBoxItem.IsSelected}" DataContext="{Binding UploadControlViewModel}" />
+        </Grid>
+    </Grid>
 </Window>

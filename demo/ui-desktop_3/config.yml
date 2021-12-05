@@ -1,1 +1,5 @@
+Version: 1
+Verbose: true
+StorageDirectoryPath: storage
+LogsDirectoryPath: logs
 DaemonAddress: tcp(ip4(127.0.0.1),42001)

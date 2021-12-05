@@ -9,13 +9,6 @@ public partial class DownloadingFileViewModel : BindableBase, ICollectionViewMod
 {
     private DownloadingFileReport? _model;
 
-    public DownloadingFileViewModel() { }
-
-    public DownloadingFileViewModel(DownloadingFileReport? model)
-    {
-        this.Model = model;
-    }
-
     public void Update(DownloadingFileReport? model)
     {
         this.Model = model;
@@ -40,4 +33,17 @@ public partial class DownloadingFileViewModel : BindableBase, ICollectionViewMod
     public double Depth => this.Model?.Status?.CurrentDepth ?? -1;
 
     public double Rate => Math.Round(((double)(this.Model?.Status?.DownloadedBlockCount ?? 0) / this.Model?.Status?.TotalBlockCount ?? 1) * 100 * 100) / 100;
+
+    public string RateText
+    {
+        get
+        {
+            var downloadedBlockCount = this.Model?.Status?.DownloadedBlockCount ?? 0;
+            var totalBlockCount = this.Model?.Status?.TotalBlockCount ?? 1;
+            var currentDepth = this.Model?.Status?.CurrentDepth ?? -1;
+            var currentDepthText = currentDepth >= 0 ? currentDepth.ToString() : "?";
+
+            return string.Format("[{0}/{1}] ({2})", downloadedBlockCount, totalBlockCount, currentDepthText);
+        }
+    }
 }

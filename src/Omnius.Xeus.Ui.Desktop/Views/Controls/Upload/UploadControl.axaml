@@ -41,6 +41,10 @@
                     Header="Name"
                     Binding="{ReflectionBinding Name}"
                     Width="Auto" />
+                <DataGridTextColumn
+                    Header="Size"
+                    Binding="{ReflectionBinding Size}"
+                    Width="Auto" />
                 <dg:DataGridTextColumn
                     Header="Creation Time"
                     Binding="{ReflectionBinding CreationTime}"

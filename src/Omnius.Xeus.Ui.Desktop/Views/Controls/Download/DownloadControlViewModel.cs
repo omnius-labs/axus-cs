@@ -8,7 +8,6 @@ using Omnius.Xeus.Intaractors;
 using Omnius.Xeus.Intaractors.Models;
 using Omnius.Xeus.Ui.Desktop.Configuration;
 using Omnius.Xeus.Ui.Desktop.ViewModels;
-using Omnius.Xeus.Ui.Desktop.Windows;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 
@@ -17,8 +16,8 @@ namespace Omnius.Xeus.Ui.Desktop.Controls;
 public class DownloadControlViewModel : AsyncDisposableBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
-    private readonly UiState _uiState;
-    private readonly IFileDownloader _fileDownloader;
+    private readonly UiStatus _uiState;
+    private readonly IIntaractorProvider _intaractorAdapter;
     private readonly IApplicationDispatcher _applicationDispatcher;
     private readonly IDialogService _dialogService;
     private readonly IClipboardService _clipboardService;
@@ -27,10 +26,10 @@ public class DownloadControlViewModel : AsyncDisposableBase
 
     private readonly CompositeDisposable _disposable = new();
 
-    public DownloadControlViewModel(UiState uiState, IFileDownloader fileDownloader, IApplicationDispatcher applicationDispatcher, IDialogService dialogService, IClipboardService clipboardService)
+    public DownloadControlViewModel(UiStatus uiState, IIntaractorProvider intaractorAdapter, IApplicationDispatcher applicationDispatcher, IDialogService dialogService, IClipboardService clipboardService)
     {
         _uiState = uiState;
-        _fileDownloader = fileDownloader;
+        _intaractorAdapter = intaractorAdapter;
         _applicationDispatcher = applicationDispatcher;
         _dialogService = dialogService;
         _clipboardService = clipboardService;
@@ -53,9 +52,13 @@ public class DownloadControlViewModel : AsyncDisposableBase
         await _downloadingFilesUpdater.DisposeAsync();
     }
 
-    private async ValueTask<IEnumerable<DownloadingFileReport>> GetDownloadingFileReports()
+    public DownloadControlStatus Status => _uiState.DownloadControl ??= new DownloadControlStatus();
+
+    private async ValueTask<IEnumerable<DownloadingFileReport>> GetDownloadingFileReports(CancellationToken cancellationToken)
     {
-        return await _fileDownloader.GetDownloadingFileReportsAsync();
+        var fileDownloader = await _intaractorAdapter.GetFileDownloaderAsync(cancellationToken);
+
+        return await fileDownloader.GetDownloadingFileReportsAsync(cancellationToken);
     }
 
     private class DownloadingFileReportEqualityComparer : IEqualityComparer<DownloadingFileReport>
@@ -85,11 +88,13 @@ public class DownloadControlViewModel : AsyncDisposableBase
 
     private async void Register()
     {
+        var fileDownloader = await _intaractorAdapter.GetFileDownloaderAsync();
+
         var text = await _dialogService.ShowTextWindowAsync();
 
         foreach (var seed in ParseSeeds(text))
         {
-            await _fileDownloader.RegisterAsync(seed);
+            await fileDownloader.RegisterAsync(seed);
         }
     }
 
@@ -108,6 +113,8 @@ public class DownloadControlViewModel : AsyncDisposableBase
 
     private async void ItemDelete()
     {
+        var fileDownloader = await _intaractorAdapter.GetFileDownloaderAsync();
+
         var selectedFiles = this.SelectedFiles.ToArray();
         if (selectedFiles.Length == 0) return;
 
@@ -115,7 +122,7 @@ public class DownloadControlViewModel : AsyncDisposableBase
         {
             if (viewModel.Model?.Seed is Seed seed)
             {
-                await _fileDownloader.UnregisterAsync(seed);
+                await fileDownloader.UnregisterAsync(seed);
             }
         }
     }

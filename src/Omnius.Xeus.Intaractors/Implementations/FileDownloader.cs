@@ -166,6 +166,8 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
+            if (_fileDownloaderRepo.Items.Exists(seed)) return;
+
             var now = DateTime.UtcNow;
             var item = new DownloadingFileItem(seed, null, now, DownloadingFileState.Downloading);
             _fileDownloaderRepo.Items.Upsert(item);
@@ -176,6 +178,8 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
+            if (!_fileDownloaderRepo.Items.Exists(seed)) return;
+
             _fileDownloaderRepo.Items.Delete(seed);
         }
     }

@@ -6,7 +6,6 @@ using Omnius.Core.Avalonia;
 using Omnius.Xeus.Intaractors;
 using Omnius.Xeus.Models;
 using Omnius.Xeus.Ui.Desktop.ViewModels;
-using Omnius.Xeus.Ui.Desktop.Windows;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 
@@ -16,7 +15,7 @@ public class PeersControlViewModel : AsyncDisposableBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IDashboard _dashboard;
+    private readonly IIntaractorProvider _intaractorAdapter;
     private readonly IApplicationDispatcher _applicationDispatcher;
     private readonly IDialogService _dialogService;
 
@@ -24,9 +23,9 @@ public class PeersControlViewModel : AsyncDisposableBase
 
     private readonly CompositeDisposable _disposable = new();
 
-    public PeersControlViewModel(IDashboard dashboard, IApplicationDispatcher applicationDispatcher, IDialogService dialogService)
+    public PeersControlViewModel(IIntaractorProvider intaractorAdapter, IApplicationDispatcher applicationDispatcher, IDialogService dialogService)
     {
-        _dashboard = dashboard;
+        _intaractorAdapter = intaractorAdapter;
         _applicationDispatcher = applicationDispatcher;
         _dialogService = dialogService;
 
@@ -42,9 +41,11 @@ public class PeersControlViewModel : AsyncDisposableBase
         await _sessionsUpdater.DisposeAsync();
     }
 
-    private async ValueTask<IEnumerable<SessionReport>> GetSessionReports()
+    private async ValueTask<IEnumerable<SessionReport>> GetSessionReports(CancellationToken cancellationToken)
     {
-        return await _dashboard.GetSessionsReportAsync();
+        var dashboard = await _intaractorAdapter.GetDashboardAsync(cancellationToken);
+
+        return await dashboard.GetSessionsReportAsync(cancellationToken);
     }
 
     private class SessionReportEqualityComparer : IEqualityComparer<SessionReport>
@@ -68,8 +69,10 @@ public class PeersControlViewModel : AsyncDisposableBase
 
     private async void AddNodeLocations()
     {
+        var dashboard = await _intaractorAdapter.GetDashboardAsync();
+
         var text = await _dialogService.ShowTextWindowAsync();
-        await _dashboard.AddCloudNodeLocationsAsync(ParseNodeLocations(text));
+        await dashboard.AddCloudNodeLocationsAsync(ParseNodeLocations(text));
     }
 
     private static IEnumerable<NodeLocation> ParseNodeLocations(string text)

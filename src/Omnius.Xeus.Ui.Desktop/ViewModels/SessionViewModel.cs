@@ -9,13 +9,6 @@ public partial class SessionViewModel : BindableBase, ICollectionViewModel<Sessi
 {
     private SessionReport? _model;
 
-    public SessionViewModel() { }
-
-    public SessionViewModel(SessionReport? model)
-    {
-        this.Model = model;
-    }
-
     public void Update(SessionReport? model)
     {
         this.Model = model;

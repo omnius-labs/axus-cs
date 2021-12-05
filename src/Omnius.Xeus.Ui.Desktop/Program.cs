@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using CommandLine;
 using Omnius.Core.Helpers;
+using Omnius.Xeus.Ui.Desktop.Configuration;
 
 namespace Omnius.Xeus.Ui.Desktop;
 
@@ -9,13 +10,13 @@ public class Program
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private static void Main(string[] args)
+    private static async Task Main(string[] args)
     {
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(Program.UnhandledException);
 
-        CommandLine.Parser.Default.ParseArguments<Options>(args)
-            .WithParsed(Run)
-            .WithNotParsed(HandleParseError);
+        var parsedResult = CommandLine.Parser.Default.ParseArguments<Options>(args);
+        parsedResult = await parsedResult.WithParsedAsync(RunAsync);
+        parsedResult.WithNotParsed(HandleParseError);
     }
 
     private static void UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -23,21 +24,21 @@ public class Program
         _logger.Error(e);
     }
 
-    private static void Run(Options o)
+    private static async Task RunAsync(Options o)
     {
-        DirectoryHelper.CreateDirectory(o.StorageDirectoryPath);
-        DirectoryHelper.CreateDirectory(o.LogsDirectoryPath);
+        var appConfig = await AppConfig.LoadAsync(o.ConfigPath);
 
-        SetLogsDirectory(o.LogsDirectoryPath);
+        DirectoryHelper.CreateDirectory(appConfig.StorageDirectoryPath!);
+        DirectoryHelper.CreateDirectory(appConfig.LogsDirectoryPath!);
 
-        if (o.Verbose)
-        {
-            ChangeLogLevel(NLog.LogLevel.Trace);
-        }
+        SetLogsDirectory(appConfig.LogsDirectoryPath!);
 
-        Bootstrapper.Instance.Build(o.ConfigPath, o.StorageDirectoryPath);
+        if (appConfig.Verbose) ChangeLogLevel(NLog.LogLevel.Trace);
+
+        Bootstrapper.Instance.Build(appConfig);
 
         _logger.Info("Starting...");
+
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(Environment.GetCommandLineArgs(), ShutdownMode.OnMainWindowClose);
     }
 
