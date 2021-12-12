@@ -26,7 +26,7 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
       - name: Test
-        run: dotnet test --no-restore --verbosity normal --filter "FullyQualifiedName~Omnius.Xeus"
+        run: dotnet test --no-restore --verbosity normal --filter "FullyQualifiedName~Omnius.Axis"
   windows:
     runs-on: windows-latest
     env:
@@ -46,4 +46,4 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
       - name: Test
-        run: dotnet test --no-restore --verbosity normal --filter "FullyQualifiedName~Omnius.Xeus"
+        run: dotnet test --no-restore --verbosity normal --filter "FullyQualifiedName~Omnius.Axis"

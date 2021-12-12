@@ -2,13 +2,13 @@
     - ./refs/core/rpfs/**/*.rpf
     - ./rpfs/**/*.rpf
   CompileTargets:
-    - Input: ./rpfs/Omnius.Xeus.Models/Omnius.Xeus.Models.rpf
-      Output: ./src/Omnius.Xeus.Models/_RocketPack/_Generated.cs
-    - Input: ./rpfs/Omnius.Xeus.Engines/Omnius.Xeus.Engines.Internal.Models.rpf
-      Output: ./src/Omnius.Xeus.Engines/Implementations/Internal/Models/_RocketPack/_Generated.cs
-    - Input: ./rpfs/Omnius.Xeus.Remoting/Omnius.Xeus.Remoting.rpf
-      Output: ./src/Omnius.Xeus.Remoting/_RocketPack/_Generated.cs
-    - Input: ./rpfs/Omnius.Xeus.Intaractors/Omnius.Xeus.Intaractors.Models.rpf
-      Output: ./src/Omnius.Xeus.Intaractors/Models/_RocketPack/_Generated.cs
-    - Input: ./rpfs/Omnius.Xeus.Intaractors/Omnius.Xeus.Intaractors.Internal.Models.rpf
-      Output: ./src/Omnius.Xeus.Intaractors/Implementations/Internal/Models/_RocketPack/_Generated.cs
+    - Input: ./rpfs/Omnius.Axis.Models/Omnius.Axis.Models.rpf
+      Output: ./src/Omnius.Axis.Models/_RocketPack/_Generated.cs
+    - Input: ./rpfs/Omnius.Axis.Engines/Omnius.Axis.Engines.Internal.Models.rpf
+      Output: ./src/Omnius.Axis.Engines/Implementations/Internal/Models/_RocketPack/_Generated.cs
+    - Input: ./rpfs/Omnius.Axis.Remoting/Omnius.Axis.Remoting.rpf
+      Output: ./src/Omnius.Axis.Remoting/_RocketPack/_Generated.cs
+    - Input: ./rpfs/Omnius.Axis.Intaractors/Omnius.Axis.Intaractors.Models.rpf
+      Output: ./src/Omnius.Axis.Intaractors/Models/_RocketPack/_Generated.cs
+    - Input: ./rpfs/Omnius.Axis.Intaractors/Omnius.Axis.Intaractors.Internal.Models.rpf
+      Output: ./src/Omnius.Axis.Intaractors/Implementations/Internal/Models/_RocketPack/_Generated.cs

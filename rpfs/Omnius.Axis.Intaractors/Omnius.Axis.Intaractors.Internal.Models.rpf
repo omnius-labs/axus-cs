@@ -1,0 +1,9 @@
+syntax v1.0;
+
+using "Omnius.Core.Cryptography";
+using "Omnius.Core.Net";
+using "Omnius.Axis.Models";
+using "Omnius.Axis.Intaractors.Models";
+
+namespace "Omnius.Axis.Intaractors.Internal.Models";
+option csharp_access_level "internal";

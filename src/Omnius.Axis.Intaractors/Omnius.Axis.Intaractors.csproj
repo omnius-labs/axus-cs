@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Collections\Omnius.Core.Collections.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Cryptography\Omnius.Core.Cryptography.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Net.Proxies\Omnius.Core.Net.Proxies.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Net.Upnp\Omnius.Core.Net.Upnp.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Net\Omnius.Core.Net.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.RocketPack.Remoting\Omnius.Core.RocketPack.Remoting.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.RocketPack\Omnius.Core.RocketPack.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Storages\Omnius.Core.Storages.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Serialization\Omnius.Core.Serialization.csproj" />
+    <ProjectReference Include="..\..\refs\core\src\Omnius.Core\Omnius.Core.csproj" />
+    <ProjectReference Include="..\Omnius.Axis.Models\Omnius.Axis.Models.csproj" />
+    <ProjectReference Include="..\Omnius.Axis.Remoting\Omnius.Axis.Remoting.csproj" />
+    <ProjectReference Include="..\Omnius.Axis.Utils\Omnius.Axis.Utils.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LiteDB" Version="5.0.11" />
+    <PackageReference Include="NLog" Version="4.7.11" />
+  </ItemGroup>
+
+</Project>

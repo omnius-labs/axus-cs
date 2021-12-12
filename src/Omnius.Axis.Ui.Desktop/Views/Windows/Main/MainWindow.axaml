@@ -1,0 +1,40 @@
+<Window x:Class="Omnius.Axis.Ui.Desktop.Windows.MainWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:dataGrid="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
+    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+    xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:local="clr-namespace:Omnius.Axis.Ui.Desktop.Windows;assembly=Omnius.Axis.Ui.Desktop"
+    xmlns:controls="clr-namespace:Omnius.Axis.Ui.Desktop.Controls;assembly=Omnius.Axis.Ui.Desktop"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="Axis"
+    FontFamily="Meiryo UI, Lucida Grande, Ubuntu"
+    x:CompileBindings="false"
+    x:DataType="local:MainWindowViewModel"
+    mc:Ignorable="d"
+    d:DesignWidth="300"
+    d:DesignHeight="300" >
+
+    <Grid ColumnDefinitions="Auto,*" Background="{DynamicResource ThemeControlLowColor}">
+        <Grid RowDefinitions="*,Auto">
+            <ListBox Name="TabListBox" Background="Transparent">
+                <ListBoxItem Name="StatusListBoxItem" Content="Status" />
+                <ListBoxItem Name="PeersListBoxItem" Content="Peers" />
+                <ListBoxItem Name="SearchListBoxItem" Content="Search" />
+                <ListBoxItem Name="DownloadListBoxItem" Content="Download" />
+                <ListBoxItem Name="UploadListBoxItem" Content="Upload" />
+            </ListBox>
+            <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="8" Spacing="8">
+                <Button Content="Settings" Command="{Binding SettingsCommand}" />
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Column="1">
+            <controls:StatusControl IsVisible="{Binding #StatusListBoxItem.IsSelected}" DataContext="{Binding StatusControlViewModel}" />
+            <controls:PeersControl IsVisible="{Binding #PeersListBoxItem.IsSelected}" DataContext="{Binding PeersControlViewModel}" />
+            <controls:SearchControl IsVisible="{Binding #SearchListBoxItem.IsSelected}" />
+            <controls:DownloadControl IsVisible="{Binding #DownloadListBoxItem.IsSelected}" DataContext="{Binding DownloadControlViewModel}" />
+            <controls:UploadControl IsVisible="{Binding #UploadListBoxItem.IsSelected}" DataContext="{Binding UploadControlViewModel}" />
+        </Grid>
+    </Grid>
+</Window>

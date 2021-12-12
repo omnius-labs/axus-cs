@@ -25,9 +25,9 @@
     <FileVersion>$(AssemblyVersion)</FileVersion>
     <Authors>Lyrise</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/omnius-labs/xeus</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/omnius-labs/xeus</RepositoryUrl>
-    <PackageTags>Xeus</PackageTags>
+    <PackageProjectUrl>https://github.com/omnius-labs/axis</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/omnius-labs/axis</RepositoryUrl>
+    <PackageTags>Axis</PackageTags>
     <Copyright>Copyright (c) 2019 Lyrise</Copyright>
     <RepositoryType>git</RepositoryType>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

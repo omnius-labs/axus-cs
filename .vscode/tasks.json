@@ -2,12 +2,12 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build (Omnius.Xeus.Daemon)",
+            "label": "build (Omnius.Axis.Daemon)",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/src/Omnius.Xeus.Daemon/Omnius.Xeus.Daemon.csproj",
+                "${workspaceFolder}/src/Omnius.Axis.Daemon/Omnius.Axis.Daemon.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -19,12 +19,12 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "build (Omnius.Xeus.Ui.Desktop)",
+            "label": "build (Omnius.Axis.Ui.Desktop)",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/src/Omnius.Xeus.Ui.Desktop/Omnius.Xeus.Ui.Desktop.csproj",
+                "${workspaceFolder}/src/Omnius.Axis.Ui.Desktop/Omnius.Axis.Ui.Desktop.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],

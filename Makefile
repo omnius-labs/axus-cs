@@ -4,13 +4,13 @@ gen-code:
 	bash ./eng/gen-code.sh
 
 test:
-	dotnet test --filter "FullyQualifiedName~Omnius.Xeus"
+	dotnet test --filter "FullyQualifiedName~Omnius.Axis"
 
 build:
 	dotnet build
 
 run-designer: build
-	dotnet msbuild ./src/Omnius.Xeus.Ui.Desktop/ /t:Preview /p:XamlFile=$(PreviewXamlFile)
+	dotnet msbuild ./src/Omnius.Axis.Ui.Desktop/ /t:Preview /p:XamlFile=$(PreviewXamlFile)
 
 format:
 	dotnet tool run dotnet-format
