@@ -71,7 +71,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
         }
     }
 
-    // 実装する
+    // TODO 実装する
     public async ValueTask CheckConsistencyAsync(Action<ConsistencyReport> callback, CancellationToken cancellationToken = default)
     {
     }
@@ -146,7 +146,6 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
 
             using (await _asyncLock.LockAsync(cancellationToken))
             {
-                // FIXME: 途中で処理が中断された場合に残骸となったブロックを除去する処理が必要
                 var newPrefix = StringConverter.HashToString(rootHash);
                 var targetBlockHashes = merkleTreeSections.SkipLast(1).SelectMany(n => n.Hashes).ToArray();
                 await this.RenameBlocksAsync(tempPrefix, newPrefix, targetBlockHashes, cancellationToken);

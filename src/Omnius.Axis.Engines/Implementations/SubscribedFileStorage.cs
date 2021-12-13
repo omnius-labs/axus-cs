@@ -185,7 +185,7 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
         return result;
     }
 
-    // TODO: 実装する
+    // TODO 実装する
     public async ValueTask CheckConsistencyAsync(Action<ConsistencyReport> callback, CancellationToken cancellationToken = default)
     {
     }

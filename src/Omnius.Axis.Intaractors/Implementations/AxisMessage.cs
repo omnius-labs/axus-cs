@@ -8,6 +8,8 @@ using Omnius.Core.Serialization;
 
 namespace Omnius.Axis.Intaractors;
 
+// FIXME CRCをつける
+// FIXME バージョン情報を付ける
 public static class AxisMessage
 {
     private static readonly string _schema = "axis";
