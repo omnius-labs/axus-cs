@@ -74,20 +74,4 @@ internal static class IpAddressHelper
 
         return true;
     }
-
-    public static IEnumerable<IPAddress> GetMyGlobalIpAddresses()
-    {
-        var list = new HashSet<IPAddress>();
-
-        try
-        {
-            list.UnionWith(Dns.GetHostAddresses(Dns.GetHostName()).Where(n => IsGlobalIpAddress(n)));
-        }
-        catch (Exception e)
-        {
-            _logger.Error(e);
-        }
-
-        return list;
-    }
 }

@@ -1,6 +1,6 @@
 Version: 1
 Verbose: true
-StorageDirectoryPath: storage
+DatabaseDirectoryPath: db
 LogsDirectoryPath: logs
 ListenAddress: tcp(ip4(127.0.0.1),40001)
 Bandwidth:

@@ -132,16 +132,16 @@ public class IntaractorProvider : AsyncDisposableBase, IIntaractorProvider
 
         _dashboard = await Dashboard.CreateAsync(service, _bytesPool, cancellationToken);
 
-        var fileUploaderOptions = new FileUploaderOptions(Path.Combine(_appConfig.StorageDirectoryPath!, "file_uploader"));
+        var fileUploaderOptions = new FileUploaderOptions(Path.Combine(_appConfig.DatabaseDirectoryPath!, "file_uploader"));
         _fileUploader = await FileUploader.CreateAsync(service, KeyValueLiteDatabaseStorage.Factory, _bytesPool, fileUploaderOptions, cancellationToken);
 
-        var fileDownloaderOptions = new FileDownloaderOptions(Path.Combine(_appConfig.StorageDirectoryPath!, "file_downloader"));
+        var fileDownloaderOptions = new FileDownloaderOptions(Path.Combine(_appConfig.DatabaseDirectoryPath!, "file_downloader"));
         _fileDownloader = await FileDownloader.CreateAsync(service, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, fileDownloaderOptions, cancellationToken);
 
-        var profilePublisherOptions = new ProfilePublisherOptions(Path.Combine(_appConfig.StorageDirectoryPath!, "profile_publisher"));
+        var profilePublisherOptions = new ProfilePublisherOptions(Path.Combine(_appConfig.DatabaseDirectoryPath!, "profile_publisher"));
         _profilePublisher = await ProfilePublisher.CreateAsync(service, KeyValueLiteDatabaseStorage.Factory, _bytesPool, profilePublisherOptions);
 
-        var profileSubscriberOptions = new ProfileSubscriberOptions(Path.Combine(_appConfig.StorageDirectoryPath!, "profile_subscriber"));
+        var profileSubscriberOptions = new ProfileSubscriberOptions(Path.Combine(_appConfig.DatabaseDirectoryPath!, "profile_subscriber"));
         _profileSubscriber = await ProfileSubscriber.CreateAsync(service, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, profileSubscriberOptions);
     }
 

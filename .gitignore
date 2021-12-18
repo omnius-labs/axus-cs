@@ -1,11 +1,10 @@
 # Custom
 tmp/
-pub/
 patch.txt
-demo/daemon_*/logs/
-demo/daemon_*/storage/
-demo/ui-desktop_*/logs/
-demo/ui-desktop_*/storage/
+pub/*/bin/
+pub/*/storage/
+demo/*/logs/
+demo/*/db/
 
 # Environment
 .env

@@ -40,7 +40,7 @@ public partial class Bootstrapper : AsyncDisposableBase
 
             serviceCollection.AddSingleton(_appConfig);
 
-            _uiState = await UiStatus.LoadAsync(Path.Combine(_appConfig.StorageDirectoryPath!, "ui_state.json"));
+            _uiState = await UiStatus.LoadAsync(Path.Combine(_appConfig.DatabaseDirectoryPath!, "ui_state.json"));
             serviceCollection.AddSingleton(_uiState);
 
             serviceCollection.AddSingleton<IBytesPool>(BytesPool.Shared);
@@ -88,7 +88,7 @@ public partial class Bootstrapper : AsyncDisposableBase
     public async ValueTask SaveAsync(CancellationToken cancellationToken = default)
     {
         if (_uiState is null) throw new NullReferenceException(nameof(_uiState));
-        await _uiState.SaveAsync(Path.Combine(_appConfig!.StorageDirectoryPath!, "ui_state.json"));
+        await _uiState.SaveAsync(Path.Combine(_appConfig!.DatabaseDirectoryPath!, "ui_state.json"));
     }
 
     public async ValueTask<ServiceProvider?> GetServiceProvider()

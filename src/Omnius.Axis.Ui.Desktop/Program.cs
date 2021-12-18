@@ -28,12 +28,12 @@ public class Program
     {
         var appConfig = await AppConfig.LoadAsync(o.ConfigPath);
 
-        DirectoryHelper.CreateDirectory(appConfig.StorageDirectoryPath!);
+        DirectoryHelper.CreateDirectory(appConfig.DatabaseDirectoryPath!);
         DirectoryHelper.CreateDirectory(appConfig.LogsDirectoryPath!);
 
         SetLogsDirectory(appConfig.LogsDirectoryPath!);
 
-        if (appConfig.Verbose) ChangeLogLevel(NLog.LogLevel.Trace);
+        if (appConfig.Mode == RunMode.Debug) ChangeLogLevel(NLog.LogLevel.Trace);
 
         Bootstrapper.Instance.Build(appConfig);
 

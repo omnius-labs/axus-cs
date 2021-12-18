@@ -10,9 +10,9 @@ public class AppConfig
 
     public int Version { get; init; }
 
-    public bool Verbose { get; init; }
+    public RunMode Mode { get; init; }
 
-    public string? StorageDirectoryPath { get; init; }
+    public string? DatabaseDirectoryPath { get; init; }
 
     public string? LogsDirectoryPath { get; init; }
 
@@ -40,9 +40,9 @@ public class AppConfig
         result ??= new AppConfig()
         {
             Version = 1,
-            StorageDirectoryPath = "storage",
+            Mode = RunMode.Release,
+            DatabaseDirectoryPath = "db",
             LogsDirectoryPath = "logs",
-            Verbose = false,
             ListenAddress = OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 32321).ToString(),
             Bandwidth = new BandwidthConfig()
             {
@@ -64,10 +64,12 @@ public class AppConfig
                 TcpAccepter = new TcpAccepterConfig()
                 {
                     UseUpnp = true,
-                    ListenAddress = OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 32320).ToString(),
+                    ListenAddress = OmniAddress.CreateTcpEndpoint(IPAddress.Any, (ushort)Random.Shared.Next(10000, 60000)).ToString(),
                 },
             },
         };
+
+        YamlHelper.WriteFile(configPath, result);
 
         return result;
     }
@@ -76,6 +78,12 @@ public class AppConfig
     {
         YamlHelper.WriteFile(configPath, this);
     }
+}
+
+public enum RunMode
+{
+    Debug,
+    Release,
 }
 
 public class BandwidthConfig

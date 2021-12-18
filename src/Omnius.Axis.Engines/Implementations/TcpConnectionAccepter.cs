@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
+using LazyCache;
+using Microsoft.Extensions.Caching.Memory;
 using Omnius.Axis.Engines.Internal;
 using Omnius.Core;
 using Omnius.Core.Net;
@@ -8,7 +10,6 @@ using Omnius.Core.Net.Connections;
 using Omnius.Core.Net.Connections.Bridge;
 using Omnius.Core.Net.Upnp;
 using Omnius.Core.Tasks;
-
 namespace Omnius.Axis.Engines;
 
 public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnectionAccepter
@@ -22,6 +23,7 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
     private readonly IBytesPool _bytesPool;
     private readonly TcpConnectionAccepterOptions _options;
 
+    private readonly CachingService _cache;
     private TcpListenerManager? _tcpListenerManager;
     private readonly AsyncLock _asyncLock = new();
 
@@ -41,6 +43,8 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
         _batchActionDispatcher = batchActionDispatcher;
         _bytesPool = bytesPool;
         _options = options;
+
+        _cache = new CachingService();
     }
 
     protected override async ValueTask OnDisposeAsync()
@@ -87,15 +91,18 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
 
     public async ValueTask<OmniAddress[]> GetListenEndpointsAsync(CancellationToken cancellationToken = default)
     {
+        var options = new MemoryCacheEntryOptions() { SlidingExpiration = TimeSpan.FromMinutes(30) };
+        return await _cache.GetOrAddAsync("GetListenEndpointsAsync", async (_) => await this.InternalGetListenEndpointsAsync(cancellationToken), options);
+    }
+
+    private async ValueTask<OmniAddress[]> InternalGetListenEndpointsAsync(CancellationToken cancellationToken = default)
+    {
         if (!_options.ListenAddress.TryGetTcpEndpoint(out var listenIpAddress, out var port)) Array.Empty<OmniAddress>();
 
         var results = new List<OmniAddress>();
-
-#if DEBUG
         results.Add(OmniAddress.CreateTcpEndpoint(listenIpAddress, port));
-#endif
 
-        var globalIpAddresses = IpAddressHelper.GetMyGlobalIpAddresses();
+        var globalIpAddresses = await this.GetMyGlobalIpAddressesAsync(cancellationToken);
 
         if (listenIpAddress.AddressFamily == AddressFamily.InterNetwork && listenIpAddress == IPAddress.Any)
         {
@@ -113,5 +120,40 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
         }
 
         return results.ToArray();
+    }
+
+    public async ValueTask<IEnumerable<IPAddress>> GetMyGlobalIpAddressesAsync(CancellationToken cancellationToken = default)
+    {
+        var list = new HashSet<IPAddress>();
+
+        try
+        {
+            if (_options.UseUpnp)
+            {
+                using var upnpClient = _upnpClientFactory.Create();
+                await upnpClient.ConnectAsync(cancellationToken);
+                var externalIp = IPAddress.Parse(await upnpClient.GetExternalIpAddressAsync(cancellationToken));
+
+                if (IpAddressHelper.IsGlobalIpAddress(externalIp))
+                {
+                    list.Add(externalIp);
+                }
+            }
+
+            foreach (var ipAddress in Dns.GetHostAddresses(Dns.GetHostName()))
+            {
+#if !DEBUG
+                if (!Internal.IpAddressHelper.IsGlobalIpAddress(ipAddress)) continue;
+#endif
+
+                list.Add(ipAddress);
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e);
+        }
+
+        return list;
     }
 }

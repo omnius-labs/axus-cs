@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    env:
+      ContinuousIntegrationBuild: true
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v2
+        with:
+          submodules: "recursive"
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+          include-prerelease: true
+      - name: Setup dotnet tool
+        run: dotnet tool restore
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: sh build.sh
+      - name: Zip
+        run: |
+          zip -r axis.win-x64.zip ./pub/win-x64/* \
+          zip -r axis.linux-x64.zip ./pub/linux-x64/*
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            axis.win-x64.zip
+            axis.linux-x64.zip
