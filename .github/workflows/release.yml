@@ -30,9 +30,8 @@ jobs:
         run: sh build-linux.sh
       - name: Zip
         run: |
-          cd ./pub \
-          && zip -r ../axis.win-x64.zip ./win-x64/* \
-          && zip -r ../axis.linux-x64.zip ./linux-x64/*
+          cd ./pub/win-x64 && zip -r ../../axis.win-x64.zip ./* \
+          && cd ./pub/linux-x64 && zip -r ../../axis.linux-x64.zip ./*
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
