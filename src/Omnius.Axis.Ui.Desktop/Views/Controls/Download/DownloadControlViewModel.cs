@@ -5,6 +5,7 @@ using System.Text;
 using Omnius.Axis.Intaractors;
 using Omnius.Axis.Intaractors.Models;
 using Omnius.Axis.Ui.Desktop.Configuration;
+using Omnius.Axis.Ui.Desktop.Internal;
 using Omnius.Axis.Ui.Desktop.ViewModels;
 using Omnius.Core;
 using Omnius.Core.Avalonia;

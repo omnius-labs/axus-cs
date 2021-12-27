@@ -7,7 +7,7 @@ namespace Omnius.Axis.Engines;
 
 public interface ISubscribedFileStorage : IWritableFileStorage, IAsyncDisposable
 {
-    ValueTask<SubscribedFileStorageReport> GetReportAsync(CancellationToken cancellationToken = default);
+    ValueTask<IEnumerable<SubscribedFileReport>> GetSubscribedFileReportsAsync(CancellationToken cancellationToken = default);
 
     ValueTask<IEnumerable<OmniHash>> GetWantContentHashesAsync(CancellationToken cancellationToken = default);
 

@@ -2,6 +2,7 @@
 #nullable enable
 
 namespace Omnius.Axis.Engines.Internal.Models;
+
 internal enum SessionManagerVersion : sbyte
 {
     Unknown = 0,

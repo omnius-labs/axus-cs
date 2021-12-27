@@ -10,5 +10,3 @@
       Output: ./src/Omnius.Axis.Remoting/_RocketPack/_Generated.cs
     - Input: ./rpfs/Omnius.Axis.Intaractors/Omnius.Axis.Intaractors.Models.rpf
       Output: ./src/Omnius.Axis.Intaractors/Models/_RocketPack/_Generated.cs
-    - Input: ./rpfs/Omnius.Axis.Intaractors/Omnius.Axis.Intaractors.Internal.Models.rpf
-      Output: ./src/Omnius.Axis.Intaractors/Implementations/Internal/Models/_RocketPack/_Generated.cs

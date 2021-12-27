@@ -82,7 +82,7 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
         _connectedAddressSet.Dispose();
     }
 
-    public async ValueTask<ShoutExchangerReport> GetReportAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<SessionReport>> GetSessionReportsAsync(CancellationToken cancellationToken = default)
     {
         var sessionReports = new List<SessionReport>();
 
@@ -91,7 +91,7 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
             sessionReports.Add(new SessionReport(ServiceName, status.Session.HandshakeType, status.Session.Address));
         }
 
-        return new ShoutExchangerReport(0, 0, sessionReports.ToArray());
+        return sessionReports.ToArray();
     }
 
     public IEnumerable<ContentClue> GetPushContentClues()

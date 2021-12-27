@@ -6,7 +6,7 @@ public interface INodeFinder : IAsyncDisposable
 {
     INodeFinderEvents GetEvents();
 
-    ValueTask<NodeFinderReport> GetReportAsync(CancellationToken cancellationToken = default);
+    ValueTask<IEnumerable<SessionReport>> GetSessionReportsAsync(CancellationToken cancellationToken = default);
 
     ValueTask<NodeLocation> GetMyNodeLocationAsync(CancellationToken cancellationToken = default);
 

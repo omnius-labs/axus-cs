@@ -2,6 +2,207 @@
 #nullable enable
 
 namespace Omnius.Axis.Remoting;
+
+public sealed partial class GetConfigResult : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.GetConfigResult>
+{
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Remoting.GetConfigResult> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.GetConfigResult>.Formatter;
+    public static global::Omnius.Axis.Remoting.GetConfigResult Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.GetConfigResult>.Empty;
+
+    static GetConfigResult()
+    {
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.GetConfigResult>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.GetConfigResult>.Empty = new global::Omnius.Axis.Remoting.GetConfigResult(global::Omnius.Axis.Models.ServiceConfig.Empty);
+    }
+
+    private readonly global::System.Lazy<int> ___hashCode;
+
+    public GetConfigResult(global::Omnius.Axis.Models.ServiceConfig config)
+    {
+        if (config is null) throw new global::System.ArgumentNullException("config");
+
+        this.Config = config;
+
+        ___hashCode = new global::System.Lazy<int>(() =>
+        {
+            var ___h = new global::System.HashCode();
+            if (config != default) ___h.Add(config.GetHashCode());
+            return ___h.ToHashCode();
+        });
+    }
+
+    public global::Omnius.Axis.Models.ServiceConfig Config { get; }
+
+    public static global::Omnius.Axis.Remoting.GetConfigResult Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
+        return Formatter.Deserialize(ref reader, 0);
+    }
+    public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
+        Formatter.Serialize(ref writer, this, 0);
+    }
+
+    public static bool operator ==(global::Omnius.Axis.Remoting.GetConfigResult? left, global::Omnius.Axis.Remoting.GetConfigResult? right)
+    {
+        return (right is null) ? (left is null) : right.Equals(left);
+    }
+    public static bool operator !=(global::Omnius.Axis.Remoting.GetConfigResult? left, global::Omnius.Axis.Remoting.GetConfigResult? right)
+    {
+        return !(left == right);
+    }
+    public override bool Equals(object? other)
+    {
+        if (other is not global::Omnius.Axis.Remoting.GetConfigResult) return false;
+        return this.Equals((global::Omnius.Axis.Remoting.GetConfigResult)other);
+    }
+    public bool Equals(global::Omnius.Axis.Remoting.GetConfigResult? target)
+    {
+        if (target is null) return false;
+        if (object.ReferenceEquals(this, target)) return true;
+        if (this.Config != target.Config) return false;
+
+        return true;
+    }
+    public override int GetHashCode() => ___hashCode.Value;
+
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Remoting.GetConfigResult>
+    {
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axis.Remoting.GetConfigResult value, in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            if (value.Config != global::Omnius.Axis.Models.ServiceConfig.Empty)
+            {
+                w.Write((uint)1);
+                global::Omnius.Axis.Models.ServiceConfig.Formatter.Serialize(ref w, value.Config, rank + 1);
+            }
+            w.Write((uint)0);
+        }
+        public global::Omnius.Axis.Remoting.GetConfigResult Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            global::Omnius.Axis.Models.ServiceConfig p_config = global::Omnius.Axis.Models.ServiceConfig.Empty;
+
+            for (; ; )
+            {
+                uint id = r.GetUInt32();
+                if (id == 0) break;
+                switch (id)
+                {
+                    case 1:
+                        {
+                            p_config = global::Omnius.Axis.Models.ServiceConfig.Formatter.Deserialize(ref r, rank + 1);
+                            break;
+                        }
+                }
+            }
+
+            return new global::Omnius.Axis.Remoting.GetConfigResult(p_config);
+        }
+    }
+}
+public sealed partial class SetConfigRequest : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.SetConfigRequest>
+{
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Remoting.SetConfigRequest> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.SetConfigRequest>.Formatter;
+    public static global::Omnius.Axis.Remoting.SetConfigRequest Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.SetConfigRequest>.Empty;
+
+    static SetConfigRequest()
+    {
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.SetConfigRequest>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.SetConfigRequest>.Empty = new global::Omnius.Axis.Remoting.SetConfigRequest(global::Omnius.Axis.Models.ServiceConfig.Empty);
+    }
+
+    private readonly global::System.Lazy<int> ___hashCode;
+
+    public SetConfigRequest(global::Omnius.Axis.Models.ServiceConfig config)
+    {
+        if (config is null) throw new global::System.ArgumentNullException("config");
+
+        this.Config = config;
+
+        ___hashCode = new global::System.Lazy<int>(() =>
+        {
+            var ___h = new global::System.HashCode();
+            if (config != default) ___h.Add(config.GetHashCode());
+            return ___h.ToHashCode();
+        });
+    }
+
+    public global::Omnius.Axis.Models.ServiceConfig Config { get; }
+
+    public static global::Omnius.Axis.Remoting.SetConfigRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
+        return Formatter.Deserialize(ref reader, 0);
+    }
+    public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
+        Formatter.Serialize(ref writer, this, 0);
+    }
+
+    public static bool operator ==(global::Omnius.Axis.Remoting.SetConfigRequest? left, global::Omnius.Axis.Remoting.SetConfigRequest? right)
+    {
+        return (right is null) ? (left is null) : right.Equals(left);
+    }
+    public static bool operator !=(global::Omnius.Axis.Remoting.SetConfigRequest? left, global::Omnius.Axis.Remoting.SetConfigRequest? right)
+    {
+        return !(left == right);
+    }
+    public override bool Equals(object? other)
+    {
+        if (other is not global::Omnius.Axis.Remoting.SetConfigRequest) return false;
+        return this.Equals((global::Omnius.Axis.Remoting.SetConfigRequest)other);
+    }
+    public bool Equals(global::Omnius.Axis.Remoting.SetConfigRequest? target)
+    {
+        if (target is null) return false;
+        if (object.ReferenceEquals(this, target)) return true;
+        if (this.Config != target.Config) return false;
+
+        return true;
+    }
+    public override int GetHashCode() => ___hashCode.Value;
+
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Remoting.SetConfigRequest>
+    {
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axis.Remoting.SetConfigRequest value, in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            if (value.Config != global::Omnius.Axis.Models.ServiceConfig.Empty)
+            {
+                w.Write((uint)1);
+                global::Omnius.Axis.Models.ServiceConfig.Formatter.Serialize(ref w, value.Config, rank + 1);
+            }
+            w.Write((uint)0);
+        }
+        public global::Omnius.Axis.Remoting.SetConfigRequest Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            global::Omnius.Axis.Models.ServiceConfig p_config = global::Omnius.Axis.Models.ServiceConfig.Empty;
+
+            for (; ; )
+            {
+                uint id = r.GetUInt32();
+                if (id == 0) break;
+                switch (id)
+                {
+                    case 1:
+                        {
+                            p_config = global::Omnius.Axis.Models.ServiceConfig.Formatter.Deserialize(ref r, rank + 1);
+                            break;
+                        }
+                }
+            }
+
+            return new global::Omnius.Axis.Remoting.SetConfigRequest(p_config);
+        }
+    }
+}
 public sealed partial class GetSessionsReportResult : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.GetSessionsReportResult>
 {
     public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Remoting.GetSessionsReportResult> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.GetSessionsReportResult>.Formatter;
@@ -2822,6 +3023,8 @@ public sealed partial class TryExportShoutResult : global::Omnius.Core.RocketPac
 }
 public interface IAxisService
 {
+    global::System.Threading.Tasks.ValueTask<global::Omnius.Axis.Remoting.GetConfigResult> GetConfigAsync(global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.ValueTask SetConfigAsync(global::Omnius.Axis.Remoting.SetConfigRequest param, global::System.Threading.CancellationToken cancellationToken = default);
     global::System.Threading.Tasks.ValueTask<global::Omnius.Axis.Remoting.GetSessionsReportResult> GetSessionsReportAsync(global::System.Threading.CancellationToken cancellationToken = default);
     global::System.Threading.Tasks.ValueTask<global::Omnius.Axis.Remoting.GetMyNodeLocationResult> GetMyNodeLocationAsync(global::System.Threading.CancellationToken cancellationToken = default);
     global::System.Threading.Tasks.ValueTask AddCloudNodeLocationsAsync(global::Omnius.Axis.Remoting.AddCloudNodeLocationsRequest param, global::System.Threading.CancellationToken cancellationToken = default);
@@ -2855,104 +3058,114 @@ public class AxisServiceRemoting
             _callerFactory = callerFactory;
             _bytesPool = bytesPool;
         }
-        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axis.Remoting.GetSessionsReportResult> GetSessionsReportAsync(global::System.Threading.CancellationToken cancellationToken = default)
+        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axis.Remoting.GetConfigResult> GetConfigAsync(global::System.Threading.CancellationToken cancellationToken = default)
         {
             await using var caller = await _callerFactory.CreateAsync(1, cancellationToken);
+            return await caller.CallFunctionAsync<global::Omnius.Axis.Remoting.GetConfigResult>(cancellationToken);
+        }
+        public async global::System.Threading.Tasks.ValueTask SetConfigAsync(global::Omnius.Axis.Remoting.SetConfigRequest param, global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            await using var caller = await _callerFactory.CreateAsync(2, cancellationToken);
+            await caller.CallActionAsync<global::Omnius.Axis.Remoting.SetConfigRequest>(param, cancellationToken);
+        }
+        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axis.Remoting.GetSessionsReportResult> GetSessionsReportAsync(global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            await using var caller = await _callerFactory.CreateAsync(3, cancellationToken);
             return await caller.CallFunctionAsync<global::Omnius.Axis.Remoting.GetSessionsReportResult>(cancellationToken);
         }
         public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axis.Remoting.GetMyNodeLocationResult> GetMyNodeLocationAsync(global::System.Threading.CancellationToken cancellationToken = default)
         {
-            await using var caller = await _callerFactory.CreateAsync(2, cancellationToken);
+            await using var caller = await _callerFactory.CreateAsync(4, cancellationToken);
             return await caller.CallFunctionAsync<global::Omnius.Axis.Remoting.GetMyNodeLocationResult>(cancellationToken);
         }
         public async global::System.Threading.Tasks.ValueTask AddCloudNodeLocationsAsync(global::Omnius.Axis.Remoting.AddCloudNodeLocationsRequest param, global::System.Threading.CancellationToken cancellationToken = default)
         {
-            await using var caller = await _callerFactory.CreateAsync(3, cancellationToken);
+            await using var caller = await _callerFactory.CreateAsync(5, cancellationToken);
             await caller.CallActionAsync<global::Omnius.Axis.Remoting.AddCloudNodeLocationsRequest>(param, cancellationToken);
         }
         public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axis.Remoting.GetPublishedFilesReportResult> GetPublishedFilesReportAsync(global::System.Threading.CancellationToken cancellationToken = default)
         {
-            await using var caller = await _callerFactory.CreateAsync(4, cancellationToken);
+            await using var caller = await _callerFactory.CreateAsync(6, cancellationToken);
             return await caller.CallFunctionAsync<global::Omnius.Axis.Remoting.GetPublishedFilesReportResult>(cancellationToken);
         }
         public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axis.Remoting.PublishFileFromStorageResult> PublishFileFromStorageAsync(global::Omnius.Axis.Remoting.PublishFileFromStorageRequest param, global::System.Threading.CancellationToken cancellationToken = default)
         {
-            await using var caller = await _callerFactory.CreateAsync(5, cancellationToken);
+            await using var caller = await _callerFactory.CreateAsync(7, cancellationToken);
             return await caller.CallFunctionAsync<global::Omnius.Axis.Remoting.PublishFileFromStorageRequest, global::Omnius.Axis.Remoting.PublishFileFromStorageResult>(param, cancellationToken);
         }
         public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axis.Remoting.PublishFileFromMemoryResult> PublishFileFromMemoryAsync(global::Omnius.Axis.Remoting.PublishFileFromMemoryRequest param, global::System.Threading.CancellationToken cancellationToken = default)
         {
-            await using var caller = await _callerFactory.CreateAsync(6, cancellationToken);
+            await using var caller = await _callerFactory.CreateAsync(8, cancellationToken);
             return await caller.CallFunctionAsync<global::Omnius.Axis.Remoting.PublishFileFromMemoryRequest, global::Omnius.Axis.Remoting.PublishFileFromMemoryResult>(param, cancellationToken);
         }
         public async global::System.Threading.Tasks.ValueTask UnpublishFileFromStorageAsync(global::Omnius.Axis.Remoting.UnpublishFileFromStorageRequest param, global::System.Threading.CancellationToken cancellationToken = default)
         {
-            await using var caller = await _callerFactory.CreateAsync(7, cancellationToken);
+            await using var caller = await _callerFactory.CreateAsync(9, cancellationToken);
             await caller.CallActionAsync<global::Omnius.Axis.Remoting.UnpublishFileFromStorageRequest>(param, cancellationToken);
         }
         public async global::System.Threading.Tasks.ValueTask UnpublishFileFromMemoryAsync(global::Omnius.Axis.Remoting.UnpublishFileFromMemoryRequest param, global::System.Threading.CancellationToken cancellationToken = default)
         {
-            await using var caller = await _callerFactory.CreateAsync(8, cancellationToken);
+            await using var caller = await _callerFactory.CreateAsync(10, cancellationToken);
             await caller.CallActionAsync<global::Omnius.Axis.Remoting.UnpublishFileFromMemoryRequest>(param, cancellationToken);
         }
         public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axis.Remoting.GetSubscribedFilesReportResult> GetSubscribedFilesReportAsync(global::System.Threading.CancellationToken cancellationToken = default)
         {
-            await using var caller = await _callerFactory.CreateAsync(9, cancellationToken);
+            await using var caller = await _callerFactory.CreateAsync(11, cancellationToken);
             return await caller.CallFunctionAsync<global::Omnius.Axis.Remoting.GetSubscribedFilesReportResult>(cancellationToken);
         }
         public async global::System.Threading.Tasks.ValueTask SubscribeFileAsync(global::Omnius.Axis.Remoting.SubscribeFileRequest param, global::System.Threading.CancellationToken cancellationToken = default)
         {
-            await using var caller = await _callerFactory.CreateAsync(10, cancellationToken);
+            await using var caller = await _callerFactory.CreateAsync(12, cancellationToken);
             await caller.CallActionAsync<global::Omnius.Axis.Remoting.SubscribeFileRequest>(param, cancellationToken);
         }
         public async global::System.Threading.Tasks.ValueTask UnsubscribeFileAsync(global::Omnius.Axis.Remoting.UnsubscribeFileRequest param, global::System.Threading.CancellationToken cancellationToken = default)
         {
-            await using var caller = await _callerFactory.CreateAsync(11, cancellationToken);
+            await using var caller = await _callerFactory.CreateAsync(13, cancellationToken);
             await caller.CallActionAsync<global::Omnius.Axis.Remoting.UnsubscribeFileRequest>(param, cancellationToken);
         }
         public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axis.Remoting.TryExportFileToStorageResult> TryExportFileToStorageAsync(global::Omnius.Axis.Remoting.TryExportFileToStorageRequest param, global::System.Threading.CancellationToken cancellationToken = default)
         {
-            await using var caller = await _callerFactory.CreateAsync(12, cancellationToken);
+            await using var caller = await _callerFactory.CreateAsync(14, cancellationToken);
             return await caller.CallFunctionAsync<global::Omnius.Axis.Remoting.TryExportFileToStorageRequest, global::Omnius.Axis.Remoting.TryExportFileToStorageResult>(param, cancellationToken);
         }
         public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axis.Remoting.TryExportFileToMemoryResult> TryExportFileToMemoryAsync(global::Omnius.Axis.Remoting.TryExportFileToMemoryRequest param, global::System.Threading.CancellationToken cancellationToken = default)
         {
-            await using var caller = await _callerFactory.CreateAsync(13, cancellationToken);
+            await using var caller = await _callerFactory.CreateAsync(15, cancellationToken);
             return await caller.CallFunctionAsync<global::Omnius.Axis.Remoting.TryExportFileToMemoryRequest, global::Omnius.Axis.Remoting.TryExportFileToMemoryResult>(param, cancellationToken);
         }
         public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axis.Remoting.GetPublishedShoutsReportResult> GetPublishedShoutsReportAsync(global::System.Threading.CancellationToken cancellationToken = default)
         {
-            await using var caller = await _callerFactory.CreateAsync(14, cancellationToken);
+            await using var caller = await _callerFactory.CreateAsync(16, cancellationToken);
             return await caller.CallFunctionAsync<global::Omnius.Axis.Remoting.GetPublishedShoutsReportResult>(cancellationToken);
         }
         public async global::System.Threading.Tasks.ValueTask PublishShoutAsync(global::Omnius.Axis.Remoting.PublishShoutRequest param, global::System.Threading.CancellationToken cancellationToken = default)
         {
-            await using var caller = await _callerFactory.CreateAsync(15, cancellationToken);
+            await using var caller = await _callerFactory.CreateAsync(17, cancellationToken);
             await caller.CallActionAsync<global::Omnius.Axis.Remoting.PublishShoutRequest>(param, cancellationToken);
         }
         public async global::System.Threading.Tasks.ValueTask UnpublishShoutAsync(global::Omnius.Axis.Remoting.UnpublishShoutRequest param, global::System.Threading.CancellationToken cancellationToken = default)
         {
-            await using var caller = await _callerFactory.CreateAsync(16, cancellationToken);
+            await using var caller = await _callerFactory.CreateAsync(18, cancellationToken);
             await caller.CallActionAsync<global::Omnius.Axis.Remoting.UnpublishShoutRequest>(param, cancellationToken);
         }
         public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axis.Remoting.GetSubscribedShoutsReportResult> GetSubscribedShoutsReportAsync(global::System.Threading.CancellationToken cancellationToken = default)
         {
-            await using var caller = await _callerFactory.CreateAsync(17, cancellationToken);
+            await using var caller = await _callerFactory.CreateAsync(19, cancellationToken);
             return await caller.CallFunctionAsync<global::Omnius.Axis.Remoting.GetSubscribedShoutsReportResult>(cancellationToken);
         }
         public async global::System.Threading.Tasks.ValueTask SubscribeShoutAsync(global::Omnius.Axis.Remoting.SubscribeShoutRequest param, global::System.Threading.CancellationToken cancellationToken = default)
         {
-            await using var caller = await _callerFactory.CreateAsync(18, cancellationToken);
+            await using var caller = await _callerFactory.CreateAsync(20, cancellationToken);
             await caller.CallActionAsync<global::Omnius.Axis.Remoting.SubscribeShoutRequest>(param, cancellationToken);
         }
         public async global::System.Threading.Tasks.ValueTask UnsubscribeShoutAsync(global::Omnius.Axis.Remoting.UnsubscribeShoutRequest param, global::System.Threading.CancellationToken cancellationToken = default)
         {
-            await using var caller = await _callerFactory.CreateAsync(19, cancellationToken);
+            await using var caller = await _callerFactory.CreateAsync(21, cancellationToken);
             await caller.CallActionAsync<global::Omnius.Axis.Remoting.UnsubscribeShoutRequest>(param, cancellationToken);
         }
         public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axis.Remoting.TryExportShoutResult> TryExportShoutAsync(global::Omnius.Axis.Remoting.TryExportShoutRequest param, global::System.Threading.CancellationToken cancellationToken = default)
         {
-            await using var caller = await _callerFactory.CreateAsync(20, cancellationToken);
+            await using var caller = await _callerFactory.CreateAsync(22, cancellationToken);
             return await caller.CallFunctionAsync<global::Omnius.Axis.Remoting.TryExportShoutRequest, global::Omnius.Axis.Remoting.TryExportShoutResult>(param, cancellationToken);
         }
     }
@@ -2978,100 +3191,110 @@ public class AxisServiceRemoting
                 {
                     case 1:
                         {
-                            await listener.ListenFunctionAsync<global::Omnius.Axis.Remoting.GetSessionsReportResult>(_service.GetSessionsReportAsync, cancellationToken);
+                            await listener.ListenFunctionAsync<global::Omnius.Axis.Remoting.GetConfigResult>(_service.GetConfigAsync, cancellationToken);
                         }
                         break;
                     case 2:
                         {
-                            await listener.ListenFunctionAsync<global::Omnius.Axis.Remoting.GetMyNodeLocationResult>(_service.GetMyNodeLocationAsync, cancellationToken);
+                            await listener.ListenActionAsync<global::Omnius.Axis.Remoting.SetConfigRequest>(_service.SetConfigAsync, cancellationToken);
                         }
                         break;
                     case 3:
                         {
-                            await listener.ListenActionAsync<global::Omnius.Axis.Remoting.AddCloudNodeLocationsRequest>(_service.AddCloudNodeLocationsAsync, cancellationToken);
+                            await listener.ListenFunctionAsync<global::Omnius.Axis.Remoting.GetSessionsReportResult>(_service.GetSessionsReportAsync, cancellationToken);
                         }
                         break;
                     case 4:
                         {
-                            await listener.ListenFunctionAsync<global::Omnius.Axis.Remoting.GetPublishedFilesReportResult>(_service.GetPublishedFilesReportAsync, cancellationToken);
+                            await listener.ListenFunctionAsync<global::Omnius.Axis.Remoting.GetMyNodeLocationResult>(_service.GetMyNodeLocationAsync, cancellationToken);
                         }
                         break;
                     case 5:
                         {
-                            await listener.ListenFunctionAsync<global::Omnius.Axis.Remoting.PublishFileFromStorageRequest, global::Omnius.Axis.Remoting.PublishFileFromStorageResult>(_service.PublishFileFromStorageAsync, cancellationToken);
+                            await listener.ListenActionAsync<global::Omnius.Axis.Remoting.AddCloudNodeLocationsRequest>(_service.AddCloudNodeLocationsAsync, cancellationToken);
                         }
                         break;
                     case 6:
                         {
-                            await listener.ListenFunctionAsync<global::Omnius.Axis.Remoting.PublishFileFromMemoryRequest, global::Omnius.Axis.Remoting.PublishFileFromMemoryResult>(_service.PublishFileFromMemoryAsync, cancellationToken);
+                            await listener.ListenFunctionAsync<global::Omnius.Axis.Remoting.GetPublishedFilesReportResult>(_service.GetPublishedFilesReportAsync, cancellationToken);
                         }
                         break;
                     case 7:
                         {
-                            await listener.ListenActionAsync<global::Omnius.Axis.Remoting.UnpublishFileFromStorageRequest>(_service.UnpublishFileFromStorageAsync, cancellationToken);
+                            await listener.ListenFunctionAsync<global::Omnius.Axis.Remoting.PublishFileFromStorageRequest, global::Omnius.Axis.Remoting.PublishFileFromStorageResult>(_service.PublishFileFromStorageAsync, cancellationToken);
                         }
                         break;
                     case 8:
                         {
-                            await listener.ListenActionAsync<global::Omnius.Axis.Remoting.UnpublishFileFromMemoryRequest>(_service.UnpublishFileFromMemoryAsync, cancellationToken);
+                            await listener.ListenFunctionAsync<global::Omnius.Axis.Remoting.PublishFileFromMemoryRequest, global::Omnius.Axis.Remoting.PublishFileFromMemoryResult>(_service.PublishFileFromMemoryAsync, cancellationToken);
                         }
                         break;
                     case 9:
                         {
-                            await listener.ListenFunctionAsync<global::Omnius.Axis.Remoting.GetSubscribedFilesReportResult>(_service.GetSubscribedFilesReportAsync, cancellationToken);
+                            await listener.ListenActionAsync<global::Omnius.Axis.Remoting.UnpublishFileFromStorageRequest>(_service.UnpublishFileFromStorageAsync, cancellationToken);
                         }
                         break;
                     case 10:
                         {
-                            await listener.ListenActionAsync<global::Omnius.Axis.Remoting.SubscribeFileRequest>(_service.SubscribeFileAsync, cancellationToken);
+                            await listener.ListenActionAsync<global::Omnius.Axis.Remoting.UnpublishFileFromMemoryRequest>(_service.UnpublishFileFromMemoryAsync, cancellationToken);
                         }
                         break;
                     case 11:
                         {
-                            await listener.ListenActionAsync<global::Omnius.Axis.Remoting.UnsubscribeFileRequest>(_service.UnsubscribeFileAsync, cancellationToken);
+                            await listener.ListenFunctionAsync<global::Omnius.Axis.Remoting.GetSubscribedFilesReportResult>(_service.GetSubscribedFilesReportAsync, cancellationToken);
                         }
                         break;
                     case 12:
                         {
-                            await listener.ListenFunctionAsync<global::Omnius.Axis.Remoting.TryExportFileToStorageRequest, global::Omnius.Axis.Remoting.TryExportFileToStorageResult>(_service.TryExportFileToStorageAsync, cancellationToken);
+                            await listener.ListenActionAsync<global::Omnius.Axis.Remoting.SubscribeFileRequest>(_service.SubscribeFileAsync, cancellationToken);
                         }
                         break;
                     case 13:
                         {
-                            await listener.ListenFunctionAsync<global::Omnius.Axis.Remoting.TryExportFileToMemoryRequest, global::Omnius.Axis.Remoting.TryExportFileToMemoryResult>(_service.TryExportFileToMemoryAsync, cancellationToken);
+                            await listener.ListenActionAsync<global::Omnius.Axis.Remoting.UnsubscribeFileRequest>(_service.UnsubscribeFileAsync, cancellationToken);
                         }
                         break;
                     case 14:
                         {
-                            await listener.ListenFunctionAsync<global::Omnius.Axis.Remoting.GetPublishedShoutsReportResult>(_service.GetPublishedShoutsReportAsync, cancellationToken);
+                            await listener.ListenFunctionAsync<global::Omnius.Axis.Remoting.TryExportFileToStorageRequest, global::Omnius.Axis.Remoting.TryExportFileToStorageResult>(_service.TryExportFileToStorageAsync, cancellationToken);
                         }
                         break;
                     case 15:
                         {
-                            await listener.ListenActionAsync<global::Omnius.Axis.Remoting.PublishShoutRequest>(_service.PublishShoutAsync, cancellationToken);
+                            await listener.ListenFunctionAsync<global::Omnius.Axis.Remoting.TryExportFileToMemoryRequest, global::Omnius.Axis.Remoting.TryExportFileToMemoryResult>(_service.TryExportFileToMemoryAsync, cancellationToken);
                         }
                         break;
                     case 16:
                         {
-                            await listener.ListenActionAsync<global::Omnius.Axis.Remoting.UnpublishShoutRequest>(_service.UnpublishShoutAsync, cancellationToken);
+                            await listener.ListenFunctionAsync<global::Omnius.Axis.Remoting.GetPublishedShoutsReportResult>(_service.GetPublishedShoutsReportAsync, cancellationToken);
                         }
                         break;
                     case 17:
                         {
-                            await listener.ListenFunctionAsync<global::Omnius.Axis.Remoting.GetSubscribedShoutsReportResult>(_service.GetSubscribedShoutsReportAsync, cancellationToken);
+                            await listener.ListenActionAsync<global::Omnius.Axis.Remoting.PublishShoutRequest>(_service.PublishShoutAsync, cancellationToken);
                         }
                         break;
                     case 18:
                         {
-                            await listener.ListenActionAsync<global::Omnius.Axis.Remoting.SubscribeShoutRequest>(_service.SubscribeShoutAsync, cancellationToken);
+                            await listener.ListenActionAsync<global::Omnius.Axis.Remoting.UnpublishShoutRequest>(_service.UnpublishShoutAsync, cancellationToken);
                         }
                         break;
                     case 19:
                         {
-                            await listener.ListenActionAsync<global::Omnius.Axis.Remoting.UnsubscribeShoutRequest>(_service.UnsubscribeShoutAsync, cancellationToken);
+                            await listener.ListenFunctionAsync<global::Omnius.Axis.Remoting.GetSubscribedShoutsReportResult>(_service.GetSubscribedShoutsReportAsync, cancellationToken);
                         }
                         break;
                     case 20:
+                        {
+                            await listener.ListenActionAsync<global::Omnius.Axis.Remoting.SubscribeShoutRequest>(_service.SubscribeShoutAsync, cancellationToken);
+                        }
+                        break;
+                    case 21:
+                        {
+                            await listener.ListenActionAsync<global::Omnius.Axis.Remoting.UnsubscribeShoutRequest>(_service.UnsubscribeShoutAsync, cancellationToken);
+                        }
+                        break;
+                    case 22:
                         {
                             await listener.ListenFunctionAsync<global::Omnius.Axis.Remoting.TryExportShoutRequest, global::Omnius.Axis.Remoting.TryExportShoutResult>(_service.TryExportShoutAsync, cancellationToken);
                         }

@@ -2,6 +2,7 @@ using System.Reactive.Disposables;
 using Avalonia.Controls;
 using Omnius.Axis.Intaractors.Models;
 using Omnius.Axis.Ui.Desktop.Configuration;
+using Omnius.Axis.Ui.Desktop.Internal;
 using Omnius.Core;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;

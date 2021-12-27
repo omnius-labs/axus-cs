@@ -1,5 +1,6 @@
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
+using Omnius.Axis.Ui.Desktop.Internal;
 using Omnius.Core.Avalonia;
 
 namespace Omnius.Axis.Ui.Desktop.Windows;

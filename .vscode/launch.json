@@ -7,8 +7,15 @@
             "request": "launch",
             "preLaunchTask": "build (Omnius.Axis.Daemon)",
             "program": "${workspaceFolder}/tmp/bin/win-vscode/Omnius.Axis.Daemon/Debug/net6.0/Omnius.Axis.Daemon.dll",
-            "args": ["--config", "./config.yml"],
-            "cwd": "${workspaceFolder}/demo/daemon_1",
+            "args": [
+                "-s",
+                "./storage/daemon",
+                "-l",
+                "tcp(ip4(127.0.0.1),43200)",
+                "-v",
+                "true"
+            ],
+            "cwd": "${workspaceFolder}/demo/1",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -18,8 +25,15 @@
             "request": "launch",
             "preLaunchTask": "build (Omnius.Axis.Ui.Desktop)",
             "program": "${workspaceFolder}/tmp/bin/win-vscode/Omnius.Axis.Ui.Desktop/Debug/net6.0/Omnius.Axis.Ui.Desktop.dll",
-            "args": ["--config", "./config.yml"],
-            "cwd": "${workspaceFolder}/demo/ui-desktop_1",
+            "args": [
+                "-s",
+                "./storage/ui-desktop",
+                "-l",
+                "tcp(ip4(127.0.0.1),43200)",
+                "-v",
+                "true"
+            ],
+            "cwd": "${workspaceFolder}/demo/1",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -29,7 +43,14 @@
             "request": "launch",
             "preLaunchTask": "build (Omnius.Axis.Daemon)",
             "program": "${workspaceFolder}/tmp/bin/linux-vscode/Omnius.Axis.Daemon/Debug/net6.0/Omnius.Axis.Daemon.dll",
-            "args": ["--config", "./config.yml"],
+            "args": [
+                "-s",
+                "./storage/daemon",
+                "-l",
+                "tcp(ip4(127.0.0.1),43200)",
+                "-v",
+                "true"
+            ],
             "cwd": "${workspaceFolder}/demo/daemon_1",
             "console": "internalConsole",
             "stopAtEntry": false
@@ -40,7 +61,14 @@
             "request": "launch",
             "preLaunchTask": "build (Omnius.Axis.Ui.Desktop)",
             "program": "${workspaceFolder}/tmp/bin/linux-vscode/Omnius.Axis.Ui.Desktop/Debug/net6.0/Omnius.Axis.Ui.Desktop.dll",
-            "args": ["--config", "./config.yml"],
+            "args": [
+                "-s",
+                "./storage/ui-desktop",
+                "-l",
+                "tcp(ip4(127.0.0.1),43200)",
+                "-v",
+                "true"
+            ],
             "cwd": "${workspaceFolder}/demo/ui-desktop_1",
             "console": "internalConsole",
             "stopAtEntry": false
@@ -51,7 +79,14 @@
             "request": "launch",
             "preLaunchTask": "build (Omnius.Axis.Daemon)",
             "program": "${workspaceFolder}/tmp/bin/mac-vscode/Omnius.Axis.Daemon/Debug/net6.0/Omnius.Axis.Daemon.dll",
-            "args": ["--config", "./config.yml"],
+            "args": [
+                "-s",
+                "./storage/daemon",
+                "-l",
+                "tcp(ip4(127.0.0.1),43200)",
+                "-v",
+                "true"
+            ],
             "cwd": "${workspaceFolder}/demo/daemon_1",
             "console": "internalConsole",
             "stopAtEntry": false
@@ -62,7 +97,14 @@
             "request": "launch",
             "preLaunchTask": "build (Omnius.Axis.Ui.Desktop)",
             "program": "${workspaceFolder}/tmp/bin/mac-vscode/Omnius.Axis.Ui.Desktop/Debug/net6.0/Omnius.Axis.Ui.Desktop.dll",
-            "args": ["--config", "./config.yml"],
+            "args": [
+                "-s",
+                "./storage/ui-desktop",
+                "-l",
+                "tcp(ip4(127.0.0.1),43200)",
+                "-v",
+                "true"
+            ],
             "cwd": "${workspaceFolder}/demo/ui-desktop_1",
             "console": "internalConsole",
             "stopAtEntry": false

@@ -104,7 +104,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
     public INodeFinderEvents GetEvents() => _events;
 
-    public async ValueTask<NodeFinderReport> GetReportAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<SessionReport>> GetSessionReportsAsync(CancellationToken cancellationToken = default)
     {
         var sessionReports = new List<SessionReport>();
 
@@ -113,7 +113,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
             sessionReports.Add(new SessionReport(ServiceName, status.Session.HandshakeType, status.Session.Address));
         }
 
-        return new NodeFinderReport(0, 0, sessionReports.ToArray());
+        return sessionReports.ToArray();
     }
 
     public async ValueTask<NodeLocation> GetMyNodeLocationAsync(CancellationToken cancellationToken = default)

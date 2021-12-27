@@ -11,12 +11,7 @@
     <NoWarn>CS1591,CS1998,NU5105,NU1603,NU1605</NoWarn>
     <GenerateFullPaths>true</GenerateFullPaths>
     <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))</RepoRoot>
-
-    <PublishSingleFile>true</PublishSingleFile>
-    <PublishReadyToRun>true</PublishReadyToRun>
     <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
-    <!-- <PublishTrimmed>true</PublishTrimmed> -->
-    <!-- <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract> -->
   </PropertyGroup>
 
   <PropertyGroup>
@@ -43,15 +38,11 @@
   </PropertyGroup>
 
   <!-- Autodetect platform -->
-  <PropertyGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' ">
+  <PropertyGroup Condition=" '$(NativeDepsPlatform)' == '' And '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' ">
     <NativeDepsPlatform>Windows</NativeDepsPlatform>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' ">
-    <NativeDepsPlatform>Mac</NativeDepsPlatform>
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">
+  <PropertyGroup Condition=" '$(NativeDepsPlatform)' == '' And '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">
     <NativeDepsPlatform>Linux</NativeDepsPlatform>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
@@ -63,10 +54,6 @@
   <PropertyGroup Condition=" '$(NativeDepsPlatform)' == 'Windows' ">
     <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\obj\win-$(BuildTargetName)\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
     <BaseOutputPath Condition=" '$(BaseOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\bin\win-$(BuildTargetName)\$(MSBuildProjectName)\</BaseOutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(NativeDepsPlatform)' == 'Mac' ">
-    <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\obj\mac-$(BuildTargetName)\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
-    <BaseOutputPath Condition=" '$(BaseOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\bin\mac-$(BuildTargetName)\$(MSBuildProjectName)\</BaseOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(NativeDepsPlatform)' == 'Linux' ">
     <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\obj\linux-$(BuildTargetName)\$(MSBuildProjectName)\</BaseIntermediateOutputPath>

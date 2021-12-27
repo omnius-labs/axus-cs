@@ -5,6 +5,9 @@ using "Omnius.Axis.Models";
 namespace "Omnius.Axis.Remoting";
 
 service AxisService {
+    GetConfig: () -> (GetConfigResult),
+    SetConfig: (SetConfigRequest) -> (),
+
     GetSessionsReport: () -> (GetSessionsReportResult),
 
     GetMyNodeLocation: () -> (GetMyNodeLocationResult),
@@ -30,6 +33,14 @@ service AxisService {
     SubscribeShout: (SubscribeShoutRequest) -> (),
     UnsubscribeShout: (UnsubscribeShoutRequest) -> (),
     TryExportShout: (TryExportShoutRequest) -> (TryExportShoutResult),
+}
+
+message GetConfigResult {
+    Config: ServiceConfig,
+}
+
+message SetConfigRequest {
+    Config: ServiceConfig,
 }
 
 message GetSessionsReportResult {

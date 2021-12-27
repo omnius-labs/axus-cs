@@ -5,5 +5,5 @@ namespace Omnius.Axis.Engines;
 
 public interface IShoutExchanger : IContentExchanger, IAsyncDisposable
 {
-    ValueTask<ShoutExchangerReport> GetReportAsync(CancellationToken cancellationToken = default);
+    ValueTask<IEnumerable<SessionReport>> GetSessionReportsAsync(CancellationToken cancellationToken = default);
 }

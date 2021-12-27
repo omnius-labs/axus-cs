@@ -24,8 +24,10 @@ jobs:
         run: dotnet tool restore
       - name: Install dependencies
         run: dotnet restore
-      - name: Build
-        run: sh build.sh
+      - name: Build (win)
+        run: sh build-win.sh
+      - name: Build (linux)
+        run: sh build-linux.sh
       - name: Zip
         run: |
           zip -r axis.win-x64.zip ./pub/win-x64/* \

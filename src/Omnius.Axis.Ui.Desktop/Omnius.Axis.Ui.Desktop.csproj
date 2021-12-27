@@ -2,9 +2,6 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <PublishSingleFile>true</PublishSingleFile>
-    <SelfContained>true</SelfContained>
-    <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
 
   <ItemGroup>
@@ -37,7 +34,6 @@
     <ProjectReference Include="..\Omnius.Axis.Remoting\Omnius.Axis.Remoting.csproj" />
     <ProjectReference Include="..\Omnius.Axis.Intaractors\Omnius.Axis.Intaractors.csproj" />
     <ProjectReference Include="..\Omnius.Axis.Utils\Omnius.Axis.Utils.csproj" />
-    <ProjectReference Include="..\Omnius.Axis.Daemon\Omnius.Axis.Daemon.csproj" />
   </ItemGroup>
 
   <ItemGroup>

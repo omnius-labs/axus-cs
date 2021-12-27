@@ -1,1 +1,0 @@
-pwsh ./start.ps1

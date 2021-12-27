@@ -2,15 +2,6 @@
   "version": 1,
   "dependencies": {
     "net6.0": {
-      "Cocona.Lite": {
-        "type": "Direct",
-        "requested": "[1.6.0, )",
-        "resolved": "1.6.0",
-        "contentHash": "pj69oszG1lUy1PJSdS+VxwnfMmKaSF5ogrX4nJyD02ZF+WWEfmaUGV/8swpVCtsGR0NMiCTMFAptjCUaArB9Xg==",
-        "dependencies": {
-          "Cocona.Core": "1.6.0"
-        }
-      },
       "NLog": {
         "type": "Direct",
         "requested": "[4.7.11, )",
@@ -33,64 +24,10 @@
         "resolved": "1.1.118",
         "contentHash": "Onx6ovGSqXSK07n/0eM3ZusiNdB6cIlJdabQhWGgJp3Vooy9AaLS/tigeybOJAobqbtggTamoWndz72JscZBvw=="
       },
-      "YamlDotNet": {
-        "type": "Direct",
-        "requested": "[11.2.1, )",
-        "resolved": "11.2.1",
-        "contentHash": "tBt8K+korVfrjH9wyDEhiLKxbs8qoLCLIFwvYgkSUuMC9//w3z0cFQ8LQAI/5MCKq+BMil0cfRTRvPeE7eXhQw=="
-      },
-      "Cocona.Core": {
-        "type": "Transitive",
-        "resolved": "1.6.0",
-        "contentHash": "670iboE7wIUZe/pOb1dsyZhYi61OrHGci7ZzR/IiW/lqiaVhE4addW1+zAGZhylsOLnACUrXDjbjsPdgfA4CPw=="
-      },
-      "LiteDB": {
-        "type": "Transitive",
-        "resolved": "5.0.11",
-        "contentHash": "6cL4bOmVCUB0gIK+6qIr68HeqjjHZicPDGQjvJ87mIOvkFsEsJWkIps3yoKNeLpHhJQur++yoQ9Q8gxsdos0xQ=="
-      },
-      "NeoSmart.AsyncLock": {
-        "type": "Transitive",
-        "resolved": "3.1.0",
-        "contentHash": "EYNPz9ZIHdoLSL4hK/86zjBZzHhvZoRdsSWhifEgCoBmKnVa7G+O5iAFbPFkxs1ZXD8d2dzewMs6x2jyxBdU4Q=="
-      },
-      "Newtonsoft.Json": {
-        "type": "Transitive",
-        "resolved": "13.0.1",
-        "contentHash": "ppPFpBcvxdsfUonNcvITKqLl3bqxWbDCZIzDWHzjpdAHRFfZe0Dw9HmA0+za13IdyrgJwpkDTDA9fHaxOrt20A=="
-      },
       "NLog.Schema": {
         "type": "Transitive",
         "resolved": "4.7.11",
         "contentHash": "9mmj/hApaSmX9jP2PxLyqywesdEI1nIT2TVWgsdoqb1yIpxvUM+1b6aMD2zJkpGN8y71jmVO2d/FKTwQXIfpSw=="
-      },
-      "System.IO.Pipelines": {
-        "type": "Transitive",
-        "resolved": "5.0.1",
-        "contentHash": "qEePWsaq9LoEEIqhbGe6D5J8c9IqQOUuTzzV6wn1POlfdLkJliZY3OlB0j0f17uMWlqZYjH7txj+2YbyrIA8Yg=="
-      },
-      "omnius.axis.utils": {
-        "type": "Project",
-        "dependencies": {
-          "LiteDB": "5.0.11",
-          "NLog": "4.7.11"
-        }
-      },
-      "omnius.core": {
-        "type": "Project",
-        "dependencies": {
-          "NLog": "4.7.11",
-          "NeoSmart.AsyncLock": "3.1.0",
-          "System.IO.Pipelines": "5.0.1"
-        }
-      },
-      "omnius.core.utils": {
-        "type": "Project",
-        "dependencies": {
-          "NLog": "4.7.11",
-          "Newtonsoft.Json": "13.0.1",
-          "YamlDotNet": "11.2.1"
-        }
       }
     },
     "net6.0/linux-x64": {}

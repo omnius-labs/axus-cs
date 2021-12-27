@@ -52,7 +52,7 @@ public sealed partial class SubscribedShoutStorage : AsyncDisposableBase, ISubsc
         _blockStorage.Dispose();
     }
 
-    public async ValueTask<SubscribedShoutStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<SubscribedShoutReport>> GetSubscribedShoutReportsAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -63,7 +63,7 @@ public sealed partial class SubscribedShoutStorage : AsyncDisposableBase, ISubsc
                 shoutReports.Add(new SubscribedShoutReport(item.Signature, item.Registrant));
             }
 
-            return new SubscribedShoutStorageReport(shoutReports.ToArray());
+            return shoutReports.ToArray();
         }
     }
 

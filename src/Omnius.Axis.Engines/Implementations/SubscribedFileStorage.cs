@@ -131,7 +131,7 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
         return MerkleTreeSection.Import(bytesPipe.Reader.GetSequence(), _bytesPool);
     }
 
-    public async ValueTask<SubscribedFileStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<SubscribedFileReport>> GetSubscribedFileReportsAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -144,7 +144,7 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
                 fileReports.Add(report);
             }
 
-            return new SubscribedFileStorageReport(fileReports.ToArray());
+            return fileReports.ToArray();
         }
     }
 

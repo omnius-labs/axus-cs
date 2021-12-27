@@ -40,38 +40,53 @@ enum SessionHandshakeType : uint8 {
     Accepted = 2,
 }
 
-// NodeFinder
+// Config
 
-message NodeFinderReport {
-    ConnectedSessionCount: uint32,
-    AcceptedSessionCount: uint32,
-    Sessions: vector<SessionReport>,
+message ServiceConfig {
+    Bandwidth: BandwidthConfig,
+    SessionConnector: SessionConnectorConfig,
+    SessionAccepter: SessionAccepterConfig,
 }
 
-// FileExchanger
-
-message FileExchangerReport {
-    ConnectedSessionCount: uint32,
-    AcceptedSessionCount: uint32,
-    Sessions: vector<SessionReport>,
+message BandwidthConfig {
+    MaxSendBytesPerSeconds: int32,
+    MaxReceiveBytesPerSeconds: int32,
 }
 
-// PublishedFileStorage
-
-message PublishedFileStorageReport {
-    PublishedFiles: vector<PublishedFileReport>,
+message SessionConnectorConfig {
+    TcpConnector: TcpConnectorConfig?,
 }
+
+message SessionAccepterConfig {
+    TcpAccepter: TcpAccepterConfig?,
+}
+
+message TcpConnectorConfig {
+    Proxy: TcpProxyConfig?,
+}
+
+message TcpProxyConfig {
+    Type: TcpProxyType,
+    Address: OmniAddress,
+}
+
+enum TcpProxyType : uint8 {
+    None = 0,
+    HttpProxy = 1,
+    Socks5Proxy = 2,
+}
+
+message TcpAccepterConfig {
+    UseUpnp: bool,
+    ListenAddress: OmniAddress,
+}
+
+// Report
 
 message PublishedFileReport {
     FilePath: string?,
     RootHash: OmniHash?,
     Registrant: string,
-}
-
-// SubscribedFileStorage
-
-message SubscribedFileStorageReport {
-    SubscribedFiles: vector<SubscribedFileReport>,
 }
 
 message SubscribedFileReport {
@@ -94,29 +109,9 @@ enum SubscribedFileState : uint8 {
     Failed = 3,
 }
 
-// ShoutExchanger
-
-message ShoutExchangerReport {
-    ConnectedSessionCount: uint32,
-    AcceptedSessionCount: uint32,
-    Sessions: vector<SessionReport>,
-}
-
-// PublishedShout
-
-message PublishedShoutStorageReport {
-    PublishedShouts: vector<PublishedShoutReport>,
-}
-
 message PublishedShoutReport {
     Signature: OmniSignature,
     Registrant: string,
-}
-
-// SubscribedShout
-
-message SubscribedShoutStorageReport {
-    SubscribedShouts: vector<SubscribedShoutReport>,
 }
 
 message SubscribedShoutReport {

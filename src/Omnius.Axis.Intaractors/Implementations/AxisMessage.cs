@@ -83,12 +83,12 @@ public static class AxisMessage
 
     private static string AddSchemaAndPath(string path, string value)
     {
-        return $"{_schema}:/{path}/{value}";
+        return $"{_schema}:{path}/{value}";
     }
 
     private static bool TryRemoveSchemaAndPath(string text, string path, [NotNullWhen(true)] out string? value)
     {
-        var targetPrefix = $"{_schema}:/{path}/";
+        var targetPrefix = $"{_schema}:{path}/";
 
         value = null;
         if (!text.StartsWith(targetPrefix)) return false;

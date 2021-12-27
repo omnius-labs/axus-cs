@@ -56,7 +56,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
         _blockStorage.Dispose();
     }
 
-    public async ValueTask<PublishedFileStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<PublishedFileReport>> GetPublishedFileReportsAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -67,7 +67,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
                 fileReports.Add(new PublishedFileReport(item.FilePath, item.RootHash, item.Registrant));
             }
 
-            return new PublishedFileStorageReport(fileReports.ToArray());
+            return fileReports.ToArray();
         }
     }
 

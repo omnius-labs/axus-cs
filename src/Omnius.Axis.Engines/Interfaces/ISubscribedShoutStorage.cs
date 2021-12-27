@@ -6,7 +6,7 @@ namespace Omnius.Axis.Engines;
 
 public interface ISubscribedShoutStorage : IWritableShoutStorage, IAsyncDisposable
 {
-    ValueTask<SubscribedShoutStorageReport> GetReportAsync(CancellationToken cancellationToken = default);
+    ValueTask<IEnumerable<SubscribedShoutReport>> GetSubscribedShoutReportsAsync(CancellationToken cancellationToken = default);
 
     ValueTask SubscribeShoutAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default);
 

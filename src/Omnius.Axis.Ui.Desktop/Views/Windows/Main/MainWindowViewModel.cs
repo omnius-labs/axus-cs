@@ -1,6 +1,7 @@
 using System.Reactive.Disposables;
 using Omnius.Axis.Ui.Desktop.Configuration;
 using Omnius.Axis.Ui.Desktop.Controls;
+using Omnius.Axis.Ui.Desktop.Internal;
 using Omnius.Core;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;

@@ -27,7 +27,7 @@ public record TcpProxyOptions
 
 public enum TcpProxyType : byte
 {
-    Unknown = 0,
+    None = 0,
     HttpProxy = 1,
     Socks5Proxy = 2,
 }

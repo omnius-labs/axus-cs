@@ -85,7 +85,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
         _connectedAddressSet.Dispose();
     }
 
-    public async ValueTask<FileExchangerReport> GetReportAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<SessionReport>> GetSessionReportsAsync(CancellationToken cancellationToken = default)
     {
         var sessionReports = new List<SessionReport>();
 
@@ -94,7 +94,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
             sessionReports.Add(new SessionReport(ServiceName, status.Session.HandshakeType, status.Session.Address));
         }
 
-        return new FileExchangerReport(0, 0, sessionReports.ToArray());
+        return sessionReports.ToArray();
     }
 
     public IEnumerable<ContentClue> GetPushContentClues()

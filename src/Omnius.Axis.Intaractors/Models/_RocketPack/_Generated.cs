@@ -2,6 +2,7 @@
 #nullable enable
 
 namespace Omnius.Axis.Intaractors.Models;
+
 public enum UploadingFileState : byte
 {
     Unknown = 0,

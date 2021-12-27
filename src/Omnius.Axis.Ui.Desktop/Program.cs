@@ -1,8 +1,9 @@
 using Avalonia;
 using Avalonia.Controls;
 using CommandLine;
-using Omnius.Axis.Ui.Desktop.Configuration;
+using Omnius.Axis.Ui.Desktop.Internal;
 using Omnius.Core.Helpers;
+using Omnius.Core.Net;
 
 namespace Omnius.Axis.Ui.Desktop;
 
@@ -26,16 +27,19 @@ public class Program
 
     private static async Task RunAsync(Options o)
     {
-        var appConfig = await AppConfig.LoadAsync(o.ConfigPath);
+        DirectoryHelper.CreateDirectory(o.StorageDirectoryPath!);
 
-        DirectoryHelper.CreateDirectory(appConfig.DatabaseDirectoryPath!);
-        DirectoryHelper.CreateDirectory(appConfig.LogsDirectoryPath!);
+        var databaseDirectoryPath = Path.Combine(o.StorageDirectoryPath!, "db");
+        var logsDirectoryPath = Path.Combine(o.StorageDirectoryPath!, "logs");
 
-        SetLogsDirectory(appConfig.LogsDirectoryPath!);
+        DirectoryHelper.CreateDirectory(databaseDirectoryPath!);
+        DirectoryHelper.CreateDirectory(logsDirectoryPath!);
 
-        if (appConfig.Mode == RunMode.Debug) ChangeLogLevel(NLog.LogLevel.Trace);
+        SetLogsDirectory(logsDirectoryPath);
 
-        Bootstrapper.Instance.Build(appConfig);
+        if (o.Verbose) ChangeLogLevel(NLog.LogLevel.Trace);
+
+        Bootstrapper.Instance.Build(databaseDirectoryPath, OmniAddress.Parse(o.ListenAddress!));
 
         _logger.Info("Starting...");
 
@@ -59,11 +63,6 @@ public class Program
         NLog.LogManager.ReconfigExistingLoggers();
     }
 
-    public static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<App>()
-            .UsePlatformDetect()
-            .LogToTrace();
-
     private static void HandleParseError(IEnumerable<Error> errs)
     {
         foreach (var err in errs)
@@ -71,4 +70,9 @@ public class Program
             _logger.Error(err);
         }
     }
+
+    public static AppBuilder BuildAvaloniaApp()
+        => AppBuilder.Configure<App>()
+            .UsePlatformDetect()
+            .LogToTrace();
 }

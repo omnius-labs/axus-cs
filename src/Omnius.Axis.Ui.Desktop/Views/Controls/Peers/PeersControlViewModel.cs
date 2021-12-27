@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Disposables;
 using Omnius.Axis.Intaractors;
 using Omnius.Axis.Models;
+using Omnius.Axis.Ui.Desktop.Internal;
 using Omnius.Axis.Ui.Desktop.ViewModels;
 using Omnius.Core;
 using Omnius.Core.Avalonia;

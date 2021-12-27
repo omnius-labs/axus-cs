@@ -1,7 +1,7 @@
 using System.Net.Sockets;
-using Omnius.Axis.Daemon.Configuration;
 using Omnius.Axis.Remoting;
 using Omnius.Core;
+using Omnius.Core.Net;
 using Omnius.Core.Net.Caps;
 using Omnius.Core.Net.Connections.Bridge;
 using Omnius.Core.Net.Connections.Multiplexer;
@@ -15,25 +15,13 @@ public static partial class Runner
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    public static async ValueTask EventLoopAsync(AppConfig appConfig, CancellationToken cancellationToken = default)
+    public static async ValueTask EventLoopAsync(string databaseDirectoryPath, OmniAddress listenAddress, CancellationToken cancellationToken = default)
     {
-        var service = await AxisService.CreateAsync(appConfig, cancellationToken);
+        await using var service = await AxisService.CreateAsync(databaseDirectoryPath, cancellationToken);
+        using var tcpListenerManager = new TcpListenerManager(listenAddress, cancellationToken);
+        using var socket = await tcpListenerManager.AcceptSocketAsync();
 
-        await ListenAsync(service, appConfig, cancellationToken);
-    }
-
-    private static async ValueTask ListenAsync(AxisService service, AppConfig appConfig, CancellationToken cancellationToken = default)
-    {
-        if (appConfig.ListenAddress is null) throw new Exception($"{nameof(appConfig.ListenAddress)} is not found");
-
-        using var tcpListenerManager = new TcpListenerManager(appConfig.ListenAddress, cancellationToken);
-
-        while (!cancellationToken.IsCancellationRequested)
-        {
-            using var socket = await tcpListenerManager.AcceptSocketAsync();
-
-            await InternalEventLoopAsync(service, socket, cancellationToken);
-        }
+        await InternalEventLoopAsync(service, socket, cancellationToken);
     }
 
     private static async ValueTask InternalEventLoopAsync(AxisService service, Socket socket, CancellationToken cancellationToken = default)

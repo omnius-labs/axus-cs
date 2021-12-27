@@ -5,5 +5,5 @@ namespace Omnius.Axis.Engines;
 
 public interface IFileExchanger : IContentExchanger, IAsyncDisposable
 {
-    ValueTask<FileExchangerReport> GetReportAsync(CancellationToken cancellationToken = default);
+    ValueTask<IEnumerable<SessionReport>> GetSessionReportsAsync(CancellationToken cancellationToken = default);
 }

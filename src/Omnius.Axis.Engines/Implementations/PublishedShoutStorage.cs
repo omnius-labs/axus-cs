@@ -52,7 +52,7 @@ public sealed partial class PublishedShoutStorage : AsyncDisposableBase, IPublis
         _blockStorage.Dispose();
     }
 
-    public async ValueTask<PublishedShoutStorageReport> GetReportAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<PublishedShoutReport>> GetPublishedShoutReportsAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -63,7 +63,7 @@ public sealed partial class PublishedShoutStorage : AsyncDisposableBase, IPublis
                 shoutReports.Add(new PublishedShoutReport(item.Signature, item.Registrant));
             }
 
-            return new PublishedShoutStorageReport(shoutReports.ToArray());
+            return shoutReports.ToArray();
         }
     }
 

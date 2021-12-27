@@ -11,10 +11,9 @@ public static partial class Runner
         private readonly TcpListener _tcpListener;
         private readonly CancellationTokenRegistration _registration;
 
-        public TcpListenerManager(string listenAddress, CancellationToken cancellationToken = default)
+        public TcpListenerManager(OmniAddress listenAddress, CancellationToken cancellationToken = default)
         {
-            var listenOmniAddress = new OmniAddress(listenAddress);
-            if (!listenOmniAddress.TryGetTcpEndpoint(out var ipAddress, out var port)) throw new Exception("listenAddress is invalid format.");
+            if (!listenAddress.TryGetTcpEndpoint(out var ipAddress, out var port)) throw new Exception("listenAddress is invalid format.");
 
             _tcpListener = new TcpListener(ipAddress!, port);
             _tcpListener.Start();
