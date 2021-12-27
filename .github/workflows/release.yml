@@ -31,7 +31,7 @@ jobs:
       - name: Zip
         run: |
           zip -r axis.win-x64.zip ./pub/win-x64/* \
-          zip -r axis.linux-x64.zip ./pub/linux-x64/*
+          && zip -r axis.linux-x64.zip ./pub/linux-x64/*
       - name: Release
         uses: softprops/action-gh-release@v1
         with:

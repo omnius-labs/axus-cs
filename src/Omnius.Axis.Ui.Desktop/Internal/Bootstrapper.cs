@@ -46,8 +46,8 @@ public partial class Bootstrapper : AsyncDisposableBase
 
             serviceCollection.AddSingleton<IBytesPool>(BytesPool.Shared);
 
-            var _intaractorProvider = new IntaractorProvider(_databaseDirectoryPath, _listenAddress, BytesPool.Shared);
-            serviceCollection.AddSingleton<IIntaractorProvider>(_intaractorProvider);
+            var intaractorProvider = new IntaractorProvider(_databaseDirectoryPath, _listenAddress, BytesPool.Shared);
+            serviceCollection.AddSingleton<IIntaractorProvider>(intaractorProvider);
             serviceCollection.AddSingleton<IDialogService, DialogService>();
 
             serviceCollection.AddSingleton<IApplicationDispatcher, ApplicationDispatcher>();
