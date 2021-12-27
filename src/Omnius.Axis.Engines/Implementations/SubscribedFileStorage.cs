@@ -101,12 +101,14 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
             var completed = await this.IsDownloadCompletedAsync(decodedItem.RootHash, lastMerkleTreeSection.Hashes, cancellationToken);
             if (!completed) continue;
 
-            if (lastMerkleTreeSection.Depth == 0) // 最後のMerkleTreeSectionまで展開済み
+            if (lastMerkleTreeSection.Depth == 0)
             {
+                // 最後のMerkleTreeSectionまで展開済み
                 _subscriberRepo.DecodedItems.Upsert(new DecodedFileItem(decodedItem.RootHash, decodedItem.MerkleTreeSections.ToArray(), SubscribedFileState.Downloaded));
             }
-            else // 最後のMerkleTreeSectionまで未展開
+            else
             {
+                // 最後のMerkleTreeSectionまで未展開
                 var nextMerkleTreeSection = await this.DecodeMerkleTreeSectionAsync(decodedItem.RootHash, lastMerkleTreeSection.Hashes, cancellationToken);
                 if (nextMerkleTreeSection is null) continue;
 
