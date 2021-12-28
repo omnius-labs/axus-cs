@@ -2,6 +2,17 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "ui-desktop design (Win)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build (Omnius.Axis.Ui.Desktop)",
+            "program": "${workspaceFolder}/tmp/bin/win-vscode/Omnius.Axis.Ui.Desktop/Debug/net6.0/Omnius.Axis.Ui.Desktop.dll",
+            "args": ["-d", "true"],
+            "cwd": "${workspaceFolder}/demo/1",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
             "name": "daemon (Win)",
             "type": "coreclr",
             "request": "launch",

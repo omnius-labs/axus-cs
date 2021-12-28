@@ -21,13 +21,13 @@ public class Program : CoconaLiteConsoleAppBase
 
     public async ValueTask RunAsync([Option("storage", new char[] { 's' })] string storageDirectoryPath, [Option("listen", new char[] { 'l' })] string listenAddress, [Option("verbose", new char[] { 'v' })] bool verbose = false)
     {
-        DirectoryHelper.CreateDirectory(storageDirectoryPath);
-
-        SetLogsDirectory(Path.Combine(storageDirectoryPath, "logs"));
-        if (verbose) ChangeLogLevel(NLog.LogLevel.Trace);
-
         try
         {
+            DirectoryHelper.CreateDirectory(storageDirectoryPath);
+
+            SetLogsDirectory(Path.Combine(storageDirectoryPath, "logs"));
+            if (verbose) ChangeLogLevel(NLog.LogLevel.Trace);
+
             _logger.Info("Starting...");
             await Runner.EventLoopAsync(Path.Combine(storageDirectoryPath, "db"), OmniAddress.Parse(listenAddress), this.Context.CancellationToken);
         }

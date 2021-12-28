@@ -20,11 +20,13 @@ public partial class MainWindow : StatefulWindowBase
 
     protected override async ValueTask OnInitializeAsync()
     {
+        if (Program.IsDesignMode) return;
+
         var serviceProvider = await Bootstrapper.Instance.GetServiceProvider();
         if (serviceProvider is null) throw new NullReferenceException();
 
-        this.ViewModel = serviceProvider.GetRequiredService<MainWindowViewModel>();
-        this.SetWindowStatus(this.ViewModel.Status?.Window);
+        var viewModel = serviceProvider.GetRequiredService<MainWindowViewModel>();
+        this.SetWindowStatus(viewModel.Status?.Window);
     }
 
     protected override async ValueTask OnActivatedAsync()
@@ -33,18 +35,12 @@ public partial class MainWindow : StatefulWindowBase
 
     protected override async ValueTask OnDisposeAsync()
     {
-        if (this.ViewModel is not null)
+        if (Program.IsDesignMode) return;
+
+        if (this.DataContext is MainWindowViewModel viewModel)
         {
-            this.ViewModel.Status.Window = this.GetWindowStatus();
-            await this.ViewModel.DisposeAsync();
+            viewModel.Status.Window = this.GetWindowStatus();
+            await viewModel.DisposeAsync();
         }
-
-        await Bootstrapper.Instance.DisposeAsync();
-    }
-
-    public MainWindowViewModel? ViewModel
-    {
-        get => this.DataContext as MainWindowViewModel;
-        set => this.DataContext = value;
     }
 }

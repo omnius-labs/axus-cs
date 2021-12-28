@@ -13,20 +13,24 @@
     x:CompileBindings="false"
     x:DataType="local:MainWindowViewModel"
     mc:Ignorable="d"
-    d:DesignWidth="300"
-    d:DesignHeight="300" >
+    d:DesignWidth="800"
+    d:DesignHeight="500" >
 
     <Grid ColumnDefinitions="Auto,*" Background="{DynamicResource ThemeControlLowColor}">
         <Grid RowDefinitions="*,Auto">
             <ListBox Name="TabListBox" Background="Transparent">
-                <ListBoxItem Name="StatusListBoxItem" Content="Status" />
+                <ListBoxItem Name="StatusListBoxItem" Content="Status" IsSelected="true" />
                 <ListBoxItem Name="PeersListBoxItem" Content="Peers" />
                 <ListBoxItem Name="SearchListBoxItem" Content="Search" />
                 <ListBoxItem Name="DownloadListBoxItem" Content="Download" />
                 <ListBoxItem Name="UploadListBoxItem" Content="Upload" />
             </ListBox>
             <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="8" Spacing="8">
-                <Button Content="Settings" Command="{Binding SettingsCommand}" />
+                <ContextMenu>
+                    <MenuItem Header="Manage">
+                        <MenuItem Command="{Binding SettingsCommand}" Header="Settings"/>
+                    </MenuItem>
+                </ContextMenu>
             </StackPanel>
         </Grid>
         <Grid Grid.Column="1">

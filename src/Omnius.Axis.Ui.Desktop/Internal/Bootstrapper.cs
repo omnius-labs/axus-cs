@@ -12,10 +12,11 @@ public partial class Bootstrapper : AsyncDisposableBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private string _databaseDirectoryPath = null!;
-    private OmniAddress _listenAddress = null!;
+    private string? _databaseDirectoryPath;
+    private OmniAddress? _listenAddress;
 
     private UiStatus? _uiState;
+    private IntaractorProvider? _intaractorProvider;
 
     private Task<ServiceProvider?>? _buildTask;
     private CancellationTokenSource _cancellationTokenSource = new();
@@ -32,27 +33,30 @@ public partial class Bootstrapper : AsyncDisposableBase
     {
         _databaseDirectoryPath = databaseDirectoryPath;
         _listenAddress = listenAddress;
+
         _buildTask = this.BuildAsync(_cancellationTokenSource.Token);
     }
 
     private async Task<ServiceProvider?> BuildAsync(CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(_databaseDirectoryPath);
+        ArgumentNullException.ThrowIfNull(_listenAddress);
+
         try
         {
+            _uiState = await UiStatus.LoadAsync(Path.Combine(_databaseDirectoryPath, UI_STATE_FILE_NAME));
+            _intaractorProvider = new IntaractorProvider(_databaseDirectoryPath, _listenAddress, BytesPool.Shared);
+
             var serviceCollection = new ServiceCollection();
 
-            _uiState = await UiStatus.LoadAsync(Path.Combine(_databaseDirectoryPath, UI_STATE_FILE_NAME));
             serviceCollection.AddSingleton(_uiState);
-
+            serviceCollection.AddSingleton<IIntaractorProvider>(_intaractorProvider);
             serviceCollection.AddSingleton<IBytesPool>(BytesPool.Shared);
-
-            var intaractorProvider = new IntaractorProvider(_databaseDirectoryPath, _listenAddress, BytesPool.Shared);
-            serviceCollection.AddSingleton<IIntaractorProvider>(intaractorProvider);
-            serviceCollection.AddSingleton<IDialogService, DialogService>();
 
             serviceCollection.AddSingleton<IApplicationDispatcher, ApplicationDispatcher>();
             serviceCollection.AddSingleton<IMainWindowProvider, MainWindowProvider>();
             serviceCollection.AddSingleton<IClipboardService, ClipboardService>();
+            serviceCollection.AddSingleton<IDialogService, DialogService>();
 
             serviceCollection.AddTransient<MainWindowViewModel>();
             serviceCollection.AddTransient<SettingsWindowViewModel>();
@@ -68,7 +72,7 @@ public partial class Bootstrapper : AsyncDisposableBase
         {
             _logger.Debug(e);
 
-            return null;
+            throw;
         }
         catch (Exception e)
         {
@@ -81,20 +85,16 @@ public partial class Bootstrapper : AsyncDisposableBase
     protected override async ValueTask OnDisposeAsync()
     {
         _cancellationTokenSource.Cancel();
-        await _buildTask!;
+        if (_buildTask is not null) await _buildTask;
         _cancellationTokenSource.Dispose();
 
-        await this.SaveAsync();
-    }
-
-    public async ValueTask SaveAsync(CancellationToken cancellationToken = default)
-    {
-        if (_uiState is null) throw new NullReferenceException(nameof(_uiState));
-        await _uiState.SaveAsync(Path.Combine(_databaseDirectoryPath, UI_STATE_FILE_NAME));
+        if (_uiState is not null) await _uiState.SaveAsync(Path.Combine(_databaseDirectoryPath!, UI_STATE_FILE_NAME));
     }
 
     public async ValueTask<ServiceProvider?> GetServiceProvider()
     {
-        return await _buildTask!;
+        ArgumentNullException.ThrowIfNull(_buildTask);
+
+        return await _buildTask;
     }
 }

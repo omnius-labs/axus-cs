@@ -7,7 +7,7 @@ using Omnius.Core.Net;
 
 namespace Omnius.Axis.Ui.Desktop;
 
-public class Program
+public static class Program
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -25,25 +25,37 @@ public class Program
         _logger.Error(e);
     }
 
-    private static async Task RunAsync(Options o)
+    private static async Task RunAsync(Options options)
     {
-        DirectoryHelper.CreateDirectory(o.StorageDirectoryPath!);
+        await InitAsync(options);
 
-        var databaseDirectoryPath = Path.Combine(o.StorageDirectoryPath!, "db");
-        var logsDirectoryPath = Path.Combine(o.StorageDirectoryPath!, "logs");
+        BuildAvaloniaApp().StartWithClassicDesktopLifetime(Environment.GetCommandLineArgs(), ShutdownMode.OnMainWindowClose);
+
+        await DisposeAsync();
+    }
+
+    private static async ValueTask InitAsync(Options options)
+    {
+        if (options.IsDesignMode)
+        {
+            Program.IsDesignMode = true;
+            return;
+        }
+
+        DirectoryHelper.CreateDirectory(options.StorageDirectoryPath!);
+
+        var databaseDirectoryPath = Path.Combine(options.StorageDirectoryPath!, "db");
+        var logsDirectoryPath = Path.Combine(options.StorageDirectoryPath!, "logs");
 
         DirectoryHelper.CreateDirectory(databaseDirectoryPath!);
         DirectoryHelper.CreateDirectory(logsDirectoryPath!);
 
         SetLogsDirectory(logsDirectoryPath);
 
-        if (o.Verbose) ChangeLogLevel(NLog.LogLevel.Trace);
-
-        Bootstrapper.Instance.Build(databaseDirectoryPath, OmniAddress.Parse(o.ListenAddress!));
+        if (options.Verbose) ChangeLogLevel(NLog.LogLevel.Trace);
 
         _logger.Info("Starting...");
-
-        BuildAvaloniaApp().StartWithClassicDesktopLifetime(Environment.GetCommandLineArgs(), ShutdownMode.OnMainWindowClose);
+        Bootstrapper.Instance.Build(databaseDirectoryPath, OmniAddress.Parse(options.ListenAddress!));
     }
 
     private static void SetLogsDirectory(string logsDirectoryPath)
@@ -63,6 +75,19 @@ public class Program
         NLog.LogManager.ReconfigExistingLoggers();
     }
 
+    public static AppBuilder BuildAvaloniaApp()
+        => AppBuilder.Configure<App>()
+            .UsePlatformDetect()
+            .LogToTrace();
+
+    private static async ValueTask DisposeAsync()
+    {
+        await Bootstrapper.Instance.DisposeAsync();
+
+        _logger.Info("Stopping...");
+        NLog.LogManager.Shutdown();
+    }
+
     private static void HandleParseError(IEnumerable<Error> errs)
     {
         foreach (var err in errs)
@@ -71,8 +96,11 @@ public class Program
         }
     }
 
-    public static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<App>()
-            .UsePlatformDetect()
-            .LogToTrace();
+    private static bool _isDesignMode;
+
+    public static bool IsDesignMode
+    {
+        get => (Design.IsDesignMode || _isDesignMode);
+        set => _isDesignMode = value;
+    }
 }

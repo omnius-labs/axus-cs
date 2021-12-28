@@ -41,7 +41,7 @@ internal sealed class ServiceManager : AsyncDisposableBase
 
     private async ValueTask InitAsync(CancellationToken cancellationToken = default)
     {
-        if (_listenAddress is null) ArgumentNullException.ThrowIfNull(_listenAddress);
+        ArgumentNullException.ThrowIfNull(_listenAddress);
 
         await this.ConnectAsync(cancellationToken);
     }

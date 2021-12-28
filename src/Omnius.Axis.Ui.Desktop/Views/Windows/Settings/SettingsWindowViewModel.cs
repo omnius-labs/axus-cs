@@ -75,7 +75,7 @@ public class SettingsWindowViewModel : AsyncDisposableBase
     private async ValueTask LoadAsync(CancellationToken cancellationToken = default)
     {
         var fileDownloader = await _intaractorAdapter.GetFileDownloaderAsync(cancellationToken);
-        var config = await fileDownloader.GetConfigAsync();
+        var config = await fileDownloader.GetConfigAsync(cancellationToken);
         this.DownloadDirectory.Value = config?.DestinationDirectory ?? string.Empty;
     }
 
@@ -83,6 +83,6 @@ public class SettingsWindowViewModel : AsyncDisposableBase
     {
         var config = new FileDownloaderConfig(this.DownloadDirectory.Value);
         var fileDownloader = await _intaractorAdapter.GetFileDownloaderAsync(cancellationToken);
-        await fileDownloader.SetConfigAsync(config);
+        await fileDownloader.SetConfigAsync(config, cancellationToken);
     }
 }

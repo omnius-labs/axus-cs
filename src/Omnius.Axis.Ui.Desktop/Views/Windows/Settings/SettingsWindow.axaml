@@ -19,9 +19,7 @@
     <Grid RowDefinitions="*,Auto" Background="{DynamicResource ThemeControlLowColor}">
         <Grid ColumnDefinitions="Auto,*">
             <ListBox Name="TabListBox" VerticalAlignment="Stretch">
-                <!-- <ListBoxItem Name="ProfileListBoxItem" Content="Profile" /> -->
-                <ListBoxItem Name="DownloadListBoxItem" Content="Download" />
-                <!-- <ListBoxItem Name="UploadListBoxItem" Content="Upload" /> -->
+                <ListBoxItem Name="DownloadListBoxItem" Content="Download" IsSelected="true" />
             </ListBox>
             <Grid Grid.Column="1">
                 <Grid IsVisible="{Binding #DownloadListBoxItem.IsSelected}" Margin="8" VerticalAlignment="Top">
