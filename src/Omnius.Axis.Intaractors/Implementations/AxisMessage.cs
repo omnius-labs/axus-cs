@@ -16,12 +16,12 @@ public static class AxisMessage
     private static readonly string _nodePath = "node";
     private static readonly string _seedPath = "seed";
 
-    public static string NodeLocationToString(NodeLocation message)
+    public static string NodeToString(NodeLocation message)
     {
         return MessageToString<NodeLocation>(_nodePath, message);
     }
 
-    public static bool TryStringToNodeLocation(string text, [NotNullWhen(true)] out NodeLocation? message)
+    public static bool TryStringToNode(string text, [NotNullWhen(true)] out NodeLocation? message)
     {
         message = null;
         return TryStringToMessage<NodeLocation>(_nodePath, text, out message);

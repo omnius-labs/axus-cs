@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using Omnius.Axis.Remoting;
@@ -17,7 +16,6 @@ internal sealed class ServiceManager : AsyncDisposableBase
 {
     private readonly OmniAddress _listenAddress;
 
-    private Process? _process;
     private Socket? _socket;
     private SocketCap? _cap;
     private BatchActionDispatcher? _batchActionDispatcher;
@@ -80,8 +78,5 @@ internal sealed class ServiceManager : AsyncDisposableBase
         if (_batchActionDispatcher is not null) await _batchActionDispatcher.DisposeAsync();
         _cap?.Dispose();
         _socket?.Dispose();
-
-        _process?.Close();
-        _process?.Dispose();
     }
 }

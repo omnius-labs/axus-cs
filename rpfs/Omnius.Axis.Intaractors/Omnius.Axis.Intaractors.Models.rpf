@@ -43,6 +43,13 @@ message FileDownloaderConfig {
     DestinationDirectory: string,
 }
 
+message ProfilePublisherConfig {
+    DigitalSignature: OmniDigitalSignature,
+    TrustedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
+    BlockedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
+    Seeds: vector<Seed>(capacity: 32 * 1024 * 1024),
+}
+
 message ProfileSubscriberConfig {
     TrustedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
     BlockedSignatures: vector<OmniSignature>(capacity: 32 * 1024),

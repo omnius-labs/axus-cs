@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Omnius.Axis.Ui.Desktop.Windows;
+using Omnius.Axis.Ui.Desktop.Views.Main;
 
 namespace Omnius.Axis.Ui.Desktop;
 

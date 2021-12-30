@@ -1,7 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Omnius.Axis.Ui.Desktop.Configuration;
-using Omnius.Axis.Ui.Desktop.Controls;
-using Omnius.Axis.Ui.Desktop.Windows;
+using Omnius.Axis.Ui.Desktop.Views.Dialogs;
+using Omnius.Axis.Ui.Desktop.Views.Main;
+using Omnius.Axis.Ui.Desktop.Views.Settings;
 using Omnius.Core;
 using Omnius.Core.Avalonia;
 using Omnius.Core.Net;
@@ -65,6 +66,7 @@ public partial class Bootstrapper : AsyncDisposableBase
             serviceCollection.AddTransient<PeersControlViewModel>();
             serviceCollection.AddTransient<DownloadControlViewModel>();
             serviceCollection.AddTransient<UploadControlViewModel>();
+            serviceCollection.AddTransient<SignaturesControlViewModel>();
 
             return serviceCollection.BuildServiceProvider();
         }
@@ -91,10 +93,8 @@ public partial class Bootstrapper : AsyncDisposableBase
         if (_uiState is not null) await _uiState.SaveAsync(Path.Combine(_databaseDirectoryPath!, UI_STATE_FILE_NAME));
     }
 
-    public async ValueTask<ServiceProvider?> GetServiceProvider()
+    public ServiceProvider GetServiceProvider()
     {
-        ArgumentNullException.ThrowIfNull(_buildTask);
-
-        return await _buildTask;
+        return _buildTask?.Result ?? throw new NullReferenceException();
     }
 }

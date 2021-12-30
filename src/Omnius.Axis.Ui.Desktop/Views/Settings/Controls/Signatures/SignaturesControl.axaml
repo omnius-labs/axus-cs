@@ -1,0 +1,43 @@
+<UserControl
+    x:Class="Omnius.Axis.Ui.Desktop.Views.Settings.SignaturesControl"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+    xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
+    xmlns:local="clr-namespace:Omnius.Axis.Ui.Desktop.Views.Settings;assembly=Omnius.Axis.Ui.Desktop"
+    xmlns:bs="clr-namespace:Omnius.Core.Avalonia.Behaviors;assembly=Omnius.Core.Avalonia"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:CompileBindings="True"
+    x:DataType="local:ISignaturesControlViewModel"
+    mc:Ignorable="d"
+    d:DesignWidth="800"
+    d:DesignHeight="500" >
+
+    <Grid RowDefinitions="Auto,*">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="12">
+            <Button Content="Register" Command="{Binding RegisterCommand}"/>
+        </StackPanel>
+        <ListBox
+            Grid.Row="1"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            Items="{Binding Signatures}"
+            SelectedItems="{Binding SelectedSignatures}" >
+            <ListBox.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Command="{Binding ItemDeleteCommand}" Header="Delete"/>
+                    <MenuItem Header="Copy As">
+                        <MenuItem Command="{Binding ItemCopySeedCommand}" Header="Copy Seed"/>
+                    </MenuItem>
+                </ContextMenu>
+            </ListBox.ContextMenu>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+
+</UserControl>

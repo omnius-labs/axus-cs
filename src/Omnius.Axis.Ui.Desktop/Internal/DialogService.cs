@@ -1,5 +1,6 @@
 using Avalonia.Controls;
-using Omnius.Axis.Ui.Desktop.Windows;
+using Omnius.Axis.Ui.Desktop.Views.Dialogs;
+using Omnius.Axis.Ui.Desktop.Views.Settings;
 using Omnius.Core.Avalonia;
 
 namespace Omnius.Axis.Ui.Desktop.Internal;
@@ -31,9 +32,9 @@ public class DialogService : IDialogService
         return await _applicationDispatcher.InvokeAsync(async () =>
         {
             var window = new TextWindow();
-            await window.ShowDialog(_mainWindowProvider.GetMainWindow());
 
-            return window.ViewModel?.GetResult() ?? string.Empty;
+            await window.ShowDialog(_mainWindowProvider.GetMainWindow());
+            return window.GetResult() ?? string.Empty;
         });
     }
 
@@ -42,6 +43,7 @@ public class DialogService : IDialogService
         await _applicationDispatcher.InvokeAsync(async () =>
         {
             var window = new SettingsWindow();
+
             await window.ShowDialog(_mainWindowProvider.GetMainWindow());
         });
     }

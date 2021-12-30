@@ -585,6 +585,106 @@ public sealed partial class FileDownloaderConfig : global::Omnius.Core.RocketPac
         }
     }
 }
+public sealed partial class ProfilePublisherConfig : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Intaractors.Models.ProfilePublisherConfig>
+{
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Intaractors.Models.ProfilePublisherConfig> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Intaractors.Models.ProfilePublisherConfig>.Formatter;
+    public static global::Omnius.Axis.Intaractors.Models.ProfilePublisherConfig Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Intaractors.Models.ProfilePublisherConfig>.Empty;
+
+    static ProfilePublisherConfig()
+    {
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Intaractors.Models.ProfilePublisherConfig>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Intaractors.Models.ProfilePublisherConfig>.Empty = new global::Omnius.Axis.Intaractors.Models.ProfilePublisherConfig(global::Omnius.Core.Cryptography.OmniDigitalSignature.Empty);
+    }
+
+    private readonly global::System.Lazy<int> ___hashCode;
+
+    public ProfilePublisherConfig(global::Omnius.Core.Cryptography.OmniDigitalSignature digitalSignature)
+    {
+        if (digitalSignature is null) throw new global::System.ArgumentNullException("digitalSignature");
+
+        this.DigitalSignature = digitalSignature;
+
+        ___hashCode = new global::System.Lazy<int>(() =>
+        {
+            var ___h = new global::System.HashCode();
+            if (digitalSignature != default) ___h.Add(digitalSignature.GetHashCode());
+            return ___h.ToHashCode();
+        });
+    }
+
+    public global::Omnius.Core.Cryptography.OmniDigitalSignature DigitalSignature { get; }
+
+    public static global::Omnius.Axis.Intaractors.Models.ProfilePublisherConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
+        return Formatter.Deserialize(ref reader, 0);
+    }
+    public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
+        Formatter.Serialize(ref writer, this, 0);
+    }
+
+    public static bool operator ==(global::Omnius.Axis.Intaractors.Models.ProfilePublisherConfig? left, global::Omnius.Axis.Intaractors.Models.ProfilePublisherConfig? right)
+    {
+        return (right is null) ? (left is null) : right.Equals(left);
+    }
+    public static bool operator !=(global::Omnius.Axis.Intaractors.Models.ProfilePublisherConfig? left, global::Omnius.Axis.Intaractors.Models.ProfilePublisherConfig? right)
+    {
+        return !(left == right);
+    }
+    public override bool Equals(object? other)
+    {
+        if (other is not global::Omnius.Axis.Intaractors.Models.ProfilePublisherConfig) return false;
+        return this.Equals((global::Omnius.Axis.Intaractors.Models.ProfilePublisherConfig)other);
+    }
+    public bool Equals(global::Omnius.Axis.Intaractors.Models.ProfilePublisherConfig? target)
+    {
+        if (target is null) return false;
+        if (object.ReferenceEquals(this, target)) return true;
+        if (this.DigitalSignature != target.DigitalSignature) return false;
+
+        return true;
+    }
+    public override int GetHashCode() => ___hashCode.Value;
+
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Intaractors.Models.ProfilePublisherConfig>
+    {
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axis.Intaractors.Models.ProfilePublisherConfig value, in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            if (value.DigitalSignature != global::Omnius.Core.Cryptography.OmniDigitalSignature.Empty)
+            {
+                w.Write((uint)1);
+                global::Omnius.Core.Cryptography.OmniDigitalSignature.Formatter.Serialize(ref w, value.DigitalSignature, rank + 1);
+            }
+            w.Write((uint)0);
+        }
+        public global::Omnius.Axis.Intaractors.Models.ProfilePublisherConfig Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            global::Omnius.Core.Cryptography.OmniDigitalSignature p_digitalSignature = global::Omnius.Core.Cryptography.OmniDigitalSignature.Empty;
+
+            for (; ; )
+            {
+                uint id = r.GetUInt32();
+                if (id == 0) break;
+                switch (id)
+                {
+                    case 1:
+                        {
+                            p_digitalSignature = global::Omnius.Core.Cryptography.OmniDigitalSignature.Formatter.Deserialize(ref r, rank + 1);
+                            break;
+                        }
+                }
+            }
+
+            return new global::Omnius.Axis.Intaractors.Models.ProfilePublisherConfig(p_digitalSignature);
+        }
+    }
+}
 public sealed partial class ProfileSubscriberConfig : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Intaractors.Models.ProfileSubscriberConfig>
 {
     public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Intaractors.Models.ProfileSubscriberConfig> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Intaractors.Models.ProfileSubscriberConfig>.Formatter;

@@ -40,13 +40,13 @@
                 <Color x:Key="ThemeAccentColor3">#66119EDA</Color>
                 <Color x:Key="ThemeAccentColor4">#33119EDA</Color>
 
-                <Color x:Key="ThemeBackgroundColor">#FF282828</Color>
+                <Color x:Key="ThemeBackgroundColor">#FF181818</Color>
                 <Color x:Key="ThemeBorderLowColor">#FF383838</Color>
                 <Color x:Key="ThemeBorderMidColor">#FF484848</Color>
                 <Color x:Key="ThemeBorderHighColor">#FF585858</Color>
-                <Color x:Key="ThemeControlLowColor">#FF282828</Color>
-                <Color x:Key="ThemeControlMidColor">#FF383838</Color>
-                <Color x:Key="ThemeControlHighColor">#FF484848</Color>
+                <Color x:Key="ThemeControlLowColor">#FF383838</Color>
+                <Color x:Key="ThemeControlMidColor">#FF484848</Color>
+                <Color x:Key="ThemeControlHighColor">#FF585858</Color>
                 <Color x:Key="ThemeControlHighlightLowColor">#FFA8A8A8</Color>
                 <Color x:Key="ThemeControlHighlightMidColor">#FF828282</Color>
                 <Color x:Key="ThemeControlHighlightHighColor">#FF505050</Color>
