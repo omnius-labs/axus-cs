@@ -7,15 +7,15 @@ namespace Omnius.Axis.Ui.Desktop.Internal;
 
 public interface IIntaractorProvider
 {
-    ValueTask<Dashboard> GetDashboardAsync(CancellationToken cancellationToken = default);
+    ValueTask<IServiceAdapter> GetServiceAdapterAsync(CancellationToken cancellationToken = default);
 
-    ValueTask<FileDownloader> GetFileDownloaderAsync(CancellationToken cancellationToken = default);
+    ValueTask<IFileDownloader> GetFileDownloaderAsync(CancellationToken cancellationToken = default);
 
-    ValueTask<FileUploader> GetFileUploaderAsync(CancellationToken cancellationToken = default);
+    ValueTask<IFileUploader> GetFileUploaderAsync(CancellationToken cancellationToken = default);
 
-    ValueTask<ProfilePublisher> GetProfilePublisherAsync(CancellationToken cancellationToken = default);
+    ValueTask<IProfilePublisher> GetProfilePublisherAsync(CancellationToken cancellationToken = default);
 
-    ValueTask<ProfileSubscriber> GetProfileSubscriberAsync(CancellationToken cancellationToken = default);
+    ValueTask<IProfileSubscriber> GetProfileSubscriberAsync(CancellationToken cancellationToken = default);
 }
 
 public partial class IntaractorProvider : AsyncDisposableBase, IIntaractorProvider
@@ -28,7 +28,7 @@ public partial class IntaractorProvider : AsyncDisposableBase, IIntaractorProvid
 
     private ServiceManager? _serviceManager;
 
-    private Dashboard? _dashboard;
+    private ServiceAdapter? _serviceAdapter;
     private FileDownloader? _fileDownloader;
     private FileUploader? _fileUploader;
     private ProfilePublisher? _profilePublisher;
@@ -48,16 +48,16 @@ public partial class IntaractorProvider : AsyncDisposableBase, IIntaractorProvid
         if (_serviceManager is not null) await _serviceManager.DisposeAsync();
     }
 
-    public async ValueTask<Dashboard> GetDashboardAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IServiceAdapter> GetServiceAdapterAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             await this.UpdateAsync(cancellationToken);
-            return _dashboard!;
+            return _serviceAdapter!;
         }
     }
 
-    public async ValueTask<FileDownloader> GetFileDownloaderAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IFileDownloader> GetFileDownloaderAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -66,7 +66,7 @@ public partial class IntaractorProvider : AsyncDisposableBase, IIntaractorProvid
         }
     }
 
-    public async ValueTask<FileUploader> GetFileUploaderAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IFileUploader> GetFileUploaderAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -75,7 +75,7 @@ public partial class IntaractorProvider : AsyncDisposableBase, IIntaractorProvid
         }
     }
 
-    public async ValueTask<ProfilePublisher> GetProfilePublisherAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IProfilePublisher> GetProfilePublisherAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -84,7 +84,7 @@ public partial class IntaractorProvider : AsyncDisposableBase, IIntaractorProvid
         }
     }
 
-    public async ValueTask<ProfileSubscriber> GetProfileSubscriberAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IProfileSubscriber> GetProfileSubscriberAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -123,24 +123,23 @@ public partial class IntaractorProvider : AsyncDisposableBase, IIntaractorProvid
         _serviceManager = await ServiceManager.CreateAsync(_listenAddress, cancellationToken);
         var service = _serviceManager.GetService()!;
 
-        _dashboard = await Dashboard.CreateAsync(service, _bytesPool, cancellationToken);
+        _serviceAdapter = new ServiceAdapter(service);
 
         var fileUploaderOptions = new FileUploaderOptions(Path.Combine(_databaseDirectoryPath, "file_uploader"));
-        _fileUploader = await FileUploader.CreateAsync(service, KeyValueLiteDatabaseStorage.Factory, _bytesPool, fileUploaderOptions, cancellationToken);
+        _fileUploader = await FileUploader.CreateAsync(_serviceAdapter, KeyValueLiteDatabaseStorage.Factory, _bytesPool, fileUploaderOptions, cancellationToken);
 
         var fileDownloaderOptions = new FileDownloaderOptions(Path.Combine(_databaseDirectoryPath, "file_downloader"));
-        _fileDownloader = await FileDownloader.CreateAsync(service, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, fileDownloaderOptions, cancellationToken);
+        _fileDownloader = await FileDownloader.CreateAsync(_serviceAdapter, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, fileDownloaderOptions, cancellationToken);
 
         var profilePublisherOptions = new ProfilePublisherOptions(Path.Combine(_databaseDirectoryPath, "profile_publisher"));
-        _profilePublisher = await ProfilePublisher.CreateAsync(service, KeyValueLiteDatabaseStorage.Factory, _bytesPool, profilePublisherOptions);
+        _profilePublisher = await ProfilePublisher.CreateAsync(_serviceAdapter, SingleValueFileStorage.Factory, _bytesPool, profilePublisherOptions);
 
         var profileSubscriberOptions = new ProfileSubscriberOptions(Path.Combine(_databaseDirectoryPath, "profile_subscriber"));
-        _profileSubscriber = await ProfileSubscriber.CreateAsync(service, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, profileSubscriberOptions);
+        _profileSubscriber = await ProfileSubscriber.CreateAsync(_serviceAdapter, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, profileSubscriberOptions);
     }
 
     private async ValueTask StopAsync(CancellationToken cancellationToken = default)
     {
-        if (_dashboard is not null) await _dashboard.DisposeAsync();
         if (_fileUploader is not null) await _fileUploader.DisposeAsync();
         if (_fileDownloader is not null) await _fileDownloader.DisposeAsync();
         if (_profilePublisher is not null) await _profilePublisher.DisposeAsync();

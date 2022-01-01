@@ -48,7 +48,7 @@ public class SettingsWindowViewModel : AsyncDisposableBase, ISettingsWindowViewM
         this.DownloadDirectory = new ReactiveProperty<string>().AddTo(_disposable);
 
         this.EditDownloadDirectoryCommand = new ReactiveCommand().AddTo(_disposable);
-        this.EditDownloadDirectoryCommand.Subscribe(() => this.OpenDownloadDirectory()).AddTo(_disposable);
+        this.EditDownloadDirectoryCommand.Subscribe(() => this.EditDownloadDirectory()).AddTo(_disposable);
 
         this.OkCommand = new ReactiveCommand().AddTo(_disposable);
         this.OkCommand.Subscribe((state) => this.Ok(state)).AddTo(_disposable);
@@ -83,7 +83,7 @@ public class SettingsWindowViewModel : AsyncDisposableBase, ISettingsWindowViewM
 
     public ReactiveCommand CancelCommand { get; }
 
-    private async void OpenDownloadDirectory()
+    private async void EditDownloadDirectory()
     {
     }
 
@@ -103,15 +103,24 @@ public class SettingsWindowViewModel : AsyncDisposableBase, ISettingsWindowViewM
 
     private async ValueTask LoadAsync(CancellationToken cancellationToken = default)
     {
+        var profileSubscriber = await _intaractorAdapter.GetProfileSubscriberAsync(cancellationToken);
+        var profileSubscriberConfig = await profileSubscriber.GetConfigAsync(cancellationToken);
+        this.TrustedSignaturesControlViewModel.Signatures.AddRange(profileSubscriberConfig.TrustedSignatures);
+        this.BlockedSignaturesControlViewModel.Signatures.AddRange(profileSubscriberConfig.BlockedSignatures);
+
         var fileDownloader = await _intaractorAdapter.GetFileDownloaderAsync(cancellationToken);
-        var config = await fileDownloader.GetConfigAsync(cancellationToken);
-        this.DownloadDirectory.Value = config?.DestinationDirectory ?? string.Empty;
+        var fileDownloaderConfig = await fileDownloader.GetConfigAsync(cancellationToken);
+        this.DownloadDirectory.Value = fileDownloaderConfig?.DestinationDirectory ?? string.Empty;
     }
 
     private async ValueTask SaveAsync(CancellationToken cancellationToken = default)
     {
-        var config = new FileDownloaderConfig(this.DownloadDirectory.Value);
+        var profileSubscriberConfig = new ProfileSubscriberConfig(this.TrustedSignaturesControlViewModel.Signatures.ToArray(), this.BlockedSignaturesControlViewModel.Signatures.ToArray(), 20, 1024);
+        var profileSubscriber = await _intaractorAdapter.GetProfileSubscriberAsync(cancellationToken);
+        await profileSubscriber.SetConfigAsync(profileSubscriberConfig, cancellationToken);
+
+        var fileDownloaderConfig = new FileDownloaderConfig(this.DownloadDirectory.Value);
         var fileDownloader = await _intaractorAdapter.GetFileDownloaderAsync(cancellationToken);
-        await fileDownloader.SetConfigAsync(config, cancellationToken);
+        await fileDownloader.SetConfigAsync(fileDownloaderConfig, cancellationToken);
     }
 }

@@ -32,11 +32,11 @@ public class MainWindowDesignViewModel : AsyncDisposableBase, IMainWindowViewMod
 
     public ReactiveCommand SettingsCommand { get; private set; }
 
-    public StatusControlViewModel? StatusControlViewModel { get; private set; } = null;
+    public StatusControlViewModel StatusControlViewModel { get; private set; } = null!;
 
-    public PeersControlViewModel? PeersControlViewModel { get; private set; } = null;
+    public PeersControlViewModel PeersControlViewModel { get; private set; } = null!;
 
-    public DownloadControlViewModel? DownloadControlViewModel { get; private set; } = null;
+    public DownloadControlViewModel DownloadControlViewModel { get; private set; } = null!;
 
-    public UploadControlViewModel? UploadControlViewModel { get; private set; } = null;
+    public UploadControlViewModel UploadControlViewModel { get; private set; } = null!;
 }

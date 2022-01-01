@@ -3,13 +3,13 @@ using Omnius.Axis.Models;
 using Omnius.Axis.Remoting;
 using Omnius.Core.Cryptography;
 
-namespace Omnius.Axis.Intaractors.Internal;
+namespace Omnius.Axis.Intaractors;
 
-internal sealed class AxisServiceAdapter
+public sealed class ServiceAdapter : IServiceAdapter
 {
     private readonly IAxisService _axisService;
 
-    public AxisServiceAdapter(IAxisService axisService)
+    public ServiceAdapter(IAxisService axisService)
     {
         _axisService = axisService;
     }

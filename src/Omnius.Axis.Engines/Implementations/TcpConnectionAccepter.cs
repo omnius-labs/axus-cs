@@ -105,14 +105,14 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
 
         var globalIpAddresses = await this.GetMyGlobalIpAddressesAsync(cancellationToken);
 
-        if (listenIpAddress.AddressFamily == AddressFamily.InterNetwork && listenIpAddress == IPAddress.Any)
+        if (listenIpAddress.AddressFamily == AddressFamily.InterNetwork)
         {
             foreach (var globalIpAddress in globalIpAddresses.Where(n => n.AddressFamily == AddressFamily.InterNetwork))
             {
                 results.Add(OmniAddress.CreateTcpEndpoint(globalIpAddress, port));
             }
         }
-        else if (listenIpAddress.AddressFamily == AddressFamily.InterNetworkV6 && listenIpAddress == IPAddress.IPv6Any)
+        else if (listenIpAddress.AddressFamily == AddressFamily.InterNetworkV6)
         {
             foreach (var globalIpAddress in globalIpAddresses.Where(n => n.AddressFamily == AddressFamily.InterNetworkV6))
             {
@@ -127,9 +127,9 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
     {
         var list = new HashSet<IPAddress>();
 
-        try
+        if (_options.UseUpnp)
         {
-            if (_options.UseUpnp)
+            try
             {
                 using var upnpClient = _upnpClientFactory.Create();
                 await upnpClient.ConnectAsync(cancellationToken);
@@ -140,20 +140,21 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
                     list.Add(externalIp);
                 }
             }
-
-            foreach (var ipAddress in Dns.GetHostAddresses(Dns.GetHostName()))
+            catch (Exception e)
             {
-#if !DEBUG
-                if (!Internal.IpAddressHelper.IsGlobalIpAddress(ipAddress)) continue;
-#endif
-
-                list.Add(ipAddress);
+                _logger.Error(e);
             }
         }
-        catch (Exception e)
+
+        foreach (var ipAddress in Dns.GetHostAddresses(Dns.GetHostName()))
         {
-            _logger.Error(e);
+            if (!Internal.IpAddressHelper.IsGlobalIpAddress(ipAddress)) continue;
+            list.Add(ipAddress);
         }
+
+#if DEBUG
+        list.Add(IPAddress.Loopback);
+#endif
 
         return list;
     }

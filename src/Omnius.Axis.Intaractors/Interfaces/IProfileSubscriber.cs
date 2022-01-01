@@ -5,8 +5,6 @@ namespace Omnius.Axis.Intaractors;
 
 public interface IProfileSubscriber
 {
-    ValueTask<IEnumerable<SubscribedProfileReport>> GetSubscribedProfileReportsAsync(CancellationToken cancellationToken = default);
-
     IAsyncEnumerable<Profile> FindAllAsync(CancellationToken cancellationToken = default);
 
     ValueTask<Profile?> FindOneAsync(OmniSignature signature, CancellationToken cancellationToken = default);

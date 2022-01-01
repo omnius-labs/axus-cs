@@ -144,5 +144,14 @@ internal sealed class ProfilePublisherRepository : DisposableBase
                 col.DeleteMany(n => n.RootHash == rootHashEntity);
             }
         }
+
+        public void DeleteAll()
+        {
+            lock (_lockObject)
+            {
+                var col = this.GetCollection();
+                col.DeleteAll();
+            }
+        }
     }
 }

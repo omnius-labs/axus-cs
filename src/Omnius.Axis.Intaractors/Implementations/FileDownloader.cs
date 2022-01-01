@@ -1,9 +1,7 @@
-using Omnius.Axis.Intaractors.Internal;
 using Omnius.Axis.Intaractors.Internal.Models;
 using Omnius.Axis.Intaractors.Internal.Repositories;
 using Omnius.Axis.Intaractors.Models;
 using Omnius.Axis.Models;
-using Omnius.Axis.Remoting;
 using Omnius.Core;
 using Omnius.Core.Helpers;
 using Omnius.Core.Storages;
@@ -14,7 +12,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly AxisServiceAdapter _service;
+    private readonly IServiceAdapter _serviceAdapter;
     private readonly IKeyValueStorageFactory _keyValueStorageFactory;
     private readonly IBytesPool _bytesPool;
     private readonly FileDownloaderOptions _options;
@@ -30,16 +28,16 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
 
     private const string Registrant = "Omnius.Axis.Intaractors.FileDownloader";
 
-    public static async ValueTask<FileDownloader> CreateAsync(IAxisService axisService, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<FileDownloader> CreateAsync(IServiceAdapter serviceAdapter, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options, CancellationToken cancellationToken = default)
     {
-        var fileDownloader = new FileDownloader(axisService, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
+        var fileDownloader = new FileDownloader(serviceAdapter, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
         await fileDownloader.InitAsync(cancellationToken);
         return fileDownloader;
     }
 
-    private FileDownloader(IAxisService axisService, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options)
+    private FileDownloader(IServiceAdapter service, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options)
     {
-        _service = new AxisServiceAdapter(axisService);
+        _serviceAdapter = service;
         _keyValueStorageFactory = keyValueStorageFactory;
         _bytesPool = bytesPool;
         _options = options;
@@ -92,19 +90,19 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _service.GetSubscribedFileReportsAsync(cancellationToken);
+            var reports = await _serviceAdapter.GetSubscribedFileReportsAsync(cancellationToken);
             var hashes = reports.Where(n => n.Registrant == Registrant).Select(n => n.RootHash).ToHashSet();
 
             foreach (var hash in hashes)
             {
                 if (_fileDownloaderRepo.Items.Exists(hash)) continue;
-                await _service.UnsubscribeFileAsync(hash, Registrant, cancellationToken);
+                await _serviceAdapter.UnsubscribeFileAsync(hash, Registrant, cancellationToken);
             }
 
             foreach (var seed in _fileDownloaderRepo.Items.FindAll().Select(n => n.Seed))
             {
                 if (hashes.Contains(seed.RootHash)) continue;
-                await _service.SubscribeFileAsync(seed.RootHash, Registrant, cancellationToken);
+                await _serviceAdapter.SubscribeFileAsync(seed.RootHash, Registrant, cancellationToken);
             }
         }
     }
@@ -116,7 +114,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
             var config = await this.GetConfigAsync(cancellationToken);
             var basePath = config.DestinationDirectory;
 
-            var reports = (await _service.GetSubscribedFileReportsAsync(cancellationToken))
+            var reports = (await _serviceAdapter.GetSubscribedFileReportsAsync(cancellationToken))
                 .Where(n => n.Registrant == Registrant)
                 .ToDictionary(n => n.RootHash);
 
@@ -130,7 +128,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
                 DirectoryHelper.CreateDirectory(basePath);
                 var filePath = Path.Combine(basePath, item.Seed.Name);
 
-                if (await _service.TryExportFileToStorageAsync(item.Seed.RootHash, filePath, cancellationToken))
+                if (await _serviceAdapter.TryExportFileToStorageAsync(item.Seed.RootHash, filePath, cancellationToken))
                 {
                     var newItem = new DownloadingFileItem(item.Seed, filePath, item.CreationTime, DownloadingFileState.Completed);
                     _fileDownloaderRepo.Items.Upsert(newItem);
@@ -145,7 +143,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
         {
             var results = new List<DownloadingFileReport>();
 
-            var reports = (await _service.GetSubscribedFileReportsAsync(cancellationToken))
+            var reports = (await _serviceAdapter.GetSubscribedFileReportsAsync(cancellationToken))
                 .Where(n => n.Registrant == Registrant)
                 .ToDictionary(n => n.RootHash);
 

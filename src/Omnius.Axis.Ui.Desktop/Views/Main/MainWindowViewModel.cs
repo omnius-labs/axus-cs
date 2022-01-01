@@ -13,13 +13,13 @@ public interface IMainWindowViewModel
 
     ReactiveCommand SettingsCommand { get; }
 
-    StatusControlViewModel? StatusControlViewModel { get; }
+    StatusControlViewModel StatusControlViewModel { get; }
 
-    PeersControlViewModel? PeersControlViewModel { get; }
+    PeersControlViewModel PeersControlViewModel { get; }
 
-    DownloadControlViewModel? DownloadControlViewModel { get; }
+    DownloadControlViewModel DownloadControlViewModel { get; }
 
-    UploadControlViewModel? UploadControlViewModel { get; }
+    UploadControlViewModel UploadControlViewModel { get; }
 }
 
 public class MainWindowViewModel : AsyncDisposableBase, IMainWindowViewModel
@@ -61,14 +61,6 @@ public class MainWindowViewModel : AsyncDisposableBase, IMainWindowViewModel
     public UploadControlViewModel UploadControlViewModel { get; }
 
     public ReactiveCommand SettingsCommand { get; }
-
-    StatusControlViewModel? IMainWindowViewModel.StatusControlViewModel => throw new NotImplementedException();
-
-    PeersControlViewModel? IMainWindowViewModel.PeersControlViewModel => throw new NotImplementedException();
-
-    DownloadControlViewModel? IMainWindowViewModel.DownloadControlViewModel => throw new NotImplementedException();
-
-    UploadControlViewModel? IMainWindowViewModel.UploadControlViewModel => throw new NotImplementedException();
 
     private async void Settings()
     {

@@ -1,8 +1,6 @@
-using Omnius.Axis.Intaractors.Internal;
 using Omnius.Axis.Intaractors.Internal.Models;
 using Omnius.Axis.Intaractors.Internal.Repositories;
 using Omnius.Axis.Intaractors.Models;
-using Omnius.Axis.Remoting;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.RocketPack;
@@ -14,7 +12,7 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly AxisServiceAdapter _service;
+    private readonly IServiceAdapter _serviceAdapter;
     private readonly IKeyValueStorageFactory _keyValueStorageFactory;
     private readonly IBytesPool _bytesPool;
     private readonly FileUploaderOptions _options;
@@ -29,16 +27,16 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
 
     private const string Registrant = "Omnius.Axis.Intaractors.FileUploader";
 
-    public static async ValueTask<FileUploader> CreateAsync(IAxisService axisService, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, FileUploaderOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<FileUploader> CreateAsync(IServiceAdapter serviceAdapter, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, FileUploaderOptions options, CancellationToken cancellationToken = default)
     {
-        var fileUploader = new FileUploader(axisService, keyValueStorageFactory, bytesPool, options);
+        var fileUploader = new FileUploader(serviceAdapter, keyValueStorageFactory, bytesPool, options);
         await fileUploader.InitAsync(cancellationToken);
         return fileUploader;
     }
 
-    private FileUploader(IAxisService axisService, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, FileUploaderOptions options)
+    private FileUploader(IServiceAdapter service, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, FileUploaderOptions options)
     {
-        _service = new AxisServiceAdapter(axisService);
+        _serviceAdapter = service;
         _keyValueStorageFactory = keyValueStorageFactory;
         _bytesPool = bytesPool;
         _options = options;
@@ -89,20 +87,20 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var publishedFileReports = await _service.GetPublishedFileReportsAsync(cancellationToken);
+            var publishedFileReports = await _serviceAdapter.GetPublishedFileReportsAsync(cancellationToken);
             var filePaths = new HashSet<string>();
             filePaths.UnionWith(publishedFileReports.Where(n => n.Registrant == Registrant).Select(n => n.FilePath).Where(n => n is not null)!);
 
             foreach (var filePath in filePaths)
             {
                 if (_fileUploaderRepo.Items.Exists(filePath)) continue;
-                await _service.UnpublishFileFromStorageAsync(filePath, Registrant, cancellationToken);
+                await _serviceAdapter.UnpublishFileFromStorageAsync(filePath, Registrant, cancellationToken);
             }
 
             foreach (var item in _fileUploaderRepo.Items.FindAll())
             {
                 if (filePaths.Contains(item.FilePath)) continue;
-                var rootHash = await _service.PublishFileFromStorageAsync(item.FilePath, Registrant, cancellationToken);
+                var rootHash = await _serviceAdapter.PublishFileFromStorageAsync(item.FilePath, Registrant, cancellationToken);
 
                 var seed = new Seed(rootHash, item.Seed.Name, item.Seed.Size, item.Seed.CreationTime);
                 var newItem = new UploadingFileItem(item.FilePath, seed, item.CreationTime, UploadingFileState.Completed);
@@ -147,7 +145,7 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
         {
             if (!_fileUploaderRepo.Items.Exists(filePath)) return;
 
-            await _service.UnpublishFileFromStorageAsync(filePath, Registrant, cancellationToken);
+            await _serviceAdapter.UnpublishFileFromStorageAsync(filePath, Registrant, cancellationToken);
 
             _fileUploaderRepo.Items.Delete(filePath);
         }

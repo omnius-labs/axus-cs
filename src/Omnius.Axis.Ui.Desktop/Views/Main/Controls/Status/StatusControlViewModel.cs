@@ -60,9 +60,9 @@ public class StatusControlViewModel : AsyncDisposableBase
             {
                 await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken).ConfigureAwait(false);
 
-                var dashboard = await _intaractorAdapter.GetDashboardAsync();
+                var serviceAdapter = await _intaractorAdapter.GetServiceAdapterAsync();
 
-                var myNodeLocation = await dashboard.GetMyNodeLocationAsync(cancellationToken);
+                var myNodeLocation = await serviceAdapter.GetMyNodeLocationAsync(cancellationToken);
 
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {

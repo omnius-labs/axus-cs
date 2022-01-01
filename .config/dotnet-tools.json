@@ -1,36 +1,18 @@
 {
-  "version": 1,
-  "isRoot": true,
-  "tools": {
-    "dotnet-format": {
-      "version": "5.1.250801",
-      "commands": [
-        "dotnet-format"
-      ]
+    "isRoot": true,
+    "tools": {
+        "coverlet.console": {
+            "commands": ["coverlet"],
+            "version": "3.1.0"
+        },
+        "dotnet-reportgenerator-globaltool": {
+            "commands": ["reportgenerator"],
+            "version": "4.8.13"
+        },
+        "nukeeper": {
+            "commands": ["nukeeper"],
+            "version": "0.35.0"
+        }
     },
-    "coverlet.console": {
-      "version": "3.1.0",
-      "commands": [
-        "coverlet"
-      ]
-    },
-    "dotnet-reportgenerator-globaltool": {
-      "version": "4.8.13",
-      "commands": [
-        "reportgenerator"
-      ]
-    },
-    "nukeeper": {
-      "version": "0.35.0",
-      "commands": [
-        "nukeeper"
-      ]
-    },
-    "dotnet-t4": {
-      "version": "2.2.1",
-      "commands": [
-        "t4"
-      ]
-    }
-  }
+    "version": 1
 }

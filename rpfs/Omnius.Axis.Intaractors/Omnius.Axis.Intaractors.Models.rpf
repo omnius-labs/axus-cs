@@ -13,9 +13,9 @@ message Profile {
 }
 
 message ProfileContent {
-    TrustedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
-    BlockedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
-    Seeds: vector<Seed>(capacity: 32 * 1024 * 1024),
+    TrustedSignatures: vector<OmniSignature>(capacity: 1024),
+    BlockedSignatures: vector<OmniSignature>(capacity: 1024),
+    Seeds: vector<Seed>(capacity: 256 * 1024),
 }
 
 message Seed {
@@ -45,14 +45,11 @@ message FileDownloaderConfig {
 
 message ProfilePublisherConfig {
     DigitalSignature: OmniDigitalSignature,
-    TrustedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
-    BlockedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
-    Seeds: vector<Seed>(capacity: 32 * 1024 * 1024),
 }
 
 message ProfileSubscriberConfig {
-    TrustedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
-    BlockedSignatures: vector<OmniSignature>(capacity: 32 * 1024),
+    TrustedSignatures: vector<OmniSignature>(capacity: 1024),
+    BlockedSignatures: vector<OmniSignature>(capacity: 1024),
     SearchDepth: uint32,
     MaxProfileCount: uint32,
 }

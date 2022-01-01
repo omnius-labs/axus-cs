@@ -161,26 +161,26 @@ public sealed partial class ProfileContent : global::Omnius.Core.RocketPack.IRoc
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public static readonly int MaxTrustedSignaturesCount = 32768;
-    public static readonly int MaxBlockedSignaturesCount = 32768;
-    public static readonly int MaxSeedsCount = 33554432;
+    public static readonly int MaxTrustedSignaturesCount = 1024;
+    public static readonly int MaxBlockedSignaturesCount = 1024;
+    public static readonly int MaxSeedsCount = 262144;
 
     public ProfileContent(global::Omnius.Core.Cryptography.OmniSignature[] trustedSignatures, global::Omnius.Core.Cryptography.OmniSignature[] blockedSignatures, global::Omnius.Axis.Intaractors.Models.Seed[] seeds)
     {
         if (trustedSignatures is null) throw new global::System.ArgumentNullException("trustedSignatures");
-        if (trustedSignatures.Length > 32768) throw new global::System.ArgumentOutOfRangeException("trustedSignatures");
+        if (trustedSignatures.Length > 1024) throw new global::System.ArgumentOutOfRangeException("trustedSignatures");
         foreach (var n in trustedSignatures)
         {
             if (n is null) throw new global::System.ArgumentNullException("n");
         }
         if (blockedSignatures is null) throw new global::System.ArgumentNullException("blockedSignatures");
-        if (blockedSignatures.Length > 32768) throw new global::System.ArgumentOutOfRangeException("blockedSignatures");
+        if (blockedSignatures.Length > 1024) throw new global::System.ArgumentOutOfRangeException("blockedSignatures");
         foreach (var n in blockedSignatures)
         {
             if (n is null) throw new global::System.ArgumentNullException("n");
         }
         if (seeds is null) throw new global::System.ArgumentNullException("seeds");
-        if (seeds.Length > 33554432) throw new global::System.ArgumentOutOfRangeException("seeds");
+        if (seeds.Length > 262144) throw new global::System.ArgumentOutOfRangeException("seeds");
         foreach (var n in seeds)
         {
             if (n is null) throw new global::System.ArgumentNullException("n");
@@ -698,19 +698,19 @@ public sealed partial class ProfileSubscriberConfig : global::Omnius.Core.Rocket
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public static readonly int MaxTrustedSignaturesCount = 32768;
-    public static readonly int MaxBlockedSignaturesCount = 32768;
+    public static readonly int MaxTrustedSignaturesCount = 1024;
+    public static readonly int MaxBlockedSignaturesCount = 1024;
 
     public ProfileSubscriberConfig(global::Omnius.Core.Cryptography.OmniSignature[] trustedSignatures, global::Omnius.Core.Cryptography.OmniSignature[] blockedSignatures, uint searchDepth, uint maxProfileCount)
     {
         if (trustedSignatures is null) throw new global::System.ArgumentNullException("trustedSignatures");
-        if (trustedSignatures.Length > 32768) throw new global::System.ArgumentOutOfRangeException("trustedSignatures");
+        if (trustedSignatures.Length > 1024) throw new global::System.ArgumentOutOfRangeException("trustedSignatures");
         foreach (var n in trustedSignatures)
         {
             if (n is null) throw new global::System.ArgumentNullException("n");
         }
         if (blockedSignatures is null) throw new global::System.ArgumentNullException("blockedSignatures");
-        if (blockedSignatures.Length > 32768) throw new global::System.ArgumentOutOfRangeException("blockedSignatures");
+        if (blockedSignatures.Length > 1024) throw new global::System.ArgumentOutOfRangeException("blockedSignatures");
         foreach (var n in blockedSignatures)
         {
             if (n is null) throw new global::System.ArgumentNullException("n");

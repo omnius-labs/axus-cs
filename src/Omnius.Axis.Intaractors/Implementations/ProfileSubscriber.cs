@@ -4,7 +4,6 @@ using Omnius.Axis.Intaractors.Internal;
 using Omnius.Axis.Intaractors.Internal.Models;
 using Omnius.Axis.Intaractors.Internal.Repositories;
 using Omnius.Axis.Intaractors.Models;
-using Omnius.Axis.Remoting;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.RocketPack;
@@ -16,7 +15,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly AxisServiceAdapter _service;
+    private readonly IServiceAdapter _serviceAdapter;
     private readonly IBytesPool _bytesPool;
     private readonly ProfileSubscriberOptions _options;
 
@@ -32,16 +31,16 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
 
     private const string Registrant = "Omnius.Axis.Intaractors.ProfileSubscriber";
 
-    public static async ValueTask<ProfileSubscriber> CreateAsync(IAxisService axisService, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ProfileSubscriberOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<ProfileSubscriber> CreateAsync(IServiceAdapter service, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ProfileSubscriberOptions options, CancellationToken cancellationToken = default)
     {
-        var profileSubscriber = new ProfileSubscriber(axisService, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
+        var profileSubscriber = new ProfileSubscriber(service, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
         await profileSubscriber.InitAsync(cancellationToken);
         return profileSubscriber;
     }
 
-    private ProfileSubscriber(IAxisService axisService, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ProfileSubscriberOptions options)
+    private ProfileSubscriber(IServiceAdapter service, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ProfileSubscriberOptions options)
     {
-        _service = new AxisServiceAdapter(axisService);
+        _serviceAdapter = service;
         _bytesPool = bytesPool;
         _options = options;
 
@@ -98,7 +97,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var subscribedShoutReports = await _service.GetSubscribedShoutReportsAsync(cancellationToken);
+            var subscribedShoutReports = await _serviceAdapter.GetSubscribedShoutReportsAsync(cancellationToken);
             var signatures = new HashSet<OmniSignature>();
             signatures.UnionWith(subscribedShoutReports.Where(n => n.Registrant == Registrant).Select(n => n.Signature));
 
@@ -106,19 +105,19 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
             {
                 if (_profileSubscriberRepo.Items.Exists(signature)) continue;
 
-                await _service.UnsubscribeShoutAsync(signature, Registrant, cancellationToken);
+                await _serviceAdapter.UnsubscribeShoutAsync(signature, Registrant, cancellationToken);
             }
 
             foreach (var item in _profileSubscriberRepo.Items.FindAll())
             {
                 if (signatures.Contains(item.Signature)) continue;
 
-                await _service.SubscribeShoutAsync(item.Signature, Registrant, cancellationToken);
+                await _serviceAdapter.SubscribeShoutAsync(item.Signature, Registrant, cancellationToken);
             }
 
             foreach (var item in _profileSubscriberRepo.Items.FindAll())
             {
-                var shout = await _service.TryExportShoutAsync(item.Signature, cancellationToken);
+                var shout = await _serviceAdapter.TryExportShoutAsync(item.Signature, cancellationToken);
                 if (shout is null) continue;
 
                 var contentRootHash = RocketMessage.FromBytes<OmniHash>(shout.Value.Memory);
@@ -134,7 +133,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var subscribedFileReports = await _service.GetSubscribedFileReportsAsync(cancellationToken);
+            var subscribedFileReports = await _serviceAdapter.GetSubscribedFileReportsAsync(cancellationToken);
             var rootHashes = new HashSet<OmniHash>();
             rootHashes.UnionWith(subscribedFileReports.Where(n => n.Registrant == Registrant).Select(n => n.RootHash));
 
@@ -142,14 +141,14 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
             {
                 if (_profileSubscriberRepo.Items.Exists(rootHash)) continue;
 
-                await _service.UnpublishFileFromMemoryAsync(rootHash, Registrant, cancellationToken);
+                await _serviceAdapter.UnpublishFileFromMemoryAsync(rootHash, Registrant, cancellationToken);
             }
 
             foreach (var rootHash in _profileSubscriberRepo.Items.FindAll().Select(n => n.RootHash))
             {
                 if (rootHashes.Contains(rootHash)) continue;
 
-                await _service.SubscribeFileAsync(rootHash, Registrant, cancellationToken);
+                await _serviceAdapter.SubscribeFileAsync(rootHash, Registrant, cancellationToken);
             }
         }
     }
@@ -238,13 +237,13 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
     {
         await Task.Delay(0, cancellationToken).ConfigureAwait(false);
 
-        var shout = await _service.TryExportShoutAsync(signature, cancellationToken);
+        var shout = await _serviceAdapter.TryExportShoutAsync(signature, cancellationToken);
         if (shout is null) return null;
 
         var contentRootHash = RocketMessage.FromBytes<OmniHash>(shout.Value.Memory);
         shout.Value.Dispose();
 
-        var contentBytes = await _service.TryExportFileToMemoryAsync(contentRootHash, cancellationToken);
+        var contentBytes = await _serviceAdapter.TryExportFileToMemoryAsync(contentRootHash, cancellationToken);
         if (contentBytes is null) return null;
 
         var content = RocketMessage.FromBytes<ProfileContent>(contentBytes.Value);
