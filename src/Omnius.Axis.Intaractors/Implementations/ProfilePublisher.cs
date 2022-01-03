@@ -108,7 +108,6 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
         }
     }
 
-
     private async Task SyncPublishedFiles(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
@@ -130,7 +129,6 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
             }
         }
     }
-
 
     public async ValueTask PublishAsync(ProfileContent profileContent, CancellationToken cancellationToken = default)
     {
