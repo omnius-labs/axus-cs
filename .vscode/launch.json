@@ -1,8 +1,22 @@
 {
     "version": "0.2.0",
+    "compounds": [
+        {
+            "name": "daemon/ui-desktop (win)",
+            "configurations": ["daemon (win)", "ui-desktop (win)"]
+        },
+        {
+            "name": "daemon/ui-desktop (linux)",
+            "configurations": ["daemon (linux)", "ui-desktop (linux)"]
+        },
+        {
+            "name": "daemon/ui-desktop (mac)",
+            "configurations": ["daemon (mac)", "ui-desktop (mac)"]
+        }
+    ],
     "configurations": [
         {
-            "name": "design ui-desktop (Win)",
+            "name": "design-ui-desktop (win)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Axis.Ui.Desktop)",
@@ -13,7 +27,7 @@
             "stopAtEntry": false
         },
         {
-            "name": "daemon (Win)",
+            "name": "daemon (win)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Axis.Daemon)",
@@ -31,25 +45,7 @@
             "stopAtEntry": false
         },
         {
-            "name": "ui-desktop (Win)",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build (Omnius.Axis.Ui.Desktop)",
-            "program": "${workspaceFolder}/tmp/bin/win-vscode/Omnius.Axis.Ui.Desktop/Debug/net6.0/Omnius.Axis.Ui.Desktop.dll",
-            "args": [
-                "-s",
-                "./storage/ui-desktop",
-                "-l",
-                "tcp(ip4(127.0.0.1),43200)",
-                "-v",
-                "true"
-            ],
-            "cwd": "${workspaceFolder}/demo/1",
-            "console": "internalConsole",
-            "stopAtEntry": false
-        },
-        {
-            "name": "daemon (Linux)",
+            "name": "daemon (linux)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Axis.Daemon)",
@@ -67,25 +63,7 @@
             "stopAtEntry": false
         },
         {
-            "name": "ui-desktop (Linux)",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build (Omnius.Axis.Ui.Desktop)",
-            "program": "${workspaceFolder}/tmp/bin/linux-vscode/Omnius.Axis.Ui.Desktop/Debug/net6.0/Omnius.Axis.Ui.Desktop.dll",
-            "args": [
-                "-s",
-                "./storage/ui-desktop",
-                "-l",
-                "tcp(ip4(127.0.0.1),43200)",
-                "-v",
-                "true"
-            ],
-            "cwd": "${workspaceFolder}/demo/ui-desktop_1",
-            "console": "internalConsole",
-            "stopAtEntry": false
-        },
-        {
-            "name": "daemon (Mac)",
+            "name": "daemon (mac)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Axis.Daemon)",
@@ -103,7 +81,43 @@
             "stopAtEntry": false
         },
         {
-            "name": "ui-desktop (Mac)",
+            "name": "ui-desktop (win)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build (Omnius.Axis.Ui.Desktop)",
+            "program": "${workspaceFolder}/tmp/bin/win-vscode/Omnius.Axis.Ui.Desktop/Debug/net6.0/Omnius.Axis.Ui.Desktop.dll",
+            "args": [
+                "-s",
+                "./storage/ui-desktop",
+                "-l",
+                "tcp(ip4(127.0.0.1),43200)",
+                "-v",
+                "true"
+            ],
+            "cwd": "${workspaceFolder}/demo/1",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "ui-desktop (linux)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build (Omnius.Axis.Ui.Desktop)",
+            "program": "${workspaceFolder}/tmp/bin/linux-vscode/Omnius.Axis.Ui.Desktop/Debug/net6.0/Omnius.Axis.Ui.Desktop.dll",
+            "args": [
+                "-s",
+                "./storage/ui-desktop",
+                "-l",
+                "tcp(ip4(127.0.0.1),43200)",
+                "-v",
+                "true"
+            ],
+            "cwd": "${workspaceFolder}/demo/ui-desktop_1",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "ui-desktop (mac)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Axis.Ui.Desktop)",
