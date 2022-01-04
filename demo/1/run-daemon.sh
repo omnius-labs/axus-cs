@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/env bash
+set -euo pipefail
+
 cd $(dirname $0)
 
 export BuildTargetName=daemon-1

@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/env bash
+set -euo pipefail
 
 export ContinuousIntegrationBuild=true
 
