@@ -20,7 +20,7 @@ public class SettingsWindow : StatefulWindowBase
 
     protected override async ValueTask OnInitializeAsync()
     {
-        if (Program.IsDesignMode)
+        if (App.Current.IsDesignMode)
         {
             var designViewModel = new SettingsWindowDesignViewModel();
             this.DataContext = designViewModel;
@@ -40,7 +40,7 @@ public class SettingsWindow : StatefulWindowBase
 
     protected override async ValueTask OnDisposeAsync()
     {
-        if (Program.IsDesignMode) return;
+        if (App.Current.IsDesignMode) return;
 
         if (this.DataContext is SettingsWindowViewModel viewModel)
         {

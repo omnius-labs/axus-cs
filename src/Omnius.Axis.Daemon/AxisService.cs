@@ -62,6 +62,26 @@ public class AxisService : AsyncDisposableBase, IAxisService
         _configStorage.Dispose();
     }
 
+    public async ValueTask<GetConfigResult> GetConfigAsync(CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
+            var config = await this.LoadConfigAsync(cancellationToken);
+            return new GetConfigResult(config);
+        }
+    }
+
+    public async ValueTask SetConfigAsync(SetConfigRequest param, CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
+            await this.SaveConfigAsync(param.Config, cancellationToken);
+
+            await this.StopAsync(cancellationToken);
+            await this.StartAsync(cancellationToken);
+        }
+    }
+
     private async ValueTask StartAsync(CancellationToken cancellationToken = default)
     {
         var config = await this.LoadConfigAsync(cancellationToken);
@@ -76,7 +96,7 @@ public class AxisService : AsyncDisposableBase, IAxisService
 
         var connectionConnectors = new List<IConnectionConnector>();
 
-        if (config.SessionConnector?.TcpConnector is TcpConnectorConfig tcpConnectorConfig)
+        if (config.TcpConnector is TcpConnectorConfig tcpConnectorConfig)
         {
             var tcpProxyType = tcpConnectorConfig.Proxy?.Type switch
             {
@@ -97,7 +117,7 @@ public class AxisService : AsyncDisposableBase, IAxisService
 
         var connectionAccepters = new List<IConnectionAccepter>();
 
-        if (config.SessionAccepter?.TcpAccepter is TcpAccepterConfig tcpAccepterConfig)
+        if (config.TcpAccepter is TcpAccepterConfig tcpAccepterConfig)
         {
             var useUpnp = tcpAccepterConfig.UseUpnp;
             var listenAddress = tcpAccepterConfig.ListenAddress;
@@ -207,13 +227,11 @@ public class AxisService : AsyncDisposableBase, IAxisService
                 bandwidth: new BandwidthConfig(
                     maxSendBytesPerSeconds: 1024 * 1024 * 32,
                     maxReceiveBytesPerSeconds: 1024 * 1024 * 32),
-                sessionConnector: new SessionConnectorConfig(
-                    tcpConnector: new TcpConnectorConfig(
-                        proxy: null)),
-                sessionAccepter: new SessionAccepterConfig(
-                    tcpAccepter: new TcpAccepterConfig(
-                        useUpnp: true,
-                        listenAddress: OmniAddress.CreateTcpEndpoint(IPAddress.Any, (ushort)Random.Shared.Next(10000, 60000)))));
+                tcpConnector: new TcpConnectorConfig(
+                    proxy: null),
+                tcpAccepter: new TcpAccepterConfig(
+                    useUpnp: true,
+                    listenAddress: OmniAddress.CreateTcpEndpoint(IPAddress.Any, (ushort)Random.Shared.Next(10000, 60000))));
 
             await _configStorage.TrySetValueAsync(config, cancellationToken);
         }
@@ -224,26 +242,6 @@ public class AxisService : AsyncDisposableBase, IAxisService
     private async ValueTask SaveConfigAsync(ServiceConfig config, CancellationToken cancellationToken = default)
     {
         await _configStorage.TrySetValueAsync(config, cancellationToken);
-    }
-
-    public async ValueTask<GetConfigResult> GetConfigAsync(CancellationToken cancellationToken = default)
-    {
-        using (await _asyncLock.LockAsync(cancellationToken))
-        {
-            var config = await this.LoadConfigAsync(cancellationToken);
-            return new GetConfigResult(config);
-        }
-    }
-
-    public async ValueTask SetConfigAsync(SetConfigRequest param, CancellationToken cancellationToken = default)
-    {
-        using (await _asyncLock.LockAsync(cancellationToken))
-        {
-            await this.SaveConfigAsync(param.Config, cancellationToken);
-
-            await this.StopAsync(cancellationToken);
-            await this.StartAsync(cancellationToken);
-        }
     }
 
     public async ValueTask<GetSessionsReportResult> GetSessionsReportAsync(CancellationToken cancellationToken = default)

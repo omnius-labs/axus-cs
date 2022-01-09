@@ -14,7 +14,7 @@ public sealed partial class UiStatus
 
     public SettingsWindowStatus? SettingsWindow { get; set; }
 
-    public TextWindowStatus? TextWindow { get; set; }
+    public MultiLineTextBoxWindowStatus? MultiLineTextBoxWindow { get; set; }
 
     public DownloadControlStatus? DownloadControl { get; set; }
 
@@ -53,7 +53,7 @@ public sealed class SettingsWindowStatus
     public WindowStatus? Window { get; set; }
 }
 
-public sealed class TextWindowStatus
+public sealed class MultiLineTextBoxWindowStatus
 {
     public WindowStatus? Window { get; set; }
 }

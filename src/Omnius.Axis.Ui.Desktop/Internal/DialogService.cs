@@ -7,7 +7,7 @@ namespace Omnius.Axis.Ui.Desktop.Internal;
 
 public interface IDialogService
 {
-    ValueTask<string> ShowTextWindowAsync();
+    ValueTask<string> ShowMultiLineTextBoxWindowAsync();
 
     ValueTask ShowSettingsWindowAsync();
 
@@ -27,11 +27,11 @@ public class DialogService : IDialogService
         _clipboardService = clipboardService;
     }
 
-    public async ValueTask<string> ShowTextWindowAsync()
+    public async ValueTask<string> ShowMultiLineTextBoxWindowAsync()
     {
         return await _applicationDispatcher.InvokeAsync(async () =>
         {
-            var window = new TextWindow();
+            var window = new MultiLineTextBoxWindow();
 
             await window.ShowDialog(_mainWindowProvider.GetMainWindow());
             return window.GetResult() ?? string.Empty;

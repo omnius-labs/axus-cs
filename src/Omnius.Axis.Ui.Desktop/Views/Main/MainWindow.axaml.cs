@@ -20,7 +20,7 @@ public partial class MainWindow : StatefulWindowBase
 
     protected override async ValueTask OnInitializeAsync()
     {
-        if (Program.IsDesignMode)
+        if (App.Current.IsDesignMode)
         {
             var designViewModel = new MainWindowDesignViewModel();
             this.DataContext = designViewModel;
@@ -40,7 +40,7 @@ public partial class MainWindow : StatefulWindowBase
 
     protected override async ValueTask OnDisposeAsync()
     {
-        if (Program.IsDesignMode) return;
+        if (App.Current.IsDesignMode) return;
 
         if (this.DataContext is MainWindowViewModel viewModel)
         {

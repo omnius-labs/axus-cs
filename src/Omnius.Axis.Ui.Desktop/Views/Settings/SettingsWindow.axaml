@@ -1,7 +1,6 @@
 <Window x:Class="Omnius.Axis.Ui.Desktop.Views.Settings.SettingsWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:dataGrid="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
     xmlns:local="clr-namespace:Omnius.Axis.Ui.Desktop.Views.Settings;assembly=Omnius.Axis.Ui.Desktop"
@@ -18,11 +17,16 @@
     <Grid RowDefinitions="*,Auto" Background="{DynamicResource ThemeControlMidColor}">
         <Grid ColumnDefinitions="Auto,*" Background="Transparent">
             <TreeView Background="Transparent">
-                <TreeViewItem Name="ProfileTreeViewItem" Header="Profile" IsSelected="True" IsExpanded="True">
+                <TreeViewItem Name="ProfileTreeViewItem" Header="Profile" IsExpanded="True" IsSelected="True">
                     <TreeViewItem Name="TrustedSignaturesTreeViewItem" Header="Trusted Signatures" />
                     <TreeViewItem Name="BlockedSignaturesTreeViewItem" Header="Ignored Signatures" />
                 </TreeViewItem>
-                <TreeViewItem Name="DownloadTreeViewItem" Header="Download" />
+                <TreeViewItem Name="FileTreeViewItem" Header="File" />
+                <TreeViewItem Name="ServiceTreeViewItem" Header="Service" IsExpanded="True">
+                    <TreeViewItem Name="BandwidthTreeViewItem" Header="Bandwidth" />
+                    <TreeViewItem Name="TcpConnectorTreeViewItem" Header="TcpConnector" />
+                    <TreeViewItem Name="TcpAccepterTreeViewItem" Header="TcpAccepter" />
+                </TreeViewItem>
             </TreeView>
             <Grid Grid.Column="1" Background="{DynamicResource ThemeControlLowColor}" >
                 <!-- Profile -->
@@ -37,21 +41,33 @@
                         </StackPanel>
                     </StackPanel>
                 </Grid>
-                <!-- TrustedSignatures -->
                 <Grid IsVisible="{Binding #TrustedSignaturesTreeViewItem.IsSelected}" VerticalAlignment="Top">
                     <local:SignaturesControl DataContext="{Binding TrustedSignaturesControlViewModel}" />
                 </Grid>
-                <!-- BlockedSignatures -->
                 <Grid IsVisible="{Binding #BlockedSignaturesTreeViewItem.IsSelected}" VerticalAlignment="Top">
                     <local:SignaturesControl DataContext="{Binding BlockedSignaturesControlViewModel}" />
                 </Grid>
-                <!-- Download -->
-                <Grid IsVisible="{Binding #DownloadTreeViewItem.IsSelected}" VerticalAlignment="Top">
+                <!-- File -->
+                <Grid IsVisible="{Binding #FileTreeViewItem.IsSelected}" VerticalAlignment="Top">
                     <StackPanel Orientation="Vertical" Margin="12">
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <Label Content="Download directory" />
                             <TextBox Text="{Binding DownloadDirectory.Value}" TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
                             <Button Content="Open" Command="{Binding EditDownloadDirectoryCommand} "/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+                <!-- Service -->
+                <Grid IsVisible="{Binding #BandwidthTreeViewItem.IsSelected}" VerticalAlignment="Top">
+                </Grid>
+                <Grid IsVisible="{Binding #TcpConnectorTreeViewItem.IsSelected}" VerticalAlignment="Top">
+                </Grid>
+                <Grid IsVisible="{Binding #TcpAccepterTreeViewItem.IsSelected}" VerticalAlignment="Top">
+                    <StackPanel Orientation="Vertical" Margin="12">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <Label Content="Use upnp" />
+                            <TextBox Text="{Binding DownloadDirectory.Value}" TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
+                            <ToggleButton Content="Open" Command="{Binding EditDownloadDirectoryCommand} "/>
                         </StackPanel>
                     </StackPanel>
                 </Grid>

@@ -91,7 +91,7 @@ public class DownloadControlViewModel : AsyncDisposableBase
     {
         var fileDownloader = await _intaractorAdapter.GetFileDownloaderAsync();
 
-        var text = await _dialogService.ShowTextWindowAsync();
+        var text = await _dialogService.ShowMultiLineTextBoxWindowAsync();
 
         foreach (var seed in ParseSeeds(text))
         {

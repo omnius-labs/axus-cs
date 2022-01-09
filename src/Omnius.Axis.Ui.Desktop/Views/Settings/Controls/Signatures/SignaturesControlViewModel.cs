@@ -73,7 +73,7 @@ public class SignaturesControlViewModel : AsyncDisposableBase, ISignaturesContro
 
     private async void Register()
     {
-        var text = await _dialogService.ShowTextWindowAsync();
+        var text = await _dialogService.ShowMultiLineTextBoxWindowAsync();
 
         foreach (var item in ParseSignateres(text))
         {

@@ -44,21 +44,13 @@ enum SessionHandshakeType : uint8 {
 
 message ServiceConfig {
     Bandwidth: BandwidthConfig,
-    SessionConnector: SessionConnectorConfig,
-    SessionAccepter: SessionAccepterConfig,
+    TcpConnector: TcpConnectorConfig?,
+    TcpAccepter: TcpAccepterConfig?,
 }
 
 message BandwidthConfig {
     MaxSendBytesPerSeconds: int32,
     MaxReceiveBytesPerSeconds: int32,
-}
-
-message SessionConnectorConfig {
-    TcpConnector: TcpConnectorConfig?,
-}
-
-message SessionAccepterConfig {
-    TcpAccepter: TcpAccepterConfig?,
 }
 
 message TcpConnectorConfig {

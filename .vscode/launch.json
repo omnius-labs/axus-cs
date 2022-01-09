@@ -19,10 +19,9 @@
             "name": "design-ui-desktop (win)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build (Omnius.Axis.Ui.Desktop)",
+            "preLaunchTask": "design-build (Omnius.Axis.Ui.Desktop)",
             "program": "${workspaceFolder}/tmp/bin/win-vscode/Omnius.Axis.Ui.Desktop/Debug/net6.0/Omnius.Axis.Ui.Desktop.dll",
-            "args": ["-d", "true"],
-            "cwd": "${workspaceFolder}/demo/1",
+            "cwd": "${workspaceFolder}/demo/0",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -40,7 +39,7 @@
                 "-v",
                 "true"
             ],
-            "cwd": "${workspaceFolder}/demo/1",
+            "cwd": "${workspaceFolder}/demo/0",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -58,7 +57,7 @@
                 "-v",
                 "true"
             ],
-            "cwd": "${workspaceFolder}/demo/daemon_1",
+            "cwd": "${workspaceFolder}/demo/0",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -76,7 +75,7 @@
                 "-v",
                 "true"
             ],
-            "cwd": "${workspaceFolder}/demo/daemon_1",
+            "cwd": "${workspaceFolder}/demo/0",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -94,7 +93,7 @@
                 "-v",
                 "true"
             ],
-            "cwd": "${workspaceFolder}/demo/1",
+            "cwd": "${workspaceFolder}/demo/0",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -112,7 +111,7 @@
                 "-v",
                 "true"
             ],
-            "cwd": "${workspaceFolder}/demo/ui-desktop_1",
+            "cwd": "${workspaceFolder}/demo/0",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -130,7 +129,7 @@
                 "-v",
                 "true"
             ],
-            "cwd": "${workspaceFolder}/demo/ui-desktop_1",
+            "cwd": "${workspaceFolder}/demo/0",
             "console": "internalConsole",
             "stopAtEntry": false
         }

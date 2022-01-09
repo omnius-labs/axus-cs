@@ -72,7 +72,7 @@ public class PeersControlViewModel : AsyncDisposableBase
     {
         var serviceAdapter = await _intaractorAdapter.GetServiceAdapterAsync();
 
-        var text = await _dialogService.ShowTextWindowAsync();
+        var text = await _dialogService.ShowMultiLineTextBoxWindowAsync();
         await serviceAdapter.AddCloudNodeLocationsAsync(ParseNodeLocations(text));
     }
 

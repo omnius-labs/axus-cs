@@ -5,9 +5,9 @@ using Omnius.Core.Avalonia;
 
 namespace Omnius.Axis.Ui.Desktop.Views.Dialogs;
 
-public class TextWindow : StatefulWindowBase
+public class MultiLineTextBoxWindow : StatefulWindowBase
 {
-    public TextWindow()
+    public MultiLineTextBoxWindow()
         : base()
     {
         this.InitializeComponent();
@@ -22,7 +22,7 @@ public class TextWindow : StatefulWindowBase
     {
         var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
 
-        var viewModel = serviceProvider.GetRequiredService<TextWindowViewModel>();
+        var viewModel = serviceProvider.GetRequiredService<MultiLineTextBoxWindowViewModel>();
         this.DataContext = viewModel;
         this.SetWindowStatus(viewModel?.Status?.Window);
     }
@@ -33,7 +33,7 @@ public class TextWindow : StatefulWindowBase
 
     protected override async ValueTask OnDisposeAsync()
     {
-        if (this.DataContext is TextWindowViewModel viewModel)
+        if (this.DataContext is MultiLineTextBoxWindowViewModel viewModel)
         {
             viewModel.Status.Window = this.GetWindowStatus();
             await viewModel.DisposeAsync();
@@ -42,7 +42,7 @@ public class TextWindow : StatefulWindowBase
 
     public string? GetResult()
     {
-        if (this.DataContext is TextWindowViewModel viewModel)
+        if (this.DataContext is MultiLineTextBoxWindowViewModel viewModel)
         {
             return viewModel.GetResult();
         }

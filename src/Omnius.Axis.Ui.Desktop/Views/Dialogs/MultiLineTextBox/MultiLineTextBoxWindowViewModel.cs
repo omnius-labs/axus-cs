@@ -8,14 +8,14 @@ using Reactive.Bindings.Extensions;
 
 namespace Omnius.Axis.Ui.Desktop.Views.Dialogs;
 
-public class TextWindowViewModel : AsyncDisposableBase
+public class MultiLineTextBoxWindowViewModel : AsyncDisposableBase
 {
     private readonly UiStatus _uiState;
     private readonly IClipboardService _clipboardService;
 
     private readonly CompositeDisposable _disposable = new();
 
-    public TextWindowViewModel(UiStatus uiState, IClipboardService clipboardService)
+    public MultiLineTextBoxWindowViewModel(UiStatus uiState, IClipboardService clipboardService)
     {
         _uiState = uiState;
         _clipboardService = clipboardService;
@@ -39,7 +39,7 @@ public class TextWindowViewModel : AsyncDisposableBase
         _disposable.Dispose();
     }
 
-    public TextWindowStatus Status => _uiState.TextWindow ??= new TextWindowStatus();
+    public MultiLineTextBoxWindowStatus Status => _uiState.MultiLineTextBoxWindow ??= new MultiLineTextBoxWindowStatus();
 
     public ReactivePropertySlim<string> Text { get; }
 

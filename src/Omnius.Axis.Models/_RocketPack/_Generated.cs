@@ -661,34 +661,31 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
     static ServiceConfig()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.ServiceConfig>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.ServiceConfig>.Empty = new global::Omnius.Axis.Models.ServiceConfig(global::Omnius.Axis.Models.BandwidthConfig.Empty, global::Omnius.Axis.Models.SessionConnectorConfig.Empty, global::Omnius.Axis.Models.SessionAccepterConfig.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.ServiceConfig>.Empty = new global::Omnius.Axis.Models.ServiceConfig(global::Omnius.Axis.Models.BandwidthConfig.Empty, null, null);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public ServiceConfig(global::Omnius.Axis.Models.BandwidthConfig bandwidth, global::Omnius.Axis.Models.SessionConnectorConfig sessionConnector, global::Omnius.Axis.Models.SessionAccepterConfig sessionAccepter)
+    public ServiceConfig(global::Omnius.Axis.Models.BandwidthConfig bandwidth, global::Omnius.Axis.Models.TcpConnectorConfig? tcpConnector, global::Omnius.Axis.Models.TcpAccepterConfig? tcpAccepter)
     {
         if (bandwidth is null) throw new global::System.ArgumentNullException("bandwidth");
-        if (sessionConnector is null) throw new global::System.ArgumentNullException("sessionConnector");
-        if (sessionAccepter is null) throw new global::System.ArgumentNullException("sessionAccepter");
-
         this.Bandwidth = bandwidth;
-        this.SessionConnector = sessionConnector;
-        this.SessionAccepter = sessionAccepter;
+        this.TcpConnector = tcpConnector;
+        this.TcpAccepter = tcpAccepter;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (bandwidth != default) ___h.Add(bandwidth.GetHashCode());
-            if (sessionConnector != default) ___h.Add(sessionConnector.GetHashCode());
-            if (sessionAccepter != default) ___h.Add(sessionAccepter.GetHashCode());
+            if (tcpConnector != default) ___h.Add(tcpConnector.GetHashCode());
+            if (tcpAccepter != default) ___h.Add(tcpAccepter.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Axis.Models.BandwidthConfig Bandwidth { get; }
-    public global::Omnius.Axis.Models.SessionConnectorConfig SessionConnector { get; }
-    public global::Omnius.Axis.Models.SessionAccepterConfig SessionAccepter { get; }
+    public global::Omnius.Axis.Models.TcpConnectorConfig? TcpConnector { get; }
+    public global::Omnius.Axis.Models.TcpAccepterConfig? TcpAccepter { get; }
 
     public static global::Omnius.Axis.Models.ServiceConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -719,8 +716,10 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
         if (this.Bandwidth != target.Bandwidth) return false;
-        if (this.SessionConnector != target.SessionConnector) return false;
-        if (this.SessionAccepter != target.SessionAccepter) return false;
+        if ((this.TcpConnector is null) != (target.TcpConnector is null)) return false;
+        if ((this.TcpConnector is not null) && (target.TcpConnector is not null) && this.TcpConnector != target.TcpConnector) return false;
+        if ((this.TcpAccepter is null) != (target.TcpAccepter is null)) return false;
+        if ((this.TcpAccepter is not null) && (target.TcpAccepter is not null) && this.TcpAccepter != target.TcpAccepter) return false;
 
         return true;
     }
@@ -737,15 +736,15 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
                 w.Write((uint)1);
                 global::Omnius.Axis.Models.BandwidthConfig.Formatter.Serialize(ref w, value.Bandwidth, rank + 1);
             }
-            if (value.SessionConnector != global::Omnius.Axis.Models.SessionConnectorConfig.Empty)
+            if (value.TcpConnector != null)
             {
                 w.Write((uint)2);
-                global::Omnius.Axis.Models.SessionConnectorConfig.Formatter.Serialize(ref w, value.SessionConnector, rank + 1);
+                global::Omnius.Axis.Models.TcpConnectorConfig.Formatter.Serialize(ref w, value.TcpConnector, rank + 1);
             }
-            if (value.SessionAccepter != global::Omnius.Axis.Models.SessionAccepterConfig.Empty)
+            if (value.TcpAccepter != null)
             {
                 w.Write((uint)3);
-                global::Omnius.Axis.Models.SessionAccepterConfig.Formatter.Serialize(ref w, value.SessionAccepter, rank + 1);
+                global::Omnius.Axis.Models.TcpAccepterConfig.Formatter.Serialize(ref w, value.TcpAccepter, rank + 1);
             }
             w.Write((uint)0);
         }
@@ -754,8 +753,8 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Axis.Models.BandwidthConfig p_bandwidth = global::Omnius.Axis.Models.BandwidthConfig.Empty;
-            global::Omnius.Axis.Models.SessionConnectorConfig p_sessionConnector = global::Omnius.Axis.Models.SessionConnectorConfig.Empty;
-            global::Omnius.Axis.Models.SessionAccepterConfig p_sessionAccepter = global::Omnius.Axis.Models.SessionAccepterConfig.Empty;
+            global::Omnius.Axis.Models.TcpConnectorConfig? p_tcpConnector = null;
+            global::Omnius.Axis.Models.TcpAccepterConfig? p_tcpAccepter = null;
 
             for (; ; )
             {
@@ -770,18 +769,18 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
                         }
                     case 2:
                         {
-                            p_sessionConnector = global::Omnius.Axis.Models.SessionConnectorConfig.Formatter.Deserialize(ref r, rank + 1);
+                            p_tcpConnector = global::Omnius.Axis.Models.TcpConnectorConfig.Formatter.Deserialize(ref r, rank + 1);
                             break;
                         }
                     case 3:
                         {
-                            p_sessionAccepter = global::Omnius.Axis.Models.SessionAccepterConfig.Formatter.Deserialize(ref r, rank + 1);
+                            p_tcpAccepter = global::Omnius.Axis.Models.TcpAccepterConfig.Formatter.Deserialize(ref r, rank + 1);
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axis.Models.ServiceConfig(p_bandwidth, p_sessionConnector, p_sessionAccepter);
+            return new global::Omnius.Axis.Models.ServiceConfig(p_bandwidth, p_tcpConnector, p_tcpAccepter);
         }
     }
 }
@@ -895,204 +894,6 @@ public sealed partial class BandwidthConfig : global::Omnius.Core.RocketPack.IRo
             }
 
             return new global::Omnius.Axis.Models.BandwidthConfig(p_maxSendBytesPerSeconds, p_maxReceiveBytesPerSeconds);
-        }
-    }
-}
-public sealed partial class SessionConnectorConfig : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.SessionConnectorConfig>
-{
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Models.SessionConnectorConfig> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.SessionConnectorConfig>.Formatter;
-    public static global::Omnius.Axis.Models.SessionConnectorConfig Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.SessionConnectorConfig>.Empty;
-
-    static SessionConnectorConfig()
-    {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.SessionConnectorConfig>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.SessionConnectorConfig>.Empty = new global::Omnius.Axis.Models.SessionConnectorConfig(null);
-    }
-
-    private readonly global::System.Lazy<int> ___hashCode;
-
-    public SessionConnectorConfig(global::Omnius.Axis.Models.TcpConnectorConfig? tcpConnector)
-    {
-        this.TcpConnector = tcpConnector;
-
-        ___hashCode = new global::System.Lazy<int>(() =>
-        {
-            var ___h = new global::System.HashCode();
-            if (tcpConnector != default) ___h.Add(tcpConnector.GetHashCode());
-            return ___h.ToHashCode();
-        });
-    }
-
-    public global::Omnius.Axis.Models.TcpConnectorConfig? TcpConnector { get; }
-
-    public static global::Omnius.Axis.Models.SessionConnectorConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
-    {
-        var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
-        return Formatter.Deserialize(ref reader, 0);
-    }
-    public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
-    {
-        var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
-        Formatter.Serialize(ref writer, this, 0);
-    }
-
-    public static bool operator ==(global::Omnius.Axis.Models.SessionConnectorConfig? left, global::Omnius.Axis.Models.SessionConnectorConfig? right)
-    {
-        return (right is null) ? (left is null) : right.Equals(left);
-    }
-    public static bool operator !=(global::Omnius.Axis.Models.SessionConnectorConfig? left, global::Omnius.Axis.Models.SessionConnectorConfig? right)
-    {
-        return !(left == right);
-    }
-    public override bool Equals(object? other)
-    {
-        if (other is not global::Omnius.Axis.Models.SessionConnectorConfig) return false;
-        return this.Equals((global::Omnius.Axis.Models.SessionConnectorConfig)other);
-    }
-    public bool Equals(global::Omnius.Axis.Models.SessionConnectorConfig? target)
-    {
-        if (target is null) return false;
-        if (object.ReferenceEquals(this, target)) return true;
-        if ((this.TcpConnector is null) != (target.TcpConnector is null)) return false;
-        if ((this.TcpConnector is not null) && (target.TcpConnector is not null) && this.TcpConnector != target.TcpConnector) return false;
-
-        return true;
-    }
-    public override int GetHashCode() => ___hashCode.Value;
-
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Models.SessionConnectorConfig>
-    {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axis.Models.SessionConnectorConfig value, in int rank)
-        {
-            if (rank > 256) throw new global::System.FormatException();
-
-            if (value.TcpConnector != null)
-            {
-                w.Write((uint)1);
-                global::Omnius.Axis.Models.TcpConnectorConfig.Formatter.Serialize(ref w, value.TcpConnector, rank + 1);
-            }
-            w.Write((uint)0);
-        }
-        public global::Omnius.Axis.Models.SessionConnectorConfig Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
-        {
-            if (rank > 256) throw new global::System.FormatException();
-
-            global::Omnius.Axis.Models.TcpConnectorConfig? p_tcpConnector = null;
-
-            for (; ; )
-            {
-                uint id = r.GetUInt32();
-                if (id == 0) break;
-                switch (id)
-                {
-                    case 1:
-                        {
-                            p_tcpConnector = global::Omnius.Axis.Models.TcpConnectorConfig.Formatter.Deserialize(ref r, rank + 1);
-                            break;
-                        }
-                }
-            }
-
-            return new global::Omnius.Axis.Models.SessionConnectorConfig(p_tcpConnector);
-        }
-    }
-}
-public sealed partial class SessionAccepterConfig : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.SessionAccepterConfig>
-{
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Models.SessionAccepterConfig> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.SessionAccepterConfig>.Formatter;
-    public static global::Omnius.Axis.Models.SessionAccepterConfig Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.SessionAccepterConfig>.Empty;
-
-    static SessionAccepterConfig()
-    {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.SessionAccepterConfig>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.SessionAccepterConfig>.Empty = new global::Omnius.Axis.Models.SessionAccepterConfig(null);
-    }
-
-    private readonly global::System.Lazy<int> ___hashCode;
-
-    public SessionAccepterConfig(global::Omnius.Axis.Models.TcpAccepterConfig? tcpAccepter)
-    {
-        this.TcpAccepter = tcpAccepter;
-
-        ___hashCode = new global::System.Lazy<int>(() =>
-        {
-            var ___h = new global::System.HashCode();
-            if (tcpAccepter != default) ___h.Add(tcpAccepter.GetHashCode());
-            return ___h.ToHashCode();
-        });
-    }
-
-    public global::Omnius.Axis.Models.TcpAccepterConfig? TcpAccepter { get; }
-
-    public static global::Omnius.Axis.Models.SessionAccepterConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
-    {
-        var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
-        return Formatter.Deserialize(ref reader, 0);
-    }
-    public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
-    {
-        var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
-        Formatter.Serialize(ref writer, this, 0);
-    }
-
-    public static bool operator ==(global::Omnius.Axis.Models.SessionAccepterConfig? left, global::Omnius.Axis.Models.SessionAccepterConfig? right)
-    {
-        return (right is null) ? (left is null) : right.Equals(left);
-    }
-    public static bool operator !=(global::Omnius.Axis.Models.SessionAccepterConfig? left, global::Omnius.Axis.Models.SessionAccepterConfig? right)
-    {
-        return !(left == right);
-    }
-    public override bool Equals(object? other)
-    {
-        if (other is not global::Omnius.Axis.Models.SessionAccepterConfig) return false;
-        return this.Equals((global::Omnius.Axis.Models.SessionAccepterConfig)other);
-    }
-    public bool Equals(global::Omnius.Axis.Models.SessionAccepterConfig? target)
-    {
-        if (target is null) return false;
-        if (object.ReferenceEquals(this, target)) return true;
-        if ((this.TcpAccepter is null) != (target.TcpAccepter is null)) return false;
-        if ((this.TcpAccepter is not null) && (target.TcpAccepter is not null) && this.TcpAccepter != target.TcpAccepter) return false;
-
-        return true;
-    }
-    public override int GetHashCode() => ___hashCode.Value;
-
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Models.SessionAccepterConfig>
-    {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axis.Models.SessionAccepterConfig value, in int rank)
-        {
-            if (rank > 256) throw new global::System.FormatException();
-
-            if (value.TcpAccepter != null)
-            {
-                w.Write((uint)1);
-                global::Omnius.Axis.Models.TcpAccepterConfig.Formatter.Serialize(ref w, value.TcpAccepter, rank + 1);
-            }
-            w.Write((uint)0);
-        }
-        public global::Omnius.Axis.Models.SessionAccepterConfig Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
-        {
-            if (rank > 256) throw new global::System.FormatException();
-
-            global::Omnius.Axis.Models.TcpAccepterConfig? p_tcpAccepter = null;
-
-            for (; ; )
-            {
-                uint id = r.GetUInt32();
-                if (id == 0) break;
-                switch (id)
-                {
-                    case 1:
-                        {
-                            p_tcpAccepter = global::Omnius.Axis.Models.TcpAccepterConfig.Formatter.Deserialize(ref r, rank + 1);
-                            break;
-                        }
-                }
-            }
-
-            return new global::Omnius.Axis.Models.SessionAccepterConfig(p_tcpAccepter);
         }
     }
 }

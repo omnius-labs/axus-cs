@@ -8,6 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <DefineConstants Condition=" '$(DesignMode)' != '' ">$(DefineConstants);DESIGN</DefineConstants>
     <NoWarn>CS1591,CS1998,NU5105,NU1603,NU1605</NoWarn>
     <GenerateFullPaths>true</GenerateFullPaths>
     <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))</RepoRoot>
