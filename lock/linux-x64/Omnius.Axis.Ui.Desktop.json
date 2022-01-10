@@ -17,18 +17,6 @@
           "System.ValueTuple": "4.5.0"
         }
       },
-      "Avalonia.Controls.DataGrid": {
-        "type": "Direct",
-        "requested": "[0.10.8, )",
-        "resolved": "0.10.8",
-        "contentHash": "AWS/s+tEDUX0icnDdsMpk6NoLAZeq+QEIiDhleJkxMTitfwvYVJlXePaoOm4w8Oi134KV/fkj7aoiU3QRr/ltg==",
-        "dependencies": {
-          "Avalonia": "0.10.8",
-          "Avalonia.Remote.Protocol": "0.10.8",
-          "JetBrains.Annotations": "10.3.0",
-          "System.Reactive": "5.0.0"
-        }
-      },
       "Avalonia.Desktop": {
         "type": "Direct",
         "requested": "[0.10.8, )",
@@ -100,6 +88,12 @@
           "Generator.Equals.Runtime": "2.2.3"
         }
       },
+      "GitInfo": {
+        "type": "Direct",
+        "requested": "[2.2.0, )",
+        "resolved": "2.2.0",
+        "contentHash": "SKTmjt40sYqoDB3S7HFVUToUN/vl6Zrt+PuSHdjbQDlcBx0JAZBdS7BXVbVKyy+0iaaF3FBd4ZxspIlKQCC9Lw=="
+      },
       "Microsoft.Extensions.DependencyInjection": {
         "type": "Direct",
         "requested": "[5.0.2, )",
@@ -152,6 +146,17 @@
         "type": "Transitive",
         "resolved": "2.1.0.2020091801",
         "contentHash": "nGsCPI8FuUknU/e6hZIqlsKRDxClXHZyztmgM8vuwslFC/BIV3LqM2wKefWbr6SORX4Lct4nivhSMkdF/TrKgg=="
+      },
+      "Avalonia.Controls.DataGrid": {
+        "type": "Transitive",
+        "resolved": "0.10.8",
+        "contentHash": "AWS/s+tEDUX0icnDdsMpk6NoLAZeq+QEIiDhleJkxMTitfwvYVJlXePaoOm4w8Oi134KV/fkj7aoiU3QRr/ltg==",
+        "dependencies": {
+          "Avalonia": "0.10.8",
+          "Avalonia.Remote.Protocol": "0.10.8",
+          "JetBrains.Annotations": "10.3.0",
+          "System.Reactive": "5.0.0"
+        }
       },
       "Avalonia.FreeDesktop": {
         "type": "Transitive",
