@@ -53,7 +53,7 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: Build
-        run: bash build-win.sh
+        run: pwsh build-win.ps1
       - name: Zip
         run: |
           cd ./pub/win-x64 && zip -r ../../axis.win-x64.zip ./*
