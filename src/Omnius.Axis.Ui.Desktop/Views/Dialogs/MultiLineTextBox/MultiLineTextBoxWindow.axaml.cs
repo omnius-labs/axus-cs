@@ -1,11 +1,11 @@
+using System.ComponentModel;
 using Avalonia.Markup.Xaml;
-using Microsoft.Extensions.DependencyInjection;
-using Omnius.Axis.Ui.Desktop.Internal;
+using Omnius.Axis.Ui.Desktop.Configuration;
 using Omnius.Core.Avalonia;
 
 namespace Omnius.Axis.Ui.Desktop.Views.Dialogs;
 
-public class MultiLineTextBoxWindow : StatefulWindowBase
+public partial class MultiLineTextBoxWindow : StatefulWindowBase<MultiLineTextBoxWindowViewModel>
 {
     public MultiLineTextBoxWindow()
         : base()
@@ -18,25 +18,19 @@ public class MultiLineTextBoxWindow : StatefulWindowBase
         AvaloniaXamlLoader.Load(this);
     }
 
-    protected override async ValueTask OnInitializeAsync()
+    protected override void OnInitialized()
     {
-        var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
-
-        var viewModel = serviceProvider.GetRequiredService<MultiLineTextBoxWindowViewModel>();
-        this.DataContext = viewModel;
-        this.SetWindowStatus(viewModel?.Status?.Window);
-    }
-
-    protected override async ValueTask OnActivatedAsync()
-    {
-    }
-
-    protected override async ValueTask OnDisposeAsync()
-    {
-        if (this.DataContext is MultiLineTextBoxWindowViewModel viewModel)
+        if (this.ViewModel?.Status is MultiLineTextBoxWindowStatus status)
         {
-            viewModel.Status.Window = this.GetWindowStatus();
-            await viewModel.DisposeAsync();
+            this.SetWindowStatus(status.Window);
+        }
+    }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        if (this.ViewModel?.Status is MultiLineTextBoxWindowStatus status)
+        {
+            status.Window = this.GetWindowStatus();
         }
     }
 

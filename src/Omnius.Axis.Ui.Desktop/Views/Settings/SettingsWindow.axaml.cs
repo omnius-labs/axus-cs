@@ -1,11 +1,11 @@
+using System.ComponentModel;
 using Avalonia.Markup.Xaml;
-using Microsoft.Extensions.DependencyInjection;
-using Omnius.Axis.Ui.Desktop.Internal;
+using Omnius.Axis.Ui.Desktop.Configuration;
 using Omnius.Core.Avalonia;
 
 namespace Omnius.Axis.Ui.Desktop.Views.Settings;
 
-public class SettingsWindow : StatefulWindowBase
+public class SettingsWindow : StatefulWindowBase<SettingsWindowViewModelBase>
 {
     public SettingsWindow()
         : base()
@@ -18,34 +18,19 @@ public class SettingsWindow : StatefulWindowBase
         AvaloniaXamlLoader.Load(this);
     }
 
-    protected override async ValueTask OnInitializeAsync()
+    protected override void OnInitialized()
     {
-        if (App.Current.IsDesignMode)
+        if (this.ViewModel?.Status is SettingsWindowStatus status)
         {
-            var designViewModel = new SettingsWindowDesignViewModel();
-            this.DataContext = designViewModel;
-            return;
+            this.SetWindowStatus(status.Window);
         }
-
-        var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
-
-        var viewModel = serviceProvider.GetRequiredService<SettingsWindowViewModel>();
-        this.DataContext = viewModel;
-        this.SetWindowStatus(viewModel?.Status?.Window);
     }
 
-    protected override async ValueTask OnActivatedAsync()
+    protected override void OnClosing(CancelEventArgs e)
     {
-    }
-
-    protected override async ValueTask OnDisposeAsync()
-    {
-        if (App.Current.IsDesignMode) return;
-
-        if (this.DataContext is SettingsWindowViewModel viewModel)
+        if (this.ViewModel?.Status is SettingsWindowStatus status)
         {
-            viewModel.Status.Window = this.GetWindowStatus();
-            await viewModel.DisposeAsync();
+            status.Window = this.GetWindowStatus();
         }
     }
 }

@@ -10,24 +10,24 @@ using Reactive.Bindings.Extensions;
 
 namespace Omnius.Axis.Ui.Desktop.Views.Settings;
 
-public interface ISettingsWindowViewModel
+public abstract class SettingsWindowViewModelBase : DisposableBase
 {
-    SettingsWindowStatus Status { get; }
+    public SettingsWindowStatus? Status { get; protected set; }
 
-    ISignaturesControlViewModel TrustedSignaturesControlViewModel { get; }
+    public ISignaturesControlViewModel? TrustedSignaturesControlViewModel { get; protected set; }
 
-    ISignaturesControlViewModel BlockedSignaturesControlViewModel { get; }
+    public ISignaturesControlViewModel? BlockedSignaturesControlViewModel { get; protected set; }
 
-    ReactiveProperty<string> DownloadDirectory { get; }
+    public ReactiveProperty<string>? DownloadDirectory { get; protected set; }
 
-    ReactiveCommand EditDownloadDirectoryCommand { get; }
+    public AsyncReactiveCommand? EditDownloadDirectoryCommand { get; protected set; }
 
-    ReactiveCommand OkCommand { get; }
+    public AsyncReactiveCommand? OkCommand { get; protected set; }
 
-    ReactiveCommand CancelCommand { get; }
+    public AsyncReactiveCommand? CancelCommand { get; protected set; }
 }
 
-public class SettingsWindowViewModel : AsyncDisposableBase, ISettingsWindowViewModel
+public class SettingsWindowViewModel : SettingsWindowViewModelBase
 {
     private readonly UiStatus _uiState;
     private readonly IIntaractorProvider _intaractorAdapter;
@@ -47,14 +47,14 @@ public class SettingsWindowViewModel : AsyncDisposableBase, ISettingsWindowViewM
 
         this.DownloadDirectory = new ReactiveProperty<string>().AddTo(_disposable);
 
-        this.EditDownloadDirectoryCommand = new ReactiveCommand().AddTo(_disposable);
-        this.EditDownloadDirectoryCommand.Subscribe(() => this.EditDownloadDirectory()).AddTo(_disposable);
+        this.EditDownloadDirectoryCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.EditDownloadDirectoryCommand.Subscribe(() => this.EditDownloadDirectoryAsync()).AddTo(_disposable);
 
-        this.OkCommand = new ReactiveCommand().AddTo(_disposable);
-        this.OkCommand.Subscribe((state) => this.Ok(state)).AddTo(_disposable);
+        this.OkCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.OkCommand.Subscribe((state) => this.OkAsync(state)).AddTo(_disposable);
 
-        this.CancelCommand = new ReactiveCommand().AddTo(_disposable);
-        this.CancelCommand.Subscribe((state) => this.Cancel(state)).AddTo(_disposable);
+        this.CancelCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.CancelCommand.Subscribe((state) => this.CancelAsync(state)).AddTo(_disposable);
 
         this.Initialize();
     }
@@ -64,30 +64,16 @@ public class SettingsWindowViewModel : AsyncDisposableBase, ISettingsWindowViewM
         await this.LoadAsync();
     }
 
-    protected override async ValueTask OnDisposeAsync()
+    protected override void OnDispose(bool disposing)
     {
         _disposable.Dispose();
     }
 
-    public SettingsWindowStatus Status => _uiState.SettingsWindow ??= new SettingsWindowStatus();
-
-    public ISignaturesControlViewModel TrustedSignaturesControlViewModel { get; }
-
-    public ISignaturesControlViewModel BlockedSignaturesControlViewModel { get; }
-
-    public ReactiveProperty<string> DownloadDirectory { get; }
-
-    public ReactiveCommand EditDownloadDirectoryCommand { get; }
-
-    public ReactiveCommand OkCommand { get; }
-
-    public ReactiveCommand CancelCommand { get; }
-
-    private async void EditDownloadDirectory()
+    private async Task EditDownloadDirectoryAsync()
     {
     }
 
-    private async void Ok(object state)
+    private async Task OkAsync(object state)
     {
         var window = (Window)state;
         window.Close();
@@ -95,7 +81,7 @@ public class SettingsWindowViewModel : AsyncDisposableBase, ISettingsWindowViewM
         await this.SaveAsync();
     }
 
-    private async void Cancel(object state)
+    private async Task CancelAsync(object state)
     {
         var window = (Window)state;
         window.Close();

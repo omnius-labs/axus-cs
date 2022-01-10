@@ -20,7 +20,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "design-build (Omnius.Axis.Ui.Desktop)",
-            "program": "${workspaceFolder}/tmp/bin/win-vscode/Omnius.Axis.Ui.Desktop/Debug/net6.0/Omnius.Axis.Ui.Desktop.dll",
+            "program": "${workspaceFolder}/tmp/bin/win-ui-desktop/Omnius.Axis.Ui.Desktop/Debug/net6.0/Omnius.Axis.Ui.Desktop.dll",
             "cwd": "${workspaceFolder}/demo/0",
             "console": "internalConsole",
             "stopAtEntry": false
@@ -30,7 +30,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Axis.Daemon)",
-            "program": "${workspaceFolder}/tmp/bin/win-vscode/Omnius.Axis.Daemon/Debug/net6.0/Omnius.Axis.Daemon.dll",
+            "program": "${workspaceFolder}/tmp/bin/win-daemon/Omnius.Axis.Daemon/Debug/net6.0/Omnius.Axis.Daemon.dll",
             "args": [
                 "-s",
                 "./storage/daemon",
@@ -48,7 +48,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Axis.Daemon)",
-            "program": "${workspaceFolder}/tmp/bin/linux-vscode/Omnius.Axis.Daemon/Debug/net6.0/Omnius.Axis.Daemon.dll",
+            "program": "${workspaceFolder}/tmp/bin/linux-daemon/Omnius.Axis.Daemon/Debug/net6.0/Omnius.Axis.Daemon.dll",
             "args": [
                 "-s",
                 "./storage/daemon",
@@ -66,7 +66,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Axis.Daemon)",
-            "program": "${workspaceFolder}/tmp/bin/mac-vscode/Omnius.Axis.Daemon/Debug/net6.0/Omnius.Axis.Daemon.dll",
+            "program": "${workspaceFolder}/tmp/bin/mac-daemon/Omnius.Axis.Daemon/Debug/net6.0/Omnius.Axis.Daemon.dll",
             "args": [
                 "-s",
                 "./storage/daemon",
@@ -84,7 +84,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Axis.Ui.Desktop)",
-            "program": "${workspaceFolder}/tmp/bin/win-vscode/Omnius.Axis.Ui.Desktop/Debug/net6.0/Omnius.Axis.Ui.Desktop.dll",
+            "program": "${workspaceFolder}/tmp/bin/win-ui-desktop/Omnius.Axis.Ui.Desktop/Debug/net6.0/Omnius.Axis.Ui.Desktop.dll",
             "args": [
                 "-s",
                 "./storage/ui-desktop",
@@ -102,7 +102,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Axis.Ui.Desktop)",
-            "program": "${workspaceFolder}/tmp/bin/linux-vscode/Omnius.Axis.Ui.Desktop/Debug/net6.0/Omnius.Axis.Ui.Desktop.dll",
+            "program": "${workspaceFolder}/tmp/bin/linux-ui-desktop/Omnius.Axis.Ui.Desktop/Debug/net6.0/Omnius.Axis.Ui.Desktop.dll",
             "args": [
                 "-s",
                 "./storage/ui-desktop",
@@ -120,7 +120,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build (Omnius.Axis.Ui.Desktop)",
-            "program": "${workspaceFolder}/tmp/bin/mac-vscode/Omnius.Axis.Ui.Desktop/Debug/net6.0/Omnius.Axis.Ui.Desktop.dll",
+            "program": "${workspaceFolder}/tmp/bin/mac-ui-desktop/Omnius.Axis.Ui.Desktop/Debug/net6.0/Omnius.Axis.Ui.Desktop.dll",
             "args": [
                 "-s",
                 "./storage/ui-desktop",

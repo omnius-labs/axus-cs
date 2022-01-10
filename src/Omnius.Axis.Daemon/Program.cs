@@ -1,3 +1,4 @@
+using System.Reflection;
 using Cocona;
 using Omnius.Core.Helpers;
 using Omnius.Core.Net;
@@ -29,6 +30,8 @@ public class Program : CoconaLiteConsoleAppBase
             if (verbose) ChangeLogLevel(NLog.LogLevel.Trace);
 
             _logger.Info("Starting...");
+            _logger.Info("AssemblyInformationalVersion: {0}", Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion);
+
             await Runner.EventLoopAsync(Path.Combine(storageDirectoryPath, "db"), OmniAddress.Parse(listenAddress), this.Context.CancellationToken);
         }
         finally

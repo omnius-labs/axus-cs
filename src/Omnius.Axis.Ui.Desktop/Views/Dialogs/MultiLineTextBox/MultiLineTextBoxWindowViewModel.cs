@@ -8,7 +8,18 @@ using Reactive.Bindings.Extensions;
 
 namespace Omnius.Axis.Ui.Desktop.Views.Dialogs;
 
-public class MultiLineTextBoxWindowViewModel : AsyncDisposableBase
+public abstract class MultiLineTextBoxWindowViewModelBase : DisposableBase
+{
+    public MultiLineTextBoxWindowStatus? Status { get; protected set; }
+
+    public ReactivePropertySlim<string>? Text { get; protected set; }
+
+    public AsyncReactiveCommand? OkCommand { get; protected set; }
+
+    public AsyncReactiveCommand? CancelCommand { get; protected set; }
+}
+
+public class MultiLineTextBoxWindowViewModel : MultiLineTextBoxWindowViewModelBase
 {
     private readonly UiStatus _uiState;
     private readonly IClipboardService _clipboardService;
@@ -20,11 +31,15 @@ public class MultiLineTextBoxWindowViewModel : AsyncDisposableBase
         _uiState = uiState;
         _clipboardService = clipboardService;
 
+        this.Status = _uiState.MultiLineTextBoxWindow ?? new MultiLineTextBoxWindowStatus();
+
         this.Text = new ReactivePropertySlim<string>().AddTo(_disposable);
-        this.OkCommand = new ReactiveCommand().AddTo(_disposable);
-        this.OkCommand.Subscribe((state) => this.Ok(state)).AddTo(_disposable);
-        this.CancelCommand = new ReactiveCommand().AddTo(_disposable);
-        this.CancelCommand.Subscribe((state) => this.Cancel(state)).AddTo(_disposable);
+
+        this.OkCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.OkCommand.Subscribe((state) => this.OkAsync(state)).AddTo(_disposable);
+
+        this.CancelCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.CancelCommand.Subscribe((state) => this.CancelAsync(state)).AddTo(_disposable);
 
         this.Initialize();
     }
@@ -34,28 +49,23 @@ public class MultiLineTextBoxWindowViewModel : AsyncDisposableBase
         this.Text.Value = await _clipboardService.GetTextAsync();
     }
 
-    protected override async ValueTask OnDisposeAsync()
+    protected override void OnDispose(bool disposing)
     {
-        _disposable.Dispose();
+        if (disposing)
+        {
+            _disposable.Dispose();
+        }
     }
-
-    public MultiLineTextBoxWindowStatus Status => _uiState.MultiLineTextBoxWindow ??= new MultiLineTextBoxWindowStatus();
-
-    public ReactivePropertySlim<string> Text { get; }
-
-    public ReactiveCommand OkCommand { get; }
-
-    public ReactiveCommand CancelCommand { get; }
 
     public string GetResult() => this.Text.Value;
 
-    private async void Ok(object state)
+    private async Task OkAsync(object state)
     {
         var window = (Window)state;
         window.Close();
     }
 
-    private async void Cancel(object state)
+    private async Task CancelAsync(object state)
     {
         this.Text.Value = string.Empty;
 

@@ -19,12 +19,29 @@ public static partial class Runner
     {
         await using var service = await AxisService.CreateAsync(databaseDirectoryPath, cancellationToken);
         using var tcpListenerManager = new TcpListenerManager(listenAddress, cancellationToken);
-        using var socket = await tcpListenerManager.AcceptSocketAsync();
 
-        await InternalEventLoopAsync(service, socket, cancellationToken);
+        var tasks = new List<Task>();
+
+        try
+        {
+            for (; ; )
+            {
+                var socket = await tcpListenerManager.AcceptSocketAsync();
+                var task = InternalEventLoopAsync(service, socket, cancellationToken);
+                tasks.Add(task);
+            }
+        }
+        catch (OperationCanceledException e)
+        {
+            _logger.Debug("OperationCanceledException", e);
+        }
+        finally
+        {
+            await Task.WhenAll(tasks);
+        }
     }
 
-    private static async ValueTask InternalEventLoopAsync(AxisService service, Socket socket, CancellationToken cancellationToken = default)
+    private static async Task InternalEventLoopAsync(AxisService service, Socket socket, CancellationToken cancellationToken = default)
     {
         using var socketCap = new SocketCap(socket);
 

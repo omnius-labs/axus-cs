@@ -2,7 +2,6 @@
     x:Class="Omnius.Axis.Ui.Desktop.Views.Main.UploadControl"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
     xmlns:local="clr-namespace:Omnius.Axis.Ui.Desktop.Views.Main;assembly=Omnius.Axis.Ui.Desktop"
@@ -19,7 +18,7 @@
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="12">
             <Button Content="Register" Command="{Binding RegisterCommand}"/>
         </StackPanel>
-        <dg:DataGrid
+        <DataGrid
             Grid.Row="1"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
@@ -28,16 +27,16 @@
             <i:Interaction.Behaviors>
                 <bs:DataGridBindSelectedItemsBehavior SelectedItems="{Binding SelectedFiles}" />
             </i:Interaction.Behaviors>
-            <dg:DataGrid.ContextMenu>
+            <DataGrid.ContextMenu>
                 <ContextMenu>
                     <MenuItem Command="{Binding ItemDeleteCommand}" Header="Delete"/>
                     <MenuItem Header="Copy As">
                         <MenuItem Command="{Binding ItemCopySeedCommand}" Header="Copy Seed"/>
                     </MenuItem>
                 </ContextMenu>
-            </dg:DataGrid.ContextMenu>
-            <dg:DataGrid.Columns>
-                <dg:DataGridTextColumn
+            </DataGrid.ContextMenu>
+            <DataGrid.Columns>
+                <DataGridTextColumn
                     Header="Name"
                     Binding="{ReflectionBinding Name}"
                     Width="Auto" />
@@ -45,16 +44,16 @@
                     Header="Size"
                     Binding="{ReflectionBinding Size}"
                     Width="Auto" />
-                <dg:DataGridTextColumn
+                <DataGridTextColumn
                     Header="Creation Time"
                     Binding="{ReflectionBinding CreationTime}"
                     Width="Auto" />
-                <dg:DataGridTextColumn
+                <DataGridTextColumn
                     Header="State"
                     Binding="{ReflectionBinding State}"
                     Width="Auto" />
-            </dg:DataGrid.Columns>
-        </dg:DataGrid>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 
 </UserControl>

@@ -1,10 +1,13 @@
+using System.Reflection;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using CommandLine;
+using Microsoft.Extensions.DependencyInjection;
 using Omnius.Axis.Ui.Desktop.Internal;
 using Omnius.Axis.Ui.Desktop.Views.Main;
+using Omnius.Core.Avalonia;
 using Omnius.Core.Helpers;
 using Omnius.Core.Net;
 
@@ -16,6 +19,8 @@ public class App : Application
 
     public static new App Current => (App)Application.Current;
 
+    public new IClassicDesktopStyleApplicationLifetime ApplicationLifetime => (IClassicDesktopStyleApplicationLifetime)base.ApplicationLifetime;
+
     public override void Initialize()
     {
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(this.UnhandledException);
@@ -24,12 +29,9 @@ public class App : Application
         {
             var parsedResult = CommandLine.Parser.Default.ParseArguments<Options>(Environment.GetCommandLineArgs());
             parsedResult = parsedResult.WithParsed(this.Startup);
-            parsedResult.WithNotParsed(HandleParseError);
+            parsedResult.WithNotParsed(this.HandleParseError);
 
-            if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            {
-                desktop.Exit += (_, _) => this.Exit();
-            }
+            this.ApplicationLifetime.Exit += (_, _) => this.Exit();
         }
 
         AvaloniaXamlLoader.Load(this);
@@ -39,10 +41,30 @@ public class App : Application
     {
         if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow();
+            var window = new MainWindow();
+            desktop.MainWindow = window;
+
+            _ = this.InitMainWindowViewModelAsync(window);
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private async ValueTask InitMainWindowViewModelAsync(MainWindow mainWindow)
+    {
+        await Task.Delay(1).ConfigureAwait(false);
+
+        var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
+        var applicationDispatcher = serviceProvider.GetRequiredService<IApplicationDispatcher>();
+        var viewModel = serviceProvider.GetRequiredService<MainWindowViewModel>();
+
+        await applicationDispatcher.InvokeAsync(() =>
+        {
+            if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                mainWindow.ViewModel = viewModel;
+            }
+        });
     }
 
     public bool IsDesignMode
@@ -77,6 +99,8 @@ public class App : Application
         if (options.Verbose) ChangeLogLevel(NLog.LogLevel.Trace);
 
         _logger.Info("Starting...");
+        _logger.Info("AssemblyInformationalVersion: {0}", Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion);
+
         Bootstrapper.Instance.Build(databaseDirectoryPath, OmniAddress.Parse(options.ListenAddress!));
     }
 

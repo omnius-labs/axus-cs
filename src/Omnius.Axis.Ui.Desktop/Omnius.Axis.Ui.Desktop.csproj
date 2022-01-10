@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
+
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +21,7 @@
     <PackageReference Include="Avalonia" Version="0.10.8" />
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
     <PackageReference Include="Generator.Equals" Version="2.2.3" />
+    <PackageReference Include="GitInfo" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
     <PackageReference Include="NLog.Config" Version="4.7.11" />
     <PackageReference Include="NLog" Version="4.7.11" />

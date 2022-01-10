@@ -13,7 +13,7 @@
             ],
             "options": {
                 "env": {
-                    "BuildTargetName": "vscode",
+                    "BuildTargetName": "ui-desktop",
                     "DesignMode": "true"
                 }
             },
@@ -31,7 +31,7 @@
             ],
             "options": {
                 "env": {
-                    "BuildTargetName": "vscode"
+                    "BuildTargetName": "daemon"
                 }
             },
             "problemMatcher": "$msCompile"
@@ -48,7 +48,7 @@
             ],
             "options": {
                 "env": {
-                    "BuildTargetName": "vscode"
+                    "BuildTargetName": "ui-desktop"
                 }
             },
             "problemMatcher": "$msCompile"

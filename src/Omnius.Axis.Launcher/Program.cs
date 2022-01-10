@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.ExceptionServices;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace Omnius.Axis.Launcher;
@@ -25,13 +25,13 @@ public class Program
     {
         try
         {
-            SetLogsDirectory("./storage/launcher/logs");
+            var basePath = Directory.GetCurrentDirectory();
+            SetLogsDirectory(Path.Combine(basePath, "storage/launcher/logs"));
 
             _logger.Info("Starting...");
+            _logger.Info("AssemblyInformationalVersion: {0}", Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion);
 
-            var basePath = Directory.GetCurrentDirectory();
-
-            // gen path
+            // gen bin path
             var daemonPath = Path.Combine(basePath, "bin/daemon/Omnius.Axis.Daemon");
             var uiDesktopPath = Path.Combine(basePath, "bin/ui-desktop/Omnius.Axis.Ui.Desktop");
 
@@ -42,15 +42,20 @@ public class Program
                 uiDesktopPath += ".exe";
             }
 
+            // gen storage path
+            var daemonStoragePath = Path.Combine(basePath, "storage/daemon");
+            var uiDesktopStoragePath = Path.Combine(basePath, "storage/ui-desktop");
+
             // find free port
-            var listenPort = FindFreePort();
+            var listenPort = FindFreeTcpPort();
 
             // start daemon
             var daemonProcessInfo = new ProcessStartInfo()
             {
                 FileName = daemonPath,
-                Arguments = $"-l tcp(ip4(127.0.0.1),{listenPort}) -s ./storage/daemon/",
                 WorkingDirectory = Path.GetDirectoryName(daemonPath),
+                Arguments = $"-l tcp(ip4(127.0.0.1),{listenPort}) -s {daemonStoragePath}",
+                CreateNoWindow = true,
                 UseShellExecute = false,
             };
             using var daemonProcess = Process.Start(daemonProcessInfo);
@@ -59,15 +64,16 @@ public class Program
             var uiDesktopProcessInfo = new ProcessStartInfo()
             {
                 FileName = uiDesktopPath,
-                Arguments = $"-l tcp(ip4(127.0.0.1),{listenPort}) -s ./storage/ui-desktop/",
                 WorkingDirectory = Path.GetDirectoryName(uiDesktopPath),
+                Arguments = $"-l tcp(ip4(127.0.0.1),{listenPort}) -s {uiDesktopStoragePath}",
                 UseShellExecute = false,
             };
             using var uiDesktopProcess = Process.Start(uiDesktopProcessInfo);
 
             // wait for exit
-            await daemonProcess!.WaitForExitAsync();
             await uiDesktopProcess!.WaitForExitAsync();
+            daemonProcess!.Kill();
+            await daemonProcess!.WaitForExitAsync();
         }
         finally
         {
@@ -76,11 +82,9 @@ public class Program
         }
     }
 
-    private static int FindFreePort()
+    private static int FindFreeTcpPort()
     {
-        Exception? lastException = null;
-
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; ; i++)
         {
             try
             {
@@ -93,14 +97,10 @@ public class Program
             }
             catch (Exception e)
             {
-                lastException = e;
+                _logger.Error(e);
+                if (i >= 10) throw;
             }
         }
-
-        _logger.Error(lastException);
-        ExceptionDispatchInfo.Throw(lastException!);
-
-        return 0; // Not executed
     }
 
     private static void SetLogsDirectory(string logsDirectoryPath)

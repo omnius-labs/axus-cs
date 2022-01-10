@@ -7,7 +7,7 @@ using Reactive.Bindings;
 
 namespace Omnius.Axis.Ui.Desktop.Views.Settings;
 
-public class SettingsWindowDesignViewModel : AsyncDisposableBase, ISettingsWindowViewModel
+public class SettingsWindowDesignViewModel : SettingsWindowViewModelBase
 {
     private readonly CompositeDisposable _disposable = new();
 
@@ -23,46 +23,32 @@ public class SettingsWindowDesignViewModel : AsyncDisposableBase, ISettingsWindo
 
         this.DownloadDirectory = new ReactiveProperty<string>().ToAdd(_disposable);
 
-        this.EditDownloadDirectoryCommand = new ReactiveCommand().ToAdd(_disposable);
-        this.EditDownloadDirectoryCommand.Subscribe(() => this.OpenDownloadDirectory()).ToAdd(_disposable);
+        this.EditDownloadDirectoryCommand = new AsyncReactiveCommand().ToAdd(_disposable);
+        this.EditDownloadDirectoryCommand.Subscribe(() => this.EditDownloadDirectoryAsync()).ToAdd(_disposable);
 
-        this.OkCommand = new ReactiveCommand().ToAdd(_disposable);
-        this.OkCommand.Subscribe(state => this.Ok(state)).ToAdd(_disposable);
+        this.OkCommand = new AsyncReactiveCommand().ToAdd(_disposable);
+        this.OkCommand.Subscribe(state => this.OkAsync(state)).ToAdd(_disposable);
 
-        this.CancelCommand = new ReactiveCommand().ToAdd(_disposable);
-        this.CancelCommand.Subscribe(state => this.Cancel(state)).ToAdd(_disposable);
+        this.CancelCommand = new AsyncReactiveCommand().ToAdd(_disposable);
+        this.CancelCommand.Subscribe(state => this.CancelAsync(state)).ToAdd(_disposable);
     }
 
-    protected override async ValueTask OnDisposeAsync()
+    protected override void OnDispose(bool disposing)
     {
         _disposable.Dispose();
     }
 
-    public SettingsWindowStatus Status { get; }
-
-    public ISignaturesControlViewModel TrustedSignaturesControlViewModel { get; }
-
-    public ISignaturesControlViewModel BlockedSignaturesControlViewModel { get; }
-
-    public ReactiveProperty<string> DownloadDirectory { get; }
-
-    public ReactiveCommand EditDownloadDirectoryCommand { get; }
-
-    public ReactiveCommand OkCommand { get; }
-
-    public ReactiveCommand CancelCommand { get; }
-
-    private async void OpenDownloadDirectory()
+    private async Task EditDownloadDirectoryAsync()
     {
     }
 
-    private async void Ok(object state)
+    private async Task OkAsync(object state)
     {
         var window = (Window)state;
         window.Close();
     }
 
-    private async void Cancel(object state)
+    private async Task CancelAsync(object state)
     {
         var window = (Window)state;
         window.Close();

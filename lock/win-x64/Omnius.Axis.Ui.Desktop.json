@@ -17,18 +17,6 @@
           "System.ValueTuple": "4.5.0"
         }
       },
-      "Avalonia.Controls.DataGrid": {
-        "type": "Direct",
-        "requested": "[0.10.8, )",
-        "resolved": "0.10.8",
-        "contentHash": "AWS/s+tEDUX0icnDdsMpk6NoLAZeq+QEIiDhleJkxMTitfwvYVJlXePaoOm4w8Oi134KV/fkj7aoiU3QRr/ltg==",
-        "dependencies": {
-          "Avalonia": "0.10.8",
-          "Avalonia.Remote.Protocol": "0.10.8",
-          "JetBrains.Annotations": "10.3.0",
-          "System.Reactive": "5.0.0"
-        }
-      },
       "Avalonia.Desktop": {
         "type": "Direct",
         "requested": "[0.10.8, )",
@@ -109,6 +97,12 @@
           "Microsoft.Extensions.DependencyInjection.Abstractions": "5.0.0"
         }
       },
+      "Nerdbank.GitVersioning": {
+        "type": "Direct",
+        "requested": "[3.4.255, )",
+        "resolved": "3.4.255",
+        "contentHash": "7aJa6+VzdKNDVJqGIWGtvIDh2HsIx8DIDfUg4yWViXc798awhSohPMk1oiAZqSntnrKThKJtn4vAMRdsCj8dtg=="
+      },
       "NLog": {
         "type": "Direct",
         "requested": "[4.7.11, )",
@@ -153,6 +147,17 @@
         "resolved": "2.1.0.2020091801",
         "contentHash": "nGsCPI8FuUknU/e6hZIqlsKRDxClXHZyztmgM8vuwslFC/BIV3LqM2wKefWbr6SORX4Lct4nivhSMkdF/TrKgg=="
       },
+      "Avalonia.Controls.DataGrid": {
+        "type": "Transitive",
+        "resolved": "0.10.8",
+        "contentHash": "AWS/s+tEDUX0icnDdsMpk6NoLAZeq+QEIiDhleJkxMTitfwvYVJlXePaoOm4w8Oi134KV/fkj7aoiU3QRr/ltg==",
+        "dependencies": {
+          "Avalonia": "0.10.8",
+          "Avalonia.Remote.Protocol": "0.10.8",
+          "JetBrains.Annotations": "10.3.0",
+          "System.Reactive": "5.0.0"
+        }
+      },
       "Avalonia.FreeDesktop": {
         "type": "Transitive",
         "resolved": "0.10.8",
@@ -196,19 +201,6 @@
           "Avalonia.Skia": "0.10.8"
         }
       },
-      "Cocona.Core": {
-        "type": "Transitive",
-        "resolved": "1.6.0",
-        "contentHash": "670iboE7wIUZe/pOb1dsyZhYi61OrHGci7ZzR/IiW/lqiaVhE4addW1+zAGZhylsOLnACUrXDjbjsPdgfA4CPw=="
-      },
-      "Cocona.Lite": {
-        "type": "Transitive",
-        "resolved": "1.6.0",
-        "contentHash": "pj69oszG1lUy1PJSdS+VxwnfMmKaSF5ogrX4nJyD02ZF+WWEfmaUGV/8swpVCtsGR0NMiCTMFAptjCUaArB9Xg==",
-        "dependencies": {
-          "Cocona.Core": "1.6.0"
-        }
-      },
       "Generator.Equals.Runtime": {
         "type": "Transitive",
         "resolved": "2.2.3",
@@ -241,15 +233,6 @@
           "System.Runtime": "4.1.0"
         }
       },
-      "LazyCache": {
-        "type": "Transitive",
-        "resolved": "2.4.0",
-        "contentHash": "THig17vqe5PEs3wvTqFrNzorz2nD4Qz9F9C3YlAydU673CogAO8z1u8NNJD6x52I7oDCQ/N/HwJIZMBH8Y/Qiw==",
-        "dependencies": {
-          "Microsoft.Extensions.Caching.Abstractions": "2.1.0",
-          "Microsoft.Extensions.Caching.Memory": "2.1.0"
-        }
-      },
       "LiteDB": {
         "type": "Transitive",
         "resolved": "5.0.11",
@@ -260,46 +243,10 @@
         "resolved": "1.1.0",
         "contentHash": "J2G1k+u5unBV+aYcwxo94ip16Rkp65pgWFb0R6zwJipzWNMgvqlWeuI7/+R+e8bob66LnSG+llLJ+z8wI94cHg=="
       },
-      "Microsoft.Extensions.Caching.Abstractions": {
-        "type": "Transitive",
-        "resolved": "2.1.0",
-        "contentHash": "R7uAb/JRwb9YQBB0qqLlX2qv4RBC/BqqIqFDqzvCjT0T2uPpbuTINLKGp+7uX2dbxjt3cpebSu5GvebeiKYpQA==",
-        "dependencies": {
-          "Microsoft.Extensions.Primitives": "2.1.0"
-        }
-      },
-      "Microsoft.Extensions.Caching.Memory": {
-        "type": "Transitive",
-        "resolved": "2.1.0",
-        "contentHash": "Jc1TrYtOxX9gsUXI4ZPVfPLI9aGjGTzVEs/qsBPw2GA+Td840YN4CvXCjgrLtWJckxl6KRNHgoYYBQgZZ/LTqg==",
-        "dependencies": {
-          "Microsoft.Extensions.Caching.Abstractions": "2.1.0",
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "2.1.0",
-          "Microsoft.Extensions.Options": "2.1.0"
-        }
-      },
       "Microsoft.Extensions.DependencyInjection.Abstractions": {
         "type": "Transitive",
         "resolved": "5.0.0",
         "contentHash": "ORj7Zh81gC69TyvmcUm9tSzytcy8AVousi+IVRAI8nLieQjOFryRusSFh7+aLk16FN9pQNqJAiMd7BTKINK0kA=="
-      },
-      "Microsoft.Extensions.Options": {
-        "type": "Transitive",
-        "resolved": "2.1.0",
-        "contentHash": "VOM1pPMi9+7/4Vc9aPLU8btHOBQy1+AvpqxLxFI2OVtqGv+1klPaV59g9R6aSt2U7ijfB3TjvAO4Tc/cn9/hxA==",
-        "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "2.1.0",
-          "Microsoft.Extensions.Primitives": "2.1.0"
-        }
-      },
-      "Microsoft.Extensions.Primitives": {
-        "type": "Transitive",
-        "resolved": "2.1.0",
-        "contentHash": "gMwH6wgWOPfyfLfMLEP+ZF7/MSJq35e0xxKEYUjt8veEznY45nBVqdfI876+9SFQq2ChcqKf2UyYc2XYj2v27w==",
-        "dependencies": {
-          "System.Memory": "4.5.0",
-          "System.Runtime.CompilerServices.Unsafe": "4.5.0"
-        }
       },
       "Microsoft.NETCore.Platforms": {
         "type": "Transitive",
@@ -572,51 +519,6 @@
         "dependencies": {
           "System.Reflection.Emit": "4.7.0",
           "System.Security.Principal.Windows": "4.7.0"
-        }
-      },
-      "omnius.axis.daemon": {
-        "type": "Project",
-        "dependencies": {
-          "Cocona.Lite": "1.6.0",
-          "NLog": "4.7.11",
-          "NLog.Config": "4.7.11",
-          "Omnius.Axis.Engines": "0.0.1-alpha.1",
-          "Omnius.Axis.Models": "0.0.1-alpha.1",
-          "Omnius.Axis.Remoting": "0.0.1-alpha.1",
-          "Omnius.Axis.Utils": "0.0.1-alpha.1",
-          "Omnius.Core": "0.0.1-alpha.1",
-          "Omnius.Core.Collections": "0.0.1-alpha.1",
-          "Omnius.Core.Cryptography": "0.0.1-alpha.1",
-          "Omnius.Core.Net": "0.0.1-alpha.1",
-          "Omnius.Core.Net.Proxies": "0.0.1-alpha.1",
-          "Omnius.Core.Net.Upnp": "0.0.1-alpha.1",
-          "Omnius.Core.Pipelines": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack": "0.0.1-alpha.1",
-          "Omnius.Core.Serialization": "0.0.1-alpha.1",
-          "Omnius.Core.Storages": "0.0.1-alpha.1",
-          "Omnius.Core.Streams": "0.0.1-alpha.1",
-          "Omnius.Core.Tasks": "0.0.1-alpha.1",
-          "Omnius.Core.Utils": "0.0.1-alpha.1",
-          "YamlDotNet": "11.2.1"
-        }
-      },
-      "omnius.axis.engines": {
-        "type": "Project",
-        "dependencies": {
-          "LazyCache": "2.4.0",
-          "LiteDB": "5.0.11",
-          "NLog": "4.7.11",
-          "Omnius.Axis.Models": "0.0.1-alpha.1",
-          "Omnius.Axis.Utils": "0.0.1-alpha.1",
-          "Omnius.Core": "0.0.1-alpha.1",
-          "Omnius.Core.Collections": "0.0.1-alpha.1",
-          "Omnius.Core.Cryptography": "0.0.1-alpha.1",
-          "Omnius.Core.Net": "0.0.1-alpha.1",
-          "Omnius.Core.Net.Proxies": "0.0.1-alpha.1",
-          "Omnius.Core.Net.Upnp": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack.Remoting": "0.0.1-alpha.1",
-          "Omnius.Core.Storages": "0.0.1-alpha.1"
         }
       },
       "omnius.axis.intaractors": {
