@@ -1,4 +1,4 @@
-namespace Omnius.Axis.Ui.Desktop.ViewModels;
+namespace Omnius.Axis.Ui.Desktop.Views.Main;
 
 public enum FileSearchConditionType
 {

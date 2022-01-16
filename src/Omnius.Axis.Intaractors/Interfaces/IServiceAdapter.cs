@@ -5,6 +5,10 @@ namespace Omnius.Axis.Intaractors;
 
 public interface IServiceAdapter
 {
+    ValueTask<ServiceConfig> GetConfigAsync(CancellationToken cancellationToken = default);
+
+    ValueTask SetConfigAsync(ServiceConfig config, CancellationToken cancellationToken = default);
+
     ValueTask AddCloudNodeLocationsAsync(IEnumerable<NodeLocation> nodeLocations, CancellationToken cancellationToken = default);
 
     ValueTask<NodeLocation> GetMyNodeLocationAsync(CancellationToken cancellationToken = default);

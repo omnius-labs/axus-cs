@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using Avalonia;
 using Avalonia.Markup.Xaml;
 using Omnius.Axis.Ui.Desktop.Configuration;
 using Omnius.Core.Avalonia;
@@ -11,6 +12,9 @@ public class SettingsWindow : StatefulWindowBase<SettingsWindowViewModelBase>
         : base()
     {
         this.InitializeComponent();
+        this.GetObservable(ViewModelProperty).Subscribe(this.OnViewModelChanged);
+        this.Closing += new EventHandler<CancelEventArgs>((_, _) => this.OnClosing());
+        this.Closed += new EventHandler((_, _) => this.OnClosed());
     }
 
     private void InitializeComponent()
@@ -18,19 +22,27 @@ public class SettingsWindow : StatefulWindowBase<SettingsWindowViewModelBase>
         AvaloniaXamlLoader.Load(this);
     }
 
-    protected override void OnInitialized()
+    private void OnViewModelChanged(SettingsWindowViewModelBase? vm)
     {
-        if (this.ViewModel?.Status is SettingsWindowStatus status)
+        if (vm?.Status is SettingsWindowStatus status)
         {
             this.SetWindowStatus(status.Window);
         }
     }
 
-    protected override void OnClosing(CancelEventArgs e)
+    private void OnClosing()
     {
         if (this.ViewModel?.Status is SettingsWindowStatus status)
         {
             status.Window = this.GetWindowStatus();
+        }
+    }
+
+    private async void OnClosed()
+    {
+        if (this.ViewModel is IAsyncDisposable disposable)
+        {
+            await disposable.DisposeAsync();
         }
     }
 }

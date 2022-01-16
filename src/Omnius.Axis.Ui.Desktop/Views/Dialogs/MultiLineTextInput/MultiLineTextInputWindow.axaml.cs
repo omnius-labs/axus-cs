@@ -4,11 +4,13 @@ using Avalonia.Markup.Xaml;
 using Omnius.Axis.Ui.Desktop.Configuration;
 using Omnius.Core.Avalonia;
 
-namespace Omnius.Axis.Ui.Desktop.Views.Main;
+namespace Omnius.Axis.Ui.Desktop.Views.Dialogs;
 
-public partial class MainWindow : StatefulWindowBase<MainWindowViewModelBase>
+public partial class MultiLineTextInputWindow : StatefulWindowBase<MultiLineTextInputWindowViewModelBase>
 {
-    public MainWindow()
+    private string? _result = null;
+
+    public MultiLineTextInputWindow()
         : base()
     {
         this.InitializeComponent();
@@ -22,9 +24,11 @@ public partial class MainWindow : StatefulWindowBase<MainWindowViewModelBase>
         AvaloniaXamlLoader.Load(this);
     }
 
-    private void OnViewModelChanged(MainWindowViewModelBase? vm)
+    public string? GetResult() => _result;
+
+    private void OnViewModelChanged(MultiLineTextInputWindowViewModelBase? vm)
     {
-        if (vm?.Status is MainWindowStatus status)
+        if (vm?.Status is MultiLineTextInputWindowStatus status)
         {
             this.SetWindowStatus(status.Window);
         }
@@ -32,7 +36,7 @@ public partial class MainWindow : StatefulWindowBase<MainWindowViewModelBase>
 
     private void OnClosing()
     {
-        if (this.ViewModel?.Status is MainWindowStatus status)
+        if (this.ViewModel?.Status is MultiLineTextInputWindowStatus status)
         {
             status.Window = this.GetWindowStatus();
         }
@@ -40,6 +44,8 @@ public partial class MainWindow : StatefulWindowBase<MainWindowViewModelBase>
 
     private async void OnClosed()
     {
+        _result = this.ViewModel?.GetResult() ?? string.Empty;
+
         if (this.ViewModel is IAsyncDisposable disposable)
         {
             await disposable.DisposeAsync();

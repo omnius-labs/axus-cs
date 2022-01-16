@@ -19,8 +19,7 @@ public partial class Bootstrapper : AsyncDisposableBase
     private UiStatus? _uiState;
     private IntaractorProvider? _intaractorProvider;
 
-    private Task<ServiceProvider?>? _buildTask;
-    private CancellationTokenSource _cancellationTokenSource = new();
+    private ServiceProvider? _serviceProvider;
 
     public static Bootstrapper Instance { get; } = new Bootstrapper();
 
@@ -30,16 +29,11 @@ public partial class Bootstrapper : AsyncDisposableBase
     {
     }
 
-    public void Build(string databaseDirectoryPath, OmniAddress listenAddress)
+    public async ValueTask BuildAsync(string databaseDirectoryPath, OmniAddress listenAddress, CancellationToken cancellationToken = default)
     {
         _databaseDirectoryPath = databaseDirectoryPath;
         _listenAddress = listenAddress;
 
-        _buildTask = this.BuildAsync(_cancellationTokenSource.Token);
-    }
-
-    private async Task<ServiceProvider?> BuildAsync(CancellationToken cancellationToken = default)
-    {
         ArgumentNullException.ThrowIfNull(_databaseDirectoryPath);
         ArgumentNullException.ThrowIfNull(_listenAddress);
 
@@ -61,14 +55,14 @@ public partial class Bootstrapper : AsyncDisposableBase
 
             serviceCollection.AddTransient<MainWindowViewModel>();
             serviceCollection.AddTransient<SettingsWindowViewModel>();
-            serviceCollection.AddTransient<MultiLineTextBoxWindowViewModel>();
+            serviceCollection.AddTransient<MultiLineTextInputWindowViewModel>();
             serviceCollection.AddTransient<StatusControlViewModel>();
             serviceCollection.AddTransient<PeersControlViewModel>();
             serviceCollection.AddTransient<DownloadControlViewModel>();
             serviceCollection.AddTransient<UploadControlViewModel>();
             serviceCollection.AddTransient<SignaturesControlViewModel>();
 
-            return serviceCollection.BuildServiceProvider();
+            _serviceProvider = serviceCollection.BuildServiceProvider();
         }
         catch (OperationCanceledException e)
         {
@@ -86,15 +80,11 @@ public partial class Bootstrapper : AsyncDisposableBase
 
     protected override async ValueTask OnDisposeAsync()
     {
-        _cancellationTokenSource.Cancel();
-        if (_buildTask is not null) await _buildTask;
-        _cancellationTokenSource.Dispose();
-
-        if (_uiState is not null) await _uiState.SaveAsync(Path.Combine(_databaseDirectoryPath!, UI_STATE_FILE_NAME));
+        if (_databaseDirectoryPath is not null && _uiState is not null) await _uiState.SaveAsync(Path.Combine(_databaseDirectoryPath, UI_STATE_FILE_NAME));
     }
 
     public ServiceProvider GetServiceProvider()
     {
-        return _buildTask?.Result ?? throw new NullReferenceException();
+        return _serviceProvider ?? throw new NullReferenceException();
     }
 }

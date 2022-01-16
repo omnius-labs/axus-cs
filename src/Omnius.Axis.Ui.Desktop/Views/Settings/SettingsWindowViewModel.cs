@@ -1,4 +1,3 @@
-using System.Reactive.Disposables;
 using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Omnius.Axis.Intaractors.Models;
@@ -6,17 +5,16 @@ using Omnius.Axis.Ui.Desktop.Configuration;
 using Omnius.Axis.Ui.Desktop.Internal;
 using Omnius.Core;
 using Reactive.Bindings;
-using Reactive.Bindings.Extensions;
 
 namespace Omnius.Axis.Ui.Desktop.Views.Settings;
 
-public abstract class SettingsWindowViewModelBase : DisposableBase
+public abstract class SettingsWindowViewModelBase : AsyncDisposableBase
 {
     public SettingsWindowStatus? Status { get; protected set; }
 
-    public ISignaturesControlViewModel? TrustedSignaturesControlViewModel { get; protected set; }
+    public SignaturesControlViewModelBase? TrustedSignaturesControlViewModel { get; protected set; }
 
-    public ISignaturesControlViewModel? BlockedSignaturesControlViewModel { get; protected set; }
+    public SignaturesControlViewModelBase? BlockedSignaturesControlViewModel { get; protected set; }
 
     public ReactiveProperty<string>? DownloadDirectory { get; protected set; }
 
@@ -33,28 +31,31 @@ public class SettingsWindowViewModel : SettingsWindowViewModelBase
     private readonly IIntaractorProvider _intaractorAdapter;
 
     private readonly CompositeDisposable _disposable = new();
+    private readonly CompositeAsyncDisposable _asyncDisposable = new();
 
     public SettingsWindowViewModel(UiStatus uiState, IIntaractorProvider intaractorAdapter)
     {
         _uiState = uiState;
         _intaractorAdapter = intaractorAdapter;
 
+        this.Status = _uiState.SettingsWindow ??= new SettingsWindowStatus();
+
         var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
 
-        this.TrustedSignaturesControlViewModel = serviceProvider.GetRequiredService<SignaturesControlViewModel>();
+        this.TrustedSignaturesControlViewModel = serviceProvider.GetRequiredService<SignaturesControlViewModel>().AddTo(_asyncDisposable);
 
-        this.BlockedSignaturesControlViewModel = serviceProvider.GetRequiredService<SignaturesControlViewModel>();
+        this.BlockedSignaturesControlViewModel = serviceProvider.GetRequiredService<SignaturesControlViewModel>().AddTo(_asyncDisposable);
 
         this.DownloadDirectory = new ReactiveProperty<string>().AddTo(_disposable);
 
         this.EditDownloadDirectoryCommand = new AsyncReactiveCommand().AddTo(_disposable);
-        this.EditDownloadDirectoryCommand.Subscribe(() => this.EditDownloadDirectoryAsync()).AddTo(_disposable);
+        this.EditDownloadDirectoryCommand.Subscribe(async () => await this.EditDownloadDirectoryAsync()).AddTo(_disposable);
 
         this.OkCommand = new AsyncReactiveCommand().AddTo(_disposable);
-        this.OkCommand.Subscribe((state) => this.OkAsync(state)).AddTo(_disposable);
+        this.OkCommand.Subscribe(async (state) => await this.OkAsync(state)).AddTo(_disposable);
 
         this.CancelCommand = new AsyncReactiveCommand().AddTo(_disposable);
-        this.CancelCommand.Subscribe((state) => this.CancelAsync(state)).AddTo(_disposable);
+        this.CancelCommand.Subscribe(async (state) => await this.CancelAsync(state)).AddTo(_disposable);
 
         this.Initialize();
     }
@@ -64,9 +65,10 @@ public class SettingsWindowViewModel : SettingsWindowViewModelBase
         await this.LoadAsync();
     }
 
-    protected override void OnDispose(bool disposing)
+    protected override async ValueTask OnDisposeAsync()
     {
         _disposable.Dispose();
+        await _asyncDisposable.DisposeAsync();
     }
 
     private async Task EditDownloadDirectoryAsync()
@@ -89,23 +91,32 @@ public class SettingsWindowViewModel : SettingsWindowViewModelBase
 
     private async ValueTask LoadAsync(CancellationToken cancellationToken = default)
     {
+        // Service
+        var serviceAdapter = await _intaractorAdapter.GetServiceAdapterAsync(cancellationToken);
+        var serviceConfig = await serviceAdapter.GetConfigAsync(cancellationToken);
+
+        // ProfileSubscriber
         var profileSubscriber = await _intaractorAdapter.GetProfileSubscriberAsync(cancellationToken);
         var profileSubscriberConfig = await profileSubscriber.GetConfigAsync(cancellationToken);
-        this.TrustedSignaturesControlViewModel.Signatures.AddRange(profileSubscriberConfig.TrustedSignatures);
-        this.BlockedSignaturesControlViewModel.Signatures.AddRange(profileSubscriberConfig.BlockedSignatures);
+        this.TrustedSignaturesControlViewModel!.SetSignatures(profileSubscriberConfig.TrustedSignatures);
+        this.BlockedSignaturesControlViewModel!.SetSignatures(profileSubscriberConfig.BlockedSignatures);
 
+        // FileDownloader
         var fileDownloader = await _intaractorAdapter.GetFileDownloaderAsync(cancellationToken);
         var fileDownloaderConfig = await fileDownloader.GetConfigAsync(cancellationToken);
-        this.DownloadDirectory.Value = fileDownloaderConfig?.DestinationDirectory ?? string.Empty;
+        this.DownloadDirectory!.Value = fileDownloaderConfig?.DestinationDirectory ?? string.Empty;
     }
 
     private async ValueTask SaveAsync(CancellationToken cancellationToken = default)
     {
-        var profileSubscriberConfig = new ProfileSubscriberConfig(this.TrustedSignaturesControlViewModel.Signatures.ToArray(), this.BlockedSignaturesControlViewModel.Signatures.ToArray(), 20, 1024);
+        // ProfileSubscriber
+        var profileSubscriberConfig = new ProfileSubscriberConfig(this.TrustedSignaturesControlViewModel!.GetSignatures().ToArray(),
+            this.BlockedSignaturesControlViewModel!.GetSignatures().ToArray(), 20, 1024);
         var profileSubscriber = await _intaractorAdapter.GetProfileSubscriberAsync(cancellationToken);
         await profileSubscriber.SetConfigAsync(profileSubscriberConfig, cancellationToken);
 
-        var fileDownloaderConfig = new FileDownloaderConfig(this.DownloadDirectory.Value);
+        // FileDownloader
+        var fileDownloaderConfig = new FileDownloaderConfig(this.DownloadDirectory!.Value);
         var fileDownloader = await _intaractorAdapter.GetFileDownloaderAsync(cancellationToken);
         await fileDownloader.SetConfigAsync(fileDownloaderConfig, cancellationToken);
     }

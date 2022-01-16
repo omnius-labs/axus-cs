@@ -1,16 +1,13 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Reactive.Disposables;
 using System.Text;
 using Omnius.Axis.Intaractors;
 using Omnius.Axis.Intaractors.Models;
 using Omnius.Axis.Ui.Desktop.Configuration;
 using Omnius.Axis.Ui.Desktop.Internal;
-using Omnius.Axis.Ui.Desktop.ViewModels;
 using Omnius.Core;
 using Omnius.Core.Avalonia;
 using Reactive.Bindings;
-using Reactive.Bindings.Extensions;
 
 namespace Omnius.Axis.Ui.Desktop.Views.Main;
 

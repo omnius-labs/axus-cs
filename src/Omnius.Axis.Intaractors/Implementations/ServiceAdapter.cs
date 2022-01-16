@@ -14,6 +14,18 @@ public sealed class ServiceAdapter : IServiceAdapter
         _axisService = axisService;
     }
 
+    public async ValueTask<ServiceConfig> GetConfigAsync(CancellationToken cancellationToken = default)
+    {
+        var output = await _axisService.GetConfigAsync(cancellationToken);
+        return output.Config;
+    }
+
+    public async ValueTask SetConfigAsync(ServiceConfig config, CancellationToken cancellationToken = default)
+    {
+        var input = new SetConfigRequest(config);
+        await _axisService.SetConfigAsync(input);
+    }
+
     public async ValueTask<IEnumerable<SessionReport>> GetSessionReportsAsync(CancellationToken cancellationToken = default)
     {
         var output = await _axisService.GetSessionsReportAsync(cancellationToken);

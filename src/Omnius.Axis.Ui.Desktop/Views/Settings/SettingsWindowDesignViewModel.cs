@@ -1,4 +1,3 @@
-using System.Reactive.Disposables;
 using Avalonia.Controls;
 using Omnius.Axis.Ui.Desktop.Configuration;
 using Omnius.Core;
@@ -16,24 +15,24 @@ public class SettingsWindowDesignViewModel : SettingsWindowViewModelBase
         this.Status = new SettingsWindowStatus();
 
         this.TrustedSignaturesControlViewModel = new SignaturesControlDesignViewModel();
-        this.TrustedSignaturesControlViewModel.Signatures.Add(OmniDigitalSignature.Create("abcd", OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256).GetOmniSignature());
+        this.TrustedSignaturesControlViewModel.SetSignatures(new[] { OmniDigitalSignature.Create("abcd", OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256).GetOmniSignature() });
 
         this.BlockedSignaturesControlViewModel = new SignaturesControlDesignViewModel();
-        this.BlockedSignaturesControlViewModel.Signatures.Add(OmniDigitalSignature.Create("efgh", OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256).GetOmniSignature());
+        this.BlockedSignaturesControlViewModel.SetSignatures(new[] { OmniDigitalSignature.Create("efgh", OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256).GetOmniSignature() });
 
-        this.DownloadDirectory = new ReactiveProperty<string>().ToAdd(_disposable);
+        this.DownloadDirectory = new ReactiveProperty<string>().AddTo(_disposable);
 
-        this.EditDownloadDirectoryCommand = new AsyncReactiveCommand().ToAdd(_disposable);
-        this.EditDownloadDirectoryCommand.Subscribe(() => this.EditDownloadDirectoryAsync()).ToAdd(_disposable);
+        this.EditDownloadDirectoryCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.EditDownloadDirectoryCommand.Subscribe(async () => await this.EditDownloadDirectoryAsync()).AddTo(_disposable);
 
-        this.OkCommand = new AsyncReactiveCommand().ToAdd(_disposable);
-        this.OkCommand.Subscribe(state => this.OkAsync(state)).ToAdd(_disposable);
+        this.OkCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.OkCommand.Subscribe(async (state) => await this.OkAsync(state)).AddTo(_disposable);
 
-        this.CancelCommand = new AsyncReactiveCommand().ToAdd(_disposable);
-        this.CancelCommand.Subscribe(state => this.CancelAsync(state)).ToAdd(_disposable);
+        this.CancelCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.CancelCommand.Subscribe(async (state) => await this.CancelAsync(state)).AddTo(_disposable);
     }
 
-    protected override void OnDispose(bool disposing)
+    protected override async ValueTask OnDisposeAsync()
     {
         _disposable.Dispose();
     }

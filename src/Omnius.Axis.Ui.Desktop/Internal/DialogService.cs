@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Microsoft.Extensions.DependencyInjection;
 using Omnius.Axis.Ui.Desktop.Views.Dialogs;
 using Omnius.Axis.Ui.Desktop.Views.Settings;
 using Omnius.Core.Avalonia;
@@ -7,7 +8,7 @@ namespace Omnius.Axis.Ui.Desktop.Internal;
 
 public interface IDialogService
 {
-    ValueTask<string> ShowMultiLineTextBoxWindowAsync();
+    ValueTask<string> ShowMultiLineTextInputWindowAsync();
 
     ValueTask ShowSettingsWindowAsync();
 
@@ -27,11 +28,13 @@ public class DialogService : IDialogService
         _clipboardService = clipboardService;
     }
 
-    public async ValueTask<string> ShowMultiLineTextBoxWindowAsync()
+    public async ValueTask<string> ShowMultiLineTextInputWindowAsync()
     {
         return await _applicationDispatcher.InvokeAsync(async () =>
         {
-            var window = new MultiLineTextBoxWindow();
+            var window = new MultiLineTextInputWindow();
+            var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
+            window.ViewModel = serviceProvider.GetRequiredService<MultiLineTextInputWindowViewModel>();
 
             await window.ShowDialog(_mainWindowProvider.GetMainWindow());
             return window.GetResult() ?? string.Empty;
@@ -43,6 +46,8 @@ public class DialogService : IDialogService
         await _applicationDispatcher.InvokeAsync(async () =>
         {
             var window = new SettingsWindow();
+            var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
+            window.ViewModel = serviceProvider.GetRequiredService<SettingsWindowViewModel>();
 
             await window.ShowDialog(_mainWindowProvider.GetMainWindow());
         });

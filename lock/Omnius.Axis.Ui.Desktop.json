@@ -73,6 +73,15 @@
           "Avalonia": "0.10.8"
         }
       },
+      "Citrus.Avalonia": {
+        "type": "Direct",
+        "requested": "[1.5.1, )",
+        "resolved": "1.5.1",
+        "contentHash": "PM0H6E580PUgn4LbJiRFUvYXSBNFmViGyxBC0/dXlMs0k3q8bTwJvInFs0qPX873jGfeHKdq6dxD4OTLlx8aBA==",
+        "dependencies": {
+          "Avalonia": "0.10.6"
+        }
+      },
       "CommandLineParser": {
         "type": "Direct",
         "requested": "[2.8.0, )",
@@ -129,12 +138,6 @@
           "System.ComponentModel.Annotations": "5.0.0",
           "System.Reactive": "5.0.0"
         }
-      },
-      "StyleCop.Analyzers": {
-        "type": "Direct",
-        "requested": "[1.1.118, )",
-        "resolved": "1.1.118",
-        "contentHash": "Onx6ovGSqXSK07n/0eM3ZusiNdB6cIlJdabQhWGgJp3Vooy9AaLS/tigeybOJAobqbtggTamoWndz72JscZBvw=="
       },
       "YamlDotNet": {
         "type": "Direct",

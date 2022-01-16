@@ -1,4 +1,3 @@
-using System.Reactive.Disposables;
 using Omnius.Axis.Ui.Desktop.Configuration;
 using Omnius.Axis.Ui.Desktop.Views.Settings;
 using Omnius.Core;
@@ -14,11 +13,11 @@ public class MainWindowDesignViewModel : MainWindowViewModelBase
     {
         this.Status = new MainWindowStatus();
 
-        this.SettingsCommand = new AsyncReactiveCommand().ToAdd(_disposable);
-        this.SettingsCommand.Subscribe(() => this.SettingsAsync()).ToAdd(_disposable);
+        this.SettingsCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.SettingsCommand.Subscribe(async () => await this.SettingsAsync()).AddTo(_disposable);
     }
 
-    protected override void OnDispose(bool disposing)
+    protected override async ValueTask OnDisposeAsync()
     {
         _disposable.Dispose();
     }

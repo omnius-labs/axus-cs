@@ -1,29 +1,27 @@
-using System.Collections.ObjectModel;
 using System.Reactive.Disposables;
-using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 
 namespace Omnius.Axis.Ui.Desktop.Views.Settings;
 
-public class SignaturesControlDesignViewModel : AsyncDisposableBase, ISignaturesControlViewModel
+public class SignaturesControlDesignViewModel : SignaturesControlViewModelBase
 {
     private readonly CompositeDisposable _disposable = new();
 
     public SignaturesControlDesignViewModel()
     {
-        this.RegisterCommand = new ReactiveCommand().AddTo(_disposable);
-        this.RegisterCommand.Subscribe(() => this.Register()).AddTo(_disposable);
+        this.RegisterCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.RegisterCommand.Subscribe(async () => await this.RegisterAsync()).AddTo(_disposable);
 
         this.Signatures = new();
         this.SelectedSignatures = new();
 
-        this.ItemDeleteCommand = new ReactiveCommand().AddTo(_disposable);
-        this.ItemDeleteCommand.Subscribe(() => this.ItemDelete()).AddTo(_disposable);
+        this.ItemDeleteCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.ItemDeleteCommand.Subscribe(async () => await this.ItemDeleteAsync()).AddTo(_disposable);
 
-        this.ItemCopySeedCommand = new ReactiveCommand().AddTo(_disposable);
-        this.ItemCopySeedCommand.Subscribe(() => this.ItemCopySeed()).AddTo(_disposable);
+        this.ItemCopySeedCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.ItemCopySeedCommand.Subscribe(async () => await this.ItemCopySeedAsync()).AddTo(_disposable);
     }
 
     protected override async ValueTask OnDisposeAsync()
@@ -31,25 +29,24 @@ public class SignaturesControlDesignViewModel : AsyncDisposableBase, ISignatures
         _disposable.Dispose();
     }
 
-    public ReactiveCommand RegisterCommand { get; }
+    public override IEnumerable<OmniSignature> GetSignatures()
+    {
+        return Array.Empty<OmniSignature>();
+    }
 
-    public ObservableCollection<OmniSignature> Signatures { get; }
-
-    public ObservableCollection<OmniSignature> SelectedSignatures { get; }
-
-    public ReactiveCommand ItemDeleteCommand { get; }
-
-    public ReactiveCommand ItemCopySeedCommand { get; }
-
-    private async void Register()
+    public override void SetSignatures(IEnumerable<OmniSignature> signatures)
     {
     }
 
-    private async void ItemDelete()
+    private async Task RegisterAsync()
     {
     }
 
-    private async void ItemCopySeed()
+    private async Task ItemDeleteAsync()
+    {
+    }
+
+    private async Task ItemCopySeedAsync()
     {
     }
 }

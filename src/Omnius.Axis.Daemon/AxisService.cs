@@ -140,7 +140,7 @@ public class AxisService : AsyncDisposableBase, IAxisService
 
         var fileExchangerOptions = new FileExchangerOptions(128);
         _fileExchanger = await FileExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedFileStorage, _subscribedFileStorage, batchActionDispatcher, bytesPool, fileExchangerOptions, cancellationToken);
-        _nodeFinder.GetEvents().GetContentExchangers.Subscribe(() => _fileExchanger).ToAdd(_disposables);
+        _nodeFinder.GetEvents().GetContentExchangers.Subscribe(() => _fileExchanger).AddTo(_disposables);
 
         var publishedShoutStorageOptions = new PublishedShoutStorageOptions(Path.Combine(_databaseDirectoryPath, "published_shout_storage"));
         _publishedShoutStorage = await PublishedShoutStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, publishedShoutStorageOptions, cancellationToken);
@@ -150,7 +150,7 @@ public class AxisService : AsyncDisposableBase, IAxisService
 
         var shoutExchangerOptions = new ShoutExchangerOptions(128);
         _shoutExchanger = await ShoutExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedShoutStorage, _subscribedShoutStorage, batchActionDispatcher, bytesPool, shoutExchangerOptions, cancellationToken);
-        _nodeFinder.GetEvents().GetContentExchangers.Subscribe(() => _shoutExchanger).ToAdd(_disposables);
+        _nodeFinder.GetEvents().GetContentExchangers.Subscribe(() => _shoutExchanger).AddTo(_disposables);
     }
 
     private async ValueTask StopAsync(CancellationToken cancellationToken = default)

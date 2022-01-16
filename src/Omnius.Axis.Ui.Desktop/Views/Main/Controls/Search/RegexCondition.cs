@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace Omnius.Axis.Ui.Desktop.ViewModels;
+namespace Omnius.Axis.Ui.Desktop.Views.Main;
 
 public class RegexCondition : IFileSearchCondition<string>, IEquatable<RegexCondition>
 {

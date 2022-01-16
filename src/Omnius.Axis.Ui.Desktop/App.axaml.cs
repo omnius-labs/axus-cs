@@ -7,7 +7,6 @@ using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Omnius.Axis.Ui.Desktop.Internal;
 using Omnius.Axis.Ui.Desktop.Views.Main;
-using Omnius.Core.Avalonia;
 using Omnius.Core.Helpers;
 using Omnius.Core.Net;
 
@@ -19,18 +18,13 @@ public class App : Application
 
     public static new App Current => (App)Application.Current;
 
-    public new IClassicDesktopStyleApplicationLifetime ApplicationLifetime => (IClassicDesktopStyleApplicationLifetime)base.ApplicationLifetime;
-
     public override void Initialize()
     {
-        AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(this.UnhandledException);
-
         if (!this.IsDesignMode)
         {
-            var parsedResult = CommandLine.Parser.Default.ParseArguments<Options>(Environment.GetCommandLineArgs());
-            parsedResult = parsedResult.WithParsed(this.Startup);
-            parsedResult.WithNotParsed(this.HandleParseError);
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler((_, e) => _logger.Error(e));
 
+            this.ApplicationLifetime.Startup += (_, _) => this.Startup();
             this.ApplicationLifetime.Exit += (_, _) => this.Exit();
         }
 
@@ -39,32 +33,20 @@ public class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        if (base.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            var window = new MainWindow();
-            desktop.MainWindow = window;
-
-            _ = this.InitMainWindowViewModelAsync(window);
+            desktop.MainWindow = new MainWindow();
         }
 
         base.OnFrameworkInitializationCompleted();
     }
 
-    private async ValueTask InitMainWindowViewModelAsync(MainWindow mainWindow)
+    public new IClassicDesktopStyleApplicationLifetime ApplicationLifetime => (IClassicDesktopStyleApplicationLifetime)base.ApplicationLifetime;
+
+    public MainWindow? MainWindow
     {
-        await Task.Delay(1).ConfigureAwait(false);
-
-        var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
-        var applicationDispatcher = serviceProvider.GetRequiredService<IApplicationDispatcher>();
-        var viewModel = serviceProvider.GetRequiredService<MainWindowViewModel>();
-
-        await applicationDispatcher.InvokeAsync(() =>
-        {
-            if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            {
-                mainWindow.ViewModel = viewModel;
-            }
-        });
+        get => this.ApplicationLifetime.MainWindow as MainWindow;
+        set => this.ApplicationLifetime.MainWindow = value;
     }
 
     public bool IsDesignMode
@@ -79,12 +61,14 @@ public class App : Application
         }
     }
 
-    private void UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    private async void Startup()
     {
-        _logger.Error(e);
+        var parsedResult = CommandLine.Parser.Default.ParseArguments<Options>(Environment.GetCommandLineArgs());
+        parsedResult = await parsedResult.WithParsedAsync(this.RunAsync);
+        parsedResult.WithNotParsed(this.HandleParseError);
     }
 
-    private void Startup(Options options)
+    private async Task RunAsync(Options options)
     {
         DirectoryHelper.CreateDirectory(options.StorageDirectoryPath!);
 
@@ -101,15 +85,19 @@ public class App : Application
         _logger.Info("Starting...");
         _logger.Info("AssemblyInformationalVersion: {0}", Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion);
 
-        Bootstrapper.Instance.Build(databaseDirectoryPath, OmniAddress.Parse(options.ListenAddress!));
+        await Bootstrapper.Instance.BuildAsync(databaseDirectoryPath, OmniAddress.Parse(options.ListenAddress!));
+
+        var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
+        var viewModel = serviceProvider.GetRequiredService<MainWindowViewModel>();
+        this.MainWindow!.ViewModel = viewModel;
     }
 
-    private async void Exit()
+    private void HandleParseError(IEnumerable<Error> errs)
     {
-        await Bootstrapper.Instance.DisposeAsync();
-
-        _logger.Info("Stopping...");
-        NLog.LogManager.Shutdown();
+        foreach (var err in errs)
+        {
+            _logger.Error(err);
+        }
     }
 
     private void SetLogsDirectory(string logsDirectoryPath)
@@ -129,11 +117,11 @@ public class App : Application
         NLog.LogManager.ReconfigExistingLoggers();
     }
 
-    private void HandleParseError(IEnumerable<Error> errs)
+    private async void Exit()
     {
-        foreach (var err in errs)
-        {
-            _logger.Error(err);
-        }
+        await Bootstrapper.Instance.DisposeAsync();
+
+        _logger.Info("Stopping...");
+        NLog.LogManager.Shutdown();
     }
 }

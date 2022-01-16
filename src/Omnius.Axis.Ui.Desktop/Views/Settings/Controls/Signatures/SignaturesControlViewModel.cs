@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Reactive.Disposables;
 using System.Text;
 using Omnius.Axis.Ui.Desktop.Configuration;
 using Omnius.Axis.Ui.Desktop.Internal;
@@ -7,24 +6,27 @@ using Omnius.Core;
 using Omnius.Core.Avalonia;
 using Omnius.Core.Cryptography;
 using Reactive.Bindings;
-using Reactive.Bindings.Extensions;
 
 namespace Omnius.Axis.Ui.Desktop.Views.Settings;
 
-public interface ISignaturesControlViewModel
+public abstract class SignaturesControlViewModelBase : AsyncDisposableBase
 {
-    ReactiveCommand RegisterCommand { get; }
+    public AsyncReactiveCommand? RegisterCommand { get; protected set; }
 
-    ObservableCollection<OmniSignature> Signatures { get; }
+    public ObservableCollection<OmniSignature>? Signatures { get; protected set; }
 
-    ObservableCollection<OmniSignature> SelectedSignatures { get; }
+    public ObservableCollection<OmniSignature>? SelectedSignatures { get; protected set; }
 
-    ReactiveCommand ItemDeleteCommand { get; }
+    public AsyncReactiveCommand? ItemDeleteCommand { get; protected set; }
 
-    ReactiveCommand ItemCopySeedCommand { get; }
+    public AsyncReactiveCommand? ItemCopySeedCommand { get; protected set; }
+
+    public abstract IEnumerable<OmniSignature> GetSignatures();
+
+    public abstract void SetSignatures(IEnumerable<OmniSignature> signatures);
 }
 
-public class SignaturesControlViewModel : AsyncDisposableBase, ISignaturesControlViewModel
+public class SignaturesControlViewModel : SignaturesControlViewModelBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
     private readonly UiStatus _uiState;
@@ -34,6 +36,7 @@ public class SignaturesControlViewModel : AsyncDisposableBase, ISignaturesContro
     private readonly IClipboardService _clipboardService;
 
     private readonly CompositeDisposable _disposable = new();
+    private readonly CompositeAsyncDisposable _asyncDisposable = new();
 
     public SignaturesControlViewModel(UiStatus uiState, IIntaractorProvider intaractorAdapter, IApplicationDispatcher applicationDispatcher, IDialogService dialogService, IClipboardService clipboardService)
     {
@@ -43,41 +46,43 @@ public class SignaturesControlViewModel : AsyncDisposableBase, ISignaturesContro
         _dialogService = dialogService;
         _clipboardService = clipboardService;
 
-        this.RegisterCommand = new ReactiveCommand().AddTo(_disposable);
-        this.RegisterCommand.Subscribe(() => this.Register()).AddTo(_disposable);
+        this.RegisterCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.RegisterCommand.Subscribe(async () => await this.RegisterAsync()).AddTo(_disposable);
 
         this.Signatures = new();
         this.SelectedSignatures = new();
 
-        this.ItemDeleteCommand = new ReactiveCommand().AddTo(_disposable);
-        this.ItemDeleteCommand.Subscribe(() => this.ItemDelete()).AddTo(_disposable);
+        this.ItemDeleteCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.ItemDeleteCommand.Subscribe(async () => await this.ItemDeleteAsync()).AddTo(_disposable);
 
-        this.ItemCopySeedCommand = new ReactiveCommand().AddTo(_disposable);
-        this.ItemCopySeedCommand.Subscribe(() => this.ItemCopySeed()).AddTo(_disposable);
+        this.ItemCopySeedCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.ItemCopySeedCommand.Subscribe(async () => await this.ItemCopySeedAsync()).AddTo(_disposable);
     }
 
     protected override async ValueTask OnDisposeAsync()
     {
         _disposable.Dispose();
+        await _asyncDisposable.DisposeAsync();
     }
 
-    public ReactiveCommand RegisterCommand { get; }
-
-    public ObservableCollection<OmniSignature> Signatures { get; }
-
-    public ObservableCollection<OmniSignature> SelectedSignatures { get; }
-
-    public ReactiveCommand ItemDeleteCommand { get; }
-
-    public ReactiveCommand ItemCopySeedCommand { get; }
-
-    private async void Register()
+    public override IEnumerable<OmniSignature> GetSignatures()
     {
-        var text = await _dialogService.ShowMultiLineTextBoxWindowAsync();
+        return this.Signatures?.ToArray() ?? Array.Empty<OmniSignature>();
+    }
+
+    public override void SetSignatures(IEnumerable<OmniSignature> signatures)
+    {
+        this.Signatures?.Clear();
+        this.Signatures?.AddRange(signatures);
+    }
+
+    private async Task RegisterAsync()
+    {
+        var text = await _dialogService.ShowMultiLineTextInputWindowAsync();
 
         foreach (var item in ParseSignateres(text))
         {
-            this.Signatures.Add(item);
+            this.Signatures!.Add(item);
         }
     }
 
@@ -94,19 +99,19 @@ public class SignaturesControlViewModel : AsyncDisposableBase, ISignaturesContro
         return results;
     }
 
-    private async void ItemDelete()
+    private async Task ItemDeleteAsync()
     {
-        foreach (var signature in this.SelectedSignatures.ToArray())
+        foreach (var signature in this.SelectedSignatures!.ToArray())
         {
-            this.Signatures.Remove(signature);
+            this.Signatures!.Remove(signature);
         }
     }
 
-    private async void ItemCopySeed()
+    private async Task ItemCopySeedAsync()
     {
         var sb = new StringBuilder();
 
-        foreach (var signature in this.SelectedSignatures.ToArray())
+        foreach (var signature in this.SelectedSignatures!.ToArray())
         {
             sb.AppendLine(signature.ToString());
         }

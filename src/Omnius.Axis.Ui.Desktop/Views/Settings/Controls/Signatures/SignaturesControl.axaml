@@ -9,7 +9,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:CompileBindings="True"
-    x:DataType="local:ISignaturesControlViewModel"
+    x:DataType="local:SignaturesControlViewModelBase"
     mc:Ignorable="d"
     d:DesignWidth="800"
     d:DesignHeight="500" >

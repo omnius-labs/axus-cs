@@ -2,7 +2,7 @@ using Generator.Equals;
 using Omnius.Axis.Intaractors.Models;
 using Omnius.Core.Avalonia;
 
-namespace Omnius.Axis.Ui.Desktop.ViewModels;
+namespace Omnius.Axis.Ui.Desktop.Views.Main;
 
 [Equatable]
 public partial class DownloadingFileViewModel : BindableBase, ICollectionViewModel<DownloadingFileViewModel, DownloadingFileReport>

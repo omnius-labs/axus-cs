@@ -1,4 +1,4 @@
-<Window x:Class="Omnius.Axis.Ui.Desktop.Views.Dialogs.MultiLineTextBoxWindow"
+<Window x:Class="Omnius.Axis.Ui.Desktop.Views.Dialogs.MultiLineTextInputWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:dataGrid="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
@@ -11,7 +11,7 @@
     Title="Text"
     FontFamily="Meiryo UI, Lucida Grande, Ubuntu"
     x:CompileBindings="False"
-    x:DataType="local:MultiLineTextBoxWindowViewModelBase"
+    x:DataType="local:MultiLineTextInputWindowViewModelBase"
     mc:Ignorable="d"
     d:DesignWidth="300"
     d:DesignHeight="300" >

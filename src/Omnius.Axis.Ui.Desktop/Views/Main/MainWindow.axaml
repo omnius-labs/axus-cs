@@ -15,25 +15,23 @@
     d:DesignWidth="800"
     d:DesignHeight="500" >
 
-    <Grid ColumnDefinitions="Auto,*" Background="{DynamicResource ThemeControlMidColor}">
-        <Grid RowDefinitions="*,Auto" Background="Transparent">
-            <ListBox Name="TabListBox" Background="Transparent">
-                <ListBoxItem Name="StatusListBoxItem" Content="Status" IsSelected="true" />
-                <ListBoxItem Name="PeersListBoxItem" Content="Peers" />
-                <ListBoxItem Name="SearchListBoxItem" Content="Search" />
-                <ListBoxItem Name="DownloadListBoxItem" Content="Download" />
-                <ListBoxItem Name="UploadListBoxItem" Content="Upload" />
-            </ListBox>
-            <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="12" Spacing="12" Background="Transparent">
-                <Button Command="{Binding SettingsCommand}" Content="Settings"/>
-            </StackPanel>
-        </Grid>
-        <Grid Grid.Column="1" Background="{DynamicResource ThemeControlLowColor}">
-            <local:StatusControl IsVisible="{Binding #StatusListBoxItem.IsSelected}" DataContext="{Binding StatusControlViewModel}" />
-            <local:PeersControl IsVisible="{Binding #PeersListBoxItem.IsSelected}" DataContext="{Binding PeersControlViewModel}" />
-            <local:SearchControl IsVisible="{Binding #SearchListBoxItem.IsSelected}" />
-            <local:DownloadControl IsVisible="{Binding #DownloadListBoxItem.IsSelected}" DataContext="{Binding DownloadControlViewModel}" />
-            <local:UploadControl IsVisible="{Binding #UploadListBoxItem.IsSelected}" DataContext="{Binding UploadControlViewModel}" />
-        </Grid>
+    <Grid>
+        <TabControl TabStripPlacement="Left">
+            <TabItem Header="Status">
+                <local:StatusControl IsVisible="{Binding #StatusListBoxItem.IsSelected}" DataContext="{Binding StatusControlViewModel}" />
+            </TabItem> 
+            <TabItem Header="Peers">
+                <local:PeersControl IsVisible="{Binding #PeersListBoxItem.IsSelected}" DataContext="{Binding PeersControlViewModel}" />
+            </TabItem> 
+            <TabItem Header="Search">
+                <local:SearchControl IsVisible="{Binding #SearchListBoxItem.IsSelected}" />
+            </TabItem> 
+            <TabItem Header="Download">
+                <local:DownloadControl IsVisible="{Binding #DownloadListBoxItem.IsSelected}" DataContext="{Binding DownloadControlViewModel}" />
+            </TabItem> 
+            <TabItem Header="Upload">
+                <local:UploadControl IsVisible="{Binding #UploadListBoxItem.IsSelected}" DataContext="{Binding UploadControlViewModel}" />
+            </TabItem> 
+        </TabControl>
     </Grid>
 </Window>

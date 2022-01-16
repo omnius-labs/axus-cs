@@ -1,4 +1,4 @@
-namespace Omnius.Axis.Ui.Desktop.ViewModels;
+namespace Omnius.Axis.Ui.Desktop.Views.Main;
 
 public class RangeCondition<T> : IFileSearchCondition<T>, IEquatable<RangeCondition<T>>
     where T : IComparable<T>, IEquatable<T>

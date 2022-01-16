@@ -97,12 +97,9 @@ public partial class IntaractorProvider : AsyncDisposableBase, IIntaractorProvid
     {
         for (; ; )
         {
-            if (_serviceManager is not null && _serviceManager.IsConnected)
-            {
-                return;
-            }
-
             cancellationToken.ThrowIfCancellationRequested();
+
+            if (_serviceManager is not null && _serviceManager.IsConnected) return;
 
             try
             {
