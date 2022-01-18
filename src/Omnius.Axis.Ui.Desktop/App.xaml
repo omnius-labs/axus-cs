@@ -4,7 +4,7 @@
             x:Class="Omnius.Axis.Ui.Desktop.App"
             xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <Application.Styles>
-        <StyleInclude Source="avares://Citrus.Avalonia/Citrus.xaml"/>
-        <StyleInclude Source="avares://Citrus.Avalonia/Rust.xaml"/> 
+        <FluentTheme Mode="Dark" />
+        <StyleInclude Source="/Styles/SideBar.xaml" />
     </Application.Styles>
 </Application>

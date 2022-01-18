@@ -8,6 +8,7 @@ public static class Program
 
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
+            .With(new Win32PlatformOptions { AllowEglInitialization = true })
             .UsePlatformDetect()
             .LogToTrace();
 }

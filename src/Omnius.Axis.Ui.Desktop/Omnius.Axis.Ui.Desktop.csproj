@@ -8,8 +8,62 @@
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>DESIGN</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="App.xaml" />
+    <None Remove="Styles\SideBar.xaml" />
+    <None Remove="Views\Dialogs\MultiLineTextInput\MultiLineTextInputWindow.xaml" />
+    <None Remove="Views\Main\Controls\Download\DownloadControl.xaml" />
+    <None Remove="Views\Main\Controls\Peers\PeersControl.xaml" />
+    <None Remove="Views\Main\Controls\Search\SearchControl.xaml" />
+    <None Remove="Views\Main\Controls\Status\StatusControl.xaml" />
+    <None Remove="Views\Main\Controls\Upload\UploadControl.xaml" />
+    <None Remove="Views\Main\MainWindow.xaml" />
+    <None Remove="Views\Settings\Controls\Signatures\SignaturesControl.xaml" />
+    <None Remove="Views\Settings\SettingsWindow.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaXaml Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaXaml>
+    <AvaloniaXaml Include="Styles\SideBar.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaXaml>
+    <AvaloniaXaml Include="Views\Dialogs\MultiLineTextInput\MultiLineTextInputWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaXaml>
+    <AvaloniaXaml Include="Views\Main\Controls\Download\DownloadControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaXaml>
+    <AvaloniaXaml Include="Views\Main\Controls\Peers\PeersControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaXaml>
+    <AvaloniaXaml Include="Views\Main\Controls\Search\SearchControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaXaml>
+    <AvaloniaXaml Include="Views\Main\Controls\Status\StatusControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaXaml>
+    <AvaloniaXaml Include="Views\Main\Controls\Upload\UploadControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaXaml>
+    <AvaloniaXaml Include="Views\Main\MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaXaml>
+    <AvaloniaXaml Include="Views\Settings\Controls\Signatures\SignaturesControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaXaml>
+    <AvaloniaXaml Include="Views\Settings\SettingsWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaXaml>
   </ItemGroup>
 
   <ItemGroup>
@@ -39,6 +93,39 @@
     <ProjectReference Include="..\Omnius.Axis.Remoting\Omnius.Axis.Remoting.csproj" />
     <ProjectReference Include="..\Omnius.Axis.Intaractors\Omnius.Axis.Intaractors.csproj" />
     <ProjectReference Include="..\Omnius.Axis.Utils\Omnius.Axis.Utils.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Dialogs\MultiLineTextInput\MultiLineTextInputWindow.xaml.cs">
+      <DependentUpon>MultiLineTextInputWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Main\Controls\Download\DownloadControl.xaml.cs">
+      <DependentUpon>DownloadControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Main\Controls\Peers\PeersControl.xaml.cs">
+      <DependentUpon>PeersControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Main\Controls\Search\SearchControl.xaml.cs">
+      <DependentUpon>SearchControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Main\Controls\Status\StatusControl.xaml.cs">
+      <DependentUpon>StatusControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Main\Controls\Upload\UploadControl.xaml.cs">
+      <DependentUpon>UploadControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Main\MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Settings\Controls\Signatures\SignaturesControl.xaml.cs">
+      <DependentUpon>SignaturesControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Settings\SettingsWindow.xaml.cs">
+      <DependentUpon>SettingsWindow.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
