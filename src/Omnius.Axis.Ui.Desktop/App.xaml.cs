@@ -36,6 +36,11 @@ public class App : Application
         if (base.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow = new MainWindow();
+
+            if (this.IsDesignMode)
+            {
+                desktop.MainWindow.DataContext = new MainWindowDesignViewModel();
+            }
         }
 
         base.OnFrameworkInitializationCompleted();

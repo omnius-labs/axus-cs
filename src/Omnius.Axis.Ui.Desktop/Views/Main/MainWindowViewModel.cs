@@ -12,7 +12,7 @@ public abstract class MainWindowViewModelBase : AsyncDisposableBase
 
     public StatusControlViewModel? StatusControlViewModel { get; protected set; }
 
-    public PeersControlViewModel? PeersControlViewModel { get; protected set; }
+    public PeersControlViewModelBase? PeersControlViewModel { get; protected set; }
 
     public DownloadControlViewModel? DownloadControlViewModel { get; protected set; }
 

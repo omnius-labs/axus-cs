@@ -3,10 +3,9 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:dataGrid="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
-    xmlns:local="clr-namespace:Omnius.Axis.Ui.Desktop.Views.Main;assembly=Omnius.Axis.Ui.Desktop"
+    xmlns:local="clr-namespace:Omnius.Axis.Ui.Desktop.Views.Main"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="Axis"
     d:DesignHeight="500"
@@ -18,46 +17,49 @@
     ExtendClientAreaToDecorationsHint="True"
     FontFamily="Meiryo UI, Lucida Grande, Ubuntu"
     FontSize="14"
-    Foreground="{StaticResource SystemBaseHighColor}"
     TransparencyLevelHint="AcrylicBlur"
     mc:Ignorable="d">
 
-    <Panel>
-        <DockPanel HorizontalAlignment="Stretch">
-            <ExperimentalAcrylicBorder DockPanel.Dock="Left" Width="240">
+    <Design.DataContext>
+        <local:MainWindowDesignViewModel />
+    </Design.DataContext>
+
+    <DockPanel>
+        <Panel Height="30" DockPanel.Dock="Top">
+            <ExperimentalAcrylicBorder IsHitTestVisible="False">
                 <ExperimentalAcrylicBorder.Material>
                     <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1" />
                 </ExperimentalAcrylicBorder.Material>
-                <AutoCompleteBox HorizontalAlignment="Stretch" Margin="20 40 20 0" Watermark="Search" Items="{Binding SearchItems}" />
             </ExperimentalAcrylicBorder>
+        </Panel>
+        <Panel DockPanel.Dock="Left">
+            <ExperimentalAcrylicBorder IsHitTestVisible="False">
+                <ExperimentalAcrylicBorder.Material>
+                    <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.5" TintOpacity="1" />
+                </ExperimentalAcrylicBorder.Material>
+            </ExperimentalAcrylicBorder>
+            <DockPanel>
+                <ListBox Classes="sidebar" DockPanel.Dock="Top">
+                    <ListBoxItem Name="StatusListBoxItem" Content="Status" IsSelected="true" />
+                    <ListBoxItem Name="PeersListBoxItem" Content="Peers" />
+                    <ListBoxItem Name="SearchListBoxItem" Content="Search" />
+                    <ListBoxItem Name="DownloadListBoxItem" Content="Download" />
+                    <ListBoxItem Name="UploadListBoxItem" Content="Upload" />
+                </ListBox>
+                <Button Classes="sidebar" VerticalAlignment="Bottom" Command="{Binding SettingsCommand}" Content="Settings"/>
+            </DockPanel>
+        </Panel>
+        <Panel DockPanel.Dock="Right">
             <ExperimentalAcrylicBorder IsHitTestVisible="False">
                 <ExperimentalAcrylicBorder.Material>
                     <ExperimentalAcrylicMaterial MaterialOpacity="0.85" TintOpacity="1" />
                 </ExperimentalAcrylicBorder.Material>
-                <TextBlock Text="{Binding #TabControl.SelectedItem.Header}" Margin="40 20" FontSize="32" FontWeight="Light" />
             </ExperimentalAcrylicBorder>
-        </DockPanel>
-
-
-        <TabControl
-            x:Name="TabControl"
-            Margin="0,40,0,20"
-            Classes="sidebar">
-            <TabItem Header="Status">
-                <local:StatusControl DataContext="{Binding StatusControlViewModel}" IsVisible="{Binding #StatusListBoxItem.IsSelected}" />
-            </TabItem>
-            <TabItem Header="Peers">
-                <local:PeersControl DataContext="{Binding PeersControlViewModel}" IsVisible="{Binding #PeersListBoxItem.IsSelected}" />
-            </TabItem>
-            <TabItem Header="Search">
-                <local:SearchControl IsVisible="{Binding #SearchListBoxItem.IsSelected}" />
-            </TabItem>
-            <TabItem Header="Download">
-                <local:DownloadControl DataContext="{Binding DownloadControlViewModel}" IsVisible="{Binding #DownloadListBoxItem.IsSelected}" />
-            </TabItem>
-            <TabItem Header="Upload">
-                <local:UploadControl DataContext="{Binding UploadControlViewModel}" IsVisible="{Binding #UploadListBoxItem.IsSelected}" />
-            </TabItem>
-        </TabControl>
-    </Panel>
+            <local:StatusControl Background="{x:Null}" IsVisible="{Binding #StatusListBoxItem.IsSelected}" DataContext="{Binding StatusControlViewModel}" />
+            <local:PeersControl IsVisible="{Binding #PeersListBoxItem.IsSelected}" DataContext="{Binding PeersControlViewModel}" />
+            <local:SearchControl IsVisible="{Binding #SearchListBoxItem.IsSelected}" />
+            <local:DownloadControl IsVisible="{Binding #DownloadListBoxItem.IsSelected}" DataContext="{Binding DownloadControlViewModel}" />
+            <local:UploadControl IsVisible="{Binding #UploadListBoxItem.IsSelected}" DataContext="{Binding UploadControlViewModel}" />
+        </Panel>
+    </DockPanel>
 </Window>

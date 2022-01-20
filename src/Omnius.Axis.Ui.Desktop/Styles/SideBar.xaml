@@ -1,77 +1,88 @@
 <Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Design.PreviewWith>
-        <Border Padding="20">
-            <TabControl Classes="sidebar">
-                <TabItem Header="Item1" />
-                <TabItem Header="Item2" />
-            </TabControl>
+        <Border>
+            <DockPanel>
+                <ListBox Classes="sidebar" DockPanel.Dock="Top">
+                    <ListBoxItem Content="Status" IsSelected="true" />
+                    <ListBoxItem Content="Peers" />
+                    <ListBoxItem Content="Search" />
+                    <ListBoxItem Content="Download" />
+                    <ListBoxItem Content="Upload" />
+                </ListBox>
+                <Button Classes="sidebar" Grid.Row="1" Content="Settings"/>
+            </DockPanel>
         </Border>
     </Design.PreviewWith>
-    <Style Selector="TabControl.sidebar">
-        <Setter Property="TabStripPlacement" Value="Left" />
-        <Setter Property="Padding" Value="0 0 0 0" />
-        <Setter Property="Background" Value="{x:Null}" />
-        <Setter Property="Template">
-            <ControlTemplate>
-                <Border
-                    Margin="{TemplateBinding Margin}"
-                    BorderBrush="{TemplateBinding BorderBrush}"
-                    BorderThickness="{TemplateBinding BorderThickness}">
-                    <DockPanel>
-                        <ScrollViewer
-                            Name="PART_ScrollViewer"
-                            Width="240"
-                            Margin="0,30,0,0"
-                            Background="{TemplateBinding Background}"
-                            DockPanel.Dock="Left"
-                            HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
-                            VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}">
-                            <ItemsPresenter
-                                Name="PART_ItemsPresenter"
-                                ItemTemplate="{TemplateBinding ItemTemplate}"
-                                Items="{TemplateBinding Items}"
-                                ItemsPanel="{TemplateBinding ItemsPanel}" />
-                        </ScrollViewer>
-                        <ContentControl
-                            HorizontalContentAlignment="Right"
-                            Content="{TemplateBinding Tag}"
-                            DockPanel.Dock="Bottom" />
-                        <ScrollViewer
-                            Background="{x:Null}"
-                            HorizontalScrollBarVisibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=SelectedItem.(ScrollViewer.HorizontalScrollBarVisibility)}"
-                            VerticalScrollBarVisibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=SelectedItem.(ScrollViewer.VerticalScrollBarVisibility)}">
-                            <ContentPresenter
-                                Name="PART_SelectedContentHost"
-                                Margin="{TemplateBinding Padding}"
-                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
-                                Content="{TemplateBinding SelectedContent}"
-                                ContentTemplate="{TemplateBinding SelectedContentTemplate}" />
-                        </ScrollViewer>
-                    </DockPanel>
-                </Border>
-            </ControlTemplate>
-        </Setter>
-    </Style>
 
-    <Style Selector="TabControl.sidebar &gt; TabItem">
+    <Style Selector="ListBox.sidebar">
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="FontSize" Value="14" />
-        <Setter Property="Margin" Value="0" />
-        <Setter Property="Padding" Value="16" />
-        <Setter Property="Width" Value="240" />
-        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-        <Setter Property="(ScrollViewer.HorizontalScrollBarVisibility)" Value="Auto" />
-        <Setter Property="(ScrollViewer.VerticalScrollBarVisibility)" Value="Auto" />
+        <Setter Property="Background" Value="{x:Null}" />
+        <Setter Property="(ScrollViewer.HorizontalScrollBarVisibility)" Value="Hidden" />
+        <Setter Property="(ScrollViewer.VerticalScrollBarVisibility)" Value="Hidden" />
     </Style>
-    <Style Selector="TabControl.sidebar &gt; TabItem:selected /template/ Border#PART_SelectedPipe">
-        <Setter Property="IsVisible" Value="False" />
+    <Style Selector="ListBox.sidebar > ListBoxItem">
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="24,16" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
     </Style>
-    <Style Selector="TabControl.sidebar &gt; TabItem:selected">
-        <Setter Property="Background" Value="#1fffffff" />
+    <Style Selector="ListBox.sidebar > ListBoxItem /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="TextBlock.FontWeight" Value="Normal" />
+        <Setter Property="TextBlock.FontSize" Value="15" />
+    </Style>
+    <Style Selector="ListBox.sidebar > ListBoxItem:disabled /template/ ContentPresenter#PART_ContentPresenter">
+    </Style>
+    <Style Selector="ListBox.sidebar > ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#3fffffff"/>
+    </Style>
+    <Style Selector="ListBox.sidebar > ListBoxItem:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#1fffffff"/>
+    </Style>
+    <Style Selector="ListBox.sidebar > ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#1fffffff"/>
+    </Style>
+    <Style Selector="ListBox.sidebar > ListBoxItem:selected:not(:focus) /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#1fffffff"/>
+    </Style>
+    <Style Selector="ListBox.sidebar > ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#1fffffff"/>
+    </Style>
+    <Style Selector="ListBox.sidebar > ListBoxItem:selected:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#1fffffff"/>
     </Style>
 
-    <Style Selector="TabControl.sidebar &gt; TabItem:pointerover /template/ Border#PART_LayoutRoot">
-        <Setter Property="Background" Value="#3fffffff" />
+    <Style Selector="Button.sidebar">
+        <Setter Property="Background" Value="{x:Null}" />
+        <Setter Property="BorderBrush" Value="{x:Null}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="Padding" Value="24,16" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+    <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#3fffffff"/>
+    </Style>
+    <Style Selector="Button:pressed  /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#1fffffff"/>
+    </Style>
+    <Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#1fffffff"/>
+    </Style>
+    <Style Selector="Button.accent /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#1fffffff"/>
+    </Style>
+    <Style Selector="Button.accent:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#1fffffff"/>
+    </Style>
+    <Style Selector="Button.accent:pressed  /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#1fffffff"/>
+    </Style>
+    <Style Selector="Button:pressed, RepeatButton:pressed, ToggleButton:pressed">
+        <Setter Property="Background" Value="#1fffffff"/>
+    </Style>
+    <Style Selector="Button.accent:disabled /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#1fffffff"/>
     </Style>
 </Styles>
+

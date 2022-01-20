@@ -5,6 +5,9 @@
             xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <Application.Styles>
         <FluentTheme Mode="Dark" />
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+
+        <StyleInclude Source="/Styles/Base.xaml" />
         <StyleInclude Source="/Styles/SideBar.xaml" />
     </Application.Styles>
 </Application>

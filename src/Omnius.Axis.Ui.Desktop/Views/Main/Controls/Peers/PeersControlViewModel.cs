@@ -9,7 +9,14 @@ using Reactive.Bindings;
 
 namespace Omnius.Axis.Ui.Desktop.Views.Main;
 
-public class PeersControlViewModel : AsyncDisposableBase
+public abstract class PeersControlViewModelBase : AsyncDisposableBase
+{
+    public AsyncReactiveCommand? AddNodeCommand { get; protected set; }
+
+    public ReadOnlyObservableCollection<SessionViewModel>? SessionReports { get; protected set; }
+}
+
+public class PeersControlViewModel : PeersControlViewModelBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -27,10 +34,11 @@ public class PeersControlViewModel : AsyncDisposableBase
         _applicationDispatcher = applicationDispatcher;
         _dialogService = dialogService;
 
-        _sessionsUpdater = new CollectionViewUpdater<SessionViewModel, SessionReport>(_applicationDispatcher, this.GetSessionReports, TimeSpan.FromSeconds(3), SessionReportEqualityComparer.Default);
+        this.AddNodeCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.AddNodeCommand.Subscribe(async () => await this.AddNodeLocationsAsync()).AddTo(_disposable);
 
-        this.AddNodeCommand = new ReactiveCommand().AddTo(_disposable);
-        this.AddNodeCommand.Subscribe(() => this.AddNodeLocations()).AddTo(_disposable);
+        _sessionsUpdater = new CollectionViewUpdater<SessionViewModel, SessionReport>(_applicationDispatcher, this.GetSessionReports, TimeSpan.FromSeconds(3), SessionReportEqualityComparer.Default);
+        this.SessionReports = _sessionsUpdater.Collection;
     }
 
     protected override async ValueTask OnDisposeAsync()
@@ -61,11 +69,7 @@ public class PeersControlViewModel : AsyncDisposableBase
         }
     }
 
-    public ReactiveCommand AddNodeCommand { get; }
-
-    public ReadOnlyObservableCollection<SessionViewModel> SessionReports => _sessionsUpdater.Collection;
-
-    private async void AddNodeLocations()
+    private async Task AddNodeLocationsAsync()
     {
         var serviceAdapter = await _intaractorAdapter.GetServiceAdapterAsync();
 

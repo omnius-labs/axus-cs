@@ -17,7 +17,7 @@
     <StackPanel Orientation="Vertical" Margin="12">
         <StackPanel Orientation="Horizontal" Spacing="12">
             <Label Content="My node profile" />
-            <TextBox Text="{Binding MyNodeLocation.Value}" IsReadOnly="true" TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
+            <TextBox Text="{Binding MyNodeLocation.Value}" Width="300" IsReadOnly="true" TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
             <Button Content="Copy" Command="{Binding CopyMyNodeLocationCommand} "/>
         </StackPanel>
     </StackPanel>
