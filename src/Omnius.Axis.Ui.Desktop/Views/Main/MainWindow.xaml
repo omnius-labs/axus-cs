@@ -7,16 +7,17 @@
     xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
     xmlns:local="clr-namespace:Omnius.Axis.Ui.Desktop.Views.Main"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:skp="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia"
     Title="Axis"
     d:DesignHeight="500"
     d:DesignWidth="800"
-    x:CompileBindings="False"
+    x:CompileBindings="True"
     x:DataType="local:MainWindowViewModelBase"
     Background="{x:Null}"
     ExtendClientAreaTitleBarHeightHint="-1"
     ExtendClientAreaToDecorationsHint="True"
+    ExtendClientAreaChromeHints="PreferSystemChrome"
     FontFamily="Meiryo UI, Lucida Grande, Ubuntu"
-    FontSize="14"
     TransparencyLevelHint="AcrylicBlur"
     mc:Ignorable="d">
 
@@ -24,42 +25,51 @@
         <local:MainWindowDesignViewModel />
     </Design.DataContext>
 
-    <DockPanel>
-        <Panel Height="30" DockPanel.Dock="Top">
-            <ExperimentalAcrylicBorder IsHitTestVisible="False">
-                <ExperimentalAcrylicBorder.Material>
-                    <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1" />
-                </ExperimentalAcrylicBorder.Material>
-            </ExperimentalAcrylicBorder>
-        </Panel>
-        <Panel DockPanel.Dock="Left">
-            <ExperimentalAcrylicBorder IsHitTestVisible="False">
-                <ExperimentalAcrylicBorder.Material>
-                    <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.5" TintOpacity="1" />
-                </ExperimentalAcrylicBorder.Material>
-            </ExperimentalAcrylicBorder>
-            <DockPanel>
-                <ListBox Classes="sidebar" DockPanel.Dock="Top">
-                    <ListBoxItem Name="StatusListBoxItem" Content="Status" IsSelected="true" />
-                    <ListBoxItem Name="PeersListBoxItem" Content="Peers" />
-                    <ListBoxItem Name="SearchListBoxItem" Content="Search" />
-                    <ListBoxItem Name="DownloadListBoxItem" Content="Download" />
-                    <ListBoxItem Name="UploadListBoxItem" Content="Upload" />
-                </ListBox>
-                <Button Classes="sidebar" VerticalAlignment="Bottom" Command="{Binding SettingsCommand}" Content="Settings"/>
-            </DockPanel>
-        </Panel>
-        <Panel DockPanel.Dock="Right">
-            <ExperimentalAcrylicBorder IsHitTestVisible="False">
-                <ExperimentalAcrylicBorder.Material>
-                    <ExperimentalAcrylicMaterial MaterialOpacity="0.85" TintOpacity="1" />
-                </ExperimentalAcrylicBorder.Material>
-            </ExperimentalAcrylicBorder>
-            <local:StatusControl Background="{x:Null}" IsVisible="{Binding #StatusListBoxItem.IsSelected}" DataContext="{Binding StatusControlViewModel}" />
-            <local:PeersControl IsVisible="{Binding #PeersListBoxItem.IsSelected}" DataContext="{Binding PeersControlViewModel}" />
-            <local:SearchControl IsVisible="{Binding #SearchListBoxItem.IsSelected}" />
-            <local:DownloadControl IsVisible="{Binding #DownloadListBoxItem.IsSelected}" DataContext="{Binding DownloadControlViewModel}" />
-            <local:UploadControl IsVisible="{Binding #UploadListBoxItem.IsSelected}" DataContext="{Binding UploadControlViewModel}" />
-        </Panel>
-    </DockPanel>
+    <Panel Margin="{Binding $parent[Window].OffScreenMargin}">
+        <ExperimentalAcrylicBorder IsHitTestVisible="False">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
+        <DockPanel>
+            <StackPanel Height="30" DockPanel.Dock="Top" HorizontalAlignment="Left" VerticalAlignment="Stretch"
+                    Orientation="Horizontal" IsHitTestVisible="False" Background="{x:Null}">
+                <skp:Svg Path="/Assets/axis.svg" Margin="4" Width="16" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding $parent[Window].Title}" VerticalAlignment="Center" FontSize="14"/>
+            </StackPanel>
+            <Panel>
+                <DockPanel>
+                    <ListBox DockPanel.Dock="Top">
+                        <ListBoxItem Name="StatusListBoxItem" IsSelected="true">
+                            <skp:Svg Path="/Assets/status.svg" Margin="4" Width="32"/>
+                        </ListBoxItem>
+                        <ListBoxItem Name="PeersListBoxItem">
+                            <skp:Svg Path="/Assets/peers.svg" Margin="4" Width="32"/>
+                        </ListBoxItem>
+                        <ListBoxItem Name="ChatListBoxItem">
+                            <skp:Svg Path="/Assets/chat.svg" Margin="4" Width="32"/>
+                        </ListBoxItem>
+                        <ListBoxItem Name="SearchListBoxItem">
+                            <skp:Svg Path="/Assets/search.svg" Margin="4" Width="32"/>
+                        </ListBoxItem>
+                        <ListBoxItem Name="DownloadListBoxItem">
+                            <skp:Svg Path="/Assets/download.svg" Margin="4" Width="32"/>
+                        </ListBoxItem>
+                        <ListBoxItem Name="UploadListBoxItem">
+                            <skp:Svg Path="/Assets/upload.svg" Margin="4" Width="32"/>
+                        </ListBoxItem>
+                    </ListBox>
+                    <Button VerticalAlignment="Bottom" Command="{Binding SettingsCommand}" Padding="4">
+                        <skp:Svg Path="/Assets/settings.svg" Margin="4" Width="32"/>
+                    </Button>
+                </DockPanel>
+            </Panel>
+            <Panel DockPanel.Dock="Right">
+                <local:StatusControl IsVisible="{Binding #StatusListBoxItem.IsSelected}" DataContext="{Binding StatusControlViewModel}" />
+                <local:PeersControl IsVisible="{Binding #PeersListBoxItem.IsSelected}" DataContext="{Binding PeersControlViewModel}" />
+                <local:DownloadControl IsVisible="{Binding #DownloadListBoxItem.IsSelected}" DataContext="{Binding DownloadControlViewModel}" />
+                <local:UploadControl IsVisible="{Binding #UploadListBoxItem.IsSelected}" DataContext="{Binding UploadControlViewModel}" />
+            </Panel>
+        </DockPanel>
+    </Panel>
 </Window>

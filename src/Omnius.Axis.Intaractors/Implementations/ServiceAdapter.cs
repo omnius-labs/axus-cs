@@ -38,6 +38,12 @@ public sealed class ServiceAdapter : IServiceAdapter
         return output.NodeLocation;
     }
 
+    public async ValueTask<IEnumerable<NodeLocation>> GetCloudNodeLocationsAsync(CancellationToken cancellationToken = default)
+    {
+        var output = await _axisService.GetCloudNodeLocationsAsync(cancellationToken);
+        return output.NodeLocations;
+    }
+
     public async ValueTask AddCloudNodeLocationsAsync(IEnumerable<NodeLocation> nodeLocations, CancellationToken cancellationToken = default)
     {
         var input = new AddCloudNodeLocationsRequest(nodeLocations.ToArray());

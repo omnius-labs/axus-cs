@@ -80,6 +80,11 @@
         "resolved": "3.1.0",
         "contentHash": "EYNPz9ZIHdoLSL4hK/86zjBZzHhvZoRdsSWhifEgCoBmKnVa7G+O5iAFbPFkxs1ZXD8d2dzewMs6x2jyxBdU4Q=="
       },
+      "Newtonsoft.Json": {
+        "type": "Transitive",
+        "resolved": "13.0.1",
+        "contentHash": "ppPFpBcvxdsfUonNcvITKqLl3bqxWbDCZIzDWHzjpdAHRFfZe0Dw9HmA0+za13IdyrgJwpkDTDA9fHaxOrt20A=="
+      },
       "Sprache": {
         "type": "Transitive",
         "resolved": "2.3.1",
@@ -251,6 +256,11 @@
           "System.Runtime": "4.3.0"
         }
       },
+      "YamlDotNet": {
+        "type": "Transitive",
+        "resolved": "11.2.1",
+        "contentHash": "tBt8K+korVfrjH9wyDEhiLKxbs8qoLCLIFwvYgkSUuMC9//w3z0cFQ8LQAI/5MCKq+BMil0cfRTRvPeE7eXhQw=="
+      },
       "omnius.axis.models": {
         "type": "Project",
         "dependencies": {
@@ -262,7 +272,8 @@
           "Omnius.Core.Net": "0.0.1-alpha.1",
           "Omnius.Core.Pipelines": "0.0.1-alpha.1",
           "Omnius.Core.RocketPack": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack.Remoting": "0.0.1-alpha.1"
+          "Omnius.Core.RocketPack.Remoting": "0.0.1-alpha.1",
+          "Omnius.Core.Utils": "0.0.1-alpha.1"
         }
       },
       "omnius.axis.utils": {
@@ -417,6 +428,14 @@
         "dependencies": {
           "NLog": "4.7.11",
           "Omnius.Core": "0.0.1-alpha.1"
+        }
+      },
+      "omnius.core.utils": {
+        "type": "Project",
+        "dependencies": {
+          "NLog": "4.7.11",
+          "Newtonsoft.Json": "13.0.1",
+          "YamlDotNet": "11.2.1"
         }
       }
     },

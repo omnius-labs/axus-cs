@@ -16,7 +16,7 @@
 
     <Grid RowDefinitions="Auto,*">
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="12">
-            <Button Content="Register" Command="{Binding RegisterCommand}"/>
+            <Button Content="Register" Command="{Binding RegisterCommand}" Width="120"/>
         </StackPanel>
         <ListBox
             Grid.Row="1"
@@ -28,7 +28,7 @@
                 <ContextMenu>
                     <MenuItem Command="{Binding ItemDeleteCommand}" Header="Delete"/>
                     <MenuItem Header="Copy As">
-                        <MenuItem Command="{Binding ItemCopySeedCommand}" Header="Copy Seed"/>
+                        <MenuItem Command="{Binding ItemCopySignatureCommand}" Header="Copy Signature"/>
                     </MenuItem>
                 </ContextMenu>
             </ListBox.ContextMenu>

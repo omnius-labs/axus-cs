@@ -5,6 +5,7 @@ using Omnius.Axis.Models;
 using Omnius.Axis.Remoting;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
+using Omnius.Core.Helpers;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Connections;
 using Omnius.Core.Net.Proxies;
@@ -20,7 +21,7 @@ public class AxisService : AsyncDisposableBase, IAxisService
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
     private readonly string _databaseDirectoryPath;
-    private ISingleValueStorage _configStorage = null!;
+    private readonly string _configPath;
 
     private ISessionConnector _sessionConnector = null!;
     private ISessionAccepter _sessionAccepter = null!;
@@ -46,27 +47,26 @@ public class AxisService : AsyncDisposableBase, IAxisService
     private AxisService(string databaseDirectoryPath)
     {
         _databaseDirectoryPath = databaseDirectoryPath;
+        DirectoryHelper.CreateDirectory(_databaseDirectoryPath);
+
+        _configPath = Path.Combine(_databaseDirectoryPath, "config.yaml");
     }
 
     private async ValueTask InitAsync(CancellationToken cancellationToken = default)
     {
-        _configStorage = SingleValueFileStorage.Factory.Create(Path.Combine(_databaseDirectoryPath, "config"), BytesPool.Shared);
-
         await this.StartAsync(cancellationToken);
     }
 
     protected override async ValueTask OnDisposeAsync()
     {
         await this.StopAsync();
-
-        _configStorage.Dispose();
     }
 
     public async ValueTask<GetConfigResult> GetConfigAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var config = await this.LoadConfigAsync(cancellationToken);
+            var config = await this.InternalLoadConfigAsync(cancellationToken);
             return new GetConfigResult(config);
         }
     }
@@ -75,7 +75,7 @@ public class AxisService : AsyncDisposableBase, IAxisService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await this.SaveConfigAsync(param.Config, cancellationToken);
+            await this.InternalSaveConfigAsync(param.Config, cancellationToken);
 
             await this.StopAsync(cancellationToken);
             await this.StartAsync(cancellationToken);
@@ -84,7 +84,7 @@ public class AxisService : AsyncDisposableBase, IAxisService
 
     private async ValueTask StartAsync(CancellationToken cancellationToken = default)
     {
-        var config = await this.LoadConfigAsync(cancellationToken);
+        var config = await this.InternalLoadConfigAsync(cancellationToken);
 
         var digitalSignature = OmniDigitalSignature.Create(Guid.NewGuid().ToString("N"), OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256);
 
@@ -96,7 +96,7 @@ public class AxisService : AsyncDisposableBase, IAxisService
 
         var connectionConnectors = new List<IConnectionConnector>();
 
-        if (config.TcpConnector is TcpConnectorConfig tcpConnectorConfig)
+        if (config.TcpConnector is TcpConnectorConfig tcpConnectorConfig && tcpConnectorConfig.IsEnabled)
         {
             var tcpProxyType = tcpConnectorConfig.Proxy?.Type switch
             {
@@ -117,7 +117,7 @@ public class AxisService : AsyncDisposableBase, IAxisService
 
         var connectionAccepters = new List<IConnectionAccepter>();
 
-        if (config.TcpAccepter is TcpAccepterConfig tcpAccepterConfig)
+        if (config.TcpAccepter is TcpAccepterConfig tcpAccepterConfig && tcpAccepterConfig.IsEnabled)
         {
             var useUpnp = tcpAccepterConfig.UseUpnp;
             var listenAddress = tcpAccepterConfig.ListenAddress;
@@ -217,9 +217,15 @@ public class AxisService : AsyncDisposableBase, IAxisService
         _disposables.Clear();
     }
 
-    private async ValueTask<ServiceConfig> LoadConfigAsync(CancellationToken cancellationToken = default)
+    private async ValueTask<ServiceConfig> InternalLoadConfigAsync(CancellationToken cancellationToken = default)
     {
-        var config = await _configStorage.TryGetValueAsync<ServiceConfig>(cancellationToken);
+        ServiceConfig? config = null;
+
+        if (File.Exists(_configPath))
+        {
+            using var stream = new FileStream(_configPath, FileMode.Open);
+            config = ServiceConfig.Import(stream);
+        }
 
         if (config is null)
         {
@@ -228,20 +234,24 @@ public class AxisService : AsyncDisposableBase, IAxisService
                     maxSendBytesPerSeconds: 1024 * 1024 * 32,
                     maxReceiveBytesPerSeconds: 1024 * 1024 * 32),
                 tcpConnector: new TcpConnectorConfig(
+                    isEnabled: true,
                     proxy: null),
                 tcpAccepter: new TcpAccepterConfig(
+                    isEnabled: true,
                     useUpnp: true,
                     listenAddress: OmniAddress.CreateTcpEndpoint(IPAddress.Any, (ushort)Random.Shared.Next(10000, 60000))));
 
-            await _configStorage.TrySetValueAsync(config, cancellationToken);
+            using var stream = new FileStream(_configPath, FileMode.OpenOrCreate);
+            config.Export(stream);
         }
 
         return config;
     }
 
-    private async ValueTask SaveConfigAsync(ServiceConfig config, CancellationToken cancellationToken = default)
+    private async ValueTask InternalSaveConfigAsync(ServiceConfig config, CancellationToken cancellationToken = default)
     {
-        await _configStorage.TrySetValueAsync(config, cancellationToken);
+        using var stream = new FileStream(_configPath, FileMode.OpenOrCreate);
+        config.Export(stream);
     }
 
     public async ValueTask<GetSessionsReportResult> GetSessionsReportAsync(CancellationToken cancellationToken = default)
@@ -298,6 +308,15 @@ public class AxisService : AsyncDisposableBase, IAxisService
         {
             var myNodeLocation = await _nodeFinder.GetMyNodeLocationAsync(cancellationToken);
             return new GetMyNodeLocationResult(myNodeLocation);
+        }
+    }
+
+    public async ValueTask<GetCloudNodeLocationsResult> GetCloudNodeLocationsAsync(CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
+            var cloudNodeLocations = await _nodeFinder.GetCloudNodeLocationsAsync(cancellationToken);
+            return new GetCloudNodeLocationsResult(cloudNodeLocations.ToArray());
         }
     }
 

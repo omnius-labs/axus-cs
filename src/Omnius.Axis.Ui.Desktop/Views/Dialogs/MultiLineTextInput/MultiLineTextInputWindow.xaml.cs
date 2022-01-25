@@ -26,9 +26,9 @@ public partial class MultiLineTextInputWindow : StatefulWindowBase<MultiLineText
 
     public string? GetResult() => _result;
 
-    private void OnViewModelChanged(MultiLineTextInputWindowViewModelBase? vm)
+    private void OnViewModelChanged(MultiLineTextInputWindowViewModelBase? viewModel)
     {
-        if (vm?.Status is MultiLineTextInputWindowStatus status)
+        if (viewModel?.Status is MultiLineTextInputWindowStatus status)
         {
             this.SetWindowStatus(status.Window);
         }

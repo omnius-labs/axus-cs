@@ -13,6 +13,7 @@ public class StatusControlViewModel : AsyncDisposableBase
 
     private readonly IIntaractorProvider _intaractorAdapter;
     private readonly IClipboardService _clipboardService;
+    private readonly INodesFetcher _nodesFetcher;
 
     private readonly Task _refreshTask;
 
@@ -20,10 +21,11 @@ public class StatusControlViewModel : AsyncDisposableBase
 
     private readonly CompositeDisposable _disposable = new();
 
-    public StatusControlViewModel(IIntaractorProvider intaractorAdapter, IClipboardService clipboardService)
+    public StatusControlViewModel(IIntaractorProvider intaractorAdapter, IClipboardService clipboardService, INodesFetcher nodesFetcher)
     {
         _intaractorAdapter = intaractorAdapter;
         _clipboardService = clipboardService;
+        _nodesFetcher = nodesFetcher;
 
         this.MyNodeLocation = new ReactiveProperty<string>().AddTo(_disposable);
         this.CopyMyNodeLocationCommand = new ReactiveCommand().AddTo(_disposable);
@@ -68,6 +70,14 @@ public class StatusControlViewModel : AsyncDisposableBase
                 {
                     this.MyNodeLocation.Value = AxisMessage.NodeToString(myNodeLocation);
                 });
+
+                var cloudNodeLocations = await serviceAdapter.GetCloudNodeLocationsAsync(cancellationToken);
+
+                if (cloudNodeLocations.Count() == 0)
+                {
+                    var fetchedNodeLocations = await _nodesFetcher.FetchAsync(cancellationToken);
+                    await serviceAdapter.AddCloudNodeLocationsAsync(fetchedNodeLocations, cancellationToken);
+                }
             }
         }
         catch (OperationCanceledException e)

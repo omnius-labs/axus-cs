@@ -62,7 +62,7 @@ public sealed partial class TcpConnectionConnector : AsyncDisposableBase, IConne
         if (!address.TryGetTcpEndpoint(out var ipAddress, out ushort port)) return null;
 
 #if !DEBUG
-        if (Internal.IpAddressHelper.IsGlobalIpAddress(ipAddress)) return null;
+        if (!Internal.IpAddressHelper.IsGlobalIpAddress(ipAddress)) return null;
 #endif
 
         var disposableList = new List<IDisposable>();

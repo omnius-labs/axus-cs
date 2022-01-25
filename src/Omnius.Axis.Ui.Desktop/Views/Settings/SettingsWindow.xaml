@@ -1,83 +1,112 @@
-<Window x:Class="Omnius.Axis.Ui.Desktop.Views.Settings.SettingsWindow"
+<Window
+    x:Class="Omnius.Axis.Ui.Desktop.Views.Settings.SettingsWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
     xmlns:local="clr-namespace:Omnius.Axis.Ui.Desktop.Views.Settings"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:skp="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia"
     Title="Settings"
-    FontFamily="Meiryo UI, Lucida Grande, Ubuntu"
+    d:DesignHeight="500"
+    d:DesignWidth="800"
     x:CompileBindings="True"
     x:DataType="local:SettingsWindowViewModelBase"
-    mc:Ignorable="d"
-    d:DesignWidth="800"
-    d:DesignHeight="500" >
+    Background="{x:Null}"
+    ExtendClientAreaTitleBarHeightHint="-1"
+    ExtendClientAreaToDecorationsHint="True"
+    ExtendClientAreaChromeHints="PreferSystemChrome"
+    FontFamily="Meiryo UI, Lucida Grande, Ubuntu"
+    TransparencyLevelHint="AcrylicBlur"
+    mc:Ignorable="d">
 
-    <Grid RowDefinitions="*,Auto" Background="{DynamicResource ThemeControlMidColor}">
-        <Grid ColumnDefinitions="Auto,*" Background="Transparent">
-            <TreeView Background="Transparent">
-                <TreeViewItem Name="ProfileTreeViewItem" Header="Profile" IsExpanded="True" IsSelected="True">
-                    <TreeViewItem Name="TrustedSignaturesTreeViewItem" Header="Trusted Signatures" />
-                    <TreeViewItem Name="BlockedSignaturesTreeViewItem" Header="Ignored Signatures" />
-                </TreeViewItem>
-                <TreeViewItem Name="FileTreeViewItem" Header="File" />
-                <TreeViewItem Name="ServiceTreeViewItem" Header="Service" IsExpanded="True">
-                    <TreeViewItem Name="BandwidthTreeViewItem" Header="Bandwidth" />
-                    <TreeViewItem Name="TcpConnectorTreeViewItem" Header="TcpConnector" />
-                    <TreeViewItem Name="TcpAccepterTreeViewItem" Header="TcpAccepter" />
-                </TreeViewItem>
-            </TreeView>
-            <Grid Grid.Column="1" Background="{DynamicResource ThemeControlLowColor}" >
-                <!-- Profile -->
-                <Grid IsVisible="{Binding #ProfileTreeViewItem.IsSelected}" VerticalAlignment="Top">
-                    <StackPanel Orientation="Vertical" Margin="12">
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <Label Content="Signature" />
-                            <TextBox Text="{Binding DownloadDirectory.Value}" TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
-                            <Button Content="New" />
-                            <Button Content="Import" />
-                            <Button Content="Export" />
-                        </StackPanel>
-                    </StackPanel>
+    <Design.DataContext>
+        <local:SettingsWindowDesignViewModel />
+    </Design.DataContext>
+
+    <Panel Margin="{Binding $parent[Window].OffScreenMargin}">
+        <ExperimentalAcrylicBorder IsHitTestVisible="False">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
+        <DockPanel>
+            <StackPanel Height="30" DockPanel.Dock="Top" HorizontalAlignment="Left" VerticalAlignment="Stretch"
+                    Orientation="Horizontal" IsHitTestVisible="False" Background="{x:Null}">
+                <skp:Svg Path="/Assets/axis.svg" Margin="4" Width="16" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding $parent[Window].Title}" VerticalAlignment="Center" FontSize="14"/>
+            </StackPanel>
+            <Grid RowDefinitions="*,Auto" Background="{DynamicResource ThemeControlMidColor}">
+                <Grid ColumnDefinitions="Auto,*" Background="Transparent">
+                    <TreeView Background="Transparent">
+                        <TreeViewItem Name="ProfileTreeViewItem" Header="Profile" IsExpanded="True" IsSelected="True">
+                            <TreeViewItem Name="TrustedSignaturesTreeViewItem" Header="Trusted Signatures" />
+                            <TreeViewItem Name="BlockedSignaturesTreeViewItem" Header="Ignored Signatures" />
+                        </TreeViewItem>
+                        <TreeViewItem Name="FileTreeViewItem" Header="File" IsExpanded="True">
+                            <TreeViewItem Name="DownloadTreeViewItem" Header="Download" />
+                        </TreeViewItem>
+                        <TreeViewItem Name="ServiceTreeViewItem" Header="Service" IsExpanded="True">
+                            <TreeViewItem Name="BandwidthTreeViewItem" Header="Bandwidth" />
+                            <TreeViewItem Name="TcpConnectorTreeViewItem" Header="TcpConnector" />
+                            <TreeViewItem Name="TcpAccepterTreeViewItem" Header="TcpAccepter" />
+                        </TreeViewItem>
+                    </TreeView>
+                    <Grid Grid.Column="1" Background="{DynamicResource ThemeControlLowColor}" Margin="12" >
+                        <!-- Profile -->
+                        <Grid IsVisible="{Binding #ProfileTreeViewItem.IsSelected}">
+                            <StackPanel Orientation="Vertical">
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <Label Content="Signature" VerticalAlignment="Center" />
+                                    <TextBox Text="{Binding DownloadDirectory.Value}" VerticalAlignment="Center" Width="300"
+                                            TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
+                                    <Button Content="New" VerticalAlignment="Center" MinWidth="120" />
+                                    <Button Content="Import" VerticalAlignment="Center" MinWidth="120" />
+                                    <Button Content="Export" VerticalAlignment="Center" MinWidth="120" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                        <!-- TrustedSignatures -->
+                        <Grid IsVisible="{Binding #TrustedSignaturesTreeViewItem.IsSelected}" VerticalAlignment="Top">
+                            <local:SignaturesControl DataContext="{Binding TrustedSignaturesControlViewModel}" />
+                        </Grid>
+                        <!-- BlockedSignatures -->
+                        <Grid IsVisible="{Binding #BlockedSignaturesTreeViewItem.IsSelected}" VerticalAlignment="Top">
+                            <local:SignaturesControl DataContext="{Binding BlockedSignaturesControlViewModel}" />
+                        </Grid>
+                        <!-- File -->
+                        <Grid IsVisible="{Binding #FileTreeViewItem.IsSelected}" VerticalAlignment="Top">
+                        </Grid>
+                        <!-- Download -->
+                        <Grid IsVisible="{Binding #DownloadTreeViewItem.IsSelected}" VerticalAlignment="Top">
+                            <StackPanel Orientation="Vertical">
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <Label Content="Download directory" VerticalAlignment="Center" />
+                                    <TextBox Text="{Binding DownloadDirectory.Value}" VerticalAlignment="Center" Width="300"
+                                            TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
+                                    <Button Content="Open" Command="{Binding EditDownloadDirectoryCommand}" VerticalAlignment="Center" MinWidth="120" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                        <!-- Service -->
+                        <Grid IsVisible="{Binding #ServiceTreeViewItem.IsSelected}" VerticalAlignment="Top">
+                        </Grid>
+                        <Grid IsVisible="{Binding #BandwidthTreeViewItem.IsSelected}" VerticalAlignment="Top">
+                        </Grid>
+                        <Grid IsVisible="{Binding #TcpConnectorTreeViewItem.IsSelected}" VerticalAlignment="Top">
+                        </Grid>
+                        <Grid IsVisible="{Binding #TcpAccepterTreeViewItem.IsSelected}" VerticalAlignment="Top">
+                        </Grid>
+                    </Grid>
                 </Grid>
-                <Grid IsVisible="{Binding #TrustedSignaturesTreeViewItem.IsSelected}" VerticalAlignment="Top">
-                    <local:SignaturesControl DataContext="{Binding TrustedSignaturesControlViewModel}" />
-                </Grid>
-                <Grid IsVisible="{Binding #BlockedSignaturesTreeViewItem.IsSelected}" VerticalAlignment="Top">
-                    <local:SignaturesControl DataContext="{Binding BlockedSignaturesControlViewModel}" />
-                </Grid>
-                <!-- File -->
-                <Grid IsVisible="{Binding #FileTreeViewItem.IsSelected}" VerticalAlignment="Top">
-                    <StackPanel Orientation="Vertical" Margin="12">
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <Label Content="Download directory" />
-                            <TextBox Text="{Binding DownloadDirectory.Value}" TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
-                            <Button Content="Open" Command="{Binding EditDownloadDirectoryCommand} "/>
-                        </StackPanel>
-                    </StackPanel>
-                </Grid>
-                <!-- Service -->
-                <Grid IsVisible="{Binding #BandwidthTreeViewItem.IsSelected}" VerticalAlignment="Top">
-                </Grid>
-                <Grid IsVisible="{Binding #TcpConnectorTreeViewItem.IsSelected}" VerticalAlignment="Top">
-                </Grid>
-                <Grid IsVisible="{Binding #TcpAccepterTreeViewItem.IsSelected}" VerticalAlignment="Top">
-                    <StackPanel Orientation="Vertical" Margin="12">
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <Label Content="Use upnp" />
-                            <TextBox Text="{Binding DownloadDirectory.Value}" TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
-                            <ToggleButton Content="Open" Command="{Binding EditDownloadDirectoryCommand} "/>
-                        </StackPanel>
+                <Grid Grid.Row="1" Background="Transparent">
+                    <StackPanel Grid.Row="1" Margin="12" Spacing="12" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Ok" Command="{Binding OkCommand}" CommandParameter="{Binding $parent[Window]}" MinWidth="120" />
+                        <Button Content="Cancel" Command="{Binding CancelCommand}" CommandParameter="{Binding $parent[Window]}" MinWidth="120" />
                     </StackPanel>
                 </Grid>
             </Grid>
-        </Grid>
-        <Grid Grid.Row="1" Background="Transparent">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="12" Spacing="12" Background="Transparent">
-                <Button Content="Ok" Command="{Binding OkCommand}" CommandParameter="{Binding $parent[Window]}" />
-                <Button Content="Cancel" Command="{Binding CancelCommand}" CommandParameter="{Binding $parent[Window]}" />
-            </StackPanel>
-        </Grid>
-    </Grid>
+        </DockPanel>
+    </Panel>
 </Window>

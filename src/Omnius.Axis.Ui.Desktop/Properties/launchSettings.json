@@ -1,0 +1,9 @@
+{
+    "profiles": {
+        "Omnius.Axis.Ui.Desktop": {
+            "commandName": "Project",
+            "commandLineArgs": "\"-s\" \"./storage/ui-desktop\" \"-l\" \"tcp(ip4(127.0.0.1),43200)\" \"-v\" \"true\"",
+            "workingDirectory": "../../demo/0"
+        }
+    }
+}

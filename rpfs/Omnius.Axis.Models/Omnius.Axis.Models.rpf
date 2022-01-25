@@ -43,7 +43,7 @@ enum SessionHandshakeType : uint8 {
 // Config
 
 message ServiceConfig {
-    Bandwidth: BandwidthConfig,
+    Bandwidth: BandwidthConfig?,
     TcpConnector: TcpConnectorConfig?,
     TcpAccepter: TcpAccepterConfig?,
 }
@@ -54,6 +54,7 @@ message BandwidthConfig {
 }
 
 message TcpConnectorConfig {
+    IsEnabled: bool,
     Proxy: TcpProxyConfig?,
 }
 
@@ -69,6 +70,7 @@ enum TcpProxyType : uint8 {
 }
 
 message TcpAccepterConfig {
+    IsEnabled: bool,
     UseUpnp: bool,
     ListenAddress: OmniAddress,
 }

@@ -52,6 +52,7 @@ public partial class Bootstrapper : AsyncDisposableBase
             serviceCollection.AddSingleton<IMainWindowProvider, MainWindowProvider>();
             serviceCollection.AddSingleton<IClipboardService, ClipboardService>();
             serviceCollection.AddSingleton<IDialogService, DialogService>();
+            serviceCollection.AddSingleton<INodesFetcher, NodesFetcher>();
 
             serviceCollection.AddTransient<MainWindowViewModel>();
             serviceCollection.AddTransient<SettingsWindowViewModel>();

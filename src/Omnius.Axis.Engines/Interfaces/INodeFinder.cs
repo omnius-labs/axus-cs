@@ -8,6 +8,8 @@ public interface INodeFinder : IAsyncDisposable
 
     ValueTask<IEnumerable<SessionReport>> GetSessionReportsAsync(CancellationToken cancellationToken = default);
 
+    ValueTask<IEnumerable<NodeLocation>> GetCloudNodeLocationsAsync(CancellationToken cancellationToken);
+
     ValueTask<NodeLocation> GetMyNodeLocationAsync(CancellationToken cancellationToken = default);
 
     ValueTask AddCloudNodeLocationsAsync(IEnumerable<NodeLocation> nodeLocations, CancellationToken cancellationToken = default);

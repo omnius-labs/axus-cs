@@ -325,7 +325,8 @@
           "Omnius.Core.Net": "0.0.1-alpha.1",
           "Omnius.Core.Pipelines": "0.0.1-alpha.1",
           "Omnius.Core.RocketPack": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack.Remoting": "0.0.1-alpha.1"
+          "Omnius.Core.RocketPack.Remoting": "0.0.1-alpha.1",
+          "Omnius.Core.Utils": "0.0.1-alpha.1"
         }
       },
       "omnius.axis.remoting": {

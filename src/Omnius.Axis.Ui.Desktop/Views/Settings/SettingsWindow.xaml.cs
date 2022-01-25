@@ -22,9 +22,9 @@ public class SettingsWindow : StatefulWindowBase<SettingsWindowViewModelBase>
         AvaloniaXamlLoader.Load(this);
     }
 
-    private void OnViewModelChanged(SettingsWindowViewModelBase? vm)
+    private void OnViewModelChanged(SettingsWindowViewModelBase? viewModel)
     {
-        if (vm?.Status is SettingsWindowStatus status)
+        if (viewModel?.Status is SettingsWindowStatus status)
         {
             this.SetWindowStatus(status.Window);
         }

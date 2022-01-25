@@ -91,10 +91,6 @@ public class SettingsWindowViewModel : SettingsWindowViewModelBase
 
     private async ValueTask LoadAsync(CancellationToken cancellationToken = default)
     {
-        // Service
-        var serviceAdapter = await _intaractorAdapter.GetServiceAdapterAsync(cancellationToken);
-        var serviceConfig = await serviceAdapter.GetConfigAsync(cancellationToken);
-
         // ProfileSubscriber
         var profileSubscriber = await _intaractorAdapter.GetProfileSubscriberAsync(cancellationToken);
         var profileSubscriberConfig = await profileSubscriber.GetConfigAsync(cancellationToken);

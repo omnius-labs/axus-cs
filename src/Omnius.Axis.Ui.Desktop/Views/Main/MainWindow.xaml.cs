@@ -22,9 +22,9 @@ public partial class MainWindow : StatefulWindowBase<MainWindowViewModelBase>
         AvaloniaXamlLoader.Load(this);
     }
 
-    private void OnViewModelChanged(MainWindowViewModelBase? vm)
+    private void OnViewModelChanged(MainWindowViewModelBase? viewModel)
     {
-        if (vm?.Status is MainWindowStatus status)
+        if (viewModel?.Status is MainWindowStatus status)
         {
             this.SetWindowStatus(status.Window);
         }

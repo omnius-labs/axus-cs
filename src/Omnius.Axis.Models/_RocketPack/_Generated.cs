@@ -661,14 +661,13 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
     static ServiceConfig()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.ServiceConfig>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.ServiceConfig>.Empty = new global::Omnius.Axis.Models.ServiceConfig(global::Omnius.Axis.Models.BandwidthConfig.Empty, null, null);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.ServiceConfig>.Empty = new global::Omnius.Axis.Models.ServiceConfig(null, null, null);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public ServiceConfig(global::Omnius.Axis.Models.BandwidthConfig bandwidth, global::Omnius.Axis.Models.TcpConnectorConfig? tcpConnector, global::Omnius.Axis.Models.TcpAccepterConfig? tcpAccepter)
+    public ServiceConfig(global::Omnius.Axis.Models.BandwidthConfig? bandwidth, global::Omnius.Axis.Models.TcpConnectorConfig? tcpConnector, global::Omnius.Axis.Models.TcpAccepterConfig? tcpAccepter)
     {
-        if (bandwidth is null) throw new global::System.ArgumentNullException("bandwidth");
         this.Bandwidth = bandwidth;
         this.TcpConnector = tcpConnector;
         this.TcpAccepter = tcpAccepter;
@@ -683,7 +682,7 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
         });
     }
 
-    public global::Omnius.Axis.Models.BandwidthConfig Bandwidth { get; }
+    public global::Omnius.Axis.Models.BandwidthConfig? Bandwidth { get; }
     public global::Omnius.Axis.Models.TcpConnectorConfig? TcpConnector { get; }
     public global::Omnius.Axis.Models.TcpAccepterConfig? TcpAccepter { get; }
 
@@ -715,7 +714,8 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
-        if (this.Bandwidth != target.Bandwidth) return false;
+        if ((this.Bandwidth is null) != (target.Bandwidth is null)) return false;
+        if ((this.Bandwidth is not null) && (target.Bandwidth is not null) && this.Bandwidth != target.Bandwidth) return false;
         if ((this.TcpConnector is null) != (target.TcpConnector is null)) return false;
         if ((this.TcpConnector is not null) && (target.TcpConnector is not null) && this.TcpConnector != target.TcpConnector) return false;
         if ((this.TcpAccepter is null) != (target.TcpAccepter is null)) return false;
@@ -731,7 +731,7 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            if (value.Bandwidth != global::Omnius.Axis.Models.BandwidthConfig.Empty)
+            if (value.Bandwidth != null)
             {
                 w.Write((uint)1);
                 global::Omnius.Axis.Models.BandwidthConfig.Formatter.Serialize(ref w, value.Bandwidth, rank + 1);
@@ -752,7 +752,7 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            global::Omnius.Axis.Models.BandwidthConfig p_bandwidth = global::Omnius.Axis.Models.BandwidthConfig.Empty;
+            global::Omnius.Axis.Models.BandwidthConfig? p_bandwidth = null;
             global::Omnius.Axis.Models.TcpConnectorConfig? p_tcpConnector = null;
             global::Omnius.Axis.Models.TcpAccepterConfig? p_tcpAccepter = null;
 
@@ -905,23 +905,26 @@ public sealed partial class TcpConnectorConfig : global::Omnius.Core.RocketPack.
     static TcpConnectorConfig()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.TcpConnectorConfig>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.TcpConnectorConfig>.Empty = new global::Omnius.Axis.Models.TcpConnectorConfig(null);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.TcpConnectorConfig>.Empty = new global::Omnius.Axis.Models.TcpConnectorConfig(false, null);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public TcpConnectorConfig(global::Omnius.Axis.Models.TcpProxyConfig? proxy)
+    public TcpConnectorConfig(bool isEnabled, global::Omnius.Axis.Models.TcpProxyConfig? proxy)
     {
+        this.IsEnabled = isEnabled;
         this.Proxy = proxy;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
+            if (isEnabled != default) ___h.Add(isEnabled.GetHashCode());
             if (proxy != default) ___h.Add(proxy.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
+    public bool IsEnabled { get; }
     public global::Omnius.Axis.Models.TcpProxyConfig? Proxy { get; }
 
     public static global::Omnius.Axis.Models.TcpConnectorConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -952,6 +955,7 @@ public sealed partial class TcpConnectorConfig : global::Omnius.Core.RocketPack.
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
+        if (this.IsEnabled != target.IsEnabled) return false;
         if ((this.Proxy is null) != (target.Proxy is null)) return false;
         if ((this.Proxy is not null) && (target.Proxy is not null) && this.Proxy != target.Proxy) return false;
 
@@ -965,9 +969,14 @@ public sealed partial class TcpConnectorConfig : global::Omnius.Core.RocketPack.
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            if (value.Proxy != null)
+            if (value.IsEnabled != false)
             {
                 w.Write((uint)1);
+                w.Write(value.IsEnabled);
+            }
+            if (value.Proxy != null)
+            {
+                w.Write((uint)2);
                 global::Omnius.Axis.Models.TcpProxyConfig.Formatter.Serialize(ref w, value.Proxy, rank + 1);
             }
             w.Write((uint)0);
@@ -976,6 +985,7 @@ public sealed partial class TcpConnectorConfig : global::Omnius.Core.RocketPack.
         {
             if (rank > 256) throw new global::System.FormatException();
 
+            bool p_isEnabled = false;
             global::Omnius.Axis.Models.TcpProxyConfig? p_proxy = null;
 
             for (; ; )
@@ -986,13 +996,18 @@ public sealed partial class TcpConnectorConfig : global::Omnius.Core.RocketPack.
                 {
                     case 1:
                         {
+                            p_isEnabled = r.GetBoolean();
+                            break;
+                        }
+                    case 2:
+                        {
                             p_proxy = global::Omnius.Axis.Models.TcpProxyConfig.Formatter.Deserialize(ref r, rank + 1);
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axis.Models.TcpConnectorConfig(p_proxy);
+            return new global::Omnius.Axis.Models.TcpConnectorConfig(p_isEnabled, p_proxy);
         }
     }
 }
@@ -1119,27 +1134,30 @@ public sealed partial class TcpAccepterConfig : global::Omnius.Core.RocketPack.I
     static TcpAccepterConfig()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.TcpAccepterConfig>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.TcpAccepterConfig>.Empty = new global::Omnius.Axis.Models.TcpAccepterConfig(false, global::Omnius.Core.Net.OmniAddress.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.TcpAccepterConfig>.Empty = new global::Omnius.Axis.Models.TcpAccepterConfig(false, false, global::Omnius.Core.Net.OmniAddress.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public TcpAccepterConfig(bool useUpnp, global::Omnius.Core.Net.OmniAddress listenAddress)
+    public TcpAccepterConfig(bool isEnabled, bool useUpnp, global::Omnius.Core.Net.OmniAddress listenAddress)
     {
         if (listenAddress is null) throw new global::System.ArgumentNullException("listenAddress");
 
+        this.IsEnabled = isEnabled;
         this.UseUpnp = useUpnp;
         this.ListenAddress = listenAddress;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
+            if (isEnabled != default) ___h.Add(isEnabled.GetHashCode());
             if (useUpnp != default) ___h.Add(useUpnp.GetHashCode());
             if (listenAddress != default) ___h.Add(listenAddress.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
+    public bool IsEnabled { get; }
     public bool UseUpnp { get; }
     public global::Omnius.Core.Net.OmniAddress ListenAddress { get; }
 
@@ -1171,6 +1189,7 @@ public sealed partial class TcpAccepterConfig : global::Omnius.Core.RocketPack.I
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
+        if (this.IsEnabled != target.IsEnabled) return false;
         if (this.UseUpnp != target.UseUpnp) return false;
         if (this.ListenAddress != target.ListenAddress) return false;
 
@@ -1184,14 +1203,19 @@ public sealed partial class TcpAccepterConfig : global::Omnius.Core.RocketPack.I
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            if (value.UseUpnp != false)
+            if (value.IsEnabled != false)
             {
                 w.Write((uint)1);
+                w.Write(value.IsEnabled);
+            }
+            if (value.UseUpnp != false)
+            {
+                w.Write((uint)2);
                 w.Write(value.UseUpnp);
             }
             if (value.ListenAddress != global::Omnius.Core.Net.OmniAddress.Empty)
             {
-                w.Write((uint)2);
+                w.Write((uint)3);
                 global::Omnius.Core.Net.OmniAddress.Formatter.Serialize(ref w, value.ListenAddress, rank + 1);
             }
             w.Write((uint)0);
@@ -1200,6 +1224,7 @@ public sealed partial class TcpAccepterConfig : global::Omnius.Core.RocketPack.I
         {
             if (rank > 256) throw new global::System.FormatException();
 
+            bool p_isEnabled = false;
             bool p_useUpnp = false;
             global::Omnius.Core.Net.OmniAddress p_listenAddress = global::Omnius.Core.Net.OmniAddress.Empty;
 
@@ -1211,10 +1236,15 @@ public sealed partial class TcpAccepterConfig : global::Omnius.Core.RocketPack.I
                 {
                     case 1:
                         {
-                            p_useUpnp = r.GetBoolean();
+                            p_isEnabled = r.GetBoolean();
                             break;
                         }
                     case 2:
+                        {
+                            p_useUpnp = r.GetBoolean();
+                            break;
+                        }
+                    case 3:
                         {
                             p_listenAddress = global::Omnius.Core.Net.OmniAddress.Formatter.Deserialize(ref r, rank + 1);
                             break;
@@ -1222,7 +1252,7 @@ public sealed partial class TcpAccepterConfig : global::Omnius.Core.RocketPack.I
                 }
             }
 
-            return new global::Omnius.Axis.Models.TcpAccepterConfig(p_useUpnp, p_listenAddress);
+            return new global::Omnius.Axis.Models.TcpAccepterConfig(p_isEnabled, p_useUpnp, p_listenAddress);
         }
     }
 }

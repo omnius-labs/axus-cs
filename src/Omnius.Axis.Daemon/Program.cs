@@ -34,6 +34,10 @@ public class Program : CoconaLiteConsoleAppBase
 
             await Runner.EventLoopAsync(Path.Combine(storageDirectoryPath, "db"), OmniAddress.Parse(listenAddress), this.Context.CancellationToken);
         }
+        catch (Exception e)
+        {
+            _logger.Error(e);
+        }
         finally
         {
             _logger.Info("Stopping...");

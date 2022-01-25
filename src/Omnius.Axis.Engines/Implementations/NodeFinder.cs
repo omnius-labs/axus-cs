@@ -125,6 +125,14 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         return myNodeLocation;
     }
 
+    public async ValueTask<IEnumerable<NodeLocation>> GetCloudNodeLocationsAsync(CancellationToken cancellationToken = default)
+    {
+        lock (_lockObject)
+        {
+            return _cloudNodeLocations.ToArray();
+        }
+    }
+
     public async ValueTask AddCloudNodeLocationsAsync(IEnumerable<NodeLocation> nodeLocations, CancellationToken cancellationToken = default)
     {
         lock (_lockObject)

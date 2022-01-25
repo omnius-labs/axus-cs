@@ -20,8 +20,8 @@ public class SignaturesControlDesignViewModel : SignaturesControlViewModelBase
         this.ItemDeleteCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.ItemDeleteCommand.Subscribe(async () => await this.ItemDeleteAsync()).AddTo(_disposable);
 
-        this.ItemCopySeedCommand = new AsyncReactiveCommand().AddTo(_disposable);
-        this.ItemCopySeedCommand.Subscribe(async () => await this.ItemCopySeedAsync()).AddTo(_disposable);
+        this.ItemCopySignatureCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.ItemCopySignatureCommand.Subscribe(async () => await this.ItemCopySeedAsync()).AddTo(_disposable);
     }
 
     protected override async ValueTask OnDisposeAsync()

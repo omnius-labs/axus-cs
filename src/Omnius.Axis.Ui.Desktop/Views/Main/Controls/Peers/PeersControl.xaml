@@ -18,9 +18,9 @@
         <local:PeersControlDesignViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto, *">
-        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="12">
-            <Button Content="Add node" Command="{Binding AddNodeCommand}"/>
+    <Grid RowDefinitions="Auto, *" Margin="12">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,12">
+            <Button Content="Add node" Command="{Binding AddNodeCommand}" Width="120"/>
         </StackPanel>
         <DataGrid
             Grid.Row="1"

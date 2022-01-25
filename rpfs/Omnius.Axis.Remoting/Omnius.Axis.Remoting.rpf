@@ -11,6 +11,8 @@ service AxisService {
     GetSessionsReport: () -> (GetSessionsReportResult),
 
     GetMyNodeLocation: () -> (GetMyNodeLocationResult),
+
+    GetCloudNodeLocations: () -> (GetCloudNodeLocationsResult),
     AddCloudNodeLocations: (AddCloudNodeLocationsRequest) -> (),
 
     GetPublishedFilesReport: () -> (GetPublishedFilesReportResult),
@@ -51,8 +53,12 @@ message GetMyNodeLocationResult {
     NodeLocation: NodeLocation,
 }
 
+message GetCloudNodeLocationsResult {
+    NodeLocations: vector<NodeLocation>(capacity: 256),
+}
+
 message AddCloudNodeLocationsRequest {
-    NodeLocations: vector<NodeLocation>(capacity: 32),
+    NodeLocations: vector<NodeLocation>(capacity: 256),
 }
 
 message GetPublishedFilesReportResult {

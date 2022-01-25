@@ -9,6 +9,8 @@ public interface IServiceAdapter
 
     ValueTask SetConfigAsync(ServiceConfig config, CancellationToken cancellationToken = default);
 
+    ValueTask<IEnumerable<NodeLocation>> GetCloudNodeLocationsAsync(CancellationToken cancellationToken = default);
+
     ValueTask AddCloudNodeLocationsAsync(IEnumerable<NodeLocation> nodeLocations, CancellationToken cancellationToken = default);
 
     ValueTask<NodeLocation> GetMyNodeLocationAsync(CancellationToken cancellationToken = default);

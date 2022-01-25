@@ -5,4 +5,5 @@
 
 ## Links
 
-- https://docs.omnius-labs.com/
+- docs: https://docs.omnius-labs.com/
+- icons: https://icooon-mono.com/

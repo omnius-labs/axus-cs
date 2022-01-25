@@ -16,9 +16,11 @@
 
     <StackPanel Orientation="Vertical" Margin="12">
         <StackPanel Orientation="Horizontal" Spacing="12">
-            <Label Content="My node profile" />
-            <TextBox Text="{Binding MyNodeLocation.Value}" Width="300" IsReadOnly="true" TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
-            <Button Content="Copy" Command="{Binding CopyMyNodeLocationCommand} "/>
+            <Label Content="My node profile" VerticalAlignment="Center" />
+            <TextBox Text="{Binding MyNodeLocation.Value}" VerticalAlignment="Center" Width="500"
+                    TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
+            <Button Content="Copy" Command="{Binding CopyMyNodeLocationCommand}"
+                    VerticalAlignment="Center" MinWidth="120" />
         </StackPanel>
     </StackPanel>
 

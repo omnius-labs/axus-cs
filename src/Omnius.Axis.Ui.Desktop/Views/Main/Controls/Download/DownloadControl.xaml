@@ -14,9 +14,9 @@
     d:DesignWidth="800"
     d:DesignHeight="500" >
 
-    <Grid RowDefinitions="Auto,*">
-        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="12">
-            <Button Content="Register" Command="{Binding RegisterCommand}"/>
+    <Grid RowDefinitions="Auto,*" Margin="12">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,12">
+            <Button Content="Register" Command="{Binding RegisterCommand}" Width="80"/>
         </StackPanel>
         <DataGrid
             Grid.Row="1"
