@@ -10,24 +10,24 @@
       },
       "NLog": {
         "type": "Direct",
-        "requested": "[4.7.11, )",
-        "resolved": "4.7.11",
-        "contentHash": "A7EpoOjWesV5BPx1cOiBndazZq1VGdagIs6oK8ttcRDl5adCMtHiTqnsD5yYaOrMxOQeCjHBf/w3nKzCmhGbgw=="
+        "requested": "[4.7.13, )",
+        "resolved": "4.7.13",
+        "contentHash": "AvoGpCuq36B+0wY313XA6gC+YeMvk24rqF8P+HS9fInBGOjCzPjpXp2ln9ATZjPOJtXgHfc8zNmTjyswFGLxvg=="
       },
       "NLog.Config": {
         "type": "Direct",
-        "requested": "[4.7.11, )",
-        "resolved": "4.7.11",
-        "contentHash": "p9N8dsMVdyXNN+KU2BsBFZ1aR+usL8JWPKe1YuXlKjPEQsltYO43tajlkX2Kilai+PAE1zw9UC8AaBq5r78x3A==",
+        "requested": "[4.7.13, )",
+        "resolved": "4.7.13",
+        "contentHash": "A7i8bS0SLd7A1y9BkyOBpIdfC91aqzJfOfHXi9xXs12s6rb9f2xYRQde2Pcpso+YrcybCR2lqczNdb/pKSqoEg==",
         "dependencies": {
-          "NLog": "4.7.11",
-          "NLog.Schema": "4.7.11"
+          "NLog": "4.7.13",
+          "NLog.Schema": "4.7.13"
         }
       },
       "NLog.Schema": {
         "type": "Transitive",
-        "resolved": "4.7.11",
-        "contentHash": "9mmj/hApaSmX9jP2PxLyqywesdEI1nIT2TVWgsdoqb1yIpxvUM+1b6aMD2zJkpGN8y71jmVO2d/FKTwQXIfpSw=="
+        "resolved": "4.7.13",
+        "contentHash": "IlbHsTRzA1YeAbrJTVETZRWkYXqo5YnaF/ppJBdE6kKD4/IjuA0CUaZMSQKbOLzwxGARMx3An1V38zjGEjRekA=="
       }
     },
     "net6.0/linux-x64": {}

@@ -5,15 +5,18 @@ namespace Omnius.Axis.Models;
 
 public sealed partial class ServiceConfig
 {
-    public static ServiceConfig Import(Stream stream)
+    public static ServiceConfig? LoadFile(string path)
     {
-        var entity = YamlHelper.ReadStream<ServiceConfigEntity>(stream);
+        if (!File.Exists(path)) return null;
+        using var fileStream = new FileStream(path, FileMode.Open);
+        var entity = YamlHelper.ReadStream<ServiceConfigEntity>(fileStream);
         return entity.Export();
     }
 
-    public void Export(Stream stream)
+    public void SaveFile(string path)
     {
         var entity = ServiceConfigEntity.Import(this);
-        YamlHelper.WriteStream(stream, entity);
+        using var fileStream = new FileStream(path, FileMode.OpenOrCreate);
+        YamlHelper.WriteStream(fileStream, entity);
     }
 }

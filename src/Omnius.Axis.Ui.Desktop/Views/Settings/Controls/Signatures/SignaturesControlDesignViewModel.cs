@@ -11,8 +11,8 @@ public class SignaturesControlDesignViewModel : SignaturesControlViewModelBase
 
     public SignaturesControlDesignViewModel()
     {
-        this.RegisterCommand = new AsyncReactiveCommand().AddTo(_disposable);
-        this.RegisterCommand.Subscribe(async () => await this.RegisterAsync()).AddTo(_disposable);
+        this.AddCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.AddCommand.Subscribe(async () => await this.RegisterAsync()).AddTo(_disposable);
 
         this.Signatures = new();
         this.SelectedSignatures = new();

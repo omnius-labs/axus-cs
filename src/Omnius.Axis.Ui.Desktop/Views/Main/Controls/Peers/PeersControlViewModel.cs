@@ -11,7 +11,7 @@ namespace Omnius.Axis.Ui.Desktop.Views.Main;
 
 public abstract class PeersControlViewModelBase : AsyncDisposableBase
 {
-    public AsyncReactiveCommand? AddNodeCommand { get; protected set; }
+    public AsyncReactiveCommand? AddCommand { get; protected set; }
 
     public ReadOnlyObservableCollection<SessionViewModel>? SessionReports { get; protected set; }
 }
@@ -34,8 +34,8 @@ public class PeersControlViewModel : PeersControlViewModelBase
         _applicationDispatcher = applicationDispatcher;
         _dialogService = dialogService;
 
-        this.AddNodeCommand = new AsyncReactiveCommand().AddTo(_disposable);
-        this.AddNodeCommand.Subscribe(async () => await this.AddNodeLocationsAsync()).AddTo(_disposable);
+        this.AddCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.AddCommand.Subscribe(async () => await this.AddNodeLocationsAsync()).AddTo(_disposable);
 
         _sessionsUpdater = new CollectionViewUpdater<SessionViewModel, SessionReport>(_applicationDispatcher, this.GetSessionReports, TimeSpan.FromSeconds(3), SessionReportEqualityComparer.Default);
         this.SessionReports = _sessionsUpdater.Collection;

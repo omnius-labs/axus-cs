@@ -1,8 +1,5 @@
 using System.Net;
 using System.Net.Sockets;
-using LazyCache;
-using Microsoft.Extensions.Caching.Memory;
-using Omnius.Axis.Engines.Internal;
 using Omnius.Core;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Caps;
@@ -24,7 +21,6 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
     private readonly IBytesPool _bytesPool;
     private readonly TcpConnectionAccepterOptions _options;
 
-    private readonly CachingService _cache;
     private TcpListenerManager? _tcpListenerManager;
     private readonly AsyncLock _asyncLock = new();
 
@@ -44,8 +40,6 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
         _batchActionDispatcher = batchActionDispatcher;
         _bytesPool = bytesPool;
         _options = options;
-
-        _cache = new CachingService();
     }
 
     protected override async ValueTask OnDisposeAsync()
@@ -92,70 +86,34 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
 
     public async ValueTask<OmniAddress[]> GetListenEndpointsAsync(CancellationToken cancellationToken = default)
     {
-        var options = new MemoryCacheEntryOptions() { SlidingExpiration = TimeSpan.FromMinutes(30) };
-        return await _cache.GetOrAddAsync("GetListenEndpointsAsync", async (_) => await this.InternalGetListenEndpointsAsync(cancellationToken), options);
-    }
-
-    private async ValueTask<OmniAddress[]> InternalGetListenEndpointsAsync(CancellationToken cancellationToken = default)
-    {
         if (!_options.ListenAddress.TryGetTcpEndpoint(out var listenIpAddress, out var port)) Array.Empty<OmniAddress>();
 
         var results = new List<OmniAddress>();
-        results.Add(OmniAddress.CreateTcpEndpoint(listenIpAddress, port));
 
-        var globalIpAddresses = await this.GetMyGlobalIpAddressesAsync(cancellationToken);
+#if DEBUG
+        results.Add(OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, port));
+#endif
 
-        if (listenIpAddress.AddressFamily == AddressFamily.InterNetwork)
+        if (_tcpListenerManager is not null)
         {
-            foreach (var globalIpAddress in globalIpAddresses.Where(n => n.AddressFamily == AddressFamily.InterNetwork))
+            var globalIpAddresses = await _tcpListenerManager.GetMyGlobalIpAddressesAsync(cancellationToken);
+
+            if (listenIpAddress.AddressFamily == AddressFamily.InterNetwork)
             {
-                results.Add(OmniAddress.CreateTcpEndpoint(globalIpAddress, port));
+                foreach (var globalIpAddress in globalIpAddresses.Where(n => n.AddressFamily == AddressFamily.InterNetwork))
+                {
+                    results.Add(OmniAddress.CreateTcpEndpoint(globalIpAddress, port));
+                }
             }
-        }
-        else if (listenIpAddress.AddressFamily == AddressFamily.InterNetworkV6)
-        {
-            foreach (var globalIpAddress in globalIpAddresses.Where(n => n.AddressFamily == AddressFamily.InterNetworkV6))
+            else if (listenIpAddress.AddressFamily == AddressFamily.InterNetworkV6)
             {
-                results.Add(OmniAddress.CreateTcpEndpoint(globalIpAddress, port));
+                foreach (var globalIpAddress in globalIpAddresses.Where(n => n.AddressFamily == AddressFamily.InterNetworkV6))
+                {
+                    results.Add(OmniAddress.CreateTcpEndpoint(globalIpAddress, port));
+                }
             }
         }
 
         return results.ToArray();
-    }
-
-    public async ValueTask<IEnumerable<IPAddress>> GetMyGlobalIpAddressesAsync(CancellationToken cancellationToken = default)
-    {
-        var list = new HashSet<IPAddress>();
-
-        if (_options.UseUpnp)
-        {
-            try
-            {
-                using var upnpClient = _upnpClientFactory.Create();
-                await upnpClient.ConnectAsync(cancellationToken);
-                var externalIp = IPAddress.Parse(await upnpClient.GetExternalIpAddressAsync(cancellationToken));
-
-                if (IpAddressHelper.IsGlobalIpAddress(externalIp))
-                {
-                    list.Add(externalIp);
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.Error(e);
-            }
-        }
-
-        foreach (var ipAddress in Dns.GetHostAddresses(Dns.GetHostName()))
-        {
-            if (!Internal.IpAddressHelper.IsGlobalIpAddress(ipAddress)) continue;
-            list.Add(ipAddress);
-        }
-
-#if DEBUG
-        list.Add(IPAddress.Loopback);
-#endif
-
-        return list;
     }
 }

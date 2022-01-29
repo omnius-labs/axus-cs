@@ -10,9 +10,9 @@
       },
       "NLog": {
         "type": "Direct",
-        "requested": "[4.7.11, )",
-        "resolved": "4.7.11",
-        "contentHash": "A7EpoOjWesV5BPx1cOiBndazZq1VGdagIs6oK8ttcRDl5adCMtHiTqnsD5yYaOrMxOQeCjHBf/w3nKzCmhGbgw=="
+        "requested": "[4.7.13, )",
+        "resolved": "4.7.13",
+        "contentHash": "AvoGpCuq36B+0wY313XA6gC+YeMvk24rqF8P+HS9fInBGOjCzPjpXp2ln9ATZjPOJtXgHfc8zNmTjyswFGLxvg=="
       }
     },
     "net6.0/win-x64": {}

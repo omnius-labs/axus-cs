@@ -14,9 +14,11 @@
     d:DesignWidth="800"
     d:DesignHeight="500" >
 
-    <Grid RowDefinitions="Auto,*" Margin="12">
-        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,12">
-            <Button Content="Register" Command="{Binding RegisterCommand}" Width="80"/>
+    <Grid RowDefinitions="Auto,*">
+        <StackPanel Orientation="Vertical" Spacing="12" Margin="16">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" HorizontalAlignment="Right" Content="Add" Width="120" Command="{Binding AddCommand}" />
+            </DockPanel>
         </StackPanel>
         <DataGrid
             Grid.Row="1"
@@ -51,6 +53,7 @@
                         <DataTemplate>
                             <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="4">
                                 <ProgressBar
+                                    Height="24"
                                     HorizontalAlignment="Stretch"
                                     VerticalAlignment="Stretch"
                                     Value="{ReflectionBinding Rate, Mode=OneWay}" />

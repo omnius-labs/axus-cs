@@ -12,6 +12,11 @@ public class SettingsWindow : StatefulWindowBase<SettingsWindowViewModelBase>
         : base()
     {
         this.InitializeComponent();
+
+#if DEBUG
+        this.AttachDevTools();
+#endif
+
         this.GetObservable(ViewModelProperty).Subscribe(this.OnViewModelChanged);
         this.Closing += new EventHandler<CancelEventArgs>((_, _) => this.OnClosing());
         this.Closed += new EventHandler((_, _) => this.OnClosed());

@@ -8,6 +8,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:Omnius.Axis.Ui.Desktop.Views.Main"
+    xmlns:styles="clr-namespace:Material.Styles;assembly=Material.Styles"
     x:CompileBindings="True"
     x:DataType="vm:PeersControlViewModel"
     mc:Ignorable="d"
@@ -18,10 +19,13 @@
         <local:PeersControlDesignViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto, *" Margin="12">
-        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,12">
-            <Button Content="Add node" Command="{Binding AddNodeCommand}" Width="120"/>
+    <Grid RowDefinitions="Auto,*">
+        <StackPanel Orientation="Vertical" Spacing="12" Margin="16">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" HorizontalAlignment="Right" Content="Add" Width="120" Command="{Binding AddCommand}" />
+            </DockPanel>
         </StackPanel>
+
         <DataGrid
             Grid.Row="1"
             HorizontalAlignment="Stretch"

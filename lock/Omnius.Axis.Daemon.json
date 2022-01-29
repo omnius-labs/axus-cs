@@ -4,11 +4,11 @@
     "net6.0": {
       "Cocona.Lite": {
         "type": "Direct",
-        "requested": "[1.6.0, )",
-        "resolved": "1.6.0",
-        "contentHash": "pj69oszG1lUy1PJSdS+VxwnfMmKaSF5ogrX4nJyD02ZF+WWEfmaUGV/8swpVCtsGR0NMiCTMFAptjCUaArB9Xg==",
+        "requested": "[2.0.2, )",
+        "resolved": "2.0.2",
+        "contentHash": "V3QPCUpJFYRDTYIn88Z+cU/yD19eZix6i/NRQPjMjwV0gEB7AJ9Cn/K//9p+XA5kudpovNL4sVas82u5snr/GA==",
         "dependencies": {
-          "Cocona.Core": "1.6.0"
+          "Cocona.Core": "2.0.2"
         }
       },
       "GitInfo": {
@@ -19,18 +19,18 @@
       },
       "NLog": {
         "type": "Direct",
-        "requested": "[4.7.11, )",
-        "resolved": "4.7.11",
-        "contentHash": "A7EpoOjWesV5BPx1cOiBndazZq1VGdagIs6oK8ttcRDl5adCMtHiTqnsD5yYaOrMxOQeCjHBf/w3nKzCmhGbgw=="
+        "requested": "[4.7.13, )",
+        "resolved": "4.7.13",
+        "contentHash": "AvoGpCuq36B+0wY313XA6gC+YeMvk24rqF8P+HS9fInBGOjCzPjpXp2ln9ATZjPOJtXgHfc8zNmTjyswFGLxvg=="
       },
       "NLog.Config": {
         "type": "Direct",
-        "requested": "[4.7.11, )",
-        "resolved": "4.7.11",
-        "contentHash": "p9N8dsMVdyXNN+KU2BsBFZ1aR+usL8JWPKe1YuXlKjPEQsltYO43tajlkX2Kilai+PAE1zw9UC8AaBq5r78x3A==",
+        "requested": "[4.7.13, )",
+        "resolved": "4.7.13",
+        "contentHash": "A7i8bS0SLd7A1y9BkyOBpIdfC91aqzJfOfHXi9xXs12s6rb9f2xYRQde2Pcpso+YrcybCR2lqczNdb/pKSqoEg==",
         "dependencies": {
-          "NLog": "4.7.11",
-          "NLog.Schema": "4.7.11"
+          "NLog": "4.7.13",
+          "NLog.Schema": "4.7.13"
         }
       },
       "YamlDotNet": {
@@ -41,8 +41,8 @@
       },
       "Cocona.Core": {
         "type": "Transitive",
-        "resolved": "1.6.0",
-        "contentHash": "670iboE7wIUZe/pOb1dsyZhYi61OrHGci7ZzR/IiW/lqiaVhE4addW1+zAGZhylsOLnACUrXDjbjsPdgfA4CPw=="
+        "resolved": "2.0.2",
+        "contentHash": "wQrVzh0dJFM5FB0hkQse23bmyUtScZSPQeCrSPKzY3z3PTu8+lNmZ95vzF9h+ANTtdYv10qs8K9LbOopfSGcmA=="
       },
       "LazyCache": {
         "type": "Transitive",
@@ -111,8 +111,8 @@
       },
       "NeoSmart.AsyncLock": {
         "type": "Transitive",
-        "resolved": "3.1.0",
-        "contentHash": "EYNPz9ZIHdoLSL4hK/86zjBZzHhvZoRdsSWhifEgCoBmKnVa7G+O5iAFbPFkxs1ZXD8d2dzewMs6x2jyxBdU4Q=="
+        "resolved": "3.2.1",
+        "contentHash": "bYIpqtgA5oZWdSgcsGA4XLkKVYuz6Qc+aEVfTYPOIX2rSFbb8NFxHcBb5V62qio8Q6Au/Xn+7ci86VW9vqIk0w=="
       },
       "Newtonsoft.Json": {
         "type": "Transitive",
@@ -121,8 +121,8 @@
       },
       "NLog.Schema": {
         "type": "Transitive",
-        "resolved": "4.7.11",
-        "contentHash": "9mmj/hApaSmX9jP2PxLyqywesdEI1nIT2TVWgsdoqb1yIpxvUM+1b6aMD2zJkpGN8y71jmVO2d/FKTwQXIfpSw=="
+        "resolved": "4.7.13",
+        "contentHash": "IlbHsTRzA1YeAbrJTVETZRWkYXqo5YnaF/ppJBdE6kKD4/IjuA0CUaZMSQKbOLzwxGARMx3An1V38zjGEjRekA=="
       },
       "Sprache": {
         "type": "Transitive",
@@ -180,8 +180,8 @@
       },
       "System.IO.Pipelines": {
         "type": "Transitive",
-        "resolved": "5.0.1",
-        "contentHash": "qEePWsaq9LoEEIqhbGe6D5J8c9IqQOUuTzzV6wn1POlfdLkJliZY3OlB0j0f17uMWlqZYjH7txj+2YbyrIA8Yg=="
+        "resolved": "6.0.1",
+        "contentHash": "1j1pZX1ICzEyjafyssU3BzWVxUsaN3zq0wEmGKj3bxINC6NkmS30eEVuZ7k/QX2UKYNCaUch6g46taYKxcpFtw=="
       },
       "System.Linq": {
         "type": "Transitive",
@@ -300,7 +300,7 @@
         "dependencies": {
           "LazyCache": "2.4.0",
           "LiteDB": "5.0.11",
-          "NLog": "4.7.11",
+          "NLog": "4.7.13",
           "Omnius.Axis.Models": "0.0.1-alpha.1",
           "Omnius.Axis.Utils": "0.0.1-alpha.1",
           "Omnius.Core": "0.0.1-alpha.1",
@@ -318,7 +318,7 @@
         "type": "Project",
         "dependencies": {
           "LiteDB": "5.0.11",
-          "NLog": "4.7.11",
+          "NLog": "4.7.13",
           "Omnius.Core": "0.0.1-alpha.1",
           "Omnius.Core.Collections": "0.0.1-alpha.1",
           "Omnius.Core.Cryptography": "0.0.1-alpha.1",
@@ -332,7 +332,7 @@
       "omnius.axis.remoting": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.11",
+          "NLog": "4.7.13",
           "Omnius.Axis.Models": "0.0.1-alpha.1",
           "Omnius.Core": "0.0.1-alpha.1",
           "Omnius.Core.Collections": "0.0.1-alpha.1",
@@ -346,30 +346,29 @@
         "type": "Project",
         "dependencies": {
           "LiteDB": "5.0.11",
-          "NLog": "4.7.11"
+          "NLog": "4.7.13"
         }
       },
       "omnius.core": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.11",
-          "NeoSmart.AsyncLock": "3.1.0",
-          "System.IO.Pipelines": "5.0.1"
+          "NLog": "4.7.13",
+          "NeoSmart.AsyncLock": "3.2.1",
+          "System.IO.Pipelines": "6.0.1"
         }
       },
       "omnius.core.collections": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.11",
+          "NLog": "4.7.13",
           "Omnius.Core": "0.0.1-alpha.1",
-          "Omnius.Core.Tasks": "0.0.1-alpha.1",
-          "System.IO.Pipelines": "5.0.1"
+          "Omnius.Core.Tasks": "0.0.1-alpha.1"
         }
       },
       "omnius.core.cryptography": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.11",
+          "NLog": "4.7.13",
           "Omnius.Core": "0.0.1-alpha.1",
           "Omnius.Core.Collections": "0.0.1-alpha.1",
           "Omnius.Core.Pipelines": "0.0.1-alpha.1",
@@ -381,7 +380,7 @@
       "omnius.core.net": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.11",
+          "NLog": "4.7.13",
           "Omnius.Core": "0.0.1-alpha.1",
           "Omnius.Core.Collections": "0.0.1-alpha.1",
           "Omnius.Core.Cryptography": "0.0.1-alpha.1",
@@ -393,7 +392,7 @@
       "omnius.core.net.caps": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.11",
+          "NLog": "4.7.13",
           "Omnius.Core": "0.0.1-alpha.1",
           "Omnius.Core.Collections": "0.0.1-alpha.1",
           "Omnius.Core.Cryptography": "0.0.1-alpha.1",
@@ -405,7 +404,7 @@
       "omnius.core.net.connections": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.11",
+          "NLog": "4.7.13",
           "Omnius.Core": "0.0.1-alpha.1",
           "Omnius.Core.Collections": "0.0.1-alpha.1",
           "Omnius.Core.Cryptography": "0.0.1-alpha.1",
@@ -421,28 +420,28 @@
       "omnius.core.net.proxies": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.11",
+          "NLog": "4.7.13",
           "Omnius.Core": "0.0.1-alpha.1"
         }
       },
       "omnius.core.net.upnp": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.11",
+          "NLog": "4.7.13",
           "Omnius.Core": "0.0.1-alpha.1"
         }
       },
       "omnius.core.pipelines": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.11",
+          "NLog": "4.7.13",
           "Omnius.Core": "0.0.1-alpha.1"
         }
       },
       "omnius.core.rocketpack": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.11",
+          "NLog": "4.7.13",
           "Omnius.Core": "0.0.1-alpha.1",
           "Omnius.Core.Pipelines": "0.0.1-alpha.1"
         }
@@ -450,7 +449,7 @@
       "omnius.core.rocketpack.remoting": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.11",
+          "NLog": "4.7.13",
           "Omnius.Core": "0.0.1-alpha.1",
           "Omnius.Core.Net": "0.0.1-alpha.1",
           "Omnius.Core.Net.Caps": "0.0.1-alpha.1",
@@ -463,7 +462,7 @@
       "omnius.core.serialization": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.11",
+          "NLog": "4.7.13",
           "Omnius.Core": "0.0.1-alpha.1",
           "Omnius.Core.Pipelines": "0.0.1-alpha.1",
           "Omnius.Core.RocketPack": "0.0.1-alpha.1"
@@ -473,7 +472,7 @@
         "type": "Project",
         "dependencies": {
           "LiteDB": "5.0.11",
-          "NLog": "4.7.11",
+          "NLog": "4.7.13",
           "Omnius.Core": "0.0.1-alpha.1",
           "Omnius.Core.Pipelines": "0.0.1-alpha.1",
           "Omnius.Core.RocketPack": "0.0.1-alpha.1",
@@ -483,7 +482,7 @@
       "omnius.core.streams": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.11",
+          "NLog": "4.7.13",
           "Omnius.Core": "0.0.1-alpha.1",
           "Omnius.Core.RocketPack": "0.0.1-alpha.1",
           "Omnius.Core.Serialization": "0.0.1-alpha.1"
@@ -492,14 +491,14 @@
       "omnius.core.tasks": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.11",
+          "NLog": "4.7.13",
           "Omnius.Core": "0.0.1-alpha.1"
         }
       },
       "omnius.core.utils": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.11",
+          "NLog": "4.7.13",
           "Newtonsoft.Json": "13.0.1",
           "YamlDotNet": "11.2.1"
         }

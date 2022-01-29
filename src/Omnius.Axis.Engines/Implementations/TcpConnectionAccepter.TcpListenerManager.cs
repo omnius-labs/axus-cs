@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using Omnius.Axis.Engines.Internal;
 using Omnius.Core;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Upnp;
@@ -14,6 +15,8 @@ public sealed partial class TcpConnectionAccepter
         private readonly IUpnpClientFactory _upnpClientFactory;
 
         private TcpListener? _tcpListener;
+
+        private string? _externalIpAddress;
 
         public static async ValueTask<TcpListenerManager> CreateAsync(OmniAddress listenAddress, bool useUpnp, IUpnpClientFactory upnpClientFactory, CancellationToken cancellationToken = default)
         {
@@ -43,7 +46,7 @@ public sealed partial class TcpConnectionAccepter
                 if (_useUpnp)
                 {
                     // "0.0.0.0"以外はUPnPでのポート開放対象外
-                    if (ipAddress == IPAddress.Any)
+                    if (ipAddress.Equals(IPAddress.Any))
                     {
                         if (upnpClient == null)
                         {
@@ -51,6 +54,10 @@ public sealed partial class TcpConnectionAccepter
                             await upnpClient.ConnectAsync(cancellationToken);
                         }
 
+                        _externalIpAddress = await upnpClient.GetExternalIpAddressAsync(cancellationToken);
+                        _logger.Debug("UPnP ExternalIpAddress: {}", _externalIpAddress);
+
+                        await upnpClient.ClosePortAsync(UpnpProtocolType.Tcp, port, cancellationToken);
                         await upnpClient.OpenPortAsync(UpnpProtocolType.Tcp, port, port, "Axis", cancellationToken);
                     }
                 }
@@ -120,6 +127,27 @@ public sealed partial class TcpConnectionAccepter
             if (_tcpListener is null || !_tcpListener.Pending()) return null;
             var socket = _tcpListener.AcceptSocket();
             return socket;
+        }
+
+        public async ValueTask<IEnumerable<IPAddress>> GetMyGlobalIpAddressesAsync(CancellationToken cancellationToken = default)
+        {
+            var results = new List<IPAddress>();
+
+            if (_externalIpAddress is not null && IPAddress.TryParse(_externalIpAddress, out var externalIpAddress))
+            {
+                if (IpAddressHelper.IsGlobalIpAddress(externalIpAddress))
+                {
+                    results.Add(externalIpAddress);
+                }
+            }
+
+            foreach (var ipAddress in Dns.GetHostAddresses(Dns.GetHostName()))
+            {
+                if (!IpAddressHelper.IsGlobalIpAddress(ipAddress)) continue;
+                results.Add(ipAddress);
+            }
+
+            return results;
         }
     }
 }

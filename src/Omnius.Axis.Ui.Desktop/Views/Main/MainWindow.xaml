@@ -35,40 +35,68 @@
             <StackPanel Height="30" DockPanel.Dock="Top" HorizontalAlignment="Left" VerticalAlignment="Stretch"
                     Orientation="Horizontal" IsHitTestVisible="False" Background="{x:Null}">
                 <skp:Svg Path="/Assets/axis.svg" Margin="4" Width="16" VerticalAlignment="Center"/>
-                <TextBlock Text="{Binding $parent[Window].Title}" VerticalAlignment="Center" FontSize="14"/>
+                <TextBlock Text="{Binding $parent[Window].Title}" VerticalAlignment="Center" FontSize="16"/>
             </StackPanel>
-            <Panel>
-                <DockPanel>
-                    <ListBox DockPanel.Dock="Top">
-                        <ListBoxItem Name="StatusListBoxItem" IsSelected="true">
-                            <skp:Svg Path="/Assets/status.svg" Margin="4" Width="32"/>
-                        </ListBoxItem>
-                        <ListBoxItem Name="PeersListBoxItem">
-                            <skp:Svg Path="/Assets/peers.svg" Margin="4" Width="32"/>
-                        </ListBoxItem>
+
+            <DockPanel>
+                <ListBox Classes="sidebar" x:Name="TabListBox" DockPanel.Dock="Top">
+                    <ListBoxItem Name="StatusListBoxItem" IsSelected="true">
+                        <Panel>
+                            <skp:Svg Path="/Assets/status.svg" />
+                        </Panel>
+                    </ListBoxItem>
+                    <ListBoxItem Name="PeersListBoxItem">
+                        <Panel>
+                            <skp:Svg Path="/Assets/peers.svg" />
+                        </Panel>
+                    </ListBoxItem>
+                    <!--
                         <ListBoxItem Name="ChatListBoxItem">
-                            <skp:Svg Path="/Assets/chat.svg" Margin="4" Width="32"/>
+                            <Panel>
+                                <skp:Svg Path="/Assets/chat.svg" />
+                            </Panel>
                         </ListBoxItem>
                         <ListBoxItem Name="SearchListBoxItem">
-                            <skp:Svg Path="/Assets/search.svg" Margin="4" Width="32"/>
+                            <Panel>
+                                <skp:Svg Path="/Assets/search.svg" />
+                            </Panel>
                         </ListBoxItem>
-                        <ListBoxItem Name="DownloadListBoxItem">
-                            <skp:Svg Path="/Assets/download.svg" Margin="4" Width="32"/>
-                        </ListBoxItem>
-                        <ListBoxItem Name="UploadListBoxItem">
-                            <skp:Svg Path="/Assets/upload.svg" Margin="4" Width="32"/>
-                        </ListBoxItem>
-                    </ListBox>
-                    <Button VerticalAlignment="Bottom" Command="{Binding SettingsCommand}" Padding="4">
-                        <skp:Svg Path="/Assets/settings.svg" Margin="4" Width="32"/>
-                    </Button>
+                        -->
+                    <ListBoxItem Name="DownloadListBoxItem">
+                        <Panel>
+                            <skp:Svg Path="/Assets/download.svg" />
+                        </Panel>
+                    </ListBoxItem>
+                    <ListBoxItem Name="UploadListBoxItem">
+                        <Panel>
+                            <skp:Svg Path="/Assets/upload.svg" />
+                        </Panel>
+                    </ListBoxItem>
+                </ListBox>
+                <Button Classes="sidebar" VerticalAlignment="Bottom" Command="{Binding SettingsCommand}" Padding="4">
+                    <Panel>
+                        <skp:Svg Path="/Assets/settings.svg" />
+                    </Panel>
+                </Button>
+            </DockPanel>
+
+            <Panel DockPanel.Dock="Right" Margin="16,0,16,16">
+                <DockPanel IsVisible="{Binding #StatusListBoxItem.IsSelected}" >
+                    <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="Status" />
+                    <local:StatusControl DataContext="{Binding StatusControlViewModel}" />
                 </DockPanel>
-            </Panel>
-            <Panel DockPanel.Dock="Right">
-                <local:StatusControl IsVisible="{Binding #StatusListBoxItem.IsSelected}" DataContext="{Binding StatusControlViewModel}" />
-                <local:PeersControl IsVisible="{Binding #PeersListBoxItem.IsSelected}" DataContext="{Binding PeersControlViewModel}" />
-                <local:DownloadControl IsVisible="{Binding #DownloadListBoxItem.IsSelected}" DataContext="{Binding DownloadControlViewModel}" />
-                <local:UploadControl IsVisible="{Binding #UploadListBoxItem.IsSelected}" DataContext="{Binding UploadControlViewModel}" />
+                <DockPanel IsVisible="{Binding #PeersListBoxItem.IsSelected}" >
+                    <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="Peers" />
+                    <local:PeersControl DataContext="{Binding PeersControlViewModel}" />
+                </DockPanel>
+                <DockPanel IsVisible="{Binding #DownloadListBoxItem.IsSelected}" >
+                    <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="Download" />
+                    <local:DownloadControl DataContext="{Binding DownloadControlViewModel}" />
+                </DockPanel>
+                <DockPanel IsVisible="{Binding #UploadListBoxItem.IsSelected}" >
+                    <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="Upload" />
+                    <local:UploadControl DataContext="{Binding UploadControlViewModel}" />
+                </DockPanel>
             </Panel>
         </DockPanel>
     </Panel>

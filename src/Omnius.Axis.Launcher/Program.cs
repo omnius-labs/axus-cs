@@ -10,6 +10,8 @@ public class Program
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
+    private static FileStream? _lockFileStream;
+
     public static async Task Main(string[] args)
     {
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(Program.UnhandledException);
@@ -27,6 +29,8 @@ public class Program
         {
             var basePath = Directory.GetCurrentDirectory();
             SetLogsDirectory(Path.Combine(basePath, "storage/launcher/logs"));
+
+            _lockFileStream = new FileStream(Path.Combine(basePath, "lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 1, FileOptions.DeleteOnClose);
 
             _logger.Info("Starting...");
             _logger.Info("AssemblyInformationalVersion: {0}", Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion);
@@ -75,10 +79,16 @@ public class Program
             daemonProcess!.Kill();
             await daemonProcess!.WaitForExitAsync();
         }
+        catch (Exception e)
+        {
+            _logger.Error(e);
+        }
         finally
         {
             _logger.Info("Stopping...");
             NLog.LogManager.Shutdown();
+
+            _lockFileStream?.Dispose();
         }
     }
 

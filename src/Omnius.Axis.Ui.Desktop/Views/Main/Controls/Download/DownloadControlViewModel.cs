@@ -34,8 +34,8 @@ public class DownloadControlViewModel : AsyncDisposableBase
 
         _downloadingFilesUpdater = new CollectionViewUpdater<DownloadingFileViewModel, DownloadingFileReport>(_applicationDispatcher, this.GetDownloadingFileReports, TimeSpan.FromSeconds(3), DownloadingFileReportEqualityComparer.Default);
 
-        this.RegisterCommand = new ReactiveCommand().AddTo(_disposable);
-        this.RegisterCommand.Subscribe(() => this.Register()).AddTo(_disposable);
+        this.AddCommand = new ReactiveCommand().AddTo(_disposable);
+        this.AddCommand.Subscribe(() => this.Register()).AddTo(_disposable);
 
         this.ItemDeleteCommand = new ReactiveCommand().AddTo(_disposable);
         this.ItemDeleteCommand.Subscribe(() => this.ItemDelete()).AddTo(_disposable);
@@ -74,7 +74,7 @@ public class DownloadControlViewModel : AsyncDisposableBase
         }
     }
 
-    public ReactiveCommand RegisterCommand { get; }
+    public ReactiveCommand AddCommand { get; }
 
     public ReadOnlyObservableCollection<DownloadingFileViewModel> DownloadingFiles => _downloadingFilesUpdater.Collection;
 

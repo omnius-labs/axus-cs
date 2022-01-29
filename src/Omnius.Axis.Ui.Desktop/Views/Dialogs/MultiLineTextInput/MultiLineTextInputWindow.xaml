@@ -30,16 +30,18 @@
         </ExperimentalAcrylicBorder>
         <DockPanel>
             <StackPanel Height="30" DockPanel.Dock="Top" HorizontalAlignment="Left" VerticalAlignment="Stretch"
-                    Orientation="Horizontal" IsHitTestVisible="False" Background="{x:Null}">
+                Orientation="Horizontal" IsHitTestVisible="False" Background="{x:Null}">
                 <skp:Svg Path="/Assets/axis.svg" Margin="4" Width="16" VerticalAlignment="Center"/>
-                <TextBlock Text="{Binding $parent[Window].Title}" VerticalAlignment="Center" FontSize="14"/>
+                <TextBlock Text="{Binding $parent[Window].Title}" VerticalAlignment="Center" FontSize="16"/>
             </StackPanel>
+
             <Grid RowDefinitions="*,Auto">
-                <TextBox Grid.Row="0" Classes="Filled" Text="{Binding Text.Value, Mode=TwoWay}" Margin="12,0"
+                <TextBox Grid.Row="0" Classes="Filled" Text="{Binding Text.Value, Mode=TwoWay}" Margin="16,16,16,0" Height="NaN"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto"
                         AcceptsReturn="True" AcceptsTab="True" TextWrapping="Wrap" VerticalContentAlignment="Top" />
                 <StackPanel Grid.Row="1" Margin="12" Spacing="12" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="Ok" Command="{Binding OkCommand}" CommandParameter="{Binding $parent[Window]}" MinWidth="80" />
-                    <Button Content="Cancel" Command="{Binding CancelCommand}" CommandParameter="{Binding $parent[Window]}" MinWidth="80" />
+                    <Button Content="Ok" Command="{Binding OkCommand}" CommandParameter="{Binding $parent[Window]}" MinWidth="120" />
+                    <Button Content="Cancel" Command="{Binding CancelCommand}" CommandParameter="{Binding $parent[Window]}" MinWidth="120" />
                 </StackPanel>
             </Grid>
         </DockPanel>

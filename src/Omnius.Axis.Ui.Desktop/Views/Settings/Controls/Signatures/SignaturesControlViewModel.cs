@@ -11,7 +11,7 @@ namespace Omnius.Axis.Ui.Desktop.Views.Settings;
 
 public abstract class SignaturesControlViewModelBase : AsyncDisposableBase
 {
-    public AsyncReactiveCommand? RegisterCommand { get; protected set; }
+    public AsyncReactiveCommand? AddCommand { get; protected set; }
 
     public ObservableCollection<OmniSignature>? Signatures { get; protected set; }
 
@@ -46,8 +46,8 @@ public class SignaturesControlViewModel : SignaturesControlViewModelBase
         _dialogService = dialogService;
         _clipboardService = clipboardService;
 
-        this.RegisterCommand = new AsyncReactiveCommand().AddTo(_disposable);
-        this.RegisterCommand.Subscribe(async () => await this.RegisterAsync()).AddTo(_disposable);
+        this.AddCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.AddCommand.Subscribe(async () => await this.RegisterAsync()).AddTo(_disposable);
 
         this.Signatures = new();
         this.SelectedSignatures = new();

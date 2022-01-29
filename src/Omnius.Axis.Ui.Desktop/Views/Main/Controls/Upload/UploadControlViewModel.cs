@@ -35,8 +35,8 @@ public class UploadControlViewModel : AsyncDisposableBase
 
         _uploadingFilesUpdater = new CollectionViewUpdater<UploadingFileViewModel, UploadingFileReport>(_applicationDispatcher, this.GetUploadingFileReports, TimeSpan.FromSeconds(3), UploadingFileReportEqualityComparer.Default);
 
-        this.RegisterCommand = new ReactiveCommand().AddTo(_disposable);
-        this.RegisterCommand.Subscribe(() => this.Register()).AddTo(_disposable);
+        this.AddCommand = new ReactiveCommand().AddTo(_disposable);
+        this.AddCommand.Subscribe(() => this.Register()).AddTo(_disposable);
 
         this.ItemDeleteCommand = new ReactiveCommand().AddTo(_disposable);
         this.ItemDeleteCommand.Subscribe(() => this.ItemDelete()).AddTo(_disposable);
@@ -73,7 +73,7 @@ public class UploadControlViewModel : AsyncDisposableBase
         }
     }
 
-    public ReactiveCommand RegisterCommand { get; }
+    public ReactiveCommand AddCommand { get; }
 
     public ReadOnlyObservableCollection<UploadingFileViewModel> UploadingFiles => _uploadingFilesUpdater.Collection;
 

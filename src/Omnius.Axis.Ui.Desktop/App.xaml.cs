@@ -16,6 +16,8 @@ public class App : Application
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
+    private FileStream? _lockFileStream;
+
     public static new App Current => (App)Application.Current;
 
     public override void Initialize()
@@ -75,26 +77,36 @@ public class App : Application
 
     private async Task RunAsync(Options options)
     {
-        DirectoryHelper.CreateDirectory(options.StorageDirectoryPath!);
+        try
+        {
+            DirectoryHelper.CreateDirectory(options.StorageDirectoryPath!);
 
-        var databaseDirectoryPath = Path.Combine(options.StorageDirectoryPath!, "db");
-        var logsDirectoryPath = Path.Combine(options.StorageDirectoryPath!, "logs");
+            var databaseDirectoryPath = Path.Combine(options.StorageDirectoryPath!, "db");
+            var logsDirectoryPath = Path.Combine(options.StorageDirectoryPath!, "logs");
 
-        DirectoryHelper.CreateDirectory(databaseDirectoryPath!);
-        DirectoryHelper.CreateDirectory(logsDirectoryPath!);
+            DirectoryHelper.CreateDirectory(databaseDirectoryPath!);
+            DirectoryHelper.CreateDirectory(logsDirectoryPath!);
 
-        SetLogsDirectory(logsDirectoryPath);
+            SetLogsDirectory(logsDirectoryPath);
 
-        if (options.Verbose) ChangeLogLevel(NLog.LogLevel.Trace);
+            if (options.Verbose) ChangeLogLevel(NLog.LogLevel.Trace);
 
-        _logger.Info("Starting...");
-        _logger.Info("AssemblyInformationalVersion: {0}", Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion);
+            _lockFileStream = new FileStream(Path.Combine(options.StorageDirectoryPath!, "lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 1, FileOptions.DeleteOnClose);
 
-        await Bootstrapper.Instance.BuildAsync(databaseDirectoryPath, OmniAddress.Parse(options.ListenAddress!));
+            _logger.Info("Starting...");
+            _logger.Info("AssemblyInformationalVersion: {0}", Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion);
 
-        var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
-        var viewModel = serviceProvider.GetRequiredService<MainWindowViewModel>();
-        this.MainWindow!.ViewModel = viewModel;
+            await Bootstrapper.Instance.BuildAsync(databaseDirectoryPath, OmniAddress.Parse(options.ListenAddress!));
+
+            var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
+            var viewModel = serviceProvider.GetRequiredService<MainWindowViewModel>();
+            this.MainWindow!.ViewModel = viewModel;
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e);
+            this.Exit();
+        }
     }
 
     private void HandleParseError(IEnumerable<Error> errs)
@@ -128,5 +140,7 @@ public class App : Application
 
         _logger.Info("Stopping...");
         NLog.LogManager.Shutdown();
+
+        _lockFileStream?.Dispose();
     }
 }

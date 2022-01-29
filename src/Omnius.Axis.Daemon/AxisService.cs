@@ -219,13 +219,7 @@ public class AxisService : AsyncDisposableBase, IAxisService
 
     private async ValueTask<ServiceConfig> InternalLoadConfigAsync(CancellationToken cancellationToken = default)
     {
-        ServiceConfig? config = null;
-
-        if (File.Exists(_configPath))
-        {
-            using var stream = new FileStream(_configPath, FileMode.Open);
-            config = ServiceConfig.Import(stream);
-        }
+        var config = ServiceConfig.LoadFile(_configPath);
 
         if (config is null)
         {
@@ -241,8 +235,7 @@ public class AxisService : AsyncDisposableBase, IAxisService
                     useUpnp: true,
                     listenAddress: OmniAddress.CreateTcpEndpoint(IPAddress.Any, (ushort)Random.Shared.Next(10000, 60000))));
 
-            using var stream = new FileStream(_configPath, FileMode.OpenOrCreate);
-            config.Export(stream);
+            config.SaveFile(_configPath);
         }
 
         return config;
@@ -250,8 +243,7 @@ public class AxisService : AsyncDisposableBase, IAxisService
 
     private async ValueTask InternalSaveConfigAsync(ServiceConfig config, CancellationToken cancellationToken = default)
     {
-        using var stream = new FileStream(_configPath, FileMode.OpenOrCreate);
-        config.Export(stream);
+        config.SaveFile(_configPath);
     }
 
     public async ValueTask<GetSessionsReportResult> GetSessionsReportAsync(CancellationToken cancellationToken = default)

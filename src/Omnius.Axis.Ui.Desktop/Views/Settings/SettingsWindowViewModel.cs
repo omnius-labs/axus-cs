@@ -1,9 +1,10 @@
 using Avalonia.Controls;
-using Microsoft.Extensions.DependencyInjection;
 using Omnius.Axis.Intaractors.Models;
+using Omnius.Axis.Models;
 using Omnius.Axis.Ui.Desktop.Configuration;
 using Omnius.Axis.Ui.Desktop.Internal;
 using Omnius.Core;
+using Omnius.Core.Net;
 using Reactive.Bindings;
 
 namespace Omnius.Axis.Ui.Desktop.Views.Settings;
@@ -12,13 +13,31 @@ public abstract class SettingsWindowViewModelBase : AsyncDisposableBase
 {
     public SettingsWindowStatus? Status { get; protected set; }
 
-    public SignaturesControlViewModelBase? TrustedSignaturesControlViewModel { get; protected set; }
+    // public ReactiveProperty<string>? ProfileSignature { get; protected set; }
 
-    public SignaturesControlViewModelBase? BlockedSignaturesControlViewModel { get; protected set; }
+    // public SignaturesControlViewModelBase? TrustedSignaturesControlViewModel { get; protected set; }
 
-    public ReactiveProperty<string>? DownloadDirectory { get; protected set; }
+    // public SignaturesControlViewModelBase? BlockedSignaturesControlViewModel { get; protected set; }
 
-    public AsyncReactiveCommand? EditDownloadDirectoryCommand { get; protected set; }
+    public ReactiveProperty<string>? FileDownloadDirectory { get; protected set; }
+
+    public AsyncReactiveCommand? OpenFileDownloadDirectoryCommand { get; protected set; }
+
+    public ReactiveProperty<string>? ServiceBandwidth { get; protected set; }
+
+    public ReactiveProperty<bool>? TcpConnectorIsEnabled { get; protected set; }
+
+    public IEnumerable<TcpProxyType>? TcpConnectorTcpProxyTypes { get; protected set; }
+
+    public ReactiveProperty<TcpProxyType>? TcpConnectorSelectedProxyType { get; protected set; }
+
+    public ReactiveProperty<string>? TcpConnectorProxyAddress { get; protected set; }
+
+    public ReactiveProperty<bool>? TcpAccepterIsEnabled { get; protected set; }
+
+    public ReactiveProperty<bool>? TcpAccepterUseUpnp { get; protected set; }
+
+    public ReactiveProperty<string>? TcpAccepterListenAddress { get; protected set; }
 
     public AsyncReactiveCommand? OkCommand { get; protected set; }
 
@@ -40,16 +59,26 @@ public class SettingsWindowViewModel : SettingsWindowViewModelBase
 
         this.Status = _uiState.SettingsWindow ??= new SettingsWindowStatus();
 
-        var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
+        this.FileDownloadDirectory = new ReactiveProperty<string>().AddTo(_disposable);
 
-        this.TrustedSignaturesControlViewModel = serviceProvider.GetRequiredService<SignaturesControlViewModel>().AddTo(_asyncDisposable);
+        this.OpenFileDownloadDirectoryCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.OpenFileDownloadDirectoryCommand.Subscribe(async () => await this.OpenDownloadDirectoryAsync()).AddTo(_disposable);
 
-        this.BlockedSignaturesControlViewModel = serviceProvider.GetRequiredService<SignaturesControlViewModel>().AddTo(_asyncDisposable);
+        this.ServiceBandwidth = new ReactiveProperty<string>().AddTo(_disposable);
 
-        this.DownloadDirectory = new ReactiveProperty<string>().AddTo(_disposable);
+        this.TcpConnectorIsEnabled = new ReactiveProperty<bool>().AddTo(_disposable);
 
-        this.EditDownloadDirectoryCommand = new AsyncReactiveCommand().AddTo(_disposable);
-        this.EditDownloadDirectoryCommand.Subscribe(async () => await this.EditDownloadDirectoryAsync()).AddTo(_disposable);
+        this.TcpConnectorTcpProxyTypes = Enum.GetValues<TcpProxyType>();
+
+        this.TcpConnectorSelectedProxyType = new ReactiveProperty<TcpProxyType>().AddTo(_disposable);
+
+        this.TcpConnectorProxyAddress = new ReactiveProperty<string>().AddTo(_disposable);
+
+        this.TcpAccepterIsEnabled = new ReactiveProperty<bool>().AddTo(_disposable);
+
+        this.TcpAccepterUseUpnp = new ReactiveProperty<bool>().AddTo(_disposable);
+
+        this.TcpAccepterListenAddress = new ReactiveProperty<string>().AddTo(_disposable);
 
         this.OkCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.OkCommand.Subscribe(async (state) => await this.OkAsync(state)).AddTo(_disposable);
@@ -71,7 +100,7 @@ public class SettingsWindowViewModel : SettingsWindowViewModelBase
         await _asyncDisposable.DisposeAsync();
     }
 
-    private async Task EditDownloadDirectoryAsync()
+    private async Task OpenDownloadDirectoryAsync()
     {
     }
 
@@ -89,31 +118,57 @@ public class SettingsWindowViewModel : SettingsWindowViewModelBase
         window.Close();
     }
 
+    // public ReactiveProperty<string>? FileDownloadDirectory { get; protected set; }
+    // public AsyncReactiveCommand? OpenDownloadDirectoryCommand { get; protected set; }
+    // public ReactiveProperty<string>? ServiceBandwidth { get; protected set; }
+    // public ReactiveProperty<bool>? TcpConnectorIsEnabled { get; protected set; }
+    // public IEnumerable<TcpProxyType>? TcpConnectorTcpProxyTypes { get; protected set; }
+    // public ReactiveProperty<TcpProxyType>? TcpConnectorSelectedProxyType { get; protected set; }
+    // public ReactiveProperty<string>? TcpConnectorProxyAddress { get; protected set; }
+    // public ReactiveProperty<bool>? TcpAccepterIsEnabled { get; protected set; }
+    // public ReactiveProperty<bool>? TcpAccepterUseUpnp { get; protected set; }
+    // public ReactiveProperty<string>? TcpAccepterListenAddress { get; protected set; }
+
     private async ValueTask LoadAsync(CancellationToken cancellationToken = default)
     {
-        // ProfileSubscriber
-        var profileSubscriber = await _intaractorAdapter.GetProfileSubscriberAsync(cancellationToken);
-        var profileSubscriberConfig = await profileSubscriber.GetConfigAsync(cancellationToken);
-        this.TrustedSignaturesControlViewModel!.SetSignatures(profileSubscriberConfig.TrustedSignatures);
-        this.BlockedSignaturesControlViewModel!.SetSignatures(profileSubscriberConfig.BlockedSignatures);
-
-        // FileDownloader
         var fileDownloader = await _intaractorAdapter.GetFileDownloaderAsync(cancellationToken);
         var fileDownloaderConfig = await fileDownloader.GetConfigAsync(cancellationToken);
-        this.DownloadDirectory!.Value = fileDownloaderConfig?.DestinationDirectory ?? string.Empty;
+        this.FileDownloadDirectory!.Value = fileDownloaderConfig?.DestinationDirectory ?? string.Empty;
+
+        var serviceAdapter = await _intaractorAdapter.GetServiceAdapterAsync(cancellationToken);
+        var serviceConfig = await serviceAdapter.GetConfigAsync(cancellationToken);
+        this.ServiceBandwidth!.Value = ((serviceConfig.Bandwidth?.MaxReceiveBytesPerSeconds ?? 0 + serviceConfig.Bandwidth?.MaxSendBytesPerSeconds ?? 0) / 2).ToString();
+        this.TcpConnectorIsEnabled!.Value = serviceConfig.TcpConnector?.IsEnabled ?? false;
+        this.TcpConnectorSelectedProxyType!.Value = serviceConfig.TcpConnector?.Proxy?.Type ?? TcpProxyType.None;
+        this.TcpConnectorProxyAddress!.Value = serviceConfig.TcpConnector?.Proxy?.Address?.ToString() ?? string.Empty;
+        this.TcpAccepterIsEnabled!.Value = serviceConfig.TcpAccepter?.IsEnabled ?? false;
+        this.TcpAccepterUseUpnp!.Value = serviceConfig.TcpAccepter?.UseUpnp ?? false;
+        this.TcpAccepterListenAddress!.Value = serviceConfig.TcpAccepter?.ListenAddress?.ToString() ?? string.Empty;
     }
 
     private async ValueTask SaveAsync(CancellationToken cancellationToken = default)
     {
-        // ProfileSubscriber
-        var profileSubscriberConfig = new ProfileSubscriberConfig(this.TrustedSignaturesControlViewModel!.GetSignatures().ToArray(),
-            this.BlockedSignaturesControlViewModel!.GetSignatures().ToArray(), 20, 1024);
-        var profileSubscriber = await _intaractorAdapter.GetProfileSubscriberAsync(cancellationToken);
-        await profileSubscriber.SetConfigAsync(profileSubscriberConfig, cancellationToken);
-
-        // FileDownloader
-        var fileDownloaderConfig = new FileDownloaderConfig(this.DownloadDirectory!.Value);
+        var fileDownloaderConfig = new FileDownloaderConfig(this.FileDownloadDirectory!.Value);
         var fileDownloader = await _intaractorAdapter.GetFileDownloaderAsync(cancellationToken);
         await fileDownloader.SetConfigAsync(fileDownloaderConfig, cancellationToken);
+
+        var serviceConfig = new ServiceConfig(
+            new BandwidthConfig(
+                maxSendBytesPerSeconds: int.Parse(this.ServiceBandwidth!.Value ?? "0"),
+                maxReceiveBytesPerSeconds: int.Parse(this.ServiceBandwidth!.Value ?? "0")),
+            new TcpConnectorConfig(
+                isEnabled: this.TcpConnectorIsEnabled!.Value,
+                proxy: new TcpProxyConfig(
+                    type: TcpConnectorSelectedProxyType!.Value,
+                    address: OmniAddress.Parse(TcpConnectorProxyAddress!.Value)
+                )
+            ),
+            new TcpAccepterConfig(
+                isEnabled: this.TcpAccepterIsEnabled!.Value,
+                useUpnp: this.TcpAccepterUseUpnp!.Value,
+                listenAddress: OmniAddress.Parse(this.TcpAccepterListenAddress!.Value)
+            ));
+        var serviceAdapter = await _intaractorAdapter.GetServiceAdapterAsync(cancellationToken);
+        await serviceAdapter.SetConfigAsync(serviceConfig, cancellationToken);
     }
 }

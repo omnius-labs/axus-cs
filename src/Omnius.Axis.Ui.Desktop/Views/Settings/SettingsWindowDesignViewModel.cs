@@ -1,7 +1,6 @@
 using Avalonia.Controls;
 using Omnius.Axis.Ui.Desktop.Configuration;
 using Omnius.Core;
-using Omnius.Core.Cryptography;
 using Reactive.Bindings;
 
 namespace Omnius.Axis.Ui.Desktop.Views.Settings;
@@ -14,16 +13,10 @@ public class SettingsWindowDesignViewModel : SettingsWindowViewModelBase
     {
         this.Status = new SettingsWindowStatus();
 
-        this.TrustedSignaturesControlViewModel = new SignaturesControlDesignViewModel();
-        this.TrustedSignaturesControlViewModel.SetSignatures(new[] { OmniDigitalSignature.Create("abcd", OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256).GetOmniSignature() });
+        this.FileDownloadDirectory = new ReactiveProperty<string>().AddTo(_disposable);
 
-        this.BlockedSignaturesControlViewModel = new SignaturesControlDesignViewModel();
-        this.BlockedSignaturesControlViewModel.SetSignatures(new[] { OmniDigitalSignature.Create("efgh", OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256).GetOmniSignature() });
-
-        this.DownloadDirectory = new ReactiveProperty<string>().AddTo(_disposable);
-
-        this.EditDownloadDirectoryCommand = new AsyncReactiveCommand().AddTo(_disposable);
-        this.EditDownloadDirectoryCommand.Subscribe(async () => await this.EditDownloadDirectoryAsync()).AddTo(_disposable);
+        this.OpenFileDownloadDirectoryCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.OpenFileDownloadDirectoryCommand.Subscribe(async () => await this.EditDownloadDirectoryAsync()).AddTo(_disposable);
 
         this.OkCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.OkCommand.Subscribe(async (state) => await this.OkAsync(state)).AddTo(_disposable);

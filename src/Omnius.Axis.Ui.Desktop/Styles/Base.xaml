@@ -1,12 +1,164 @@
-<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:scg="clr-namespace:System.Collections;assembly=netstandard"
+        xmlns:sys="clr-namespace:System;assembly=netstandard">
     <Design.PreviewWith>
-        <Border>
-            <UserControl Width="100" Height="100"/>
-        </Border>
+        <StackPanel Orientation="Vertical" MinWidth="500">
+            <StackPanel.Styles>
+                <Style Selector="Label.separator" >
+                    <Setter Property="Background" Value="Black" />
+                    <Setter Property="Height" Value="32" />
+                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                </Style>
+            </StackPanel.Styles>
+
+            <Label Classes="separator" Content="UserControl" />
+            <UserControl MinWidth="100" MinHeight="100"/>
+
+            <Label Classes="separator" Content="TextBox" />
+            <TextBox Text="Sample Text"/>
+
+            <Label Classes="separator" Content="Label" />
+            <Label Content="Sample Text"/>
+
+            <Label Classes="separator" Content="CheckBox" />
+            <CheckBox Content="Sample Text"/>
+
+            <Label Classes="separator" Content="Button" />
+            <Button Content="Sample Text"/>
+
+            <Label Classes="separator" Content="ToggleSwitch" />
+            <ToggleSwitch Content="Sample Text"/>
+
+            <Label Classes="separator" Content="ComboBox" />
+            <ComboBox SelectedIndex="0">
+                <ComboBox.Items>
+                    <ComboBoxItem Content="Test1" />
+                    <ComboBoxItem Content="Test2" />
+                    <ComboBoxItem Content="Test3" />
+                </ComboBox.Items>
+            </ComboBox>
+
+            <Label Classes="separator" Content="DataGrid" />
+            <DataGrid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Height="150" >
+                <DataGrid.Columns>
+                    <DataGridTextColumn
+                        Header="Name"
+                        Binding="{ReflectionBinding}"
+                        Width="Auto" />
+                </DataGrid.Columns>
+                <DataGrid.Items>
+                    <scg:ArrayList>
+                        <sys:String>foo</sys:String>
+                        <sys:String>bar</sys:String>
+                    </scg:ArrayList>
+                </DataGrid.Items>
+            </DataGrid>
+
+            <Label Classes="separator" Content="TreeView" />
+            <TreeView>
+                <TreeViewItem Header="File" IsExpanded="True" IsSelected="True" />
+                <TreeViewItem Header="Service" IsExpanded="True" >
+                    <TreeViewItem Header="Connector" />
+                    <TreeViewItem Header="Accepter" />
+                </TreeViewItem>
+            </TreeView>
+
+        </StackPanel>
     </Design.PreviewWith>
 
     <Style Selector="UserControl">
         <Setter Property="Background" Value="{x:Null}" />
     </Style>
+
+    <Style Selector="TextBox">
+        <Setter Property="Height" Value="36" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Label">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="CheckBox">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="ContentTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <Label Content="{Binding}" />
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style Selector="Button">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="ContentTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <Label Content="{Binding}" />
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style Selector="ToggleSwitch">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="ContentTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <Label Content="{Binding}" />
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style Selector="ComboBox">
+        <Setter Property="Height" Value="31" />
+        <Setter Property="Padding" Value="6,0" />
+        <Setter Property="Margin" Value="0,5" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="ComboBox TextBlock">
+        <Setter Property="FontSize" Value="16" />
+    </Style>
+
+    <Style Selector="DataGrid">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="BorderBrush" Value="Gray" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <Style Selector="DataGridColumnHeader TextBlock">
+        <Setter Property="Height" Value="NaN"/>
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontWeight" Value="Regular" />
+    </Style>
+
+    <Style Selector="DataGridCell TextBlock">
+        <Setter Property="Height" Value="NaN"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontWeight" Value="Regular" />
+    </Style>
+
+    <Style Selector="TreeViewItem TextBlock">
+        <Setter Property="Height" Value="NaN"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontWeight" Value="Regular" />
+    </Style>
+
 </Styles>
 
