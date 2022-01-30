@@ -35,10 +35,6 @@ public static partial class Runner
         {
             _logger.Debug("OperationCanceledException", e);
         }
-        finally
-        {
-            await Task.WhenAll(tasks);
-        }
     }
 
     private static async Task InternalEventLoopAsync(AxisService service, Socket socket, CancellationToken cancellationToken = default)

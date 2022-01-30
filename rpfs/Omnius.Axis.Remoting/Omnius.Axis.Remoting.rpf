@@ -54,11 +54,11 @@ message GetMyNodeLocationResult {
 }
 
 message GetCloudNodeLocationsResult {
-    NodeLocations: vector<NodeLocation>(capacity: 256),
+    NodeLocations: vector<NodeLocation>(capacity: 8192),
 }
 
 message AddCloudNodeLocationsRequest {
-    NodeLocations: vector<NodeLocation>(capacity: 256),
+    NodeLocations: vector<NodeLocation>(capacity: 8192),
 }
 
 message GetPublishedFilesReportResult {

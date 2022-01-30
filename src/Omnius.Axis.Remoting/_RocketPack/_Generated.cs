@@ -435,12 +435,12 @@ public sealed partial class GetCloudNodeLocationsResult : global::Omnius.Core.Ro
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public static readonly int MaxNodeLocationsCount = 256;
+    public static readonly int MaxNodeLocationsCount = 8192;
 
     public GetCloudNodeLocationsResult(global::Omnius.Axis.Models.NodeLocation[] nodeLocations)
     {
         if (nodeLocations is null) throw new global::System.ArgumentNullException("nodeLocations");
-        if (nodeLocations.Length > 256) throw new global::System.ArgumentOutOfRangeException("nodeLocations");
+        if (nodeLocations.Length > 8192) throw new global::System.ArgumentOutOfRangeException("nodeLocations");
         foreach (var n in nodeLocations)
         {
             if (n is null) throw new global::System.ArgumentNullException("n");
@@ -554,12 +554,12 @@ public sealed partial class AddCloudNodeLocationsRequest : global::Omnius.Core.R
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public static readonly int MaxNodeLocationsCount = 256;
+    public static readonly int MaxNodeLocationsCount = 8192;
 
     public AddCloudNodeLocationsRequest(global::Omnius.Axis.Models.NodeLocation[] nodeLocations)
     {
         if (nodeLocations is null) throw new global::System.ArgumentNullException("nodeLocations");
-        if (nodeLocations.Length > 256) throw new global::System.ArgumentOutOfRangeException("nodeLocations");
+        if (nodeLocations.Length > 8192) throw new global::System.ArgumentOutOfRangeException("nodeLocations");
         foreach (var n in nodeLocations)
         {
             if (n is null) throw new global::System.ArgumentNullException("n");
