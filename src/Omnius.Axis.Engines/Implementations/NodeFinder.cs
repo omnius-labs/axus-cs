@@ -516,7 +516,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
     private async ValueTask ComputeSendingDataMessage(CancellationToken cancellationToken = default)
     {
-        // 自分のノードプロファイル
+        // 自分のノードロケーション
         var myNodeLocation = await this.GetMyNodeLocationAsync(cancellationToken);
 
         // ノード情報
@@ -525,7 +525,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         // コンテンツのロケーション情報
         var contentLocationMap = new Dictionary<ContentClue, HashSet<NodeLocation>>();
 
-        // 送信するノードプロファイル
+        // 送信するノードロケーション
         var sendingPushNodeLocations = new List<NodeLocation>();
 
         // 送信するコンテンツのロケーション情報
@@ -539,13 +539,11 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
             nodeElements.Add(new KademliaElement<NodeElement>(connectionStatus.Id, new NodeElement(connectionStatus)));
         }
 
-        // 自分のノードプロファイルを追加
+        // 自分のノードロケーションを追加
         sendingPushNodeLocations.Add(await this.GetMyNodeLocationAsync(cancellationToken));
 
-        lock (_lockObject)
-        {
-            sendingPushNodeLocations.AddRange(_cloudNodeLocations);
-        }
+        // 接続中のノードのノードロケーションを追加
+        sendingPushNodeLocations.AddRange(nodeElements.Select(n => n.Value.SessionStatus.NodeLocation).Where(n => n.Addresses.Count > 0));
 
         foreach (var contentExchanger in _contentExchangerEventPipe.Publicher.Publish())
         {
