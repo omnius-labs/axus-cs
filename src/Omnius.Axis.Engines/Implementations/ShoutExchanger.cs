@@ -41,6 +41,8 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
+    private readonly CompositeDisposable _disposables = new();
+
     private readonly object _lockObject = new();
 
     private const string ServiceName = "shout_exchanger";
@@ -71,6 +73,9 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
         _connectLoopTask = this.ConnectLoopAsync(_cancellationTokenSource.Token);
         _acceptLoopTask = this.AcceptLoopAsync(_cancellationTokenSource.Token);
         _computeLoopTask = this.ComputeLoopAsync(_cancellationTokenSource.Token);
+
+        _nodeFinder.GetEvents().GetPushContentClues.Subscribe(() => this.GetPushContentClues()).AddTo(_disposables);
+        _nodeFinder.GetEvents().GetWantContentClues.Subscribe(() => this.GetWantContentClues()).AddTo(_disposables);
     }
 
     protected override async ValueTask OnDisposeAsync()
@@ -80,6 +85,8 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
         _cancellationTokenSource.Dispose();
 
         _connectedAddressSet.Dispose();
+
+        _disposables.Dispose();
     }
 
     public async ValueTask<IEnumerable<SessionReport>> GetSessionReportsAsync(CancellationToken cancellationToken = default)

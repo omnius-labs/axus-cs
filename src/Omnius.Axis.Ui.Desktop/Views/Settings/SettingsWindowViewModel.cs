@@ -11,6 +11,8 @@ namespace Omnius.Axis.Ui.Desktop.Views.Settings;
 
 public abstract class SettingsWindowViewModelBase : AsyncDisposableBase
 {
+    public abstract ValueTask InitializeAsync(CancellationToken cancellationToken = default);
+
     public SettingsWindowStatus? Status { get; protected set; }
 
     // public ReactiveProperty<string>? ProfileSignature { get; protected set; }
@@ -85,11 +87,9 @@ public class SettingsWindowViewModel : SettingsWindowViewModelBase
 
         this.CancelCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.CancelCommand.Subscribe(async (state) => await this.CancelAsync(state)).AddTo(_disposable);
-
-        this.Initialize();
     }
 
-    private async void Initialize()
+    public override async ValueTask InitializeAsync(CancellationToken cancellationToken = default)
     {
         await this.LoadAsync();
     }

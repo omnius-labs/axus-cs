@@ -16,7 +16,7 @@ public record ConnectionAcceptedResult
     public OmniAddress Address { get; }
 }
 
-public interface IConnectionAccepter
+public interface IConnectionAccepter : IAsyncDisposable
 {
     ValueTask<ConnectionAcceptedResult?> AcceptAsync(CancellationToken cancellationToken = default);
 

@@ -1,4 +1,4 @@
-using Omnius.Axis.Engines.Primitives;
+using Omnius.Axis.Models;
 using Omnius.Core.Pipelines;
 
 namespace Omnius.Axis.Engines;
@@ -7,11 +7,14 @@ public sealed partial class NodeFinder
 {
     private sealed class Events : INodeFinderEvents
     {
-        public Events(IEventSubscriber<IContentExchanger> getContentExchanger)
+        public Events(IEventSubscriber<IEnumerable<ContentClue>> getPushContentClues, IEventSubscriber<IEnumerable<ContentClue>> getWantContentClues)
         {
-            this.GetContentExchangers = getContentExchanger;
+            this.GetPushContentClues = getPushContentClues;
+            this.GetWantContentClues = getWantContentClues;
         }
 
-        public IEventSubscriber<IContentExchanger> GetContentExchangers { get; }
+        public IEventSubscriber<IEnumerable<ContentClue>> GetPushContentClues { get; }
+
+        public IEventSubscriber<IEnumerable<ContentClue>> GetWantContentClues { get; }
     }
 }

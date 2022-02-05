@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Collections.Immutable;
 using System.Net;
 using Omnius.Axis.Engines;
 using Omnius.Axis.Models;
@@ -23,6 +24,8 @@ public class AxisService : AsyncDisposableBase, IAxisService
     private readonly string _databaseDirectoryPath;
     private readonly string _configPath;
 
+    private ImmutableList<IConnectionConnector> _connectionConnectors = ImmutableList<IConnectionConnector>.Empty;
+    private ImmutableList<IConnectionAccepter> _connectionAccepters = ImmutableList<IConnectionAccepter>.Empty;
     private ISessionConnector _sessionConnector = null!;
     private ISessionAccepter _sessionAccepter = null!;
     private INodeFinder _nodeFinder = null!;
@@ -32,8 +35,6 @@ public class AxisService : AsyncDisposableBase, IAxisService
     private IPublishedShoutStorage _publishedShoutStorage = null!;
     private ISubscribedShoutStorage _subscribedShoutStorage = null!;
     private IShoutExchanger _shoutExchanger = null!;
-
-    private List<IDisposable> _disposables = new();
 
     private AsyncLock _asyncLock = new();
 
@@ -94,7 +95,7 @@ public class AxisService : AsyncDisposableBase, IAxisService
         var senderBandwidthLimiter = new BandwidthLimiter(config.Bandwidth?.MaxSendBytesPerSeconds ?? int.MaxValue);
         var receiverBandwidthLimiter = new BandwidthLimiter(config.Bandwidth?.MaxReceiveBytesPerSeconds ?? int.MaxValue);
 
-        var connectionConnectors = new List<IConnectionConnector>();
+        var connectionConnectors = ImmutableList.CreateBuilder<IConnectionConnector>();
 
         if (config.TcpConnector is TcpConnectorConfig tcpConnectorConfig && tcpConnectorConfig.IsEnabled)
         {
@@ -112,10 +113,12 @@ public class AxisService : AsyncDisposableBase, IAxisService
             connectionConnectors.Add(tcpConnectionConnector);
         }
 
-        var sessionConnectorOptions = new SessionConnectorOptions(digitalSignature);
-        _sessionConnector = await SessionConnector.CreateAsync(connectionConnectors, batchActionDispatcher, bytesPool, sessionConnectorOptions, cancellationToken);
+        _connectionConnectors = connectionConnectors.ToImmutable();
 
-        var connectionAccepters = new List<IConnectionAccepter>();
+        var sessionConnectorOptions = new SessionConnectorOptions(digitalSignature);
+        _sessionConnector = await SessionConnector.CreateAsync(_connectionConnectors, batchActionDispatcher, bytesPool, sessionConnectorOptions, cancellationToken);
+
+        var connectionAccepters = ImmutableList.CreateBuilder<IConnectionAccepter>();
 
         if (config.TcpAccepter is TcpAccepterConfig tcpAccepterConfig && tcpAccepterConfig.IsEnabled)
         {
@@ -126,8 +129,10 @@ public class AxisService : AsyncDisposableBase, IAxisService
             connectionAccepters.Add(tcpConnectionAccepter);
         }
 
+        _connectionAccepters = connectionAccepters.ToImmutable();
+
         var sessionAccepterOptions = new SessionAccepterOptions(digitalSignature);
-        _sessionAccepter = await SessionAccepter.CreateAsync(connectionAccepters, batchActionDispatcher, bytesPool, sessionAccepterOptions, cancellationToken);
+        _sessionAccepter = await SessionAccepter.CreateAsync(_connectionAccepters, batchActionDispatcher, bytesPool, sessionAccepterOptions, cancellationToken);
 
         var nodeFinderOptions = new NodeFinderOptions(Path.Combine(_databaseDirectoryPath, "node_finder"), 128);
         _nodeFinder = await NodeFinder.CreateAsync(_sessionConnector, _sessionAccepter, batchActionDispatcher, bytesPool, nodeFinderOptions, cancellationToken);
@@ -140,7 +145,6 @@ public class AxisService : AsyncDisposableBase, IAxisService
 
         var fileExchangerOptions = new FileExchangerOptions(128);
         _fileExchanger = await FileExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedFileStorage, _subscribedFileStorage, batchActionDispatcher, bytesPool, fileExchangerOptions, cancellationToken);
-        _nodeFinder.GetEvents().GetContentExchangers.Subscribe(() => _fileExchanger).AddTo(_disposables);
 
         var publishedShoutStorageOptions = new PublishedShoutStorageOptions(Path.Combine(_databaseDirectoryPath, "published_shout_storage"));
         _publishedShoutStorage = await PublishedShoutStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, publishedShoutStorageOptions, cancellationToken);
@@ -150,27 +154,14 @@ public class AxisService : AsyncDisposableBase, IAxisService
 
         var shoutExchangerOptions = new ShoutExchangerOptions(128);
         _shoutExchanger = await ShoutExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedShoutStorage, _subscribedShoutStorage, batchActionDispatcher, bytesPool, shoutExchangerOptions, cancellationToken);
-        _nodeFinder.GetEvents().GetContentExchangers.Subscribe(() => _shoutExchanger).AddTo(_disposables);
     }
 
     private async ValueTask StopAsync(CancellationToken cancellationToken = default)
     {
-        if (_sessionConnector is not null)
+        if (_fileExchanger is not null)
         {
-            await _sessionConnector.DisposeAsync();
-            _sessionConnector = null!;
-        }
-
-        if (_sessionAccepter is not null)
-        {
-            await _sessionAccepter.DisposeAsync();
-            _sessionAccepter = null!;
-        }
-
-        if (_nodeFinder is not null)
-        {
-            await _nodeFinder.DisposeAsync();
-            _nodeFinder = null!;
+            await _fileExchanger.DisposeAsync();
+            _fileExchanger = null!;
         }
 
         if (_publishedFileStorage is not null)
@@ -185,10 +176,10 @@ public class AxisService : AsyncDisposableBase, IAxisService
             _subscribedFileStorage = null!;
         }
 
-        if (_fileExchanger is not null)
+        if (_shoutExchanger is not null)
         {
-            await _fileExchanger.DisposeAsync();
-            _fileExchanger = null!;
+            await _shoutExchanger.DisposeAsync();
+            _shoutExchanger = null!;
         }
 
         if (_publishedShoutStorage is not null)
@@ -203,18 +194,35 @@ public class AxisService : AsyncDisposableBase, IAxisService
             _subscribedShoutStorage = null!;
         }
 
-        if (_shoutExchanger is not null)
+        if (_nodeFinder is not null)
         {
-            await _shoutExchanger.DisposeAsync();
-            _shoutExchanger = null!;
+            await _nodeFinder.DisposeAsync();
+            _nodeFinder = null!;
         }
 
-        foreach (var disposable in _disposables)
+        if (_sessionConnector is not null)
         {
-            disposable.Dispose();
+            await _sessionConnector.DisposeAsync();
+            _sessionConnector = null!;
         }
 
-        _disposables.Clear();
+        if (_sessionAccepter is not null)
+        {
+            await _sessionAccepter.DisposeAsync();
+            _sessionAccepter = null!;
+        }
+
+        foreach (var connectionConnector in _connectionConnectors)
+        {
+            await connectionConnector.DisposeAsync();
+        }
+        _connectionConnectors = _connectionConnectors.Clear();
+
+        foreach (var connectionAccepter in _connectionAccepters)
+        {
+            await connectionAccepter.DisposeAsync();
+        }
+        _connectionAccepters = _connectionAccepters.Clear();
     }
 
     private async ValueTask<ServiceConfig> InternalLoadConfigAsync(CancellationToken cancellationToken = default)

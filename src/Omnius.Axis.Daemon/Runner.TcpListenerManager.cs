@@ -31,6 +31,7 @@ public static partial class Runner
 
             if (_tcpListener is not null)
             {
+                _tcpListener.Stop();
                 _tcpListener.Server.Dispose();
             }
         }

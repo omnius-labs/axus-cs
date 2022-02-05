@@ -3,7 +3,7 @@ using Omnius.Core.Net.Connections;
 
 namespace Omnius.Axis.Engines;
 
-public interface IConnectionConnector
+public interface IConnectionConnector : IAsyncDisposable
 {
     ValueTask<IConnection?> ConnectAsync(OmniAddress address, CancellationToken cancellationToken = default);
 }

@@ -88,6 +88,7 @@ public sealed partial class TcpConnectionAccepter
                     var ipEndpoint = (IPEndPoint)_tcpListener.LocalEndpoint;
 
                     _tcpListener.Stop();
+                    _tcpListener.Server.Dispose();
 
                     if (_useUpnp)
                     {

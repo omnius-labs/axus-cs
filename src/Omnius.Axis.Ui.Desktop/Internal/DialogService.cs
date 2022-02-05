@@ -34,7 +34,10 @@ public class DialogService : IDialogService
         {
             var window = new MultiLineTextInputWindow();
             var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
-            window.ViewModel = serviceProvider.GetRequiredService<MultiLineTextInputWindowViewModel>();
+
+            var viewModel = serviceProvider.GetRequiredService<MultiLineTextInputWindowViewModel>();
+            await viewModel.InitializeAsync();
+            window.ViewModel = viewModel;
 
             await window.ShowDialog(_mainWindowProvider.GetMainWindow());
             return window.GetResult() ?? string.Empty;
@@ -47,7 +50,10 @@ public class DialogService : IDialogService
         {
             var window = new SettingsWindow();
             var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
-            window.ViewModel = serviceProvider.GetRequiredService<SettingsWindowViewModel>();
+
+            var viewModel = serviceProvider.GetRequiredService<SettingsWindowViewModel>();
+            await viewModel.InitializeAsync();
+            window.ViewModel = viewModel;
 
             await window.ShowDialog(_mainWindowProvider.GetMainWindow());
         });

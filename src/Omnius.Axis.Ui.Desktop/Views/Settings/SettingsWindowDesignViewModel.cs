@@ -25,6 +25,10 @@ public class SettingsWindowDesignViewModel : SettingsWindowViewModelBase
         this.CancelCommand.Subscribe(async (state) => await this.CancelAsync(state)).AddTo(_disposable);
     }
 
+    public override async ValueTask InitializeAsync(CancellationToken cancellationToken = default)
+    {
+    }
+
     protected override async ValueTask OnDisposeAsync()
     {
         _disposable.Dispose();

@@ -8,6 +8,8 @@ namespace Omnius.Axis.Ui.Desktop.Views.Dialogs;
 
 public abstract class MultiLineTextInputWindowViewModelBase : AsyncDisposableBase
 {
+    public abstract ValueTask InitializeAsync(CancellationToken cancellationToken = default);
+
     public MultiLineTextInputWindowStatus? Status { get; protected set; }
 
     public ReactivePropertySlim<string>? Text { get; protected set; }
@@ -40,11 +42,9 @@ public class MultiLineTextInputWindowViewModel : MultiLineTextInputWindowViewMod
 
         this.CancelCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.CancelCommand.Subscribe(async (state) => await this.CancelAsync(state)).AddTo(_disposable);
-
-        this.Initialize();
     }
 
-    public async void Initialize()
+    public override async ValueTask InitializeAsync(CancellationToken cancellationToken = default)
     {
         this.Text!.Value = await _clipboardService.GetTextAsync();
     }
