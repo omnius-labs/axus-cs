@@ -101,6 +101,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         {
             await sessionStatus.DisposeAsync();
         }
+
         _sessionStatusSet = _sessionStatusSet.Clear();
 
         _connectedAddressSet.Dispose();

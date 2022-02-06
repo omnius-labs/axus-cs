@@ -91,6 +91,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
         {
             await sessionStatus.DisposeAsync();
         }
+
         _sessionStatusSet = _sessionStatusSet.Clear();
 
         _connectedAddressSet.Dispose();

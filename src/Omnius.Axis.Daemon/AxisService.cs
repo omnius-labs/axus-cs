@@ -216,12 +216,14 @@ public class AxisService : AsyncDisposableBase, IAxisService
         {
             await connectionConnector.DisposeAsync();
         }
+
         _connectionConnectors = _connectionConnectors.Clear();
 
         foreach (var connectionAccepter in _connectionAccepters)
         {
             await connectionAccepter.DisposeAsync();
         }
+
         _connectionAccepters = _connectionAccepters.Clear();
     }
 
