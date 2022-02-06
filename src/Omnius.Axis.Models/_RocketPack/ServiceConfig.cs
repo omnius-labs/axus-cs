@@ -26,7 +26,7 @@ public sealed partial class ServiceConfig
     public void SaveFile(string path)
     {
         var entity = ServiceConfigEntity.Import(this);
-        using var fileStream = new FileStream(path, FileMode.Truncate);
+        using var fileStream = new FileStream(path, FileMode.Create);
         YamlHelper.WriteStream(fileStream, entity);
     }
 }

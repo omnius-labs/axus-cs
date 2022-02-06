@@ -74,8 +74,10 @@ public class Program
             };
             using var uiDesktopProcess = Process.Start(uiDesktopProcessInfo);
 
-            // wait for exit
+            // wait for ui-desktop exit
             await uiDesktopProcess!.WaitForExitAsync();
+
+            // wait for daemon exit
             daemonProcess!.Kill();
             await daemonProcess!.WaitForExitAsync();
         }
