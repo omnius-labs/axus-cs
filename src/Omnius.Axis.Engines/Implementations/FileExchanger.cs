@@ -222,7 +222,6 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
         return false;
     }
 
-
     private async ValueTask<IEnumerable<NodeLocation>> FindNodeLocationsForConnecting(OmniHash rootHash, CancellationToken cancellationToken)
     {
         var contentClue = RootHashToContentClue(rootHash);
