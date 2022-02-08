@@ -10,10 +10,12 @@ public sealed partial class FileExchanger
 {
     private sealed class SessionStatus : AsyncDisposableBase
     {
-        public SessionStatus(ISession session, OmniHash rootHash, IBatchActionDispatcher batchActionDispatcher)
+        public SessionStatus(ISession session, ExchangeType exchangeType, OmniHash rootHash, IBatchActionDispatcher batchActionDispatcher)
         {
             this.Session = session;
+            this.ExchangeType = exchangeType;
             this.RootHash = rootHash;
+            this.BatchActionDispatcher = batchActionDispatcher;
             this.LastReceivedTime = DateTime.UtcNow;
 
             this.SentBlockHashes = new(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), batchActionDispatcher);
@@ -29,9 +31,9 @@ public sealed partial class FileExchanger
         }
 
         public ISession Session { get; }
-
+        public ExchangeType ExchangeType { get; }
         public OmniHash RootHash { get; }
-
+        public IBatchActionDispatcher BatchActionDispatcher { get; }
         public DateTime LastReceivedTime { get; set; }
 
         public FileExchangerDataMessage? SendingDataMessage { get; set; }
@@ -39,5 +41,12 @@ public sealed partial class FileExchanger
         public VolatileHashSet<OmniHash> SentBlockHashes { get; }
 
         public VolatileHashSet<OmniHash> ReceivedWantBlockHashes { get; }
+    }
+
+    private enum ExchangeType
+    {
+        Unknown,
+        Published,
+        Subscribed,
     }
 }

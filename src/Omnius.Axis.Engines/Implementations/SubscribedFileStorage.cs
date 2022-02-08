@@ -192,7 +192,7 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
     {
     }
 
-    public async ValueTask<IEnumerable<OmniHash>> GetWantContentHashesAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<OmniHash>> GetWantRootHashesAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -200,7 +200,6 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
 
             foreach (var item in _subscriberRepo.DecodedItems.FindAll())
             {
-                if (item.State == SubscribedFileState.Downloaded) continue;
                 results.Add(item.RootHash);
             }
 
@@ -213,7 +212,7 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var decodedItem = _subscriberRepo.DecodedItems.FindOne(rootHash);
-            if (decodedItem is null || decodedItem.State == SubscribedFileState.Downloaded) return Enumerable.Empty<OmniHash>();
+            if (decodedItem is null) return Enumerable.Empty<OmniHash>();
 
             var lastMerkleTreeSection = decodedItem.MerkleTreeSections[^1];
 
@@ -236,7 +235,7 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var decodedItem = _subscriberRepo.DecodedItems.FindOne(rootHash);
-            if (decodedItem is null || decodedItem.State == SubscribedFileState.Downloaded) return false;
+            if (decodedItem is null) return false;
 
             return true;
         }
@@ -247,7 +246,7 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var decodedItem = _subscriberRepo.DecodedItems.FindOne(rootHash);
-            if (decodedItem is null || decodedItem.State == SubscribedFileState.Downloaded) return false;
+            if (decodedItem is null) return false;
 
             if (!decodedItem.MerkleTreeSections.Any(n => n.Contains(blockHash))) return false;
 

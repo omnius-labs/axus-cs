@@ -76,7 +76,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
     {
     }
 
-    public async ValueTask<IEnumerable<OmniHash>> GetPushContentHashesAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<OmniHash>> GetPushRootHashesAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {

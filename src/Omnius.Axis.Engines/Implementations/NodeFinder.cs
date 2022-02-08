@@ -200,30 +200,15 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
             {
                 await Task.Delay(1000, cancellationToken).ConfigureAwait(false);
 
-                int connectionCount = _sessionStatusSet.Select(n => n.Session.HandshakeType == SessionHandshakeType.Connected).Count();
-                if (connectionCount > (_options.MaxSessionCount / 2)) continue;
+                var sessionStatuses = _sessionStatusSet
+                    .Where(n => n.Session.HandshakeType == SessionHandshakeType.Connected).ToList();
 
-                var nodeLocation = this.FindNodeLocationToConnecting();
-                if (nodeLocation == null) continue;
+                if (sessionStatuses.Count > _options.MaxSessionCount / 2) continue;
 
-                foreach (var targetAddress in nodeLocation.Addresses)
+                foreach (var nodeLocation in await this.FindNodeLocationsForConnecting(cancellationToken))
                 {
-                    _connectedAddressSet.Add(targetAddress);
-
-                    var session = await _sessionConnector.ConnectAsync(targetAddress, ServiceName, cancellationToken);
-                    if (session is null) continue;
-
-                    if (await this.TryAddSessionAsync(session, cancellationToken))
-                    {
-                        _logger.Debug("Connected: {0}", targetAddress);
-                        this.RefreshCloudNodeLocation(nodeLocation);
-                    }
-                    else
-                    {
-                        this.RemoveCloudNodeLocation(nodeLocation);
-                    }
-
-                    break;
+                    var result = await this.TryConnectAsync(nodeLocation, cancellationToken);
+                    if (result) break;
                 }
             }
         }
@@ -237,21 +222,62 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         }
     }
 
-    private NodeLocation? FindNodeLocationToConnecting()
+    private async ValueTask<bool> TryConnectAsync(NodeLocation nodeLocation, CancellationToken cancellationToken = default)
     {
-        lock (_lockObject)
+        try
         {
-            var nodeLocations = _cloudNodeLocations.ToArray();
-            _random.Shuffle(nodeLocations);
+            foreach (var targetAddress in nodeLocation.Addresses)
+            {
+                _connectedAddressSet.Add(targetAddress);
 
-            var ignoreAddressSet = new HashSet<OmniAddress>();
-            ignoreAddressSet.UnionWith(_sessionStatusSet.Select(n => n.Session.Address));
-            ignoreAddressSet.UnionWith(_connectedAddressSet);
+                var session = await _sessionConnector.ConnectAsync(targetAddress, ServiceName, cancellationToken);
+                if (session is null) continue;
 
-            return nodeLocations
-                .Where(n => !n.Addresses.Any(n => ignoreAddressSet.Contains(n)))
-                .FirstOrDefault();
+                var result = await this.TryAddSessionAsync(session, cancellationToken);
+                if (!result) continue;
+
+                this.RefreshCloudNodeLocation(nodeLocation);
+                return true;
+            }
+
+            this.RemoveCloudNodeLocation(nodeLocation);
+            return false;
         }
+        catch (OperationCanceledException e)
+        {
+            _logger.Debug(e);
+        }
+        catch (Exception e)
+        {
+            _logger.Warn(e);
+        }
+
+        return false;
+    }
+
+    private async ValueTask<IEnumerable<NodeLocation>> FindNodeLocationsForConnecting(CancellationToken cancellationToken = default)
+    {
+        var nodeLocations = _cloudNodeLocations.ToArray();
+        _random.Shuffle(nodeLocations);
+
+        var ignoredAddressSet = await this.GetIgnoredAddressSet(cancellationToken);
+
+        return nodeLocations
+            .Where(n => !n.Addresses.Any(n => ignoredAddressSet.Contains(n)))
+            .ToArray();
+    }
+
+    private async ValueTask<HashSet<OmniAddress>> GetIgnoredAddressSet(CancellationToken cancellationToken)
+    {
+        var myNodeLocation = await this.GetMyNodeLocationAsync();
+
+        var set = new HashSet<OmniAddress>();
+
+        set.UnionWith(myNodeLocation.Addresses);
+        set.UnionWith(_sessionStatusSet.Select(n => n.Session.Address));
+        set.UnionWith(_connectedAddressSet);
+
+        return set;
     }
 
     private async Task AcceptLoopAsync(CancellationToken cancellationToken)
@@ -262,16 +288,15 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
             {
                 await Task.Delay(1000, cancellationToken).ConfigureAwait(false);
 
-                int connectionCount = _sessionStatusSet.Select(n => n.Session.HandshakeType == SessionHandshakeType.Accepted).Count();
-                if (connectionCount > (_options.MaxSessionCount / 2)) continue;
+                var sessionStatuses = _sessionStatusSet
+                    .Where(n => n.Session.HandshakeType == SessionHandshakeType.Accepted).ToList();
+
+                if (sessionStatuses.Count > _options.MaxSessionCount / 2) continue;
 
                 var session = await _sessionAccepter.AcceptAsync(ServiceName, cancellationToken);
                 if (session is null) continue;
 
-                if (await this.TryAddSessionAsync(session, cancellationToken))
-                {
-                    _logger.Debug("Accepted: {0}", session.Address);
-                }
+                await this.TryAddSessionAsync(session, cancellationToken);
             }
         }
         catch (OperationCanceledException e)
@@ -554,6 +579,12 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
         foreach (var contentClue in _getWantContentCluesEventPipe.Publicher.Publish().SelectMany(n => n))
         {
+            contentLocationMap.GetOrAdd(contentClue, (_) => new HashSet<NodeLocation>())
+                .Add(myNodeLocation);
+
+            sendingPushContentLocationMap.GetOrAdd(contentClue, (_) => new HashSet<NodeLocation>())
+                .Add(myNodeLocation);
+
             sendingWantContentClueSet.Add(contentClue);
         }
 
