@@ -611,13 +611,13 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
             }
         }
 
-        // Compute PushNodeLocations
+        // Compute SendingPushCloudNodeLocations
         foreach (var element in nodeElements)
         {
             element.Value.SendingPushCloudNodeLocations.AddRange(sendingPushNodeLocations);
         }
 
-        // Compute PushContentLocations
+        // Compute SendingPushContentLocations
         foreach (var (contentClue, nodeLocations) in sendingPushContentLocationMap)
         {
             foreach (var element in Kademlia.Search(_myId.AsSpan(), contentClue.RootHash.Value.Span, nodeElements, 1))
@@ -626,7 +626,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
             }
         }
 
-        // Compute WantLocations
+        // Compute SendingWantContentClues
         foreach (var contentClue in sendingWantContentClueSet)
         {
             foreach (var element in Kademlia.Search(_myId.AsSpan(), contentClue.RootHash.Value.Span, nodeElements, 1))
@@ -635,7 +635,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
             }
         }
 
-        // Compute GiveLocations
+        // Compute SendingGiveContentLocations
         foreach (var nodeElement in nodeElements)
         {
             foreach (var contentClue in nodeElement.Value.SessionStatus.ReceivedWantContentClues)
