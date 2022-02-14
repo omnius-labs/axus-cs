@@ -5,7 +5,7 @@ namespace Omnius.Axis.Engines;
 
 public interface INodeFinderEvents
 {
-    IEventSubscriber<IEnumerable<ContentClue>> GetPushContentClues { get; }
+    IEventListener<IEnumerable<ContentClue>> GetPushContentClues { get; }
 
-    IEventSubscriber<IEnumerable<ContentClue>> GetWantContentClues { get; }
+    IEventListener<IEnumerable<ContentClue>> GetWantContentClues { get; }
 }

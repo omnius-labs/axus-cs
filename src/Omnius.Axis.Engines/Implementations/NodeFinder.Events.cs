@@ -7,14 +7,14 @@ public sealed partial class NodeFinder
 {
     private sealed class Events : INodeFinderEvents
     {
-        public Events(IEventSubscriber<IEnumerable<ContentClue>> getPushContentClues, IEventSubscriber<IEnumerable<ContentClue>> getWantContentClues)
+        public Events(IEventListener<IEnumerable<ContentClue>> getPushContentClues, IEventListener<IEnumerable<ContentClue>> getWantContentClues)
         {
             this.GetPushContentClues = getPushContentClues;
             this.GetWantContentClues = getWantContentClues;
         }
 
-        public IEventSubscriber<IEnumerable<ContentClue>> GetPushContentClues { get; }
+        public IEventListener<IEnumerable<ContentClue>> GetPushContentClues { get; }
 
-        public IEventSubscriber<IEnumerable<ContentClue>> GetWantContentClues { get; }
+        public IEventListener<IEnumerable<ContentClue>> GetWantContentClues { get; }
     }
 }

@@ -79,8 +79,8 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
         _receiveLoopTask = this.ReceiveLoopAsync(_cancellationTokenSource.Token);
         _computeLoopTask = this.ComputeLoopAsync(_cancellationTokenSource.Token);
 
-        _nodeFinder.GetEvents().GetPushContentClues.Subscribe(() => this.GetPushContentClues()).AddTo(_disposables);
-        _nodeFinder.GetEvents().GetWantContentClues.Subscribe(() => this.GetWantContentClues()).AddTo(_disposables);
+        _nodeFinder.GetEvents().GetPushContentClues.Listen(() => this.GetPushContentClues()).AddTo(_disposables);
+        _nodeFinder.GetEvents().GetWantContentClues.Listen(() => this.GetWantContentClues()).AddTo(_disposables);
     }
 
     protected override async ValueTask OnDisposeAsync()

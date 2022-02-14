@@ -69,7 +69,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         _options = options;
         _myId = GenId();
 
-        _events = new Events(_getPushContentCluesEventPipe.Subscriber, _getWantContentCluesEventPipe.Subscriber);
+        _events = new Events(_getPushContentCluesEventPipe.Listener, _getWantContentCluesEventPipe.Listener);
 
         _connectedAddressSet = new VolatileHashSet<OmniAddress>(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), _batchActionDispatcher);
 
@@ -568,7 +568,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         // 接続中のノードのノードロケーションを追加
         sendingPushNodeLocations.AddRange(nodeElements.Select(n => n.Value.SessionStatus.NodeLocation).Where(n => n.Addresses.Count > 0));
 
-        foreach (var contentClue in _getPushContentCluesEventPipe.Publicher.Publish().SelectMany(n => n))
+        foreach (var contentClue in _getPushContentCluesEventPipe.Caller.Call().Flatten())
         {
             contentLocationMap.GetOrAdd(contentClue, (_) => new HashSet<NodeLocation>())
                 .Add(myNodeLocation);
@@ -577,7 +577,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
                 .Add(myNodeLocation);
         }
 
-        foreach (var contentClue in _getWantContentCluesEventPipe.Publicher.Publish().SelectMany(n => n))
+        foreach (var contentClue in _getWantContentCluesEventPipe.Caller.Call().Flatten())
         {
             contentLocationMap.GetOrAdd(contentClue, (_) => new HashSet<NodeLocation>())
                 .Add(myNodeLocation);

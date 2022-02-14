@@ -62,7 +62,7 @@ public static partial class Runner
             var server = new AxisServiceRemoting.Server<DefaultErrorMessage>(service, listenerFactory, bytesPool);
 
             var linkedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            using var onClose = bridgeConnection.Events.OnClosed.Subscribe(() => linkedCancellationTokenSource.Cancel());
+            using var onCloseListener = bridgeConnection.Events.OnClosed.Listen(() => linkedCancellationTokenSource.Cancel());
 
             await server.EventLoopAsync(linkedCancellationTokenSource.Token);
         }
