@@ -18,7 +18,7 @@ public class App : Application
 
     private FileStream? _lockFileStream;
 
-    public static new App Current => (App)Application.Current;
+    public static new App? Current => Application.Current as App;
 
     public override void Initialize()
     {
@@ -26,8 +26,8 @@ public class App : Application
         {
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler((_, e) => _logger.Error(e));
 
-            this.ApplicationLifetime.Startup += (_, _) => this.Startup();
-            this.ApplicationLifetime.Exit += (_, _) => this.Exit();
+            this.ApplicationLifetime!.Startup += (_, _) => this.Startup();
+            this.ApplicationLifetime!.Exit += (_, _) => this.Exit();
         }
 
         AvaloniaXamlLoader.Load(this);
@@ -48,12 +48,18 @@ public class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
-    public new IClassicDesktopStyleApplicationLifetime ApplicationLifetime => (IClassicDesktopStyleApplicationLifetime)base.ApplicationLifetime;
+    public new IClassicDesktopStyleApplicationLifetime? ApplicationLifetime => base.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
 
     public MainWindow? MainWindow
     {
-        get => this.ApplicationLifetime.MainWindow as MainWindow;
-        set => this.ApplicationLifetime.MainWindow = value;
+        get => this.ApplicationLifetime?.MainWindow as MainWindow;
+        set
+        {
+            if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifeTime)
+            {
+                lifeTime.MainWindow = value;
+            }
+        }
     }
 
     public bool IsDesignMode
@@ -105,7 +111,6 @@ public class App : Application
         catch (Exception e)
         {
             _logger.Error(e);
-            this.Exit();
         }
     }
 

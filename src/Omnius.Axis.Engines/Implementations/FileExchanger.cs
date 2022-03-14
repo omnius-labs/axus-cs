@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using Omnius.Axis.Engines.Internal.Models;
 using Omnius.Axis.Models;
 using Omnius.Core;
@@ -32,12 +33,12 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
     private volatile ImmutableHashSet<ContentClue> _pushContentClues = ImmutableHashSet<ContentClue>.Empty;
     private volatile ImmutableHashSet<ContentClue> _wantContentClues = ImmutableHashSet<ContentClue>.Empty;
 
-    private readonly Task _connectForPublishLoopTask;
-    private readonly Task _connectForSubscribeLoopTask;
-    private readonly Task _acceptLoopTask;
-    private readonly Task _sendLoopTask;
-    private readonly Task _receiveLoopTask;
-    private readonly Task _computeLoopTask;
+    private Task? _connectForPublishLoopTask;
+    private Task? _connectForSubscribeLoopTask;
+    private Task? _acceptLoopTask;
+    private Task? _sendLoopTask;
+    private Task? _receiveLoopTask;
+    private Task? _computeLoopTask;
 
     private readonly Random _random = new();
 
@@ -47,13 +48,14 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
     private readonly object _lockObject = new();
 
-    private const string ServiceName = "file_exchanger";
+    private const string Schema = "file_exchanger";
 
     public static async ValueTask<FileExchanger> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
         IPublishedFileStorage publishedFileStorage, ISubscribedFileStorage subscribedFileStorage, IBatchActionDispatcher batchActionDispatcher,
         IBytesPool bytesPool, FileExchangerOptions options, CancellationToken cancellationToken = default)
     {
         var fileExchanger = new FileExchanger(sessionConnector, sessionAccepter, nodeFinder, publishedFileStorage, subscribedFileStorage, batchActionDispatcher, bytesPool, options);
+        await fileExchanger.InitAsync(cancellationToken);
         return fileExchanger;
     }
 
@@ -72,21 +74,24 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
         _connectedAddressSet = new VolatileHashSet<OmniAddress>(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), _batchActionDispatcher);
 
+        _nodeFinder.GetEvents().GetPushContentClues.Listen(() => this.GetPushContentClues()).AddTo(_disposables);
+        _nodeFinder.GetEvents().GetWantContentClues.Listen(() => this.GetWantContentClues()).AddTo(_disposables);
+    }
+
+    private async ValueTask InitAsync(CancellationToken cancellationToken = default)
+    {
         _connectForPublishLoopTask = this.ConnectForPublishLoopAsync(_cancellationTokenSource.Token);
         _connectForSubscribeLoopTask = this.ConnectForSubscribeLoopAsync(_cancellationTokenSource.Token);
         _acceptLoopTask = this.AcceptLoopAsync(_cancellationTokenSource.Token);
         _sendLoopTask = this.SendLoopAsync(_cancellationTokenSource.Token);
         _receiveLoopTask = this.ReceiveLoopAsync(_cancellationTokenSource.Token);
         _computeLoopTask = this.ComputeLoopAsync(_cancellationTokenSource.Token);
-
-        _nodeFinder.GetEvents().GetPushContentClues.Listen(() => this.GetPushContentClues()).AddTo(_disposables);
-        _nodeFinder.GetEvents().GetWantContentClues.Listen(() => this.GetWantContentClues()).AddTo(_disposables);
     }
 
     protected override async ValueTask OnDisposeAsync()
     {
         _cancellationTokenSource.Cancel();
-        await Task.WhenAll(_connectForPublishLoopTask, _connectForSubscribeLoopTask, _acceptLoopTask, _sendLoopTask, _receiveLoopTask, _computeLoopTask);
+        await Task.WhenAll(_connectForPublishLoopTask!, _connectForSubscribeLoopTask!, _acceptLoopTask!, _sendLoopTask!, _receiveLoopTask!, _computeLoopTask!);
         _cancellationTokenSource.Dispose();
 
         foreach (var sessionStatus in _sessionStatusSet)
@@ -107,7 +112,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
         foreach (var status in _sessionStatusSet)
         {
-            sessionReports.Add(new SessionReport(ServiceName, status.Session.HandshakeType, status.Session.Address));
+            sessionReports.Add(new SessionReport(Schema, status.Session.HandshakeType, status.Session.Address));
         }
 
         return sessionReports.ToArray();
@@ -195,6 +200,20 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
         }
     }
 
+    private async ValueTask<IEnumerable<NodeLocation>> FindNodeLocationsForConnecting(OmniHash rootHash, CancellationToken cancellationToken)
+    {
+        var contentClue = RootHashToContentClue(rootHash);
+
+        var nodeLocations = await _nodeFinder.FindNodeLocationsAsync(contentClue, cancellationToken);
+        _random.Shuffle(nodeLocations);
+
+        var ignoredAddressSet = await this.GetIgnoredAddressSet(cancellationToken);
+
+        return nodeLocations
+            .Where(n => !n.Addresses.Any(n => ignoredAddressSet.Contains(n)))
+            .ToArray();
+    }
+
     private async ValueTask<bool> TryConnectAsync(NodeLocation nodeLocation, ExchangeType exchangeType, OmniHash rootHash, CancellationToken cancellationToken = default)
     {
         try
@@ -203,7 +222,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
             {
                 _connectedAddressSet.Add(targetAddress);
 
-                var session = await _sessionConnector.ConnectAsync(targetAddress, ServiceName, cancellationToken);
+                var session = await _sessionConnector.ConnectAsync(targetAddress, Schema, cancellationToken);
                 if (session is null) continue;
 
                 var result = await this.TryAddConnectedSessionAsync(session, exchangeType, rootHash, cancellationToken);
@@ -220,20 +239,6 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
         }
 
         return false;
-    }
-
-    private async ValueTask<IEnumerable<NodeLocation>> FindNodeLocationsForConnecting(OmniHash rootHash, CancellationToken cancellationToken)
-    {
-        var contentClue = RootHashToContentClue(rootHash);
-
-        var nodeLocations = await _nodeFinder.FindNodeLocationsAsync(contentClue, cancellationToken);
-        _random.Shuffle(nodeLocations);
-
-        var ignoredAddressSet = await this.GetIgnoredAddressSet(cancellationToken);
-
-        return nodeLocations
-            .Where(n => !n.Addresses.Any(n => ignoredAddressSet.Contains(n)))
-            .ToArray();
     }
 
     private async ValueTask<HashSet<OmniAddress>> GetIgnoredAddressSet(CancellationToken cancellationToken)
@@ -262,7 +267,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
                 if (sessionStatuses.Count > _options.MaxSessionCount / 2) continue;
 
-                var session = await _sessionAccepter.AcceptAsync(ServiceName, cancellationToken);
+                var session = await _sessionAccepter.AcceptAsync(Schema, cancellationToken);
                 if (session is null) continue;
 
                 await this.TryAddAcceptedSessionAsync(session, cancellationToken);
@@ -504,21 +509,34 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
     private async Task ComputeLoopAsync(CancellationToken cancellationToken)
     {
+        var trimSessionsStopwatch = new Stopwatch();
+        var computeContentCluesStopwatch = new Stopwatch();
+        var computeSendingDataStopwatch = new Stopwatch();
+
         try
         {
-            await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken).ConfigureAwait(false);
-
             for (; ; )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken).ConfigureAwait(false);
 
-                await this.RemoveDeadSessionsAsync(cancellationToken);
-                await this.RemoveUnnecessarySessionsAsync(cancellationToken);
-                await this.ComputePushContentCluesAsync(cancellationToken);
-                await this.ComputeWantContentCluesAsync(cancellationToken);
-                await this.ComputeSendingDataMessage(cancellationToken);
+                if (trimSessionsStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromSeconds(30)))
+                {
+                    await this.TrimDeadSessionsAsync(cancellationToken);
+                    await this.TrimUnnecessarySessionsAsync(cancellationToken);
+                }
+
+                if (computeContentCluesStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromSeconds(30)))
+                {
+                    await this.ComputePushContentCluesAsync(cancellationToken);
+                    await this.ComputeWantContentCluesAsync(cancellationToken);
+                }
+
+                if (computeSendingDataStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromSeconds(10)))
+                {
+                    await this.ComputeSendingDataMessage(cancellationToken);
+                }
             }
         }
         catch (OperationCanceledException e)
@@ -533,20 +551,20 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
         }
     }
 
-    private async ValueTask RemoveDeadSessionsAsync(CancellationToken cancellationToken = default)
+    private async ValueTask TrimDeadSessionsAsync(CancellationToken cancellationToken = default)
     {
         foreach (var sessionStatus in _sessionStatusSet)
         {
             var elapsed = (DateTime.UtcNow - sessionStatus.LastReceivedTime);
             if (elapsed.TotalMinutes < 3) continue;
 
-            _logger.Debug($"Remove dead session: {sessionStatus.Session.Address}");
+            _logger.Debug($"Trim dead session: {sessionStatus.Session.Address}");
 
             await this.RemoveSessionStatusAsync(sessionStatus);
         }
     }
 
-    private async ValueTask RemoveUnnecessarySessionsAsync(CancellationToken cancellationToken = default)
+    private async ValueTask TrimUnnecessarySessionsAsync(CancellationToken cancellationToken = default)
     {
         foreach (var sessionStatus in _sessionStatusSet)
         {
@@ -556,7 +574,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
             if (necessary) continue;
 
-            _logger.Debug($"Remove unnecessary session: {sessionStatus.Session.Address}");
+            _logger.Debug($"Trim unnecessary session: {sessionStatus.Session.Address}");
 
             await this.RemoveSessionStatusAsync(sessionStatus);
         }
@@ -654,6 +672,6 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
     private static ContentClue RootHashToContentClue(OmniHash rootHash)
     {
-        return new ContentClue(ServiceName, rootHash);
+        return new ContentClue(Schema, rootHash);
     }
 }

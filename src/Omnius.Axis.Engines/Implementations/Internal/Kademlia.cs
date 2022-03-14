@@ -26,40 +26,13 @@ internal static class Kademlia
 
         int i = 2;
 
-        for (; i < 0x4; i++)
-        {
-            _distanceHashTable[i] = 2;
-        }
-
-        for (; i < 0x8; i++)
-        {
-            _distanceHashTable[i] = 3;
-        }
-
-        for (; i < 0x10; i++)
-        {
-            _distanceHashTable[i] = 4;
-        }
-
-        for (; i < 0x20; i++)
-        {
-            _distanceHashTable[i] = 5;
-        }
-
-        for (; i < 0x40; i++)
-        {
-            _distanceHashTable[i] = 6;
-        }
-
-        for (; i < 0x80; i++)
-        {
-            _distanceHashTable[i] = 7;
-        }
-
-        for (; i <= 0xff; i++)
-        {
-            _distanceHashTable[i] = 8;
-        }
+        for (; i < 0x4; i++) _distanceHashTable[i] = 2;
+        for (; i < 0x8; i++) _distanceHashTable[i] = 3;
+        for (; i < 0x10; i++) _distanceHashTable[i] = 4;
+        for (; i < 0x20; i++) _distanceHashTable[i] = 5;
+        for (; i < 0x40; i++) _distanceHashTable[i] = 6;
+        for (; i < 0x80; i++) _distanceHashTable[i] = 7;
+        for (; i <= 0xff; i++) _distanceHashTable[i] = 8;
     }
 
     public static int Distance(ReadOnlySpan<byte> x, ReadOnlySpan<byte> y)
@@ -94,7 +67,6 @@ internal static class Kademlia
 
         var targetList = new List<SortEntry<T>>();
 
-        if (baseId != null)
         {
             var xor = new byte[targetId.Length];
             BytesOperations.Xor(targetId, baseId, xor);

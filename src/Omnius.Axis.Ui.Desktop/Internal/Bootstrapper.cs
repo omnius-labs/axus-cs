@@ -23,7 +23,7 @@ public partial class Bootstrapper : AsyncDisposableBase
 
     public static Bootstrapper Instance { get; } = new Bootstrapper();
 
-    private const string UI_STATE_FILE_NAME = "ui_state.json";
+    private const string UI_STATUS_FILE_NAME = "ui_status.json";
 
     private Bootstrapper()
     {
@@ -39,14 +39,17 @@ public partial class Bootstrapper : AsyncDisposableBase
 
         try
         {
-            _uiState = await UiStatus.LoadAsync(Path.Combine(_databaseDirectoryPath, UI_STATE_FILE_NAME));
-            _intaractorProvider = new IntaractorProvider(_databaseDirectoryPath, _listenAddress, BytesPool.Shared);
+            _uiState = await UiStatus.LoadAsync(Path.Combine(_databaseDirectoryPath, UI_STATUS_FILE_NAME));
+
+            var bytesPool = BytesPool.Shared;
+            _intaractorProvider = new IntaractorProvider(_databaseDirectoryPath, _listenAddress, bytesPool);
 
             var serviceCollection = new ServiceCollection();
 
             serviceCollection.AddSingleton(_uiState);
+
+            serviceCollection.AddSingleton<IBytesPool>(bytesPool);
             serviceCollection.AddSingleton<IIntaractorProvider>(_intaractorProvider);
-            serviceCollection.AddSingleton<IBytesPool>(BytesPool.Shared);
 
             serviceCollection.AddSingleton<IApplicationDispatcher, ApplicationDispatcher>();
             serviceCollection.AddSingleton<IMainWindowProvider, MainWindowProvider>();
@@ -81,7 +84,7 @@ public partial class Bootstrapper : AsyncDisposableBase
 
     protected override async ValueTask OnDisposeAsync()
     {
-        if (_databaseDirectoryPath is not null && _uiState is not null) await _uiState.SaveAsync(Path.Combine(_databaseDirectoryPath, UI_STATE_FILE_NAME));
+        if (_databaseDirectoryPath is not null && _uiState is not null) await _uiState.SaveAsync(Path.Combine(_databaseDirectoryPath, UI_STATUS_FILE_NAME));
     }
 
     public ServiceProvider GetServiceProvider()
