@@ -6,6 +6,7 @@ using Omnius.Core;
 using Omnius.Core.Avalonia;
 using Omnius.Core.Cryptography;
 using Reactive.Bindings;
+using Reactive.Bindings.Extensions;
 
 namespace Omnius.Axis.Ui.Desktop.Views.Settings;
 

@@ -86,7 +86,10 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
 
     public async ValueTask<OmniAddress[]> GetListenEndpointsAsync(CancellationToken cancellationToken = default)
     {
-        if (!_options.ListenAddress.TryGetTcpEndpoint(out var listenIpAddress, out var port)) Array.Empty<OmniAddress>();
+        if (!_options.ListenAddress.TryGetTcpEndpoint(out var listenIpAddress, out var port))
+        {
+            return Array.Empty<OmniAddress>();
+        }
 
         var results = new List<OmniAddress>();
 

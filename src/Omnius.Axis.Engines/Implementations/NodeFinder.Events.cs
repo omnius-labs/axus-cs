@@ -9,12 +9,12 @@ public sealed partial class NodeFinder
     {
         public Events(IFuncListener<IEnumerable<ContentClue>> getPushContentClues, IFuncListener<IEnumerable<ContentClue>> getWantContentClues)
         {
-            this.GetPushContentClues = getPushContentClues;
-            this.GetWantContentClues = getWantContentClues;
+            this.GetPushContentCluesListener = getPushContentClues;
+            this.GetWantContentCluesListener = getWantContentClues;
         }
 
-        public IFuncListener<IEnumerable<ContentClue>> GetPushContentClues { get; }
+        public IFuncListener<IEnumerable<ContentClue>> GetPushContentCluesListener { get; }
 
-        public IFuncListener<IEnumerable<ContentClue>> GetWantContentClues { get; }
+        public IFuncListener<IEnumerable<ContentClue>> GetWantContentCluesListener { get; }
     }
 }

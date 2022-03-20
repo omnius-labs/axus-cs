@@ -6,6 +6,7 @@ using Omnius.Axis.Ui.Desktop.Internal;
 using Omnius.Core;
 using Omnius.Core.Net;
 using Reactive.Bindings;
+using Reactive.Bindings.Extensions;
 
 namespace Omnius.Axis.Ui.Desktop.Views.Settings;
 

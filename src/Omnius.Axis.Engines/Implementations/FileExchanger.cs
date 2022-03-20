@@ -28,6 +28,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
     private readonly FileExchangerOptions _options;
 
     private readonly VolatileHashSet<OmniAddress> _connectedAddressSet;
+
     private volatile ImmutableHashSet<SessionStatus> _sessionStatusSet = ImmutableHashSet<SessionStatus>.Empty;
 
     private volatile ImmutableHashSet<ContentClue> _pushContentClues = ImmutableHashSet<ContentClue>.Empty;
@@ -39,6 +40,8 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
     private Task? _sendLoopTask;
     private Task? _receiveLoopTask;
     private Task? _computeLoopTask;
+    private readonly IDisposable _getPushContentCluesListenerRegister;
+    private readonly IDisposable _getWantContentCluesListenerRegister;
 
     private readonly Random _random = new();
 
@@ -74,8 +77,8 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
         _connectedAddressSet = new VolatileHashSet<OmniAddress>(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), _batchActionDispatcher);
 
-        _nodeFinder.GetEvents().GetPushContentClues.Listen(() => this.GetPushContentClues()).AddTo(_disposables);
-        _nodeFinder.GetEvents().GetWantContentClues.Listen(() => this.GetWantContentClues()).AddTo(_disposables);
+        _getPushContentCluesListenerRegister = _nodeFinder.GetEvents().GetPushContentCluesListener.Listen(() => _pushContentClues);
+        _getWantContentCluesListenerRegister = _nodeFinder.GetEvents().GetWantContentCluesListener.Listen(() => _wantContentClues);
     }
 
     private async ValueTask InitAsync(CancellationToken cancellationToken = default)
@@ -103,7 +106,8 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
         _connectedAddressSet.Dispose();
 
-        _disposables.Dispose();
+        _getPushContentCluesListenerRegister.Dispose();
+        _getWantContentCluesListenerRegister.Dispose();
     }
 
     public async ValueTask<IEnumerable<SessionReport>> GetSessionReportsAsync(CancellationToken cancellationToken = default)
@@ -116,16 +120,6 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
         }
 
         return sessionReports.ToArray();
-    }
-
-    public IEnumerable<ContentClue> GetPushContentClues()
-    {
-        return _pushContentClues;
-    }
-
-    public IEnumerable<ContentClue> GetWantContentClues()
-    {
-        return _wantContentClues;
     }
 
     private async Task ConnectForPublishLoopAsync(CancellationToken cancellationToken = default)
@@ -178,7 +172,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
                 if (sessionStatuses.Count > _options.MaxSessionCount / 4) continue;
 
-                foreach (var rootHash in await _publishedFileStorage.GetPushRootHashesAsync(cancellationToken))
+                foreach (var rootHash in await _subscribedFileStorage.GetWantRootHashesAsync(cancellationToken))
                 {
                     foreach (var nodeLocation in await this.FindNodeLocationsForConnecting(rootHash, cancellationToken))
                     {
@@ -214,6 +208,19 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
             .ToArray();
     }
 
+    private async ValueTask<HashSet<OmniAddress>> GetIgnoredAddressSet(CancellationToken cancellationToken)
+    {
+        var myNodeLocation = await _nodeFinder.GetMyNodeLocationAsync();
+
+        var set = new HashSet<OmniAddress>();
+
+        set.UnionWith(myNodeLocation.Addresses);
+        set.UnionWith(_sessionStatusSet.Select(n => n.Session.Address));
+        set.UnionWith(_connectedAddressSet);
+
+        return set;
+    }
+
     private async ValueTask<bool> TryConnectAsync(NodeLocation nodeLocation, ExchangeType exchangeType, OmniHash rootHash, CancellationToken cancellationToken = default)
     {
         try
@@ -239,19 +246,6 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
         }
 
         return false;
-    }
-
-    private async ValueTask<HashSet<OmniAddress>> GetIgnoredAddressSet(CancellationToken cancellationToken)
-    {
-        var myNodeLocation = await _nodeFinder.GetMyNodeLocationAsync();
-
-        var set = new HashSet<OmniAddress>();
-
-        set.UnionWith(myNodeLocation.Addresses);
-        set.UnionWith(_sessionStatusSet.Select(n => n.Session.Address));
-        set.UnionWith(_connectedAddressSet);
-
-        return set;
     }
 
     private async Task AcceptLoopAsync(CancellationToken cancellationToken)

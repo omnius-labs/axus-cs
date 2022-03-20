@@ -13,6 +13,8 @@
 
   <ItemGroup>
     <PackageReference Include="Moq" Version="4.16.1" />
+    <PackageReference Include="NLog.Config" Version="4.7.13" />
+    <PackageReference Include="NLog" Version="4.7.13" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,6 +28,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

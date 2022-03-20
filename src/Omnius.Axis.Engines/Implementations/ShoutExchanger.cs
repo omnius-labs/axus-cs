@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Data;
+using System.Diagnostics;
 using Omnius.Axis.Engines.Internal.Models;
 using Omnius.Axis.Models;
 using Omnius.Core;
@@ -35,9 +36,13 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
     private ImmutableHashSet<ContentClue> _pushContentClues = ImmutableHashSet<ContentClue>.Empty;
     private ImmutableHashSet<ContentClue> _wantContentClues = ImmutableHashSet<ContentClue>.Empty;
 
-    private Task _connectLoopTask = null!;
-    private Task _acceptLoopTask = null!;
-    private Task _computeLoopTask = null!;
+    private Task? _connectLoopTask;
+    private Task? _acceptLoopTask;
+    private Task? _computeLoopTask;
+    private readonly IDisposable _getPushContentCluesListenerRegister;
+    private readonly IDisposable _getWantContentCluesListenerRegister;
+
+    private readonly Random _random = new();
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
@@ -45,13 +50,14 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
     private readonly object _lockObject = new();
 
-    private const string ServiceName = "shout_exchanger";
+    private const string Schema = "shout_exchanger";
 
     public static async ValueTask<ShoutExchanger> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
         IPublishedShoutStorage publishedShoutStorage, ISubscribedShoutStorage subscribedShoutStorage, IBatchActionDispatcher batchActionDispatcher,
         IBytesPool bytesPool, ShoutExchangerOptions options, CancellationToken cancellationToken = default)
     {
         var shoutExchanger = new ShoutExchanger(sessionConnector, sessionAccepter, nodeFinder, publishedShoutStorage, subscribedShoutStorage, batchActionDispatcher, bytesPool, options);
+        await shoutExchanger.InitAsync(cancellationToken);
         return shoutExchanger;
     }
 
@@ -70,12 +76,15 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
         _connectedAddressSet = new VolatileHashSet<OmniAddress>(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), _batchActionDispatcher);
 
+        _getPushContentCluesListenerRegister = _nodeFinder.GetEvents().GetPushContentCluesListener.Listen(() => _pushContentClues);
+        _getWantContentCluesListenerRegister = _nodeFinder.GetEvents().GetWantContentCluesListener.Listen(() => _wantContentClues);
+    }
+
+    private async ValueTask InitAsync(CancellationToken cancellationToken = default)
+    {
         _connectLoopTask = this.ConnectLoopAsync(_cancellationTokenSource.Token);
         _acceptLoopTask = this.AcceptLoopAsync(_cancellationTokenSource.Token);
         _computeLoopTask = this.ComputeLoopAsync(_cancellationTokenSource.Token);
-
-        _nodeFinder.GetEvents().GetPushContentClues.Listen(() => this.GetPushContentClues()).AddTo(_disposables);
-        _nodeFinder.GetEvents().GetWantContentClues.Listen(() => this.GetWantContentClues()).AddTo(_disposables);
     }
 
     protected override async ValueTask OnDisposeAsync()
@@ -84,9 +93,17 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
         await Task.WhenAll(_connectLoopTask!, _acceptLoopTask!);
         _cancellationTokenSource.Dispose();
 
+        foreach (var sessionStatus in _sessionStatusSet)
+        {
+            await sessionStatus.DisposeAsync();
+        }
+
+        _sessionStatusSet = _sessionStatusSet.Clear();
+
         _connectedAddressSet.Dispose();
 
-        _disposables.Dispose();
+        _getPushContentCluesListenerRegister.Dispose();
+        _getWantContentCluesListenerRegister.Dispose();
     }
 
     public async ValueTask<IEnumerable<SessionReport>> GetSessionReportsAsync(CancellationToken cancellationToken = default)
@@ -95,20 +112,10 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
         foreach (var status in _sessionStatusSet)
         {
-            sessionReports.Add(new SessionReport(ServiceName, status.Session.HandshakeType, status.Session.Address));
+            sessionReports.Add(new SessionReport(Schema, status.Session.HandshakeType, status.Session.Address));
         }
 
         return sessionReports.ToArray();
-    }
-
-    public IEnumerable<ContentClue> GetPushContentClues()
-    {
-        return _pushContentClues;
-    }
-
-    public IEnumerable<ContentClue> GetWantContentClues()
-    {
-        return _wantContentClues;
     }
 
     private async Task ConnectLoopAsync(CancellationToken cancellationToken)
@@ -121,46 +128,18 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
             {
                 await Task.Delay(1000, cancellationToken);
 
-                int connectionCount = _sessionStatusSet.Select(n => n.Session.HandshakeType == SessionHandshakeType.Connected).Count();
-                if (_sessionStatusSet.Count > (_options.MaxSessionCount / 2)) continue;
+                var sessionStatuses = _sessionStatusSet
+                    .Where(n => n.Session.HandshakeType == SessionHandshakeType.Connected).ToList();
+
+                if (sessionStatuses.Count > _options.MaxSessionCount / 4) continue;
 
                 foreach (var signature in await _subscribedShoutStorage.GetSignaturesAsync(cancellationToken))
                 {
-                    var contentClue = SignatureToContentClue(signature);
-
-                    NodeLocation? targetNodeLocation = null;
+                    foreach (var nodeLocation in await this.FindNodeLocationsForConnecting(signature, cancellationToken))
                     {
-                        var nodeLocations = await _nodeFinder.FindNodeLocationsAsync(contentClue, cancellationToken);
-                        random.Shuffle(nodeLocations);
-
-                        var ignoreAddressSet = new HashSet<OmniAddress>();
-                        lock (_lockObject)
-                        {
-                            ignoreAddressSet.UnionWith(_sessionStatusSet.Select(n => n.Session.Address));
-                            ignoreAddressSet.UnionWith(_connectedAddressSet);
-                        }
-
-                        targetNodeLocation = nodeLocations
-                            .Where(n => !n.Addresses.Any(n => ignoreAddressSet.Contains(n)))
-                            .FirstOrDefault();
+                        var result = await this.TryConnectAsync(nodeLocation, signature, cancellationToken);
+                        if (result) break;
                     }
-
-                    if (targetNodeLocation == null) continue;
-
-                    foreach (var targetAddress in targetNodeLocation.Addresses)
-                    {
-                        var session = await _sessionConnector.ConnectAsync(targetAddress, ServiceName, cancellationToken);
-                        if (session is null) continue;
-
-                        _connectedAddressSet.Add(targetAddress);
-
-                        if (await this.TryAddConnectedSessionAsync(session, signature, cancellationToken))
-                        {
-                            goto End;
-                        }
-                    }
-
-                End:;
                 }
             }
         }
@@ -176,24 +155,74 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
         }
     }
 
+    private async ValueTask<IEnumerable<NodeLocation>> FindNodeLocationsForConnecting(OmniSignature signature, CancellationToken cancellationToken)
+    {
+        var contentClue = SignatureToContentClue(signature);
+
+        var nodeLocations = await _nodeFinder.FindNodeLocationsAsync(contentClue, cancellationToken);
+        _random.Shuffle(nodeLocations);
+
+        var ignoredAddressSet = await this.GetIgnoredAddressSet(cancellationToken);
+
+        return nodeLocations
+            .Where(n => !n.Addresses.Any(n => ignoredAddressSet.Contains(n)))
+            .ToArray();
+    }
+
+    private async ValueTask<HashSet<OmniAddress>> GetIgnoredAddressSet(CancellationToken cancellationToken)
+    {
+        var myNodeLocation = await _nodeFinder.GetMyNodeLocationAsync();
+
+        var set = new HashSet<OmniAddress>();
+
+        set.UnionWith(myNodeLocation.Addresses);
+        set.UnionWith(_sessionStatusSet.Select(n => n.Session.Address));
+        set.UnionWith(_connectedAddressSet);
+
+        return set;
+    }
+
+    private async ValueTask<bool> TryConnectAsync(NodeLocation nodeLocation, OmniSignature signature, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            foreach (var targetAddress in nodeLocation.Addresses)
+            {
+                _connectedAddressSet.Add(targetAddress);
+
+                var session = await _sessionConnector.ConnectAsync(targetAddress, Schema, cancellationToken);
+                if (session is null) continue;
+
+                var result = await this.TryAddConnectedSessionAsync(session, signature, cancellationToken);
+                if (!result) continue;
+            }
+        }
+        catch (OperationCanceledException e)
+        {
+            _logger.Debug(e);
+        }
+        catch (Exception e)
+        {
+            _logger.Warn(e);
+        }
+
+        return false;
+    }
+
     private async Task AcceptLoopAsync(CancellationToken cancellationToken)
     {
         try
         {
-            var random = new Random();
-
             while (!cancellationToken.IsCancellationRequested)
             {
-                await Task.Delay(1000, cancellationToken);
+                await Task.Delay(1000, cancellationToken).ConfigureAwait(false);
 
-                lock (_lockObject)
-                {
-                    int connectionCount = _sessionStatusSet.Select(n => n.Session.HandshakeType == SessionHandshakeType.Accepted).Count();
+                var sessionStatuses = _sessionStatusSet
+                    .Where(n => n.Session.HandshakeType == SessionHandshakeType.Accepted).ToList();
 
-                    if (_sessionStatusSet.Count > (_options.MaxSessionCount / 2)) continue;
-                }
+                if (sessionStatuses.Count > _options.MaxSessionCount / 2) continue;
 
-                var session = await _sessionAccepter.AcceptAsync(ServiceName, cancellationToken);
+                var session = await _sessionAccepter.AcceptAsync(Schema, cancellationToken);
                 if (session is null) continue;
 
                 await this.TryAddAcceptedSessionAsync(session, cancellationToken);
@@ -356,16 +385,19 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
     private async Task ComputeLoopAsync(CancellationToken cancellationToken)
     {
+        var computeContentCluesStopwatch = new Stopwatch();
+
         try
         {
-            var random = new Random();
-
             while (!cancellationToken.IsCancellationRequested)
             {
                 await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken).ConfigureAwait(false);
 
-                await this.UpdatePushContentCluesAsync(cancellationToken);
-                await this.UpdateWantContentCluesAsync(cancellationToken);
+                if (computeContentCluesStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromSeconds(30)))
+                {
+                    await this.UpdatePushContentCluesAsync(cancellationToken);
+                    await this.UpdateWantContentCluesAsync(cancellationToken);
+                }
             }
         }
         catch (OperationCanceledException e)
@@ -411,6 +443,6 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
         using var bytesPipe = new BytesPipe();
         signature.Export(bytesPipe.Writer, BytesPool.Shared);
         var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(bytesPipe.Reader.GetSequence()));
-        return new ContentClue(ServiceName, hash);
+        return new ContentClue(Schema, hash);
     }
 }

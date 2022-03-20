@@ -3,6 +3,7 @@ using Omnius.Axis.Ui.Desktop.Configuration;
 using Omnius.Axis.Ui.Desktop.Internal;
 using Omnius.Core;
 using Reactive.Bindings;
+using Reactive.Bindings.Extensions;
 
 namespace Omnius.Axis.Ui.Desktop.Views.Main;
 
@@ -38,10 +39,10 @@ public class MainWindowViewModel : MainWindowViewModelBase
 
         var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
 
-        this.StatusControlViewModel = serviceProvider.GetRequiredService<StatusControlViewModel>().AddTo(_asyncDisposable);
-        this.PeersControlViewModel = serviceProvider.GetRequiredService<PeersControlViewModel>().AddTo(_asyncDisposable);
-        this.DownloadControlViewModel = serviceProvider.GetRequiredService<DownloadControlViewModel>().AddTo(_asyncDisposable);
-        this.UploadControlViewModel = serviceProvider.GetRequiredService<UploadControlViewModel>().AddTo(_asyncDisposable);
+        this.StatusControlViewModel = serviceProvider.GetRequiredService<StatusControlViewModel>();
+        this.PeersControlViewModel = serviceProvider.GetRequiredService<PeersControlViewModel>();
+        this.DownloadControlViewModel = serviceProvider.GetRequiredService<DownloadControlViewModel>();
+        this.UploadControlViewModel = serviceProvider.GetRequiredService<UploadControlViewModel>();
 
         this.SettingsCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.SettingsCommand.Subscribe(async () => await this.SettingsAsync()).AddTo(_disposable);
@@ -50,7 +51,11 @@ public class MainWindowViewModel : MainWindowViewModelBase
     protected override async ValueTask OnDisposeAsync()
     {
         _disposable.Dispose();
-        await _asyncDisposable.DisposeAsync();
+
+        await this.StatusControlViewModel!.DisposeAsync();
+        await this.PeersControlViewModel!.DisposeAsync();
+        await this.DownloadControlViewModel!.DisposeAsync();
+        await this.UploadControlViewModel!.DisposeAsync();
     }
 
     private async Task SettingsAsync()

@@ -1,6 +1,7 @@
 using System.Net.Sockets;
 using Omnius.Axis.Remoting;
 using Omnius.Core;
+using Omnius.Core.Helpers;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Caps;
 using Omnius.Core.Net.Connections.Bridge;
@@ -62,7 +63,7 @@ public static partial class Runner
             var server = new AxisServiceRemoting.Server<DefaultErrorMessage>(service, listenerFactory, bytesPool);
 
             var linkedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            using var onCloseListener = bridgeConnection.Events.OnClosed.Listen(() => linkedCancellationTokenSource.Cancel());
+            using var onCloseListenerRegister = bridgeConnection.Events.OnClosed.Listen(() => ExceptionHelper.TryCatch<ObjectDisposedException>(() => linkedCancellationTokenSource.Cancel()));
 
             await server.EventLoopAsync(linkedCancellationTokenSource.Token);
         }

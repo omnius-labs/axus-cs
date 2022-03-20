@@ -3,6 +3,7 @@ using Omnius.Axis.Ui.Desktop.Configuration;
 using Omnius.Core;
 using Omnius.Core.Avalonia;
 using Reactive.Bindings;
+using Reactive.Bindings.Extensions;
 
 namespace Omnius.Axis.Ui.Desktop.Views.Dialogs;
 

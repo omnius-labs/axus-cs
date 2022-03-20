@@ -1,9 +1,8 @@
-using Omnius.Axis.Engines.Primitives;
 using Omnius.Axis.Models;
 
 namespace Omnius.Axis.Engines;
 
-public interface IFileExchanger : IContentExchanger, IAsyncDisposable
+public interface IFileExchanger : IAsyncDisposable
 {
     ValueTask<IEnumerable<SessionReport>> GetSessionReportsAsync(CancellationToken cancellationToken = default);
 }
