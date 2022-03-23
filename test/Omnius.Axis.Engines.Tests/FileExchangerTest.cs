@@ -13,8 +13,8 @@ public class FileExchangerTest
     {
         var results = new List<(OmniAddress, OmniAddress, long, TimeSpan)>{
             (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50011), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50012), 1, TimeSpan.FromMinutes(3)),
-            (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50031), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50032), 8192, TimeSpan.FromMinutes(3)),
-            (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50051), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50052), 1024 * 1024 * 32, TimeSpan.FromMinutes(3)),
+            // (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50031), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50032), 8192, TimeSpan.FromMinutes(3)),
+            // (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50051), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50052), 1024 * 1024 * 32, TimeSpan.FromMinutes(3)),
         };
         return results.Select(n => new object[] { n.Item1, n.Item2, n.Item3, n.Item4 });
     }
