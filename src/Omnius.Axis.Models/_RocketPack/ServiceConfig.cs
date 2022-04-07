@@ -18,7 +18,8 @@ public sealed partial class ServiceConfig
         }
         catch (Exception e)
         {
-            _logger.Error(e);
+            _logger.Error(e, "Unexpected Exception");
+
             return null;
         }
     }

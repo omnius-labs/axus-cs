@@ -47,6 +47,8 @@ public sealed partial class TcpConnectionConnector : AsyncDisposableBase, IConne
 
     public async ValueTask<IConnection?> ConnectAsync(OmniAddress address, CancellationToken cancellationToken = default)
     {
+        this.ThrowIfDisposingRequested();
+
         var cap = await this.ConnectCapAsync(address, cancellationToken);
         if (cap == null) return null;
 
@@ -55,11 +57,10 @@ public sealed partial class TcpConnectionConnector : AsyncDisposableBase, IConne
         return bridgeConnection;
     }
 
-    public async ValueTask<ICap?> ConnectCapAsync(OmniAddress address, CancellationToken cancellationToken = default)
+    private async ValueTask<ICap?> ConnectCapAsync(OmniAddress address, CancellationToken cancellationToken = default)
     {
-        this.ThrowIfDisposingRequested();
 
-        if (!address.TryGetTcpEndpoint(out var ipAddress, out ushort port)) return null;
+        if (!address.TryGetTcpEndpoint(out var ipAddress, out ushort port)) throw new FormatException("address is not tcp endpoint");
 
 #if !DEBUG
         if (!Internal.IpAddressHelper.IsGlobalIpAddress(ipAddress)) return null;
@@ -74,8 +75,6 @@ public sealed partial class TcpConnectionConnector : AsyncDisposableBase, IConne
                 if (_socks5ProxyClientFactory is not null && _options.Proxy.Type == TcpProxyType.Socks5Proxy)
                 {
                     var socket = await ConnectSocketAsync(new IPEndPoint(proxyAddress, proxyPort), cancellationToken);
-                    if (socket == null) return null;
-
                     disposableList.Add(socket);
 
                     var proxy = _socks5ProxyClientFactory.Create(ipAddress.ToString(), port);
@@ -89,8 +88,6 @@ public sealed partial class TcpConnectionConnector : AsyncDisposableBase, IConne
                 else if (_httpProxyClientFactory is not null && _options.Proxy.Type == TcpProxyType.HttpProxy)
                 {
                     var socket = await ConnectSocketAsync(new IPEndPoint(proxyAddress, proxyPort), cancellationToken);
-                    if (socket == null) return null;
-
                     disposableList.Add(socket);
 
                     var proxy = _httpProxyClientFactory.Create(ipAddress.ToString(), port);
@@ -105,8 +102,6 @@ public sealed partial class TcpConnectionConnector : AsyncDisposableBase, IConne
             else
             {
                 var socket = await ConnectSocketAsync(new IPEndPoint(ipAddress, port), cancellationToken);
-                if (socket == null) return null;
-
                 disposableList.Add(socket);
 
                 var cap = new SocketCap(socket);
@@ -117,7 +112,7 @@ public sealed partial class TcpConnectionConnector : AsyncDisposableBase, IConne
         }
         catch (Exception e)
         {
-            _logger.Error(e);
+            _logger.Error(e, "Unexpected Exception");
 
             foreach (var item in disposableList)
             {
@@ -128,7 +123,7 @@ public sealed partial class TcpConnectionConnector : AsyncDisposableBase, IConne
         return null;
     }
 
-    private static async ValueTask<Socket?> ConnectSocketAsync(IPEndPoint remoteEndPoint, CancellationToken cancellationToken = default)
+    private static async ValueTask<Socket> ConnectSocketAsync(IPEndPoint remoteEndPoint, CancellationToken cancellationToken = default)
     {
         await Task.Delay(1, cancellationToken).ConfigureAwait(false);
 
@@ -145,11 +140,10 @@ public sealed partial class TcpConnectionConnector : AsyncDisposableBase, IConne
 
             return socket;
         }
-        catch (SocketException)
+        catch (Exception)
         {
             socket?.Dispose();
-
-            return null;
+            throw;
         }
     }
 }

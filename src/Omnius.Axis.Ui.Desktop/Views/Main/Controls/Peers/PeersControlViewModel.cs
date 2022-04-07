@@ -50,9 +50,9 @@ public class PeersControlViewModel : PeersControlViewModelBase
 
     private async ValueTask<IEnumerable<SessionReport>> GetSessionReports(CancellationToken cancellationToken)
     {
-        var serviceAdapter = await _intaractorAdapter.GetServiceAdapterAsync(cancellationToken);
+        var serviceController = await _intaractorAdapter.GetserviceControllerAsync(cancellationToken);
 
-        return await serviceAdapter.GetSessionReportsAsync(cancellationToken);
+        return await serviceController.GetSessionReportsAsync(cancellationToken);
     }
 
     private class SessionReportEqualityComparer : IEqualityComparer<SessionReport>
@@ -72,10 +72,10 @@ public class PeersControlViewModel : PeersControlViewModelBase
 
     private async Task AddNodeLocationsAsync()
     {
-        var serviceAdapter = await _intaractorAdapter.GetServiceAdapterAsync();
+        var serviceController = await _intaractorAdapter.GetserviceControllerAsync();
 
         var text = await _dialogService.ShowMultiLineTextInputWindowAsync();
-        await serviceAdapter.AddCloudNodeLocationsAsync(ParseNodeLocations(text));
+        await serviceController.AddCloudNodeLocationsAsync(ParseNodeLocations(text));
     }
 
     private static IEnumerable<NodeLocation> ParseNodeLocations(string text)

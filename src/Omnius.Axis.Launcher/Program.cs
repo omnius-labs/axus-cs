@@ -20,7 +20,7 @@ public class Program
 
     private static void UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-        _logger.Error(e);
+        _logger.Error(e.ExceptionObject as Exception, "Unexpected Exception");
     }
 
     public static async ValueTask RunAsync()
@@ -83,7 +83,7 @@ public class Program
         }
         catch (Exception e)
         {
-            _logger.Error(e);
+            _logger.Error(e, "Unexpected Exception");
         }
         finally
         {
@@ -107,9 +107,8 @@ public class Program
 
                 return port;
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                _logger.Error(e);
                 if (i >= 10) throw;
             }
         }

@@ -7,12 +7,12 @@ public sealed class ShoutExchangerException : Exception
     {
     }
 
-    public ShoutExchangerException(string message)
+    public ShoutExchangerException(string? message)
         : base(message)
     {
     }
 
-    public ShoutExchangerException(string message, Exception innerException)
+    public ShoutExchangerException(string? message, Exception? innerException)
         : base(message, innerException)
     {
     }

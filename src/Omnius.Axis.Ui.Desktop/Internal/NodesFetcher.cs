@@ -33,7 +33,7 @@ public class NodesFetcher : INodesFetcher
         }
         catch (Exception e)
         {
-            _logger.Warn(e);
+            _logger.Warn(e, "Failed to fetch node locations");
         }
 
         return Enumerable.Empty<NodeLocation>();

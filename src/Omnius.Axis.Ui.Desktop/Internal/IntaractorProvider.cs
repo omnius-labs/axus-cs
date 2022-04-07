@@ -5,9 +5,9 @@ using Omnius.Core.Storages;
 
 namespace Omnius.Axis.Ui.Desktop.Internal;
 
-public interface IIntaractorProvider
+public interface IIntaractorProvider : IAsyncDisposable
 {
-    ValueTask<IServiceAdapter> GetServiceAdapterAsync(CancellationToken cancellationToken = default);
+    ValueTask<IServiceController> GetserviceControllerAsync(CancellationToken cancellationToken = default);
 
     ValueTask<IFileDownloader> GetFileDownloaderAsync(CancellationToken cancellationToken = default);
 
@@ -28,7 +28,7 @@ public partial class IntaractorProvider : AsyncDisposableBase, IIntaractorProvid
 
     private ServiceManager? _serviceManager;
 
-    private ServiceAdapter? _serviceAdapter;
+    private ServiceController? _serviceController;
     private FileDownloader? _fileDownloader;
     private FileUploader? _fileUploader;
     private ProfilePublisher? _profilePublisher;
@@ -48,12 +48,12 @@ public partial class IntaractorProvider : AsyncDisposableBase, IIntaractorProvid
         if (_serviceManager is not null) await _serviceManager.DisposeAsync();
     }
 
-    public async ValueTask<IServiceAdapter> GetServiceAdapterAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IServiceController> GetserviceControllerAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             await this.UpdateAsync(cancellationToken);
-            return _serviceAdapter!;
+            return _serviceController!;
         }
     }
 
@@ -108,7 +108,7 @@ public partial class IntaractorProvider : AsyncDisposableBase, IIntaractorProvid
             }
             catch (Exception e)
             {
-                _logger.Warn(e);
+                _logger.Warn(e, "Disconnected is Service");
             }
 
             await Task.Delay(3000);
@@ -120,19 +120,19 @@ public partial class IntaractorProvider : AsyncDisposableBase, IIntaractorProvid
         _serviceManager = await ServiceManager.CreateAsync(_listenAddress, cancellationToken);
         var service = _serviceManager.GetService()!;
 
-        _serviceAdapter = new ServiceAdapter(service);
+        _serviceController = new ServiceController(service);
 
         var fileUploaderOptions = new FileUploaderOptions(Path.Combine(_databaseDirectoryPath, "file_uploader"));
-        _fileUploader = await FileUploader.CreateAsync(_serviceAdapter, KeyValueLiteDatabaseStorage.Factory, _bytesPool, fileUploaderOptions, cancellationToken);
+        _fileUploader = await FileUploader.CreateAsync(_serviceController, KeyValueLiteDatabaseStorage.Factory, _bytesPool, fileUploaderOptions, cancellationToken);
 
         var fileDownloaderOptions = new FileDownloaderOptions(Path.Combine(_databaseDirectoryPath, "file_downloader"));
-        _fileDownloader = await FileDownloader.CreateAsync(_serviceAdapter, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, fileDownloaderOptions, cancellationToken);
+        _fileDownloader = await FileDownloader.CreateAsync(_serviceController, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, fileDownloaderOptions, cancellationToken);
 
         var profilePublisherOptions = new ProfilePublisherOptions(Path.Combine(_databaseDirectoryPath, "profile_publisher"));
-        _profilePublisher = await ProfilePublisher.CreateAsync(_serviceAdapter, SingleValueFileStorage.Factory, _bytesPool, profilePublisherOptions);
+        _profilePublisher = await ProfilePublisher.CreateAsync(_serviceController, SingleValueFileStorage.Factory, _bytesPool, profilePublisherOptions);
 
         var profileSubscriberOptions = new ProfileSubscriberOptions(Path.Combine(_databaseDirectoryPath, "profile_subscriber"));
-        _profileSubscriber = await ProfileSubscriber.CreateAsync(_serviceAdapter, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, profileSubscriberOptions);
+        _profileSubscriber = await ProfileSubscriber.CreateAsync(_serviceController, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, profileSubscriberOptions);
     }
 
     private async ValueTask StopAsync(CancellationToken cancellationToken = default)

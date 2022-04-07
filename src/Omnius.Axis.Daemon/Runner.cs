@@ -21,20 +21,27 @@ public static partial class Runner
         await using var service = await AxisService.CreateAsync(databaseDirectoryPath, cancellationToken);
         using var tcpListenerManager = new TcpListenerManager(listenAddress, cancellationToken);
 
-        var tasks = new List<Task>();
-
-        try
+        for (; ; )
         {
-            for (; ; )
+            _logger.Debug("EventLoop: Start");
+
+            try
             {
                 var socket = await tcpListenerManager.AcceptSocketAsync();
-                var task = InternalEventLoopAsync(service, socket, cancellationToken);
-                tasks.Add(task);
+                await InternalEventLoopAsync(service, socket, cancellationToken);
             }
-        }
-        catch (OperationCanceledException e)
-        {
-            _logger.Debug("OperationCanceledException", e);
+            catch (OperationCanceledException)
+            {
+                _logger.Debug("Operation Canceled");
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e, "Unexpected Exception");
+            }
+            finally
+            {
+                _logger.Debug("EventLoop: End");
+            }
         }
     }
 
@@ -56,24 +63,11 @@ public static partial class Runner
         var errorMessageFactory = new DefaultErrorMessageFactory();
         var listenerFactory = new RocketRemotingListenerFactory<DefaultErrorMessage>(multiplexer, errorMessageFactory, bytesPool);
 
-        try
-        {
-            _logger.Debug("InternalEventLoopAsync: Start");
+        var server = new AxisServiceRemoting.Server<DefaultErrorMessage>(service, listenerFactory, bytesPool);
 
-            var server = new AxisServiceRemoting.Server<DefaultErrorMessage>(service, listenerFactory, bytesPool);
+        using var linkedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        using var onCloseListenerRegister = bridgeConnection.Events.OnClosed.Listen(() => ExceptionHelper.TryCatch<ObjectDisposedException>(() => linkedCancellationTokenSource.Cancel()));
 
-            var linkedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            using var onCloseListenerRegister = bridgeConnection.Events.OnClosed.Listen(() => ExceptionHelper.TryCatch<ObjectDisposedException>(() => linkedCancellationTokenSource.Cancel()));
-
-            await server.EventLoopAsync(linkedCancellationTokenSource.Token);
-        }
-        catch (Exception e)
-        {
-            _logger.Error(e);
-        }
-        finally
-        {
-            _logger.Debug("InternalEventLoopAsync: End");
-        }
+        await server.EventLoopAsync(linkedCancellationTokenSource.Token);
     }
 }

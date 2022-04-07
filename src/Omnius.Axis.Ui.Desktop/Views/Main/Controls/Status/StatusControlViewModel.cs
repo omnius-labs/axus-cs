@@ -63,27 +63,27 @@ public class StatusControlViewModel : AsyncDisposableBase
             {
                 await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken).ConfigureAwait(false);
 
-                var serviceAdapter = await _intaractorAdapter.GetServiceAdapterAsync();
+                var serviceController = await _intaractorAdapter.GetserviceControllerAsync();
 
-                var myNodeLocation = await serviceAdapter.GetMyNodeLocationAsync(cancellationToken);
+                var myNodeLocation = await serviceController.GetMyNodeLocationAsync(cancellationToken);
 
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     this.MyNodeLocation.Value = AxisMessage.NodeToString(myNodeLocation);
                 });
 
-                var cloudNodeLocations = await serviceAdapter.GetCloudNodeLocationsAsync(cancellationToken);
+                var cloudNodeLocations = await serviceController.GetCloudNodeLocationsAsync(cancellationToken);
 
                 if (cloudNodeLocations.Count() == 0)
                 {
                     var fetchedNodeLocations = await _nodesFetcher.FetchAsync(cancellationToken);
-                    await serviceAdapter.AddCloudNodeLocationsAsync(fetchedNodeLocations, cancellationToken);
+                    await serviceController.AddCloudNodeLocationsAsync(fetchedNodeLocations, cancellationToken);
                 }
             }
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            _logger.Debug(e);
+            _logger.Debug("Operation Canceled");
         }
     }
 }

@@ -229,13 +229,13 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
                 }
             }
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            _logger.Debug(e);
+            _logger.Debug("Operation Canceled");
         }
         catch (Exception e)
         {
-            _logger.Error(e);
+            _logger.Error(e, "Unexpected Exception");
         }
     }
 
@@ -260,13 +260,13 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
             this.RemoveCloudNodeLocation(nodeLocation);
             return false;
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            _logger.Debug(e);
+            _logger.Debug("Operation Canceled");
         }
         catch (Exception e)
         {
-            _logger.Warn(e);
+            _logger.Error(e, "Unexpected Exception");
         }
 
         return false;
@@ -316,13 +316,13 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
                 await this.TryAddSessionAsync(session, cancellationToken);
             }
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            _logger.Debug(e);
+            _logger.Debug("Operation Canceled");
         }
         catch (Exception e)
         {
-            _logger.Error(e);
+            _logger.Error(e, "Unexpected Exception");
         }
     }
 
@@ -346,15 +346,21 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
             throw new NotSupportedException();
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            _logger.Debug(e);
+            _logger.Debug("Operation Canceled");
+
+            await session.DisposeAsync();
+        }
+        catch (ConnectionException)
+        {
+            _logger.Debug("Connection Exception");
 
             await session.DisposeAsync();
         }
         catch (Exception e)
         {
-            _logger.Warn(e);
+            _logger.Error(e, "Unexpected Exception");
 
             await session.DisposeAsync();
         }
@@ -432,24 +438,34 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
                         sessionStatus.SendingDataMessage = null;
                     }
+                    catch (ObjectDisposedException)
+                    {
+                        _logger.Debug("Object Disposed");
+
+                        await this.RemoveSessionStatusAsync(sessionStatus);
+                    }
+                    catch (ConnectionException)
+                    {
+                        _logger.Debug("Connection Exception");
+
+                        await this.RemoveSessionStatusAsync(sessionStatus);
+                    }
                     catch (Exception e)
                     {
-                        _logger.Debug(e);
+                        _logger.Error(e, "Unexpected Exception");
 
                         await this.RemoveSessionStatusAsync(sessionStatus);
                     }
                 }
             }
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            _logger.Debug(e);
+            _logger.Debug("Operation Canceled");
         }
         catch (Exception e)
         {
-            _logger.Error(e);
-
-            throw;
+            _logger.Error(e, "Unexpected Exception");
         }
     }
 
@@ -487,24 +503,34 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
                             _receivedGiveContentLocationMap.AddRange(contentLocation.ContentClue, contentLocation.NodeLocations);
                         }
                     }
+                    catch (ObjectDisposedException)
+                    {
+                        _logger.Debug("Object Disposed");
+
+                        await this.RemoveSessionStatusAsync(sessionStatus);
+                    }
+                    catch (ConnectionException)
+                    {
+                        _logger.Debug("Connection Exception");
+
+                        await this.RemoveSessionStatusAsync(sessionStatus);
+                    }
                     catch (Exception e)
                     {
-                        _logger.Debug(e);
+                        _logger.Error(e, "Unexpected Exception");
 
                         await this.RemoveSessionStatusAsync(sessionStatus);
                     }
                 }
             }
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            _logger.Debug(e);
+            _logger.Debug("Operation Canceled");
         }
         catch (Exception e)
         {
-            _logger.Error(e);
-
-            throw;
+            _logger.Error(e, "Unexpected Exception");
         }
     }
 
@@ -538,15 +564,13 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
                 }
             }
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            _logger.Debug(e);
+            _logger.Debug("Operation Canceled");
         }
         catch (Exception e)
         {
-            _logger.Error(e);
-
-            throw;
+            _logger.Error(e, "Unexpected Exception");
         }
     }
 

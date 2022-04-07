@@ -78,15 +78,13 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
                 await this.UpdateDecodedFileItemAsync(_cancellationTokenSource.Token);
             }
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            _logger.Debug(e);
+            _logger.Debug("Operation Canceled");
         }
         catch (Exception e)
         {
-            _logger.Error(e);
-
-            throw;
+            _logger.Error(e, "Unexpected Exception");
         }
     }
 

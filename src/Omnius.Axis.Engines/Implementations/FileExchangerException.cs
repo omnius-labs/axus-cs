@@ -7,12 +7,12 @@ public sealed class FileExchangerException : Exception
     {
     }
 
-    public FileExchangerException(string message)
+    public FileExchangerException(string? message)
         : base(message)
     {
     }
 
-    public FileExchangerException(string message, Exception innerException)
+    public FileExchangerException(string? message, Exception? innerException)
         : base(message, innerException)
     {
     }

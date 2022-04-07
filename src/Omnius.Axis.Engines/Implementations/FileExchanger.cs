@@ -146,15 +146,13 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                 }
             }
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            _logger.Debug(e);
+            _logger.Debug("Operation Canceled");
         }
         catch (Exception e)
         {
-            _logger.Error(e);
-
-            throw;
+            _logger.Error(e, "Unexpected Exception");
         }
     }
 
@@ -182,15 +180,13 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                 }
             }
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            _logger.Debug(e);
+            _logger.Debug("Operation Canceled");
         }
         catch (Exception e)
         {
-            _logger.Error(e);
-
-            throw;
+            _logger.Error(e, "Unexpected Exception");
         }
     }
 
@@ -236,13 +232,13 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                 if (!result) continue;
             }
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            _logger.Debug(e);
+            _logger.Debug("Operation Canceled");
         }
         catch (Exception e)
         {
-            _logger.Warn(e);
+            _logger.Error(e, "Unexpected Exception");
         }
 
         return false;
@@ -267,15 +263,13 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                 await this.TryAddAcceptedSessionAsync(session, cancellationToken);
             }
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            _logger.Debug(e);
+            _logger.Debug("Operation Canceled");
         }
         catch (Exception e)
         {
-            _logger.Error(e);
-
-            throw;
+            _logger.Error(e, "Unexpected Exception");
         }
     }
 
@@ -301,15 +295,21 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
             throw new NotSupportedException();
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            _logger.Debug(e);
+            _logger.Debug("Operation Canceled");
+
+            await session.DisposeAsync();
+        }
+        catch (ConnectionException)
+        {
+            _logger.Debug("Connection Exception");
 
             await session.DisposeAsync();
         }
         catch (Exception e)
         {
-            _logger.Warn(e);
+            _logger.Error(e, "Unexpected Exception");
 
             await session.DisposeAsync();
         }
@@ -354,15 +354,21 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
             throw new NotSupportedException();
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            _logger.Debug(e);
+            _logger.Debug("Operation Canceled");
+
+            await session.DisposeAsync();
+        }
+        catch (ConnectionException)
+        {
+            _logger.Debug("Connection Exception");
 
             await session.DisposeAsync();
         }
         catch (Exception e)
         {
-            _logger.Warn(e);
+            _logger.Error(e, "Unexpected Exception");
 
             await session.DisposeAsync();
         }
@@ -408,11 +414,11 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                         var dataMessage = sessionStatus.SendingDataMessage;
                         if (dataMessage is null || !sessionStatus.Session.Connection.Sender.TrySend(dataMessage)) continue;
 
-                        _logger.Debug($"Sent data message: {sessionStatus.Session.Address}");
+                        _logger.Debug($"[{nameof(FileExchanger)}] Sent Messsage ({sessionStatus.Session.Address})");
 
                         foreach (var block in dataMessage.GiveBlocks)
                         {
-                            _logger.Debug($"Sent block: ({block.Hash.ToString(ConvertStringType.Base58)})");
+                            _logger.Debug($"[{nameof(FileExchanger)}] Sent Block ({sessionStatus.Session.Address}) ({block.Hash.ToString(ConvertStringType.Base16)})");
 
                             block.Value.Dispose();
                         }
@@ -420,24 +426,34 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                         sessionStatus.SentBlockHashes.UnionWith(dataMessage.GiveBlocks.Select(n => n.Hash));
                         sessionStatus.SendingDataMessage = null;
                     }
+                    catch (ObjectDisposedException)
+                    {
+                        _logger.Debug("Object Disposed");
+
+                        await this.RemoveSessionStatusAsync(sessionStatus);
+                    }
+                    catch (ConnectionException)
+                    {
+                        _logger.Debug("Connection Exception");
+
+                        await this.RemoveSessionStatusAsync(sessionStatus);
+                    }
                     catch (Exception e)
                     {
-                        _logger.Debug(e);
+                        _logger.Error(e, "Unexpected Exception");
 
                         await this.RemoveSessionStatusAsync(sessionStatus);
                     }
                 }
             }
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            _logger.Debug(e);
+            _logger.Debug("Operation Canceled");
         }
         catch (Exception e)
         {
-            _logger.Error(e);
-
-            throw;
+            _logger.Error(e, "Unexpected Exception");
         }
     }
 
@@ -480,24 +496,34 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                             }
                         }
                     }
+                    catch (ObjectDisposedException)
+                    {
+                        _logger.Debug("Object Disposed");
+
+                        await this.RemoveSessionStatusAsync(sessionStatus);
+                    }
+                    catch (ConnectionException)
+                    {
+                        _logger.Debug("Connection Exception");
+
+                        await this.RemoveSessionStatusAsync(sessionStatus);
+                    }
                     catch (Exception e)
                     {
-                        _logger.Debug(e);
+                        _logger.Error(e, "Unexpected Exception");
 
                         await this.RemoveSessionStatusAsync(sessionStatus);
                     }
                 }
             }
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            _logger.Debug(e);
+            _logger.Debug("Operation Canceled");
         }
         catch (Exception e)
         {
-            _logger.Error(e);
-
-            throw;
+            _logger.Error(e, "Unexpected Exception");
         }
     }
 
@@ -533,15 +559,13 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                 }
             }
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            _logger.Debug(e);
+            _logger.Debug("Operation Canceled");
         }
         catch (Exception e)
         {
-            _logger.Error(e);
-
-            throw;
+            _logger.Error(e, "Unexpected Exception");
         }
     }
 
@@ -552,7 +576,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
             var elapsed = (DateTime.UtcNow - sessionStatus.LastReceivedTime);
             if (elapsed.TotalMinutes < 3) continue;
 
-            _logger.Debug($"Trim dead session: {sessionStatus.Session.Address}");
+            _logger.Debug($"[{nameof(FileExchanger)}] Trim dead session ({sessionStatus.Session.Address})");
 
             await this.RemoveSessionStatusAsync(sessionStatus);
         }
@@ -568,7 +592,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
             if (necessary) continue;
 
-            _logger.Debug($"Trim unnecessary session: {sessionStatus.Session.Address}");
+            _logger.Debug($"[{nameof(FileExchanger)}] Trim unnecessary session ({sessionStatus.Session.Address})");
 
             await this.RemoveSessionStatusAsync(sessionStatus);
         }

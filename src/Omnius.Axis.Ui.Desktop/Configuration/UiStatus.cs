@@ -1,4 +1,3 @@
-using Omnius.Core.Avalonia.Models;
 using Omnius.Core.Helpers;
 using Omnius.Core.Utils;
 
@@ -28,7 +27,7 @@ public sealed partial class UiStatus
         }
         catch (Exception e)
         {
-            _logger.Debug(e);
+            _logger.Error(e, "Unexpected Exception");
         }
 
         result ??= new UiStatus();
@@ -45,17 +44,14 @@ public sealed partial class UiStatus
 
 public sealed class MainWindowStatus
 {
-    public WindowStatus? Window { get; set; }
 }
 
 public sealed class SettingsWindowStatus
 {
-    public WindowStatus? Window { get; set; }
 }
 
 public sealed class MultiLineTextInputWindowStatus
 {
-    public WindowStatus? Window { get; set; }
 }
 
 public sealed class DownloadControlStatus

@@ -19,7 +19,10 @@ public class Program : CoconaLiteConsoleAppBase
 
     private static void UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-        _logger.Error(e);
+        if (e.ExceptionObject is Exception ex)
+        {
+            _logger.Error(ex, "Unhandled Exception");
+        }
     }
 
     public async ValueTask RunAsync([Option("storage", new char[] { 's' })] string storageDirectoryPath, [Option("listen", new char[] { 'l' })] string listenAddress, [Option("verbose", new char[] { 'v' })] bool verbose = false)
@@ -38,9 +41,13 @@ public class Program : CoconaLiteConsoleAppBase
 
             await Runner.EventLoopAsync(Path.Combine(storageDirectoryPath, "db"), OmniAddress.Parse(listenAddress), this.Context.CancellationToken);
         }
+        catch (OperationCanceledException)
+        {
+            _logger.Debug("Operation Canceled");
+        }
         catch (Exception e)
         {
-            _logger.Error(e);
+            _logger.Error(e, "Unexpected Exception");
         }
         finally
         {

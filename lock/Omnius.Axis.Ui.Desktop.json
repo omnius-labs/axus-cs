@@ -942,7 +942,8 @@
           "Avalonia.Xaml.Interactions": "0.10.12",
           "Avalonia.Xaml.Interactivity": "0.10.12",
           "NLog": "4.7.13",
-          "Omnius.Core": "0.0.1-alpha.1"
+          "Omnius.Core": "0.0.1-alpha.1",
+          "Omnius.Core.Utils": "0.0.1-alpha.1"
         }
       },
       "omnius.core.collections": {
@@ -985,8 +986,7 @@
           "Omnius.Core.Collections": "0.0.1-alpha.1",
           "Omnius.Core.Cryptography": "0.0.1-alpha.1",
           "Omnius.Core.RocketPack": "0.0.1-alpha.1",
-          "Omnius.Core.Serialization": "0.0.1-alpha.1",
-          "Sprache": "2.3.1"
+          "Omnius.Core.Serialization": "0.0.1-alpha.1"
         }
       },
       "omnius.core.net.connections": {
@@ -1001,8 +1001,7 @@
           "Omnius.Core.Pipelines": "0.0.1-alpha.1",
           "Omnius.Core.RocketPack": "0.0.1-alpha.1",
           "Omnius.Core.Serialization": "0.0.1-alpha.1",
-          "Omnius.Core.Tasks": "0.0.1-alpha.1",
-          "Sprache": "2.3.1"
+          "Omnius.Core.Tasks": "0.0.1-alpha.1"
         }
       },
       "omnius.core.net.proxies": {

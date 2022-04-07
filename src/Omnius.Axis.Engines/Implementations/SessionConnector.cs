@@ -58,9 +58,16 @@ public sealed class SessionConnector : AsyncDisposableBase, ISessionConnector
                 var session = await this.CreateSessionAsync(connection, address, scheme, linkedTokenSource.Token);
                 return session;
             }
+            catch (OperationCanceledException)
+            {
+                _logger.Debug("Operation Canceled");
+
+                await connection.DisposeAsync();
+            }
             catch (Exception e)
             {
-                _logger.Debug(e);
+                _logger.Error(e, "Unexpected Exception");
+
                 await connection.DisposeAsync();
             }
         }

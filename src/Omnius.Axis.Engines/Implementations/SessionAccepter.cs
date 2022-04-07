@@ -80,15 +80,13 @@ public sealed partial class SessionAccepter : AsyncDisposableBase, ISessionAccep
                 await channel.Writer.WriteAsync(session, cancellationToken);
             }
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            _logger.Debug(e);
+            _logger.Debug("Operation Canceled");
         }
         catch (Exception e)
         {
-            _logger.Error(e);
-
-            throw;
+            _logger.Error(e, "Unexpected Exception");
         }
     }
 
@@ -107,9 +105,16 @@ public sealed partial class SessionAccepter : AsyncDisposableBase, ISessionAccep
                 var session = await this.CreateSessionAsync(acceptedResult.Connection, acceptedResult.Address, linkedTokenSource.Token);
                 return session;
             }
+            catch (OperationCanceledException)
+            {
+                _logger.Debug("Operation Canceled");
+
+                await acceptedResult.Connection.DisposeAsync();
+            }
             catch (Exception e)
             {
-                _logger.Debug(e);
+                _logger.Error(e, "Unexpected Exception");
+
                 await acceptedResult.Connection.DisposeAsync();
             }
         }
