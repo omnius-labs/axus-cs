@@ -33,7 +33,7 @@ public partial class Bootstrapper : AsyncDisposableBase
         {
             var bytesPool = BytesPool.Shared;
 
-            var uiState = await UiStatus.LoadAsync(Path.Combine(_axisEnvironment.LogsDirectoryPath, UI_STATUS_FILE_NAME));
+            var uiState = await UiStatus.LoadAsync(Path.Combine(_axisEnvironment.DatabaseDirectoryPath, UI_STATUS_FILE_NAME));
 
             var intaractorProvider = new IntaractorProvider(_axisEnvironment.DatabaseDirectoryPath, _axisEnvironment.ListenAddress, bytesPool);
 
@@ -50,20 +50,20 @@ public partial class Bootstrapper : AsyncDisposableBase
             serviceCollection.AddSingleton<IDialogService, DialogService>();
             serviceCollection.AddSingleton<INodesFetcher, NodesFetcher>();
 
-            serviceCollection.AddTransient<MainWindowViewModel>();
-            serviceCollection.AddTransient<SettingsWindowViewModel>();
-            serviceCollection.AddTransient<MultiLineTextInputWindowViewModel>();
-            serviceCollection.AddTransient<StatusControlViewModel>();
-            serviceCollection.AddTransient<PeersControlViewModel>();
-            serviceCollection.AddTransient<DownloadControlViewModel>();
-            serviceCollection.AddTransient<UploadControlViewModel>();
-            serviceCollection.AddTransient<SignaturesControlViewModel>();
+            serviceCollection.AddSingleton<MainWindowViewModel>();
+            serviceCollection.AddSingleton<SettingsWindowViewModel>();
+            serviceCollection.AddSingleton<MultiLineTextInputWindowViewModel>();
+            serviceCollection.AddSingleton<StatusControlViewModel>();
+            serviceCollection.AddSingleton<PeersControlViewModel>();
+            serviceCollection.AddSingleton<DownloadControlViewModel>();
+            serviceCollection.AddSingleton<UploadControlViewModel>();
+            serviceCollection.AddSingleton<SignaturesControlViewModel>();
 
             _serviceProvider = serviceCollection.BuildServiceProvider();
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {

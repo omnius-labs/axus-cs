@@ -62,6 +62,10 @@ public sealed partial class TcpConnectionAccepter
                     }
                 }
             }
+            catch (Exception e)
+            {
+                _logger.Error(e, "Unexpected Exception");
+            }
             finally
             {
                 if (upnpClient != null)

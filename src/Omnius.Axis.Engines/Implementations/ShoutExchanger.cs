@@ -143,9 +143,9 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
                 }
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {
@@ -195,9 +195,9 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
                 if (!result) continue;
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {
@@ -226,9 +226,9 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
                 await this.TryAddAcceptedSessionAsync(session, cancellationToken);
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {
@@ -271,9 +271,9 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
                 throw new NotSupportedException();
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {
@@ -326,9 +326,9 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
                 throw new NotSupportedException();
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {
@@ -396,9 +396,9 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
                 }
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {

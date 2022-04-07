@@ -73,9 +73,9 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
                 await this.SyncPublishedFiles(cancellationToken);
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {

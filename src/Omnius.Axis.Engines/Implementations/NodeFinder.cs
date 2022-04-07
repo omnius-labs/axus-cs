@@ -229,9 +229,9 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
                 }
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {
@@ -260,9 +260,9 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
             this.RemoveCloudNodeLocation(nodeLocation);
             return false;
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {
@@ -316,9 +316,9 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
                 await this.TryAddSessionAsync(session, cancellationToken);
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {
@@ -459,9 +459,9 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
                 }
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {
@@ -524,9 +524,9 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
                 }
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {
@@ -564,9 +564,9 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
                 }
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {

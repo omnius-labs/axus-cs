@@ -63,7 +63,7 @@ public class StatusControlViewModel : AsyncDisposableBase
             {
                 await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken).ConfigureAwait(false);
 
-                var serviceController = await _intaractorAdapter.GetserviceControllerAsync();
+                var serviceController = await _intaractorAdapter.GetServiceControllerAsync();
 
                 var myNodeLocation = await serviceController.GetMyNodeLocationAsync(cancellationToken);
 
@@ -81,9 +81,9 @@ public class StatusControlViewModel : AsyncDisposableBase
                 }
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
     }
 }

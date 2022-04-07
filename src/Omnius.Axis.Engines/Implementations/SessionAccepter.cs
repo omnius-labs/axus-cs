@@ -80,9 +80,9 @@ public sealed partial class SessionAccepter : AsyncDisposableBase, ISessionAccep
                 await channel.Writer.WriteAsync(session, cancellationToken);
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {

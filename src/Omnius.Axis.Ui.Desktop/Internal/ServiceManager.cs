@@ -60,7 +60,7 @@ internal sealed class ServiceManager : AsyncDisposableBase
         var bridgeConnectionOptions = new BridgeConnectionOptions(int.MaxValue);
         _bridgeConnection = new BridgeConnection(_cap, null, null, _batchActionDispatcher, bytesPool, bridgeConnectionOptions);
 
-        var multiplexerOptions = new MultiplexerV1.OmniConnectionMultiplexerOptions(OmniConnectionMultiplexerType.Connected, TimeSpan.FromMilliseconds(1000 * 10), 10, uint.MaxValue, 10);
+        var multiplexerOptions = new MultiplexerV1.OmniConnectionMultiplexerOptions(OmniConnectionMultiplexerType.Connected, TimeSpan.FromMinutes(1), 10, int.MaxValue, 10);
         _multiplexer = OmniConnectionMultiplexer.CreateV1(_bridgeConnection, _batchActionDispatcher, bytesPool, multiplexerOptions);
 
         await _multiplexer.HandshakeAsync(cancellationToken);

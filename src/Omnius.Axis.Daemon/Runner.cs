@@ -1,7 +1,6 @@
 using System.Net.Sockets;
 using Omnius.Axis.Remoting;
 using Omnius.Core;
-using Omnius.Core.Helpers;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Caps;
 using Omnius.Core.Net.Connections.Bridge;
@@ -55,7 +54,7 @@ public static partial class Runner
         var bridgeConnectionOptions = new BridgeConnectionOptions(int.MaxValue);
         await using var bridgeConnection = new BridgeConnection(socketCap, null, null, batchActionDispatcher, bytesPool, bridgeConnectionOptions);
 
-        var multiplexerOption = new OmniConnectionMultiplexerOptions(OmniConnectionMultiplexerType.Accepted, TimeSpan.FromMinutes(1), 3, 1024 * 1024 * 4, 3);
+        var multiplexerOption = new OmniConnectionMultiplexerOptions(OmniConnectionMultiplexerType.Accepted, TimeSpan.FromMinutes(1), 10, int.MaxValue, 10);
         await using var multiplexer = OmniConnectionMultiplexer.CreateV1(bridgeConnection, batchActionDispatcher, bytesPool, multiplexerOption);
 
         await multiplexer.HandshakeAsync(cancellationToken);
@@ -66,7 +65,7 @@ public static partial class Runner
         var server = new AxisServiceRemoting.Server<DefaultErrorMessage>(service, listenerFactory, bytesPool);
 
         using var linkedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        using var onCloseListenerRegister = bridgeConnection.Events.OnClosed.Listen(() => ExceptionHelper.TryCatch<ObjectDisposedException>(() => linkedCancellationTokenSource.Cancel()));
+        // using var onCloseListenerRegister = bridgeConnection.Events.OnClosed.Listen(() => ExceptionHelper.TryCatch<ObjectDisposedException>(() => linkedCancellationTokenSource.Cancel()));
 
         await server.EventLoopAsync(linkedCancellationTokenSource.Token);
     }

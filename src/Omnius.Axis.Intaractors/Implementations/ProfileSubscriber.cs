@@ -83,9 +83,9 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
                 await this.UpdateProfilesAsync(cancellationToken);
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {

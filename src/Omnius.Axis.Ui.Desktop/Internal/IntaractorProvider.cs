@@ -7,7 +7,7 @@ namespace Omnius.Axis.Ui.Desktop.Internal;
 
 public interface IIntaractorProvider : IAsyncDisposable
 {
-    ValueTask<IServiceController> GetserviceControllerAsync(CancellationToken cancellationToken = default);
+    ValueTask<IServiceController> GetServiceControllerAsync(CancellationToken cancellationToken = default);
 
     ValueTask<IFileDownloader> GetFileDownloaderAsync(CancellationToken cancellationToken = default);
 
@@ -45,10 +45,10 @@ public partial class IntaractorProvider : AsyncDisposableBase, IIntaractorProvid
 
     protected override async ValueTask OnDisposeAsync()
     {
-        if (_serviceManager is not null) await _serviceManager.DisposeAsync();
+        await this.StopAsync();
     }
 
-    public async ValueTask<IServiceController> GetserviceControllerAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IServiceController> GetServiceControllerAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -101,6 +101,8 @@ public partial class IntaractorProvider : AsyncDisposableBase, IIntaractorProvid
 
             if (_serviceManager is not null && _serviceManager.IsConnected) return;
 
+            _logger.Debug("Update Start: ServiceManager");
+
             try
             {
                 await this.StopAsync(cancellationToken);
@@ -111,7 +113,9 @@ public partial class IntaractorProvider : AsyncDisposableBase, IIntaractorProvid
                 _logger.Warn(e, "Disconnected is Service");
             }
 
-            await Task.Delay(3000);
+            _logger.Debug("Update End: ServiceManager");
+
+            await Task.Delay(1000 * 10);
         }
     }
 
@@ -119,7 +123,6 @@ public partial class IntaractorProvider : AsyncDisposableBase, IIntaractorProvid
     {
         _serviceManager = await ServiceManager.CreateAsync(_listenAddress, cancellationToken);
         var service = _serviceManager.GetService()!;
-
         _serviceController = new ServiceController(service);
 
         var fileUploaderOptions = new FileUploaderOptions(Path.Combine(_databaseDirectoryPath, "file_uploader"));
@@ -129,18 +132,28 @@ public partial class IntaractorProvider : AsyncDisposableBase, IIntaractorProvid
         _fileDownloader = await FileDownloader.CreateAsync(_serviceController, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, fileDownloaderOptions, cancellationToken);
 
         var profilePublisherOptions = new ProfilePublisherOptions(Path.Combine(_databaseDirectoryPath, "profile_publisher"));
-        _profilePublisher = await ProfilePublisher.CreateAsync(_serviceController, SingleValueFileStorage.Factory, _bytesPool, profilePublisherOptions);
+        _profilePublisher = await ProfilePublisher.CreateAsync(_serviceController, SingleValueFileStorage.Factory, _bytesPool, profilePublisherOptions, cancellationToken);
 
         var profileSubscriberOptions = new ProfileSubscriberOptions(Path.Combine(_databaseDirectoryPath, "profile_subscriber"));
-        _profileSubscriber = await ProfileSubscriber.CreateAsync(_serviceController, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, profileSubscriberOptions);
+        _profileSubscriber = await ProfileSubscriber.CreateAsync(_serviceController, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, profileSubscriberOptions, cancellationToken);
     }
 
     private async ValueTask StopAsync(CancellationToken cancellationToken = default)
     {
-        if (_fileUploader is not null) await _fileUploader.DisposeAsync();
-        if (_fileDownloader is not null) await _fileDownloader.DisposeAsync();
         if (_profilePublisher is not null) await _profilePublisher.DisposeAsync();
+        _profilePublisher = null;
+
         if (_profileSubscriber is not null) await _profileSubscriber.DisposeAsync();
+        _profileSubscriber = null;
+
+        if (_fileUploader is not null) await _fileUploader.DisposeAsync();
+        _fileUploader = null;
+
+        if (_fileDownloader is not null) await _fileDownloader.DisposeAsync();
+        _fileDownloader = null;
+
         if (_serviceManager is not null) await _serviceManager.DisposeAsync();
+        _serviceManager = null;
+        _serviceController = null;
     }
 }

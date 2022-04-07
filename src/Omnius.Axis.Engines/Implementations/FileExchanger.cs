@@ -146,9 +146,9 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                 }
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {
@@ -180,9 +180,9 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                 }
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {
@@ -232,9 +232,9 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                 if (!result) continue;
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {
@@ -263,9 +263,9 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                 await this.TryAddAcceptedSessionAsync(session, cancellationToken);
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {
@@ -447,9 +447,9 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                 }
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {
@@ -517,9 +517,9 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                 }
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {
@@ -559,9 +559,9 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                 }
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
         }
         catch (Exception e)
         {

@@ -136,7 +136,7 @@ public class SettingsWindowViewModel : SettingsWindowViewModelBase
         var fileDownloaderConfig = await fileDownloader.GetConfigAsync(cancellationToken);
         this.FileDownloadDirectory!.Value = fileDownloaderConfig?.DestinationDirectory ?? string.Empty;
 
-        var serviceController = await _intaractorAdapter.GetserviceControllerAsync(cancellationToken);
+        var serviceController = await _intaractorAdapter.GetServiceControllerAsync(cancellationToken);
         var serviceConfig = await serviceController.GetConfigAsync(cancellationToken);
         this.ServiceBandwidth!.Value = ((serviceConfig.Bandwidth?.MaxReceiveBytesPerSeconds ?? 0 + serviceConfig.Bandwidth?.MaxSendBytesPerSeconds ?? 0) / 2).ToString();
         this.TcpConnectorIsEnabled!.Value = serviceConfig.TcpConnector?.IsEnabled ?? false;
@@ -169,7 +169,7 @@ public class SettingsWindowViewModel : SettingsWindowViewModelBase
                 useUpnp: this.TcpAccepterUseUpnp!.Value,
                 listenAddress: OmniAddress.Parse(this.TcpAccepterListenAddress!.Value)
             ));
-        var serviceController = await _intaractorAdapter.GetserviceControllerAsync(cancellationToken);
+        var serviceController = await _intaractorAdapter.GetServiceControllerAsync(cancellationToken);
         await serviceController.SetConfigAsync(serviceConfig, cancellationToken);
     }
 }
