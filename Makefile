@@ -4,7 +4,8 @@ gen-code:
 	bash ./eng/gen-code.sh
 
 test:
-	dotnet test --filter "FullyQualifiedName~Omnius.Axis"
+	dotnet format --verify-no-changes
+ 	dotnet test --filter "FullyQualifiedName~Omnius.Axis"
 
 build:
 	dotnet build
