@@ -295,9 +295,9 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
             throw new NotSupportedException();
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
 
             await session.DisposeAsync();
         }
@@ -354,9 +354,9 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
             throw new NotSupportedException();
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
 
             await session.DisposeAsync();
         }

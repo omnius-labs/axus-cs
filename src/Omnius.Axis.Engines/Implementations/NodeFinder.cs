@@ -346,9 +346,9 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
             throw new NotSupportedException();
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
-            _logger.Debug("Operation Canceled");
+            _logger.Debug(e, "Operation Canceled");
 
             await session.DisposeAsync();
         }

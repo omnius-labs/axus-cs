@@ -105,9 +105,9 @@ public sealed partial class SessionAccepter : AsyncDisposableBase, ISessionAccep
                 var session = await this.CreateSessionAsync(acceptedResult.Connection, acceptedResult.Address, linkedTokenSource.Token);
                 return session;
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException e)
             {
-                _logger.Debug("Operation Canceled");
+                _logger.Debug(e, "Operation Canceled");
 
                 await acceptedResult.Connection.DisposeAsync();
             }
