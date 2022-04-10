@@ -1,0 +1,27 @@
+@startuml Auto Update
+actor User as user
+participant "Launcher(old)" as launcher_old
+participant "Launcher(updater)" as launcher_updater
+participant "Launcher(new)" as launcher_new
+participant "IndexServer" as index_server
+participant "GitHub" as github
+user -> launcher_old : Start
+activate launcher_old
+launcher_old -> index_server : request update.yaml
+launcher_old <-- index_server: response update.yaml
+launcher_old -> github : request zip
+launcher_old <-- github: response zip
+launcher_old -> launcher_old : extract zip to updater directory
+launcher_old -> launcher_updater : start
+activate launcher_updater
+launcher_updater -> launcher_updater : wait for Launcher(old) to exit
+launcher_old -> launcher_old : exit
+deactivate launcher_old
+launcher_updater -> launcher_updater : delete to Launcher(old)
+launcher_updater -> launcher_updater : replace bin dir from old to new
+launcher_updater -> launcher_new : start
+activate launcher_new
+launcher_new -> launcher_new : wait for Launcher(updater) to exit
+launcher_updater -> launcher_updater : exit
+deactivate launcher_updater
+@enduml
