@@ -13,9 +13,9 @@ public sealed partial class UiStatus
 
     public SettingsWindowStatus? SettingsWindow { get; set; }
 
-    public MultiLineTextInputWindowStatus? MultiLineTextInputWindow { get; set; }
+    public TextEditWindowStatus? TextEditWindow { get; set; }
 
-    public DownloadControlStatus? DownloadControl { get; set; }
+    public DownloadViewStatus? DownloadView { get; set; }
 
     public static async ValueTask<UiStatus> LoadAsync(string configPath)
     {
@@ -50,11 +50,11 @@ public sealed class SettingsWindowStatus
 {
 }
 
-public sealed class MultiLineTextInputWindowStatus
+public sealed class TextEditWindowStatus
 {
 }
 
-public sealed class DownloadControlStatus
+public sealed class DownloadViewStatus
 {
     public double DataGrid_Rate_Width { get; set; }
 }

@@ -7,7 +7,7 @@ using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Omnius.Axis.Ui.Desktop.Configuration;
 using Omnius.Axis.Ui.Desktop.Internal;
-using Omnius.Axis.Ui.Desktop.Views.Main;
+using Omnius.Axis.Ui.Desktop.Windows.Main;
 using Omnius.Core.Helpers;
 using Omnius.Core.Net;
 
@@ -87,7 +87,7 @@ public class App : Application
 
             if (options.Verbose) ChangeLogLevel(NLog.LogLevel.Trace);
 
-            _lockFileStream = new FileStream(Path.Combine(options.StorageDirectoryPath!, "lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 1, FileOptions.DeleteOnClose);
+            _lockFileStream = new FileStream(Path.Combine(Directory.GetCurrentDirectory(), "lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 1, FileOptions.DeleteOnClose);
 
             _logger.Info("Starting...");
             _logger.Info("AssemblyInformationalVersion: {0}", Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion);
@@ -97,7 +97,7 @@ public class App : Application
             await Bootstrapper.Instance.BuildAsync(axisEnvironment);
 
             var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
-            var viewModel = serviceProvider.GetRequiredService<MainWindowViewModel>();
+            var viewModel = serviceProvider.GetRequiredService<MainWindowModel>();
 
             this.MainWindow!.ViewModel = viewModel;
         }

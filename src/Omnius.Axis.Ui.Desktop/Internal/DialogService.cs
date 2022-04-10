@@ -1,15 +1,15 @@
 using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Omnius.Axis.Ui.Desktop.Configuration;
-using Omnius.Axis.Ui.Desktop.Views.Dialogs;
-using Omnius.Axis.Ui.Desktop.Views.Settings;
+using Omnius.Axis.Ui.Desktop.TextEdit;
+using Omnius.Axis.Ui.Desktop.Windows.Settings;
 using Omnius.Core.Avalonia;
 
 namespace Omnius.Axis.Ui.Desktop.Internal;
 
 public interface IDialogService
 {
-    ValueTask<string> ShowMultiLineTextInputWindowAsync();
+    ValueTask<string> ShowTextEditWindowAsync();
 
     ValueTask ShowSettingsWindowAsync();
 
@@ -31,14 +31,14 @@ public class DialogService : IDialogService
         _clipboardService = clipboardService;
     }
 
-    public async ValueTask<string> ShowMultiLineTextInputWindowAsync()
+    public async ValueTask<string> ShowTextEditWindowAsync()
     {
         return await _applicationDispatcher.InvokeAsync(async () =>
         {
-            var window = new MultiLineTextInputWindow(Path.Combine(_axisEnvironment.DatabaseDirectoryPath, "windows", "multi_line_text_input"));
+            var window = new TextEditWindow(Path.Combine(_axisEnvironment.DatabaseDirectoryPath, "windows", "multi_line_text_input"));
             var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
 
-            var viewModel = serviceProvider.GetRequiredService<MultiLineTextInputWindowViewModel>();
+            var viewModel = serviceProvider.GetRequiredService<TextEditWindowModel>();
             await viewModel.InitializeAsync();
             window.ViewModel = viewModel;
 
@@ -54,7 +54,7 @@ public class DialogService : IDialogService
             var window = new SettingsWindow(Path.Combine(_axisEnvironment.DatabaseDirectoryPath, "windows", "settings"));
             var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
 
-            var viewModel = serviceProvider.GetRequiredService<SettingsWindowViewModel>();
+            var viewModel = serviceProvider.GetRequiredService<SettingsWindowModel>();
             await viewModel.InitializeAsync();
             window.ViewModel = viewModel;
 

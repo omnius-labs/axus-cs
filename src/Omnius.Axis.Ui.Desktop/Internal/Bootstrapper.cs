@@ -1,8 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Omnius.Axis.Ui.Desktop.Configuration;
-using Omnius.Axis.Ui.Desktop.Views.Dialogs;
-using Omnius.Axis.Ui.Desktop.Views.Main;
-using Omnius.Axis.Ui.Desktop.Views.Settings;
+using Omnius.Axis.Ui.Desktop.TextEdit;
+using Omnius.Axis.Ui.Desktop.Windows.Main;
+using Omnius.Axis.Ui.Desktop.Windows.Settings;
 using Omnius.Core;
 using Omnius.Core.Avalonia;
 
@@ -50,14 +50,14 @@ public partial class Bootstrapper : AsyncDisposableBase
             serviceCollection.AddSingleton<IDialogService, DialogService>();
             serviceCollection.AddSingleton<INodesFetcher, NodesFetcher>();
 
-            serviceCollection.AddSingleton<MainWindowViewModel>();
-            serviceCollection.AddSingleton<SettingsWindowViewModel>();
-            serviceCollection.AddSingleton<MultiLineTextInputWindowViewModel>();
-            serviceCollection.AddSingleton<StatusControlViewModel>();
-            serviceCollection.AddSingleton<PeersControlViewModel>();
-            serviceCollection.AddSingleton<DownloadControlViewModel>();
-            serviceCollection.AddSingleton<UploadControlViewModel>();
-            serviceCollection.AddSingleton<SignaturesControlViewModel>();
+            serviceCollection.AddSingleton<MainWindowModel>();
+            serviceCollection.AddSingleton<SettingsWindowModel>();
+            serviceCollection.AddSingleton<TextEditWindowModel>();
+            serviceCollection.AddSingleton<StatusViewViewModel>();
+            serviceCollection.AddSingleton<PeersViewViewModel>();
+            serviceCollection.AddSingleton<DownloadViewViewModel>();
+            serviceCollection.AddSingleton<UploadViewViewModel>();
+            serviceCollection.AddSingleton<SignaturesViewViewModel>();
 
             _serviceProvider = serviceCollection.BuildServiceProvider();
         }
