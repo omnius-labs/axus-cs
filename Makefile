@@ -5,7 +5,7 @@ gen-code:
 
 test:
 	dotnet format --verify-no-changes
- 	dotnet test --filter "FullyQualifiedName~Omnius.Axis"
+	dotnet test --filter "FullyQualifiedName~Omnius.Axis"
 
 build:
 	dotnet build
