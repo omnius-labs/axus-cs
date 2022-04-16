@@ -1,13 +1,13 @@
 using Omnius.Core.Helpers;
 using Omnius.Core.Utils;
 
-namespace Omnius.Axis.Ui.Desktop.Configuration;
+namespace Omnius.Axis.Ui.Desktop.Models;
 
-public sealed partial class UiStatus
+public sealed class UiStatus
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    public int Version { get; init; }
+    public int Version { get; set; }
 
     public MainWindowStatus? MainWindow { get; set; }
 

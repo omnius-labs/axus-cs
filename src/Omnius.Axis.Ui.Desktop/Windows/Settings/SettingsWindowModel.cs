@@ -1,8 +1,8 @@
 using Avalonia.Controls;
 using Omnius.Axis.Intaractors.Models;
 using Omnius.Axis.Models;
-using Omnius.Axis.Ui.Desktop.Configuration;
 using Omnius.Axis.Ui.Desktop.Internal;
+using Omnius.Axis.Ui.Desktop.Models;
 using Omnius.Core;
 using Omnius.Core.Net;
 using Reactive.Bindings;

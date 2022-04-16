@@ -1,4 +1,4 @@
-using Omnius.Axis.Ui.Desktop.Configuration;
+using Omnius.Axis.Ui.Desktop.Models;
 using Omnius.Axis.Ui.Desktop.Windows.Settings;
 using Omnius.Core;
 using Reactive.Bindings;

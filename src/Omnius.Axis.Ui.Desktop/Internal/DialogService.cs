@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
-using Omnius.Axis.Ui.Desktop.Configuration;
+using Omnius.Axis.Ui.Desktop.Models;
 using Omnius.Axis.Ui.Desktop.TextEdit;
 using Omnius.Axis.Ui.Desktop.Windows.Settings;
 using Omnius.Core.Avalonia;

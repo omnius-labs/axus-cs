@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Text;
-using Omnius.Axis.Ui.Desktop.Configuration;
 using Omnius.Axis.Ui.Desktop.Internal;
+using Omnius.Axis.Ui.Desktop.Models;
 using Omnius.Core;
 using Omnius.Core.Avalonia;
 using Omnius.Core.Cryptography;

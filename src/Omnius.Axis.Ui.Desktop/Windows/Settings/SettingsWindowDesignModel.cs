@@ -1,5 +1,5 @@
 using Avalonia.Controls;
-using Omnius.Axis.Ui.Desktop.Configuration;
+using Omnius.Axis.Ui.Desktop.Models;
 using Omnius.Core;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;

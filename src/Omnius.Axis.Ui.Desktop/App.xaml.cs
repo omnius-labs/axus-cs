@@ -5,7 +5,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
-using Omnius.Axis.Ui.Desktop.Configuration;
+using Omnius.Axis.Ui.Desktop.Models;
 using Omnius.Axis.Ui.Desktop.Internal;
 using Omnius.Axis.Ui.Desktop.Windows.Main;
 using Omnius.Core.Helpers;
@@ -68,11 +68,10 @@ public class App : Application
     private void Startup()
     {
         var parsedResult = CommandLine.Parser.Default.ParseArguments<Options>(Environment.GetCommandLineArgs());
-        parsedResult = parsedResult.WithParsed(this.Run);
-        parsedResult.WithNotParsed(this.HandleParseError);
+        parsedResult.WithParsed(this.OnParsed);
     }
 
-    private async void Run(Options options)
+    private async void OnParsed(Options options)
     {
         try
         {
@@ -104,14 +103,6 @@ public class App : Application
         catch (Exception e)
         {
             _logger.Error(e, "Unexpected Exception");
-        }
-    }
-
-    private void HandleParseError(IEnumerable<Error> errs)
-    {
-        foreach (var err in errs)
-        {
-            _logger.Error(err);
         }
     }
 

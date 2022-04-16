@@ -1,6 +1,6 @@
 using Omnius.Core.Net;
 
-namespace Omnius.Axis.Ui.Desktop.Configuration;
+namespace Omnius.Axis.Ui.Desktop.Models;
 
 public sealed class AxisEnvironment
 {

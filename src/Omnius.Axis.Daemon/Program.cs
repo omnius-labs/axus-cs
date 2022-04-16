@@ -9,8 +9,6 @@ public class Program : CoconaLiteConsoleAppBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private FileStream? _lockFileStream;
-
     public static void Main(string[] args)
     {
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(Program.UnhandledException);
@@ -27,6 +25,8 @@ public class Program : CoconaLiteConsoleAppBase
 
     public async ValueTask RunAsync([Option("storage", new char[] { 's' })] string storageDirectoryPath, [Option("listen", new char[] { 'l' })] string listenAddress, [Option("verbose", new char[] { 'v' })] bool verbose = false)
     {
+        FileStream? lockFileStream = null;
+
         try
         {
             DirectoryHelper.CreateDirectory(storageDirectoryPath);
@@ -34,7 +34,7 @@ public class Program : CoconaLiteConsoleAppBase
             SetLogsDirectory(Path.Combine(storageDirectoryPath, "logs"));
             if (verbose) ChangeLogLevel(NLog.LogLevel.Trace);
 
-            _lockFileStream = new FileStream(Path.Combine(Directory.GetCurrentDirectory(), "lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 1, FileOptions.DeleteOnClose);
+            lockFileStream = new FileStream(Path.Combine(Directory.GetCurrentDirectory(), "lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 1, FileOptions.DeleteOnClose);
 
             _logger.Info("Starting...");
             _logger.Info("AssemblyInformationalVersion: {0}", Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion);
@@ -54,7 +54,7 @@ public class Program : CoconaLiteConsoleAppBase
             _logger.Info("Stopping...");
             NLog.LogManager.Shutdown();
 
-            _lockFileStream?.Dispose();
+            lockFileStream?.Dispose();
         }
     }
 

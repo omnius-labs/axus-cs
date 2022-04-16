@@ -943,6 +943,7 @@
           "Avalonia.Xaml.Interactivity": "0.10.12",
           "NLog": "4.7.13",
           "Omnius.Core": "0.0.1-alpha.1",
+          "Omnius.Core.Pipelines": "0.0.1-alpha.1",
           "Omnius.Core.Utils": "0.0.1-alpha.1"
         }
       },

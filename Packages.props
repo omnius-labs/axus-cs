@@ -29,6 +29,7 @@
     <PackageReference Update="System.Text.Json" Version="6.0.1" />
     <PackageReference Update="YamlDotNet" Version="11.2.1" />
     <PackageReference Update="YamlDotNet" Version="11.2.1" />
+    <PackageReference Update="MessageBox.Avalonia" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -120,10 +120,10 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
 
             foreach (var item in _fileDownloaderRepo.Items.FindAll())
             {
+                if (item.State == DownloadingFileState.Completed) continue;
+
                 if (!reports.TryGetValue(item.Seed.RootHash, out var report)) continue;
                 if (report.Status.State != SubscribedFileState.Downloaded) continue;
-
-                if (item.State == DownloadingFileState.Completed) continue;
 
                 DirectoryHelper.CreateDirectory(basePath);
                 var filePath = Path.Combine(basePath, item.Seed.Name);
