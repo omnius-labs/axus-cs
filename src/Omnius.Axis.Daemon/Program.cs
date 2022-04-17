@@ -34,7 +34,7 @@ public class Program : CoconaLiteConsoleAppBase
             SetLogsDirectory(Path.Combine(storageDirectoryPath, "logs"));
             if (verbose) ChangeLogLevel(NLog.LogLevel.Trace);
 
-            lockFileStream = new FileStream(Path.Combine(Directory.GetCurrentDirectory(), "lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 1, FileOptions.DeleteOnClose);
+            lockFileStream = new FileStream(Path.Combine(storageDirectoryPath, "lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 1, FileOptions.DeleteOnClose);
 
             _logger.Info("Starting...");
             _logger.Info("AssemblyInformationalVersion: {0}", Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion);
