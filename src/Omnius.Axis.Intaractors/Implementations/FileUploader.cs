@@ -41,7 +41,7 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
         _bytesPool = bytesPool;
         _options = options;
 
-        _fileUploaderRepo = new FileUploaderRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
+        _fileUploaderRepo = new FileUploaderRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
     }
 
     private async ValueTask InitAsync(CancellationToken cancellationToken = default)

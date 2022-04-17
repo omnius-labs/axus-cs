@@ -40,7 +40,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
         _bytesPool = bytesPool;
         _options = options;
 
-        _publisherRepo = new PublishedFileStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
+        _publisherRepo = new PublishedFileStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
         _blockStorage = _keyValueStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
     }
 

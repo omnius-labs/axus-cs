@@ -36,7 +36,7 @@ public sealed partial class SubscribedShoutStorage : AsyncDisposableBase, ISubsc
         _bytesPool = bytesPool;
         _options = options;
 
-        _subscriberRepo = new SubscribedShoutStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
+        _subscriberRepo = new SubscribedShoutStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
         _blockStorage = _keyValueStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
     }
 

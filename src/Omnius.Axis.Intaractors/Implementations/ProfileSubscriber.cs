@@ -44,7 +44,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
         _bytesPool = bytesPool;
         _options = options;
 
-        _profileSubscriberRepo = new ProfileSubscriberRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
+        _profileSubscriberRepo = new ProfileSubscriberRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
         _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
         _cachedProfileStorage = keyValueStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "profiles"), _bytesPool);
     }

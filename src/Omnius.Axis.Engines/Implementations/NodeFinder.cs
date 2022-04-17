@@ -74,7 +74,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         _options = options;
         _myId = GenId();
 
-        _nodeFinderRepo = new NodeFinderRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
+        _nodeFinderRepo = new NodeFinderRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
 
         _events = new Events(_getPushContentCluesFuncPipe.Listener, _getWantContentCluesFuncPipe.Listener);
 

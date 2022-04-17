@@ -41,7 +41,7 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
         _bytesPool = bytesPool;
         _options = options;
 
-        _subscriberRepo = new SubscribedFileStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
+        _subscriberRepo = new SubscribedFileStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
         _blockStorage = _keyValueStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
     }
 

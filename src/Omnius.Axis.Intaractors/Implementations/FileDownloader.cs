@@ -43,7 +43,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
         _options = options;
 
         _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
-        _fileDownloaderRepo = new FileDownloaderRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
+        _fileDownloaderRepo = new FileDownloaderRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
     }
 
     private async ValueTask InitAsync(CancellationToken cancellationToken = default)

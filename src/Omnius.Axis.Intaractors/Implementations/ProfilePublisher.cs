@@ -41,7 +41,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
         _bytesPool = bytesPool;
         _options = options;
 
-        _profilePublisherRepo = new ProfilePublisherRepository(Path.Combine(_options.ConfigDirectoryPath, "state"));
+        _profilePublisherRepo = new ProfilePublisherRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
         _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
     }
 
