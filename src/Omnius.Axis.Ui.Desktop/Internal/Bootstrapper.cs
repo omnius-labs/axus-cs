@@ -50,14 +50,14 @@ public partial class Bootstrapper : AsyncDisposableBase
             serviceCollection.AddSingleton<IDialogService, DialogService>();
             serviceCollection.AddSingleton<INodesFetcher, NodesFetcher>();
 
-            serviceCollection.AddSingleton<MainWindowModel>();
-            serviceCollection.AddSingleton<SettingsWindowModel>();
-            serviceCollection.AddSingleton<TextEditWindowModel>();
-            serviceCollection.AddSingleton<StatusViewViewModel>();
-            serviceCollection.AddSingleton<PeersViewViewModel>();
-            serviceCollection.AddSingleton<DownloadViewViewModel>();
-            serviceCollection.AddSingleton<UploadViewViewModel>();
-            serviceCollection.AddSingleton<SignaturesViewViewModel>();
+            serviceCollection.AddTransient<MainWindowModel>();
+            serviceCollection.AddTransient<SettingsWindowModel>();
+            serviceCollection.AddTransient<TextEditWindowModel>();
+            serviceCollection.AddTransient<StatusViewViewModel>();
+            serviceCollection.AddTransient<PeersViewViewModel>();
+            serviceCollection.AddTransient<DownloadViewViewModel>();
+            serviceCollection.AddTransient<UploadViewViewModel>();
+            serviceCollection.AddTransient<SignaturesViewViewModel>();
 
             _serviceProvider = serviceCollection.BuildServiceProvider();
         }
