@@ -46,7 +46,7 @@ internal sealed class ServiceManager : AsyncDisposableBase
 
     private async ValueTask ConnectAsync(CancellationToken cancellationToken = default)
     {
-        if (!_listenAddress.TryGetTcpEndpoint(out var ipAddress, out var port)) throw new Exception("address is invalid format.");
+        if (!_listenAddress.TryParseTcpEndpoint(out var ipAddress, out var port)) throw new Exception("address is invalid format.");
 
         var bytesPool = BytesPool.Shared;
 

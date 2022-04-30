@@ -45,68 +45,47 @@
                 </StackPanel>
 
                 <TreeView DockPanel.Dock="Left">
-                    <!-- <TreeViewItem Name="ProfileTreeViewItem" Header="Profile" IsExpanded="True">
-                            <TreeViewItem Name="TrustedSignaturesTreeViewItem" Header="Trusted Signatures" />
-                            <TreeViewItem Name="BlockedSignaturesTreeViewItem" Header="Blocked Signatures" />
-                        </TreeViewItem> -->
-                    <TreeViewItem Name="FileTreeViewItem" Header="File" IsExpanded="True" IsSelected="True" />
-                    <TreeViewItem Name="ServiceTreeViewItem" Header="Service" IsExpanded="True" >
+                    <TreeViewItem Name="NetworkTreeViewItem" Header="Network" IsExpanded="True" >
+                        <TreeViewItem Name="I2pConnectorTreeViewItem" Header="I2p Connector" />
+                        <TreeViewItem Name="I2pAccepterTreeViewItem" Header="I2p Accepter" />
                         <TreeViewItem Name="TcpConnectorTreeViewItem" Header="Tcp Connector" />
                         <TreeViewItem Name="TcpAccepterTreeViewItem" Header="Tcp Accepter" />
                     </TreeViewItem>
+                    <TreeViewItem Name="FileTreeViewItem" Header="File" IsExpanded="True" IsSelected="True" />
                 </TreeView>
 
                 <Panel DockPanel.Dock="Right" Margin="16,16,16,0">
-                    <!-- Profile -->
-                    <!-- <Grid IsVisible="{Binding #ProfileTreeViewItem.IsSelected}">
-                            <StackPanel Orientation="Vertical" Spacing="12">
-                                <TextBlock Classes="Headline5" Text="Profile" />
-                                <StackPanel Orientation="Vertical">
-                                    <StackPanel Orientation="Horizontal" Spacing="12">
-                                        <Label Content="Signature" VerticalAlignment="Center" />
-                                        <TextBox Text="{Binding ProfileSignature.Value}" VerticalAlignment="Center" Width="300"
-                                                TextWrapping="NoWrap" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
-                                        <Button Content="New" VerticalAlignment="Center" MinWidth="80" />
-                                        <Button Content="Import" VerticalAlignment="Center" MinWidth="80" />
-                                        <Button Content="Export" VerticalAlignment="Center" MinWidth="80" />
-                                    </StackPanel>
-                                </StackPanel>
-                            </StackPanel>
-                        </Grid> -->
-                    <!-- TrustedSignatures -->
-                    <!-- <Grid IsVisible="{Binding #TrustedSignaturesTreeViewItem.IsSelected}" VerticalAlignment="Top">
-                            <StackPanel Orientation="Vertical" Spacing="12">
-                                <TextBlock Classes="Headline5" Text="Trusted Signatures" />
-                                <local:SignaturesView DataContext="{Binding TrustedSignaturesViewViewModel}" />
-                            </StackPanel>
-                        </Grid> -->
-                    <!-- BlockedSignatures -->
-                    <!-- <Grid IsVisible="{Binding #BlockedSignaturesTreeViewItem.IsSelected}" VerticalAlignment="Top">
-                            <StackPanel Orientation="Vertical" Spacing="12">
-                                <TextBlock Classes="Headline5" Text="Blocked Signatures" />
-                                <local:SignaturesView DataContext="{Binding BlockedSignaturesViewViewModel}" />
-                            </StackPanel>
-                        </Grid> -->
-
-                    <!-- File -->
-                    <DockPanel IsVisible="{Binding #FileTreeViewItem.IsSelected}" >
-                        <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="File" />
+                    <!-- Network -->
+                    <DockPanel IsVisible="{Binding #NetworkTreeViewItem.IsSelected}" >
+                        <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="Network" />
                         <StackPanel Orientation="Vertical" Spacing="12" Margin="16">
                             <DockPanel>
-                                <Label DockPanel.Dock="Left" Content="Download directory:" VerticalAlignment="Center" />
-                                <Button DockPanel.Dock="Right" Content="Open" Width="120"  Command="{Binding OpenFileDownloadDirectoryCommand}" />
-                                <TextBox Text="{Binding FileDownloadDirectory.Value}" Margin="16,0"
+                                <Label DockPanel.Dock="Left" Content="Bandwidth:" VerticalAlignment="Center" />
+                                <TextBox Text="{Binding NetworkBandwidth.Value}" Margin="16,0"
                                         TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
                             </DockPanel>
                         </StackPanel>
                     </DockPanel>
-                    <!-- Service -->
-                    <DockPanel IsVisible="{Binding #ServiceTreeViewItem.IsSelected}" >
-                        <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="Service" />
+                    <!-- I2pConnector -->
+                    <DockPanel IsVisible="{Binding #I2pConnectorTreeViewItem.IsSelected}" >
+                        <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="I2p Connector" />
                         <StackPanel Orientation="Vertical" Spacing="12" Margin="16">
+                            <CheckBox Content="Enabled" IsChecked="{Binding I2pConnectorIsEnabled.Value}" />
                             <DockPanel>
-                                <Label DockPanel.Dock="Left" Content="Bandwidth:" VerticalAlignment="Center" />
-                                <TextBox Text="{Binding ServiceBandwidth.Value}" Margin="16,0"
+                                <Label DockPanel.Dock="Left" Content="Sam Bridge address:" VerticalAlignment="Center" />
+                                <TextBox Text="{Binding I2pConnectorSamBridgeAddress.Value}" Margin="16,0"
+                                        TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
+                            </DockPanel>
+                        </StackPanel>
+                    </DockPanel>
+                    <!-- I2pAccepter -->
+                    <DockPanel IsVisible="{Binding #I2pAccepterTreeViewItem.IsSelected}" >
+                        <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="I2p Accepter" />
+                        <StackPanel Orientation="Vertical" Spacing="12" Margin="16">
+                            <CheckBox Content="Enabled" IsChecked="{Binding I2pAccepterIsEnabled.Value}" />
+                            <DockPanel>
+                                <Label DockPanel.Dock="Left" Content="Sam Bridge address:" VerticalAlignment="Center" />
+                                <TextBox Text="{Binding I2pAccepterSamBridgeAddress.Value}" Margin="16,0"
                                         TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
                             </DockPanel>
                         </StackPanel>
@@ -137,6 +116,18 @@
                             <DockPanel>
                                 <Label DockPanel.Dock="Left" Content="Listen address:" VerticalAlignment="Center" />
                                 <TextBox Text="{Binding TcpAccepterListenAddress.Value}" Margin="16,0"
+                                        TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
+                            </DockPanel>
+                        </StackPanel>
+                    </DockPanel>
+                    <!-- File -->
+                    <DockPanel IsVisible="{Binding #FileTreeViewItem.IsSelected}" >
+                        <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="File" />
+                        <StackPanel Orientation="Vertical" Spacing="12" Margin="16">
+                            <DockPanel>
+                                <Label DockPanel.Dock="Left" Content="Download directory:" VerticalAlignment="Center" />
+                                <Button DockPanel.Dock="Right" Content="Open" Width="120"  Command="{Binding OpenFileDownloadDirectoryCommand}" />
+                                <TextBox Text="{Binding FileDownloadDirectory.Value}" Margin="16,0"
                                         TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
                             </DockPanel>
                         </StackPanel>

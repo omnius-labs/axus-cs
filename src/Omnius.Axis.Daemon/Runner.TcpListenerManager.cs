@@ -13,7 +13,7 @@ public static partial class Runner
 
         public TcpListenerManager(OmniAddress listenAddress, CancellationToken cancellationToken = default)
         {
-            if (!listenAddress.TryGetTcpEndpoint(out var ipAddress, out var port)) throw new Exception("listenAddress is invalid format.");
+            if (!listenAddress.TryParseTcpEndpoint(out var ipAddress, out var port)) throw new Exception("listenAddress is invalid format.");
 
             _tcpListener = new TcpListener(ipAddress!, port);
             _tcpListener.Start();

@@ -13,12 +13,6 @@ build:
 run-designer: build
 	dotnet msbuild ./src/Omnius.Axis.Ui.Desktop/ /t:Preview /p:XamlFile=$(PreviewXamlFile)
 
-format:
-	dotnet tool run dotnet-format
-
-update-nuget:
-	dotnet tool run nukeeper update
-
 update-dotnet-tool:
 	bash ./eng/update-dotnet-tool.sh
 

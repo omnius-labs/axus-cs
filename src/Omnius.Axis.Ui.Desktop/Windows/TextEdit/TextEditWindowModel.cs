@@ -5,7 +5,7 @@ using Omnius.Core.Avalonia;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 
-namespace Omnius.Axis.Ui.Desktop.TextEdit;
+namespace Omnius.Axis.Ui.Desktop.Windows.TextEdit;
 
 public abstract class TextEditWindowModelBase : AsyncDisposableBase
 {
@@ -37,10 +37,8 @@ public class TextEditWindowModel : TextEditWindowModelBase
         this.Status = _uiState.TextEditWindow ??= new TextEditWindowStatus();
 
         this.Text = new ReactivePropertySlim<string>().AddTo(_disposable);
-
         this.OkCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.OkCommand.Subscribe(async (state) => await this.OkAsync(state)).AddTo(_disposable);
-
         this.CancelCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.CancelCommand.Subscribe(async (state) => await this.CancelAsync(state)).AddTo(_disposable);
     }

@@ -661,14 +661,16 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
     static ServiceConfig()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.ServiceConfig>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.ServiceConfig>.Empty = new global::Omnius.Axis.Models.ServiceConfig(null, null, null);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.ServiceConfig>.Empty = new global::Omnius.Axis.Models.ServiceConfig(null, null, null, null, null);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public ServiceConfig(global::Omnius.Axis.Models.BandwidthConfig? bandwidth, global::Omnius.Axis.Models.TcpConnectorConfig? tcpConnector, global::Omnius.Axis.Models.TcpAccepterConfig? tcpAccepter)
+    public ServiceConfig(global::Omnius.Axis.Models.BandwidthConfig? bandwidth, global::Omnius.Axis.Models.I2pConnectorConfig? i2pConnector, global::Omnius.Axis.Models.I2pAccepterConfig? i2pAccepter, global::Omnius.Axis.Models.TcpConnectorConfig? tcpConnector, global::Omnius.Axis.Models.TcpAccepterConfig? tcpAccepter)
     {
         this.Bandwidth = bandwidth;
+        this.I2pConnector = i2pConnector;
+        this.I2pAccepter = i2pAccepter;
         this.TcpConnector = tcpConnector;
         this.TcpAccepter = tcpAccepter;
 
@@ -676,6 +678,8 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
         {
             var ___h = new global::System.HashCode();
             if (bandwidth != default) ___h.Add(bandwidth.GetHashCode());
+            if (i2pConnector != default) ___h.Add(i2pConnector.GetHashCode());
+            if (i2pAccepter != default) ___h.Add(i2pAccepter.GetHashCode());
             if (tcpConnector != default) ___h.Add(tcpConnector.GetHashCode());
             if (tcpAccepter != default) ___h.Add(tcpAccepter.GetHashCode());
             return ___h.ToHashCode();
@@ -683,6 +687,8 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
     }
 
     public global::Omnius.Axis.Models.BandwidthConfig? Bandwidth { get; }
+    public global::Omnius.Axis.Models.I2pConnectorConfig? I2pConnector { get; }
+    public global::Omnius.Axis.Models.I2pAccepterConfig? I2pAccepter { get; }
     public global::Omnius.Axis.Models.TcpConnectorConfig? TcpConnector { get; }
     public global::Omnius.Axis.Models.TcpAccepterConfig? TcpAccepter { get; }
 
@@ -716,6 +722,10 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
         if (object.ReferenceEquals(this, target)) return true;
         if ((this.Bandwidth is null) != (target.Bandwidth is null)) return false;
         if ((this.Bandwidth is not null) && (target.Bandwidth is not null) && this.Bandwidth != target.Bandwidth) return false;
+        if ((this.I2pConnector is null) != (target.I2pConnector is null)) return false;
+        if ((this.I2pConnector is not null) && (target.I2pConnector is not null) && this.I2pConnector != target.I2pConnector) return false;
+        if ((this.I2pAccepter is null) != (target.I2pAccepter is null)) return false;
+        if ((this.I2pAccepter is not null) && (target.I2pAccepter is not null) && this.I2pAccepter != target.I2pAccepter) return false;
         if ((this.TcpConnector is null) != (target.TcpConnector is null)) return false;
         if ((this.TcpConnector is not null) && (target.TcpConnector is not null) && this.TcpConnector != target.TcpConnector) return false;
         if ((this.TcpAccepter is null) != (target.TcpAccepter is null)) return false;
@@ -736,14 +746,24 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
                 w.Write((uint)1);
                 global::Omnius.Axis.Models.BandwidthConfig.Formatter.Serialize(ref w, value.Bandwidth, rank + 1);
             }
-            if (value.TcpConnector != null)
+            if (value.I2pConnector != null)
             {
                 w.Write((uint)2);
+                global::Omnius.Axis.Models.I2pConnectorConfig.Formatter.Serialize(ref w, value.I2pConnector, rank + 1);
+            }
+            if (value.I2pAccepter != null)
+            {
+                w.Write((uint)3);
+                global::Omnius.Axis.Models.I2pAccepterConfig.Formatter.Serialize(ref w, value.I2pAccepter, rank + 1);
+            }
+            if (value.TcpConnector != null)
+            {
+                w.Write((uint)4);
                 global::Omnius.Axis.Models.TcpConnectorConfig.Formatter.Serialize(ref w, value.TcpConnector, rank + 1);
             }
             if (value.TcpAccepter != null)
             {
-                w.Write((uint)3);
+                w.Write((uint)5);
                 global::Omnius.Axis.Models.TcpAccepterConfig.Formatter.Serialize(ref w, value.TcpAccepter, rank + 1);
             }
             w.Write((uint)0);
@@ -753,6 +773,8 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Axis.Models.BandwidthConfig? p_bandwidth = null;
+            global::Omnius.Axis.Models.I2pConnectorConfig? p_i2pConnector = null;
+            global::Omnius.Axis.Models.I2pAccepterConfig? p_i2pAccepter = null;
             global::Omnius.Axis.Models.TcpConnectorConfig? p_tcpConnector = null;
             global::Omnius.Axis.Models.TcpAccepterConfig? p_tcpAccepter = null;
 
@@ -769,10 +791,20 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
                         }
                     case 2:
                         {
-                            p_tcpConnector = global::Omnius.Axis.Models.TcpConnectorConfig.Formatter.Deserialize(ref r, rank + 1);
+                            p_i2pConnector = global::Omnius.Axis.Models.I2pConnectorConfig.Formatter.Deserialize(ref r, rank + 1);
                             break;
                         }
                     case 3:
+                        {
+                            p_i2pAccepter = global::Omnius.Axis.Models.I2pAccepterConfig.Formatter.Deserialize(ref r, rank + 1);
+                            break;
+                        }
+                    case 4:
+                        {
+                            p_tcpConnector = global::Omnius.Axis.Models.TcpConnectorConfig.Formatter.Deserialize(ref r, rank + 1);
+                            break;
+                        }
+                    case 5:
                         {
                             p_tcpAccepter = global::Omnius.Axis.Models.TcpAccepterConfig.Formatter.Deserialize(ref r, rank + 1);
                             break;
@@ -780,7 +812,7 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
                 }
             }
 
-            return new global::Omnius.Axis.Models.ServiceConfig(p_bandwidth, p_tcpConnector, p_tcpAccepter);
+            return new global::Omnius.Axis.Models.ServiceConfig(p_bandwidth, p_i2pConnector, p_i2pAccepter, p_tcpConnector, p_tcpAccepter);
         }
     }
 }
@@ -894,6 +926,236 @@ public sealed partial class BandwidthConfig : global::Omnius.Core.RocketPack.IRo
             }
 
             return new global::Omnius.Axis.Models.BandwidthConfig(p_maxSendBytesPerSeconds, p_maxReceiveBytesPerSeconds);
+        }
+    }
+}
+public sealed partial class I2pConnectorConfig : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.I2pConnectorConfig>
+{
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Models.I2pConnectorConfig> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.I2pConnectorConfig>.Formatter;
+    public static global::Omnius.Axis.Models.I2pConnectorConfig Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.I2pConnectorConfig>.Empty;
+
+    static I2pConnectorConfig()
+    {
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.I2pConnectorConfig>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.I2pConnectorConfig>.Empty = new global::Omnius.Axis.Models.I2pConnectorConfig(false, global::Omnius.Core.Net.OmniAddress.Empty);
+    }
+
+    private readonly global::System.Lazy<int> ___hashCode;
+
+    public I2pConnectorConfig(bool isEnabled, global::Omnius.Core.Net.OmniAddress samBridgeAddress)
+    {
+        if (samBridgeAddress is null) throw new global::System.ArgumentNullException("samBridgeAddress");
+
+        this.IsEnabled = isEnabled;
+        this.SamBridgeAddress = samBridgeAddress;
+
+        ___hashCode = new global::System.Lazy<int>(() =>
+        {
+            var ___h = new global::System.HashCode();
+            if (isEnabled != default) ___h.Add(isEnabled.GetHashCode());
+            if (samBridgeAddress != default) ___h.Add(samBridgeAddress.GetHashCode());
+            return ___h.ToHashCode();
+        });
+    }
+
+    public bool IsEnabled { get; }
+    public global::Omnius.Core.Net.OmniAddress SamBridgeAddress { get; }
+
+    public static global::Omnius.Axis.Models.I2pConnectorConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
+        return Formatter.Deserialize(ref reader, 0);
+    }
+    public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
+        Formatter.Serialize(ref writer, this, 0);
+    }
+
+    public static bool operator ==(global::Omnius.Axis.Models.I2pConnectorConfig? left, global::Omnius.Axis.Models.I2pConnectorConfig? right)
+    {
+        return (right is null) ? (left is null) : right.Equals(left);
+    }
+    public static bool operator !=(global::Omnius.Axis.Models.I2pConnectorConfig? left, global::Omnius.Axis.Models.I2pConnectorConfig? right)
+    {
+        return !(left == right);
+    }
+    public override bool Equals(object? other)
+    {
+        if (other is not global::Omnius.Axis.Models.I2pConnectorConfig) return false;
+        return this.Equals((global::Omnius.Axis.Models.I2pConnectorConfig)other);
+    }
+    public bool Equals(global::Omnius.Axis.Models.I2pConnectorConfig? target)
+    {
+        if (target is null) return false;
+        if (object.ReferenceEquals(this, target)) return true;
+        if (this.IsEnabled != target.IsEnabled) return false;
+        if (this.SamBridgeAddress != target.SamBridgeAddress) return false;
+
+        return true;
+    }
+    public override int GetHashCode() => ___hashCode.Value;
+
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Models.I2pConnectorConfig>
+    {
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axis.Models.I2pConnectorConfig value, in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            if (value.IsEnabled != false)
+            {
+                w.Write((uint)1);
+                w.Write(value.IsEnabled);
+            }
+            if (value.SamBridgeAddress != global::Omnius.Core.Net.OmniAddress.Empty)
+            {
+                w.Write((uint)2);
+                global::Omnius.Core.Net.OmniAddress.Formatter.Serialize(ref w, value.SamBridgeAddress, rank + 1);
+            }
+            w.Write((uint)0);
+        }
+        public global::Omnius.Axis.Models.I2pConnectorConfig Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            bool p_isEnabled = false;
+            global::Omnius.Core.Net.OmniAddress p_samBridgeAddress = global::Omnius.Core.Net.OmniAddress.Empty;
+
+            for (; ; )
+            {
+                uint id = r.GetUInt32();
+                if (id == 0) break;
+                switch (id)
+                {
+                    case 1:
+                        {
+                            p_isEnabled = r.GetBoolean();
+                            break;
+                        }
+                    case 2:
+                        {
+                            p_samBridgeAddress = global::Omnius.Core.Net.OmniAddress.Formatter.Deserialize(ref r, rank + 1);
+                            break;
+                        }
+                }
+            }
+
+            return new global::Omnius.Axis.Models.I2pConnectorConfig(p_isEnabled, p_samBridgeAddress);
+        }
+    }
+}
+public sealed partial class I2pAccepterConfig : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.I2pAccepterConfig>
+{
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Models.I2pAccepterConfig> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.I2pAccepterConfig>.Formatter;
+    public static global::Omnius.Axis.Models.I2pAccepterConfig Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.I2pAccepterConfig>.Empty;
+
+    static I2pAccepterConfig()
+    {
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.I2pAccepterConfig>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.I2pAccepterConfig>.Empty = new global::Omnius.Axis.Models.I2pAccepterConfig(false, global::Omnius.Core.Net.OmniAddress.Empty);
+    }
+
+    private readonly global::System.Lazy<int> ___hashCode;
+
+    public I2pAccepterConfig(bool isEnabled, global::Omnius.Core.Net.OmniAddress samBridgeAddress)
+    {
+        if (samBridgeAddress is null) throw new global::System.ArgumentNullException("samBridgeAddress");
+
+        this.IsEnabled = isEnabled;
+        this.SamBridgeAddress = samBridgeAddress;
+
+        ___hashCode = new global::System.Lazy<int>(() =>
+        {
+            var ___h = new global::System.HashCode();
+            if (isEnabled != default) ___h.Add(isEnabled.GetHashCode());
+            if (samBridgeAddress != default) ___h.Add(samBridgeAddress.GetHashCode());
+            return ___h.ToHashCode();
+        });
+    }
+
+    public bool IsEnabled { get; }
+    public global::Omnius.Core.Net.OmniAddress SamBridgeAddress { get; }
+
+    public static global::Omnius.Axis.Models.I2pAccepterConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
+        return Formatter.Deserialize(ref reader, 0);
+    }
+    public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
+        Formatter.Serialize(ref writer, this, 0);
+    }
+
+    public static bool operator ==(global::Omnius.Axis.Models.I2pAccepterConfig? left, global::Omnius.Axis.Models.I2pAccepterConfig? right)
+    {
+        return (right is null) ? (left is null) : right.Equals(left);
+    }
+    public static bool operator !=(global::Omnius.Axis.Models.I2pAccepterConfig? left, global::Omnius.Axis.Models.I2pAccepterConfig? right)
+    {
+        return !(left == right);
+    }
+    public override bool Equals(object? other)
+    {
+        if (other is not global::Omnius.Axis.Models.I2pAccepterConfig) return false;
+        return this.Equals((global::Omnius.Axis.Models.I2pAccepterConfig)other);
+    }
+    public bool Equals(global::Omnius.Axis.Models.I2pAccepterConfig? target)
+    {
+        if (target is null) return false;
+        if (object.ReferenceEquals(this, target)) return true;
+        if (this.IsEnabled != target.IsEnabled) return false;
+        if (this.SamBridgeAddress != target.SamBridgeAddress) return false;
+
+        return true;
+    }
+    public override int GetHashCode() => ___hashCode.Value;
+
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Models.I2pAccepterConfig>
+    {
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axis.Models.I2pAccepterConfig value, in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            if (value.IsEnabled != false)
+            {
+                w.Write((uint)1);
+                w.Write(value.IsEnabled);
+            }
+            if (value.SamBridgeAddress != global::Omnius.Core.Net.OmniAddress.Empty)
+            {
+                w.Write((uint)2);
+                global::Omnius.Core.Net.OmniAddress.Formatter.Serialize(ref w, value.SamBridgeAddress, rank + 1);
+            }
+            w.Write((uint)0);
+        }
+        public global::Omnius.Axis.Models.I2pAccepterConfig Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            bool p_isEnabled = false;
+            global::Omnius.Core.Net.OmniAddress p_samBridgeAddress = global::Omnius.Core.Net.OmniAddress.Empty;
+
+            for (; ; )
+            {
+                uint id = r.GetUInt32();
+                if (id == 0) break;
+                switch (id)
+                {
+                    case 1:
+                        {
+                            p_isEnabled = r.GetBoolean();
+                            break;
+                        }
+                    case 2:
+                        {
+                            p_samBridgeAddress = global::Omnius.Core.Net.OmniAddress.Formatter.Deserialize(ref r, rank + 1);
+                            break;
+                        }
+                }
+            }
+
+            return new global::Omnius.Axis.Models.I2pAccepterConfig(p_isEnabled, p_samBridgeAddress);
         }
     }
 }

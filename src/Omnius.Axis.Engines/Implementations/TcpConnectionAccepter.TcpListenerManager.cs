@@ -38,7 +38,7 @@ public sealed partial class TcpConnectionAccepter
             try
             {
                 // TcpListenerの追加処理
-                if (!listenAddress.TryGetTcpEndpoint(out var ipAddress, out ushort port, false)) return;
+                if (!listenAddress.TryParseTcpEndpoint(out var ipAddress, out ushort port, false)) return;
 
                 _tcpListener = new TcpListener(ipAddress, port);
                 _tcpListener.Start(3);

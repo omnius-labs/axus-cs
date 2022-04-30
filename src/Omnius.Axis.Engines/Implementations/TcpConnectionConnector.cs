@@ -59,8 +59,7 @@ public sealed partial class TcpConnectionConnector : AsyncDisposableBase, IConne
 
     private async ValueTask<ICap?> ConnectCapAsync(OmniAddress address, CancellationToken cancellationToken = default)
     {
-
-        if (!address.TryGetTcpEndpoint(out var ipAddress, out ushort port)) throw new FormatException("address is not tcp endpoint");
+        if (!address.TryParseTcpEndpoint(out var ipAddress, out ushort port)) return null;
 
 #if !DEBUG
         if (!Internal.IpAddressHelper.IsGlobalIpAddress(ipAddress)) return null;
@@ -70,7 +69,7 @@ public sealed partial class TcpConnectionConnector : AsyncDisposableBase, IConne
 
         try
         {
-            if (_options.Proxy?.Address is not null && _options.Proxy.Address.TryGetTcpEndpoint(out var proxyAddress, out ushort proxyPort, true))
+            if (_options.Proxy?.Address is not null && _options.Proxy.Address.TryParseTcpEndpoint(out var proxyAddress, out ushort proxyPort, true))
             {
                 if (_socks5ProxyClientFactory is not null && _options.Proxy.Type == TcpProxyType.Socks5Proxy)
                 {

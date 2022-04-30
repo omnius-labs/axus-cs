@@ -14,7 +14,10 @@ public class SignaturesViewDesignViewModel : SignaturesViewViewModelBase
         this.AddCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.AddCommand.Subscribe(async () => await this.RegisterAsync()).AddTo(_disposable);
 
-        this.Signatures = new();
+        var sampleSignature1 = OmniDigitalSignature.Create("sample1", OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256).GetOmniSignature();
+        var sampleSignature2 = OmniDigitalSignature.Create("sample2", OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256).GetOmniSignature();
+
+        this.Signatures = new(new[] { sampleSignature1, sampleSignature2 });
         this.SelectedSignatures = new();
 
         this.ItemDeleteCommand = new AsyncReactiveCommand().AddTo(_disposable);

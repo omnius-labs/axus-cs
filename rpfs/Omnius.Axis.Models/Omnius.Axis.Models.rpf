@@ -44,6 +44,8 @@ enum SessionHandshakeType : uint8 {
 
 message ServiceConfig {
     Bandwidth: BandwidthConfig?,
+    I2pConnector: I2pConnectorConfig?,
+    I2pAccepter: I2pAccepterConfig?,
     TcpConnector: TcpConnectorConfig?,
     TcpAccepter: TcpAccepterConfig?,
 }
@@ -51,6 +53,16 @@ message ServiceConfig {
 message BandwidthConfig {
     MaxSendBytesPerSeconds: int32,
     MaxReceiveBytesPerSeconds: int32,
+}
+
+message I2pConnectorConfig {
+    IsEnabled: bool,
+    SamBridgeAddress: OmniAddress,
+}
+
+message I2pAccepterConfig {
+    IsEnabled: bool,
+    SamBridgeAddress: OmniAddress,
 }
 
 message TcpConnectorConfig {

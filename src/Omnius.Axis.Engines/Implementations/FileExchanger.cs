@@ -677,11 +677,9 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
             if (results.Count >= FileExchangerDataMessage.MaxGiveBlocksCount)
             {
-                goto End;
+                break;
             }
         }
-
-    End:
 
         receivedWantBlockHashSet.ExceptWith(results.Select(n => n.Hash));
 

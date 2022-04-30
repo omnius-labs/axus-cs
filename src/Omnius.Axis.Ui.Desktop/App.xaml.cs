@@ -21,11 +21,8 @@ public class App : Application
 
     public override void Initialize()
     {
-        if (!this.IsDesignMode)
-        {
-            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler((_, e) => _logger.Error(e));
-            this.ApplicationLifetime!.Exit += (_, _) => this.Exit();
-        }
+        AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler((_, e) => _logger.Error(e));
+        this.ApplicationLifetime!.Exit += (_, _) => this.Exit();
 
         AvaloniaXamlLoader.Load(this);
     }
@@ -67,6 +64,13 @@ public class App : Application
 
     private void Startup()
     {
+        if (this.IsDesignMode)
+        {
+            this.MainWindow = new MainWindow();
+            this.MainWindow.ViewModel = new MainWindowDesignModel();
+            return;
+        }
+
         var parsedResult = CommandLine.Parser.Default.ParseArguments<Options>(Environment.GetCommandLineArgs());
         parsedResult.WithParsed(this.OnParsed);
     }
@@ -96,9 +100,7 @@ public class App : Application
             await Bootstrapper.Instance.BuildAsync(axisEnvironment);
 
             var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
-            var viewModel = serviceProvider.GetRequiredService<MainWindowModel>();
-
-            this.MainWindow!.ViewModel = viewModel;
+            this.MainWindow.ViewModel = serviceProvider.GetRequiredService<MainWindowModel>();
         }
         catch (Exception e)
         {

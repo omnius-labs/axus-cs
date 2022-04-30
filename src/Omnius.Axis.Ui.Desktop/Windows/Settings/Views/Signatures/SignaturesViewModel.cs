@@ -49,13 +49,10 @@ public class SignaturesViewViewModel : SignaturesViewViewModelBase
 
         this.AddCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.AddCommand.Subscribe(async () => await this.RegisterAsync()).AddTo(_disposable);
-
         this.Signatures = new();
         this.SelectedSignatures = new();
-
         this.ItemDeleteCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.ItemDeleteCommand.Subscribe(async () => await this.ItemDeleteAsync()).AddTo(_disposable);
-
         this.ItemCopySignatureCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.ItemCopySignatureCommand.Subscribe(async () => await this.ItemCopySeedAsync()).AddTo(_disposable);
     }

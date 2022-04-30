@@ -42,6 +42,11 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
         _options = options;
     }
 
+    private async ValueTask InitAsync(CancellationToken cancellationToken = default)
+    {
+        _tcpListenerManager = await TcpListenerManager.CreateAsync(_options.ListenAddress, _options.UseUpnp, _upnpClientFactory, cancellationToken);
+    }
+
     protected override async ValueTask OnDisposeAsync()
     {
         if (_tcpListenerManager is not null) await _tcpListenerManager.DisposeAsync();
@@ -51,13 +56,23 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            if (_tcpListenerManager is null)
-            {
-                _tcpListenerManager = await TcpListenerManager.CreateAsync(_options.ListenAddress, _options.UseUpnp, _upnpClientFactory, cancellationToken);
-            }
+            var (cap, address) = await this.AcceptCapAsync(cancellationToken);
+            if (cap is null || address is null) return null;
 
-            var socket = await _tcpListenerManager.AcceptAsync(cancellationToken);
-            if (socket is null || socket.RemoteEndPoint is null) return null;
+            var bridgeConnectionOptions = new BridgeConnectionOptions(MaxReceiveByteCount);
+            var bridgeConnection = new BridgeConnection(cap, _senderBandwidthLimiter, _receiverBandwidthLimiter, _batchActionDispatcher, _bytesPool, bridgeConnectionOptions);
+            return new ConnectionAcceptedResult(bridgeConnection, address);
+        }
+    }
+
+    private async ValueTask<(ICap?, OmniAddress?)> AcceptCapAsync(CancellationToken cancellationToken = default)
+    {
+        var disposableList = new List<IDisposable>();
+
+        try
+        {
+            var socket = await _tcpListenerManager!.AcceptAsync(cancellationToken);
+            if (socket is null || socket.RemoteEndPoint is null) return (null, null);
 
             var endpoint = (IPEndPoint)socket.RemoteEndPoint;
 
@@ -78,15 +93,24 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
 
             var cap = new SocketCap(socket);
 
-            var bridgeConnectionOptions = new BridgeConnectionOptions(MaxReceiveByteCount);
-            var bridgeConnection = new BridgeConnection(cap, _senderBandwidthLimiter, _receiverBandwidthLimiter, _batchActionDispatcher, _bytesPool, bridgeConnectionOptions);
-            return new ConnectionAcceptedResult(bridgeConnection, address);
+            return (cap, address);
         }
+        catch (Exception e)
+        {
+            _logger.Error(e, "Unexpected Exception");
+
+            foreach (var item in disposableList)
+            {
+                item.Dispose();
+            }
+        }
+
+        return (null, null);
     }
 
     public async ValueTask<OmniAddress[]> GetListenEndpointsAsync(CancellationToken cancellationToken = default)
     {
-        if (!_options.ListenAddress.TryGetTcpEndpoint(out var listenIpAddress, out var port))
+        if (!_options.ListenAddress.TryParseTcpEndpoint(out var listenIpAddress, out var port))
         {
             return Array.Empty<OmniAddress>();
         }
@@ -97,23 +121,25 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
         results.Add(OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, port));
 #endif
 
-        if (_tcpListenerManager is not null)
+        if (_tcpListenerManager is null)
         {
-            var globalIpAddresses = await _tcpListenerManager.GetMyGlobalIpAddressesAsync(cancellationToken);
+            return results.ToArray();
+        }
 
-            if (listenIpAddress.AddressFamily == AddressFamily.InterNetwork)
+        var globalIpAddresses = await _tcpListenerManager.GetMyGlobalIpAddressesAsync(cancellationToken);
+
+        if (listenIpAddress.AddressFamily == AddressFamily.InterNetwork)
+        {
+            foreach (var globalIpAddress in globalIpAddresses.Where(n => n.AddressFamily == AddressFamily.InterNetwork))
             {
-                foreach (var globalIpAddress in globalIpAddresses.Where(n => n.AddressFamily == AddressFamily.InterNetwork))
-                {
-                    results.Add(OmniAddress.CreateTcpEndpoint(globalIpAddress, port));
-                }
+                results.Add(OmniAddress.CreateTcpEndpoint(globalIpAddress, port));
             }
-            else if (listenIpAddress.AddressFamily == AddressFamily.InterNetworkV6)
+        }
+        else if (listenIpAddress.AddressFamily == AddressFamily.InterNetworkV6)
+        {
+            foreach (var globalIpAddress in globalIpAddresses.Where(n => n.AddressFamily == AddressFamily.InterNetworkV6))
             {
-                foreach (var globalIpAddress in globalIpAddresses.Where(n => n.AddressFamily == AddressFamily.InterNetworkV6))
-                {
-                    results.Add(OmniAddress.CreateTcpEndpoint(globalIpAddress, port));
-                }
+                results.Add(OmniAddress.CreateTcpEndpoint(globalIpAddress, port));
             }
         }
 

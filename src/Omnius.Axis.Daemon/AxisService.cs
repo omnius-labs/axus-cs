@@ -97,6 +97,13 @@ public class AxisService : AsyncDisposableBase, IAxisService
 
         var connectionConnectors = ImmutableList.CreateBuilder<IConnectionConnector>();
 
+        if (config.I2pConnector is I2pConnectorConfig i2pConnectorConfig && i2pConnectorConfig.IsEnabled)
+        {
+            var i2pConnectionConnectorOptions = new I2pConnectionConnectorOptions(i2pConnectorConfig.SamBridgeAddress);
+            var i2pConnectionConnector = await I2pConnectionConnector.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, batchActionDispatcher, bytesPool, i2pConnectionConnectorOptions, cancellationToken);
+            connectionConnectors.Add(i2pConnectionConnector);
+        }
+
         if (config.TcpConnector is TcpConnectorConfig tcpConnectorConfig && tcpConnectorConfig.IsEnabled)
         {
             var tcpProxyType = tcpConnectorConfig.Proxy?.Type switch
@@ -119,6 +126,13 @@ public class AxisService : AsyncDisposableBase, IAxisService
         _sessionConnector = await SessionConnector.CreateAsync(_connectionConnectors, batchActionDispatcher, bytesPool, sessionConnectorOptions, cancellationToken);
 
         var connectionAccepters = ImmutableList.CreateBuilder<IConnectionAccepter>();
+
+        if (config.I2pAccepter is I2pAccepterConfig i2pAccepterConfig && i2pAccepterConfig.IsEnabled)
+        {
+            var i2pConnectionAccepterOptions = new I2pConnectionAccepterOptions(i2pAccepterConfig.SamBridgeAddress);
+            var i2pConnectionAccepter = await I2pConnectionAccepter.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, batchActionDispatcher, bytesPool, i2pConnectionAccepterOptions, cancellationToken);
+            connectionAccepters.Add(i2pConnectionAccepter);
+        }
 
         if (config.TcpAccepter is TcpAccepterConfig tcpAccepterConfig && tcpAccepterConfig.IsEnabled)
         {
@@ -237,6 +251,12 @@ public class AxisService : AsyncDisposableBase, IAxisService
                 bandwidth: new BandwidthConfig(
                     maxSendBytesPerSeconds: 1024 * 1024 * 32,
                     maxReceiveBytesPerSeconds: 1024 * 1024 * 32),
+                i2pConnector: new I2pConnectorConfig(
+                    isEnabled: true,
+                    samBridgeAddress: OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 7656)),
+                i2pAccepter: new I2pAccepterConfig(
+                    isEnabled: true,
+                    samBridgeAddress: OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 7656)),
                 tcpConnector: new TcpConnectorConfig(
                     isEnabled: true,
                     proxy: null),

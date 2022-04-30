@@ -2,7 +2,7 @@ using Avalonia;
 using Avalonia.Markup.Xaml;
 using Omnius.Core.Avalonia;
 
-namespace Omnius.Axis.Ui.Desktop.TextEdit;
+namespace Omnius.Axis.Ui.Desktop.Windows.TextEdit;
 
 public partial class TextEditWindow : StatefulWindowBase<TextEditWindowModelBase>
 {
