@@ -124,6 +124,8 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         _connectedAddressSet.Dispose();
         _receivedPushContentLocationMap.Dispose();
         _receivedGiveContentLocationMap.Dispose();
+
+        _nodeFinderRepo.Dispose();
     }
 
     public INodeFinderEvents GetEvents() => _events;
