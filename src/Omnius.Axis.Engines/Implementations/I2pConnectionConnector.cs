@@ -55,6 +55,8 @@ public sealed partial class I2pConnectionConnector : AsyncDisposableBase, IConne
         _cancellationTokenSource.Cancel();
         await _watchLoopTask!;
         _cancellationTokenSource.Dispose();
+
+        if (_samBridge is not null) await _samBridge.DisposeAsync();
     }
 
     private async Task WatchLoopAsync(CancellationToken cancellationToken)
