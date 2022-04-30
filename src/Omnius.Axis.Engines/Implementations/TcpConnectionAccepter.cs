@@ -77,6 +77,7 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
         {
             var socket = await _tcpListenerManager.AcceptAsync(cancellationToken);
             if (socket is null || socket.RemoteEndPoint is null) return (null, null);
+            disposableList.Add(socket);
 
             var endpoint = (IPEndPoint)socket.RemoteEndPoint;
 
@@ -96,6 +97,7 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
             }
 
             var cap = new SocketCap(socket);
+            disposableList.Add(cap);
 
             return (cap, address);
         }
