@@ -71,44 +71,20 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
     {
         if (_tcpListenerManager is null) return (null, null);
 
-        var disposableList = new List<IDisposable>();
-
         try
         {
             var socket = await _tcpListenerManager.AcceptAsync(cancellationToken);
             if (socket is null || socket.RemoteEndPoint is null) return (null, null);
-            disposableList.Add(socket);
-
-            var endpoint = (IPEndPoint)socket.RemoteEndPoint;
-
-            OmniAddress address;
-
-            if (endpoint.AddressFamily == AddressFamily.InterNetwork)
-            {
-                address = OmniAddress.CreateTcpEndpoint(endpoint.Address, (ushort)endpoint.Port);
-            }
-            else if (endpoint.AddressFamily == AddressFamily.InterNetworkV6)
-            {
-                address = OmniAddress.CreateTcpEndpoint(endpoint.Address, (ushort)endpoint.Port);
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
 
             var cap = new SocketCap(socket);
-            disposableList.Add(cap);
+            var endpoint = (IPEndPoint)socket.RemoteEndPoint;
+            var address = OmniAddress.CreateTcpEndpoint(endpoint.Address, (ushort)endpoint.Port);
 
             return (cap, address);
         }
         catch (Exception e)
         {
             _logger.Error(e, "Unexpected Exception");
-
-            foreach (var item in disposableList)
-            {
-                item.Dispose();
-            }
         }
 
         return (null, null);

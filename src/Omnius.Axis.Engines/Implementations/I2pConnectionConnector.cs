@@ -109,26 +109,14 @@ public sealed partial class I2pConnectionConnector : AsyncDisposableBase, IConne
         if (_samBridge is null) return null;
         if (!address.TryParseI2pEndpoint(out var i2pAddress)) return null;
 
-        var disposableList = new List<IDisposable>();
-
         try
         {
             var socket = await _samBridge.ConnectAsync(i2pAddress, cancellationToken);
-            disposableList.Add(socket);
-
-            var cap = new SocketCap(socket);
-            disposableList.Add(cap);
-
-            return cap;
+            return new SocketCap(socket);
         }
         catch (Exception e)
         {
             _logger.Error(e, "Unexpected Exception");
-
-            foreach (var item in disposableList)
-            {
-                item.Dispose();
-            }
         }
 
         return null;

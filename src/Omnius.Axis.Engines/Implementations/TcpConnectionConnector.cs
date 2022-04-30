@@ -79,10 +79,7 @@ public sealed partial class TcpConnectionConnector : AsyncDisposableBase, IConne
                     var proxy = _socks5ProxyClientFactory.Create(ipAddress.ToString(), port);
                     await proxy.ConnectAsync(socket, cancellationToken);
 
-                    var cap = new SocketCap(socket);
-                    disposableList.Add(cap);
-
-                    return cap;
+                    return new SocketCap(socket);
                 }
                 else if (_httpProxyClientFactory is not null && _options.Proxy.Type == TcpProxyType.HttpProxy)
                 {
@@ -92,21 +89,13 @@ public sealed partial class TcpConnectionConnector : AsyncDisposableBase, IConne
                     var proxy = _httpProxyClientFactory.Create(ipAddress.ToString(), port);
                     await proxy.ConnectAsync(socket, cancellationToken);
 
-                    var cap = new SocketCap(socket);
-                    disposableList.Add(cap);
-
-                    return cap;
+                    return new SocketCap(socket);
                 }
             }
             else
             {
                 var socket = await ConnectSocketAsync(new IPEndPoint(ipAddress, port), cancellationToken);
-                disposableList.Add(socket);
-
-                var cap = new SocketCap(socket);
-                disposableList.Add(cap);
-
-                return cap;
+                return new SocketCap(socket);
             }
         }
         catch (Exception e)

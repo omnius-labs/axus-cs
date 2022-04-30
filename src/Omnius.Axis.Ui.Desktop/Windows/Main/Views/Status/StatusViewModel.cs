@@ -72,13 +72,8 @@ public class StatusViewViewModel : AsyncDisposableBase
                     this.MyNodeLocation.Value = AxisMessage.NodeToString(myNodeLocation);
                 });
 
-                var cloudNodeLocations = await serviceController.GetCloudNodeLocationsAsync(cancellationToken);
-
-                if (cloudNodeLocations.Count() == 0)
-                {
-                    var fetchedNodeLocations = await _nodesFetcher.FetchAsync(cancellationToken);
-                    await serviceController.AddCloudNodeLocationsAsync(fetchedNodeLocations, cancellationToken);
-                }
+                var fetchedNodeLocations = await _nodesFetcher.FetchAsync(cancellationToken);
+                await serviceController.AddCloudNodeLocationsAsync(fetchedNodeLocations, cancellationToken);
             }
         }
         catch (OperationCanceledException e)

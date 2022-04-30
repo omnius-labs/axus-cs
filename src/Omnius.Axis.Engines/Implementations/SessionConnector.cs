@@ -47,28 +47,39 @@ public sealed class SessionConnector : AsyncDisposableBase, ISessionConnector
     {
         foreach (var connector in _connectionConnectors)
         {
-            var connection = await connector.ConnectAsync(address, cancellationToken);
-            if (connection is null) continue;
+            var disposableList = new List<IAsyncDisposable>();
 
             try
             {
                 using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                linkedTokenSource.CancelAfter(TimeSpan.FromSeconds(20));
+                linkedTokenSource.CancelAfter(TimeSpan.FromSeconds(60));
+
+                var connection = await connector.ConnectAsync(address, linkedTokenSource.Token);
+                if (connection is null) continue;
+                disposableList.Add(connection);
 
                 var session = await this.CreateSessionAsync(connection, address, scheme, linkedTokenSource.Token);
+                disposableList.Add(session);
+
                 return session;
             }
             catch (OperationCanceledException e)
             {
                 _logger.Debug(e, "Operation Canceled");
 
-                await connection.DisposeAsync();
+                foreach (var item in disposableList)
+                {
+                    await item.DisposeAsync();
+                }
             }
             catch (Exception e)
             {
                 _logger.Error(e, "Unexpected Exception");
 
-                await connection.DisposeAsync();
+                foreach (var item in disposableList)
+                {
+                    await item.DisposeAsync();
+                }
             }
         }
 

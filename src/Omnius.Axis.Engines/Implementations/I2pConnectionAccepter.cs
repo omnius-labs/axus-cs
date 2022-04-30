@@ -109,25 +109,19 @@ public sealed partial class I2pConnectionAccepter : AsyncDisposableBase, IConnec
     {
         if (_samBridge is null) return (null, null);
 
-        var disposableList = new List<IDisposable>();
-
         try
         {
             var acceptResult = await _samBridge.AcceptAsync(cancellationToken);
+            if (acceptResult is null) return (null, null);
+
             var address = OmniAddress.CreateI2pEndpoint(acceptResult.Destination);
             var cap = new SocketCap(acceptResult.Socket);
-            disposableList.Add(cap);
 
             return (cap, address);
         }
         catch (Exception e)
         {
             _logger.Error(e, "Unexpected Exception");
-
-            foreach (var item in disposableList)
-            {
-                item.Dispose();
-            }
         }
 
         return (null, null);
