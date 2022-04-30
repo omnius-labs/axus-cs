@@ -104,13 +104,14 @@ public sealed partial class I2pConnectionConnector : AsyncDisposableBase, IConne
 
     private async ValueTask<ICap?> ConnectCapAsync(OmniAddress address, CancellationToken cancellationToken = default)
     {
+        if (_samBridge is null) return null;
         if (!address.TryParseI2pEndpoint(out var i2pAddress)) return null;
 
         var disposableList = new List<IDisposable>();
 
         try
         {
-            var socket = await _samBridge!.ConnectAsync(i2pAddress, cancellationToken);
+            var socket = await _samBridge.ConnectAsync(i2pAddress, cancellationToken);
             disposableList.Add(socket);
 
             var cap = new SocketCap(socket);

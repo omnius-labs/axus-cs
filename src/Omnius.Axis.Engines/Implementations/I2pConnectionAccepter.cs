@@ -3,8 +3,8 @@ using Omnius.Core.Net;
 using Omnius.Core.Net.Caps;
 using Omnius.Core.Net.Connections;
 using Omnius.Core.Net.Connections.Bridge;
-using Omnius.Core.Tasks;
 using Omnius.Core.Net.I2p;
+using Omnius.Core.Tasks;
 
 namespace Omnius.Axis.Engines;
 
@@ -105,11 +105,13 @@ public sealed partial class I2pConnectionAccepter : AsyncDisposableBase, IConnec
 
     private async ValueTask<(ICap?, OmniAddress?)> AcceptCapAsync(CancellationToken cancellationToken = default)
     {
+        if (_samBridge is null) return (null, null);
+
         var disposableList = new List<IDisposable>();
 
         try
         {
-            var acceptResult = await _samBridge!.AcceptAsync(cancellationToken);
+            var acceptResult = await _samBridge.AcceptAsync(cancellationToken);
             var address = OmniAddress.CreateI2pEndpoint(acceptResult.Destination);
             var cap = new SocketCap(acceptResult.Socket);
 

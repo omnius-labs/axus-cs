@@ -22,6 +22,7 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
     private readonly TcpConnectionAccepterOptions _options;
 
     private TcpListenerManager? _tcpListenerManager;
+
     private readonly AsyncLock _asyncLock = new();
 
     private const int MaxReceiveByteCount = 1024 * 1024 * 256;
@@ -29,6 +30,7 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
     public static async ValueTask<TcpConnectionAccepter> CreateAsync(IBandwidthLimiter senderBandwidthLimiter, IBandwidthLimiter receiverBandwidthLimiter, IUpnpClientFactory upnpClientFactory, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, TcpConnectionAccepterOptions options, CancellationToken cancellationToken = default)
     {
         var tcpConnectionAccepter = new TcpConnectionAccepter(senderBandwidthLimiter, receiverBandwidthLimiter, upnpClientFactory, batchActionDispatcher, bytesPool, options);
+        await tcpConnectionAccepter.InitAsync(cancellationToken);
         return tcpConnectionAccepter;
     }
 
@@ -67,11 +69,13 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
 
     private async ValueTask<(ICap?, OmniAddress?)> AcceptCapAsync(CancellationToken cancellationToken = default)
     {
+        if (_tcpListenerManager is null) return (null, null);
+
         var disposableList = new List<IDisposable>();
 
         try
         {
-            var socket = await _tcpListenerManager!.AcceptAsync(cancellationToken);
+            var socket = await _tcpListenerManager.AcceptAsync(cancellationToken);
             if (socket is null || socket.RemoteEndPoint is null) return (null, null);
 
             var endpoint = (IPEndPoint)socket.RemoteEndPoint;
