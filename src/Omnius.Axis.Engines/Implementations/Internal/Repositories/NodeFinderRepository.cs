@@ -1,6 +1,7 @@
 using LiteDB;
 using Omnius.Axis.Engines.Internal.Entities;
 using Omnius.Axis.Models;
+using Omnius.Axis.Utils;
 using Omnius.Core;
 using Omnius.Core.Helpers;
 
@@ -17,7 +18,7 @@ internal sealed class NodeFinderRepository : DisposableBase
         _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
         _database.UtcDate = true;
 
-        this.NodeLocations = new NodeLocationRepository(_database);
+        this.NodeLocations = new CachedNodeLocationRepository(_database);
     }
 
     protected override void OnDispose(bool disposing)
@@ -30,17 +31,17 @@ internal sealed class NodeFinderRepository : DisposableBase
         await this.NodeLocations.MigrateAsync(cancellationToken);
     }
 
-    public NodeLocationRepository NodeLocations { get; }
+    public CachedNodeLocationRepository NodeLocations { get; }
 
-    public sealed class NodeLocationRepository
+    public sealed class CachedNodeLocationRepository
     {
-        private const string CollectionName = "node_locations";
+        private const string CollectionName = "cached_node_locations";
 
         private readonly LiteDatabase _database;
 
         private readonly object _lockObject = new();
 
-        public NodeLocationRepository(LiteDatabase database)
+        public CachedNodeLocationRepository(LiteDatabase database)
         {
             _database = database;
         }
@@ -49,31 +50,87 @@ internal sealed class NodeFinderRepository : DisposableBase
         {
             lock (_lockObject)
             {
+                if (_database.GetDocumentVersion(CollectionName) <= 0)
+                {
+                    var col = this.GetCollection();
+                    col.EnsureIndex(x => x.Value, true);
+                }
+
+                _database.SetDocumentVersion(CollectionName, 1);
             }
         }
 
-        private ILiteCollection<NodeLocationEntity> GetCollection()
+        private ILiteCollection<CachedNodeLocationEntity> GetCollection()
         {
-            var col = _database.GetCollection<NodeLocationEntity>(CollectionName);
+            var col = _database.GetCollection<CachedNodeLocationEntity>(CollectionName);
             return col;
         }
 
-        public IEnumerable<NodeLocation> Load()
+        public IEnumerable<NodeLocation> FindAll()
         {
             lock (_lockObject)
             {
                 var col = this.GetCollection();
-                return col.FindAll().Select(n => n.Export()).ToArray();
+                return col.FindAll().Where(n => n.Value != null).Select(n => n.Value!.Export()).ToArray();
             }
         }
 
-        public void Save(IEnumerable<NodeLocation> nodeLocations)
+        public bool TryInsert(NodeLocation value, DateTime creationTime)
+        {
+            lock (_lockObject)
+            {
+                var itemEntity = new CachedNodeLocationEntity()
+                {
+                    Value = NodeLocationEntity.Import(value),
+                    CreationTime = creationTime,
+                    LastConnectionTime = DateTime.MinValue
+                };
+
+                var col = this.GetCollection();
+
+                if (col.Exists(n => n.Value == itemEntity.Value)) return false;
+
+                col.Insert(itemEntity);
+                return true;
+            }
+        }
+
+        public void Upsert(NodeLocation value, DateTime creationTime, DateTime lastConnectionTime)
+        {
+            lock (_lockObject)
+            {
+                var itemEntity = new CachedNodeLocationEntity()
+                {
+                    Value = NodeLocationEntity.Import(value),
+                    CreationTime = creationTime,
+                    LastConnectionTime = lastConnectionTime
+                };
+
+                var col = this.GetCollection();
+
+                _database.BeginTrans();
+
+                col.DeleteMany(n => n.Value == itemEntity.Value);
+                col.Insert(itemEntity);
+
+                _database.Commit();
+            }
+        }
+
+        public void TrimExcess(int capacity)
         {
             lock (_lockObject)
             {
                 var col = this.GetCollection();
-                col.DeleteAll();
-                col.InsertBulk(nodeLocations.Select(n => NodeLocationEntity.Import(n)));
+
+                _database.BeginTrans();
+
+                foreach (var extra in col.FindAll().OrderBy(n => n.CreationTime).OrderByDescending(n => n.LastConnectionTime).Skip(capacity).ToArray())
+                {
+                    col.DeleteMany(n => n.Value == extra.Value);
+                }
+
+                _database.Commit();
             }
         }
     }

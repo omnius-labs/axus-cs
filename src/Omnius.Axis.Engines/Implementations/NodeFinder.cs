@@ -34,7 +34,6 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
     private readonly byte[] _myId;
 
-    private readonly LinkedList<NodeLocation> _cloudNodeLocations = new();
     private readonly VolatileHashSet<OmniAddress> _connectedAddressSet;
     private ImmutableHashSet<SessionStatus> _sessionStatusSet = ImmutableHashSet<SessionStatus>.Empty;
 
@@ -78,7 +77,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
         _events = new Events(_getPushContentCluesFuncPipe.Listener, _getWantContentCluesFuncPipe.Listener);
 
-        _connectedAddressSet = new VolatileHashSet<OmniAddress>(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), _batchActionDispatcher);
+        _connectedAddressSet = new VolatileHashSet<OmniAddress>(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(10), _batchActionDispatcher);
 
         _receivedPushContentLocationMap = new VolatileListDictionary<ContentClue, NodeLocation>(TimeSpan.FromMinutes(30), TimeSpan.FromSeconds(30), _batchActionDispatcher);
         _receivedGiveContentLocationMap = new VolatileListDictionary<ContentClue, NodeLocation>(TimeSpan.FromMinutes(30), TimeSpan.FromSeconds(30), _batchActionDispatcher);
@@ -87,11 +86,6 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
     private async ValueTask InitAsync(CancellationToken cancellationToken = default)
     {
         await _nodeFinderRepo.MigrateAsync(cancellationToken);
-
-        foreach (var nodeLocation in _nodeFinderRepo.NodeLocations.Load())
-        {
-            _cloudNodeLocations.AddLast(nodeLocation);
-        }
 
         _connectLoopTask = this.ConnectLoopAsync(_cancellationTokenSource.Token);
         _acceptLoopTask = this.AcceptLoopAsync(_cancellationTokenSource.Token);
@@ -155,7 +149,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
     {
         lock (_lockObject)
         {
-            return _cloudNodeLocations.ToArray();
+            return _nodeFinderRepo.NodeLocations.FindAll();
         }
     }
 
@@ -165,9 +159,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         {
             foreach (var nodeLocation in nodeLocations)
             {
-                if (_cloudNodeLocations.Count >= 2048) return;
-                if (_cloudNodeLocations.Any(n => n.Addresses.Any(m => nodeLocation.Addresses.Contains(m)))) continue;
-                _cloudNodeLocations.AddLast(nodeLocation);
+                _nodeFinderRepo.NodeLocations.TryInsert(nodeLocation, DateTime.UtcNow);
             }
         }
     }
@@ -193,21 +185,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
     {
         lock (_lockObject)
         {
-            _cloudNodeLocations.RemoveAll(n => n.Addresses.Any(m => nodeLocation.Addresses.Contains(m)));
-            _cloudNodeLocations.AddFirst(nodeLocation);
-        }
-    }
-
-    private bool RemoveCloudNodeLocation(NodeLocation nodeLocation)
-    {
-        lock (_lockObject)
-        {
-            if (_cloudNodeLocations.Count >= 1024)
-            {
-                _cloudNodeLocations.Remove(nodeLocation);
-            }
-
-            return false;
+            _nodeFinderRepo.NodeLocations.Upsert(nodeLocation, DateTime.UtcNow, DateTime.UtcNow);
         }
     }
 
@@ -259,7 +237,6 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
                 return true;
             }
 
-            this.RemoveCloudNodeLocation(nodeLocation);
             return false;
         }
         catch (OperationCanceledException e)
@@ -276,7 +253,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
     private async ValueTask<IEnumerable<NodeLocation>> FindNodeLocationsForConnecting(CancellationToken cancellationToken = default)
     {
-        var nodeLocations = _cloudNodeLocations.ToArray();
+        var nodeLocations = _nodeFinderRepo.NodeLocations.FindAll().ToList();
         _random.Shuffle(nodeLocations);
 
         var ignoredAddressSet = await this.GetIgnoredAddressSet(cancellationToken);
@@ -550,11 +527,6 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
                 await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken).ConfigureAwait(false);
 
-                if (saveCloudNodeLocationsStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromMinutes(5)))
-                {
-                    await this.SaveCloudNodeLocationsAsync(cancellationToken);
-                }
-
                 if (!trimDeadSessionsStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromMinutes(1)))
                 {
                     await this.TrimDeadSessionsAsync(cancellationToken);
@@ -574,15 +546,6 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         {
             _logger.Error(e, "Unexpected Exception");
         }
-    }
-
-    private async ValueTask SaveCloudNodeLocationsAsync(CancellationToken cancellationToken = default)
-    {
-        var results = new List<NodeLocation>();
-        results.AddRange(_sessionStatusSet.Select(n => n.NodeLocation));
-        results.AddRange(_cloudNodeLocations);
-
-        _nodeFinderRepo.NodeLocations.Save(results);
     }
 
     private async ValueTask TrimDeadSessionsAsync(CancellationToken cancellationToken = default)
