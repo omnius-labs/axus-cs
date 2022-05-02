@@ -67,7 +67,11 @@ public sealed partial class I2pConnectionAccepter : AsyncDisposableBase, IConnec
             {
                 if (_samBridge?.IsConnected ?? false) continue;
 
-                if (_samBridge is not null) await _samBridge.DisposeAsync();
+                if (_samBridge is not null)
+                {
+                    await _samBridge.DisposeAsync();
+                    _samBridge = null;
+                }
 
                 if (_options.SamBridgeAddress.TryParseTcpEndpoint(out var samBridgeAddress, out var samBridgePort, true))
                 {
@@ -121,7 +125,7 @@ public sealed partial class I2pConnectionAccepter : AsyncDisposableBase, IConnec
         }
         catch (Exception e)
         {
-            _logger.Error(e, "Unexpected Exception");
+            _logger.Debug(e, "SamBridge Exception");
         }
 
         return (null, null);

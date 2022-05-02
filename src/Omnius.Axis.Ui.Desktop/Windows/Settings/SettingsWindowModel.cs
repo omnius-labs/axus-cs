@@ -122,7 +122,7 @@ public class SettingsWindowModel : SettingsWindowModelBase
         var serviceConfig = await serviceController.GetConfigAsync(cancellationToken);
         var fileDownloaderConfig = await fileDownloader.GetConfigAsync(cancellationToken);
 
-        this.NetworkBandwidth!.Value = ((serviceConfig.Bandwidth?.MaxReceiveBytesPerSeconds ?? 0 + serviceConfig.Bandwidth?.MaxSendBytesPerSeconds ?? 0) / 2).ToString();
+        this.NetworkBandwidth!.Value = (((serviceConfig.Bandwidth?.MaxReceiveBytesPerSeconds ?? 0) + (serviceConfig.Bandwidth?.MaxSendBytesPerSeconds ?? 0)) / 2).ToString();
         this.I2pConnectorIsEnabled!.Value = serviceConfig.I2pConnector?.IsEnabled ?? false;
         this.I2pConnectorSamBridgeAddress!.Value = serviceConfig.I2pConnector?.SamBridgeAddress?.ToString() ?? string.Empty;
         this.I2pAccepterIsEnabled!.Value = serviceConfig.I2pAccepter?.IsEnabled ?? false;

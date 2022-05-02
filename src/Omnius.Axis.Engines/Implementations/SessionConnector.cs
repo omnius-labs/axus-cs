@@ -52,7 +52,7 @@ public sealed class SessionConnector : AsyncDisposableBase, ISessionConnector
             try
             {
                 using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                linkedTokenSource.CancelAfter(TimeSpan.FromMinutes(10));
+                linkedTokenSource.CancelAfter(TimeSpan.FromMinutes(3));
 
                 var connection = await connector.ConnectAsync(address, linkedTokenSource.Token);
                 if (connection is null) continue;

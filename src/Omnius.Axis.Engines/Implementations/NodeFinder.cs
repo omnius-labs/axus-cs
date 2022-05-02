@@ -555,7 +555,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         foreach (var sessionStatus in _sessionStatusSet)
         {
             var elapsed = (now - sessionStatus.LastReceivedTime);
-            if (elapsed.TotalMinutes < 30) continue;
+            if (elapsed.TotalMinutes < 3) continue;
 
             await this.RemoveSessionStatusAsync(sessionStatus);
         }
