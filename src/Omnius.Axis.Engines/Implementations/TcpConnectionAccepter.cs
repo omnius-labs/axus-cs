@@ -84,7 +84,7 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
         }
         catch (Exception e)
         {
-            _logger.Error(e, "Unexpected Exception");
+            _logger.Debug(e, "Tcp Accept Exception");
         }
 
         return (null, null);

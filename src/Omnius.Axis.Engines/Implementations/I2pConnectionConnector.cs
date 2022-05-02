@@ -122,7 +122,7 @@ public sealed partial class I2pConnectionConnector : AsyncDisposableBase, IConne
         }
         catch (Exception e)
         {
-            _logger.Debug(e, "SamBridge Exception");
+            _logger.Debug(e, "I2p Connect Exception");
         }
 
         return null;

@@ -100,7 +100,7 @@ public sealed partial class TcpConnectionConnector : AsyncDisposableBase, IConne
         }
         catch (Exception e)
         {
-            _logger.Error(e, "Unexpected Exception");
+            _logger.Debug(e, "Tcp Connect Exception");
 
             foreach (var item in disposableList)
             {
