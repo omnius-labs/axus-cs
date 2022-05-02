@@ -574,7 +574,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
         foreach (var sessionStatus in _sessionStatusSet)
         {
             var elapsed = (DateTime.UtcNow - sessionStatus.LastReceivedTime);
-            if (elapsed.TotalMinutes < 3) continue;
+            if (elapsed.TotalMinutes < 30) continue;
 
             _logger.Debug($"[{nameof(FileExchanger)}] Trim dead session ({sessionStatus.Session.Address})");
 

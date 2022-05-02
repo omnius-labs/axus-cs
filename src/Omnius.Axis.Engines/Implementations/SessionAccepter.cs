@@ -95,7 +95,7 @@ public sealed partial class SessionAccepter : AsyncDisposableBase, ISessionAccep
         try
         {
             using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            linkedTokenSource.CancelAfter(TimeSpan.FromMinutes(3));
+            linkedTokenSource.CancelAfter(TimeSpan.FromMinutes(10));
 
             var session = await this.CreateSessionAsync(acceptedResult.Connection, acceptedResult.Address, linkedTokenSource.Token);
             return session;

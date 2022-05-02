@@ -25,7 +25,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
     private readonly AsyncLock _asyncLock = new();
     private readonly AsyncLock _publishAsyncLock = new();
 
-    private const int MaxBlockLength = 8 * 1024 * 1024;
+    private const int MaxBlockLength = 256 * 1024;
 
     public static async ValueTask<PublishedFileStorage> CreateAsync(IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, PublishedFileStorageOptions options, CancellationToken cancellationToken = default)
     {
