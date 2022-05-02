@@ -21,7 +21,7 @@ public sealed partial class SessionAccepter : AsyncDisposableBase, ISessionAccep
 
     private readonly SessionChannels _sessionChannels = new(3);
 
-    private readonly Task _acceptLoopTask;
+    private readonly List<Task> _acceptLoopTasks = new();
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
@@ -40,25 +40,22 @@ public sealed partial class SessionAccepter : AsyncDisposableBase, ISessionAccep
         _bytesPool = bytesPool;
         _options = options;
 
-        _acceptLoopTask = this.InternalAcceptLoopAsync(_cancellationTokenSource.Token);
+        foreach (var connectionAccepter in _connectionAccepters)
+        {
+            _acceptLoopTasks.Add(this.AcceptLoopAsync(connectionAccepter, _cancellationTokenSource.Token));
+        }
     }
 
     protected override async ValueTask OnDisposeAsync()
     {
         _cancellationTokenSource.Cancel();
 
-        await _acceptLoopTask;
+        await Task.WhenAll(_acceptLoopTasks);
 
         _cancellationTokenSource.Dispose();
     }
 
-    public async ValueTask<ISession> AcceptAsync(string scheme, CancellationToken cancellationToken = default)
-    {
-        var channel = _sessionChannels.GetOrCreate(scheme);
-        return await channel!.Reader.ReadAsync(cancellationToken);
-    }
-
-    private async Task InternalAcceptLoopAsync(CancellationToken cancellationToken)
+    private async Task AcceptLoopAsync(IConnectionAccepter connectionAccepter, CancellationToken cancellationToken)
     {
         try
         {
@@ -68,7 +65,7 @@ public sealed partial class SessionAccepter : AsyncDisposableBase, ISessionAccep
             {
                 await Task.Delay(1000, cancellationToken);
 
-                var session = await this.InternalAcceptAsync(cancellationToken);
+                var session = await this.InternalAcceptAsync(connectionAccepter, cancellationToken);
                 if (session is null) continue;
 
                 if (!_sessionChannels.TryGet(session.Scheme, out var channel))
@@ -90,33 +87,30 @@ public sealed partial class SessionAccepter : AsyncDisposableBase, ISessionAccep
         }
     }
 
-    private async ValueTask<ISession?> InternalAcceptAsync(CancellationToken cancellationToken = default)
+    private async ValueTask<ISession?> InternalAcceptAsync(IConnectionAccepter connectionAccepter, CancellationToken cancellationToken = default)
     {
-        foreach (var accepter in _connectionAccepters)
+        var acceptedResult = await connectionAccepter.AcceptAsync(cancellationToken);
+        if (acceptedResult is null) return null;
+
+        try
         {
-            var acceptedResult = await accepter.AcceptAsync(cancellationToken);
-            if (acceptedResult is null) continue;
+            using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            linkedTokenSource.CancelAfter(TimeSpan.FromMinutes(3));
 
-            try
-            {
-                using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                linkedTokenSource.CancelAfter(TimeSpan.FromSeconds(60));
+            var session = await this.CreateSessionAsync(acceptedResult.Connection, acceptedResult.Address, linkedTokenSource.Token);
+            return session;
+        }
+        catch (OperationCanceledException e)
+        {
+            _logger.Debug(e, "Operation Canceled");
 
-                var session = await this.CreateSessionAsync(acceptedResult.Connection, acceptedResult.Address, linkedTokenSource.Token);
-                return session;
-            }
-            catch (OperationCanceledException e)
-            {
-                _logger.Debug(e, "Operation Canceled");
+            await acceptedResult.Connection.DisposeAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e, "Unexpected Exception");
 
-                await acceptedResult.Connection.DisposeAsync();
-            }
-            catch (Exception e)
-            {
-                _logger.Error(e, "Unexpected Exception");
-
-                await acceptedResult.Connection.DisposeAsync();
-            }
+            await acceptedResult.Connection.DisposeAsync();
         }
 
         return null;
@@ -153,6 +147,12 @@ public sealed partial class SessionAccepter : AsyncDisposableBase, ISessionAccep
         {
             throw new NotSupportedException();
         }
+    }
+
+    public async ValueTask<ISession> AcceptAsync(string scheme, CancellationToken cancellationToken = default)
+    {
+        var channel = _sessionChannels.GetOrCreate(scheme);
+        return await channel!.Reader.ReadAsync(cancellationToken);
     }
 
     public async ValueTask<OmniAddress[]> GetListenEndpointsAsync(CancellationToken cancellationToken = default)

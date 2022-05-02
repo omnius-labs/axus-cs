@@ -65,7 +65,9 @@ public sealed partial class I2pConnectionConnector : AsyncDisposableBase, IConne
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                if (_samBridge is not null && _samBridge.IsConnected) continue;
+                if (_samBridge?.IsConnected ?? false) continue;
+
+                if (_samBridge is not null) await _samBridge.DisposeAsync();
 
                 if (_options.SamBridgeAddress.TryParseTcpEndpoint(out var samBridgeAddress, out var samBridgePort, true))
                 {

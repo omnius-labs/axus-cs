@@ -65,7 +65,9 @@ public sealed partial class I2pConnectionAccepter : AsyncDisposableBase, IConnec
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                if (_samBridge is not null && _samBridge.IsConnected) continue;
+                if (_samBridge?.IsConnected ?? false) continue;
+
+                if (_samBridge is not null) await _samBridge.DisposeAsync();
 
                 if (_options.SamBridgeAddress.TryParseTcpEndpoint(out var samBridgeAddress, out var samBridgePort, true))
                 {
@@ -112,8 +114,6 @@ public sealed partial class I2pConnectionAccepter : AsyncDisposableBase, IConnec
         try
         {
             var acceptResult = await _samBridge.AcceptAsync(cancellationToken);
-            if (acceptResult is null) return (null, null);
-
             var address = OmniAddress.CreateI2pEndpoint(acceptResult.Destination);
             var cap = new SocketCap(acceptResult.Socket);
 
