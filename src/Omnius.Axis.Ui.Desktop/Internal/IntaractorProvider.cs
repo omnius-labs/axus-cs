@@ -115,7 +115,7 @@ public partial class IntaractorProvider : AsyncDisposableBase, IIntaractorProvid
 
             _logger.Debug("Update End: ServiceManager");
 
-            await Task.Delay(1000 * 10);
+            await Task.Delay(1000 * 3);
         }
     }
 
