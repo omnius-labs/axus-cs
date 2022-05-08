@@ -325,7 +325,18 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var config = await _configStorage.TryGetValueAsync<ProfileSubscriberConfig>(cancellationToken);
-            if (config is null) return ProfileSubscriberConfig.Empty;
+
+            if (config is null)
+            {
+                config = new ProfileSubscriberConfig(
+                    trustedSignatures: Array.Empty<OmniSignature>(),
+                    blockedSignatures: Array.Empty<OmniSignature>(),
+                    searchDepth: 128,
+                    maxProfileCount: 1024
+                );
+
+                await _configStorage.TrySetValueAsync(config, cancellationToken);
+            }
 
             return config;
         }

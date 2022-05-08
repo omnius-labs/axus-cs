@@ -157,7 +157,15 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var config = await _configStorage.TryGetValueAsync<ProfilePublisherConfig>(cancellationToken);
-            if (config is null) return ProfilePublisherConfig.Empty;
+
+            if (config is null)
+            {
+                config = new ProfilePublisherConfig(
+                    digitalSignature: OmniDigitalSignature.Create("Anonymous", OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256)
+                );
+
+                await _configStorage.TrySetValueAsync(config, cancellationToken);
+            }
 
             return config;
         }

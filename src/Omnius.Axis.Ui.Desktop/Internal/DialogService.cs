@@ -35,7 +35,7 @@ public class DialogService : IDialogService
     {
         return await _applicationDispatcher.InvokeAsync(async () =>
         {
-            var window = new TextEditWindow(Path.Combine(_axisEnvironment.DatabaseDirectoryPath, "windows", "multi_line_text_input"));
+            var window = new TextEditWindow(Path.Combine(_axisEnvironment.DatabaseDirectoryPath, "windows", "text_edit"));
             var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
 
             var viewModel = serviceProvider.GetRequiredService<TextEditWindowModel>();

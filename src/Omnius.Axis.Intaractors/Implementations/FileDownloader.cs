@@ -13,7 +13,6 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
     private readonly IServiceController _serviceController;
-    private readonly IKeyValueStorageFactory _keyValueStorageFactory;
     private readonly IBytesPool _bytesPool;
     private readonly FileDownloaderOptions _options;
 
@@ -28,17 +27,16 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
 
     private const string Registrant = "Omnius.Axis.Intaractors.FileDownloader";
 
-    public static async ValueTask<FileDownloader> CreateAsync(IServiceController serviceController, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<FileDownloader> CreateAsync(IServiceController serviceController, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options, CancellationToken cancellationToken = default)
     {
-        var fileDownloader = new FileDownloader(serviceController, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
+        var fileDownloader = new FileDownloader(serviceController, singleValueStorageFactory, bytesPool, options);
         await fileDownloader.InitAsync(cancellationToken);
         return fileDownloader;
     }
 
-    private FileDownloader(IServiceController service, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options)
+    private FileDownloader(IServiceController service, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options)
     {
         _serviceController = service;
-        _keyValueStorageFactory = keyValueStorageFactory;
         _bytesPool = bytesPool;
         _options = options;
 
@@ -112,7 +110,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var config = await this.GetConfigAsync(cancellationToken);
-            var basePath = config.DestinationDirectory;
+            var basePath = Path.GetFullPath(config.DestinationDirectory);
 
             var reports = (await _serviceController.GetSubscribedFileReportsAsync(cancellationToken))
                 .Where(n => n.Registrant == Registrant)
@@ -187,7 +185,15 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var config = await _configStorage.TryGetValueAsync<FileDownloaderConfig>(cancellationToken);
-            if (config is null) return FileDownloaderConfig.Empty;
+
+            if (config is null)
+            {
+                config = new FileDownloaderConfig(
+                    destinationDirectory: "../downloads"
+                );
+
+                await _configStorage.TrySetValueAsync(config, cancellationToken);
+            }
 
             return config;
         }
