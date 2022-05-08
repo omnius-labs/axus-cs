@@ -4,11 +4,11 @@ namespace Omnius.Axis.Intaractors.Internal.Models;
 
 internal record UploadingFileItem
 {
-    public UploadingFileItem(string filePath, Seed seed, DateTime creationTime, UploadingFileState state)
+    public UploadingFileItem(string filePath, Seed seed, DateTime createdTime, UploadingFileState state)
     {
         this.FilePath = filePath;
         this.Seed = seed;
-        this.CreationTime = creationTime;
+        this.CreatedTime = createdTime;
         this.State = state;
     }
 
@@ -16,7 +16,7 @@ internal record UploadingFileItem
 
     public Seed Seed { get; }
 
-    public DateTime CreationTime { get; }
+    public DateTime CreatedTime { get; }
 
     public UploadingFileState State { get; }
 }

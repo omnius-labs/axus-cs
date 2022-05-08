@@ -112,14 +112,14 @@ public sealed partial class SubscribedShoutStorage : AsyncDisposableBase, ISubsc
         }
     }
 
-    public async ValueTask<DateTime?> ReadShoutCreationTimeAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+    public async ValueTask<DateTime?> ReadShoutCreatedTimeAsync(OmniSignature signature, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var writtenItem = _subscriberRepo.WrittenItems.FindOne(signature);
             if (writtenItem == null) return null;
 
-            return writtenItem.CreationTime;
+            return writtenItem.CreatedTime;
         }
     }
 
@@ -149,12 +149,12 @@ public sealed partial class SubscribedShoutStorage : AsyncDisposableBase, ISubsc
         if (!_subscriberRepo.Items.Exists(signature)) return;
 
         var writtenItem = _subscriberRepo.WrittenItems.FindOne(signature);
-        if (writtenItem is not null && writtenItem.CreationTime >= message.CreationTime.ToDateTime()) return;
+        if (writtenItem is not null && writtenItem.CreatedTime >= message.CreatedTime.ToDateTime()) return;
 
         using var bytesPise = new BytesPipe(_bytesPool);
         message.Export(bytesPise.Writer, _bytesPool);
 
-        _subscriberRepo.WrittenItems.Insert(new WrittenShoutItem(signature, message.CreationTime.ToDateTime()));
+        _subscriberRepo.WrittenItems.Insert(new WrittenShoutItem(signature, message.CreatedTime.ToDateTime()));
 
         var blockName = ComputeBlockName(signature);
         await _blockStorage.TryWriteAsync(blockName, bytesPise.Reader.GetSequence(), cancellationToken);

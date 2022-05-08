@@ -11,7 +11,7 @@ public interface IReadOnlyShoutStorage
 
     ValueTask<bool> ContainsShoutAsync(OmniSignature signature, CancellationToken cancellationToken = default);
 
-    ValueTask<DateTime?> ReadShoutCreationTimeAsync(OmniSignature signature, CancellationToken cancellationToken = default);
+    ValueTask<DateTime?> ReadShoutCreatedTimeAsync(OmniSignature signature, CancellationToken cancellationToken = default);
 
     ValueTask<Shout?> ReadShoutAsync(OmniSignature signature, CancellationToken cancellationToken = default);
 }

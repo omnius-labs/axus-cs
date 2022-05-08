@@ -67,7 +67,7 @@
                 </DataGridTemplateColumn>
                 <DataGridTextColumn
                     Header="Creation Time"
-                    Binding="{ReflectionBinding CreationTime}"
+                    Binding="{ReflectionBinding CreatedTime}"
                     Width="Auto" />
                 <DataGridTextColumn
                     Header="State"

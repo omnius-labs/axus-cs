@@ -128,7 +128,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
 
                 if (await _serviceController.TryExportFileToStorageAsync(item.Seed.RootHash, filePath, cancellationToken))
                 {
-                    var newItem = new DownloadingFileItem(item.Seed, filePath, item.CreationTime, DownloadingFileState.Completed);
+                    var newItem = new DownloadingFileItem(item.Seed, filePath, item.CreatedTime, DownloadingFileState.Completed);
                     _fileDownloaderRepo.Items.Upsert(newItem);
                 }
             }
@@ -151,7 +151,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
 
                 var status = new DownloadingFileStatus(report.Status.CurrentDepth, report.Status.DownloadedBlockCount,
                     report.Status.TotalBlockCount, item.State);
-                results.Add(new DownloadingFileReport(item.Seed, item.FilePath, item.CreationTime, status));
+                results.Add(new DownloadingFileReport(item.Seed, item.FilePath, item.CreatedTime, status));
             }
 
             return results;

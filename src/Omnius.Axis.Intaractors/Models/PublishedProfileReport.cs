@@ -4,13 +4,13 @@ namespace Omnius.Axis.Intaractors.Models;
 
 public record PublishedProfileReport
 {
-    public PublishedProfileReport(DateTime creationTime, OmniSignature signature)
+    public PublishedProfileReport(DateTime createdTime, OmniSignature signature)
     {
-        this.CreationTime = creationTime;
+        this.CreatedTime = createdTime;
         this.Signature = signature;
     }
 
-    public DateTime CreationTime { get; }
+    public DateTime CreatedTime { get; }
 
     public OmniSignature Signature { get; }
 }

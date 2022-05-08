@@ -75,14 +75,14 @@ internal sealed class NodeFinderRepository : DisposableBase
             }
         }
 
-        public bool TryInsert(NodeLocation value, DateTime creationTime)
+        public bool TryInsert(NodeLocation value, DateTime createdTime)
         {
             lock (_lockObject)
             {
                 var itemEntity = new CachedNodeLocationEntity()
                 {
                     Value = NodeLocationEntity.Import(value),
-                    CreationTime = creationTime,
+                    CreatedTime = createdTime,
                     LastConnectionTime = DateTime.MinValue
                 };
 
@@ -95,14 +95,14 @@ internal sealed class NodeFinderRepository : DisposableBase
             }
         }
 
-        public void Upsert(NodeLocation value, DateTime creationTime, DateTime lastConnectionTime)
+        public void Upsert(NodeLocation value, DateTime createdTime, DateTime lastConnectionTime)
         {
             lock (_lockObject)
             {
                 var itemEntity = new CachedNodeLocationEntity()
                 {
                     Value = NodeLocationEntity.Import(value),
-                    CreationTime = creationTime,
+                    CreatedTime = createdTime,
                     LastConnectionTime = lastConnectionTime
                 };
 
@@ -125,7 +125,7 @@ internal sealed class NodeFinderRepository : DisposableBase
 
                 _database.BeginTrans();
 
-                foreach (var extra in col.FindAll().OrderBy(n => n.CreationTime).OrderByDescending(n => n.LastConnectionTime).Skip(capacity).ToArray())
+                foreach (var extra in col.FindAll().OrderBy(n => n.CreatedTime).OrderByDescending(n => n.LastConnectionTime).Skip(capacity).ToArray())
                 {
                     col.DeleteMany(n => n.Value == extra.Value);
                 }

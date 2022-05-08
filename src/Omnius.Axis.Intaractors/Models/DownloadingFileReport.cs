@@ -2,17 +2,17 @@ namespace Omnius.Axis.Intaractors.Models;
 
 public record DownloadingFileReport
 {
-    public DownloadingFileReport(Seed seed, string? filePath, DateTime creationTime, DownloadingFileStatus status)
+    public DownloadingFileReport(Seed seed, string? filePath, DateTime createdTime, DownloadingFileStatus status)
     {
         this.Seed = seed;
         this.FilePath = filePath;
-        this.CreationTime = creationTime;
+        this.CreatedTime = createdTime;
         this.Status = status;
     }
 
     public Seed Seed { get; }
     public string? FilePath { get; }
-    public DateTime CreationTime { get; }
+    public DateTime CreatedTime { get; }
     public DownloadingFileStatus Status { get; }
 }
 

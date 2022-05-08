@@ -30,27 +30,27 @@ public sealed partial class Profile : global::Omnius.Core.RocketPack.IRocketMess
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public Profile(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Timestamp creationTime, global::Omnius.Axis.Intaractors.Models.ProfileContent content)
+    public Profile(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Timestamp createdTime, global::Omnius.Axis.Intaractors.Models.ProfileContent content)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
         if (content is null) throw new global::System.ArgumentNullException("content");
 
         this.Signature = signature;
-        this.CreationTime = creationTime;
+        this.CreatedTime = createdTime;
         this.Content = content;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (signature != default) ___h.Add(signature.GetHashCode());
-            if (creationTime != default) ___h.Add(creationTime.GetHashCode());
+            if (createdTime != default) ___h.Add(createdTime.GetHashCode());
             if (content != default) ___h.Add(content.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
-    public global::Omnius.Core.RocketPack.Timestamp CreationTime { get; }
+    public global::Omnius.Core.RocketPack.Timestamp CreatedTime { get; }
     public global::Omnius.Axis.Intaractors.Models.ProfileContent Content { get; }
 
     public static global::Omnius.Axis.Intaractors.Models.Profile Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -82,7 +82,7 @@ public sealed partial class Profile : global::Omnius.Core.RocketPack.IRocketMess
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
         if (this.Signature != target.Signature) return false;
-        if (this.CreationTime != target.CreationTime) return false;
+        if (this.CreatedTime != target.CreatedTime) return false;
         if (this.Content != target.Content) return false;
 
         return true;
@@ -100,10 +100,10 @@ public sealed partial class Profile : global::Omnius.Core.RocketPack.IRocketMess
                 w.Write((uint)1);
                 global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
             }
-            if (value.CreationTime != global::Omnius.Core.RocketPack.Timestamp.Zero)
+            if (value.CreatedTime != global::Omnius.Core.RocketPack.Timestamp.Zero)
             {
                 w.Write((uint)2);
-                w.Write(value.CreationTime);
+                w.Write(value.CreatedTime);
             }
             if (value.Content != global::Omnius.Axis.Intaractors.Models.ProfileContent.Empty)
             {
@@ -117,7 +117,7 @@ public sealed partial class Profile : global::Omnius.Core.RocketPack.IRocketMess
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Core.Cryptography.OmniSignature p_signature = global::Omnius.Core.Cryptography.OmniSignature.Empty;
-            global::Omnius.Core.RocketPack.Timestamp p_creationTime = global::Omnius.Core.RocketPack.Timestamp.Zero;
+            global::Omnius.Core.RocketPack.Timestamp p_createdTime = global::Omnius.Core.RocketPack.Timestamp.Zero;
             global::Omnius.Axis.Intaractors.Models.ProfileContent p_content = global::Omnius.Axis.Intaractors.Models.ProfileContent.Empty;
 
             for (; ; )
@@ -133,7 +133,7 @@ public sealed partial class Profile : global::Omnius.Core.RocketPack.IRocketMess
                         }
                     case 2:
                         {
-                            p_creationTime = r.GetTimestamp();
+                            p_createdTime = r.GetTimestamp();
                             break;
                         }
                     case 3:
@@ -144,7 +144,7 @@ public sealed partial class Profile : global::Omnius.Core.RocketPack.IRocketMess
                 }
             }
 
-            return new global::Omnius.Axis.Intaractors.Models.Profile(p_signature, p_creationTime, p_content);
+            return new global::Omnius.Axis.Intaractors.Models.Profile(p_signature, p_createdTime, p_content);
         }
     }
 }
@@ -350,14 +350,14 @@ public sealed partial class Seed : global::Omnius.Core.RocketPack.IRocketMessage
 
     public static readonly int MaxNameLength = 256;
 
-    public Seed(global::Omnius.Core.Cryptography.OmniHash rootHash, string name, ulong size, global::Omnius.Core.RocketPack.Timestamp creationTime)
+    public Seed(global::Omnius.Core.Cryptography.OmniHash rootHash, string name, ulong size, global::Omnius.Core.RocketPack.Timestamp createdTime)
     {
         if (name is null) throw new global::System.ArgumentNullException("name");
         if (name.Length > 256) throw new global::System.ArgumentOutOfRangeException("name");
         this.RootHash = rootHash;
         this.Name = name;
         this.Size = size;
-        this.CreationTime = creationTime;
+        this.CreatedTime = createdTime;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
@@ -365,7 +365,7 @@ public sealed partial class Seed : global::Omnius.Core.RocketPack.IRocketMessage
             if (rootHash != default) ___h.Add(rootHash.GetHashCode());
             if (name != default) ___h.Add(name.GetHashCode());
             if (size != default) ___h.Add(size.GetHashCode());
-            if (creationTime != default) ___h.Add(creationTime.GetHashCode());
+            if (createdTime != default) ___h.Add(createdTime.GetHashCode());
             return ___h.ToHashCode();
         });
     }
@@ -373,7 +373,7 @@ public sealed partial class Seed : global::Omnius.Core.RocketPack.IRocketMessage
     public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
     public string Name { get; }
     public ulong Size { get; }
-    public global::Omnius.Core.RocketPack.Timestamp CreationTime { get; }
+    public global::Omnius.Core.RocketPack.Timestamp CreatedTime { get; }
 
     public static global::Omnius.Axis.Intaractors.Models.Seed Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -406,7 +406,7 @@ public sealed partial class Seed : global::Omnius.Core.RocketPack.IRocketMessage
         if (this.RootHash != target.RootHash) return false;
         if (this.Name != target.Name) return false;
         if (this.Size != target.Size) return false;
-        if (this.CreationTime != target.CreationTime) return false;
+        if (this.CreatedTime != target.CreatedTime) return false;
 
         return true;
     }
@@ -433,10 +433,10 @@ public sealed partial class Seed : global::Omnius.Core.RocketPack.IRocketMessage
                 w.Write((uint)3);
                 w.Write(value.Size);
             }
-            if (value.CreationTime != global::Omnius.Core.RocketPack.Timestamp.Zero)
+            if (value.CreatedTime != global::Omnius.Core.RocketPack.Timestamp.Zero)
             {
                 w.Write((uint)4);
-                w.Write(value.CreationTime);
+                w.Write(value.CreatedTime);
             }
             w.Write((uint)0);
         }
@@ -447,7 +447,7 @@ public sealed partial class Seed : global::Omnius.Core.RocketPack.IRocketMessage
             global::Omnius.Core.Cryptography.OmniHash p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
             string p_name = string.Empty;
             ulong p_size = 0;
-            global::Omnius.Core.RocketPack.Timestamp p_creationTime = global::Omnius.Core.RocketPack.Timestamp.Zero;
+            global::Omnius.Core.RocketPack.Timestamp p_createdTime = global::Omnius.Core.RocketPack.Timestamp.Zero;
 
             for (; ; )
             {
@@ -472,13 +472,13 @@ public sealed partial class Seed : global::Omnius.Core.RocketPack.IRocketMessage
                         }
                     case 4:
                         {
-                            p_creationTime = r.GetTimestamp();
+                            p_createdTime = r.GetTimestamp();
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axis.Intaractors.Models.Seed(p_rootHash, p_name, p_size, p_creationTime);
+            return new global::Omnius.Axis.Intaractors.Models.Seed(p_rootHash, p_name, p_size, p_createdTime);
         }
     }
 }

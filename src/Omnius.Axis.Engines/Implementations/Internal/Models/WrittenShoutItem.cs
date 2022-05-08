@@ -4,13 +4,13 @@ namespace Omnius.Axis.Engines.Internal.Models;
 
 internal record WrittenShoutItem
 {
-    public WrittenShoutItem(OmniSignature signature, DateTime creationTime)
+    public WrittenShoutItem(OmniSignature signature, DateTime createdTime)
     {
         this.Signature = signature;
-        this.CreationTime = creationTime;
+        this.CreatedTime = createdTime;
     }
 
     public OmniSignature Signature { get; }
 
-    public DateTime CreationTime { get; }
+    public DateTime CreatedTime { get; }
 }

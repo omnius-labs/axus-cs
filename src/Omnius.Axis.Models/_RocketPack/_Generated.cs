@@ -273,25 +273,25 @@ public sealed partial class Shout : global::Omnius.Core.RocketPack.IRocketMessag
 
     public static readonly int MaxValueLength = 33554432;
 
-    public Shout(global::Omnius.Core.RocketPack.Timestamp creationTime, global::System.Buffers.IMemoryOwner<byte> value, global::Omnius.Core.Cryptography.OmniCertificate? certificate)
+    public Shout(global::Omnius.Core.RocketPack.Timestamp createdTime, global::System.Buffers.IMemoryOwner<byte> value, global::Omnius.Core.Cryptography.OmniCertificate? certificate)
     {
         if (value is null) throw new global::System.ArgumentNullException("value");
         if (value.Memory.Length > 33554432) throw new global::System.ArgumentOutOfRangeException("value");
-        this.CreationTime = creationTime;
+        this.CreatedTime = createdTime;
         this.Value = value;
         this.Certificate = certificate;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
-            if (creationTime != default) ___h.Add(creationTime.GetHashCode());
+            if (createdTime != default) ___h.Add(createdTime.GetHashCode());
             if (!value.Memory.IsEmpty) ___h.Add(global::Omnius.Core.Helpers.ObjectHelper.GetHashCode(value.Memory.Span));
             if (certificate != default) ___h.Add(certificate.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
-    public global::Omnius.Core.RocketPack.Timestamp CreationTime { get; }
+    public global::Omnius.Core.RocketPack.Timestamp CreatedTime { get; }
     public global::System.Buffers.IMemoryOwner<byte> Value { get; }
     public global::Omnius.Core.Cryptography.OmniCertificate? Certificate { get; }
 
@@ -323,7 +323,7 @@ public sealed partial class Shout : global::Omnius.Core.RocketPack.IRocketMessag
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
-        if (this.CreationTime != target.CreationTime) return false;
+        if (this.CreatedTime != target.CreatedTime) return false;
         if (!global::Omnius.Core.BytesOperations.Equals(this.Value.Memory.Span, target.Value.Memory.Span)) return false;
         if ((this.Certificate is null) != (target.Certificate is null)) return false;
         if ((this.Certificate is not null) && (target.Certificate is not null) && this.Certificate != target.Certificate) return false;
@@ -338,10 +338,10 @@ public sealed partial class Shout : global::Omnius.Core.RocketPack.IRocketMessag
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            if (value.CreationTime != global::Omnius.Core.RocketPack.Timestamp.Zero)
+            if (value.CreatedTime != global::Omnius.Core.RocketPack.Timestamp.Zero)
             {
                 w.Write((uint)1);
-                w.Write(value.CreationTime);
+                w.Write(value.CreatedTime);
             }
             if (!value.Value.Memory.IsEmpty)
             {
@@ -359,7 +359,7 @@ public sealed partial class Shout : global::Omnius.Core.RocketPack.IRocketMessag
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            global::Omnius.Core.RocketPack.Timestamp p_creationTime = global::Omnius.Core.RocketPack.Timestamp.Zero;
+            global::Omnius.Core.RocketPack.Timestamp p_createdTime = global::Omnius.Core.RocketPack.Timestamp.Zero;
             global::System.Buffers.IMemoryOwner<byte> p_value = global::Omnius.Core.MemoryOwner<byte>.Empty;
             global::Omnius.Core.Cryptography.OmniCertificate? p_certificate = null;
 
@@ -371,7 +371,7 @@ public sealed partial class Shout : global::Omnius.Core.RocketPack.IRocketMessag
                 {
                     case 1:
                         {
-                            p_creationTime = r.GetTimestamp();
+                            p_createdTime = r.GetTimestamp();
                             break;
                         }
                     case 2:
@@ -387,7 +387,7 @@ public sealed partial class Shout : global::Omnius.Core.RocketPack.IRocketMessag
                 }
             }
 
-            return new global::Omnius.Axis.Models.Shout(p_creationTime, p_value, p_certificate);
+            return new global::Omnius.Axis.Models.Shout(p_createdTime, p_value, p_certificate);
         }
     }
 }

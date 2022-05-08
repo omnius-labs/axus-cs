@@ -17,7 +17,7 @@ message ContentClue {
 }
 
 message Shout {
-    CreationTime: timestamp,
+    CreatedTime: timestamp,
     Value: bytes(capacity: 32 * 1024 * 1024, recyclable: true),
     Certificate: OmniCertificate?,
 }

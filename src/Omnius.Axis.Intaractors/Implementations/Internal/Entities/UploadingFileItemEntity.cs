@@ -9,7 +9,7 @@ internal record UploadingFileItemEntity
 
     public SeedEntity? Seed { get; set; }
 
-    public DateTime CreationTime { get; set; }
+    public DateTime CreatedTime { get; set; }
 
     public int State { get; set; }
 
@@ -19,13 +19,13 @@ internal record UploadingFileItemEntity
         {
             Seed = SeedEntity.Import(value.Seed),
             FilePath = value.FilePath,
-            CreationTime = value.CreationTime,
+            CreatedTime = value.CreatedTime,
             State = (int)value.State,
         };
     }
 
     public UploadingFileItem Export()
     {
-        return new UploadingFileItem(this.FilePath ?? string.Empty, this.Seed?.Export() ?? Intaractors.Models.Seed.Empty, this.CreationTime, (UploadingFileState)this.State);
+        return new UploadingFileItem(this.FilePath ?? string.Empty, this.Seed?.Export() ?? Intaractors.Models.Seed.Empty, this.CreatedTime, (UploadingFileState)this.State);
     }
 }

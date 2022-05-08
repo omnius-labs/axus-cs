@@ -1784,23 +1784,23 @@ internal sealed partial class ShoutExchangerFetchRequestMessage : global::Omnius
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public ShoutExchangerFetchRequestMessage(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Timestamp creationTime)
+    public ShoutExchangerFetchRequestMessage(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Timestamp createdTime)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
         this.Signature = signature;
-        this.CreationTime = creationTime;
+        this.CreatedTime = createdTime;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (signature != default) ___h.Add(signature.GetHashCode());
-            if (creationTime != default) ___h.Add(creationTime.GetHashCode());
+            if (createdTime != default) ___h.Add(createdTime.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
-    public global::Omnius.Core.RocketPack.Timestamp CreationTime { get; }
+    public global::Omnius.Core.RocketPack.Timestamp CreatedTime { get; }
 
     public static global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerFetchRequestMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -1831,7 +1831,7 @@ internal sealed partial class ShoutExchangerFetchRequestMessage : global::Omnius
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
         if (this.Signature != target.Signature) return false;
-        if (this.CreationTime != target.CreationTime) return false;
+        if (this.CreatedTime != target.CreatedTime) return false;
 
         return true;
     }
@@ -1848,10 +1848,10 @@ internal sealed partial class ShoutExchangerFetchRequestMessage : global::Omnius
                 w.Write((uint)1);
                 global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
             }
-            if (value.CreationTime != global::Omnius.Core.RocketPack.Timestamp.Zero)
+            if (value.CreatedTime != global::Omnius.Core.RocketPack.Timestamp.Zero)
             {
                 w.Write((uint)2);
-                w.Write(value.CreationTime);
+                w.Write(value.CreatedTime);
             }
             w.Write((uint)0);
         }
@@ -1860,7 +1860,7 @@ internal sealed partial class ShoutExchangerFetchRequestMessage : global::Omnius
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Core.Cryptography.OmniSignature p_signature = global::Omnius.Core.Cryptography.OmniSignature.Empty;
-            global::Omnius.Core.RocketPack.Timestamp p_creationTime = global::Omnius.Core.RocketPack.Timestamp.Zero;
+            global::Omnius.Core.RocketPack.Timestamp p_createdTime = global::Omnius.Core.RocketPack.Timestamp.Zero;
 
             for (; ; )
             {
@@ -1875,13 +1875,13 @@ internal sealed partial class ShoutExchangerFetchRequestMessage : global::Omnius
                         }
                     case 2:
                         {
-                            p_creationTime = r.GetTimestamp();
+                            p_createdTime = r.GetTimestamp();
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerFetchRequestMessage(p_signature, p_creationTime);
+            return new global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerFetchRequestMessage(p_signature, p_createdTime);
         }
     }
 }

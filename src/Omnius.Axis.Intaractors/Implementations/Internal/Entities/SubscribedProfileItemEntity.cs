@@ -9,7 +9,7 @@ internal record SubscribedProfileItemEntity
 
     public OmniHashEntity? RootHash { get; set; }
 
-    public DateTime CreationTime { get; set; }
+    public DateTime CreatedTime { get; set; }
 
     public static SubscribedProfileItemEntity Import(SubscribedProfileItem value)
     {
@@ -17,12 +17,12 @@ internal record SubscribedProfileItemEntity
         {
             Signature = OmniSignatureEntity.Import(value.Signature),
             RootHash = OmniHashEntity.Import(value.RootHash),
-            CreationTime = value.CreationTime,
+            CreatedTime = value.CreatedTime,
         };
     }
 
     public SubscribedProfileItem Export()
     {
-        return new SubscribedProfileItem(this.Signature?.Export() ?? OmniSignature.Empty, this.RootHash?.Export() ?? OmniHash.Empty, this.CreationTime);
+        return new SubscribedProfileItem(this.Signature?.Export() ?? OmniSignature.Empty, this.RootHash?.Export() ?? OmniHash.Empty, this.CreatedTime);
     }
 }

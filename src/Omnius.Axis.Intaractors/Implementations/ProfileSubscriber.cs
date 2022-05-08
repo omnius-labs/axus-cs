@@ -123,7 +123,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
                 var contentRootHash = RocketMessage.FromBytes<OmniHash>(shout.Value.Memory);
                 shout.Value.Dispose();
 
-                var newItem = new SubscribedProfileItem(item.Signature, contentRootHash, shout.CreationTime.ToDateTime());
+                var newItem = new SubscribedProfileItem(item.Signature, contentRootHash, shout.CreatedTime.ToDateTime());
                 _profileSubscriberRepo.Items.Upsert(newItem);
             }
         }
@@ -223,7 +223,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
                 }
                 else
                 {
-                    yield return cachedProfile.CreationTime <= downloadedProfile.CreationTime ? downloadedProfile : cachedProfile;
+                    yield return cachedProfile.CreatedTime <= downloadedProfile.CreatedTime ? downloadedProfile : cachedProfile;
                 }
             }
             else if (downloadedProfile is not null)
@@ -248,7 +248,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
 
         var content = RocketMessage.FromBytes<ProfileContent>(contentBytes.Value);
 
-        return new Profile(signature, shout.CreationTime, content);
+        return new Profile(signature, shout.CreatedTime, content);
     }
 
     private async ValueTask ShrinkCachedProfileStorage(IEnumerable<OmniSignature> allTargetSignatures, CancellationToken cancellationToken = default)
@@ -293,7 +293,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
 
             foreach (var item in _profileSubscriberRepo.Items.FindAll())
             {
-                reports.Add(new SubscribedProfileReport(item.CreationTime, item.Signature));
+                reports.Add(new SubscribedProfileReport(item.CreatedTime, item.Signature));
             }
 
             return reports;

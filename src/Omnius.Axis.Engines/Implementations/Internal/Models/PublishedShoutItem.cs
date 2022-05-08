@@ -4,16 +4,16 @@ namespace Omnius.Axis.Engines.Internal.Models;
 
 internal record PublishedShoutItem
 {
-    public PublishedShoutItem(OmniSignature signature, DateTime creationTime, string registrant)
+    public PublishedShoutItem(OmniSignature signature, DateTime createdTime, string registrant)
     {
         this.Signature = signature;
-        this.CreationTime = creationTime;
+        this.CreatedTime = createdTime;
         this.Registrant = registrant;
     }
 
     public OmniSignature Signature { get; }
 
-    public DateTime CreationTime { get; }
+    public DateTime CreatedTime { get; }
 
     public string Registrant { get; }
 }

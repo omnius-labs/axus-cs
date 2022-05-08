@@ -2,16 +2,16 @@ namespace Omnius.Axis.Intaractors.Models;
 
 public record UploadingFileReport
 {
-    public UploadingFileReport(string filePath, Seed? seed, DateTime creationTime, UploadingFileState state)
+    public UploadingFileReport(string filePath, Seed? seed, DateTime createdTime, UploadingFileState state)
     {
         this.FilePath = filePath;
         this.Seed = seed;
-        this.CreationTime = creationTime;
+        this.CreatedTime = createdTime;
         this.State = state;
     }
 
     public string FilePath { get; }
     public Seed? Seed { get; }
-    public DateTime CreationTime { get; }
+    public DateTime CreatedTime { get; }
     public UploadingFileState State { get; }
 }

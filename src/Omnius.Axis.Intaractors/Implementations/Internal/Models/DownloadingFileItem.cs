@@ -4,11 +4,11 @@ namespace Omnius.Axis.Intaractors.Internal.Models;
 
 internal record DownloadingFileItem
 {
-    public DownloadingFileItem(Seed seed, string? filePath, DateTime creationTime, DownloadingFileState state)
+    public DownloadingFileItem(Seed seed, string? filePath, DateTime createdTime, DownloadingFileState state)
     {
         this.Seed = seed;
         this.FilePath = filePath;
-        this.CreationTime = creationTime;
+        this.CreatedTime = createdTime;
         this.State = state;
     }
 
@@ -16,7 +16,7 @@ internal record DownloadingFileItem
 
     public string? FilePath { get; }
 
-    public DateTime CreationTime { get; }
+    public DateTime CreatedTime { get; }
 
     public DownloadingFileState State { get; }
 }

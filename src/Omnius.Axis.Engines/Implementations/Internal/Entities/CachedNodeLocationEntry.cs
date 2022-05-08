@@ -7,7 +7,7 @@ internal record CachedNodeLocationEntity
 {
     public NodeLocationEntity? Value { get; set; }
 
-    public DateTime CreationTime { get; set; }
+    public DateTime CreatedTime { get; set; }
 
     public DateTime LastConnectionTime { get; set; }
 
@@ -16,13 +16,13 @@ internal record CachedNodeLocationEntity
         return new CachedNodeLocationEntity()
         {
             Value = NodeLocationEntity.Import(value.Value),
-            CreationTime = value.CreationTime,
+            CreatedTime = value.CreatedTime,
             LastConnectionTime = value.LastConnectionTime,
         };
     }
 
     public CachedNodeLocation Export()
     {
-        return new CachedNodeLocation(this.Value?.Export() ?? NodeLocation.Empty, this.CreationTime, this.LastConnectionTime);
+        return new CachedNodeLocation(this.Value?.Export() ?? NodeLocation.Empty, this.CreatedTime, this.LastConnectionTime);
     }
 }

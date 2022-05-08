@@ -6,7 +6,7 @@ internal record PublishedShoutItemEntity
 {
     public OmniSignatureEntity? Signature { get; set; }
 
-    public DateTime CreationTime { get; set; }
+    public DateTime CreatedTime { get; set; }
 
     public string? Registrant { get; set; }
 
@@ -21,6 +21,6 @@ internal record PublishedShoutItemEntity
 
     public PublishedShoutItem Export()
     {
-        return new PublishedShoutItem(this.Signature!.Export(), this.CreationTime, this.Registrant ?? string.Empty);
+        return new PublishedShoutItem(this.Signature!.Export(), this.CreatedTime, this.Registrant ?? string.Empty);
     }
 }

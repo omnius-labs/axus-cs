@@ -8,7 +8,7 @@ namespace "Omnius.Axis.Intaractors.Models";
 
 message Profile {
     Signature: OmniSignature,
-    CreationTime: timestamp,
+    CreatedTime: timestamp,
     Content: ProfileContent,
 }
 
@@ -22,7 +22,7 @@ message Seed {
     RootHash: OmniHash,
     Name: string(capacity: 256),
     Size: uint64,
-    CreationTime: timestamp,
+    CreatedTime: timestamp,
 }
 
 enum UploadingFileState : uint8 {

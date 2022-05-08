@@ -245,10 +245,10 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
             if (version == ShoutExchangerVersion.Version1)
             {
-                var messageCreationTime = await this.ReadMessageCreationTimeAsync(signature, cancellationToken);
-                if (messageCreationTime == null) messageCreationTime = DateTime.MinValue;
+                var messageCreatedTime = await this.ReadMessageCreatedTimeAsync(signature, cancellationToken);
+                if (messageCreatedTime == null) messageCreatedTime = DateTime.MinValue;
 
-                var requestMessage = new ShoutExchangerFetchRequestMessage(signature, Timestamp.FromDateTime(messageCreationTime.Value));
+                var requestMessage = new ShoutExchangerFetchRequestMessage(signature, Timestamp.FromDateTime(messageCreatedTime.Value));
                 var resultMessage = await session.Connection.SendAndReceiveAsync<ShoutExchangerFetchRequestMessage, ShoutExchangerFetchResultMessage>(requestMessage, cancellationToken);
 
                 if (resultMessage.Type == ShoutExchangerFetchResultType.Found && resultMessage.Shout is not null)
@@ -294,15 +294,15 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
             {
                 var requestMessage = await session.Connection.Receiver.ReceiveAsync<ShoutExchangerFetchRequestMessage>(cancellationToken);
 
-                var messageCreationTime = await this.ReadMessageCreationTimeAsync(requestMessage.Signature, cancellationToken);
-                if (messageCreationTime == null) messageCreationTime = DateTime.MinValue;
+                var messageCreatedTime = await this.ReadMessageCreatedTimeAsync(requestMessage.Signature, cancellationToken);
+                if (messageCreatedTime == null) messageCreatedTime = DateTime.MinValue;
 
-                if (requestMessage.CreationTime.ToDateTime() == messageCreationTime.Value)
+                if (requestMessage.CreatedTime.ToDateTime() == messageCreatedTime.Value)
                 {
                     var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.Same, null);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
                 }
-                else if (requestMessage.CreationTime.ToDateTime() < messageCreationTime.Value)
+                else if (requestMessage.CreatedTime.ToDateTime() < messageCreatedTime.Value)
                 {
                     var message = await this.ReadMessageAsync(requestMessage.Signature, cancellationToken);
                     var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.Found, message);
@@ -347,29 +347,29 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
         return version;
     }
 
-    private async ValueTask<DateTime?> ReadMessageCreationTimeAsync(OmniSignature signature, CancellationToken cancellationToken)
+    private async ValueTask<DateTime?> ReadMessageCreatedTimeAsync(OmniSignature signature, CancellationToken cancellationToken)
     {
-        var wantStorageCreationTime = await _subscribedShoutStorage.ReadShoutCreationTimeAsync(signature, cancellationToken);
-        var pushStorageCreationTime = await _publishedShoutStorage.ReadShoutCreationTimeAsync(signature, cancellationToken);
-        if (wantStorageCreationTime is null && pushStorageCreationTime is null) return null;
+        var wantStorageCreatedTime = await _subscribedShoutStorage.ReadShoutCreatedTimeAsync(signature, cancellationToken);
+        var pushStorageCreatedTime = await _publishedShoutStorage.ReadShoutCreatedTimeAsync(signature, cancellationToken);
+        if (wantStorageCreatedTime is null && pushStorageCreatedTime is null) return null;
 
-        if ((wantStorageCreationTime ?? DateTime.MinValue) < (pushStorageCreationTime ?? DateTime.MinValue))
+        if ((wantStorageCreatedTime ?? DateTime.MinValue) < (pushStorageCreatedTime ?? DateTime.MinValue))
         {
-            return pushStorageCreationTime;
+            return pushStorageCreatedTime;
         }
         else
         {
-            return wantStorageCreationTime;
+            return wantStorageCreatedTime;
         }
     }
 
     public async ValueTask<Shout?> ReadMessageAsync(OmniSignature signature, CancellationToken cancellationToken)
     {
-        var wantStorageCreationTime = await _subscribedShoutStorage.ReadShoutCreationTimeAsync(signature, cancellationToken);
-        var pushStorageCreationTime = await _publishedShoutStorage.ReadShoutCreationTimeAsync(signature, cancellationToken);
-        if (wantStorageCreationTime is null && pushStorageCreationTime is null) return null;
+        var wantStorageCreatedTime = await _subscribedShoutStorage.ReadShoutCreatedTimeAsync(signature, cancellationToken);
+        var pushStorageCreatedTime = await _publishedShoutStorage.ReadShoutCreatedTimeAsync(signature, cancellationToken);
+        if (wantStorageCreatedTime is null && pushStorageCreatedTime is null) return null;
 
-        if ((wantStorageCreationTime ?? DateTime.MinValue) < (pushStorageCreationTime ?? DateTime.MinValue))
+        if ((wantStorageCreatedTime ?? DateTime.MinValue) < (pushStorageCreatedTime ?? DateTime.MinValue))
         {
             return await _publishedShoutStorage.ReadShoutAsync(signature, cancellationToken);
         }

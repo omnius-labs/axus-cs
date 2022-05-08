@@ -107,7 +107,7 @@ public sealed partial class PublishedShoutStorage : AsyncDisposableBase, IPublis
             using var bytesPipe = new BytesPipe(_bytesPool);
             message.Export(bytesPipe.Writer, _bytesPool);
 
-            _publisherRepo.Items.Insert(new PublishedShoutItem(signature, message.CreationTime.ToDateTime(), registrant));
+            _publisherRepo.Items.Insert(new PublishedShoutItem(signature, message.CreatedTime.ToDateTime(), registrant));
 
             var blockName = ComputeBlockName(signature);
             await _blockStorage.TryWriteAsync(blockName, bytesPipe.Reader.GetSequence(), cancellationToken);
@@ -122,14 +122,14 @@ public sealed partial class PublishedShoutStorage : AsyncDisposableBase, IPublis
         }
     }
 
-    public async ValueTask<DateTime?> ReadShoutCreationTimeAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+    public async ValueTask<DateTime?> ReadShoutCreatedTimeAsync(OmniSignature signature, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var item = _publisherRepo.Items.Find(signature).FirstOrDefault();
             if (item == null) return null;
 
-            return item.CreationTime;
+            return item.CreatedTime;
         }
     }
 

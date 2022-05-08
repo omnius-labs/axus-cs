@@ -115,7 +115,7 @@ enum ShoutExchangerVersion : uint8 {
 
 message ShoutExchangerFetchRequestMessage {
     Signature: OmniSignature,
-    CreationTime: timestamp,
+    CreatedTime: timestamp,
 }
 
 message ShoutExchangerFetchResultMessage {
