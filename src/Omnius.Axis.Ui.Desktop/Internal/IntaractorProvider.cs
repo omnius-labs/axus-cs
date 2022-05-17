@@ -126,10 +126,10 @@ public partial class IntaractorProvider : AsyncDisposableBase, IIntaractorProvid
         _serviceController = new ServiceController(service);
 
         var fileUploaderOptions = new FileUploaderOptions(Path.Combine(_databaseDirectoryPath, "file_uploader"));
-        _fileUploader = await FileUploader.CreateAsync(_serviceController, KeyValueLiteDatabaseStorage.Factory, _bytesPool, fileUploaderOptions, cancellationToken);
+        _fileUploader = await FileUploader.CreateAsync(_serviceController, _bytesPool, fileUploaderOptions, cancellationToken);
 
         var fileDownloaderOptions = new FileDownloaderOptions(Path.Combine(_databaseDirectoryPath, "file_downloader"));
-        _fileDownloader = await FileDownloader.CreateAsync(_serviceController, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, fileDownloaderOptions, cancellationToken);
+        _fileDownloader = await FileDownloader.CreateAsync(_serviceController, SingleValueFileStorage.Factory, _bytesPool, fileDownloaderOptions, cancellationToken);
 
         var profilePublisherOptions = new ProfilePublisherOptions(Path.Combine(_databaseDirectoryPath, "profile_publisher"));
         _profilePublisher = await ProfilePublisher.CreateAsync(_serviceController, SingleValueFileStorage.Factory, _bytesPool, profilePublisherOptions, cancellationToken);
