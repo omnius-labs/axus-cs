@@ -4,9 +4,9 @@ using Omnius.Core.Cryptography;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Connections;
 
-namespace Omnius.Axis.Engines;
+namespace Omnius.Axis.Engines.Internal;
 
-public class Session : AsyncDisposableBase, ISession
+internal class Session : AsyncDisposableBase, ISession
 {
     public Session(IConnection connection, OmniAddress address, SessionHandshakeType handshakeType, OmniSignature signature, string scheme)
     {
