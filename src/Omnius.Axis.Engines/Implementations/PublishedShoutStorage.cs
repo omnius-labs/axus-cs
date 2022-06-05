@@ -110,7 +110,7 @@ public sealed partial class PublishedShoutStorage : AsyncDisposableBase, IPublis
             _publisherRepo.Items.Insert(new PublishedShoutItem(signature, message.CreatedTime.ToDateTime(), registrant));
 
             var blockName = ComputeBlockName(signature);
-            await _blockStorage.TryWriteAsync(blockName, bytesPipe.Reader.GetSequence(), cancellationToken);
+            await _blockStorage.WriteAsync(blockName, bytesPipe.Reader.GetSequence(), cancellationToken);
         }
     }
 
@@ -129,7 +129,7 @@ public sealed partial class PublishedShoutStorage : AsyncDisposableBase, IPublis
             var item = _publisherRepo.Items.Find(signature).FirstOrDefault();
             if (item == null) return null;
 
-            return item.CreatedTime;
+            return item.CreatedTime.ToUniversalTime().Truncate(TimeSpan.FromTicks(TimeSpan.TicksPerSecond));
         }
     }
 

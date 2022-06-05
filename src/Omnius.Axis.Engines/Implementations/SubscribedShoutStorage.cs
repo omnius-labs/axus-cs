@@ -119,7 +119,7 @@ public sealed partial class SubscribedShoutStorage : AsyncDisposableBase, ISubsc
             var writtenItem = _subscriberRepo.WrittenItems.FindOne(signature);
             if (writtenItem == null) return null;
 
-            return writtenItem.CreatedTime;
+            return writtenItem.CreatedTime.ToUniversalTime().Truncate(TimeSpan.FromTicks(TimeSpan.TicksPerSecond));
         }
     }
 
@@ -157,7 +157,7 @@ public sealed partial class SubscribedShoutStorage : AsyncDisposableBase, ISubsc
         _subscriberRepo.WrittenItems.Insert(new WrittenShoutItem(signature, message.CreatedTime.ToDateTime()));
 
         var blockName = ComputeBlockName(signature);
-        await _blockStorage.TryWriteAsync(blockName, bytesPise.Reader.GetSequence(), cancellationToken);
+        await _blockStorage.WriteAsync(blockName, bytesPise.Reader.GetSequence(), cancellationToken);
     }
 
     private static string ComputeBlockName(OmniSignature signature)

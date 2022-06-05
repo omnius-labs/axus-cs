@@ -15,6 +15,7 @@ internal record PublishedShoutItemEntity
         return new PublishedShoutItemEntity()
         {
             Signature = OmniSignatureEntity.Import(value.Signature),
+            CreatedTime = value.CreatedTime,
             Registrant = value.Registrant,
         };
     }

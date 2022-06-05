@@ -204,8 +204,8 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
                 foreach (var nodeLocation in await this.FindNodeLocationsForConnecting(cancellationToken))
                 {
-                    var result = await this.TryConnectAsync(nodeLocation, cancellationToken);
-                    if (result) break;
+                    var success = await this.TryConnectAsync(nodeLocation, cancellationToken);
+                    if (success) break;
                 }
             }
         }
@@ -217,38 +217,6 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         {
             _logger.Error(e, "Unexpected Exception");
         }
-    }
-
-    private async ValueTask<bool> TryConnectAsync(NodeLocation nodeLocation, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            foreach (var targetAddress in nodeLocation.Addresses)
-            {
-                _connectedAddressSet.Add(targetAddress);
-
-                var session = await _sessionConnector.ConnectAsync(targetAddress, Schema, cancellationToken);
-                if (session is null) continue;
-
-                var result = await this.TryAddSessionAsync(session, cancellationToken);
-                if (!result) continue;
-
-                this.RefreshCloudNodeLocation(nodeLocation);
-                return true;
-            }
-
-            return false;
-        }
-        catch (OperationCanceledException e)
-        {
-            _logger.Debug(e, "Operation Canceled");
-        }
-        catch (Exception e)
-        {
-            _logger.Error(e, "Unexpected Exception");
-        }
-
-        return false;
     }
 
     private async ValueTask<IEnumerable<NodeLocation>> FindNodeLocationsForConnecting(CancellationToken cancellationToken = default)
@@ -276,6 +244,42 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         return set;
     }
 
+    private async ValueTask<bool> TryConnectAsync(NodeLocation nodeLocation, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            foreach (var targetAddress in nodeLocation.Addresses)
+            {
+                _connectedAddressSet.Add(targetAddress);
+
+                var session = await _sessionConnector.ConnectAsync(targetAddress, Schema, cancellationToken);
+                if (session is null) continue;
+
+                var success = await this.TryAddSessionAsync(session, cancellationToken);
+
+                if (!success)
+                {
+                    await session.DisposeAsync();
+                    continue;
+                }
+
+                this.RefreshCloudNodeLocation(nodeLocation);
+
+                return true;
+            }
+        }
+        catch (OperationCanceledException e)
+        {
+            _logger.Debug(e, "Operation Canceled");
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e, "Unexpected Exception");
+        }
+
+        return false;
+    }
+
     private async Task AcceptLoopAsync(CancellationToken cancellationToken)
     {
         try
@@ -286,13 +290,13 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
                 var sessionStatuses = _sessionStatusSet
                     .Where(n => n.Session.HandshakeType == SessionHandshakeType.Accepted).ToList();
-
                 if (sessionStatuses.Count > _options.MaxSessionCount / 2) continue;
 
                 var session = await _sessionAccepter.AcceptAsync(Schema, cancellationToken);
                 if (session is null) continue;
 
-                await this.TryAddSessionAsync(session, cancellationToken);
+                bool success = await this.TryAddSessionAsync(session, cancellationToken);
+                if (!success) await session.DisposeAsync();
             }
         }
         catch (OperationCanceledException e)
@@ -310,53 +314,44 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         try
         {
             var version = await this.HandshakeVersionAsync(session.Connection, cancellationToken);
-            if (version is null) throw new Exception("Handshake failed.");
 
             if (version == NodeFinderVersion.Version1)
             {
                 var profile = await this.HandshakeProfileAsync(session.Connection, cancellationToken);
-                if (profile is null) throw new Exception("Handshake failed.");
 
-                var sessionStatus = new SessionStatus(session, profile.Id, profile.NodeLocation, _batchActionDispatcher);
-                if (!this.TryAddSessionStatus(sessionStatus)) throw new Exception("Handshake failed.");
-
-                return true;
+                return this.InternalTryAddSession(session, profile.Id, profile.NodeLocation);
             }
 
-            throw new NotSupportedException();
+            _logger.Debug("Unknown Version");
+
+            return false;
         }
         catch (OperationCanceledException e)
         {
             _logger.Debug(e, "Operation Canceled");
-
-            await session.DisposeAsync();
         }
         catch (ConnectionException)
         {
             _logger.Debug("Connection Exception");
-
-            await session.DisposeAsync();
         }
         catch (Exception e)
         {
             _logger.Error(e, "Unexpected Exception");
-
-            await session.DisposeAsync();
         }
 
         return false;
     }
 
-    private async ValueTask<NodeFinderVersion?> HandshakeVersionAsync(IConnection connection, CancellationToken cancellationToken = default)
+    private async ValueTask<NodeFinderVersion> HandshakeVersionAsync(IConnection connection, CancellationToken cancellationToken = default)
     {
         var myHelloMessage = new NodeFinderHelloMessage(new[] { NodeFinderVersion.Version1 });
         var otherHelloMessage = await connection.ExchangeAsync(myHelloMessage, cancellationToken);
 
         var version = EnumHelper.GetOverlappedMaxValue(myHelloMessage.Versions, otherHelloMessage.Versions);
-        return version;
+        return version ?? NodeFinderVersion.Unknown;
     }
 
-    private async ValueTask<NodeFinderProfileMessage?> HandshakeProfileAsync(IConnection connection, CancellationToken cancellationToken = default)
+    private async ValueTask<NodeFinderProfileMessage> HandshakeProfileAsync(IConnection connection, CancellationToken cancellationToken = default)
     {
         var myNodeLocation = await this.GetMyNodeLocationAsync(cancellationToken);
 
@@ -366,31 +361,43 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         return otherProfileMessage;
     }
 
-    private bool TryAddSessionStatus(SessionStatus sessionStatus)
+    private bool InternalTryAddSession(ISession session, ReadOnlyMemory<byte> id, NodeLocation location)
     {
         lock (_lockObject)
         {
             // 自分自身の場合は接続しない
-            if (BytesOperations.Equals(_myId.AsSpan(), sessionStatus.Id.Span)) return false;
+            if (BytesOperations.Equals(_myId.AsSpan(), id.Span))
+            {
+                _logger.Debug($"Connected to myself");
+                return false;
+            }
 
             // 既に接続済みの場合は接続しない
-            if (_sessionStatusSet.Any(n => n.Session.Signature == sessionStatus.Session.Signature)) return false;
+            if (_sessionStatusSet.Any(n => n.Session.Signature == session.Signature))
+            {
+                _logger.Debug($"Already connected");
+                return false;
+            }
 
             // k-bucketに空きがある場合は追加する
             // kademliaのk-bucketの距離毎のノード数は最大20とする。(k=20)
-            var targetNodeDistance = Kademlia.Distance(_myId.AsSpan(), sessionStatus.Id.Span);
-
             var countMap = new Dictionary<int, int>();
             foreach (var connectionStatus in _sessionStatusSet)
             {
-                var nodeDistance = Kademlia.Distance(_myId.AsSpan(), sessionStatus.Id.Span);
+                var nodeDistance = Kademlia.Distance(_myId.AsSpan(), id.Span);
                 countMap.AddOrUpdate(nodeDistance, (_) => 1, (_, current) => current + 1);
             }
 
+            var targetNodeDistance = Kademlia.Distance(_myId.AsSpan(), id.Span);
             countMap.TryGetValue(targetNodeDistance, out int count);
-            if (count > MaxBucketLength) return false;
 
-            _sessionStatusSet = _sessionStatusSet.Add(sessionStatus);
+            if (count > MaxBucketLength)
+            {
+                _logger.Debug("Overflowed connections per bucket");
+                return false;
+            }
+
+            _sessionStatusSet = _sessionStatusSet.Add(new SessionStatus(session, id, location, _batchActionDispatcher));
 
             return true;
         }
@@ -413,7 +420,25 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
                         var dataMessage = sessionStatus.SendingDataMessage;
                         if (dataMessage is null || !sessionStatus.Session.Connection.Sender.TrySend(dataMessage)) continue;
 
-                        _logger.Debug($"Send data message: {sessionStatus.Session.Address}");
+                        if (dataMessage.PushCloudNodeLocations.Count > 0)
+                        {
+                            _logger.Debug($"Send PushCloudNodeLocations: (Address: {sessionStatus.Session.Address}, Count: {dataMessage.PushCloudNodeLocations.Count})");
+                        }
+
+                        if (dataMessage.WantContentClues.Count > 0)
+                        {
+                            _logger.Debug($"Send WantContentClues: (Address: {sessionStatus.Session.Address}, Count: {dataMessage.WantContentClues.Count})");
+                        }
+
+                        if (dataMessage.PushContentLocations.Count > 0)
+                        {
+                            _logger.Debug($"Send PushContentLocations: (Address: {sessionStatus.Session.Address}, Count: {dataMessage.PushContentLocations.Count})");
+                        }
+
+                        if (dataMessage.GiveContentLocations.Count > 0)
+                        {
+                            _logger.Debug($"Send GiveContentLocations: (Address: {sessionStatus.Session.Address}, Count: {dataMessage.GiveContentLocations.Count})");
+                        }
 
                         sessionStatus.SendingDataMessage = null;
                     }
@@ -464,22 +489,38 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
                     {
                         if (!sessionStatus.Session.Connection.Receiver.TryReceive<NodeFinderDataMessage>(out var dataMessage)) continue;
 
-                        _logger.Debug($"Received data message: {sessionStatus.Session.Address}");
-
                         sessionStatus.LastReceivedTime = DateTime.UtcNow;
 
-                        await this.AddCloudNodeLocationsAsync(dataMessage.PushCloudNodeLocations, cancellationToken);
-
-                        sessionStatus.ReceivedWantContentClues.UnionWith(dataMessage.WantContentClues);
-
-                        foreach (var contentLocation in dataMessage.PushContentLocations)
+                        if (dataMessage.PushCloudNodeLocations.Count > 0)
                         {
-                            _receivedPushContentLocationMap.AddRange(contentLocation.ContentClue, contentLocation.NodeLocations);
+                            await this.AddCloudNodeLocationsAsync(dataMessage.PushCloudNodeLocations, cancellationToken);
+                            _logger.Debug($"Receive PushCloudNodeLocations: (Address: {sessionStatus.Session.Address}, Count: {dataMessage.PushCloudNodeLocations.Count})");
                         }
 
-                        foreach (var contentLocation in dataMessage.GiveContentLocations)
+                        if (dataMessage.WantContentClues.Count > 0)
                         {
-                            _receivedGiveContentLocationMap.AddRange(contentLocation.ContentClue, contentLocation.NodeLocations);
+                            sessionStatus.ReceivedWantContentClues.UnionWith(dataMessage.WantContentClues);
+                            _logger.Debug($"Receive WantContentClues: (Address: {sessionStatus.Session.Address}, Count: {dataMessage.WantContentClues.Count})");
+                        }
+
+                        if (dataMessage.PushContentLocations.Count > 0)
+                        {
+                            foreach (var contentLocation in dataMessage.PushContentLocations)
+                            {
+                                _receivedPushContentLocationMap.AddRange(contentLocation.ContentClue, contentLocation.NodeLocations);
+                            }
+
+                            _logger.Debug($"Receive PushContentLocations: (Address: {sessionStatus.Session.Address}, Count: {dataMessage.PushContentLocations.Count})");
+                        }
+
+                        if (dataMessage.GiveContentLocations.Count > 0)
+                        {
+                            foreach (var contentLocation in dataMessage.GiveContentLocations)
+                            {
+                                _receivedGiveContentLocationMap.AddRange(contentLocation.ContentClue, contentLocation.NodeLocations);
+                            }
+
+                            _logger.Debug($"Receive GiveContentLocations: (Address: {sessionStatus.Session.Address}, Count: {dataMessage.GiveContentLocations.Count})");
                         }
                     }
                     catch (ObjectDisposedException)

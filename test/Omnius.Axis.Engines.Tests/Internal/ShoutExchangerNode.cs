@@ -12,7 +12,7 @@ using Omnius.Core.UnitTestToolkit;
 
 namespace Omnius.Axis.Engines;
 
-internal class FileExchangerNode : AsyncDisposableBase
+internal class ShoutExchangerNode : AsyncDisposableBase
 {
     private OmniAddress _listenAddress;
     private readonly IDisposable _workingDirectoryDeleter;
@@ -24,20 +24,20 @@ internal class FileExchangerNode : AsyncDisposableBase
     private ISessionConnector _sessionConnector = null!;
     private ISessionAccepter _sessionAccepter = null!;
     private INodeFinder _nodeFinder = null!;
-    private IPublishedFileStorage _publishedFileStorage = null!;
-    private ISubscribedFileStorage _subscribedFileStorage = null!;
-    private IFileExchanger _fileExchanger = null!;
+    private IPublishedShoutStorage _publishedShoutStorage = null!;
+    private ISubscribedShoutStorage _subscribedShoutStorage = null!;
+    private IShoutExchanger _shoutExchanger = null!;
 
     private AsyncLock _asyncLock = new();
 
-    public static async ValueTask<FileExchangerNode> CreateAsync(OmniAddress listenAddress, CancellationToken cancellationToken = default)
+    public static async ValueTask<ShoutExchangerNode> CreateAsync(OmniAddress listenAddress, CancellationToken cancellationToken = default)
     {
-        var result = new FileExchangerNode(listenAddress);
+        var result = new ShoutExchangerNode(listenAddress);
         await result.InitAsync(cancellationToken);
         return result;
     }
 
-    public FileExchangerNode(OmniAddress listenAddress)
+    public ShoutExchangerNode(OmniAddress listenAddress)
     {
         _listenAddress = listenAddress;
         _workingDirectoryDeleter = FixtureFactory.GenTempDirectory(out var workingDirectoryPath);
@@ -90,34 +90,34 @@ internal class FileExchangerNode : AsyncDisposableBase
         var nodeFinderOptions = new NodeFinderOptions(Path.Combine(_databaseDirectoryPath, "node_finder"), 128);
         _nodeFinder = await NodeFinder.CreateAsync(_sessionConnector, _sessionAccepter, batchActionDispatcher, bytesPool, nodeFinderOptions, cancellationToken);
 
-        var publishedFileStorageOptions = new PublishedFileStorageOptions(Path.Combine(_databaseDirectoryPath, "published_file_storage"));
-        _publishedFileStorage = await PublishedFileStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, publishedFileStorageOptions, cancellationToken);
+        var publishedShoutStorageOptions = new PublishedShoutStorageOptions(Path.Combine(_databaseDirectoryPath, "published_shout_storage"));
+        _publishedShoutStorage = await PublishedShoutStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, publishedShoutStorageOptions, cancellationToken);
 
-        var subscribedFileStorageOptions = new SubscribedFileStorageOptions(Path.Combine(_databaseDirectoryPath, "subscribed_file_storage"));
-        _subscribedFileStorage = await SubscribedFileStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, subscribedFileStorageOptions, cancellationToken);
+        var subscribedShoutStorageOptions = new SubscribedShoutStorageOptions(Path.Combine(_databaseDirectoryPath, "subscribed_shout_storage"));
+        _subscribedShoutStorage = await SubscribedShoutStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, subscribedShoutStorageOptions, cancellationToken);
 
-        var fileExchangerOptions = new FileExchangerOptions(128);
-        _fileExchanger = await FileExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedFileStorage, _subscribedFileStorage, batchActionDispatcher, bytesPool, fileExchangerOptions, cancellationToken);
+        var shoutExchangerOptions = new ShoutExchangerOptions(128);
+        _shoutExchanger = await ShoutExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedShoutStorage, _subscribedShoutStorage, batchActionDispatcher, bytesPool, shoutExchangerOptions, cancellationToken);
     }
 
     protected override async ValueTask OnDisposeAsync()
     {
-        if (_fileExchanger is not null)
+        if (_shoutExchanger is not null)
         {
-            await _fileExchanger.DisposeAsync();
-            _fileExchanger = null!;
+            await _shoutExchanger.DisposeAsync();
+            _shoutExchanger = null!;
         }
 
-        if (_publishedFileStorage is not null)
+        if (_publishedShoutStorage is not null)
         {
-            await _publishedFileStorage.DisposeAsync();
-            _publishedFileStorage = null!;
+            await _publishedShoutStorage.DisposeAsync();
+            _publishedShoutStorage = null!;
         }
 
-        if (_subscribedFileStorage is not null)
+        if (_subscribedShoutStorage is not null)
         {
-            await _subscribedFileStorage.DisposeAsync();
-            _subscribedFileStorage = null!;
+            await _subscribedShoutStorage.DisposeAsync();
+            _subscribedShoutStorage = null!;
         }
 
         if (_nodeFinder is not null)
@@ -157,7 +157,7 @@ internal class FileExchangerNode : AsyncDisposableBase
 
     public INodeFinder GetNodeFinder() => _nodeFinder;
 
-    public IPublishedFileStorage GetPublishedFileStorage() => _publishedFileStorage;
+    public IPublishedShoutStorage GetPublishedShoutStorage() => _publishedShoutStorage;
 
-    public ISubscribedFileStorage GetSubscribedFileStorage() => _subscribedFileStorage;
+    public ISubscribedShoutStorage GetSubscribedShoutStorage() => _subscribedShoutStorage;
 }

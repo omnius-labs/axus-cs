@@ -27,8 +27,8 @@ internal enum FileExchangerVersion : byte
 internal enum FileExchangerHandshakeResultType : byte
 {
     Unknown = 0,
-    Rejected = 1,
-    Accepted = 2,
+    Succeeded = 1,
+    Rejected = 2,
 }
 internal enum ShoutExchangerVersion : byte
 {
@@ -38,10 +38,16 @@ internal enum ShoutExchangerVersion : byte
 internal enum ShoutExchangerFetchResultType : byte
 {
     Unknown = 0,
-    Rejected = 1,
-    Found = 2,
-    NotFound = 3,
-    Same = 4,
+    Found = 1,
+    NotFound = 2,
+    Same = 3,
+    Rejected = 4,
+}
+internal enum ShoutExchangerPostType : byte
+{
+    Unknown = 0,
+    Found = 1,
+    NotFound = 2,
 }
 internal sealed partial class Block : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Engines.Internal.Models.Block>
 {
@@ -2007,26 +2013,27 @@ internal sealed partial class ShoutExchangerPostMessage : global::Omnius.Core.Ro
     static ShoutExchangerPostMessage()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerPostMessage>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerPostMessage>.Empty = new global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerPostMessage(global::Omnius.Axis.Models.Shout.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerPostMessage>.Empty = new global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerPostMessage((global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerPostType)0, null);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public ShoutExchangerPostMessage(global::Omnius.Axis.Models.Shout shout)
+    public ShoutExchangerPostMessage(global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerPostType type, global::Omnius.Axis.Models.Shout? shout)
     {
-        if (shout is null) throw new global::System.ArgumentNullException("shout");
-
+        this.Type = type;
         this.Shout = shout;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
+            if (type != default) ___h.Add(type.GetHashCode());
             if (shout != default) ___h.Add(shout.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
-    public global::Omnius.Axis.Models.Shout Shout { get; }
+    public global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerPostType Type { get; }
+    public global::Omnius.Axis.Models.Shout? Shout { get; }
 
     public static global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerPostMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -2056,7 +2063,9 @@ internal sealed partial class ShoutExchangerPostMessage : global::Omnius.Core.Ro
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
-        if (this.Shout != target.Shout) return false;
+        if (this.Type != target.Type) return false;
+        if ((this.Shout is null) != (target.Shout is null)) return false;
+        if ((this.Shout is not null) && (target.Shout is not null) && this.Shout != target.Shout) return false;
 
         return true;
     }
@@ -2068,9 +2077,14 @@ internal sealed partial class ShoutExchangerPostMessage : global::Omnius.Core.Ro
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            if (value.Shout != global::Omnius.Axis.Models.Shout.Empty)
+            if (value.Type != (global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerPostType)0)
             {
                 w.Write((uint)1);
+                w.Write((ulong)value.Type);
+            }
+            if (value.Shout != null)
+            {
+                w.Write((uint)2);
                 global::Omnius.Axis.Models.Shout.Formatter.Serialize(ref w, value.Shout, rank + 1);
             }
             w.Write((uint)0);
@@ -2079,7 +2093,8 @@ internal sealed partial class ShoutExchangerPostMessage : global::Omnius.Core.Ro
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            global::Omnius.Axis.Models.Shout p_shout = global::Omnius.Axis.Models.Shout.Empty;
+            global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerPostType p_type = (global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerPostType)0;
+            global::Omnius.Axis.Models.Shout? p_shout = null;
 
             for (; ; )
             {
@@ -2089,13 +2104,18 @@ internal sealed partial class ShoutExchangerPostMessage : global::Omnius.Core.Ro
                 {
                     case 1:
                         {
+                            p_type = (global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerPostType)r.GetUInt64();
+                            break;
+                        }
+                    case 2:
+                        {
                             p_shout = global::Omnius.Axis.Models.Shout.Formatter.Deserialize(ref r, rank + 1);
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerPostMessage(p_shout);
+            return new global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerPostMessage(p_type, p_shout);
         }
     }
 }

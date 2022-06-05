@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Net;
-using Omnius.Core.Cryptography.Functions;
+using FluentAssertions;
+using Omnius.Core;
 using Omnius.Core.Net;
 using Omnius.Core.UnitTestToolkit;
 using Xunit;
@@ -9,7 +10,7 @@ namespace Omnius.Axis.Engines;
 
 public class FileExchangerTest
 {
-    public static IEnumerable<object[]> GetPublishAndSubscribeCases()
+    public static IEnumerable<object[]> GetPublishAndSubscribeTestCases()
     {
         var results = new List<(OmniAddress, OmniAddress, long, TimeSpan)>{
             (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50011), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50012), 1, TimeSpan.FromMinutes(3)),
@@ -20,7 +21,7 @@ public class FileExchangerTest
     }
 
     [Theory]
-    [MemberData(nameof(GetPublishAndSubscribeCases))]
+    [MemberData(nameof(GetPublishAndSubscribeTestCases))]
     public async Task PublishAndSubscribeTest(OmniAddress publisherListenPort, OmniAddress subscriberListenPort, long fileSize, TimeSpan timeout)
     {
         await using var fileExchanger1 = await FileExchangerNode.CreateAsync(publisherListenPort);
@@ -41,8 +42,8 @@ public class FileExchangerTest
         var rootHash = await publishedFileStorage.PublishFileAsync(publishedFilePath, "test");
         await subscribedFileStorage.SubscribeFileAsync(rootHash, "test");
 
-        using var subscribDirectoryDeleter = FixtureFactory.GenTempDirectory(out var subscribDirectoryPath);
-        var subscribedFilePath = Path.Combine(subscribDirectoryPath, "subscribed_test_file");
+        using var subscriberDirectoryDeleter = FixtureFactory.GenTempDirectory(out var subscriberDirectoryPath);
+        var subscribedFilePath = Path.Combine(subscriberDirectoryPath, "subscribed_test_file");
 
         var sw = Stopwatch.StartNew();
 
@@ -61,6 +62,9 @@ public class FileExchangerTest
         using var publishedFileStream = new FileStream(publishedFilePath, FileMode.Open);
         using var subscribedFileStream = new FileStream(subscribedFilePath, FileMode.Open);
 
-        Assert.Equal(await Sha2_256.ComputeHashAsync(publishedFileStream), await Sha2_256.ComputeHashAsync(subscribedFileStream));
+        var publishedFileBytes = await publishedFileStream.ToBytesAsync();
+        var subscribedFileBytes = await subscribedFileStream.ToBytesAsync();
+
+        publishedFileBytes.Should().BeEquivalentTo(subscribedFileBytes);
     }
 }

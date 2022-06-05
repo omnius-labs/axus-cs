@@ -1,12 +1,18 @@
 {
     "cSpell.words": [
         "Avalonia",
+        "Bson",
+        "Deleter",
         "Intaractor",
         "Intaractors",
         "Kademlia",
         "Merkle",
+        "metadatas",
+        "Nito",
+        "notnull",
         "Omni",
         "Omnius",
-        "Upnp"
+        "Upnp",
+        "Upsert"
     ]
 }

@@ -263,7 +263,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
     private async ValueTask WriteBlockAsync(string prefix, OmniHash blockHash, ReadOnlyMemory<byte> memory)
     {
         var key = GenKey(prefix, blockHash);
-        await _blockStorage.TryWriteAsync(key, memory);
+        await _blockStorage.WriteAsync(key, memory);
     }
 
     public async ValueTask UnpublishFileAsync(string filePath, string registrant, CancellationToken cancellationToken = default)

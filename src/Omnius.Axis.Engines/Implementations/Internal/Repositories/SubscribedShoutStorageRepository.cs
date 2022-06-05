@@ -109,7 +109,7 @@ internal sealed partial class SubscribedShoutStorageRepository : DisposableBase
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
                 var col = this.GetCollection();
-                return col.FindOne(n => n.Signature == signatureEntity && n.Registrant == registrant).Export();
+                return col.FindOne(n => n.Signature == signatureEntity && n.Registrant == registrant)?.Export();
             }
         }
 
@@ -199,7 +199,7 @@ internal sealed partial class SubscribedShoutStorageRepository : DisposableBase
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
                 var col = this.GetCollection();
-                return col.FindOne(n => n.Signature == signatureEntity).Export();
+                return col.FindOne(n => n.Signature == signatureEntity)?.Export();
             }
         }
 

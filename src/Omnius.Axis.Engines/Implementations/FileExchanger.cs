@@ -9,7 +9,6 @@ using Omnius.Core.Cryptography;
 using Omnius.Core.Helpers;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Connections;
-using Omnius.Core.Serialization;
 using Omnius.Core.Tasks;
 
 namespace Omnius.Axis.Engines;
@@ -29,13 +28,13 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
     private readonly VolatileHashSet<OmniAddress> _connectedAddressSet;
 
-    private volatile ImmutableHashSet<SessionStatus> _sessionStatusSet = ImmutableHashSet<SessionStatus>.Empty;
+    private ImmutableHashSet<SessionStatus> _sessionStatusSet = ImmutableHashSet<SessionStatus>.Empty;
 
-    private volatile ImmutableHashSet<ContentClue> _pushContentClues = ImmutableHashSet<ContentClue>.Empty;
-    private volatile ImmutableHashSet<ContentClue> _wantContentClues = ImmutableHashSet<ContentClue>.Empty;
+    private ImmutableHashSet<ContentClue> _pushContentClues = ImmutableHashSet<ContentClue>.Empty;
+    private ImmutableHashSet<ContentClue> _wantContentClues = ImmutableHashSet<ContentClue>.Empty;
 
-    private Task? _connectForPublishLoopTask;
-    private Task? _connectForSubscribeLoopTask;
+    private Task? _publishConnectLoopTask;
+    private Task? _subscribeConnectLoopTask;
     private Task? _acceptLoopTask;
     private Task? _sendLoopTask;
     private Task? _receiveLoopTask;
@@ -83,8 +82,8 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
     private async ValueTask InitAsync(CancellationToken cancellationToken = default)
     {
-        _connectForPublishLoopTask = this.ConnectForPublishLoopAsync(_cancellationTokenSource.Token);
-        _connectForSubscribeLoopTask = this.ConnectForSubscribeLoopAsync(_cancellationTokenSource.Token);
+        _publishConnectLoopTask = this.PublishConnectLoopAsync(_cancellationTokenSource.Token);
+        _subscribeConnectLoopTask = this.SubscribeConnectLoopAsync(_cancellationTokenSource.Token);
         _acceptLoopTask = this.AcceptLoopAsync(_cancellationTokenSource.Token);
         _sendLoopTask = this.SendLoopAsync(_cancellationTokenSource.Token);
         _receiveLoopTask = this.ReceiveLoopAsync(_cancellationTokenSource.Token);
@@ -94,7 +93,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
     protected override async ValueTask OnDisposeAsync()
     {
         _cancellationTokenSource.Cancel();
-        await Task.WhenAll(_connectForPublishLoopTask!, _connectForSubscribeLoopTask!, _acceptLoopTask!, _sendLoopTask!, _receiveLoopTask!, _computeLoopTask!);
+        await Task.WhenAll(_publishConnectLoopTask!, _subscribeConnectLoopTask!, _acceptLoopTask!, _sendLoopTask!, _receiveLoopTask!, _computeLoopTask!);
         _cancellationTokenSource.Dispose();
 
         foreach (var sessionStatus in _sessionStatusSet)
@@ -122,7 +121,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
         return sessionReports.ToArray();
     }
 
-    private async Task ConnectForPublishLoopAsync(CancellationToken cancellationToken = default)
+    private async Task PublishConnectLoopAsync(CancellationToken cancellationToken = default)
     {
         try
         {
@@ -133,16 +132,17 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                 var sessionStatuses = _sessionStatusSet
                     .Where(n => n.Session.HandshakeType == SessionHandshakeType.Connected)
                     .Where(n => n.ExchangeType == ExchangeType.Published).ToList();
-
                 if (sessionStatuses.Count > _options.MaxSessionCount / 4) continue;
 
-                foreach (var rootHash in await _publishedFileStorage.GetPushRootHashesAsync(cancellationToken))
+                var rootHashes = await _publishedFileStorage.GetPushRootHashesAsync(cancellationToken);
+
+                var rootHash = rootHashes.FirstOrDefault();
+                if (rootHash == default) continue;
+
+                foreach (var nodeLocation in await this.FindNodeLocationsForConnecting(rootHash, cancellationToken))
                 {
-                    foreach (var nodeLocation in await this.FindNodeLocationsForConnecting(rootHash, cancellationToken))
-                    {
-                        var result = await this.TryConnectAsync(nodeLocation, ExchangeType.Published, rootHash, cancellationToken);
-                        if (result) break;
-                    }
+                    var success = await this.TryConnectAsync(nodeLocation, ExchangeType.Published, rootHash, cancellationToken);
+                    if (success) break;
                 }
             }
         }
@@ -156,7 +156,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
         }
     }
 
-    private async Task ConnectForSubscribeLoopAsync(CancellationToken cancellationToken = default)
+    private async Task SubscribeConnectLoopAsync(CancellationToken cancellationToken = default)
     {
         try
         {
@@ -167,16 +167,17 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                 var sessionStatuses = _sessionStatusSet
                     .Where(n => n.Session.HandshakeType == SessionHandshakeType.Connected)
                     .Where(n => n.ExchangeType == ExchangeType.Subscribed).ToList();
-
                 if (sessionStatuses.Count > _options.MaxSessionCount / 4) continue;
 
-                foreach (var rootHash in await _subscribedFileStorage.GetWantRootHashesAsync(cancellationToken))
+                var rootHashes = await _subscribedFileStorage.GetWantRootHashesAsync(cancellationToken);
+
+                var rootHash = rootHashes.FirstOrDefault();
+                if (rootHash == default) continue;
+
+                foreach (var nodeLocation in await this.FindNodeLocationsForConnecting(rootHash, cancellationToken))
                 {
-                    foreach (var nodeLocation in await this.FindNodeLocationsForConnecting(rootHash, cancellationToken))
-                    {
-                        var result = await this.TryConnectAsync(nodeLocation, ExchangeType.Subscribed, rootHash, cancellationToken);
-                        if (result) break;
-                    }
+                    var success = await this.TryConnectAsync(nodeLocation, ExchangeType.Subscribed, rootHash, cancellationToken);
+                    if (success) break;
                 }
             }
         }
@@ -228,8 +229,15 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                 var session = await _sessionConnector.ConnectAsync(targetAddress, Schema, cancellationToken);
                 if (session is null) continue;
 
-                var result = await this.TryAddConnectedSessionAsync(session, exchangeType, rootHash, cancellationToken);
-                if (!result) continue;
+                var success = await this.TryAddConnectedSessionAsync(session, exchangeType, rootHash, cancellationToken);
+
+                if (!success)
+                {
+                    await session.DisposeAsync();
+                    continue;
+                }
+
+                return true;
             }
         }
         catch (OperationCanceledException e)
@@ -254,13 +262,13 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
                 var sessionStatuses = _sessionStatusSet
                     .Where(n => n.Session.HandshakeType == SessionHandshakeType.Accepted).ToList();
-
                 if (sessionStatuses.Count > _options.MaxSessionCount / 2) continue;
 
                 var session = await _sessionAccepter.AcceptAsync(Schema, cancellationToken);
                 if (session is null) continue;
 
-                await this.TryAddAcceptedSessionAsync(session, cancellationToken);
+                bool success = await this.TryAddAcceptedSessionAsync(session, cancellationToken);
+                if (!success) await session.DisposeAsync();
             }
         }
         catch (OperationCanceledException e)
@@ -278,40 +286,48 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
         try
         {
             var version = await this.HandshakeVersionAsync(session.Connection, cancellationToken);
-            if (version is null) throw new Exception("Handshake failed.");
 
             if (version == FileExchangerVersion.Version1)
             {
                 var requestMessage = new FileExchangerHandshakeRequestMessage(rootHash);
                 var resultMessage = await session.Connection.SendAndReceiveAsync<FileExchangerHandshakeRequestMessage, FileExchangerHandshakeResultMessage>(requestMessage, cancellationToken);
 
-                if (resultMessage.Type != FileExchangerHandshakeResultType.Accepted) throw new Exception("Handshake failed.");
+                if (resultMessage.Type == FileExchangerHandshakeResultType.Succeeded)
+                {
+                    if (exchangeType == ExchangeType.Published)
+                    {
+                        _logger.Debug("ConnectedSession Succeeded (Published): (Address: {session.Address})");
+                    }
+                    else if (exchangeType == ExchangeType.Subscribed)
+                    {
+                        _logger.Debug("ConnectedSession Succeeded (Subscribed): (Address: {session.Address})");
+                    }
 
-                var sessionStatus = new SessionStatus(session, exchangeType, rootHash, _batchActionDispatcher);
-                if (!this.TryAddSessionStatus(sessionStatus)) throw new Exception("Handshake failed.");
+                    return this.InternalTryAddSession(session, exchangeType, rootHash);
+                }
+                else if (resultMessage.Type == FileExchangerHandshakeResultType.Rejected)
+                {
+                    _logger.Debug($"ConnectedSession Rejected: (Address: {session.Address})");
 
-                return true;
+                    return false;
+                }
             }
 
-            throw new NotSupportedException();
+            _logger.Debug("ConnectedSession Unknown Version");
+
+            return false;
         }
         catch (OperationCanceledException e)
         {
             _logger.Debug(e, "Operation Canceled");
-
-            await session.DisposeAsync();
         }
         catch (ConnectionException)
         {
             _logger.Debug("Connection Exception");
-
-            await session.DisposeAsync();
         }
         catch (Exception e)
         {
             _logger.Error(e, "Unexpected Exception");
-
-            await session.DisposeAsync();
         }
 
         return false;
@@ -322,7 +338,6 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
         try
         {
             var version = await this.HandshakeVersionAsync(session.Connection, cancellationToken);
-            if (version is null) throw new Exception("Handshake failed.");
 
             if (version == FileExchangerVersion.Version1)
             {
@@ -330,71 +345,78 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
                 if (await _publishedFileStorage.ContainsPushContentAsync(requestMessage.RootHash, cancellationToken))
                 {
-                    var resultMessage = new FileExchangerHandshakeResultMessage(FileExchangerHandshakeResultType.Accepted);
+                    var resultMessage = new FileExchangerHandshakeResultMessage(FileExchangerHandshakeResultType.Succeeded);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
 
+                    _logger.Debug("AcceptedSession Succeeded (Published): (Address: {session.Address})");
+
                     var sessionStatus = new SessionStatus(session, ExchangeType.Published, requestMessage.RootHash, _batchActionDispatcher);
-                    return this.TryAddSessionStatus(sessionStatus);
+                    return this.InternalTryAddSession(session, ExchangeType.Published, requestMessage.RootHash);
                 }
                 else if (await _subscribedFileStorage.ContainsWantContentAsync(requestMessage.RootHash, cancellationToken))
                 {
-                    var resultMessage = new FileExchangerHandshakeResultMessage(FileExchangerHandshakeResultType.Accepted);
+                    var resultMessage = new FileExchangerHandshakeResultMessage(FileExchangerHandshakeResultType.Succeeded);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
 
-                    var sessionStatus = new SessionStatus(session, ExchangeType.Subscribed, requestMessage.RootHash, _batchActionDispatcher);
-                    return this.TryAddSessionStatus(sessionStatus);
+                    _logger.Debug("AcceptedSession Succeeded (Subscribed): (Address: {session.Address})");
+
+                    return this.InternalTryAddSession(session, ExchangeType.Subscribed, requestMessage.RootHash);
                 }
                 else
                 {
                     var resultMessage = new FileExchangerHandshakeResultMessage(FileExchangerHandshakeResultType.Rejected);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
+
+                    _logger.Debug($"AcceptedSession Rejected: (Address: {session.Address})");
+
                     return false;
                 }
             }
 
-            throw new NotSupportedException();
+            _logger.Debug("Unknown Version");
+
+            return false;
         }
         catch (OperationCanceledException e)
         {
             _logger.Debug(e, "Operation Canceled");
-
-            await session.DisposeAsync();
         }
         catch (ConnectionException)
         {
             _logger.Debug("Connection Exception");
-
-            await session.DisposeAsync();
         }
         catch (Exception e)
         {
             _logger.Error(e, "Unexpected Exception");
-
-            await session.DisposeAsync();
         }
 
         return false;
     }
 
-    private async ValueTask<FileExchangerVersion?> HandshakeVersionAsync(IConnection connection, CancellationToken cancellationToken = default)
+    private async ValueTask<FileExchangerVersion> HandshakeVersionAsync(IConnection connection, CancellationToken cancellationToken = default)
     {
         var myHelloMessage = new FileExchangerHelloMessage(new[] { FileExchangerVersion.Version1 });
         var otherHelloMessage = await connection.ExchangeAsync(myHelloMessage, cancellationToken);
 
         var version = EnumHelper.GetOverlappedMaxValue(myHelloMessage.Versions, otherHelloMessage.Versions);
-        return version;
+        return version ?? FileExchangerVersion.Unknown;
     }
 
-    private bool TryAddSessionStatus(SessionStatus sessionStatus)
+    private bool InternalTryAddSession(ISession session, ExchangeType exchangeType, OmniHash rootHash)
     {
         lock (_lockObject)
         {
             // 既に接続済みの場合は接続しない
-            if (_sessionStatusSet.Any(n => n.Session.Signature == sessionStatus.Session.Signature && n.RootHash == sessionStatus.RootHash)) return false;
-            _sessionStatusSet = _sessionStatusSet.Add(sessionStatus);
-        }
+            if (_sessionStatusSet.Any(n => n.Session.Signature == session.Signature && n.RootHash == rootHash))
+            {
+                _logger.Debug($"Already connected");
+                return false;
+            }
 
-        return true;
+            _sessionStatusSet = _sessionStatusSet.Add(new SessionStatus(session, exchangeType, rootHash, _batchActionDispatcher));
+
+            return true;
+        }
     }
 
     private async Task SendLoopAsync(CancellationToken cancellationToken)
@@ -414,12 +436,18 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                         var dataMessage = sessionStatus.SendingDataMessage;
                         if (dataMessage is null || !sessionStatus.Session.Connection.Sender.TrySend(dataMessage)) continue;
 
-                        _logger.Debug($"[{nameof(FileExchanger)}] Sent Messsage ({sessionStatus.Session.Address})");
+                        if (dataMessage.WantBlockHashes.Count > 0)
+                        {
+                            _logger.Debug($"Send WantBlockHashes: (Address: {sessionStatus.Session.Address}, Count: {dataMessage.WantBlockHashes.Count})");
+                        }
+
+                        if (dataMessage.GiveBlocks.Count > 0)
+                        {
+                            _logger.Debug($"Send GiveBlocks: (Address: {sessionStatus.Session.Address}, Count: {dataMessage.GiveBlocks.Count})");
+                        }
 
                         foreach (var block in dataMessage.GiveBlocks)
                         {
-                            _logger.Debug($"[{nameof(FileExchanger)}] Sent Block ({sessionStatus.Session.Address}) ({block.Hash.ToString(ConvertStringType.Base16)})");
-
                             block.Value.Dispose();
                         }
 
@@ -473,19 +501,24 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                     {
                         if (!sessionStatus.Session.Connection.Receiver.TryReceive<FileExchangerDataMessage>(out var dataMessage)) continue;
 
-                        _logger.Debug($"Received data message: {sessionStatus.Session.Address}");
-
                         sessionStatus.LastReceivedTime = DateTime.UtcNow;
 
                         try
                         {
-                            sessionStatus.ReceivedWantBlockHashes.UnionWith(dataMessage.WantBlockHashes);
-
-                            foreach (var block in dataMessage.GiveBlocks)
+                            if (dataMessage.WantBlockHashes.Count > 0)
                             {
-                                _logger.Debug($"Received block: ({block.Hash.ToString(ConvertStringType.Base58)})");
+                                sessionStatus.ReceivedWantBlockHashes.UnionWith(dataMessage.WantBlockHashes);
+                                _logger.Debug($"Receive WantBlockHashes: (Address: {sessionStatus.Session.Address}, Count: {dataMessage.WantBlockHashes.Count})");
+                            }
 
-                                await _subscribedFileStorage.WriteBlockAsync(sessionStatus.RootHash, block.Hash, block.Value.Memory, cancellationToken);
+                            if (dataMessage.GiveBlocks.Count > 0)
+                            {
+                                foreach (var block in dataMessage.GiveBlocks)
+                                {
+                                    await _subscribedFileStorage.WriteBlockAsync(sessionStatus.RootHash, block.Hash, block.Value.Memory, cancellationToken);
+                                }
+
+                                _logger.Debug($"Receive GiveBlocks: (Address: {sessionStatus.Session.Address}, Count: {dataMessage.GiveBlocks.Count})");
                             }
                         }
                         finally

@@ -93,8 +93,8 @@ message FileExchangerHandshakeResultMessage {
 
 enum FileExchangerHandshakeResultType : uint8 {
     Unknown = 0,
-    Rejected = 1,
-    Accepted = 2,
+    Succeeded = 1,
+    Rejected = 2,
 }
 
 message FileExchangerDataMessage {
@@ -125,12 +125,19 @@ message ShoutExchangerFetchResultMessage {
 
 enum ShoutExchangerFetchResultType : uint8 {
     Unknown = 0,
-    Rejected = 1,
-    Found = 2,
-    NotFound = 3,
-    Same = 4,
+    Found = 1,
+    NotFound = 2,
+    Same = 3,
+    Rejected = 4,
 }
 
 message ShoutExchangerPostMessage {
-    Shout: Shout,
+    Type: ShoutExchangerPostType,
+    Shout: Shout?,
+}
+
+enum ShoutExchangerPostType : uint8 {
+    Unknown = 0,
+    Found = 1,
+    NotFound = 2,
 }

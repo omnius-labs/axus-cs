@@ -212,7 +212,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var cachedProfile = await _cachedProfileStorage.TryGetValueAsync<Profile>(StringConverter.SignatureToString(signature), cancellationToken);
+            var cachedProfile = await _cachedProfileStorage.TryReadAsync<Profile>(StringConverter.SignatureToString(signature), cancellationToken);
             var downloadedProfile = await this.InternalExportAsync(signature, cancellationToken);
 
             if (cachedProfile is not null)
@@ -304,7 +304,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            return await _cachedProfileStorage.TryGetValueAsync<Profile>(StringConverter.SignatureToString(signature), cancellationToken);
+            return await _cachedProfileStorage.TryReadAsync<Profile>(StringConverter.SignatureToString(signature), cancellationToken);
         }
     }
 
@@ -312,9 +312,11 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await foreach (var value in _cachedProfileStorage.GetValuesAsync<Profile>(cancellationToken))
+            await foreach (var key in _cachedProfileStorage.GetKeysAsync(cancellationToken))
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                var value = await _cachedProfileStorage.TryReadAsync<Profile>(key, cancellationToken);
+                if (value is null) continue;
+
                 yield return value;
             }
         }

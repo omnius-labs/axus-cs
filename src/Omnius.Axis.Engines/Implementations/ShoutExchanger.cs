@@ -90,7 +90,7 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
     protected override async ValueTask OnDisposeAsync()
     {
         _cancellationTokenSource.Cancel();
-        await Task.WhenAll(_connectLoopTask!, _acceptLoopTask!);
+        await Task.WhenAll(_connectLoopTask!, _acceptLoopTask!, _computeLoopTask!);
         _cancellationTokenSource.Dispose();
 
         foreach (var sessionStatus in _sessionStatusSet)
@@ -122,24 +122,23 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
     {
         try
         {
-            var random = new Random();
-
             while (!cancellationToken.IsCancellationRequested)
             {
-                await Task.Delay(1000, cancellationToken);
+                await Task.Delay(1000, cancellationToken).ConfigureAwait(false);
 
                 var sessionStatuses = _sessionStatusSet
                     .Where(n => n.Session.HandshakeType == SessionHandshakeType.Connected).ToList();
-
                 if (sessionStatuses.Count > _options.MaxSessionCount / 4) continue;
 
-                foreach (var signature in await _subscribedShoutStorage.GetSignaturesAsync(cancellationToken))
+                var signatures = await _subscribedShoutStorage.GetSignaturesAsync(cancellationToken);
+
+                var signature = signatures.FirstOrDefault();
+                if (signature is null) continue;
+
+                foreach (var nodeLocation in await this.FindNodeLocationsForConnecting(signature, cancellationToken))
                 {
-                    foreach (var nodeLocation in await this.FindNodeLocationsForConnecting(signature, cancellationToken))
-                    {
-                        var result = await this.TryConnectAsync(nodeLocation, signature, cancellationToken);
-                        if (result) break;
-                    }
+                    var success = await this.TryConnectAsync(nodeLocation, signature, cancellationToken);
+                    if (success) break;
                 }
             }
         }
@@ -191,8 +190,15 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
                 var session = await _sessionConnector.ConnectAsync(targetAddress, Schema, cancellationToken);
                 if (session is null) continue;
 
-                var result = await this.TryAddConnectedSessionAsync(session, signature, cancellationToken);
-                if (!result) continue;
+                var success = await this.TryAddConnectedSessionAsync(session, signature, cancellationToken);
+
+                if (!success)
+                {
+                    await session.DisposeAsync();
+                    continue;
+                }
+
+                return true;
             }
         }
         catch (OperationCanceledException e)
@@ -217,13 +223,13 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
                 var sessionStatuses = _sessionStatusSet
                     .Where(n => n.Session.HandshakeType == SessionHandshakeType.Accepted).ToList();
-
                 if (sessionStatuses.Count > _options.MaxSessionCount / 2) continue;
 
                 var session = await _sessionAccepter.AcceptAsync(Schema, cancellationToken);
                 if (session is null) continue;
 
-                await this.TryAddAcceptedSessionAsync(session, cancellationToken);
+                bool success = await this.TryAddAcceptedSessionAsync(session, cancellationToken);
+                if (!success) await session.DisposeAsync();
             }
         }
         catch (OperationCanceledException e)
@@ -241,39 +247,68 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
         try
         {
             var version = await this.HandshakeVersionAsync(session.Connection, cancellationToken);
-            if (version is null) return false;
 
             if (version == ShoutExchangerVersion.Version1)
             {
-                var messageCreatedTime = await this.ReadMessageCreatedTimeAsync(signature, cancellationToken);
-                if (messageCreatedTime == null) messageCreatedTime = DateTime.MinValue;
+                var shoutCreatedTime = Timestamp.Zero;
+                var shoutCreatedDateTime = await this.ReadShoutCreatedTimeAsync(signature, cancellationToken);
+                if (shoutCreatedDateTime is not null) shoutCreatedTime = Timestamp.FromDateTime(shoutCreatedDateTime.Value);
 
-                var requestMessage = new ShoutExchangerFetchRequestMessage(signature, Timestamp.FromDateTime(messageCreatedTime.Value));
+                var requestMessage = new ShoutExchangerFetchRequestMessage(signature, shoutCreatedTime);
                 var resultMessage = await session.Connection.SendAndReceiveAsync<ShoutExchangerFetchRequestMessage, ShoutExchangerFetchResultMessage>(requestMessage, cancellationToken);
+
+                _logger.Debug($"Send ShoutFetchRequest: (Signature: {requestMessage.Signature.ToString()})");
 
                 if (resultMessage.Type == ShoutExchangerFetchResultType.Found && resultMessage.Shout is not null)
                 {
+                    _logger.Debug($"Receive ShoutFetchResult: (Type: Found, Signature: {requestMessage.Signature.ToString()})");
+
                     await _subscribedShoutStorage.WriteShoutAsync(resultMessage.Shout, cancellationToken);
                 }
                 else if (resultMessage.Type == ShoutExchangerFetchResultType.NotFound)
                 {
-                    var message = await this.ReadMessageAsync(signature, cancellationToken);
-                    if (message is null) throw new ShoutExchangerException();
+                    _logger.Debug($"Receive ShoutFetchResult: (Type: NotFound, Signature: {requestMessage.Signature.ToString()})");
 
-                    var postMessage = new ShoutExchangerPostMessage(message);
-                    await session.Connection.Sender.SendAsync(postMessage, cancellationToken);
+                    var shout = await this.ReadShoutAsync(signature, cancellationToken);
+
+                    if (shout is not null)
+                    {
+                        var postMessage = new ShoutExchangerPostMessage(ShoutExchangerPostType.Found, null);
+                        await session.Connection.Sender.SendAsync(postMessage, cancellationToken);
+
+                        _logger.Debug($"Send ShoutPost: (Type: Found, Signature: {requestMessage.Signature.ToString()})");
+                    }
+                    else
+                    {
+                        var postMessage = new ShoutExchangerPostMessage(ShoutExchangerPostType.NotFound, null);
+                        await session.Connection.Sender.SendAsync(postMessage, cancellationToken);
+
+                        _logger.Debug($"Send ShoutPost: (Type: NotFound, Signature: {requestMessage.Signature.ToString()})");
+                    }
+                }
+                else if (resultMessage.Type == ShoutExchangerFetchResultType.Rejected)
+                {
+                    _logger.Debug($"Receive ShoutFetchResult: (Type: Rejected, Signature: {requestMessage.Signature.ToString()})");
+                }
+                else if (resultMessage.Type == ShoutExchangerFetchResultType.Same)
+                {
+                    _logger.Debug($"Receive ShoutFetchResult: (Type: Same, Signature: {requestMessage.Signature.ToString()})");
                 }
 
                 return true;
             }
-            else
-            {
-                throw new NotSupportedException();
-            }
+
+            _logger.Debug("Unknown Version");
+
+            return false;
         }
         catch (OperationCanceledException e)
         {
             _logger.Debug(e, "Operation Canceled");
+        }
+        catch (ConnectionException)
+        {
+            _logger.Debug("Connection Exception");
         }
         catch (Exception e)
         {
@@ -288,47 +323,67 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
         try
         {
             var version = await this.HandshakeVersionAsync(session.Connection, cancellationToken);
-            if (version is null) return false;
 
             if (version == ShoutExchangerVersion.Version1)
             {
                 var requestMessage = await session.Connection.Receiver.ReceiveAsync<ShoutExchangerFetchRequestMessage>(cancellationToken);
 
-                var messageCreatedTime = await this.ReadMessageCreatedTimeAsync(requestMessage.Signature, cancellationToken);
-                if (messageCreatedTime == null) messageCreatedTime = DateTime.MinValue;
+                _logger.Debug($"Receive ShoutFetchRequest: (Signature: {requestMessage.Signature.ToString()})");
 
-                if (requestMessage.CreatedTime.ToDateTime() == messageCreatedTime.Value)
+                var shoutCreatedTime = Timestamp.Zero;
+                var shoutCreatedDateTime = await this.ReadShoutCreatedTimeAsync(requestMessage.Signature, cancellationToken);
+                if (shoutCreatedDateTime is not null) shoutCreatedTime = Timestamp.FromDateTime(shoutCreatedDateTime.Value);
+
+                if (requestMessage.CreatedTime == shoutCreatedTime)
                 {
                     var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.Same, null);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
+
+                    _logger.Debug($"Send ShoutFetchResult: (Type: Same, Signature: {requestMessage.Signature.ToString()})");
                 }
-                else if (requestMessage.CreatedTime.ToDateTime() < messageCreatedTime.Value)
+                else if (requestMessage.CreatedTime < shoutCreatedTime)
                 {
-                    var message = await this.ReadMessageAsync(requestMessage.Signature, cancellationToken);
+                    var message = await this.ReadShoutAsync(requestMessage.Signature, cancellationToken);
                     var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.Found, message);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
+
+                    _logger.Debug($"Send ShoutFetchResult: (Type: Found, Signature: {requestMessage.Signature.ToString()})");
                 }
                 else
                 {
                     var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.NotFound, null);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
 
-                    var postMessage = await session.Connection.Receiver.ReceiveAsync<ShoutExchangerPostMessage>(cancellationToken);
-                    if (postMessage.Shout is null) return false;
+                    _logger.Debug($"Send ShoutFetchResult: (Type: NotFound, Signature: {requestMessage.Signature.ToString()})");
 
-                    await _subscribedShoutStorage.WriteShoutAsync(postMessage.Shout, cancellationToken);
+                    var postMessage = await session.Connection.Receiver.ReceiveAsync<ShoutExchangerPostMessage>(cancellationToken);
+
+                    if (postMessage.Type == ShoutExchangerPostType.Found && postMessage.Shout is not null)
+                    {
+                        _logger.Debug($"Send ShoutPost: (Type: Found, Signature: {requestMessage.Signature.ToString()})");
+
+                        await _subscribedShoutStorage.WriteShoutAsync(postMessage.Shout, cancellationToken);
+                    }
+                    else if (postMessage.Type == ShoutExchangerPostType.NotFound)
+                    {
+                        _logger.Debug($"Send ShoutPost: (Type: NotFound, Signature: {requestMessage.Signature.ToString()})");
+                    }
                 }
 
                 return true;
             }
-            else
-            {
-                throw new NotSupportedException();
-            }
+
+            _logger.Debug("Unknown Version");
+
+            return false;
         }
         catch (OperationCanceledException e)
         {
             _logger.Debug(e, "Operation Canceled");
+        }
+        catch (ConnectionException)
+        {
+            _logger.Debug("Connection Exception");
         }
         catch (Exception e)
         {
@@ -338,44 +393,44 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
         return false;
     }
 
-    private async ValueTask<ShoutExchangerVersion?> HandshakeVersionAsync(IConnection connection, CancellationToken cancellationToken = default)
+    private async ValueTask<ShoutExchangerVersion> HandshakeVersionAsync(IConnection connection, CancellationToken cancellationToken = default)
     {
         var myHelloMessage = new ShoutExchangerHelloMessage(new[] { ShoutExchangerVersion.Version1 });
         var otherHelloMessage = await connection.ExchangeAsync(myHelloMessage, cancellationToken);
 
         var version = EnumHelper.GetOverlappedMaxValue(myHelloMessage.Versions, otherHelloMessage.Versions);
-        return version;
+        return version ?? ShoutExchangerVersion.Unknown;
     }
 
-    private async ValueTask<DateTime?> ReadMessageCreatedTimeAsync(OmniSignature signature, CancellationToken cancellationToken)
+    private async ValueTask<DateTime?> ReadShoutCreatedTimeAsync(OmniSignature signature, CancellationToken cancellationToken)
     {
         var wantStorageCreatedTime = await _subscribedShoutStorage.ReadShoutCreatedTimeAsync(signature, cancellationToken);
         var pushStorageCreatedTime = await _publishedShoutStorage.ReadShoutCreatedTimeAsync(signature, cancellationToken);
         if (wantStorageCreatedTime is null && pushStorageCreatedTime is null) return null;
 
-        if ((wantStorageCreatedTime ?? DateTime.MinValue) < (pushStorageCreatedTime ?? DateTime.MinValue))
-        {
-            return pushStorageCreatedTime;
-        }
-        else
+        if ((wantStorageCreatedTime ?? DateTime.MinValue) > (pushStorageCreatedTime ?? DateTime.MinValue))
         {
             return wantStorageCreatedTime;
         }
+        else
+        {
+            return pushStorageCreatedTime;
+        }
     }
 
-    public async ValueTask<Shout?> ReadMessageAsync(OmniSignature signature, CancellationToken cancellationToken)
+    public async ValueTask<Shout?> ReadShoutAsync(OmniSignature signature, CancellationToken cancellationToken)
     {
         var wantStorageCreatedTime = await _subscribedShoutStorage.ReadShoutCreatedTimeAsync(signature, cancellationToken);
         var pushStorageCreatedTime = await _publishedShoutStorage.ReadShoutCreatedTimeAsync(signature, cancellationToken);
         if (wantStorageCreatedTime is null && pushStorageCreatedTime is null) return null;
 
-        if ((wantStorageCreatedTime ?? DateTime.MinValue) < (pushStorageCreatedTime ?? DateTime.MinValue))
+        if ((wantStorageCreatedTime ?? DateTime.MinValue) > (pushStorageCreatedTime ?? DateTime.MinValue))
         {
-            return await _publishedShoutStorage.ReadShoutAsync(signature, cancellationToken);
+            return await _subscribedShoutStorage.ReadShoutAsync(signature, cancellationToken);
         }
         else
         {
-            return await _subscribedShoutStorage.ReadShoutAsync(signature, cancellationToken);
+            return await _publishedShoutStorage.ReadShoutAsync(signature, cancellationToken);
         }
     }
 

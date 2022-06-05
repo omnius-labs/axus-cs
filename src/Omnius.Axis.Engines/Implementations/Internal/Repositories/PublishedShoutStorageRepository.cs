@@ -105,7 +105,7 @@ internal sealed partial class PublishedShoutStorageRepository : DisposableBase
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
                 var col = this.GetCollection();
-                return col.FindOne(n => n.Signature == signatureEntity && n.Registrant == registrant).Export();
+                return col.FindOne(n => n.Signature == signatureEntity && n.Registrant == registrant)?.Export();
             }
         }
 

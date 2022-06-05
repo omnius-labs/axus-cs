@@ -106,7 +106,7 @@ internal sealed class ProfilePublisherRepository : DisposableBase
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
                 var col = this.GetCollection();
-                return col.FindOne(n => n.Signature == signatureEntity).Export();
+                return col.FindOne(n => n.Signature == signatureEntity)?.Export();
             }
         }
 

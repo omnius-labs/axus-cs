@@ -361,7 +361,7 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
             if (!decodedItem.MerkleTreeSections.Any(n => n.Contains(blockHash))) return;
 
             var key = GenKey(rootHash, blockHash);
-            await _blockStorage.TryWriteAsync(key, memory, cancellationToken);
+            await _blockStorage.WriteAsync(key, memory, cancellationToken);
         }
     }
 

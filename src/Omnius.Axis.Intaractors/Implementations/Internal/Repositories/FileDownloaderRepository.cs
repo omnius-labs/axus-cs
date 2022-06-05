@@ -106,7 +106,7 @@ internal sealed class FileDownloaderRepository : DisposableBase
                 var seedEntity = SeedEntity.Import(seed);
 
                 var col = this.GetCollection();
-                return col.FindOne(n => n.Seed == seedEntity).Export();
+                return col.FindOne(n => n.Seed == seedEntity)?.Export();
             }
         }
 
