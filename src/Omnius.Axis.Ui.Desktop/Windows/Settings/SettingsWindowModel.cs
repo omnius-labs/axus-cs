@@ -1,6 +1,6 @@
 using Avalonia.Controls;
-using Omnius.Axis.Intaractors;
-using Omnius.Axis.Intaractors.Models;
+using Omnius.Axis.Interactors;
+using Omnius.Axis.Interactors.Models;
 using Omnius.Axis.Models;
 using Omnius.Axis.Ui.Desktop.Internal;
 using Omnius.Axis.Ui.Desktop.Models;
@@ -54,16 +54,16 @@ public class SettingsWindowModel : SettingsWindowModelBase
 {
     private readonly UiStatus _uiState;
     private readonly IAxisServiceMediator _axisServiceMediator;
-    private readonly IIntaractorProvider _intaractorProvider;
+    private readonly IInteractorProvider _InteractorProvider;
 
     private readonly CompositeDisposable _disposable = new();
     private readonly CompositeAsyncDisposable _asyncDisposable = new();
 
-    public SettingsWindowModel(UiStatus uiState, IAxisServiceMediator axisServiceMediator, IIntaractorProvider intaractorProvider)
+    public SettingsWindowModel(UiStatus uiState, IAxisServiceMediator axisServiceMediator, IInteractorProvider InteractorProvider)
     {
         _uiState = uiState;
         _axisServiceMediator = axisServiceMediator;
-        _intaractorProvider = intaractorProvider;
+        _InteractorProvider = InteractorProvider;
 
         this.Status = _uiState.SettingsWindow ??= new SettingsWindowStatus();
 
@@ -119,7 +119,7 @@ public class SettingsWindowModel : SettingsWindowModelBase
 
     private async ValueTask LoadAsync(CancellationToken cancellationToken = default)
     {
-        var fileDownloader = _intaractorProvider.GetFileDownloader();
+        var fileDownloader = _InteractorProvider.GetFileDownloader();
 
         var serviceConfig = await _axisServiceMediator.GetConfigAsync(cancellationToken);
         var fileDownloaderConfig = await fileDownloader.GetConfigAsync(cancellationToken);
@@ -166,7 +166,7 @@ public class SettingsWindowModel : SettingsWindowModelBase
             ));
         var fileDownloaderConfig = new FileDownloaderConfig(this.FileDownloadDirectory!.Value);
 
-        var fileDownloader = _intaractorProvider.GetFileDownloader();
+        var fileDownloader = _InteractorProvider.GetFileDownloader();
 
         await _axisServiceMediator.SetConfigAsync(serviceConfig, cancellationToken);
         await fileDownloader.SetConfigAsync(fileDownloaderConfig, cancellationToken);

@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Axis.Daemon", "src\O
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Axis.Engines", "src\Omnius.Axis.Engines\Omnius.Axis.Engines.csproj", "{0D62653E-DB9A-43ED-9FEA-0320B45144A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Axis.Intaractors", "src\Omnius.Axis.Intaractors\Omnius.Axis.Intaractors.csproj", "{632D0386-94EF-423D-B245-CD7C6C466BCE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Axis.Interactors", "src\Omnius.Axis.Interactors\Omnius.Axis.Interactors.csproj", "{632D0386-94EF-423D-B245-CD7C6C466BCE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Axis.Launcher", "src\Omnius.Axis.Launcher\Omnius.Axis.Launcher.csproj", "{499C5860-2911-4EA6-8D75-CF5834C30E15}"
 EndProject

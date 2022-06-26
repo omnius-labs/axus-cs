@@ -1,8 +1,8 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using Omnius.Axis.Intaractors;
-using Omnius.Axis.Intaractors.Models;
+using Omnius.Axis.Interactors;
+using Omnius.Axis.Interactors.Models;
 using Omnius.Axis.Ui.Desktop.Internal;
 using Omnius.Axis.Ui.Desktop.Models;
 using Omnius.Core;
@@ -16,7 +16,7 @@ public class DownloadViewViewModel : AsyncDisposableBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
     private readonly UiStatus _uiState;
-    private readonly IIntaractorProvider _intaractorProvider;
+    private readonly IInteractorProvider _InteractorProvider;
     private readonly IApplicationDispatcher _applicationDispatcher;
     private readonly IDialogService _dialogService;
     private readonly IClipboardService _clipboardService;
@@ -25,10 +25,10 @@ public class DownloadViewViewModel : AsyncDisposableBase
 
     private readonly CompositeDisposable _disposable = new();
 
-    public DownloadViewViewModel(UiStatus uiState, IIntaractorProvider intaractorProvider, IApplicationDispatcher applicationDispatcher, IDialogService dialogService, IClipboardService clipboardService)
+    public DownloadViewViewModel(UiStatus uiState, IInteractorProvider InteractorProvider, IApplicationDispatcher applicationDispatcher, IDialogService dialogService, IClipboardService clipboardService)
     {
         _uiState = uiState;
-        _intaractorProvider = intaractorProvider;
+        _InteractorProvider = InteractorProvider;
         _applicationDispatcher = applicationDispatcher;
         _dialogService = dialogService;
         _clipboardService = clipboardService;
@@ -55,7 +55,7 @@ public class DownloadViewViewModel : AsyncDisposableBase
 
     private async ValueTask<IEnumerable<DownloadingFileReport>> GetDownloadingFileReports(CancellationToken cancellationToken)
     {
-        var fileDownloader = _intaractorProvider.GetFileDownloader();
+        var fileDownloader = _InteractorProvider.GetFileDownloader();
 
         return await fileDownloader.GetDownloadingFileReportsAsync(cancellationToken);
     }
@@ -87,7 +87,7 @@ public class DownloadViewViewModel : AsyncDisposableBase
 
     private async void Register()
     {
-        var fileDownloader = _intaractorProvider.GetFileDownloader();
+        var fileDownloader = _InteractorProvider.GetFileDownloader();
 
         var text = await _dialogService.ShowTextEditWindowAsync();
 
@@ -112,7 +112,7 @@ public class DownloadViewViewModel : AsyncDisposableBase
 
     private async void ItemDelete()
     {
-        var fileDownloader = _intaractorProvider.GetFileDownloader();
+        var fileDownloader = _InteractorProvider.GetFileDownloader();
 
         var selectedFiles = this.SelectedFiles.ToArray();
         if (selectedFiles.Length == 0) return;

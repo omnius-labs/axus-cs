@@ -1,8 +1,8 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using Omnius.Axis.Intaractors;
-using Omnius.Axis.Intaractors.Models;
+using Omnius.Axis.Interactors;
+using Omnius.Axis.Interactors.Models;
 using Omnius.Axis.Ui.Desktop.Internal;
 using Omnius.Axis.Ui.Desktop.Models;
 using Omnius.Core;
@@ -16,7 +16,7 @@ public class UploadViewViewModel : AsyncDisposableBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
     private readonly UiStatus _uiState;
-    private readonly IIntaractorProvider _intaractorProvider;
+    private readonly IInteractorProvider _InteractorProvider;
     private readonly IApplicationDispatcher _applicationDispatcher;
     private readonly IDialogService _dialogService;
     private readonly IClipboardService _clipboardService;
@@ -26,10 +26,10 @@ public class UploadViewViewModel : AsyncDisposableBase
 
     private readonly CompositeDisposable _disposable = new();
 
-    public UploadViewViewModel(UiStatus uiState, IIntaractorProvider intaractorProvider, IApplicationDispatcher applicationDispatcher, IDialogService dialogService, IClipboardService clipboardService)
+    public UploadViewViewModel(UiStatus uiState, IInteractorProvider InteractorProvider, IApplicationDispatcher applicationDispatcher, IDialogService dialogService, IClipboardService clipboardService)
     {
         _uiState = uiState;
-        _intaractorProvider = intaractorProvider;
+        _InteractorProvider = InteractorProvider;
         _applicationDispatcher = applicationDispatcher;
         _dialogService = dialogService;
         _clipboardService = clipboardService;
@@ -54,7 +54,7 @@ public class UploadViewViewModel : AsyncDisposableBase
 
     private async ValueTask<IEnumerable<UploadingFileReport>> GetUploadingFileReports(CancellationToken cancellationToken)
     {
-        var fileUploader = _intaractorProvider.GetFileUploader();
+        var fileUploader = _InteractorProvider.GetFileUploader();
 
         return await fileUploader.GetUploadingFileReportsAsync(cancellationToken);
     }
@@ -86,7 +86,7 @@ public class UploadViewViewModel : AsyncDisposableBase
 
     private async void Register()
     {
-        var fileUploader = _intaractorProvider.GetFileUploader();
+        var fileUploader = _InteractorProvider.GetFileUploader();
 
         foreach (var filePath in await _dialogService.ShowOpenFileWindowAsync())
         {
@@ -96,7 +96,7 @@ public class UploadViewViewModel : AsyncDisposableBase
 
     private async void ItemDelete()
     {
-        var fileUploader = _intaractorProvider.GetFileUploader();
+        var fileUploader = _InteractorProvider.GetFileUploader();
 
         var selectedFiles = this.SelectedFiles.ToArray();
         if (selectedFiles.Length == 0) return;

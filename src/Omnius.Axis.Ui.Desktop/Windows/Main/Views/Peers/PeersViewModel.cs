@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
-using Omnius.Axis.Intaractors;
+using Omnius.Axis.Interactors;
 using Omnius.Axis.Models;
 using Omnius.Axis.Ui.Desktop.Internal;
 using Omnius.Core;

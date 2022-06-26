@@ -15,7 +15,7 @@ package Omnius.Axis.Ui.Desktop {
     }
 }
 
-package Omnius.Axis.Intaractors {
+package Omnius.Axis.Interactors {
     rectangle FilePublisher <<$component>><<behavior>>
     rectangle FileSubscriber <<$component>><<behavior>>
     rectangle UserProfilePublisher <<$component>><<behavior>>

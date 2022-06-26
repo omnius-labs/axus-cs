@@ -1,5 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using Omnius.Axis.Intaractors;
+using Omnius.Axis.Interactors;
 using Omnius.Axis.Ui.Desktop.Models;
 using Omnius.Axis.Ui.Desktop.Windows.Main;
 using Omnius.Axis.Ui.Desktop.Windows.Settings;
@@ -38,7 +38,7 @@ public partial class Bootstrapper : AsyncDisposableBase
 
             var axisServiceProvider = await AxisServiceProvider.CreateAsync(axisEnvironment.ListenAddress, cancellationToken);
             var axisServiceMediator = new AxisServiceMediator(axisServiceProvider.GetService());
-            var intaractorProvider = await IntaractorProvider.CreateAsync(_axisEnvironment.DatabaseDirectoryPath, axisServiceMediator, bytesPool, cancellationToken);
+            var InteractorProvider = await InteractorProvider.CreateAsync(_axisEnvironment.DatabaseDirectoryPath, axisServiceMediator, bytesPool, cancellationToken);
 
             var serviceCollection = new ServiceCollection();
 
@@ -46,7 +46,7 @@ public partial class Bootstrapper : AsyncDisposableBase
             serviceCollection.AddSingleton<IBytesPool>(bytesPool);
             serviceCollection.AddSingleton(uiState);
             serviceCollection.AddSingleton<IAxisServiceMediator>(axisServiceMediator);
-            serviceCollection.AddSingleton<IIntaractorProvider>(intaractorProvider);
+            serviceCollection.AddSingleton<IInteractorProvider>(InteractorProvider);
 
             serviceCollection.AddSingleton<IApplicationDispatcher, ApplicationDispatcher>();
             serviceCollection.AddSingleton<IMainWindowProvider, MainWindowProvider>();
@@ -84,7 +84,7 @@ public partial class Bootstrapper : AsyncDisposableBase
         var uiStatus = _serviceProvider.GetRequiredService<UiStatus>();
         await uiStatus.SaveAsync(Path.Combine(_axisEnvironment.DatabaseDirectoryPath, UI_STATUS_FILE_NAME));
 
-        await _serviceProvider.GetRequiredService<IIntaractorProvider>().DisposeAsync();
+        await _serviceProvider.GetRequiredService<IInteractorProvider>().DisposeAsync();
     }
 
     public ServiceProvider GetServiceProvider()

@@ -4,8 +4,6 @@
         "Bootstrapper",
         "Bson",
         "Deleter",
-        "Intaractor",
-        "Intaractors",
         "Kademlia",
         "Merkle",
         "metadatas",

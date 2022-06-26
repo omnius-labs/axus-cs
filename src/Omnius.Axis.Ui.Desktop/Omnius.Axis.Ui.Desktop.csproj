@@ -50,7 +50,7 @@
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core\Omnius.Core.csproj" />
     <ProjectReference Include="..\Omnius.Axis.Models\Omnius.Axis.Models.csproj" />
     <ProjectReference Include="..\Omnius.Axis.Remoting\Omnius.Axis.Remoting.csproj" />
-    <ProjectReference Include="..\Omnius.Axis.Intaractors\Omnius.Axis.Intaractors.csproj" />
+    <ProjectReference Include="..\Omnius.Axis.Interactors\Omnius.Axis.Interactors.csproj" />
     <ProjectReference Include="..\Omnius.Axis.Utils\Omnius.Axis.Utils.csproj" />
   </ItemGroup>
 

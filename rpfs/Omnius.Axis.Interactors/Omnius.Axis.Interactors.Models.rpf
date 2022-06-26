@@ -1,0 +1,55 @@
+syntax v1.0;
+
+using "Omnius.Core.Cryptography";
+using "Omnius.Core.Net";
+using "Omnius.Axis.Models";
+
+namespace "Omnius.Axis.Interactors.Models";
+
+message Profile {
+    Signature: OmniSignature,
+    CreatedTime: timestamp,
+    Content: ProfileContent,
+}
+
+message ProfileContent {
+    TrustedSignatures: vector<OmniSignature>(capacity: 1024),
+    BlockedSignatures: vector<OmniSignature>(capacity: 1024),
+    Seeds: vector<Seed>(capacity: 256 * 1024),
+}
+
+message Seed {
+    RootHash: OmniHash,
+    Name: string(capacity: 256),
+    Size: uint64,
+    CreatedTime: timestamp,
+}
+
+enum UploadingFileState : uint8 {
+    Unknown = 0,
+    Waiting = 1,
+    Encoding = 2,
+    Completed = 3,
+}
+
+enum DownloadingFileState : uint8 {
+    Unknown = 0,
+    Downloading = 1,
+    Decoding = 2,
+    Completed = 3,
+}
+
+message FileDownloaderConfig {
+    DestinationDirectory: string,
+}
+
+message ProfilePublisherConfig {
+    DigitalSignature: OmniDigitalSignature,
+}
+
+message ProfileSubscriberConfig {
+    TrustedSignatures: vector<OmniSignature>(capacity: 1024),
+    BlockedSignatures: vector<OmniSignature>(capacity: 1024),
+    SearchDepth: uint32,
+    MaxProfileCount: uint32,
+}

@@ -1,10 +1,10 @@
-using Omnius.Axis.Intaractors;
+using Omnius.Axis.Interactors;
 using Omnius.Core;
 using Omnius.Core.Storages;
 
 namespace Omnius.Axis.Ui.Desktop.Internal;
 
-public interface IIntaractorProvider : IAsyncDisposable
+public interface IInteractorProvider : IAsyncDisposable
 {
     IFileDownloader GetFileDownloader();
 
@@ -15,7 +15,7 @@ public interface IIntaractorProvider : IAsyncDisposable
     IProfileSubscriber GetProfileSubscriber();
 }
 
-public partial class IntaractorProvider : AsyncDisposableBase, IIntaractorProvider
+public partial class InteractorProvider : AsyncDisposableBase, IInteractorProvider
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -31,14 +31,14 @@ public partial class IntaractorProvider : AsyncDisposableBase, IIntaractorProvid
 
     private readonly AsyncLock _asyncLock = new();
 
-    public static async ValueTask<IntaractorProvider> CreateAsync(string databaseDirectoryPath, IAxisServiceMediator axisServiceMediator, IBytesPool bytesPool, CancellationToken cancellationToken = default)
+    public static async ValueTask<InteractorProvider> CreateAsync(string databaseDirectoryPath, IAxisServiceMediator axisServiceMediator, IBytesPool bytesPool, CancellationToken cancellationToken = default)
     {
-        var result = new IntaractorProvider(databaseDirectoryPath, axisServiceMediator, bytesPool);
+        var result = new InteractorProvider(databaseDirectoryPath, axisServiceMediator, bytesPool);
         await result.InitAsync(cancellationToken);
         return result;
     }
 
-    internal IntaractorProvider(string databaseDirectoryPath, IAxisServiceMediator axisServiceMediator, IBytesPool bytesPool)
+    internal InteractorProvider(string databaseDirectoryPath, IAxisServiceMediator axisServiceMediator, IBytesPool bytesPool)
     {
         _databaseDirectoryPath = databaseDirectoryPath;
         _axisServiceMediator = axisServiceMediator;

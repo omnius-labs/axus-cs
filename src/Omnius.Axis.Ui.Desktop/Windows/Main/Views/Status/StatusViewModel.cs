@@ -1,5 +1,5 @@
 using Avalonia.Threading;
-using Omnius.Axis.Intaractors;
+using Omnius.Axis.Interactors;
 using Omnius.Core;
 using Omnius.Core.Avalonia;
 using Reactive.Bindings;

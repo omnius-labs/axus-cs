@@ -1,5 +1,5 @@
 using Generator.Equals;
-using Omnius.Axis.Intaractors.Models;
+using Omnius.Axis.Interactors.Models;
 using Omnius.Core.Avalonia;
 
 namespace Omnius.Axis.Ui.Desktop.Windows.Main;
