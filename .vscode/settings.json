@@ -4,6 +4,8 @@
         "Bootstrapper",
         "Bson",
         "Deleter",
+        "hashcash",
+        "Interactor",
         "Kademlia",
         "Merkle",
         "metadatas",

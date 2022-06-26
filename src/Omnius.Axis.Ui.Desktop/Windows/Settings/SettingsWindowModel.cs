@@ -54,16 +54,16 @@ public class SettingsWindowModel : SettingsWindowModelBase
 {
     private readonly UiStatus _uiState;
     private readonly IAxisServiceMediator _axisServiceMediator;
-    private readonly IInteractorProvider _InteractorProvider;
+    private readonly IInteractorProvider _interactorProvider;
 
     private readonly CompositeDisposable _disposable = new();
     private readonly CompositeAsyncDisposable _asyncDisposable = new();
 
-    public SettingsWindowModel(UiStatus uiState, IAxisServiceMediator axisServiceMediator, IInteractorProvider InteractorProvider)
+    public SettingsWindowModel(UiStatus uiState, IAxisServiceMediator axisServiceMediator, IInteractorProvider interactorProvider)
     {
         _uiState = uiState;
         _axisServiceMediator = axisServiceMediator;
-        _InteractorProvider = InteractorProvider;
+        _interactorProvider = interactorProvider;
 
         this.Status = _uiState.SettingsWindow ??= new SettingsWindowStatus();
 
@@ -119,7 +119,7 @@ public class SettingsWindowModel : SettingsWindowModelBase
 
     private async ValueTask LoadAsync(CancellationToken cancellationToken = default)
     {
-        var fileDownloader = _InteractorProvider.GetFileDownloader();
+        var fileDownloader = _interactorProvider.GetFileDownloader();
 
         var serviceConfig = await _axisServiceMediator.GetConfigAsync(cancellationToken);
         var fileDownloaderConfig = await fileDownloader.GetConfigAsync(cancellationToken);
@@ -166,7 +166,7 @@ public class SettingsWindowModel : SettingsWindowModelBase
             ));
         var fileDownloaderConfig = new FileDownloaderConfig(this.FileDownloadDirectory!.Value);
 
-        var fileDownloader = _InteractorProvider.GetFileDownloader();
+        var fileDownloader = _interactorProvider.GetFileDownloader();
 
         await _axisServiceMediator.SetConfigAsync(serviceConfig, cancellationToken);
         await fileDownloader.SetConfigAsync(fileDownloaderConfig, cancellationToken);

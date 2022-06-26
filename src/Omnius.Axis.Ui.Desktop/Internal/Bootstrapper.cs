@@ -38,7 +38,7 @@ public partial class Bootstrapper : AsyncDisposableBase
 
             var axisServiceProvider = await AxisServiceProvider.CreateAsync(axisEnvironment.ListenAddress, cancellationToken);
             var axisServiceMediator = new AxisServiceMediator(axisServiceProvider.GetService());
-            var InteractorProvider = await InteractorProvider.CreateAsync(_axisEnvironment.DatabaseDirectoryPath, axisServiceMediator, bytesPool, cancellationToken);
+            var interactorProvider = await InteractorProvider.CreateAsync(_axisEnvironment.DatabaseDirectoryPath, axisServiceMediator, bytesPool, cancellationToken);
 
             var serviceCollection = new ServiceCollection();
 
@@ -46,7 +46,7 @@ public partial class Bootstrapper : AsyncDisposableBase
             serviceCollection.AddSingleton<IBytesPool>(bytesPool);
             serviceCollection.AddSingleton(uiState);
             serviceCollection.AddSingleton<IAxisServiceMediator>(axisServiceMediator);
-            serviceCollection.AddSingleton<IInteractorProvider>(InteractorProvider);
+            serviceCollection.AddSingleton<IInteractorProvider>(interactorProvider);
 
             serviceCollection.AddSingleton<IApplicationDispatcher, ApplicationDispatcher>();
             serviceCollection.AddSingleton<IMainWindowProvider, MainWindowProvider>();
