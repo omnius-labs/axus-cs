@@ -296,11 +296,11 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                 {
                     if (exchangeType == ExchangeType.Published)
                     {
-                        _logger.Debug("ConnectedSession Succeeded (Published): (Address: {session.Address})");
+                        _logger.Debug($"ConnectedSession Succeeded (Published): (Address: {session.Address})");
                     }
                     else if (exchangeType == ExchangeType.Subscribed)
                     {
-                        _logger.Debug("ConnectedSession Succeeded (Subscribed): (Address: {session.Address})");
+                        _logger.Debug($"ConnectedSession Succeeded (Subscribed): (Address: {session.Address})");
                     }
 
                     return this.InternalTryAddSession(session, exchangeType, rootHash);
@@ -348,7 +348,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                     var resultMessage = new FileExchangerHandshakeResultMessage(FileExchangerHandshakeResultType.Succeeded);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
 
-                    _logger.Debug("AcceptedSession Succeeded (Published): (Address: {session.Address})");
+                    _logger.Debug($"AcceptedSession Succeeded (Published): (Address: {session.Address})");
 
                     var sessionStatus = new SessionStatus(session, ExchangeType.Published, requestMessage.RootHash, _batchActionDispatcher);
                     return this.InternalTryAddSession(session, ExchangeType.Published, requestMessage.RootHash);
@@ -358,7 +358,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                     var resultMessage = new FileExchangerHandshakeResultMessage(FileExchangerHandshakeResultType.Succeeded);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
 
-                    _logger.Debug("AcceptedSession Succeeded (Subscribed): (Address: {session.Address})");
+                    _logger.Debug($"AcceptedSession Succeeded (Subscribed): (Address: {session.Address})");
 
                     return this.InternalTryAddSession(session, ExchangeType.Subscribed, requestMessage.RootHash);
                 }

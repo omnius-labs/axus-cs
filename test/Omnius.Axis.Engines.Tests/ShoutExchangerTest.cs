@@ -16,7 +16,7 @@ public class ShoutExchangerTest
     public static IEnumerable<object[]> GetPublishAndSubscribeTestCases()
     {
         var results = new List<(OmniAddress, OmniAddress, TimeSpan)>{
-            (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50011), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50012), TimeSpan.FromMinutes(10)),
+            (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback,40011), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 40012), TimeSpan.FromMinutes(3)),
             // (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50031), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50032), TimeSpan.FromMinutes(3)),
             // (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50051), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50052), TimeSpan.FromMinutes(3)),
         };
