@@ -1,6 +1,5 @@
 using Avalonia.Threading;
 using Omnius.Axis.Intaractors;
-using Omnius.Axis.Ui.Desktop.Internal;
 using Omnius.Core;
 using Omnius.Core.Avalonia;
 using Reactive.Bindings;
@@ -12,9 +11,8 @@ public class StatusViewViewModel : AsyncDisposableBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IIntaractorProvider _intaractorAdapter;
+    private readonly IAxisServiceMediator _axisServiceMediator;
     private readonly IClipboardService _clipboardService;
-    private readonly INodesFetcher _nodesFetcher;
 
     private readonly Task _refreshTask;
 
@@ -22,11 +20,10 @@ public class StatusViewViewModel : AsyncDisposableBase
 
     private readonly CompositeDisposable _disposable = new();
 
-    public StatusViewViewModel(IIntaractorProvider intaractorAdapter, IClipboardService clipboardService, INodesFetcher nodesFetcher)
+    public StatusViewViewModel(IAxisServiceMediator axisServiceMediator, IClipboardService clipboardService)
     {
-        _intaractorAdapter = intaractorAdapter;
+        _axisServiceMediator = axisServiceMediator;
         _clipboardService = clipboardService;
-        _nodesFetcher = nodesFetcher;
 
         this.MyNodeLocation = new ReactiveProperty<string>().AddTo(_disposable);
         this.CopyMyNodeLocationCommand = new ReactiveCommand().AddTo(_disposable);
@@ -63,17 +60,12 @@ public class StatusViewViewModel : AsyncDisposableBase
             {
                 await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken).ConfigureAwait(false);
 
-                var serviceController = await _intaractorAdapter.GetServiceControllerAsync();
-
-                var myNodeLocation = await serviceController.GetMyNodeLocationAsync(cancellationToken);
+                var myNodeLocation = await _axisServiceMediator.GetMyNodeLocationAsync(cancellationToken);
 
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    this.MyNodeLocation.Value = AxisMessage.NodeToString(myNodeLocation);
+                    this.MyNodeLocation.Value = AxisMessageConverter.NodeToString(myNodeLocation);
                 });
-
-                var fetchedNodeLocations = await _nodesFetcher.FetchAsync(cancellationToken);
-                await serviceController.AddCloudNodeLocationsAsync(fetchedNodeLocations, cancellationToken);
             }
         }
         catch (OperationCanceledException e)

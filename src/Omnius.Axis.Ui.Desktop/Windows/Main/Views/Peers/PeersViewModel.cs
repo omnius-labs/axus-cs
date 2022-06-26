@@ -21,7 +21,7 @@ public class PeersViewViewModel : PeersViewViewModelBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IIntaractorProvider _intaractorAdapter;
+    private readonly IAxisServiceMediator _axisServiceMediator;
     private readonly IApplicationDispatcher _applicationDispatcher;
     private readonly IDialogService _dialogService;
 
@@ -29,9 +29,9 @@ public class PeersViewViewModel : PeersViewViewModelBase
 
     private readonly CompositeDisposable _disposable = new();
 
-    public PeersViewViewModel(IIntaractorProvider intaractorAdapter, IApplicationDispatcher applicationDispatcher, IDialogService dialogService)
+    public PeersViewViewModel(IAxisServiceMediator axisServiceMediator, IApplicationDispatcher applicationDispatcher, IDialogService dialogService)
     {
-        _intaractorAdapter = intaractorAdapter;
+        _axisServiceMediator = axisServiceMediator;
         _applicationDispatcher = applicationDispatcher;
         _dialogService = dialogService;
 
@@ -50,9 +50,7 @@ public class PeersViewViewModel : PeersViewViewModelBase
 
     private async ValueTask<IEnumerable<SessionReport>> GetSessionReports(CancellationToken cancellationToken)
     {
-        var serviceController = await _intaractorAdapter.GetServiceControllerAsync(cancellationToken);
-
-        return await serviceController.GetSessionReportsAsync(cancellationToken);
+        return await _axisServiceMediator.GetSessionReportsAsync(cancellationToken);
     }
 
     private class SessionReportEqualityComparer : IEqualityComparer<SessionReport>
@@ -72,10 +70,8 @@ public class PeersViewViewModel : PeersViewViewModelBase
 
     private async Task AddNodeLocationsAsync()
     {
-        var serviceController = await _intaractorAdapter.GetServiceControllerAsync();
-
         var text = await _dialogService.ShowTextEditWindowAsync();
-        await serviceController.AddCloudNodeLocationsAsync(ParseNodeLocations(text));
+        await _axisServiceMediator.AddCloudNodeLocationsAsync(ParseNodeLocations(text));
     }
 
     private static IEnumerable<NodeLocation> ParseNodeLocations(string text)
@@ -84,7 +80,7 @@ public class PeersViewViewModel : PeersViewViewModelBase
 
         foreach (var line in text.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries).Select(n => n.Trim()))
         {
-            if (!AxisMessage.TryStringToNode(line, out var nodeLocation)) continue;
+            if (!AxisMessageConverter.TryStringToNode(line, out var nodeLocation)) continue;
             results.Add(nodeLocation);
         }
 

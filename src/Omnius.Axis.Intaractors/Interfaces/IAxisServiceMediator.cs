@@ -3,7 +3,7 @@ using Omnius.Core.Cryptography;
 
 namespace Omnius.Axis.Intaractors;
 
-public interface IServiceController
+public interface IAxisServiceMediator
 {
     ValueTask<ServiceConfig> GetConfigAsync(CancellationToken cancellationToken = default);
 

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Omnius.Axis.Intaractors;
 using Omnius.Axis.Ui.Desktop.Models;
 using Omnius.Axis.Ui.Desktop.Windows.Main;
 using Omnius.Axis.Ui.Desktop.Windows.Settings;
@@ -35,20 +36,22 @@ public partial class Bootstrapper : AsyncDisposableBase
 
             var uiState = await UiStatus.LoadAsync(Path.Combine(_axisEnvironment.DatabaseDirectoryPath, UI_STATUS_FILE_NAME));
 
-            var intaractorProvider = new IntaractorProvider(_axisEnvironment.DatabaseDirectoryPath, _axisEnvironment.ListenAddress, bytesPool);
+            var axisServiceProvider = await AxisServiceProvider.CreateAsync(axisEnvironment.ListenAddress, cancellationToken);
+            var axisServiceMediator = new AxisServiceMediator(axisServiceProvider.GetService());
+            var intaractorProvider = await IntaractorProvider.CreateAsync(_axisEnvironment.DatabaseDirectoryPath, axisServiceMediator, bytesPool, cancellationToken);
 
             var serviceCollection = new ServiceCollection();
 
             serviceCollection.AddSingleton(_axisEnvironment);
             serviceCollection.AddSingleton<IBytesPool>(bytesPool);
             serviceCollection.AddSingleton(uiState);
+            serviceCollection.AddSingleton<IAxisServiceMediator>(axisServiceMediator);
             serviceCollection.AddSingleton<IIntaractorProvider>(intaractorProvider);
 
             serviceCollection.AddSingleton<IApplicationDispatcher, ApplicationDispatcher>();
             serviceCollection.AddSingleton<IMainWindowProvider, MainWindowProvider>();
             serviceCollection.AddSingleton<IClipboardService, ClipboardService>();
             serviceCollection.AddSingleton<IDialogService, DialogService>();
-            serviceCollection.AddSingleton<INodesFetcher, NodesFetcher>();
 
             serviceCollection.AddTransient<MainWindowModel>();
             serviceCollection.AddTransient<SettingsWindowModel>();

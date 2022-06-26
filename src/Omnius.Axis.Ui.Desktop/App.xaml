@@ -13,7 +13,9 @@
         <StyleInclude Source="avares://Material.DataGrid/DataGrid.xaml"/>
         <StyleInclude Source="avares://Avalonia.Themes.Fluent/Controls/TitleBar.xaml"/>
         <StyleInclude Source="avares://Avalonia.Themes.Fluent/Controls/CaptionButtons.xaml"/>
+        <StyleInclude Source="avares://AvaloniaEdit/AvaloniaEdit.xaml" />
         <StyleInclude Source="/Styles/Base.xaml"/>
         <StyleInclude Source="/Styles/SideBar.xaml" />
+        <StyleInclude Source="/Styles/OptionMenu.xaml" />
     </Application.Styles>
 </Application>

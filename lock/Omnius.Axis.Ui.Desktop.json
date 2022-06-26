@@ -17,6 +17,17 @@
           "System.ValueTuple": "4.5.0"
         }
       },
+      "Avalonia.AvaloniaEdit": {
+        "type": "Direct",
+        "requested": "[0.10.12.2, )",
+        "resolved": "0.10.12.2",
+        "contentHash": "JUVufb2/P19M5jSFISSfoP7WTVm9G1JdiBZ3odl4avrac/HZXVcXnv5cz39EDSrWNAveBHWUcaVRRDpB9U01Xg==",
+        "dependencies": {
+          "Avalonia": "0.10.12",
+          "System.Collections.Immutable": "1.6.0",
+          "System.Xml.ReaderWriter": "4.3.1"
+        }
+      },
       "Avalonia.Desktop": {
         "type": "Direct",
         "requested": "[0.10.12, )",
@@ -664,6 +675,29 @@
           "System.Threading.Tasks": "4.3.0"
         }
       },
+      "System.IO.FileSystem": {
+        "type": "Transitive",
+        "resolved": "4.3.0",
+        "contentHash": "3wEMARTnuio+ulnvi+hkRNROYwa1kylvYahhcLk4HSoVdl+xxTFVeVlYOfLwrDPImGls0mDqbMhrza8qnWPTdA==",
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.1.0",
+          "Microsoft.NETCore.Targets": "1.1.0",
+          "System.IO": "4.3.0",
+          "System.IO.FileSystem.Primitives": "4.3.0",
+          "System.Runtime": "4.3.0",
+          "System.Runtime.Handles": "4.3.0",
+          "System.Text.Encoding": "4.3.0",
+          "System.Threading.Tasks": "4.3.0"
+        }
+      },
+      "System.IO.FileSystem.Primitives": {
+        "type": "Transitive",
+        "resolved": "4.3.0",
+        "contentHash": "6QOb2XFLch7bEc4lIcJH49nJN2HV+OC3fHDgsLVsBVBk3Y4hFAnOBGzJ2lUu7CyDDFo9IBWkSsnbkT6IBwwiMw==",
+        "dependencies": {
+          "System.Runtime": "4.3.0"
+        }
+      },
       "System.IO.Pipelines": {
         "type": "Transitive",
         "resolved": "6.0.1",
@@ -897,6 +931,17 @@
           "System.Runtime.CompilerServices.Unsafe": "4.5.2"
         }
       },
+      "System.Text.Encoding.Extensions": {
+        "type": "Transitive",
+        "resolved": "4.3.0",
+        "contentHash": "YVMK0Bt/A43RmwizJoZ22ei2nmrhobgeiYwFzC4YAN+nue8RF6djXDMog0UCn+brerQoYVyaS+ghy9P/MUVcmw==",
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.1.0",
+          "Microsoft.NETCore.Targets": "1.1.0",
+          "System.Runtime": "4.3.0",
+          "System.Text.Encoding": "4.3.0"
+        }
+      },
       "System.Text.RegularExpressions": {
         "type": "Transitive",
         "resolved": "4.3.0",
@@ -933,6 +978,28 @@
         "type": "Transitive",
         "resolved": "4.5.0",
         "contentHash": "okurQJO6NRE/apDIP23ajJ0hpiNmJ+f0BwOlB/cSqTLQlw5upkf+5+96+iG2Jw40G1fCVCyPz/FhIABUjMR+RQ=="
+      },
+      "System.Xml.ReaderWriter": {
+        "type": "Transitive",
+        "resolved": "4.3.1",
+        "contentHash": "fVU1Xp9TEOHv1neQDtcJ4hNfYJ1pjfXzKY3VFeiRZK6HTV4Af2Ihyvq1FkPLrL1hzZhXv7NTmowQnL5DgTzIKA==",
+        "dependencies": {
+          "System.Collections": "4.3.0",
+          "System.Diagnostics.Debug": "4.3.0",
+          "System.Globalization": "4.3.0",
+          "System.IO": "4.3.0",
+          "System.IO.FileSystem": "4.3.0",
+          "System.IO.FileSystem.Primitives": "4.3.0",
+          "System.Resources.ResourceManager": "4.3.0",
+          "System.Runtime": "4.3.0",
+          "System.Runtime.Extensions": "4.3.0",
+          "System.Runtime.InteropServices": "4.3.0",
+          "System.Text.Encoding": "4.3.0",
+          "System.Text.Encoding.Extensions": "4.3.0",
+          "System.Text.RegularExpressions": "4.3.0",
+          "System.Threading.Tasks": "4.3.0",
+          "System.Threading.Tasks.Extensions": "4.3.0"
+        }
       },
       "Tmds.DBus": {
         "type": "Transitive",
@@ -1010,6 +1077,7 @@
         "type": "Project",
         "dependencies": {
           "Avalonia": "0.10.12",
+          "Avalonia.AvaloniaEdit": "0.10.12.2",
           "Avalonia.Controls.DataGrid": "0.10.12",
           "Avalonia.Desktop": "0.10.12",
           "Avalonia.Skia": "0.10.12",

@@ -13,7 +13,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IServiceController _serviceController;
+    private readonly IAxisServiceMediator _serviceController;
     private readonly IBytesPool _bytesPool;
     private readonly ProfilePublisherOptions _options;
 
@@ -28,14 +28,14 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
 
     private const string Registrant = "Omnius.Axis.Intaractors.ProfilePublisher";
 
-    public static async ValueTask<ProfilePublisher> CreateAsync(IServiceController serviceController, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, ProfilePublisherOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<ProfilePublisher> CreateAsync(IAxisServiceMediator serviceController, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, ProfilePublisherOptions options, CancellationToken cancellationToken = default)
     {
         var profilePublisher = new ProfilePublisher(serviceController, singleValueStorageFactory, bytesPool, options);
         await profilePublisher.InitAsync(cancellationToken);
         return profilePublisher;
     }
 
-    private ProfilePublisher(IServiceController serviceController, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, ProfilePublisherOptions options)
+    private ProfilePublisher(IAxisServiceMediator serviceController, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, ProfilePublisherOptions options)
     {
         _serviceController = serviceController;
         _bytesPool = bytesPool;

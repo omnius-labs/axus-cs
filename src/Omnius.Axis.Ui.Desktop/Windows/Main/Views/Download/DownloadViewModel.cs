@@ -16,7 +16,7 @@ public class DownloadViewViewModel : AsyncDisposableBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
     private readonly UiStatus _uiState;
-    private readonly IIntaractorProvider _intaractorAdapter;
+    private readonly IIntaractorProvider _intaractorProvider;
     private readonly IApplicationDispatcher _applicationDispatcher;
     private readonly IDialogService _dialogService;
     private readonly IClipboardService _clipboardService;
@@ -25,10 +25,10 @@ public class DownloadViewViewModel : AsyncDisposableBase
 
     private readonly CompositeDisposable _disposable = new();
 
-    public DownloadViewViewModel(UiStatus uiState, IIntaractorProvider intaractorAdapter, IApplicationDispatcher applicationDispatcher, IDialogService dialogService, IClipboardService clipboardService)
+    public DownloadViewViewModel(UiStatus uiState, IIntaractorProvider intaractorProvider, IApplicationDispatcher applicationDispatcher, IDialogService dialogService, IClipboardService clipboardService)
     {
         _uiState = uiState;
-        _intaractorAdapter = intaractorAdapter;
+        _intaractorProvider = intaractorProvider;
         _applicationDispatcher = applicationDispatcher;
         _dialogService = dialogService;
         _clipboardService = clipboardService;
@@ -55,7 +55,7 @@ public class DownloadViewViewModel : AsyncDisposableBase
 
     private async ValueTask<IEnumerable<DownloadingFileReport>> GetDownloadingFileReports(CancellationToken cancellationToken)
     {
-        var fileDownloader = await _intaractorAdapter.GetFileDownloaderAsync(cancellationToken);
+        var fileDownloader = _intaractorProvider.GetFileDownloader();
 
         return await fileDownloader.GetDownloadingFileReportsAsync(cancellationToken);
     }
@@ -87,7 +87,7 @@ public class DownloadViewViewModel : AsyncDisposableBase
 
     private async void Register()
     {
-        var fileDownloader = await _intaractorAdapter.GetFileDownloaderAsync();
+        var fileDownloader = _intaractorProvider.GetFileDownloader();
 
         var text = await _dialogService.ShowTextEditWindowAsync();
 
@@ -103,7 +103,7 @@ public class DownloadViewViewModel : AsyncDisposableBase
 
         foreach (var line in text.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries).Select(n => n.Trim()))
         {
-            if (!AxisMessage.TryStringToSeed(line, out var seed)) continue;
+            if (!AxisMessageConverter.TryStringToSeed(line, out var seed)) continue;
             results.Add(seed);
         }
 
@@ -112,7 +112,7 @@ public class DownloadViewViewModel : AsyncDisposableBase
 
     private async void ItemDelete()
     {
-        var fileDownloader = await _intaractorAdapter.GetFileDownloaderAsync();
+        var fileDownloader = _intaractorProvider.GetFileDownloader();
 
         var selectedFiles = this.SelectedFiles.ToArray();
         if (selectedFiles.Length == 0) return;
@@ -136,7 +136,7 @@ public class DownloadViewViewModel : AsyncDisposableBase
         foreach (var viewModel in selectedFiles)
         {
             if (viewModel.Model?.Seed is null) continue;
-            sb.AppendLine(AxisMessage.SeedToString(viewModel.Model.Seed));
+            sb.AppendLine(AxisMessageConverter.SeedToString(viewModel.Model.Seed));
         }
 
         await _clipboardService.SetTextAsync(sb.ToString());

@@ -8,7 +8,7 @@ using Omnius.Core.Serialization;
 
 namespace Omnius.Axis.Intaractors;
 
-public static class AxisMessage
+public static class AxisMessageConverter
 {
     private static readonly string _schema = "axis";
     private static readonly string _nodePath = "node";

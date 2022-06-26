@@ -2,7 +2,7 @@ using Omnius.Axis.Intaractors.Models;
 
 namespace Omnius.Axis.Intaractors;
 
-public interface IProfilePublisher
+public interface IProfilePublisher : IAsyncDisposable
 {
     ValueTask PublishAsync(ProfileContent profileContent, CancellationToken cancellationToken = default);
 

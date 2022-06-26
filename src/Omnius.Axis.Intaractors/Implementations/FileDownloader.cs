@@ -12,7 +12,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IServiceController _serviceController;
+    private readonly IAxisServiceMediator _serviceController;
     private readonly IBytesPool _bytesPool;
     private readonly FileDownloaderOptions _options;
 
@@ -27,14 +27,14 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
 
     private const string Registrant = "Omnius.Axis.Intaractors.FileDownloader";
 
-    public static async ValueTask<FileDownloader> CreateAsync(IServiceController serviceController, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<FileDownloader> CreateAsync(IAxisServiceMediator serviceController, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options, CancellationToken cancellationToken = default)
     {
         var fileDownloader = new FileDownloader(serviceController, singleValueStorageFactory, bytesPool, options);
         await fileDownloader.InitAsync(cancellationToken);
         return fileDownloader;
     }
 
-    private FileDownloader(IServiceController service, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options)
+    private FileDownloader(IAxisServiceMediator service, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options)
     {
         _serviceController = service;
         _bytesPool = bytesPool;

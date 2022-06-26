@@ -31,7 +31,7 @@ public class SignaturesViewViewModel : SignaturesViewViewModelBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
     private readonly UiStatus _uiState;
-    private readonly IIntaractorProvider _intaractorAdapter;
+    private readonly IIntaractorProvider _intaractorProvider;
     private readonly IApplicationDispatcher _applicationDispatcher;
     private readonly IDialogService _dialogService;
     private readonly IClipboardService _clipboardService;
@@ -39,10 +39,10 @@ public class SignaturesViewViewModel : SignaturesViewViewModelBase
     private readonly CompositeDisposable _disposable = new();
     private readonly CompositeAsyncDisposable _asyncDisposable = new();
 
-    public SignaturesViewViewModel(UiStatus uiState, IIntaractorProvider intaractorAdapter, IApplicationDispatcher applicationDispatcher, IDialogService dialogService, IClipboardService clipboardService)
+    public SignaturesViewViewModel(UiStatus uiState, IIntaractorProvider intaractorProvider, IApplicationDispatcher applicationDispatcher, IDialogService dialogService, IClipboardService clipboardService)
     {
         _uiState = uiState;
-        _intaractorAdapter = intaractorAdapter;
+        _intaractorProvider = intaractorProvider;
         _applicationDispatcher = applicationDispatcher;
         _dialogService = dialogService;
         _clipboardService = clipboardService;

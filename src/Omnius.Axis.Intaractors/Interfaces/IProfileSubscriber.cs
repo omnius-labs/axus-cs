@@ -3,7 +3,7 @@ using Omnius.Core.Cryptography;
 
 namespace Omnius.Axis.Intaractors;
 
-public interface IProfileSubscriber
+public interface IProfileSubscriber : IAsyncDisposable
 {
     IAsyncEnumerable<Profile> FindAllAsync(CancellationToken cancellationToken = default);
 

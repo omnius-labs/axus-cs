@@ -19,6 +19,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Styles\OptionMenu.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" />
     <PackageReference Include="Avalonia.Diagnostics" />
     <PackageReference Include="Avalonia.Skia" />
@@ -26,6 +30,7 @@
     <PackageReference Include="Avalonia.Xaml.Behaviors" />
     <PackageReference Include="Avalonia.Xaml.Interactions" />
     <PackageReference Include="Avalonia.Xaml.Interactivity" />
+    <PackageReference Include="Avalonia.AvaloniaEdit" />
     <PackageReference Include="Avalonia" />
     <PackageReference Include="CommandLineParser" />
     <PackageReference Include="Generator.Equals" />
@@ -47,6 +52,12 @@
     <ProjectReference Include="..\Omnius.Axis.Remoting\Omnius.Axis.Remoting.csproj" />
     <ProjectReference Include="..\Omnius.Axis.Intaractors\Omnius.Axis.Intaractors.csproj" />
     <ProjectReference Include="..\Omnius.Axis.Utils\Omnius.Axis.Utils.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Update="Styles\OptionMenu.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AvaloniaResource>
   </ItemGroup>
 
   <ItemGroup>

@@ -2,7 +2,7 @@ using Omnius.Axis.Intaractors.Models;
 
 namespace Omnius.Axis.Intaractors;
 
-public interface IFileDownloader
+public interface IFileDownloader : IAsyncDisposable
 {
     ValueTask<IEnumerable<DownloadingFileReport>> GetDownloadingFileReportsAsync(CancellationToken cancellationToken = default);
 

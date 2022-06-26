@@ -22,7 +22,11 @@ public class App : Application
     public override void Initialize()
     {
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler((_, e) => _logger.Error(e));
-        this.ApplicationLifetime!.Exit += (_, _) => this.Exit();
+
+        if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
+        {
+            lifetime.Exit += (_, _) => this.Exit();
+        }
 
         AvaloniaXamlLoader.Load(this);
     }
@@ -38,17 +42,7 @@ public class App : Application
 
     public new IClassicDesktopStyleApplicationLifetime? ApplicationLifetime => base.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
 
-    public MainWindow? MainWindow
-    {
-        get => this.ApplicationLifetime?.MainWindow as MainWindow;
-        set
-        {
-            if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifeTime)
-            {
-                lifeTime.MainWindow = value;
-            }
-        }
-    }
+    public MainWindow? MainWindow => this.ApplicationLifetime?.MainWindow as MainWindow;
 
     public bool IsDesignMode
     {
@@ -66,8 +60,13 @@ public class App : Application
     {
         if (this.IsDesignMode)
         {
-            this.MainWindow = new MainWindow();
-            this.MainWindow.ViewModel = new MainWindowDesignModel();
+            if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifeTime)
+            {
+                var mainWindow = new MainWindow();
+                mainWindow.ViewModel = new MainWindowDesignModel();
+                lifeTime.MainWindow = mainWindow;
+            }
+
             return;
         }
 
@@ -95,12 +94,17 @@ public class App : Application
             _logger.Info("Starting...");
             _logger.Info("AssemblyInformationalVersion: {0}", Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion);
 
-            this.MainWindow = new MainWindow(Path.Combine(axisEnvironment.DatabaseDirectoryPath, "windows", "main"));
+            var mainWindow = new MainWindow(Path.Combine(axisEnvironment.DatabaseDirectoryPath, "windows", "main"));
+
+            if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
+            {
+                lifetime.MainWindow = mainWindow;
+            }
 
             await Bootstrapper.Instance.BuildAsync(axisEnvironment);
 
             var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
-            this.MainWindow.ViewModel = serviceProvider.GetRequiredService<MainWindowModel>();
+            mainWindow.ViewModel = serviceProvider.GetRequiredService<MainWindowModel>();
         }
         catch (Exception e)
         {

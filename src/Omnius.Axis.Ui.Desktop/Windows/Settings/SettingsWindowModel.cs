@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Omnius.Axis.Intaractors;
 using Omnius.Axis.Intaractors.Models;
 using Omnius.Axis.Models;
 using Omnius.Axis.Ui.Desktop.Internal;
@@ -52,15 +53,17 @@ public abstract class SettingsWindowModelBase : AsyncDisposableBase
 public class SettingsWindowModel : SettingsWindowModelBase
 {
     private readonly UiStatus _uiState;
-    private readonly IIntaractorProvider _intaractorAdapter;
+    private readonly IAxisServiceMediator _axisServiceMediator;
+    private readonly IIntaractorProvider _intaractorProvider;
 
     private readonly CompositeDisposable _disposable = new();
     private readonly CompositeAsyncDisposable _asyncDisposable = new();
 
-    public SettingsWindowModel(UiStatus uiState, IIntaractorProvider intaractorAdapter)
+    public SettingsWindowModel(UiStatus uiState, IAxisServiceMediator axisServiceMediator, IIntaractorProvider intaractorProvider)
     {
         _uiState = uiState;
-        _intaractorAdapter = intaractorAdapter;
+        _axisServiceMediator = axisServiceMediator;
+        _intaractorProvider = intaractorProvider;
 
         this.Status = _uiState.SettingsWindow ??= new SettingsWindowStatus();
 
@@ -116,10 +119,9 @@ public class SettingsWindowModel : SettingsWindowModelBase
 
     private async ValueTask LoadAsync(CancellationToken cancellationToken = default)
     {
-        var serviceController = await _intaractorAdapter.GetServiceControllerAsync(cancellationToken);
-        var fileDownloader = await _intaractorAdapter.GetFileDownloaderAsync(cancellationToken);
+        var fileDownloader = _intaractorProvider.GetFileDownloader();
 
-        var serviceConfig = await serviceController.GetConfigAsync(cancellationToken);
+        var serviceConfig = await _axisServiceMediator.GetConfigAsync(cancellationToken);
         var fileDownloaderConfig = await fileDownloader.GetConfigAsync(cancellationToken);
 
         this.NetworkBandwidth!.Value = (((serviceConfig.Bandwidth?.MaxReceiveBytesPerSeconds ?? 0) + (serviceConfig.Bandwidth?.MaxSendBytesPerSeconds ?? 0)) / 2).ToString();
@@ -164,10 +166,9 @@ public class SettingsWindowModel : SettingsWindowModelBase
             ));
         var fileDownloaderConfig = new FileDownloaderConfig(this.FileDownloadDirectory!.Value);
 
-        var serviceController = await _intaractorAdapter.GetServiceControllerAsync(cancellationToken);
-        var fileDownloader = await _intaractorAdapter.GetFileDownloaderAsync(cancellationToken);
+        var fileDownloader = _intaractorProvider.GetFileDownloader();
 
-        await serviceController.SetConfigAsync(serviceConfig, cancellationToken);
+        await _axisServiceMediator.SetConfigAsync(serviceConfig, cancellationToken);
         await fileDownloader.SetConfigAsync(fileDownloaderConfig, cancellationToken);
     }
 }

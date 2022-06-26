@@ -4,13 +4,13 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
-    xmlns:vm="clr-namespace:Omnius.Axis.Ui.Desktop.Windows.Main;assembly=Omnius.Axis.Ui.Desktop"
+    xmlns:local="clr-namespace:Omnius.Axis.Ui.Desktop.Windows.Main"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:local="clr-namespace:Omnius.Axis.Ui.Desktop.Windows.Main"
     xmlns:styles="clr-namespace:Material.Styles;assembly=Material.Styles"
+    xmlns:skp="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia"
     x:CompileBindings="True"
-    x:DataType="vm:PeersViewViewModel"
+    x:DataType="local:PeersViewViewModel"
     mc:Ignorable="d"
     d:DesignWidth="800"
     d:DesignHeight="500" >
@@ -19,15 +19,25 @@
         <local:PeersViewDesignViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto,*">
-        <StackPanel Orientation="Vertical" Spacing="12" Margin="16">
-            <DockPanel>
-                <Button DockPanel.Dock="Right" HorizontalAlignment="Right" Content="Add" Width="120" Command="{Binding AddCommand}" />
-            </DockPanel>
-        </StackPanel>
+    <Grid RowDefinitions="Auto,8,*" Margin="16">
+        <DockPanel>
+            <TextBlock Classes="Headline4" Text="Peers" />
+            <Menu Classes="OptionMenu" HorizontalAlignment="Right">
+                <MenuItem>
+                    <MenuItem.Header>
+                        <StackPanel>
+                            <Panel>
+                                <skp:Svg Path="/Assets/menu.svg" />
+                            </Panel>
+                        </StackPanel>
+                    </MenuItem.Header>
+                    <MenuItem Header="Add Node" Command="{Binding AddCommand}" />
+                </MenuItem>
+            </Menu>
+        </DockPanel>
 
         <DataGrid
-            Grid.Row="1"
+            Grid.Row="2"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             CanUserResizeColumns="True"
@@ -50,3 +60,4 @@
     </Grid>
 
 </UserControl>
+

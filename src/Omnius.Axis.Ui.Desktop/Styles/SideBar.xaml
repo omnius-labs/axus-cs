@@ -4,49 +4,70 @@
     xmlns:skp="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia">
     <Design.PreviewWith>
         <Border>
-            <DockPanel>
-                <ListBox Classes="sidebar" x:Name="TabListBox" DockPanel.Dock="Top">
+            <DockPanel Classes="Sidebar">
+                <ListBox x:Name="TabListBox" DockPanel.Dock="Top">
                     <ListBoxItem Name="StatusListBoxItem" IsSelected="true">
-                        <Panel>
-                            <skp:Svg Path="/Assets/status.svg" />
-                        </Panel>
+                        <StackPanel>
+                            <Panel>
+                                <skp:Svg Path="/Assets/status.svg" />
+                            </Panel>
+                            <TextBlock Text="Status" />
+                        </StackPanel>
                     </ListBoxItem>
                     <ListBoxItem Name="PeersListBoxItem">
-                        <Panel>
-                            <skp:Svg Path="/Assets/peers.svg" />
-                        </Panel>
+                        <StackPanel>
+                            <Panel>
+                                <skp:Svg Path="/Assets/peers.svg" />
+                            </Panel>
+                            <TextBlock Text="Peers" />
+                        </StackPanel>
                     </ListBoxItem>
                     <ListBoxItem Name="ChatListBoxItem">
-                        <Panel>
-                            <skp:Svg Path="/Assets/chat.svg" />
-                        </Panel>
+                        <StackPanel>
+                            <Panel>
+                                <skp:Svg Path="/Assets/chat.svg" />
+                            </Panel>
+                            <TextBlock Text="Chat" />
+                        </StackPanel>
                     </ListBoxItem>
                     <ListBoxItem Name="SearchListBoxItem">
-                        <Panel>
-                            <skp:Svg Path="/Assets/search.svg" />
-                        </Panel>
+                        <StackPanel>
+                            <Panel>
+                                <skp:Svg Path="/Assets/search.svg" />
+                            </Panel>
+                            <TextBlock Text="Search" />
+                        </StackPanel>
                     </ListBoxItem>
                     <ListBoxItem Name="DownloadListBoxItem">
-                        <Panel>
-                            <skp:Svg Path="/Assets/download.svg" />
-                        </Panel>
+                        <StackPanel>
+                            <Panel>
+                                <skp:Svg Path="/Assets/download.svg" />
+                            </Panel>
+                            <TextBlock Text="Download" />
+                        </StackPanel>
                     </ListBoxItem>
                     <ListBoxItem Name="UploadListBoxItem">
-                        <Panel>
-                            <skp:Svg Path="/Assets/upload.svg" />
-                        </Panel>
+                        <StackPanel>
+                            <Panel>
+                                <skp:Svg Path="/Assets/upload.svg" />
+                            </Panel>
+                            <TextBlock Text="Upload" />
+                        </StackPanel>
                     </ListBoxItem>
                 </ListBox>
-                <Button Classes="sidebar" VerticalAlignment="Bottom" Command="{Binding SettingsCommand}" Padding="4">
-                    <Panel>
-                        <skp:Svg Path="/Assets/settings.svg" />
-                    </Panel>
+                <Button Classes="Flat Accent">
+                    <StackPanel>
+                        <Panel>
+                            <skp:Svg Path="/Assets/settings.svg" />
+                        </Panel>
+                        <TextBlock Text="Settings" />
+                    </StackPanel>
                 </Button>
             </DockPanel>
         </Border>
     </Design.PreviewWith>
 
-    <Style Selector="ListBox.sidebar">
+    <Style Selector="DockPanel.Sidebar > ListBox">
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Background" Value="{x:Null}" />
         <Setter Property="Margin" Value="0" />
@@ -54,25 +75,34 @@
         <Setter Property="(ScrollViewer.HorizontalScrollBarVisibility)" Value="Hidden" />
         <Setter Property="(ScrollViewer.VerticalScrollBarVisibility)" Value="Hidden" />
     </Style>
-    <Style Selector="ListBox.sidebar > ListBoxItem">
+    <Style Selector="DockPanel.Sidebar > ListBox > ListBoxItem">
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
-        <Setter Property="Height" Value="64" />
-        <Setter Property="Width" Value="64" />
+        <Setter Property="Height" Value="70" />
+        <Setter Property="Width" Value="80" />
     </Style>
-    <Style Selector="ListBox.sidebar > ListBoxItem > Panel">
+    <Style Selector="DockPanel.Sidebar > ListBox > ListBoxItem > StackPanel > Panel">
         <Setter Property="Margin" Value="4" />
-        <Setter Property="Height" Value="36" />
-        <Setter Property="Width" Value="36" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="Width" Value="32" />
     </Style>
-    <Style Selector="Button.sidebar">
-        <Setter Property="Height" Value="64" />
-        <Setter Property="Width" Value="64" />
+    <Style Selector="DockPanel.Sidebar > ListBox > ListBoxItem > StackPanel > TextBlock">
+        <Setter Property="HorizontalAlignment" Value="Center" />
     </Style>
-    <Style Selector="Button.sidebar >  Panel">
+    <Style Selector="DockPanel.Sidebar > Button">
+        <Setter Property="Height" Value="70" />
+        <Setter Property="Width" Value="80" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+    <Style Selector="DockPanel.Sidebar > Button > StackPanel > Panel">
         <Setter Property="Margin" Value="4" />
-        <Setter Property="Height" Value="36" />
-        <Setter Property="Width" Value="36" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="Width" Value="32" />
     </Style>
+    <Style Selector="DockPanel.Sidebar > StackPanel > TextBlock">
+        <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+
 </Styles>
 

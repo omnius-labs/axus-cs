@@ -5,11 +5,11 @@ using Omnius.Core.Cryptography;
 
 namespace Omnius.Axis.Intaractors;
 
-public sealed class ServiceController : IServiceController
+public sealed class AxisServiceMediator : IAxisServiceMediator
 {
     private readonly IAxisService _axisService;
 
-    public ServiceController(IAxisService axisService)
+    public AxisServiceMediator(IAxisService axisService)
     {
         _axisService = axisService;
     }

@@ -6,10 +6,12 @@
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
     xmlns:local="clr-namespace:Omnius.Axis.Ui.Desktop.Windows.TextEdit"
+    xmlns:bs="clr-namespace:Omnius.Core.Avalonia.Behaviors;assembly=Omnius.Core.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:skp="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia"
+    xmlns:AvalonEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
     WindowStartupLocation="CenterOwner"
-    Title="Text input"
+    Title="Text edit"
     d:DesignHeight="300"
     d:DesignWidth="500"
     x:CompileBindings="True"
@@ -29,21 +31,23 @@
             </ExperimentalAcrylicBorder.Material>
         </ExperimentalAcrylicBorder>
         <DockPanel>
-            <StackPanel Height="30" DockPanel.Dock="Top" HorizontalAlignment="Left" VerticalAlignment="Stretch"
+            <StackPanel Height="32" DockPanel.Dock="Top" HorizontalAlignment="Left" VerticalAlignment="Stretch"
                 Orientation="Horizontal" IsHitTestVisible="False" Background="{x:Null}">
-                <skp:Svg Path="/Assets/axis.svg" Margin="4" Width="16" VerticalAlignment="Center"/>
-                <TextBlock Text="{Binding $parent[Window].Title}" VerticalAlignment="Center" FontSize="16"/>
+                <skp:Svg Path="/Assets/axis.svg" Margin="8,4" Width="14" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding $parent[Window].Title}" VerticalAlignment="Center" FontSize="14"/>
             </StackPanel>
 
-            <Grid RowDefinitions="*,Auto">
-                <TextBox Grid.Row="0" Classes="Filled" Text="{Binding Text.Value, Mode=TwoWay}" Margin="16,16,16,0" Height="NaN"
-                        ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                        AcceptsReturn="True" AcceptsTab="True" TextWrapping="Wrap" VerticalContentAlignment="Top" />
-                <StackPanel Grid.Row="1" Margin="12" Spacing="12" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="Ok" Command="{Binding OkCommand}" CommandParameter="{Binding $parent[Window]}" MinWidth="120" />
-                    <Button Content="Cancel" Command="{Binding CancelCommand}" CommandParameter="{Binding $parent[Window]}" MinWidth="120" />
-                </StackPanel>
-            </Grid>
+            <StackPanel DockPanel.Dock="Bottom" Margin="16,0,16,16" Spacing="8" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Classes="Flat Accent" Content="Ok" Command="{Binding OkCommand}" CommandParameter="{Binding $parent[Window]}" MinWidth="64" />
+                <Button Classes="Flat" Content="Cancel" Command="{Binding CancelCommand}" CommandParameter="{Binding $parent[Window]}" MinWidth="64" />
+            </StackPanel>
+
+            <AvalonEdit:TextEditor Margin="16,8"
+                HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <i:Interaction.Behaviors>
+                    <bs:AvalonEditTextEditorTextBehavior Text="{Binding Text.Value, Mode=TwoWay}" />
+                </i:Interaction.Behaviors>
+            </AvalonEdit:TextEditor>
         </DockPanel>
     </Panel>
 </Window>

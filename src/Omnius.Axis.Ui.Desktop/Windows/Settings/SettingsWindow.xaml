@@ -32,16 +32,16 @@
             </ExperimentalAcrylicBorder.Material>
         </ExperimentalAcrylicBorder>
         <DockPanel>
-            <StackPanel Height="30" DockPanel.Dock="Top" HorizontalAlignment="Left" VerticalAlignment="Stretch"
-                    Orientation="Horizontal" IsHitTestVisible="False" Background="{x:Null}">
-                <skp:Svg Path="/Assets/axis.svg" Margin="4" Width="16" VerticalAlignment="Center"/>
-                <TextBlock Text="{Binding $parent[Window].Title}" VerticalAlignment="Center" FontSize="16"/>
+            <StackPanel Height="32" DockPanel.Dock="Top" HorizontalAlignment="Left" VerticalAlignment="Stretch"
+                Orientation="Horizontal" IsHitTestVisible="False" Background="{x:Null}">
+                <skp:Svg Path="/Assets/axis.svg" Margin="8,4" Width="14" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding $parent[Window].Title}" VerticalAlignment="Center" FontSize="14"/>
             </StackPanel>
 
             <DockPanel>
                 <StackPanel DockPanel.Dock="Bottom" Margin="16" Spacing="12" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="Ok" Command="{Binding OkCommand}" CommandParameter="{Binding $parent[Window]}" MinWidth="120" />
-                    <Button Content="Cancel" Command="{Binding CancelCommand}" CommandParameter="{Binding $parent[Window]}" MinWidth="120" />
+                    <Button Classes="Flat Accent" Content="Ok" Command="{Binding OkCommand}" CommandParameter="{Binding $parent[Window]}" MinWidth="64" />
+                    <Button Classes="Flat" Content="Cancel" Command="{Binding CancelCommand}" CommandParameter="{Binding $parent[Window]}" MinWidth="64" />
                 </StackPanel>
 
                 <TreeView DockPanel.Dock="Left">
@@ -58,10 +58,10 @@
                     <!-- Network -->
                     <DockPanel IsVisible="{Binding #NetworkTreeViewItem.IsSelected}" >
                         <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="Network" />
-                        <StackPanel Orientation="Vertical" Spacing="12" Margin="16">
+                        <StackPanel Orientation="Vertical" Spacing="8" Margin="16">
                             <DockPanel>
                                 <Label DockPanel.Dock="Left" Content="Bandwidth:" VerticalAlignment="Center" />
-                                <TextBox Text="{Binding NetworkBandwidth.Value}" Margin="16,0"
+                                <TextBox Text="{Binding NetworkBandwidth.Value}" Margin="8,0"
                                         TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
                             </DockPanel>
                         </StackPanel>
@@ -69,11 +69,11 @@
                     <!-- I2pConnector -->
                     <DockPanel IsVisible="{Binding #I2pConnectorTreeViewItem.IsSelected}" >
                         <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="I2p Connector" />
-                        <StackPanel Orientation="Vertical" Spacing="12" Margin="16">
+                        <StackPanel Orientation="Vertical" Spacing="8" Margin="16">
                             <CheckBox Content="Enabled" IsChecked="{Binding I2pConnectorIsEnabled.Value}" />
                             <DockPanel>
                                 <Label DockPanel.Dock="Left" Content="Sam Bridge address:" VerticalAlignment="Center" />
-                                <TextBox Text="{Binding I2pConnectorSamBridgeAddress.Value}" Margin="16,0"
+                                <TextBox Text="{Binding I2pConnectorSamBridgeAddress.Value}" Margin="8,0"
                                         TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
                             </DockPanel>
                         </StackPanel>
@@ -81,11 +81,11 @@
                     <!-- I2pAccepter -->
                     <DockPanel IsVisible="{Binding #I2pAccepterTreeViewItem.IsSelected}" >
                         <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="I2p Accepter" />
-                        <StackPanel Orientation="Vertical" Spacing="12" Margin="16">
+                        <StackPanel Orientation="Vertical" Spacing="8" Margin="16">
                             <CheckBox Content="Enabled" IsChecked="{Binding I2pAccepterIsEnabled.Value}" />
                             <DockPanel>
                                 <Label DockPanel.Dock="Left" Content="Sam Bridge address:" VerticalAlignment="Center" />
-                                <TextBox Text="{Binding I2pAccepterSamBridgeAddress.Value}" Margin="16,0"
+                                <TextBox Text="{Binding I2pAccepterSamBridgeAddress.Value}" Margin="8,0"
                                         TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
                             </DockPanel>
                         </StackPanel>
@@ -93,16 +93,16 @@
                     <!-- TcpConnector -->
                     <DockPanel IsVisible="{Binding #TcpConnectorTreeViewItem.IsSelected}" >
                         <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="Tcp Connector" />
-                        <StackPanel Orientation="Vertical" Spacing="12" Margin="16">
+                        <StackPanel Orientation="Vertical" Spacing="8" Margin="16">
                             <CheckBox Content="Enabled" IsChecked="{Binding TcpConnectorIsEnabled.Value}" />
                             <DockPanel>
                                 <Label DockPanel.Dock="Left" Content="Proxy type:" VerticalAlignment="Center" />
-                                <ComboBox Margin="16,0" Items="{Binding TcpConnectorTcpProxyTypes}"
+                                <ComboBox Margin="8,0" Items="{Binding TcpConnectorTcpProxyTypes}"
                                         SelectedItem="{Binding TcpConnectorSelectedProxyType.Value}" />
                             </DockPanel>
                             <DockPanel>
                                 <Label DockPanel.Dock="Left" Content="Proxy address:" VerticalAlignment="Center" />
-                                <TextBox Text="{Binding TcpConnectorProxyAddress.Value}" Margin="16,0"
+                                <TextBox Text="{Binding TcpConnectorProxyAddress.Value}" Margin="8,0"
                                         TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
                             </DockPanel>
                         </StackPanel>
@@ -110,12 +110,12 @@
                     <!-- TcpAccepter -->
                     <DockPanel IsVisible="{Binding #TcpAccepterTreeViewItem.IsSelected}" >
                         <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="Tcp Accepter" />
-                        <StackPanel Orientation="Vertical" Spacing="12" Margin="16">
+                        <StackPanel Orientation="Vertical" Spacing="8" Margin="16">
                             <CheckBox Content="Enabled" IsChecked="{Binding TcpAccepterIsEnabled.Value}" />
                             <CheckBox Content="Use UPnP" IsChecked="{Binding TcpAccepterUseUpnp.Value}" />
                             <DockPanel>
                                 <Label DockPanel.Dock="Left" Content="Listen address:" VerticalAlignment="Center" />
-                                <TextBox Text="{Binding TcpAccepterListenAddress.Value}" Margin="16,0"
+                                <TextBox Text="{Binding TcpAccepterListenAddress.Value}" Margin="8,0"
                                         TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
                             </DockPanel>
                         </StackPanel>
@@ -123,11 +123,11 @@
                     <!-- File -->
                     <DockPanel IsVisible="{Binding #FileTreeViewItem.IsSelected}" >
                         <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="File" />
-                        <StackPanel Orientation="Vertical" Spacing="12" Margin="16">
+                        <StackPanel Orientation="Vertical" Spacing="8" Margin="8">
                             <DockPanel>
                                 <Label DockPanel.Dock="Left" Content="Download directory:" VerticalAlignment="Center" />
-                                <Button DockPanel.Dock="Right" Content="Open" Width="120"  Command="{Binding OpenFileDownloadDirectoryCommand}" />
-                                <TextBox Text="{Binding FileDownloadDirectory.Value}" Margin="16,0"
+                                <Button Classes="Flat" DockPanel.Dock="Right" Content="Open" MinWidth="64" Command="{Binding OpenFileDownloadDirectoryCommand}" />
+                                <TextBox Text="{Binding FileDownloadDirectory.Value}" Margin="8,0"
                                         TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
                             </DockPanel>
                         </StackPanel>

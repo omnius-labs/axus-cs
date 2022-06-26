@@ -1,0 +1,41 @@
+<Styles
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:skp="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia">
+    <Design.PreviewWith>
+        <Border>
+            <Menu Classes="OptionMenu">
+                <MenuItem>
+                    <MenuItem.Header>
+                        <StackPanel>
+                            <Panel>
+                                <skp:Svg Path="/Assets/menu.svg" />
+                            </Panel>
+                        </StackPanel>
+                    </MenuItem.Header>
+                </MenuItem>
+            </Menu>
+        </Border>
+    </Design.PreviewWith>
+
+    <Style Selector="Menu.OptionMenu">
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Background" Value="{x:Null}" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="(ScrollViewer.HorizontalScrollBarVisibility)" Value="Hidden" />
+        <Setter Property="(ScrollViewer.VerticalScrollBarVisibility)" Value="Hidden" />
+    </Style>
+    <Style Selector="Menu.OptionMenu > MenuItem">
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Height" Value="48" />
+        <Setter Property="Width" Value="48" />
+    </Style>
+    <Style Selector="Menu.OptionMenu > MenuItem > StackPanel > Panel">
+        <Setter Property="Margin" Value="4" />
+        <Setter Property="Height" Value="24" />
+        <Setter Property="Width" Value="24" />
+    </Style>
+
+</Styles>
+

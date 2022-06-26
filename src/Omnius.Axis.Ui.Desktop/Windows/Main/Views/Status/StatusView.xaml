@@ -15,13 +15,17 @@
     d:DesignWidth="800"
     d:DesignHeight="500" >
 
-    <StackPanel Orientation="Vertical" Spacing="12" Margin="16">
-        <DockPanel>
-            <Label DockPanel.Dock="Left" Content="My node profile:" VerticalAlignment="Center" />
-            <Button DockPanel.Dock="Right" Content="Copy" Width="120"  Command="{Binding CopyMyNodeLocationCommand}" />
-            <TextBox Text="{Binding MyNodeLocation.Value}" Margin="16,0"
-                    TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
-        </DockPanel>
+    <StackPanel Orientation="Vertical" Spacing="8" Margin="16">
+        <TextBlock Classes="Headline4" Text="Status" />
+        <StackPanel Orientation="Vertical" Spacing="8">
+            <styles:Card MinWidth="240" VerticalAlignment="Top">
+                <StackPanel Margin="8" Spacing="8">
+                    <TextBlock Classes="Headline6" Text="My node profile" />
+                    <TextBox Text="{Binding MyNodeLocation.Value}" TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
+                    <Button Classes="Flat" HorizontalAlignment="Right" Content="Copy" MinWidth="64" Command="{Binding CopyMyNodeLocationCommand}" />
+                </StackPanel>
+            </styles:Card>
+        </StackPanel>
     </StackPanel>
 
 </UserControl>

@@ -15,7 +15,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IServiceController _serviceController;
+    private readonly IAxisServiceMediator _serviceController;
     private readonly IBytesPool _bytesPool;
     private readonly ProfileSubscriberOptions _options;
 
@@ -31,14 +31,14 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
 
     private const string Registrant = "Omnius.Axis.Intaractors.ProfileSubscriber";
 
-    public static async ValueTask<ProfileSubscriber> CreateAsync(IServiceController service, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ProfileSubscriberOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<ProfileSubscriber> CreateAsync(IAxisServiceMediator service, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ProfileSubscriberOptions options, CancellationToken cancellationToken = default)
     {
         var profileSubscriber = new ProfileSubscriber(service, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
         await profileSubscriber.InitAsync(cancellationToken);
         return profileSubscriber;
     }
 
-    private ProfileSubscriber(IServiceController service, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ProfileSubscriberOptions options)
+    private ProfileSubscriber(IAxisServiceMediator service, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ProfileSubscriberOptions options)
     {
         _serviceController = service;
         _bytesPool = bytesPool;

@@ -11,7 +11,7 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IServiceController _serviceController;
+    private readonly IAxisServiceMediator _serviceController;
     private readonly IBytesPool _bytesPool;
     private readonly FileUploaderOptions _options;
 
@@ -25,14 +25,14 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
 
     private const string Registrant = "Omnius.Axis.Intaractors.FileUploader";
 
-    public static async ValueTask<FileUploader> CreateAsync(IServiceController serviceController, IBytesPool bytesPool, FileUploaderOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<FileUploader> CreateAsync(IAxisServiceMediator serviceController, IBytesPool bytesPool, FileUploaderOptions options, CancellationToken cancellationToken = default)
     {
         var fileUploader = new FileUploader(serviceController, bytesPool, options);
         await fileUploader.InitAsync(cancellationToken);
         return fileUploader;
     }
 
-    private FileUploader(IServiceController service, IBytesPool bytesPool, FileUploaderOptions options)
+    private FileUploader(IAxisServiceMediator service, IBytesPool bytesPool, FileUploaderOptions options)
     {
         _serviceController = service;
         _bytesPool = bytesPool;

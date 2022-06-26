@@ -10,10 +10,12 @@ using Omnius.Core.RocketPack.Remoting;
 using Omnius.Core.Tasks;
 using MultiplexerV1 = Omnius.Core.Net.Connections.Multiplexer.V1;
 
-namespace Omnius.Axis.Ui.Desktop.Internal;
+namespace Omnius.Axis.Intaractors;
 
-internal sealed class ServiceManager : AsyncDisposableBase
+public sealed class AxisServiceProvider : AsyncDisposableBase, IAxisServiceProvider
 {
+    private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
+
     private readonly OmniAddress _listenAddress;
 
     private Socket? _socket;
@@ -25,14 +27,14 @@ internal sealed class ServiceManager : AsyncDisposableBase
 
     public bool IsConnected => _multiplexer?.IsConnected ?? false;
 
-    public static async ValueTask<ServiceManager> CreateAsync(OmniAddress listenAddress, CancellationToken cancellationToken = default)
+    public static async ValueTask<AxisServiceProvider> CreateAsync(OmniAddress listenAddress, CancellationToken cancellationToken = default)
     {
-        var result = new ServiceManager(listenAddress);
+        var result = new AxisServiceProvider(listenAddress);
         await result.InitAsync(cancellationToken);
         return result;
     }
 
-    private ServiceManager(OmniAddress listenAddress)
+    private AxisServiceProvider(OmniAddress listenAddress)
     {
         _listenAddress = listenAddress;
     }
@@ -40,6 +42,9 @@ internal sealed class ServiceManager : AsyncDisposableBase
     private async ValueTask InitAsync(CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(_listenAddress);
+
+        using var timeoutCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeoutCancellationToken.CancelAfter(TimeSpan.FromSeconds(60));
 
         await this.ConnectAsync(cancellationToken);
     }
@@ -50,9 +55,7 @@ internal sealed class ServiceManager : AsyncDisposableBase
 
         var bytesPool = BytesPool.Shared;
 
-        _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        await _socket.ConnectAsync(new IPEndPoint(ipAddress, port), TimeSpan.FromSeconds(3), cancellationToken);
-
+        _socket = await ConnectSocketAsync(ipAddress, port, cancellationToken);
         _cap = new SocketCap(_socket);
 
         _batchActionDispatcher = new BatchActionDispatcher(TimeSpan.FromMilliseconds(10));
@@ -69,7 +72,29 @@ internal sealed class ServiceManager : AsyncDisposableBase
         _axisServiceRemotingClient = new AxisServiceRemoting.Client<DefaultErrorMessage>(rocketRemotingCallerFactory, bytesPool);
     }
 
-    public IAxisService? GetService() => _axisServiceRemotingClient;
+    private static async ValueTask<Socket> ConnectSocketAsync(IPAddress ipAddress, ushort port, CancellationToken cancellationToken = default)
+    {
+        var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+        for (; ; )
+        {
+            try
+            {
+                await socket.ConnectAsync(new IPEndPoint(ipAddress, port), TimeSpan.FromSeconds(10), cancellationToken);
+                break;
+            }
+            catch (SocketException e)
+            {
+                _logger.Error(e, "Socket Exception");
+            }
+
+            await Task.Delay(3000).ConfigureAwait(false);
+        }
+
+        return socket;
+    }
+
+    public IAxisService GetService() => _axisServiceRemotingClient ?? throw new NullReferenceException();
 
     protected override async ValueTask OnDisposeAsync()
     {
