@@ -6,6 +6,7 @@
         "Deleter",
         "hashcash",
         "Interactor",
+        "Interactors",
         "Kademlia",
         "Merkle",
         "metadatas",

@@ -39,7 +39,6 @@ public class DialogService : IDialogService
             var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
 
             var viewModel = serviceProvider.GetRequiredService<TextEditWindowModel>();
-            await viewModel.InitializeAsync();
             window.ViewModel = viewModel;
 
             await window.ShowDialog(_mainWindowProvider.GetMainWindow());

@@ -9,8 +9,6 @@ namespace Omnius.Axis.Ui.Desktop.Windows.TextEdit;
 
 public abstract class TextEditWindowModelBase : AsyncDisposableBase
 {
-    public abstract ValueTask InitializeAsync(CancellationToken cancellationToken = default);
-
     public TextEditWindowStatus? Status { get; protected set; }
 
     public ReactivePropertySlim<string>? Text { get; protected set; }
@@ -41,11 +39,6 @@ public class TextEditWindowModel : TextEditWindowModelBase
         this.OkCommand.Subscribe(async (state) => await this.OkAsync(state)).AddTo(_disposable);
         this.CancelCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.CancelCommand.Subscribe(async (state) => await this.CancelAsync(state)).AddTo(_disposable);
-    }
-
-    public override async ValueTask InitializeAsync(CancellationToken cancellationToken = default)
-    {
-        this.Text!.Value = await _clipboardService.GetTextAsync();
     }
 
     protected override async ValueTask OnDisposeAsync()
