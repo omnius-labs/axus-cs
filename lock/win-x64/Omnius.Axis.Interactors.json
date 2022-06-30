@@ -295,6 +295,19 @@
           "Omnius.Core.Utils": "0.0.1-alpha.1"
         }
       },
+      "omnius.axis.remoting": {
+        "type": "Project",
+        "dependencies": {
+          "NLog": "4.7.13",
+          "Omnius.Axis.Models": "0.0.1-alpha.1",
+          "Omnius.Core": "0.0.1-alpha.1",
+          "Omnius.Core.Collections": "0.0.1-alpha.1",
+          "Omnius.Core.Cryptography": "0.0.1-alpha.1",
+          "Omnius.Core.Net": "0.0.1-alpha.1",
+          "Omnius.Core.RocketPack": "0.0.1-alpha.1",
+          "Omnius.Core.RocketPack.Remoting": "0.0.1-alpha.1"
+        }
+      },
       "omnius.axis.utils": {
         "type": "Project",
         "dependencies": {
@@ -366,14 +379,6 @@
           "Omnius.Core.RocketPack": "0.0.1-alpha.1",
           "Omnius.Core.Serialization": "0.0.1-alpha.1",
           "Omnius.Core.Tasks": "0.0.1-alpha.1"
-        }
-      },
-      "omnius.core.net.i2p": {
-        "type": "Project",
-        "dependencies": {
-          "NLog": "4.7.13",
-          "Omnius.Core": "0.0.1-alpha.1",
-          "Omnius.Core.Pipelines": "0.0.1-alpha.1"
         }
       },
       "omnius.core.net.proxies": {
