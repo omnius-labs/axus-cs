@@ -3,15 +3,33 @@
     "compounds": [
         {
             "name": "daemon/ui-desktop (win)",
-            "configurations": ["daemon (win)", "ui-desktop (win)"]
+            "configurations": ["daemon (win)", "ui-desktop (win)"],
+            "stopAll": true,
+            "presentation": {
+                "hidden": false,
+                "group": "daemon/ui-desktop",
+                "order": 1
+            }
         },
         {
             "name": "daemon/ui-desktop (linux)",
-            "configurations": ["daemon (linux)", "ui-desktop (linux)"]
+            "configurations": ["daemon (linux)", "ui-desktop (linux)"],
+            "stopAll": true,
+            "presentation": {
+                "hidden": false,
+                "group": "daemon/ui-desktop",
+                "order": 2
+            }
         },
         {
             "name": "daemon/ui-desktop (mac)",
-            "configurations": ["daemon (mac)", "ui-desktop (mac)"]
+            "configurations": ["daemon (mac)", "ui-desktop (mac)"],
+            "stopAll": true,
+            "presentation": {
+                "hidden": false,
+                "group": "daemon/ui-desktop",
+                "order": 3
+            }
         }
     ],
     "configurations": [

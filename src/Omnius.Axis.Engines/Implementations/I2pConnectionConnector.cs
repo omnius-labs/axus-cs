@@ -65,7 +65,11 @@ public sealed partial class I2pConnectionConnector : AsyncDisposableBase, IConne
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                if (_samBridge?.IsConnected ?? false) continue;
+                if (_samBridge?.IsConnected ?? false)
+                {
+                    await Task.Delay(1000 * 30, cancellationToken).ConfigureAwait(false);
+                    continue;
+                }
 
                 if (_samBridge is not null)
                 {

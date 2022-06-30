@@ -1,7 +1,7 @@
 {
     "profiles": {
         "Omnius.Axis.Ui.Desktop": {
-            "commandLineArgs": "\"-s\" \"./storage/ui-desktop\" \"-l\" \"tcp(ip4(127.0.0.1),43200)\" \"-v\" \"true\"",
+            "commandLineArgs": "\"-s\" \"./storage/daemon\" \"-l\" \"tcp(ip4(127.0.0.1),43200)\" \"-v\" \"true\"",
             "commandName": "Project",
             "workingDirectory": "../../demo/0"
         }
