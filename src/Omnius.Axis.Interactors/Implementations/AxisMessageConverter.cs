@@ -25,15 +25,15 @@ public static class AxisMessageConverter
         return TryStringToMessage<NodeLocation>(_nodePath, 1, text, out message);
     }
 
-    public static string SeedToString(Seed message)
+    public static string FileSeedToString(FileSeed message)
     {
-        return MessageToString<Seed>(_seedPath, 1, message);
+        return MessageToString<FileSeed>(_seedPath, 1, message);
     }
 
-    public static bool TryStringToSeed(string text, [NotNullWhen(true)] out Seed? message)
+    public static bool TryStringToFileSeed(string text, [NotNullWhen(true)] out FileSeed? message)
     {
         message = null;
-        return TryStringToMessage<Seed>(_seedPath, 1, text, out message);
+        return TryStringToMessage<FileSeed>(_seedPath, 1, text, out message);
     }
 
     private static string MessageToString<T>(string path, int version, T message)
@@ -71,12 +71,12 @@ public static class AxisMessageConverter
 
     private static string AddSchemaAndPath(string path, int version, string value)
     {
-        return $"{_schema}:{path}/{version}/{value}";
+        return $"{_schema}:{path}/v{version}/{value}";
     }
 
     private static bool TryRemoveSchemaAndPath(string text, string path, int version, [NotNullWhen(true)] out string? value)
     {
-        var targetPrefix = $"{_schema}:{path}/{version}/";
+        var targetPrefix = $"{_schema}:{path}/v{version}/";
 
         value = null;
         if (!text.StartsWith(targetPrefix)) return false;

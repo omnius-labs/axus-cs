@@ -2,19 +2,27 @@
     "cSpell.words": [
         "Avalonia",
         "Bootstrapper",
+        "Brotli",
         "Bson",
+        "Castagnoli",
+        "Cocona",
+        "Deconstructor",
         "Deleter",
+        "Ganss",
         "hashcash",
         "Interactor",
         "Interactors",
         "Kademlia",
         "Merkle",
         "metadatas",
+        "Nanos",
         "Nito",
         "notnull",
         "Omni",
         "Omnius",
+        "Sprache",
         "Upnp",
-        "Upsert"
+        "Upsert",
+        "Varint"
     ]
 }

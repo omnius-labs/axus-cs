@@ -70,7 +70,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
 
             for (; ; )
             {
-                await Task.Delay(1000 * 30, cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken).ConfigureAwait(false);
 
                 await this.SyncPublishedShouts(cancellationToken);
                 await this.SyncPublishedFiles(cancellationToken);

@@ -149,14 +149,14 @@ public sealed partial class ContentClue : global::Omnius.Core.RocketPack.IRocket
     static ContentClue()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.ContentClue>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.ContentClue>.Empty = new global::Omnius.Axis.Models.ContentClue(string.Empty, global::Omnius.Core.Cryptography.OmniHash.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.ContentClue>.Empty = new global::Omnius.Axis.Models.ContentClue(global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.Cryptography.OmniHash.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxSchemeLength = 256;
 
-    public ContentClue(string scheme, global::Omnius.Core.Cryptography.OmniHash rootHash)
+    public ContentClue(global::Omnius.Core.RocketPack.Utf8String scheme, global::Omnius.Core.Cryptography.OmniHash rootHash)
     {
         if (scheme is null) throw new global::System.ArgumentNullException("scheme");
         if (scheme.Length > 256) throw new global::System.ArgumentOutOfRangeException("scheme");
@@ -166,13 +166,13 @@ public sealed partial class ContentClue : global::Omnius.Core.RocketPack.IRocket
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
-            if (scheme != default) ___h.Add(scheme.GetHashCode());
+            if (!scheme.IsEmpty) ___h.Add(scheme.GetHashCode());
             if (rootHash != default) ___h.Add(rootHash.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
-    public string Scheme { get; }
+    public global::Omnius.Core.RocketPack.Utf8String Scheme { get; }
     public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
 
     public static global::Omnius.Axis.Models.ContentClue Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -216,7 +216,7 @@ public sealed partial class ContentClue : global::Omnius.Core.RocketPack.IRocket
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            if (value.Scheme != string.Empty)
+            if (value.Scheme != global::Omnius.Core.RocketPack.Utf8String.Empty)
             {
                 w.Write((uint)1);
                 w.Write(value.Scheme);
@@ -232,7 +232,7 @@ public sealed partial class ContentClue : global::Omnius.Core.RocketPack.IRocket
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            string p_scheme = string.Empty;
+            global::Omnius.Core.RocketPack.Utf8String p_scheme = global::Omnius.Core.RocketPack.Utf8String.Empty;
             global::Omnius.Core.Cryptography.OmniHash p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
 
             for (; ; )
@@ -527,14 +527,14 @@ public sealed partial class SessionReport : global::Omnius.Core.RocketPack.IRock
     static SessionReport()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.SessionReport>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.SessionReport>.Empty = new global::Omnius.Axis.Models.SessionReport(string.Empty, (global::Omnius.Axis.Models.SessionHandshakeType)0, global::Omnius.Core.Net.OmniAddress.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.SessionReport>.Empty = new global::Omnius.Axis.Models.SessionReport(global::Omnius.Core.RocketPack.Utf8String.Empty, (global::Omnius.Axis.Models.SessionHandshakeType)0, global::Omnius.Core.Net.OmniAddress.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxServiceNameLength = 256;
 
-    public SessionReport(string serviceName, global::Omnius.Axis.Models.SessionHandshakeType handshakeType, global::Omnius.Core.Net.OmniAddress address)
+    public SessionReport(global::Omnius.Core.RocketPack.Utf8String serviceName, global::Omnius.Axis.Models.SessionHandshakeType handshakeType, global::Omnius.Core.Net.OmniAddress address)
     {
         if (serviceName is null) throw new global::System.ArgumentNullException("serviceName");
         if (serviceName.Length > 256) throw new global::System.ArgumentOutOfRangeException("serviceName");
@@ -547,14 +547,14 @@ public sealed partial class SessionReport : global::Omnius.Core.RocketPack.IRock
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
-            if (serviceName != default) ___h.Add(serviceName.GetHashCode());
+            if (!serviceName.IsEmpty) ___h.Add(serviceName.GetHashCode());
             if (handshakeType != default) ___h.Add(handshakeType.GetHashCode());
             if (address != default) ___h.Add(address.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
-    public string ServiceName { get; }
+    public global::Omnius.Core.RocketPack.Utf8String ServiceName { get; }
     public global::Omnius.Axis.Models.SessionHandshakeType HandshakeType { get; }
     public global::Omnius.Core.Net.OmniAddress Address { get; }
 
@@ -600,7 +600,7 @@ public sealed partial class SessionReport : global::Omnius.Core.RocketPack.IRock
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            if (value.ServiceName != string.Empty)
+            if (value.ServiceName != global::Omnius.Core.RocketPack.Utf8String.Empty)
             {
                 w.Write((uint)1);
                 w.Write(value.ServiceName);
@@ -621,7 +621,7 @@ public sealed partial class SessionReport : global::Omnius.Core.RocketPack.IRock
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            string p_serviceName = string.Empty;
+            global::Omnius.Core.RocketPack.Utf8String p_serviceName = global::Omnius.Core.RocketPack.Utf8String.Empty;
             global::Omnius.Axis.Models.SessionHandshakeType p_handshakeType = (global::Omnius.Axis.Models.SessionHandshakeType)0;
             global::Omnius.Core.Net.OmniAddress p_address = global::Omnius.Core.Net.OmniAddress.Empty;
 
@@ -1526,7 +1526,7 @@ public sealed partial class PublishedFileReport : global::Omnius.Core.RocketPack
     static PublishedFileReport()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.PublishedFileReport>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.PublishedFileReport>.Empty = new global::Omnius.Axis.Models.PublishedFileReport(null, null, string.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.PublishedFileReport>.Empty = new global::Omnius.Axis.Models.PublishedFileReport(null, null, global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
@@ -1534,7 +1534,7 @@ public sealed partial class PublishedFileReport : global::Omnius.Core.RocketPack
     public static readonly int MaxFilePathLength = 2147483647;
     public static readonly int MaxRegistrantLength = 2147483647;
 
-    public PublishedFileReport(string? filePath, global::Omnius.Core.Cryptography.OmniHash? rootHash, string registrant)
+    public PublishedFileReport(global::Omnius.Core.RocketPack.Utf8String? filePath, global::Omnius.Core.Cryptography.OmniHash? rootHash, global::Omnius.Core.RocketPack.Utf8String registrant)
     {
         if (filePath is not null && filePath.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("filePath");
         if (registrant is null) throw new global::System.ArgumentNullException("registrant");
@@ -1547,16 +1547,16 @@ public sealed partial class PublishedFileReport : global::Omnius.Core.RocketPack
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
-            if (filePath != default) ___h.Add(filePath.GetHashCode());
+            if (filePath is not null && !filePath.IsEmpty) ___h.Add(filePath.GetHashCode());
             if (rootHash is not null) ___h.Add(rootHash.Value.GetHashCode());
-            if (registrant != default) ___h.Add(registrant.GetHashCode());
+            if (!registrant.IsEmpty) ___h.Add(registrant.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
-    public string? FilePath { get; }
+    public global::Omnius.Core.RocketPack.Utf8String? FilePath { get; }
     public global::Omnius.Core.Cryptography.OmniHash? RootHash { get; }
-    public string Registrant { get; }
+    public global::Omnius.Core.RocketPack.Utf8String Registrant { get; }
 
     public static global::Omnius.Axis.Models.PublishedFileReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -1611,7 +1611,7 @@ public sealed partial class PublishedFileReport : global::Omnius.Core.RocketPack
                 w.Write((uint)2);
                 global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.RootHash.Value, rank + 1);
             }
-            if (value.Registrant != string.Empty)
+            if (value.Registrant != global::Omnius.Core.RocketPack.Utf8String.Empty)
             {
                 w.Write((uint)3);
                 w.Write(value.Registrant);
@@ -1622,9 +1622,9 @@ public sealed partial class PublishedFileReport : global::Omnius.Core.RocketPack
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            string? p_filePath = null;
+            global::Omnius.Core.RocketPack.Utf8String? p_filePath = null;
             global::Omnius.Core.Cryptography.OmniHash? p_rootHash = null;
-            string p_registrant = string.Empty;
+            global::Omnius.Core.RocketPack.Utf8String p_registrant = global::Omnius.Core.RocketPack.Utf8String.Empty;
 
             for (; ; )
             {
@@ -1662,14 +1662,14 @@ public sealed partial class SubscribedFileReport : global::Omnius.Core.RocketPac
     static SubscribedFileReport()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.SubscribedFileReport>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.SubscribedFileReport>.Empty = new global::Omnius.Axis.Models.SubscribedFileReport(global::Omnius.Core.Cryptography.OmniHash.Empty, string.Empty, global::Omnius.Axis.Models.SubscribedFileStatus.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.SubscribedFileReport>.Empty = new global::Omnius.Axis.Models.SubscribedFileReport(global::Omnius.Core.Cryptography.OmniHash.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Axis.Models.SubscribedFileStatus.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxRegistrantLength = 2147483647;
 
-    public SubscribedFileReport(global::Omnius.Core.Cryptography.OmniHash rootHash, string registrant, global::Omnius.Axis.Models.SubscribedFileStatus status)
+    public SubscribedFileReport(global::Omnius.Core.Cryptography.OmniHash rootHash, global::Omnius.Core.RocketPack.Utf8String registrant, global::Omnius.Axis.Models.SubscribedFileStatus status)
     {
         if (registrant is null) throw new global::System.ArgumentNullException("registrant");
         if (registrant.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("registrant");
@@ -1683,14 +1683,14 @@ public sealed partial class SubscribedFileReport : global::Omnius.Core.RocketPac
         {
             var ___h = new global::System.HashCode();
             if (rootHash != default) ___h.Add(rootHash.GetHashCode());
-            if (registrant != default) ___h.Add(registrant.GetHashCode());
+            if (!registrant.IsEmpty) ___h.Add(registrant.GetHashCode());
             if (status != default) ___h.Add(status.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
-    public string Registrant { get; }
+    public global::Omnius.Core.RocketPack.Utf8String Registrant { get; }
     public global::Omnius.Axis.Models.SubscribedFileStatus Status { get; }
 
     public static global::Omnius.Axis.Models.SubscribedFileReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -1740,7 +1740,7 @@ public sealed partial class SubscribedFileReport : global::Omnius.Core.RocketPac
                 w.Write((uint)1);
                 global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.RootHash, rank + 1);
             }
-            if (value.Registrant != string.Empty)
+            if (value.Registrant != global::Omnius.Core.RocketPack.Utf8String.Empty)
             {
                 w.Write((uint)2);
                 w.Write(value.Registrant);
@@ -1757,7 +1757,7 @@ public sealed partial class SubscribedFileReport : global::Omnius.Core.RocketPac
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Core.Cryptography.OmniHash p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
-            string p_registrant = string.Empty;
+            global::Omnius.Core.RocketPack.Utf8String p_registrant = global::Omnius.Core.RocketPack.Utf8String.Empty;
             global::Omnius.Axis.Models.SubscribedFileStatus p_status = global::Omnius.Axis.Models.SubscribedFileStatus.Empty;
 
             for (; ; )
@@ -1939,14 +1939,14 @@ public sealed partial class PublishedShoutReport : global::Omnius.Core.RocketPac
     static PublishedShoutReport()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.PublishedShoutReport>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.PublishedShoutReport>.Empty = new global::Omnius.Axis.Models.PublishedShoutReport(global::Omnius.Core.Cryptography.OmniSignature.Empty, string.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.PublishedShoutReport>.Empty = new global::Omnius.Axis.Models.PublishedShoutReport(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxRegistrantLength = 2147483647;
 
-    public PublishedShoutReport(global::Omnius.Core.Cryptography.OmniSignature signature, string registrant)
+    public PublishedShoutReport(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String registrant)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
         if (registrant is null) throw new global::System.ArgumentNullException("registrant");
@@ -1959,13 +1959,13 @@ public sealed partial class PublishedShoutReport : global::Omnius.Core.RocketPac
         {
             var ___h = new global::System.HashCode();
             if (signature != default) ___h.Add(signature.GetHashCode());
-            if (registrant != default) ___h.Add(registrant.GetHashCode());
+            if (!registrant.IsEmpty) ___h.Add(registrant.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
-    public string Registrant { get; }
+    public global::Omnius.Core.RocketPack.Utf8String Registrant { get; }
 
     public static global::Omnius.Axis.Models.PublishedShoutReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -2013,7 +2013,7 @@ public sealed partial class PublishedShoutReport : global::Omnius.Core.RocketPac
                 w.Write((uint)1);
                 global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
             }
-            if (value.Registrant != string.Empty)
+            if (value.Registrant != global::Omnius.Core.RocketPack.Utf8String.Empty)
             {
                 w.Write((uint)2);
                 w.Write(value.Registrant);
@@ -2025,7 +2025,7 @@ public sealed partial class PublishedShoutReport : global::Omnius.Core.RocketPac
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Core.Cryptography.OmniSignature p_signature = global::Omnius.Core.Cryptography.OmniSignature.Empty;
-            string p_registrant = string.Empty;
+            global::Omnius.Core.RocketPack.Utf8String p_registrant = global::Omnius.Core.RocketPack.Utf8String.Empty;
 
             for (; ; )
             {
@@ -2058,14 +2058,14 @@ public sealed partial class SubscribedShoutReport : global::Omnius.Core.RocketPa
     static SubscribedShoutReport()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.SubscribedShoutReport>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.SubscribedShoutReport>.Empty = new global::Omnius.Axis.Models.SubscribedShoutReport(global::Omnius.Core.Cryptography.OmniSignature.Empty, string.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.SubscribedShoutReport>.Empty = new global::Omnius.Axis.Models.SubscribedShoutReport(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxRegistrantLength = 2147483647;
 
-    public SubscribedShoutReport(global::Omnius.Core.Cryptography.OmniSignature signature, string registrant)
+    public SubscribedShoutReport(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String registrant)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
         if (registrant is null) throw new global::System.ArgumentNullException("registrant");
@@ -2078,13 +2078,13 @@ public sealed partial class SubscribedShoutReport : global::Omnius.Core.RocketPa
         {
             var ___h = new global::System.HashCode();
             if (signature != default) ___h.Add(signature.GetHashCode());
-            if (registrant != default) ___h.Add(registrant.GetHashCode());
+            if (!registrant.IsEmpty) ___h.Add(registrant.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
-    public string Registrant { get; }
+    public global::Omnius.Core.RocketPack.Utf8String Registrant { get; }
 
     public static global::Omnius.Axis.Models.SubscribedShoutReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -2132,7 +2132,7 @@ public sealed partial class SubscribedShoutReport : global::Omnius.Core.RocketPa
                 w.Write((uint)1);
                 global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
             }
-            if (value.Registrant != string.Empty)
+            if (value.Registrant != global::Omnius.Core.RocketPack.Utf8String.Empty)
             {
                 w.Write((uint)2);
                 w.Write(value.Registrant);
@@ -2144,7 +2144,7 @@ public sealed partial class SubscribedShoutReport : global::Omnius.Core.RocketPa
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Core.Cryptography.OmniSignature p_signature = global::Omnius.Core.Cryptography.OmniSignature.Empty;
-            string p_registrant = string.Empty;
+            global::Omnius.Core.RocketPack.Utf8String p_registrant = global::Omnius.Core.RocketPack.Utf8String.Empty;
 
             for (; ; )
             {

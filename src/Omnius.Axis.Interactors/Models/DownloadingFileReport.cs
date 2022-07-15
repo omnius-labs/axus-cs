@@ -2,15 +2,15 @@ namespace Omnius.Axis.Interactors.Models;
 
 public record DownloadingFileReport
 {
-    public DownloadingFileReport(Seed seed, string? filePath, DateTime createdTime, DownloadingFileStatus status)
+    public DownloadingFileReport(FileSeed fileSeed, string? filePath, DateTime createdTime, DownloadingFileStatus status)
     {
-        this.Seed = seed;
+        this.FileSeed = fileSeed;
         this.FilePath = filePath;
         this.CreatedTime = createdTime;
         this.Status = status;
     }
 
-    public Seed Seed { get; }
+    public FileSeed FileSeed { get; }
     public string? FilePath { get; }
     public DateTime CreatedTime { get; }
     public DownloadingFileStatus Status { get; }

@@ -7,7 +7,7 @@ internal record UploadingFileItemEntity
 {
     public string? FilePath { get; set; }
 
-    public SeedEntity? Seed { get; set; }
+    public FileSeedEntity? FileSeed { get; set; }
 
     public DateTime CreatedTime { get; set; }
 
@@ -17,7 +17,7 @@ internal record UploadingFileItemEntity
     {
         return new UploadingFileItemEntity()
         {
-            Seed = SeedEntity.Import(value.Seed),
+            FileSeed = FileSeedEntity.Import(value.FileSeed),
             FilePath = value.FilePath,
             CreatedTime = value.CreatedTime,
             State = (int)value.State,
@@ -26,6 +26,6 @@ internal record UploadingFileItemEntity
 
     public UploadingFileItem Export()
     {
-        return new UploadingFileItem(this.FilePath ?? string.Empty, this.Seed?.Export() ?? Interactors.Models.Seed.Empty, this.CreatedTime, (UploadingFileState)this.State);
+        return new UploadingFileItem(this.FilePath ?? string.Empty, this.FileSeed?.Export() ?? Interactors.Models.FileSeed.Empty, this.CreatedTime, (UploadingFileState)this.State);
     }
 }

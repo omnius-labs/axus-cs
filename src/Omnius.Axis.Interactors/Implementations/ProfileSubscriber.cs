@@ -76,7 +76,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
 
             for (; ; )
             {
-                await Task.Delay(1000 * 30, cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken).ConfigureAwait(false);
 
                 await this.SyncSubscribedShouts(cancellationToken);
                 await this.SyncSubscribedFiles(cancellationToken);

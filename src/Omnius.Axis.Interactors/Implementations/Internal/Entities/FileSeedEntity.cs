@@ -4,16 +4,16 @@ using Omnius.Core.RocketPack;
 
 namespace Omnius.Axis.Interactors.Internal.Entities;
 
-internal record SeedEntity
+internal record FileSeedEntity
 {
     public OmniHashEntity? RootHash { get; set; }
     public string? Name { get; set; }
     public DateTime CreatedTime { get; set; }
     public ulong Size { get; set; }
 
-    public static SeedEntity Import(Seed value)
+    public static FileSeedEntity Import(FileSeed value)
     {
-        return new SeedEntity()
+        return new FileSeedEntity()
         {
             RootHash = OmniHashEntity.Import(value.RootHash),
             Name = value.Name,
@@ -22,8 +22,8 @@ internal record SeedEntity
         };
     }
 
-    public Seed Export()
+    public FileSeed Export()
     {
-        return new Seed(this.RootHash?.Export() ?? OmniHash.Empty, this.Name ?? string.Empty, this.Size, Timestamp.FromDateTime(this.CreatedTime));
+        return new FileSeed(this.RootHash?.Export() ?? OmniHash.Empty, this.Name ?? string.Empty, this.Size, Timestamp.FromDateTime(this.CreatedTime));
     }
 }

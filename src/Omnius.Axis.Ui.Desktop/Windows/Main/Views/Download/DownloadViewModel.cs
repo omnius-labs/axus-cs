@@ -66,12 +66,12 @@ public class DownloadViewViewModel : AsyncDisposableBase
 
         public bool Equals(DownloadingFileReport? x, DownloadingFileReport? y)
         {
-            return (x?.Seed == y?.Seed);
+            return (x?.FileSeed == y?.FileSeed);
         }
 
         public int GetHashCode([DisallowNull] DownloadingFileReport obj)
         {
-            return obj?.Seed?.GetHashCode() ?? 0;
+            return obj?.FileSeed?.GetHashCode() ?? 0;
         }
     }
 
@@ -91,19 +91,19 @@ public class DownloadViewViewModel : AsyncDisposableBase
 
         var text = await _dialogService.ShowTextEditWindowAsync();
 
-        foreach (var seed in ParseSeeds(text))
+        foreach (var seed in ParseFileSeeds(text))
         {
             await fileDownloader.RegisterAsync(seed);
         }
     }
 
-    private static IEnumerable<Seed> ParseSeeds(string text)
+    private static IEnumerable<FileSeed> ParseFileSeeds(string text)
     {
-        var results = new List<Seed>();
+        var results = new List<FileSeed>();
 
         foreach (var line in text.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries).Select(n => n.Trim()))
         {
-            if (!AxisMessageConverter.TryStringToSeed(line, out var seed)) continue;
+            if (!AxisMessageConverter.TryStringToFileSeed(line, out var seed)) continue;
             results.Add(seed);
         }
 
@@ -119,9 +119,9 @@ public class DownloadViewViewModel : AsyncDisposableBase
 
         foreach (var viewModel in selectedFiles)
         {
-            if (viewModel.Model?.Seed is Seed seed)
+            if (viewModel.Model?.FileSeed is FileSeed fileSeed)
             {
-                await fileDownloader.UnregisterAsync(seed);
+                await fileDownloader.UnregisterAsync(fileSeed);
             }
         }
     }
@@ -135,8 +135,8 @@ public class DownloadViewViewModel : AsyncDisposableBase
 
         foreach (var viewModel in selectedFiles)
         {
-            if (viewModel.Model?.Seed is null) continue;
-            sb.AppendLine(AxisMessageConverter.SeedToString(viewModel.Model.Seed));
+            if (viewModel.Model?.FileSeed is null) continue;
+            sb.AppendLine(AxisMessageConverter.FileSeedToString(viewModel.Model.FileSeed));
         }
 
         await _clipboardService.SetTextAsync(sb.ToString());

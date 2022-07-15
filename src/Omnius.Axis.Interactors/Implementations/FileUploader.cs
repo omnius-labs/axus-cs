@@ -65,7 +65,7 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
 
             for (; ; )
             {
-                await Task.Delay(1000 * 30, cancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken).ConfigureAwait(false);
 
                 await this.SyncPublishedFiles(cancellationToken);
             }
@@ -84,9 +84,13 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var publishedFileReports = await _serviceController.GetPublishedFileReportsAsync(cancellationToken);
-            var filePaths = new HashSet<string>();
-            filePaths.UnionWith(publishedFileReports.Where(n => n.Registrant == Registrant).Select(n => n.FilePath).Where(n => n is not null)!);
+            var reports = await _serviceController.GetPublishedFileReportsAsync(cancellationToken);
+            var filePaths = reports
+                .Where(n => n.Registrant == Registrant)
+                .Select(n => n.FilePath)
+                .Where(n => n is not null)
+                .Select(n => n!.ToString())
+                .ToHashSet();
 
             foreach (var filePath in filePaths)
             {
@@ -99,8 +103,8 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
                 if (filePaths.Contains(item.FilePath)) continue;
                 var rootHash = await _serviceController.PublishFileFromStorageAsync(item.FilePath, Registrant, cancellationToken);
 
-                var seed = new Seed(rootHash, item.Seed.Name, item.Seed.Size, item.Seed.CreatedTime);
-                var newItem = new UploadingFileItem(item.FilePath, seed, item.CreatedTime, UploadingFileState.Completed);
+                var fileSeed = new FileSeed(rootHash, item.FileSeed.Name, item.FileSeed.Size, item.FileSeed.CreatedTime);
+                var newItem = new UploadingFileItem(item.FilePath, fileSeed, item.CreatedTime, UploadingFileState.Completed);
 
                 _fileUploaderRepo.Items.Upsert(newItem);
             }
@@ -115,7 +119,7 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
 
             foreach (var item in _fileUploaderRepo.Items.FindAll())
             {
-                var seed = (item.State == UploadingFileState.Completed) ? item.Seed : null;
+                var seed = (item.State == UploadingFileState.Completed) ? item.FileSeed : null;
                 reports.Add(new UploadingFileReport(item.FilePath, seed, item.CreatedTime, item.State));
             }
 
@@ -130,8 +134,8 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
             if (_fileUploaderRepo.Items.Exists(filePath)) return;
 
             var now = DateTime.UtcNow;
-            var seed = new Seed(OmniHash.Empty, name, (ulong)new FileInfo(filePath).Length, Timestamp.FromDateTime(now));
-            var item = new UploadingFileItem(filePath, seed, now, UploadingFileState.Waiting);
+            var fileSeed = new FileSeed(OmniHash.Empty, name, (ulong)new FileInfo(filePath).Length, Timestamp.FromDateTime(now));
+            var item = new UploadingFileItem(filePath, fileSeed, now, UploadingFileState.Waiting);
             _fileUploaderRepo.Items.Upsert(item);
         }
     }

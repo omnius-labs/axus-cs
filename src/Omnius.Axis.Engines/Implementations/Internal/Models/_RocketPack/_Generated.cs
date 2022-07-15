@@ -420,14 +420,14 @@ internal sealed partial class SessionManagerSessionRequestMessage : global::Omni
     static SessionManagerSessionRequestMessage()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Engines.Internal.Models.SessionManagerSessionRequestMessage>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Engines.Internal.Models.SessionManagerSessionRequestMessage>.Empty = new global::Omnius.Axis.Engines.Internal.Models.SessionManagerSessionRequestMessage(string.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Engines.Internal.Models.SessionManagerSessionRequestMessage>.Empty = new global::Omnius.Axis.Engines.Internal.Models.SessionManagerSessionRequestMessage(global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxSchemeLength = 2147483647;
 
-    public SessionManagerSessionRequestMessage(string scheme)
+    public SessionManagerSessionRequestMessage(global::Omnius.Core.RocketPack.Utf8String scheme)
     {
         if (scheme is null) throw new global::System.ArgumentNullException("scheme");
         if (scheme.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("scheme");
@@ -437,12 +437,12 @@ internal sealed partial class SessionManagerSessionRequestMessage : global::Omni
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
-            if (scheme != default) ___h.Add(scheme.GetHashCode());
+            if (!scheme.IsEmpty) ___h.Add(scheme.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
-    public string Scheme { get; }
+    public global::Omnius.Core.RocketPack.Utf8String Scheme { get; }
 
     public static global::Omnius.Axis.Engines.Internal.Models.SessionManagerSessionRequestMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -484,7 +484,7 @@ internal sealed partial class SessionManagerSessionRequestMessage : global::Omni
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            if (value.Scheme != string.Empty)
+            if (value.Scheme != global::Omnius.Core.RocketPack.Utf8String.Empty)
             {
                 w.Write((uint)1);
                 w.Write(value.Scheme);
@@ -495,7 +495,7 @@ internal sealed partial class SessionManagerSessionRequestMessage : global::Omni
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            string p_scheme = string.Empty;
+            global::Omnius.Core.RocketPack.Utf8String p_scheme = global::Omnius.Core.RocketPack.Utf8String.Empty;
 
             for (; ; )
             {

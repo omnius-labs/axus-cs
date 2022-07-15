@@ -55,7 +55,7 @@ internal sealed class FileDownloaderRepository : DisposableBase
                 if (_database.GetDocumentVersion(CollectionName) <= 0)
                 {
                     var col = this.GetCollection();
-                    col.EnsureIndex(x => x.Seed!.RootHash, true);
+                    col.EnsureIndex(x => x.FileSeed!.RootHash, true);
                 }
 
                 _database.SetDocumentVersion(CollectionName, 1);
@@ -68,14 +68,14 @@ internal sealed class FileDownloaderRepository : DisposableBase
             return col;
         }
 
-        public bool Exists(Seed seed)
+        public bool Exists(FileSeed fileSeed)
         {
             lock (_lockObject)
             {
-                var seedEntity = SeedEntity.Import(seed);
+                var seedEntity = FileSeedEntity.Import(fileSeed);
 
                 var col = this.GetCollection();
-                return col.Exists(n => n.Seed == seedEntity);
+                return col.Exists(n => n.FileSeed == seedEntity);
             }
         }
 
@@ -86,7 +86,7 @@ internal sealed class FileDownloaderRepository : DisposableBase
                 var rootHashEntity = OmniHashEntity.Import(rootHash);
 
                 var col = this.GetCollection();
-                return col.Exists(n => n.Seed!.RootHash == rootHashEntity);
+                return col.Exists(n => n.FileSeed!.RootHash == rootHashEntity);
             }
         }
 
@@ -99,14 +99,14 @@ internal sealed class FileDownloaderRepository : DisposableBase
             }
         }
 
-        public DownloadingFileItem? FindOne(Seed seed)
+        public DownloadingFileItem? FindOne(FileSeed fileSeed)
         {
             lock (_lockObject)
             {
-                var seedEntity = SeedEntity.Import(seed);
+                var seedEntity = FileSeedEntity.Import(fileSeed);
 
                 var col = this.GetCollection();
-                return col.FindOne(n => n.Seed == seedEntity)?.Export();
+                return col.FindOne(n => n.FileSeed == seedEntity)?.Export();
             }
         }
 
@@ -120,21 +120,21 @@ internal sealed class FileDownloaderRepository : DisposableBase
 
                 _database.BeginTrans();
 
-                col.DeleteMany(n => n.Seed!.RootHash == itemEntity.Seed!.RootHash);
+                col.DeleteMany(n => n.FileSeed!.RootHash == itemEntity.FileSeed!.RootHash);
                 col.Insert(itemEntity);
 
                 _database.Commit();
             }
         }
 
-        public void Delete(Seed seed)
+        public void Delete(FileSeed fileSeed)
         {
             lock (_lockObject)
             {
-                var seedEntity = SeedEntity.Import(seed);
+                var seedEntity = FileSeedEntity.Import(fileSeed);
 
                 var col = this.GetCollection();
-                col.DeleteMany(n => n.Seed!.RootHash == seedEntity.RootHash);
+                col.DeleteMany(n => n.FileSeed!.RootHash == seedEntity.RootHash);
             }
         }
     }
