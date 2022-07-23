@@ -1,3 +1,4 @@
+using System.Buffers;
 using Omnius.Axis.Models;
 using Omnius.Core.Cryptography;
 
@@ -35,7 +36,7 @@ public interface IAxisServiceMediator
 
     ValueTask SubscribeShoutAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default);
 
-    ValueTask<ReadOnlyMemory<byte>?> TryExportFileToMemoryAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
+    ValueTask<IMemoryOwner<byte>?> TryExportFileToMemoryAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
 
     ValueTask<bool> TryExportFileToStorageAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default);
 

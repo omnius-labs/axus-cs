@@ -107,7 +107,7 @@ public sealed class AxisServiceMediator : IAxisServiceMediator
         return output.Success;
     }
 
-    public async ValueTask<ReadOnlyMemory<byte>?> TryExportFileToMemoryAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+    public async ValueTask<IMemoryOwner<byte>?> TryExportFileToMemoryAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
     {
         var input = new TryExportFileToMemoryRequest(rootHash);
         var output = await _axisService.TryExportFileToMemoryAsync(input, cancellationToken);

@@ -53,6 +53,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
     private readonly object _lockObject = new();
 
     private const int MaxBucketLength = 20;
+    private const int MaxNodeLocationCount = 1000;
     private const string Schema = "node_finder";
 
     public static async ValueTask<NodeFinder> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, IBatchActionDispatcher batchActionDispatcher,
@@ -556,7 +557,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
     private async Task ComputeLoopAsync(CancellationToken cancellationToken)
     {
-        var saveCloudNodeLocationsStopwatch = new Stopwatch();
+        var nodeLocationsTrimExcessStopwatch = new Stopwatch();
         var trimDeadSessionsStopwatch = new Stopwatch();
         var computeSendingDataMessageStopwatch = new Stopwatch();
 
@@ -568,12 +569,17 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
                 await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken).ConfigureAwait(false);
 
-                if (!trimDeadSessionsStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromMinutes(1)))
+                if (nodeLocationsTrimExcessStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromMinutes(1)))
+                {
+                    _nodeFinderRepo.NodeLocations.TrimExcess(MaxNodeLocationCount);
+                }
+
+                if (trimDeadSessionsStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromMinutes(1)))
                 {
                     await this.TrimDeadSessionsAsync(cancellationToken);
                 }
 
-                if (!computeSendingDataMessageStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromSeconds(10)))
+                if (computeSendingDataMessageStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromSeconds(10)))
                 {
                     await this.ComputeSendingDataMessageAsync(cancellationToken);
                 }

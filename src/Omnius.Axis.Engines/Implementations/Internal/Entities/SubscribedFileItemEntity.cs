@@ -9,12 +9,12 @@ internal record SubscribedFileItemEntity
 
     public string? Registrant { get; set; }
 
-    public static SubscribedFileItemEntity Import(SubscribedFileItem value)
+    public static SubscribedFileItemEntity Import(SubscribedFileItem item)
     {
         return new SubscribedFileItemEntity()
         {
-            RootHash = OmniHashEntity.Import(value.RootHash),
-            Registrant = value.Registrant,
+            RootHash = OmniHashEntity.Import(item.RootHash),
+            Registrant = item.Registrant,
         };
     }
 

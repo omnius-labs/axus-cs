@@ -7,11 +7,11 @@ internal record NodeLocationEntity
 {
     public string[]? Addresses { get; set; }
 
-    public static NodeLocationEntity Import(NodeLocation value)
+    public static NodeLocationEntity Import(NodeLocation item)
     {
         return new NodeLocationEntity()
         {
-            Addresses = value.Addresses.Select(n => n.ToString()).ToArray()
+            Addresses = item.Addresses.Select(n => n.ToString()).ToArray()
         };
     }
 

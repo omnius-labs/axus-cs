@@ -30,5 +30,5 @@ public partial class UploadingFileViewModel : BindableBase, ICollectionViewModel
 
     public DateTime CreatedTime => this.Model?.CreatedTime ?? DateTime.MinValue;
 
-    public UploadingFileState State => this.Model?.State ?? UploadingFileState.Unknown;
+    public UploadingFileState State => this.Model?.Status.State ?? UploadingFileState.Unknown;
 }

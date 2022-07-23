@@ -120,7 +120,9 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
             foreach (var item in _fileUploaderRepo.Items.FindAll())
             {
                 var seed = (item.State == UploadingFileState.Completed) ? item.FileSeed : null;
-                reports.Add(new UploadingFileReport(item.FilePath, seed, item.CreatedTime, item.State));
+
+                var status = new UploadingFileStatus(item.State);
+                reports.Add(new UploadingFileReport(item.FilePath, seed, item.CreatedTime, status));
             }
 
             return reports;

@@ -11,14 +11,14 @@ internal record FileSeedEntity
     public DateTime CreatedTime { get; set; }
     public ulong Size { get; set; }
 
-    public static FileSeedEntity Import(FileSeed value)
+    public static FileSeedEntity Import(FileSeed item)
     {
         return new FileSeedEntity()
         {
-            RootHash = OmniHashEntity.Import(value.RootHash),
-            Name = value.Name,
-            Size = value.Size,
-            CreatedTime = value.CreatedTime.ToDateTime(),
+            RootHash = OmniHashEntity.Import(item.RootHash),
+            Name = item.Name,
+            Size = item.Size,
+            CreatedTime = item.CreatedTime.ToDateTime(),
         };
     }
 

@@ -13,14 +13,14 @@ internal record UploadingFileItemEntity
 
     public int State { get; set; }
 
-    public static UploadingFileItemEntity Import(UploadingFileItem value)
+    public static UploadingFileItemEntity Import(UploadingFileItem item)
     {
         return new UploadingFileItemEntity()
         {
-            FileSeed = FileSeedEntity.Import(value.FileSeed),
-            FilePath = value.FilePath,
-            CreatedTime = value.CreatedTime,
-            State = (int)value.State,
+            FileSeed = FileSeedEntity.Import(item.FileSeed),
+            FilePath = item.FilePath,
+            CreatedTime = item.CreatedTime,
+            State = (int)item.State,
         };
     }
 

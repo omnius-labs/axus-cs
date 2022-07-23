@@ -12,13 +12,13 @@ internal record DecodedFileItemEntity
 
     public int State { get; set; }
 
-    public static DecodedFileItemEntity Import(DecodedFileItem value)
+    public static DecodedFileItemEntity Import(DecodedFileItem item)
     {
         return new DecodedFileItemEntity()
         {
-            RootHash = OmniHashEntity.Import(value.RootHash),
-            MerkleTreeSections = value.MerkleTreeSections?.Select(n => MerkleTreeSectionEntity.Import(n))?.ToArray() ?? Array.Empty<MerkleTreeSectionEntity>(),
-            State = (int)value.State,
+            RootHash = OmniHashEntity.Import(item.RootHash),
+            MerkleTreeSections = item.MerkleTreeSections?.Select(n => MerkleTreeSectionEntity.Import(n))?.ToArray() ?? Array.Empty<MerkleTreeSectionEntity>(),
+            State = (int)item.State,
         };
     }
 

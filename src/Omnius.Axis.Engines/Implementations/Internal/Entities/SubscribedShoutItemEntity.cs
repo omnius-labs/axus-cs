@@ -8,12 +8,12 @@ internal record SubscribedShoutItemEntity
 
     public string? Registrant { get; set; }
 
-    public static SubscribedShoutItemEntity Import(SubscribedShoutItem value)
+    public static SubscribedShoutItemEntity Import(SubscribedShoutItem item)
     {
         return new SubscribedShoutItemEntity()
         {
-            Signature = OmniSignatureEntity.Import(value.Signature),
-            Registrant = value.Registrant,
+            Signature = OmniSignatureEntity.Import(item.Signature),
+            Registrant = item.Registrant,
         };
     }
 

@@ -13,14 +13,14 @@ internal record DownloadingFileItemEntity
 
     public int State { get; set; }
 
-    public static DownloadingFileItemEntity Import(DownloadingFileItem value)
+    public static DownloadingFileItemEntity Import(DownloadingFileItem item)
     {
         return new DownloadingFileItemEntity()
         {
-            FileSeed = FileSeedEntity.Import(value.FileSeed),
-            FilePath = value.FilePath,
-            CreatedTime = value.CreatedTime,
-            State = (int)value.State,
+            FileSeed = FileSeedEntity.Import(item.FileSeed),
+            FilePath = item.FilePath,
+            CreatedTime = item.CreatedTime,
+            State = (int)item.State,
         };
     }
 

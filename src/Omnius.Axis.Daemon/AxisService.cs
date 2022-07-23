@@ -416,7 +416,7 @@ public class AxisService : AsyncDisposableBase, IAxisService
             var bytesPool = BytesPool.Shared;
             using var bytesPipe = new BytesPipe(bytesPool);
             var success = await _subscribedFileStorage.TryExportFileAsync(param.RootHash, bytesPipe.Writer, cancellationToken);
-            return new TryExportFileToMemoryResult(bytesPipe.Reader.GetSequence().ToMemory(bytesPool));
+            return new TryExportFileToMemoryResult(bytesPipe.Reader.GetSequence().ToMemoryOwner(bytesPool));
         }
     }
 

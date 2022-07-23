@@ -17,15 +17,15 @@ internal record PublishedFileItemEntity
 
     public int MaxBlockLength { get; set; }
 
-    public static PublishedFileItemEntity Import(PublishedFileItem value)
+    public static PublishedFileItemEntity Import(PublishedFileItem item)
     {
         return new PublishedFileItemEntity()
         {
-            RootHash = OmniHashEntity.Import(value.RootHash),
-            FilePath = value.FilePath,
-            Registrant = value.Registrant,
-            MerkleTreeSections = value.MerkleTreeSections?.Select(n => MerkleTreeSectionEntity.Import(n))?.ToArray() ?? Array.Empty<MerkleTreeSectionEntity>(),
-            MaxBlockLength = value.MaxBlockLength,
+            RootHash = OmniHashEntity.Import(item.RootHash),
+            FilePath = item.FilePath,
+            Registrant = item.Registrant,
+            MerkleTreeSections = item.MerkleTreeSections?.Select(n => MerkleTreeSectionEntity.Import(n))?.ToArray() ?? Array.Empty<MerkleTreeSectionEntity>(),
+            MaxBlockLength = item.MaxBlockLength,
         };
     }
 

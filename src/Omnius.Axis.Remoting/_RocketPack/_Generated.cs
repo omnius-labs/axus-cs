@@ -2124,7 +2124,7 @@ public sealed partial class TryExportFileToMemoryRequest : global::Omnius.Core.R
         }
     }
 }
-public sealed partial class TryExportFileToMemoryResult : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.TryExportFileToMemoryResult>
+public sealed partial class TryExportFileToMemoryResult : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.TryExportFileToMemoryResult>, global::System.IDisposable
 {
     public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Remoting.TryExportFileToMemoryResult> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.TryExportFileToMemoryResult>.Formatter;
     public static global::Omnius.Axis.Remoting.TryExportFileToMemoryResult Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.TryExportFileToMemoryResult>.Empty;
@@ -2139,21 +2139,26 @@ public sealed partial class TryExportFileToMemoryResult : global::Omnius.Core.Ro
 
     public static readonly int MaxMemoryLength = 33554432;
 
-    public TryExportFileToMemoryResult(global::System.ReadOnlyMemory<byte>? memory)
+    public TryExportFileToMemoryResult(global::System.Buffers.IMemoryOwner<byte>? memory)
     {
-        if (memory is not null && memory.Value.Length > 33554432) throw new global::System.ArgumentOutOfRangeException("memory");
+        if (memory is not null && memory.Memory.Length > 33554432) throw new global::System.ArgumentOutOfRangeException("memory");
 
         this.Memory = memory;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
-            if (memory is not null && !memory.Value.IsEmpty) ___h.Add(global::Omnius.Core.Helpers.ObjectHelper.GetHashCode(memory.Value.Span));
+            if (memory is not null && !memory.Memory.IsEmpty) ___h.Add(global::Omnius.Core.Helpers.ObjectHelper.GetHashCode(memory.Memory.Span));
             return ___h.ToHashCode();
         });
     }
 
-    public global::System.ReadOnlyMemory<byte>? Memory { get; }
+    public void Dispose()
+    {
+        if (this.Memory is not null) this.Memory.Dispose();
+    }
+
+    public global::System.Buffers.IMemoryOwner<byte>? Memory { get; }
 
     public static global::Omnius.Axis.Remoting.TryExportFileToMemoryResult Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -2184,7 +2189,7 @@ public sealed partial class TryExportFileToMemoryResult : global::Omnius.Core.Ro
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
         if ((this.Memory is null) != (target.Memory is null)) return false;
-        if ((this.Memory is not null) && (target.Memory is not null) && !global::Omnius.Core.BytesOperations.Equals(this.Memory.Value.Span, target.Memory.Value.Span)) return false;
+        if ((this.Memory is not null) && (target.Memory is not null) && !global::Omnius.Core.BytesOperations.Equals(this.Memory.Memory.Span, target.Memory.Memory.Span)) return false;
 
         return true;
     }
@@ -2199,7 +2204,7 @@ public sealed partial class TryExportFileToMemoryResult : global::Omnius.Core.Ro
             if (value.Memory != null)
             {
                 w.Write((uint)1);
-                w.Write(value.Memory.Value.Span);
+                w.Write(value.Memory.Memory.Span);
             }
             w.Write((uint)0);
         }
@@ -2207,7 +2212,7 @@ public sealed partial class TryExportFileToMemoryResult : global::Omnius.Core.Ro
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            global::System.ReadOnlyMemory<byte>? p_memory = null;
+            global::System.Buffers.IMemoryOwner<byte>? p_memory = null;
 
             for (; ; )
             {
@@ -2217,7 +2222,7 @@ public sealed partial class TryExportFileToMemoryResult : global::Omnius.Core.Ro
                 {
                     case 1:
                         {
-                            p_memory = r.GetMemory(33554432);
+                            p_memory = r.GetRecyclableMemory(33554432);
                             break;
                         }
                 }
@@ -2346,7 +2351,7 @@ public sealed partial class GetPublishedShoutsReportResult : global::Omnius.Core
         }
     }
 }
-public sealed partial class PublishShoutRequest : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.PublishShoutRequest>
+public sealed partial class PublishShoutRequest : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.PublishShoutRequest>, global::System.IDisposable
 {
     public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Remoting.PublishShoutRequest> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.PublishShoutRequest>.Formatter;
     public static global::Omnius.Axis.Remoting.PublishShoutRequest Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.PublishShoutRequest>.Empty;
@@ -2377,6 +2382,11 @@ public sealed partial class PublishShoutRequest : global::Omnius.Core.RocketPack
             if (!registrant.IsEmpty) ___h.Add(registrant.GetHashCode());
             return ___h.ToHashCode();
         });
+    }
+
+    public void Dispose()
+    {
+        this.Shout.Dispose();
     }
 
     public global::Omnius.Axis.Models.Shout Shout { get; }
@@ -3041,7 +3051,7 @@ public sealed partial class TryExportShoutRequest : global::Omnius.Core.RocketPa
         }
     }
 }
-public sealed partial class TryExportShoutResult : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.TryExportShoutResult>
+public sealed partial class TryExportShoutResult : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.TryExportShoutResult>, global::System.IDisposable
 {
     public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Remoting.TryExportShoutResult> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.TryExportShoutResult>.Formatter;
     public static global::Omnius.Axis.Remoting.TryExportShoutResult Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Remoting.TryExportShoutResult>.Empty;
@@ -3064,6 +3074,11 @@ public sealed partial class TryExportShoutResult : global::Omnius.Core.RocketPac
             if (shout != default) ___h.Add(shout.GetHashCode());
             return ___h.ToHashCode();
         });
+    }
+
+    public void Dispose()
+    {
+        if (this.Shout is not null) this.Shout.Dispose();
     }
 
     public global::Omnius.Axis.Models.Shout? Shout { get; }

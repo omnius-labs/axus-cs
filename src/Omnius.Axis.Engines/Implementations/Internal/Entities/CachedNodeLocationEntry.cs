@@ -11,13 +11,13 @@ internal record CachedNodeLocationEntity
 
     public DateTime LastConnectionTime { get; set; }
 
-    public static CachedNodeLocationEntity Import(CachedNodeLocation value)
+    public static CachedNodeLocationEntity Import(CachedNodeLocation item)
     {
         return new CachedNodeLocationEntity()
         {
-            Value = NodeLocationEntity.Import(value.Value),
-            CreatedTime = value.CreatedTime,
-            LastConnectionTime = value.LastConnectionTime,
+            Value = NodeLocationEntity.Import(item.Value),
+            CreatedTime = item.CreatedTime,
+            LastConnectionTime = item.LastConnectionTime,
         };
     }
 

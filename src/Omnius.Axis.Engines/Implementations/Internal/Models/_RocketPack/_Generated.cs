@@ -49,7 +49,7 @@ internal enum ShoutExchangerPostType : byte
     Found = 1,
     NotFound = 2,
 }
-internal sealed partial class Block : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Engines.Internal.Models.Block>
+internal sealed partial class Block : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Engines.Internal.Models.Block>, global::System.IDisposable
 {
     public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Engines.Internal.Models.Block> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Engines.Internal.Models.Block>.Formatter;
     public static global::Omnius.Axis.Engines.Internal.Models.Block Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Engines.Internal.Models.Block>.Empty;
@@ -79,6 +79,11 @@ internal sealed partial class Block : global::Omnius.Core.RocketPack.IRocketMess
             if (!value.Memory.IsEmpty) ___h.Add(global::Omnius.Core.Helpers.ObjectHelper.GetHashCode(value.Memory.Span));
             return ___h.ToHashCode();
         });
+    }
+
+    public void Dispose()
+    {
+        this.Value.Dispose();
     }
 
     public global::Omnius.Core.Cryptography.OmniHash Hash { get; }
@@ -1891,7 +1896,7 @@ internal sealed partial class ShoutExchangerFetchRequestMessage : global::Omnius
         }
     }
 }
-internal sealed partial class ShoutExchangerFetchResultMessage : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerFetchResultMessage>
+internal sealed partial class ShoutExchangerFetchResultMessage : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerFetchResultMessage>, global::System.IDisposable
 {
     public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerFetchResultMessage> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerFetchResultMessage>.Formatter;
     public static global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerFetchResultMessage Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerFetchResultMessage>.Empty;
@@ -1916,6 +1921,11 @@ internal sealed partial class ShoutExchangerFetchResultMessage : global::Omnius.
             if (shout != default) ___h.Add(shout.GetHashCode());
             return ___h.ToHashCode();
         });
+    }
+
+    public void Dispose()
+    {
+        if (this.Shout is not null) this.Shout.Dispose();
     }
 
     public global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerFetchResultType Type { get; }
@@ -2005,7 +2015,7 @@ internal sealed partial class ShoutExchangerFetchResultMessage : global::Omnius.
         }
     }
 }
-internal sealed partial class ShoutExchangerPostMessage : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerPostMessage>
+internal sealed partial class ShoutExchangerPostMessage : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerPostMessage>, global::System.IDisposable
 {
     public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerPostMessage> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerPostMessage>.Formatter;
     public static global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerPostMessage Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerPostMessage>.Empty;
@@ -2030,6 +2040,11 @@ internal sealed partial class ShoutExchangerPostMessage : global::Omnius.Core.Ro
             if (shout != default) ___h.Add(shout.GetHashCode());
             return ___h.ToHashCode();
         });
+    }
+
+    public void Dispose()
+    {
+        if (this.Shout is not null) this.Shout.Dispose();
     }
 
     public global::Omnius.Axis.Engines.Internal.Models.ShoutExchangerPostType Type { get; }

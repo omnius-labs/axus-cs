@@ -336,27 +336,27 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
                 if (requestMessage.CreatedTime == shoutCreatedTime)
                 {
-                    var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.Same, null);
+                    using var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.Same, null);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
 
                     _logger.Debug($"Send ShoutFetchResult: (Type: Same, Signature: {requestMessage.Signature.ToString()})");
                 }
                 else if (requestMessage.CreatedTime < shoutCreatedTime)
                 {
-                    var message = await this.ReadShoutAsync(requestMessage.Signature, cancellationToken);
-                    var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.Found, message);
+                    using var message = await this.ReadShoutAsync(requestMessage.Signature, cancellationToken);
+                    using var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.Found, message);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
 
                     _logger.Debug($"Send ShoutFetchResult: (Type: Found, Signature: {requestMessage.Signature.ToString()})");
                 }
                 else
                 {
-                    var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.NotFound, null);
+                    using var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.NotFound, null);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
 
                     _logger.Debug($"Send ShoutFetchResult: (Type: NotFound, Signature: {requestMessage.Signature.ToString()})");
 
-                    var postMessage = await session.Connection.Receiver.ReceiveAsync<ShoutExchangerPostMessage>(cancellationToken);
+                    using var postMessage = await session.Connection.Receiver.ReceiveAsync<ShoutExchangerPostMessage>(cancellationToken);
 
                     if (postMessage.Type == ShoutExchangerPostType.Found && postMessage.Shout is not null)
                     {

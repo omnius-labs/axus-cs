@@ -13,12 +13,12 @@ internal record MerkleTreeSectionEntity
 
     public OmniHashEntity[]? Hashes { get; set; }
 
-    public static MerkleTreeSectionEntity Import(MerkleTreeSection value)
+    public static MerkleTreeSectionEntity Import(MerkleTreeSection item)
     {
         return new MerkleTreeSectionEntity()
         {
-            Depth = value.Depth,
-            Hashes = value.Hashes.Select(n => OmniHashEntity.Import(n)).ToArray(),
+            Depth = item.Depth,
+            Hashes = item.Hashes.Select(n => OmniHashEntity.Import(n)).ToArray(),
         };
     }
 

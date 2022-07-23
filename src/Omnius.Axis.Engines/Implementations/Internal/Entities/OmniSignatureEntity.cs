@@ -8,12 +8,12 @@ internal record OmniSignatureEntity
 
     public OmniHashEntity? Hash { get; set; }
 
-    public static OmniSignatureEntity Import(OmniSignature value)
+    public static OmniSignatureEntity Import(OmniSignature item)
     {
         return new OmniSignatureEntity()
         {
-            Name = value.Name,
-            Hash = OmniHashEntity.Import(value.Hash),
+            Name = item.Name,
+            Hash = OmniHashEntity.Import(item.Hash),
         };
     }
 

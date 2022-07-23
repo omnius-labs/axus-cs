@@ -36,7 +36,7 @@ internal sealed class ProfilePublisherRepository : DisposableBase
 
     public sealed class PublishedProfileItemRepository
     {
-        private const string CollectionName = "published_profile_items";
+        private const string CollectionName = "published_items";
 
         private readonly LiteDatabase _database;
 

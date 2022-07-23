@@ -8,12 +8,12 @@ internal record OmniHashEntity
 
     public byte[]? Value { get; set; }
 
-    public static OmniHashEntity Import(OmniHash value)
+    public static OmniHashEntity Import(OmniHash item)
     {
         return new OmniHashEntity()
         {
-            AlgorithmType = (int)value.AlgorithmType,
-            Value = value.Value.ToArray(),
+            AlgorithmType = (int)item.AlgorithmType,
+            Value = item.Value.ToArray(),
         };
     }
 

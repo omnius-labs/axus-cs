@@ -31,3 +31,11 @@ public record DownloadingFileStatus
     public uint TotalBlockCount { get; }
     public DownloadingFileState State { get; }
 }
+
+public enum DownloadingFileState : byte
+{
+    Unknown = 0,
+    Downloading = 1,
+    Decoding = 2,
+    Completed = 3,
+}

@@ -258,7 +258,7 @@ public sealed partial class ContentClue : global::Omnius.Core.RocketPack.IRocket
         }
     }
 }
-public sealed partial class Shout : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.Shout>
+public sealed partial class Shout : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.Shout>, global::System.IDisposable
 {
     public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axis.Models.Shout> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.Shout>.Formatter;
     public static global::Omnius.Axis.Models.Shout Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axis.Models.Shout>.Empty;
@@ -289,6 +289,11 @@ public sealed partial class Shout : global::Omnius.Core.RocketPack.IRocketMessag
             if (certificate != default) ___h.Add(certificate.GetHashCode());
             return ___h.ToHashCode();
         });
+    }
+
+    public void Dispose()
+    {
+        this.Value.Dispose();
     }
 
     public global::Omnius.Core.RocketPack.Timestamp CreatedTime { get; }

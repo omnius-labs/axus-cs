@@ -10,13 +10,13 @@ internal record PublishedShoutItemEntity
 
     public string? Registrant { get; set; }
 
-    public static PublishedShoutItemEntity Import(PublishedShoutItem value)
+    public static PublishedShoutItemEntity Import(PublishedShoutItem item)
     {
         return new PublishedShoutItemEntity()
         {
-            Signature = OmniSignatureEntity.Import(value.Signature),
-            CreatedTime = value.CreatedTime,
-            Registrant = value.Registrant,
+            Signature = OmniSignatureEntity.Import(item.Signature),
+            CreatedTime = item.CreatedTime,
+            Registrant = item.Registrant,
         };
     }
 

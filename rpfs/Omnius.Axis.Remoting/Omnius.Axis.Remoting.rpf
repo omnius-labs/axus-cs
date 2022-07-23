@@ -119,7 +119,7 @@ message TryExportFileToMemoryRequest {
 }
 
 message TryExportFileToMemoryResult {
-    Memory: bytes?(capacity: 32 * 1024 * 1024),
+    Memory: bytes?(capacity: 32 * 1024 * 1024, recyclable: true),
 }
 
 message GetPublishedShoutsReportResult {

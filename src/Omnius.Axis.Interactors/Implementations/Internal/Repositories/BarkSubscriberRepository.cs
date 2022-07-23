@@ -8,18 +8,18 @@ using Omnius.Core.Helpers;
 
 namespace Omnius.Axis.Interactors.Internal.Repositories;
 
-internal sealed class ProfileSubscriberRepository : DisposableBase
+internal sealed class BarkSubscriberRepository : DisposableBase
 {
     private readonly LiteDatabase _database;
 
-    public ProfileSubscriberRepository(string dirPath)
+    public BarkSubscriberRepository(string dirPath)
     {
         DirectoryHelper.CreateDirectory(dirPath);
 
         _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
         _database.UtcDate = true;
 
-        this.Items = new SubscribedProfileItemRepository(_database);
+        this.Items = new SubscribedBarkItemRepository(_database);
     }
 
     protected override void OnDispose(bool disposing)
@@ -32,9 +32,34 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
         await this.Items.MigrateAsync(cancellationToken);
     }
 
-    public SubscribedProfileItemRepository Items { get; }
+    public SubscribedBarkPackageMetadataRepository Metadatas { get; }
 
-    public sealed class SubscribedProfileItemRepository
+    public SubscribedBarkItemRepository Items { get; }
+
+    public sealed class SubscribedBarkPackageMetadataRepository
+    {
+        private const string CollectionName = "metadatas";
+
+        private readonly LiteDatabase _database;
+
+        private readonly object _lockObject = new();
+
+        public SubscribedBarkPackageMetadataRepository(LiteDatabase database)
+        {
+            _database = database;
+        }
+
+        internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
+        {
+        }
+
+        private ILiteCollection<SubscribedBarkPackageMetadataEntity> GetCollection()
+        {
+            var col = _database.GetCollection<SubscribedBarkPackageMetadataEntity>(CollectionName);
+            return col;
+        }
+    }
+    public sealed class SubscribedBarkItemRepository
     {
         private const string CollectionName = "subscribed_items";
 
@@ -42,7 +67,7 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
 
         private readonly object _lockObject = new();
 
-        public SubscribedProfileItemRepository(LiteDatabase database)
+        public SubscribedBarkItemRepository(LiteDatabase database)
         {
             _database = database;
         }
@@ -54,43 +79,22 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
                 if (_database.GetDocumentVersion(CollectionName) <= 0)
                 {
                     var col = this.GetCollection();
+                    col.EnsureIndex(x => x.Tag, false);
                     col.EnsureIndex(x => x.Signature, false);
-                    col.EnsureIndex(x => x.RootHash, false);
+                    col.EnsureIndex(x => x.SelfHash, true);
                 }
 
                 _database.SetDocumentVersion(CollectionName, 1);
             }
         }
 
-        private ILiteCollection<SubscribedProfileItemEntity> GetCollection()
+        private ILiteCollection<SubscribedBarkItemEntity> GetCollection()
         {
-            var col = _database.GetCollection<SubscribedProfileItemEntity>(CollectionName);
+            var col = _database.GetCollection<SubscribedBarkItemEntity>(CollectionName);
             return col;
         }
 
-        public bool Exists(OmniSignature signature)
-        {
-            lock (_lockObject)
-            {
-                var signatureEntity = OmniSignatureEntity.Import(signature);
-
-                var col = this.GetCollection();
-                return col.Exists(n => n.Signature == signatureEntity);
-            }
-        }
-
-        public bool Exists(OmniHash rootHash)
-        {
-            lock (_lockObject)
-            {
-                var rootHashEntity = OmniHashEntity.Import(rootHash);
-
-                var col = this.GetCollection();
-                return col.Exists(n => n.RootHash == rootHashEntity);
-            }
-        }
-
-        public IEnumerable<SubscribedProfileItem> FindAll()
+        public IEnumerable<SubscribedBarkItem> FindByTag(string tag)
         {
             lock (_lockObject)
             {
@@ -99,31 +103,29 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
             }
         }
 
-        public SubscribedProfileItem? FindOne(OmniSignature signature)
+        public SubscribedBarkItem? FindBySelfHash(OmniHash selfHash)
         {
             lock (_lockObject)
             {
-                var signatureEntity = OmniSignatureEntity.Import(signature);
+                var selfHashEntity = OmniHashEntity.Import(selfHash);
 
                 var col = this.GetCollection();
-                return col.FindOne(n => n.Signature == signatureEntity)?.Export();
+                return col.FindOne(n => n.SelfHash == selfHashEntity)?.Export();
             }
         }
 
-        public void Upsert(SubscribedProfileItem item)
+        public void InsertBulk(IEnumerable<SubscribedBarkItem> items)
         {
             lock (_lockObject)
             {
-                var itemEntity = SubscribedProfileItemEntity.Import(item);
+                var itemEntities = items.Select(n => SubscribedBarkItemEntity.Import(n)).ToArray();
 
                 var col = this.GetCollection();
-
-                col.DeleteMany(n => n.Signature == itemEntity.Signature && n.RootHash == itemEntity.RootHash);
-                col.Insert(itemEntity);
+                col.InsertBulk(itemEntities);
             }
         }
 
-        public void Delete(OmniSignature signature)
+        public void DeleteBySignature(OmniSignature signature)
         {
             lock (_lockObject)
             {
@@ -131,17 +133,6 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
 
                 var col = this.GetCollection();
                 col.DeleteMany(n => n.Signature == signatureEntity);
-            }
-        }
-
-        public void Delete(OmniHash rootHash)
-        {
-            lock (_lockObject)
-            {
-                var rootHashEntity = OmniHashEntity.Import(rootHash);
-
-                var col = this.GetCollection();
-                col.DeleteMany(n => n.RootHash == rootHashEntity);
             }
         }
     }

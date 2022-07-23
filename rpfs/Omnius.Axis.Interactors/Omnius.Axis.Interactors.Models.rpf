@@ -8,19 +8,10 @@ namespace "Omnius.Axis.Interactors.Models";
 
 // Profile
 
-message Profile {
-    Signature: OmniSignature,
-    CreatedTime: timestamp,
-    Content: ProfileContent,
-}
-
-message ProfileContent {
-    TrustedSignatures: vector<OmniSignature>(capacity: 1024),
-    BlockedSignatures: vector<OmniSignature>(capacity: 1024),
-}
-
 message ProfilePublisherConfig {
     DigitalSignature: OmniDigitalSignature,
+    TrustedSignatures: vector<OmniSignature>(capacity: 1024),
+    BlockedSignatures: vector<OmniSignature>(capacity: 1024),
 }
 
 message ProfileSubscriberConfig {
@@ -32,54 +23,32 @@ message ProfileSubscriberConfig {
 
 // Bark
 
-message BarkPackage {
-    Signature: OmniSignature,
-    CreatedTime: timestamp,
-    Content: BarkPackageContent,
+message BarkReply {
+    Version: BarkReplyVersion,
+    Hash: OmniHash,
 }
 
-message BarkPackageContent {
-    Barks: vector<Bark>(capacity: 32 * 1024),
+enum BarkReplyVersion : int8 {
+    Unknown = 0,
+    Version1 = 1,
 }
 
-message Bark {
-    Tag: string(capacity: 256),
-    CreatedTime: timestamp,
-    Comment: string(capacity: 1024),
-    Anchor: OmniHash?,
+message BarkPublisherConfig {
+    DigitalSignature: OmniDigitalSignature,
+}
+
+message BarkSubscriberConfig {
+    Tags: vector<string(capacity: 256)>(capacity: 256),
+    MaxBarkCount: uint32,
 }
 
 // File
-
-message FileSeedPackage {
-    Signature: OmniSignature,
-    CreatedTime: timestamp,
-    Content: FileSeedPackageContent,
-}
-
-message FileSeedPackageContent {
-    FileSeeds: vector<FileSeed>(capacity: 256 * 1024),
-}
 
 message FileSeed {
     RootHash: OmniHash,
     Name: string(capacity: 256),
     Size: uint64,
     CreatedTime: timestamp,
-}
-
-enum UploadingFileState : uint8 {
-    Unknown = 0,
-    Waiting = 1,
-    Encoding = 2,
-    Completed = 3,
-}
-
-enum DownloadingFileState : uint8 {
-    Unknown = 0,
-    Downloading = 1,
-    Decoding = 2,
-    Completed = 3,
 }
 
 message FileDownloaderConfig {

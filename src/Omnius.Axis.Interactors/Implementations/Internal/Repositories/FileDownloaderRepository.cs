@@ -37,7 +37,7 @@ internal sealed class FileDownloaderRepository : DisposableBase
 
     public sealed class DownloadingFileItemRepository
     {
-        private const string CollectionName = "downloading_box_items";
+        private const string CollectionName = "downloading_items";
 
         private readonly LiteDatabase _database;
 

@@ -11,13 +11,13 @@ internal record SubscribedProfileItemEntity
 
     public DateTime CreatedTime { get; set; }
 
-    public static SubscribedProfileItemEntity Import(SubscribedProfileItem value)
+    public static SubscribedProfileItemEntity Import(SubscribedProfileItem item)
     {
         return new SubscribedProfileItemEntity()
         {
-            Signature = OmniSignatureEntity.Import(value.Signature),
-            RootHash = OmniHashEntity.Import(value.RootHash),
-            CreatedTime = value.CreatedTime,
+            Signature = OmniSignatureEntity.Import(item.Signature),
+            RootHash = OmniHashEntity.Import(item.RootHash),
+            CreatedTime = item.CreatedTime,
         };
     }
 

@@ -8,12 +8,12 @@ internal record WrittenShoutItemEntity
 
     public DateTime CreatedTime { get; set; }
 
-    public static WrittenShoutItemEntity Import(WrittenShoutItem value)
+    public static WrittenShoutItemEntity Import(WrittenShoutItem item)
     {
         return new WrittenShoutItemEntity()
         {
-            Signature = OmniSignatureEntity.Import(value.Signature),
-            CreatedTime = value.CreatedTime,
+            Signature = OmniSignatureEntity.Import(item.Signature),
+            CreatedTime = item.CreatedTime,
         };
     }
 

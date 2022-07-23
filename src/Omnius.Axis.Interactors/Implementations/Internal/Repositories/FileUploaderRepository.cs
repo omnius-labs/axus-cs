@@ -35,7 +35,7 @@ internal sealed class FileUploaderRepository : DisposableBase
 
     public sealed class UploadingFileItemRepository
     {
-        private const string CollectionName = "uploading_file_items";
+        private const string CollectionName = "uploading_items";
 
         private readonly LiteDatabase _database;
 
