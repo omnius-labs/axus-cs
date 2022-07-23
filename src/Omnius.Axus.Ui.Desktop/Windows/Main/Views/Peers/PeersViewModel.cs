@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using Omnius.Axus.Interactors;
+using Omnius.Axus.Models;
 using Omnius.Axus.Ui.Desktop.Internal;
 using Omnius.Core;
 using Omnius.Core.Avalonia;
@@ -59,8 +61,6 @@ public class PeersViewViewModel : PeersViewViewModelBase
         {
             return (x?.ServiceName == y?.ServiceName) && (x?.HandshakeType == y?.HandshakeType) && (x?.Address == y?.Address);
         }
-
-        public bool Equals(SessionReport? x, SessionReport? y) => throw new NotImplementedException();
 
         public int GetHashCode([DisallowNull] SessionReport obj)
         {

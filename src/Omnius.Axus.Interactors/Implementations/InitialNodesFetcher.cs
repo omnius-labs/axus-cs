@@ -1,3 +1,4 @@
+using Omnius.Axus.Models;
 using Omnius.Core;
 
 namespace Omnius.Axus.Interactors;

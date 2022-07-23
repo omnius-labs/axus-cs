@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Omnius.Axus.Interactors;
 using Omnius.Axus.Ui.Desktop.Models;
 using Omnius.Axus.Ui.Desktop.Windows.Main;
 using Omnius.Axus.Ui.Desktop.Windows.Settings;

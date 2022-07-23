@@ -1,3 +1,4 @@
+using Omnius.Axus.Interactors;
 using Omnius.Core;
 using Omnius.Core.Storages;
 

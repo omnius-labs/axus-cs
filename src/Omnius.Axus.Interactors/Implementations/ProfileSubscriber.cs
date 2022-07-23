@@ -300,7 +300,6 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
         }
     }
 
-
     public async ValueTask<ProfileMessage?> FindBySignatureAsync(OmniSignature signature, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
