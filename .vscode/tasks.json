@@ -2,12 +2,12 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "design-build (Omnius.Axis.Ui.Desktop)",
+            "label": "design-build (Omnius.Axus.Ui.Desktop)",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/src/Omnius.Axis.Ui.Desktop/Omnius.Axis.Ui.Desktop.csproj",
+                "${workspaceFolder}/src/Omnius.Axus.Ui.Desktop/Omnius.Axus.Ui.Desktop.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -20,12 +20,12 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "build (Omnius.Axis.Daemon)",
+            "label": "build (Omnius.Axus.Daemon)",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/src/Omnius.Axis.Daemon/Omnius.Axis.Daemon.csproj",
+                "${workspaceFolder}/src/Omnius.Axus.Daemon/Omnius.Axus.Daemon.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -37,12 +37,12 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "build (Omnius.Axis.Ui.Desktop)",
+            "label": "build (Omnius.Axus.Ui.Desktop)",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/src/Omnius.Axis.Ui.Desktop/Omnius.Axis.Ui.Desktop.csproj",
+                "${workspaceFolder}/src/Omnius.Axus.Ui.Desktop/Omnius.Axus.Ui.Desktop.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],

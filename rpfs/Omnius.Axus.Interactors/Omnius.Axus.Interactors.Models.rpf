@@ -1,0 +1,56 @@
+syntax v1.0;
+
+using "Omnius.Core.Cryptography";
+using "Omnius.Core.Net";
+using "Omnius.Axus.Models";
+
+namespace "Omnius.Axus.Interactors.Models";
+
+// Profile
+
+message ProfilePublisherConfig {
+    DigitalSignature: OmniDigitalSignature,
+    TrustedSignatures: vector<OmniSignature>(capacity: 1024),
+    BlockedSignatures: vector<OmniSignature>(capacity: 1024),
+}
+
+message ProfileSubscriberConfig {
+    TrustedSignatures: vector<OmniSignature>(capacity: 1024),
+    BlockedSignatures: vector<OmniSignature>(capacity: 1024),
+    SearchDepth: uint32,
+    MaxProfileCount: uint32,
+}
+
+// Bark
+
+message BarkReply {
+    Version: BarkReplyVersion,
+    Hash: OmniHash,
+}
+
+enum BarkReplyVersion : int8 {
+    Unknown = 0,
+    Version1 = 1,
+}
+
+message BarkPublisherConfig {
+    DigitalSignature: OmniDigitalSignature,
+}
+
+message BarkSubscriberConfig {
+    Tags: vector<string(capacity: 256)>(capacity: 256),
+    MaxBarkCount: uint32,
+}
+
+// File
+
+message FileSeed {
+    RootHash: OmniHash,
+    Name: string(capacity: 256),
+    Size: uint64,
+    CreatedTime: timestamp,
+}
+
+message FileDownloaderConfig {
+    DestinationDirectory: string,
+}

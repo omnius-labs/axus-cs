@@ -27,9 +27,9 @@
     <FileVersion>$(AssemblyVersion)</FileVersion>
     <Authors>Lyrise</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/omnius-labs/axis</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/omnius-labs/axis</RepositoryUrl>
-    <PackageTags>Axis</PackageTags>
+    <PackageProjectUrl>https://github.com/omnius-labs/axus</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/omnius-labs/axus</RepositoryUrl>
+    <PackageTags>Axus</PackageTags>
     <Copyright>Copyright (c) 2019 Lyrise</Copyright>
     <RepositoryType>git</RepositoryType>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

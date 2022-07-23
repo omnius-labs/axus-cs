@@ -5,8 +5,8 @@ skinparam rectangle<<behavior>> {
 }
 sprite $component jar:archimate/component
 
-package Omnius.Axis.Ui.Desktop {
-    package Omnius.Axis.Ui.Desktop.Presenters {
+package Omnius.Axus.Ui.Desktop {
+    package Omnius.Axus.Ui.Desktop.Presenters {
         rectangle UserProfileFinder <<$component>><<behavior>>
         rectangle UserProfileUploader <<$component>><<behavior>>
         rectangle FileFinder <<$component>><<behavior>>
@@ -15,34 +15,34 @@ package Omnius.Axis.Ui.Desktop {
     }
 }
 
-package Omnius.Axis.Interactors {
+package Omnius.Axus.Interactors {
     rectangle FilePublisher <<$component>><<behavior>>
     rectangle FileSubscriber <<$component>><<behavior>>
     rectangle UserProfilePublisher <<$component>><<behavior>>
     rectangle UserProfileSubscriber <<$component>><<behavior>>
 }
 
-package Omnius.Axis.Daemon {
-    rectangle AxisService.Client <<$component>><<behavior>>
-    rectangle AxisService.Server <<$component>><<behavior>>
+package Omnius.Axus.Daemon {
+    rectangle AxusService.Client <<$component>><<behavior>>
+    rectangle AxusService.Server <<$component>><<behavior>>
 }
 
-package Omnius.Axis.Daemon {
-    rectangle AxisServiceImpl <<$component>><<behavior>>
+package Omnius.Axus.Daemon {
+    rectangle AxusServiceImpl <<$component>><<behavior>>
 }
 
-package Ominus.Axis.Engines {
-    package Ominus.Axis.Engines.Connectors {
+package Ominus.Axus.Engines {
+    package Ominus.Axus.Engines.Connectors {
         rectangle TcpConnector <<$component>><<behavior>>
     }
-    package Ominus.Axis.Engines.Exchangers {
+    package Ominus.Axus.Engines.Exchangers {
         rectangle ContentExchanger <<$component>><<behavior>>
         rectangle DeclaredMessageExchanger <<$component>><<behavior>>
     }
-    package Ominus.Axis.Engines.Mediators {
+    package Ominus.Axus.Engines.Mediators {
         rectangle CkadMediator <<$component>><<behavior>>
     }
-    package Ominus.Axis.Engines.Storages {
+    package Ominus.Axus.Engines.Storages {
         rectangle PublishedFileStorage <<$component>><<behavior>>
         rectangle SubscribedFileStorage <<$component>><<behavior>>
         rectangle PublishedDeclaredMessage <<$component>><<behavior>>
@@ -56,16 +56,16 @@ FileFinder -down-> UserProfileFinder
 FileDowndoader -down-> FileSubscriber
 FileUploader -down-> FilePublisher
 
-FilePublisher -down-> AxisService.Client
-FileSubscriber -down-> AxisService.Client
-UserProfilePublisher -down-> AxisService.Client
-UserProfileSubscriber -down-> AxisService.Client
+FilePublisher -down-> AxusService.Client
+FileSubscriber -down-> AxusService.Client
+UserProfilePublisher -down-> AxusService.Client
+UserProfileSubscriber -down-> AxusService.Client
 
-AxisService.Client .down.> AxisService.Server : TCP
+AxusService.Client .down.> AxusService.Server : TCP
 
-AxisService.Server -down-> AxisServiceImpl
+AxusService.Server -down-> AxusServiceImpl
 
-AxisServiceImpl -down-> Ominus.Axis.Engines
+AxusServiceImpl -down-> Ominus.Axus.Engines
 
 CkadMediator -left-> TcpConnector
 

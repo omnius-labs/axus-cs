@@ -1,0 +1,126 @@
+﻿syntax v1.0;
+
+using "Omnius.Core.Cryptography";
+using "Omnius.Core.Net";
+
+namespace "Omnius.Axus.Models";
+
+// Common
+
+message NodeLocation {
+    Addresses: vector<OmniAddress>(capacity: 32),
+}
+
+message ContentClue {
+    Scheme: string(capacity: 256),
+    RootHash: OmniHash,
+}
+
+message Shout {
+    CreatedTime: timestamp,
+    Value: bytes(capacity: 32 * 1024 * 1024, recyclable: true),
+    Certificate: OmniCertificate?,
+}
+
+message ConsistencyReport {
+    BadBlockCount: uint32,
+    CheckedBlockCount: uint32,
+    TotalBlockCount: uint32,
+}
+
+message SessionReport {
+    ServiceName: string(capacity: 256),
+    HandshakeType: SessionHandshakeType,
+    Address: OmniAddress,
+}
+
+enum SessionHandshakeType : uint8 {
+    Unknown = 0,
+    Connected = 1,
+    Accepted = 2,
+}
+
+// Config
+
+message ServiceConfig {
+    Bandwidth: BandwidthConfig?,
+    I2pConnector: I2pConnectorConfig?,
+    I2pAccepter: I2pAccepterConfig?,
+    TcpConnector: TcpConnectorConfig?,
+    TcpAccepter: TcpAccepterConfig?,
+}
+
+message BandwidthConfig {
+    MaxSendBytesPerSeconds: int32,
+    MaxReceiveBytesPerSeconds: int32,
+}
+
+message I2pConnectorConfig {
+    IsEnabled: bool,
+    SamBridgeAddress: OmniAddress,
+}
+
+message I2pAccepterConfig {
+    IsEnabled: bool,
+    SamBridgeAddress: OmniAddress,
+}
+
+message TcpConnectorConfig {
+    IsEnabled: bool,
+    Proxy: TcpProxyConfig?,
+}
+
+message TcpProxyConfig {
+    Type: TcpProxyType,
+    Address: OmniAddress,
+}
+
+enum TcpProxyType : uint8 {
+    None = 0,
+    HttpProxy = 1,
+    Socks5Proxy = 2,
+}
+
+message TcpAccepterConfig {
+    IsEnabled: bool,
+    UseUpnp: bool,
+    ListenAddress: OmniAddress,
+}
+
+// Report
+
+message PublishedFileReport {
+    FilePath: string?,
+    RootHash: OmniHash?,
+    Registrant: string,
+}
+
+message SubscribedFileReport {
+    RootHash: OmniHash,
+    Registrant: string,
+    Status: SubscribedFileStatus,
+}
+
+message SubscribedFileStatus {
+    CurrentDepth: int32,
+    DownloadedBlockCount: uint32,
+    TotalBlockCount: uint32,
+    State: SubscribedFileState,
+}
+
+enum SubscribedFileState : uint8 {
+    Unknown = 0,
+    Downloading = 1,
+    Downloaded = 2,
+    Failed = 3,
+}
+
+message PublishedShoutReport {
+    Signature: OmniSignature,
+    Registrant: string,
+}
+
+message SubscribedShoutReport {
+    Signature: OmniSignature,
+    Registrant: string,
+}

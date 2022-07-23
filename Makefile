@@ -5,13 +5,13 @@ gen-code:
 
 test:
 	dotnet format --verify-no-changes
-	dotnet test --filter "FullyQualifiedName~Omnius.Axis"
+	dotnet test --filter "FullyQualifiedName~Omnius.Axus"
 
 build:
 	dotnet build
 
 run-designer: build
-	dotnet msbuild ./src/Omnius.Axis.Ui.Desktop/ /t:Preview /p:XamlFile=$(PreviewXamlFile)
+	dotnet msbuild ./src/Omnius.Axus.Ui.Desktop/ /t:Preview /p:XamlFile=$(PreviewXamlFile)
 
 update-dotnet-tool:
 	bash ./eng/update-dotnet-tool.sh

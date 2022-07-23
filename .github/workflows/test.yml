@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: Test
-        run: dotnet test --filter "FullyQualifiedName~Omnius.Axis"
+        run: dotnet test --filter "FullyQualifiedName~Omnius.Axus"
   windows:
     runs-on: windows-latest
     env:
@@ -45,4 +45,4 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: Test
-        run: dotnet test --filter "FullyQualifiedName~Omnius.Axis"
+        run: dotnet test --filter "FullyQualifiedName~Omnius.Axus"
