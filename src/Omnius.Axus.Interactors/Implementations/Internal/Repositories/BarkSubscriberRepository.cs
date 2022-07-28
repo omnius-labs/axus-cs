@@ -19,6 +19,7 @@ internal sealed class BarkSubscriberRepository : DisposableBase
         _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
         _database.UtcDate = true;
 
+        this.Metadatas = new SubscribedBarkPackageMetadataRepository(_database);
         this.Items = new SubscribedBarkItemRepository(_database);
     }
 
@@ -59,6 +60,7 @@ internal sealed class BarkSubscriberRepository : DisposableBase
             return col;
         }
     }
+
     public sealed class SubscribedBarkItemRepository
     {
         private const string CollectionName = "subscribed_items";

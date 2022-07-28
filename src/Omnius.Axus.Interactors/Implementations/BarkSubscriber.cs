@@ -1,7 +1,7 @@
 using Omnius.Axus.Interactors.Internal.Repositories;
 using Omnius.Axus.Interactors.Models;
 using Omnius.Core;
-using Omnius.Core.Cryptography;
+using Omnius.Core.RocketPack;
 using Omnius.Core.Storages;
 
 namespace Omnius.Axus.Interactors;
@@ -71,7 +71,11 @@ public sealed partial class BarkSubscriber : AsyncDisposableBase, IBarkSubscribe
 
             for (; ; )
             {
-                await Task.Delay(TimeSpan.FromMinutes(3), cancellationToken).ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken).ConfigureAwait(false);
+
+                await this.SyncSubscribedShouts(cancellationToken);
+                await this.SyncSubscribedFiles(cancellationToken);
+                await this.UpdateProfilesAsync(cancellationToken);
             }
         }
         catch (OperationCanceledException e)
@@ -84,8 +88,70 @@ public sealed partial class BarkSubscriber : AsyncDisposableBase, IBarkSubscribe
         }
     }
 
+    private async Task SyncSubscribedShouts(CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
+            var reports = await _serviceController.GetSubscribedShoutReportsAsync(cancellationToken);
+            var signatures = reports
+                .Where(n => n.Registrant == Registrant)
+                .Select(n => n.Signature)
+                .ToHashSet();
+
+            foreach (var signature in signatures)
+            {
+                if (_barkSubscriberRepo.Metadatas..(signature)) continue;
+                await _serviceController.UnsubscribeShoutAsync(signature, Registrant, cancellationToken);
+            }
+
+            foreach (var item in _profileSubscriberRepo.Items.FindAll())
+            {
+                if (signatures.Contains(item.Signature)) continue;
+                await _serviceController.SubscribeShoutAsync(item.Signature, Registrant, cancellationToken);
+            }
+
+            foreach (var item in _profileSubscriberRepo.Items.FindAll())
+            {
+                using var shout = await _serviceController.TryExportShoutAsync(item.Signature, cancellationToken);
+                if (shout is null) continue;
+
+                var rootHash = RocketMessage.FromBytes<OmniHash>(shout.Value.Memory);
+
+                var newItem = new SubscribedProfileItem(item.Signature, rootHash, shout.CreatedTime.ToDateTime());
+                _profileSubscriberRepo.Items.Upsert(newItem);
+            }
+        }
+    }
+
     public ValueTask<IEnumerable<BarkMessage>> FindByTagAsync(string tag, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public ValueTask<BarkMessage?> FindBySelfHashAsync(string tag, OmniHash hash, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public ValueTask<BarkSubscriberConfig> GetConfigAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public ValueTask SetConfigAsync(BarkSubscriberConfig config, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+
+    public ValueTask<BarkMessage?> FindByReplyAsync(string tag, BarkReply reply, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+
+    public async ValueTask<BarkSubscriberConfig> GetConfigAsync(CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
+            var config = await _configStorage.TryGetValueAsync<BarkSubscriberConfig>(cancellationToken);
+
+            if (config is null)
+            {
+                config = new BarkSubscriberConfig(
+                    tags: Array.Empty<Utf8String>(),
+                    maxBarkCount: 10000
+                );
+
+                await _configStorage.TrySetValueAsync(config, cancellationToken);
+            }
+
+            return config;
+        }
+    }
+
+    public async ValueTask SetConfigAsync(BarkSubscriberConfig config, CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
+            await _configStorage.TrySetValueAsync(config, cancellationToken);
+        }
+    }
 }
