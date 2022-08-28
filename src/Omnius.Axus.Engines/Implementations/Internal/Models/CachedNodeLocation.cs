@@ -12,8 +12,6 @@ internal record CachedNodeLocation
     }
 
     public NodeLocation Value { get; }
-
     public DateTime CreatedTime { get; }
-
     public DateTime LastConnectionTime { get; }
 }

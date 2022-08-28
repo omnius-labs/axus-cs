@@ -24,7 +24,7 @@ public partial class SessionViewModel : BindableBase, ICollectionViewModel<Sessi
         }
     }
 
-    public string ServiceName => this.Model?.ServiceName ?? "";
+    public string Scheme => this.Model?.Scheme ?? "";
 
     public string HandshakeType => this.Model?.HandshakeType.ToString() ?? "";
 

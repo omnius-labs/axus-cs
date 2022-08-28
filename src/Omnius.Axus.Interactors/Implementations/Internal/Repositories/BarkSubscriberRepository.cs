@@ -19,7 +19,6 @@ internal sealed class BarkSubscriberRepository : DisposableBase
         _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
         _database.UtcDate = true;
 
-        this.Metadatas = new SubscribedBarkPackageMetadataRepository(_database);
         this.Items = new SubscribedBarkItemRepository(_database);
     }
 
@@ -33,33 +32,7 @@ internal sealed class BarkSubscriberRepository : DisposableBase
         await this.Items.MigrateAsync(cancellationToken);
     }
 
-    public SubscribedBarkPackageMetadataRepository Metadatas { get; }
-
     public SubscribedBarkItemRepository Items { get; }
-
-    public sealed class SubscribedBarkPackageMetadataRepository
-    {
-        private const string CollectionName = "metadatas";
-
-        private readonly LiteDatabase _database;
-
-        private readonly object _lockObject = new();
-
-        public SubscribedBarkPackageMetadataRepository(LiteDatabase database)
-        {
-            _database = database;
-        }
-
-        internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
-        {
-        }
-
-        private ILiteCollection<SubscribedBarkPackageMetadataEntity> GetCollection()
-        {
-            var col = _database.GetCollection<SubscribedBarkPackageMetadataEntity>(CollectionName);
-            return col;
-        }
-    }
 
     public sealed class SubscribedBarkItemRepository
     {
@@ -81,9 +54,8 @@ internal sealed class BarkSubscriberRepository : DisposableBase
                 if (_database.GetDocumentVersion(CollectionName) <= 0)
                 {
                     var col = this.GetCollection();
-                    col.EnsureIndex(x => x.Tag, false);
                     col.EnsureIndex(x => x.Signature, false);
-                    col.EnsureIndex(x => x.SelfHash, true);
+                    col.EnsureIndex(x => x.RootHash, false);
                 }
 
                 _database.SetDocumentVersion(CollectionName, 1);
@@ -96,7 +68,29 @@ internal sealed class BarkSubscriberRepository : DisposableBase
             return col;
         }
 
-        public IEnumerable<SubscribedBarkItem> FindByTag(string tag)
+        public bool Exists(OmniSignature signature)
+        {
+            lock (_lockObject)
+            {
+                var signatureEntity = OmniSignatureEntity.Import(signature);
+
+                var col = this.GetCollection();
+                return col.Exists(n => n.Signature == signatureEntity);
+            }
+        }
+
+        public bool Exists(OmniHash rootHash)
+        {
+            lock (_lockObject)
+            {
+                var rootHashEntity = OmniHashEntity.Import(rootHash);
+
+                var col = this.GetCollection();
+                return col.Exists(n => n.RootHash == rootHashEntity);
+            }
+        }
+
+        public IEnumerable<SubscribedBarkItem> FindAll()
         {
             lock (_lockObject)
             {
@@ -105,29 +99,31 @@ internal sealed class BarkSubscriberRepository : DisposableBase
             }
         }
 
-        public SubscribedBarkItem? FindBySelfHash(OmniHash selfHash)
+        public SubscribedBarkItem? FindOne(OmniSignature signature)
         {
             lock (_lockObject)
             {
-                var selfHashEntity = OmniHashEntity.Import(selfHash);
+                var signatureEntity = OmniSignatureEntity.Import(signature);
 
                 var col = this.GetCollection();
-                return col.FindOne(n => n.SelfHash == selfHashEntity)?.Export();
+                return col.FindOne(n => n.Signature == signatureEntity)?.Export();
             }
         }
 
-        public void InsertBulk(IEnumerable<SubscribedBarkItem> items)
+        public void Upsert(SubscribedBarkItem item)
         {
             lock (_lockObject)
             {
-                var itemEntities = items.Select(n => SubscribedBarkItemEntity.Import(n)).ToArray();
+                var itemEntity = SubscribedBarkItemEntity.Import(item);
 
                 var col = this.GetCollection();
-                col.InsertBulk(itemEntities);
+
+                col.DeleteMany(n => n.Signature == itemEntity.Signature);
+                col.Insert(itemEntity);
             }
         }
 
-        public void DeleteBySignature(OmniSignature signature)
+        public void Delete(OmniSignature signature)
         {
             lock (_lockObject)
             {
@@ -135,6 +131,34 @@ internal sealed class BarkSubscriberRepository : DisposableBase
 
                 var col = this.GetCollection();
                 col.DeleteMany(n => n.Signature == signatureEntity);
+            }
+        }
+
+        public void Delete(OmniHash rootHash)
+        {
+            lock (_lockObject)
+            {
+                var rootHashEntity = OmniHashEntity.Import(rootHash);
+
+                var col = this.GetCollection();
+                col.DeleteMany(n => n.RootHash == rootHashEntity);
+            }
+        }
+
+        public void Shrink(IEnumerable<OmniSignature> excludedSignatures)
+        {
+            lock (_lockObject)
+            {
+                var col = this.GetCollection();
+
+                var allSignatureSet = col.FindAll().Select(n => n.Signature!.Export()).ToHashSet();
+                allSignatureSet.ExceptWith(excludedSignatures);
+
+                foreach (var signature in allSignatureSet)
+                {
+                    var signatureEntity = OmniSignatureEntity.Import(signature);
+                    col.DeleteMany(n => n.Signature == signatureEntity);
+                }
             }
         }
     }

@@ -5,7 +5,6 @@ namespace Omnius.Axus.Engines.Internal.Entities;
 internal record OmniHashEntity
 {
     public int AlgorithmType { get; set; }
-
     public byte[]? Value { get; set; }
 
     public static OmniHashEntity Import(OmniHash item)

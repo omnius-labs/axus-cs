@@ -257,16 +257,13 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
                 if (session is null) continue;
 
                 var success = await this.TryAddSessionAsync(session, cancellationToken);
-
-                if (!success)
+                if (success)
                 {
-                    await session.DisposeAsync();
-                    continue;
+                    this.RefreshCloudNodeLocation(nodeLocation);
+                    return true;
                 }
 
-                this.RefreshCloudNodeLocation(nodeLocation);
-
-                return true;
+                await session.DisposeAsync();
             }
         }
         catch (OperationCanceledException e)
@@ -319,7 +316,6 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
             if (version == NodeFinderVersion.Version1)
             {
                 var profile = await this.HandshakeProfileAsync(session.Connection, cancellationToken);
-
                 return this.InternalTryAddSession(session, profile.Id, profile.NodeLocation);
             }
 

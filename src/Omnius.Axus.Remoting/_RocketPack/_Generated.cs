@@ -2483,32 +2483,38 @@ public sealed partial class UnpublishShoutRequest : global::Omnius.Core.RocketPa
     static UnpublishShoutRequest()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishShoutRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishShoutRequest>.Empty = new global::Omnius.Axus.Remoting.UnpublishShoutRequest(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishShoutRequest>.Empty = new global::Omnius.Axus.Remoting.UnpublishShoutRequest(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
+    public static readonly int MaxChannelLength = 2147483647;
     public static readonly int MaxRegistrantLength = 2147483647;
 
-    public UnpublishShoutRequest(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String registrant)
+    public UnpublishShoutRequest(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String channel, global::Omnius.Core.RocketPack.Utf8String registrant)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
+        if (channel is null) throw new global::System.ArgumentNullException("channel");
+        if (channel.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("channel");
         if (registrant is null) throw new global::System.ArgumentNullException("registrant");
         if (registrant.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("registrant");
 
         this.Signature = signature;
+        this.Channel = channel;
         this.Registrant = registrant;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (signature != default) ___h.Add(signature.GetHashCode());
+            if (!channel.IsEmpty) ___h.Add(channel.GetHashCode());
             if (!registrant.IsEmpty) ___h.Add(registrant.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
+    public global::Omnius.Core.RocketPack.Utf8String Channel { get; }
     public global::Omnius.Core.RocketPack.Utf8String Registrant { get; }
 
     public static global::Omnius.Axus.Remoting.UnpublishShoutRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -2540,6 +2546,7 @@ public sealed partial class UnpublishShoutRequest : global::Omnius.Core.RocketPa
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
         if (this.Signature != target.Signature) return false;
+        if (this.Channel != target.Channel) return false;
         if (this.Registrant != target.Registrant) return false;
 
         return true;
@@ -2557,9 +2564,14 @@ public sealed partial class UnpublishShoutRequest : global::Omnius.Core.RocketPa
                 w.Write((uint)1);
                 global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
             }
-            if (value.Registrant != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            if (value.Channel != global::Omnius.Core.RocketPack.Utf8String.Empty)
             {
                 w.Write((uint)2);
+                w.Write(value.Channel);
+            }
+            if (value.Registrant != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            {
+                w.Write((uint)3);
                 w.Write(value.Registrant);
             }
             w.Write((uint)0);
@@ -2569,6 +2581,7 @@ public sealed partial class UnpublishShoutRequest : global::Omnius.Core.RocketPa
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Core.Cryptography.OmniSignature p_signature = global::Omnius.Core.Cryptography.OmniSignature.Empty;
+            global::Omnius.Core.RocketPack.Utf8String p_channel = global::Omnius.Core.RocketPack.Utf8String.Empty;
             global::Omnius.Core.RocketPack.Utf8String p_registrant = global::Omnius.Core.RocketPack.Utf8String.Empty;
 
             for (; ; )
@@ -2584,13 +2597,18 @@ public sealed partial class UnpublishShoutRequest : global::Omnius.Core.RocketPa
                         }
                     case 2:
                         {
+                            p_channel = r.GetString(2147483647);
+                            break;
+                        }
+                    case 3:
+                        {
                             p_registrant = r.GetString(2147483647);
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.UnpublishShoutRequest(p_signature, p_registrant);
+            return new global::Omnius.Axus.Remoting.UnpublishShoutRequest(p_signature, p_channel, p_registrant);
         }
     }
 }
@@ -2721,32 +2739,38 @@ public sealed partial class SubscribeShoutRequest : global::Omnius.Core.RocketPa
     static SubscribeShoutRequest()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeShoutRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeShoutRequest>.Empty = new global::Omnius.Axus.Remoting.SubscribeShoutRequest(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeShoutRequest>.Empty = new global::Omnius.Axus.Remoting.SubscribeShoutRequest(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
+    public static readonly int MaxChannelLength = 2147483647;
     public static readonly int MaxRegistrantLength = 2147483647;
 
-    public SubscribeShoutRequest(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String registrant)
+    public SubscribeShoutRequest(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String channel, global::Omnius.Core.RocketPack.Utf8String registrant)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
+        if (channel is null) throw new global::System.ArgumentNullException("channel");
+        if (channel.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("channel");
         if (registrant is null) throw new global::System.ArgumentNullException("registrant");
         if (registrant.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("registrant");
 
         this.Signature = signature;
+        this.Channel = channel;
         this.Registrant = registrant;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (signature != default) ___h.Add(signature.GetHashCode());
+            if (!channel.IsEmpty) ___h.Add(channel.GetHashCode());
             if (!registrant.IsEmpty) ___h.Add(registrant.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
+    public global::Omnius.Core.RocketPack.Utf8String Channel { get; }
     public global::Omnius.Core.RocketPack.Utf8String Registrant { get; }
 
     public static global::Omnius.Axus.Remoting.SubscribeShoutRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -2778,6 +2802,7 @@ public sealed partial class SubscribeShoutRequest : global::Omnius.Core.RocketPa
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
         if (this.Signature != target.Signature) return false;
+        if (this.Channel != target.Channel) return false;
         if (this.Registrant != target.Registrant) return false;
 
         return true;
@@ -2795,9 +2820,14 @@ public sealed partial class SubscribeShoutRequest : global::Omnius.Core.RocketPa
                 w.Write((uint)1);
                 global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
             }
-            if (value.Registrant != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            if (value.Channel != global::Omnius.Core.RocketPack.Utf8String.Empty)
             {
                 w.Write((uint)2);
+                w.Write(value.Channel);
+            }
+            if (value.Registrant != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            {
+                w.Write((uint)3);
                 w.Write(value.Registrant);
             }
             w.Write((uint)0);
@@ -2807,6 +2837,7 @@ public sealed partial class SubscribeShoutRequest : global::Omnius.Core.RocketPa
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Core.Cryptography.OmniSignature p_signature = global::Omnius.Core.Cryptography.OmniSignature.Empty;
+            global::Omnius.Core.RocketPack.Utf8String p_channel = global::Omnius.Core.RocketPack.Utf8String.Empty;
             global::Omnius.Core.RocketPack.Utf8String p_registrant = global::Omnius.Core.RocketPack.Utf8String.Empty;
 
             for (; ; )
@@ -2822,13 +2853,18 @@ public sealed partial class SubscribeShoutRequest : global::Omnius.Core.RocketPa
                         }
                     case 2:
                         {
+                            p_channel = r.GetString(2147483647);
+                            break;
+                        }
+                    case 3:
+                        {
                             p_registrant = r.GetString(2147483647);
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.SubscribeShoutRequest(p_signature, p_registrant);
+            return new global::Omnius.Axus.Remoting.SubscribeShoutRequest(p_signature, p_channel, p_registrant);
         }
     }
 }
@@ -2840,32 +2876,38 @@ public sealed partial class UnsubscribeShoutRequest : global::Omnius.Core.Rocket
     static UnsubscribeShoutRequest()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeShoutRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeShoutRequest>.Empty = new global::Omnius.Axus.Remoting.UnsubscribeShoutRequest(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeShoutRequest>.Empty = new global::Omnius.Axus.Remoting.UnsubscribeShoutRequest(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
+    public static readonly int MaxChannelLength = 2147483647;
     public static readonly int MaxRegistrantLength = 2147483647;
 
-    public UnsubscribeShoutRequest(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String registrant)
+    public UnsubscribeShoutRequest(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String channel, global::Omnius.Core.RocketPack.Utf8String registrant)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
+        if (channel is null) throw new global::System.ArgumentNullException("channel");
+        if (channel.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("channel");
         if (registrant is null) throw new global::System.ArgumentNullException("registrant");
         if (registrant.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("registrant");
 
         this.Signature = signature;
+        this.Channel = channel;
         this.Registrant = registrant;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (signature != default) ___h.Add(signature.GetHashCode());
+            if (!channel.IsEmpty) ___h.Add(channel.GetHashCode());
             if (!registrant.IsEmpty) ___h.Add(registrant.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
+    public global::Omnius.Core.RocketPack.Utf8String Channel { get; }
     public global::Omnius.Core.RocketPack.Utf8String Registrant { get; }
 
     public static global::Omnius.Axus.Remoting.UnsubscribeShoutRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -2897,6 +2939,7 @@ public sealed partial class UnsubscribeShoutRequest : global::Omnius.Core.Rocket
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
         if (this.Signature != target.Signature) return false;
+        if (this.Channel != target.Channel) return false;
         if (this.Registrant != target.Registrant) return false;
 
         return true;
@@ -2914,9 +2957,14 @@ public sealed partial class UnsubscribeShoutRequest : global::Omnius.Core.Rocket
                 w.Write((uint)1);
                 global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
             }
-            if (value.Registrant != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            if (value.Channel != global::Omnius.Core.RocketPack.Utf8String.Empty)
             {
                 w.Write((uint)2);
+                w.Write(value.Channel);
+            }
+            if (value.Registrant != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            {
+                w.Write((uint)3);
                 w.Write(value.Registrant);
             }
             w.Write((uint)0);
@@ -2926,6 +2974,7 @@ public sealed partial class UnsubscribeShoutRequest : global::Omnius.Core.Rocket
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Core.Cryptography.OmniSignature p_signature = global::Omnius.Core.Cryptography.OmniSignature.Empty;
+            global::Omnius.Core.RocketPack.Utf8String p_channel = global::Omnius.Core.RocketPack.Utf8String.Empty;
             global::Omnius.Core.RocketPack.Utf8String p_registrant = global::Omnius.Core.RocketPack.Utf8String.Empty;
 
             for (; ; )
@@ -2941,13 +2990,18 @@ public sealed partial class UnsubscribeShoutRequest : global::Omnius.Core.Rocket
                         }
                     case 2:
                         {
+                            p_channel = r.GetString(2147483647);
+                            break;
+                        }
+                    case 3:
+                        {
                             p_registrant = r.GetString(2147483647);
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.UnsubscribeShoutRequest(p_signature, p_registrant);
+            return new global::Omnius.Axus.Remoting.UnsubscribeShoutRequest(p_signature, p_channel, p_registrant);
         }
     }
 }
@@ -2959,26 +3013,33 @@ public sealed partial class TryExportShoutRequest : global::Omnius.Core.RocketPa
     static TryExportShoutRequest()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportShoutRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportShoutRequest>.Empty = new global::Omnius.Axus.Remoting.TryExportShoutRequest(global::Omnius.Core.Cryptography.OmniSignature.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportShoutRequest>.Empty = new global::Omnius.Axus.Remoting.TryExportShoutRequest(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public TryExportShoutRequest(global::Omnius.Core.Cryptography.OmniSignature signature)
+    public static readonly int MaxChannelLength = 2147483647;
+
+    public TryExportShoutRequest(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String channel)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
+        if (channel is null) throw new global::System.ArgumentNullException("channel");
+        if (channel.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("channel");
 
         this.Signature = signature;
+        this.Channel = channel;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (signature != default) ___h.Add(signature.GetHashCode());
+            if (!channel.IsEmpty) ___h.Add(channel.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
+    public global::Omnius.Core.RocketPack.Utf8String Channel { get; }
 
     public static global::Omnius.Axus.Remoting.TryExportShoutRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -3009,6 +3070,7 @@ public sealed partial class TryExportShoutRequest : global::Omnius.Core.RocketPa
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
         if (this.Signature != target.Signature) return false;
+        if (this.Channel != target.Channel) return false;
 
         return true;
     }
@@ -3025,6 +3087,11 @@ public sealed partial class TryExportShoutRequest : global::Omnius.Core.RocketPa
                 w.Write((uint)1);
                 global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
             }
+            if (value.Channel != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            {
+                w.Write((uint)2);
+                w.Write(value.Channel);
+            }
             w.Write((uint)0);
         }
         public global::Omnius.Axus.Remoting.TryExportShoutRequest Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
@@ -3032,6 +3099,7 @@ public sealed partial class TryExportShoutRequest : global::Omnius.Core.RocketPa
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Core.Cryptography.OmniSignature p_signature = global::Omnius.Core.Cryptography.OmniSignature.Empty;
+            global::Omnius.Core.RocketPack.Utf8String p_channel = global::Omnius.Core.RocketPack.Utf8String.Empty;
 
             for (; ; )
             {
@@ -3044,10 +3112,15 @@ public sealed partial class TryExportShoutRequest : global::Omnius.Core.RocketPa
                             p_signature = global::Omnius.Core.Cryptography.OmniSignature.Formatter.Deserialize(ref r, rank + 1);
                             break;
                         }
+                    case 2:
+                        {
+                            p_channel = r.GetString(2147483647);
+                            break;
+                        }
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.TryExportShoutRequest(p_signature);
+            return new global::Omnius.Axus.Remoting.TryExportShoutRequest(p_signature, p_channel);
         }
     }
 }

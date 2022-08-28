@@ -5,7 +5,6 @@ namespace Omnius.Axus.Engines.Internal.Entities;
 internal record OmniSignatureEntity
 {
     public string? Name { get; set; }
-
     public OmniHashEntity? Hash { get; set; }
 
     public static OmniSignatureEntity Import(OmniSignature item)

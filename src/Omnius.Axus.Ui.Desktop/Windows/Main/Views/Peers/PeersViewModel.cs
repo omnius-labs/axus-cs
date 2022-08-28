@@ -21,7 +21,7 @@ public class PeersViewViewModel : PeersViewViewModelBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IAxusServiceMediator _axusServiceMediator;
+    private readonly IServiceMediator _axusServiceMediator;
     private readonly IApplicationDispatcher _applicationDispatcher;
     private readonly IDialogService _dialogService;
 
@@ -29,7 +29,7 @@ public class PeersViewViewModel : PeersViewViewModelBase
 
     private readonly CompositeDisposable _disposable = new();
 
-    public PeersViewViewModel(IAxusServiceMediator axusServiceMediator, IApplicationDispatcher applicationDispatcher, IDialogService dialogService)
+    public PeersViewViewModel(IServiceMediator axusServiceMediator, IApplicationDispatcher applicationDispatcher, IDialogService dialogService)
     {
         _axusServiceMediator = axusServiceMediator;
         _applicationDispatcher = applicationDispatcher;
@@ -59,7 +59,7 @@ public class PeersViewViewModel : PeersViewViewModelBase
 
         public bool Equals(SessionReport? x, SessionReport? y)
         {
-            return (x?.ServiceName == y?.ServiceName) && (x?.HandshakeType == y?.HandshakeType) && (x?.Address == y?.Address);
+            return (x?.Scheme == y?.Scheme) && (x?.HandshakeType == y?.HandshakeType) && (x?.Address == y?.Address);
         }
 
         public int GetHashCode([DisallowNull] SessionReport obj)

@@ -20,7 +20,7 @@ public partial class InteractorProvider : AsyncDisposableBase, IInteractorProvid
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
     private string _databaseDirectoryPath;
-    private IAxusServiceMediator? _axusServiceMediator;
+    private IServiceMediator? _axusServiceMediator;
     private readonly IBytesPool _bytesPool;
 
     private IInitialNodesFetcher? _initialNodesFetcher;
@@ -31,14 +31,14 @@ public partial class InteractorProvider : AsyncDisposableBase, IInteractorProvid
 
     private readonly AsyncLock _asyncLock = new();
 
-    public static async ValueTask<InteractorProvider> CreateAsync(string databaseDirectoryPath, IAxusServiceMediator axusServiceMediator, IBytesPool bytesPool, CancellationToken cancellationToken = default)
+    public static async ValueTask<InteractorProvider> CreateAsync(string databaseDirectoryPath, IServiceMediator axusServiceMediator, IBytesPool bytesPool, CancellationToken cancellationToken = default)
     {
         var result = new InteractorProvider(databaseDirectoryPath, axusServiceMediator, bytesPool);
         await result.InitAsync(cancellationToken);
         return result;
     }
 
-    internal InteractorProvider(string databaseDirectoryPath, IAxusServiceMediator axusServiceMediator, IBytesPool bytesPool)
+    internal InteractorProvider(string databaseDirectoryPath, IServiceMediator axusServiceMediator, IBytesPool bytesPool)
     {
         _databaseDirectoryPath = databaseDirectoryPath;
         _axusServiceMediator = axusServiceMediator;

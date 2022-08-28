@@ -5,9 +5,8 @@ namespace Omnius.Axus.Engines.Internal.Entities;
 internal record PublishedShoutItemEntity
 {
     public OmniSignatureEntity? Signature { get; set; }
-
+    public string? Channel { get; set; }
     public DateTime CreatedTime { get; set; }
-
     public string? Registrant { get; set; }
 
     public static PublishedShoutItemEntity Import(PublishedShoutItem item)
@@ -15,6 +14,7 @@ internal record PublishedShoutItemEntity
         return new PublishedShoutItemEntity()
         {
             Signature = OmniSignatureEntity.Import(item.Signature),
+            Channel = item.Channel,
             CreatedTime = item.CreatedTime,
             Registrant = item.Registrant,
         };
@@ -22,6 +22,6 @@ internal record PublishedShoutItemEntity
 
     public PublishedShoutItem Export()
     {
-        return new PublishedShoutItem(this.Signature!.Export(), this.CreatedTime, this.Registrant ?? string.Empty);
+        return new PublishedShoutItem(this.Signature!.Export(), this.Channel ?? string.Empty, this.CreatedTime, this.Registrant ?? string.Empty);
     }
 }

@@ -1,6 +1,8 @@
+using Omnius.Axus.Interactors.Internal.Models;
 using Omnius.Axus.Interactors.Internal.Repositories;
 using Omnius.Axus.Interactors.Models;
 using Omnius.Core;
+using Omnius.Core.Cryptography;
 using Omnius.Core.RocketPack;
 using Omnius.Core.Storages;
 
@@ -10,13 +12,14 @@ public sealed partial class BarkSubscriber : AsyncDisposableBase, IBarkSubscribe
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IAxusServiceMediator _serviceController;
+    private readonly IProfileSubscriber _profileSubscriber;
+    private readonly IServiceMediator _serviceMediator;
     private readonly IBytesPool _bytesPool;
     private readonly BarkSubscriberOptions _options;
 
     private readonly BarkSubscriberRepository _barkSubscriberRepo;
+    private readonly CachedBarkMessageRepository _cachedBarkMessageRepo;
     private readonly ISingleValueStorage _configStorage;
-    private readonly IKeyValueStorage<string> _cachedBarkStorage;
 
     private Task _watchLoopTask = null!;
 
@@ -24,30 +27,31 @@ public sealed partial class BarkSubscriber : AsyncDisposableBase, IBarkSubscribe
 
     private readonly AsyncLock _asyncLock = new();
 
-    private const string Registrant = "Omnius.Axus.Interactors.BarkSubscriber";
+    private const string Channel = "bark/v1";
+    private const string Registrant = "bark_subscriber/v1";
 
-    public static async ValueTask<BarkSubscriber> CreateAsync(IAxusServiceMediator service, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkSubscriberOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<BarkSubscriber> CreateAsync(IProfileSubscriber profileSubscriber, IServiceMediator axusServiceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkSubscriberOptions options, CancellationToken cancellationToken = default)
     {
-        var barkSubscriber = new BarkSubscriber(service, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
+        var barkSubscriber = new BarkSubscriber(profileSubscriber, axusServiceMediator, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
         await barkSubscriber.InitAsync(cancellationToken);
         return barkSubscriber;
     }
 
-    private BarkSubscriber(IAxusServiceMediator service, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkSubscriberOptions options)
+    private BarkSubscriber(IProfileSubscriber profileSubscriber, IServiceMediator axusServiceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkSubscriberOptions options)
     {
-        _serviceController = service;
+        _profileSubscriber = profileSubscriber;
+        _serviceMediator = axusServiceMediator;
         _bytesPool = bytesPool;
         _options = options;
 
         _barkSubscriberRepo = new BarkSubscriberRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
         _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
-        _cachedBarkStorage = keyValueStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "profiles"), _bytesPool);
+        _cachedBarkMessageRepo = new CachedBarkMessageRepository(Path.Combine(_options.ConfigDirectoryPath, "cached_bark_messages"), _bytesPool);
     }
 
     internal async ValueTask InitAsync(CancellationToken cancellationToken = default)
     {
         await _barkSubscriberRepo.MigrateAsync(cancellationToken);
-        await _cachedBarkStorage.MigrateAsync(cancellationToken);
 
         _watchLoopTask = this.WatchLoopAsync(_cancellationTokenSource.Token);
     }
@@ -60,7 +64,6 @@ public sealed partial class BarkSubscriber : AsyncDisposableBase, IBarkSubscribe
 
         _barkSubscriberRepo.Dispose();
         _configStorage.Dispose();
-        _cachedBarkStorage.Dispose();
     }
 
     private async Task WatchLoopAsync(CancellationToken cancellationToken = default)
@@ -75,7 +78,8 @@ public sealed partial class BarkSubscriber : AsyncDisposableBase, IBarkSubscribe
 
                 await this.SyncSubscribedShouts(cancellationToken);
                 await this.SyncSubscribedFiles(cancellationToken);
-                await this.UpdateProfilesAsync(cancellationToken);
+                var excludedSignatures = await this.InternalFetchTargetSignatures(cancellationToken);
+                await this.InternalShrinkAsync(excludedSignatures, cancellationToken);
             }
         }
         catch (OperationCanceledException e)
@@ -92,7 +96,7 @@ public sealed partial class BarkSubscriber : AsyncDisposableBase, IBarkSubscribe
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceController.GetSubscribedShoutReportsAsync(cancellationToken);
+            var reports = await _serviceMediator.GetSubscribedShoutReportsAsync(cancellationToken);
             var signatures = reports
                 .Where(n => n.Registrant == Registrant)
                 .Select(n => n.Signature)
@@ -100,32 +104,120 @@ public sealed partial class BarkSubscriber : AsyncDisposableBase, IBarkSubscribe
 
             foreach (var signature in signatures)
             {
-                if (_barkSubscriberRepo.Metadatas..(signature)) continue;
-                await _serviceController.UnsubscribeShoutAsync(signature, Registrant, cancellationToken);
+                if (_barkSubscriberRepo.Items.Exists(signature)) continue;
+                await _serviceMediator.UnsubscribeShoutAsync(signature, Channel, Registrant, cancellationToken);
             }
 
-            foreach (var item in _profileSubscriberRepo.Items.FindAll())
+            foreach (var item in _barkSubscriberRepo.Items.FindAll())
             {
                 if (signatures.Contains(item.Signature)) continue;
-                await _serviceController.SubscribeShoutAsync(item.Signature, Registrant, cancellationToken);
+                await _serviceMediator.SubscribeShoutAsync(item.Signature, Channel, Registrant, cancellationToken);
             }
 
-            foreach (var item in _profileSubscriberRepo.Items.FindAll())
+            foreach (var item in _barkSubscriberRepo.Items.FindAll())
             {
-                using var shout = await _serviceController.TryExportShoutAsync(item.Signature, cancellationToken);
+                using var shout = await _serviceMediator.TryExportShoutAsync(item.Signature, Channel, cancellationToken);
                 if (shout is null) continue;
 
                 var rootHash = RocketMessage.FromBytes<OmniHash>(shout.Value.Memory);
 
-                var newItem = new SubscribedProfileItem(item.Signature, rootHash, shout.CreatedTime.ToDateTime());
-                _profileSubscriberRepo.Items.Upsert(newItem);
+                var newItem = new SubscribedBarkItem(item.Signature, rootHash, shout.CreatedTime.ToDateTime());
+                _barkSubscriberRepo.Items.Upsert(newItem);
             }
         }
     }
 
-    public ValueTask<IEnumerable<BarkMessage>> FindByTagAsync(string tag, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+    private async Task SyncSubscribedFiles(CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
+            var reports = await _serviceMediator.GetSubscribedFileReportsAsync(cancellationToken);
+            var rootHashes = reports
+                .Where(n => n.Authors.Contains(Registrant))
+                .Select(n => n.RootHash)
+                .ToHashSet();
 
-    public ValueTask<BarkMessage?> FindByReplyAsync(string tag, BarkReply reply, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+            foreach (var rootHash in rootHashes)
+            {
+                if (_barkSubscriberRepo.Items.Exists(rootHash)) continue;
+                await _serviceMediator.UnpublishFileFromMemoryAsync(rootHash, Registrant, cancellationToken);
+            }
+
+            foreach (var rootHash in _barkSubscriberRepo.Items.FindAll().Select(n => n.RootHash))
+            {
+                if (rootHashes.Contains(rootHash)) continue;
+                await _serviceMediator.SubscribeFileAsync(rootHash, Registrant, cancellationToken);
+            }
+        }
+    }
+
+    private async ValueTask<IEnumerable<OmniSignature>> InternalFetchTargetSignatures(CancellationToken cancellationToken = default)
+    {
+        var signatures = new List<OmniSignature>();
+
+        foreach (var profile in await _profileSubscriber.FindAllAsync(cancellationToken))
+        {
+            signatures.Add(profile.Signature);
+        }
+
+        return signatures;
+    }
+
+    private async ValueTask InternalShrinkAsync(IEnumerable<OmniSignature> excludedSignatures, CancellationToken cancellationToken = default)
+    {
+        _cachedBarkMessageRepo.Shrink(excludedSignatures);
+        _barkSubscriberRepo.Items.Shrink(excludedSignatures);
+    }
+
+    private async ValueTask InternalFetchBarkMessagesAsync(IEnumerable<OmniSignature> targetSignatures, CancellationToken cancellationToken = default)
+    {
+        var config = await this.GetConfigAsync(cancellationToken);
+        var tagSet = config.Tags.ToHashSet();
+
+        foreach (var signature in targetSignatures)
+        {
+            foreach (var message in await this.InternalExportAsync(signature, cancellationToken))
+            {
+                if (!tagSet.Contains(message.Value.Tag)) continue;
+            }
+        }
+    }
+
+    private async ValueTask<IEnumerable<CachedBarkMessage>> InternalExportAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+    {
+        await Task.Delay(0, cancellationToken).ConfigureAwait(false);
+
+        using var shout = await _serviceMediator.TryExportShoutAsync(signature, Channel, cancellationToken);
+        if (shout is null) return Enumerable.Empty<CachedBarkMessage>();
+
+        var contentRootHash = RocketMessage.FromBytes<OmniHash>(shout.Value.Memory);
+
+        using var contentBytes = await _serviceMediator.TryExportFileToMemoryAsync(contentRootHash, cancellationToken);
+        if (contentBytes is null) return Enumerable.Empty<CachedBarkMessage>();
+
+        var content = RocketMessage.FromBytes<BarkContent>(contentBytes.Memory);
+
+        var results = new List<CachedBarkMessage>();
+
+        foreach (var message in content.Messages)
+        {
+            results.Add(new CachedBarkMessage(signature, message));
+        }
+
+        return results;
+    }
+
+    public async ValueTask<IEnumerable<BarkMessageReport>> FindByTagAsync(string tag, CancellationToken cancellationToken = default)
+    {
+        var results = _cachedBarkMessageRepo.FetchByTag(tag);
+        return results.Select(n => n.ToReport());
+    }
+
+    public async ValueTask<BarkMessageReport?> FindBySelfHashAsync(OmniHash selfHash, CancellationToken cancellationToken = default)
+    {
+        var result = _cachedBarkMessageRepo.FetchBySelfHash(selfHash);
+        return result?.ToReport();
+    }
 
     public async ValueTask<BarkSubscriberConfig> GetConfigAsync(CancellationToken cancellationToken = default)
     {

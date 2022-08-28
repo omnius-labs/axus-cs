@@ -432,7 +432,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await _publishedShoutStorage.UnpublishShoutAsync(param.Signature, param.Registrant, cancellationToken);
+            await _publishedShoutStorage.UnpublishShoutAsync(param.Signature, param.Channel, param.Registrant, cancellationToken);
         }
     }
 
@@ -440,7 +440,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await _subscribedShoutStorage.SubscribeShoutAsync(param.Signature, param.Registrant, cancellationToken);
+            await _subscribedShoutStorage.SubscribeShoutAsync(param.Signature, param.Channel, param.Registrant, cancellationToken);
         }
     }
 
@@ -448,7 +448,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await _subscribedShoutStorage.UnsubscribeShoutAsync(param.Signature, param.Registrant, cancellationToken);
+            await _subscribedShoutStorage.UnsubscribeShoutAsync(param.Signature, param.Channel, param.Registrant, cancellationToken);
         }
     }
 
@@ -456,7 +456,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var shout = await _subscribedShoutStorage.ReadShoutAsync(param.Signature, cancellationToken);
+            var shout = await _subscribedShoutStorage.ReadShoutAsync(param.Signature, param.Channel, cancellationToken);
             return new TryExportShoutResult(shout);
         }
     }

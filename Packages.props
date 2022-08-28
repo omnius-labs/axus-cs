@@ -32,6 +32,9 @@
     <PackageReference Update="MessageBox.Avalonia" Version="2.0.0" />
     <PackageReference Update="Nito.AsyncEx" Version="5.1.2" />
     <PackageReference Update="Avalonia.AvaloniaEdit" Version="0.10.12.2" />
+    <PackageReference Update="System.Data.SQLite.Core" Version="1.0.116" />
+    <PackageReference Update="SqlKata" Version="2.3.7" />
+    <PackageReference Update="SqlKata.Execution" Version="2.3.7" />
   </ItemGroup>
 
   <ItemGroup>

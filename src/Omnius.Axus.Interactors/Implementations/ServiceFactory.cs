@@ -12,7 +12,7 @@ using MultiplexerV1 = Omnius.Core.Net.Connections.Multiplexer.V1;
 
 namespace Omnius.Axus.Interactors;
 
-public sealed class AxusServiceProvider : AsyncDisposableBase, IAxusServiceProvider
+public sealed class ServiceFactory : AsyncDisposableBase, IServiceProvider
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -27,14 +27,14 @@ public sealed class AxusServiceProvider : AsyncDisposableBase, IAxusServiceProvi
 
     public bool IsConnected => _multiplexer?.IsConnected ?? false;
 
-    public static async ValueTask<AxusServiceProvider> CreateAsync(OmniAddress listenAddress, CancellationToken cancellationToken = default)
+    public static async ValueTask<ServiceFactory> CreateAsync(OmniAddress listenAddress, CancellationToken cancellationToken = default)
     {
-        var result = new AxusServiceProvider(listenAddress);
+        var result = new ServiceFactory(listenAddress);
         await result.InitAsync(cancellationToken);
         return result;
     }
 
-    private AxusServiceProvider(OmniAddress listenAddress)
+    private ServiceFactory(OmniAddress listenAddress)
     {
         _listenAddress = listenAddress;
     }
@@ -94,7 +94,7 @@ public sealed class AxusServiceProvider : AsyncDisposableBase, IAxusServiceProvi
         return socket;
     }
 
-    public IAxusService GetService() => _axusServiceRemotingClient ?? throw new NullReferenceException();
+    public IAxusService Create() => _axusServiceRemotingClient ?? throw new NullReferenceException();
 
     protected override async ValueTask OnDisposeAsync()
     {

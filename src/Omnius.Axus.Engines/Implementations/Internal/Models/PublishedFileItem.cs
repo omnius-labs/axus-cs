@@ -15,12 +15,8 @@ internal record PublishedFileItem
     }
 
     public OmniHash RootHash { get; }
-
     public string? FilePath { get; }
-
     public string Registrant { get; }
-
     public ReadOnlyListSlim<MerkleTreeSection> MerkleTreeSections { get; }
-
     public int MaxBlockLength { get; }
 }

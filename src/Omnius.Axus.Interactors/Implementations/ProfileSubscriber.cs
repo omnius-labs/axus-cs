@@ -15,7 +15,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IAxusServiceMediator _serviceController;
+    private readonly IServiceMediator _serviceMediator;
     private readonly IBytesPool _bytesPool;
     private readonly ProfileSubscriberOptions _options;
 
@@ -29,24 +29,25 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
 
     private readonly AsyncLock _asyncLock = new();
 
-    private const string Registrant = "Omnius.Axus.Interactors.ProfileSubscriber";
+    private const string Channel = "profile/v1";
+    private const string Registrant = "profile_subscriber/v1";
 
-    public static async ValueTask<ProfileSubscriber> CreateAsync(IAxusServiceMediator service, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ProfileSubscriberOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<ProfileSubscriber> CreateAsync(IServiceMediator service, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ProfileSubscriberOptions options, CancellationToken cancellationToken = default)
     {
         var profileSubscriber = new ProfileSubscriber(service, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
         await profileSubscriber.InitAsync(cancellationToken);
         return profileSubscriber;
     }
 
-    private ProfileSubscriber(IAxusServiceMediator service, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ProfileSubscriberOptions options)
+    private ProfileSubscriber(IServiceMediator service, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ProfileSubscriberOptions options)
     {
-        _serviceController = service;
+        _serviceMediator = service;
         _bytesPool = bytesPool;
         _options = options;
 
         _profileSubscriberRepo = new ProfileSubscriberRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
         _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
-        _cachedProfileStorage = keyValueStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "profiles"), _bytesPool);
+        _cachedProfileStorage = keyValueStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "cached_profiles"), _bytesPool);
     }
 
     internal async ValueTask InitAsync(CancellationToken cancellationToken = default)
@@ -97,7 +98,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceController.GetSubscribedShoutReportsAsync(cancellationToken);
+            var reports = await _serviceMediator.GetSubscribedShoutReportsAsync(cancellationToken);
             var signatures = reports
                 .Where(n => n.Registrant == Registrant)
                 .Select(n => n.Signature)
@@ -106,18 +107,18 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
             foreach (var signature in signatures)
             {
                 if (_profileSubscriberRepo.Items.Exists(signature)) continue;
-                await _serviceController.UnsubscribeShoutAsync(signature, Registrant, cancellationToken);
+                await _serviceMediator.UnsubscribeShoutAsync(signature, Channel, Registrant, cancellationToken);
             }
 
             foreach (var item in _profileSubscriberRepo.Items.FindAll())
             {
                 if (signatures.Contains(item.Signature)) continue;
-                await _serviceController.SubscribeShoutAsync(item.Signature, Registrant, cancellationToken);
+                await _serviceMediator.SubscribeShoutAsync(item.Signature, Channel, Registrant, cancellationToken);
             }
 
             foreach (var item in _profileSubscriberRepo.Items.FindAll())
             {
-                using var shout = await _serviceController.TryExportShoutAsync(item.Signature, cancellationToken);
+                using var shout = await _serviceMediator.TryExportShoutAsync(item.Signature, Channel, cancellationToken);
                 if (shout is null) continue;
 
                 var rootHash = RocketMessage.FromBytes<OmniHash>(shout.Value.Memory);
@@ -132,22 +133,22 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceController.GetSubscribedFileReportsAsync(cancellationToken);
+            var reports = await _serviceMediator.GetSubscribedFileReportsAsync(cancellationToken);
             var rootHashes = reports
-                .Where(n => n.Registrant == Registrant)
+                .Where(n => n.Authors.Contains(Registrant))
                 .Select(n => n.RootHash)
                 .ToHashSet();
 
             foreach (var rootHash in rootHashes)
             {
                 if (_profileSubscriberRepo.Items.Exists(rootHash)) continue;
-                await _serviceController.UnpublishFileFromMemoryAsync(rootHash, Registrant, cancellationToken);
+                await _serviceMediator.UnpublishFileFromMemoryAsync(rootHash, Registrant, cancellationToken);
             }
 
             foreach (var rootHash in _profileSubscriberRepo.Items.FindAll().Select(n => n.RootHash))
             {
                 if (rootHashes.Contains(rootHash)) continue;
-                await _serviceController.SubscribeFileAsync(rootHash, Registrant, cancellationToken);
+                await _serviceMediator.SubscribeFileAsync(rootHash, Registrant, cancellationToken);
             }
         }
     }
@@ -171,7 +172,7 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
         }
     }
 
-    private async IAsyncEnumerable<CachedProfile> InternalRecursiveFindProfilesAsync(IEnumerable<OmniSignature> rootSignatures, IEnumerable<OmniSignature> ignoreSignatures, int depth, int maxCount, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    private async IAsyncEnumerable<CachedProfileContent> InternalRecursiveFindProfilesAsync(IEnumerable<OmniSignature> rootSignatures, IEnumerable<OmniSignature> ignoreSignatures, int depth, int maxCount, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         if (maxCount == 0) yield break;
 
@@ -192,8 +193,8 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
             await foreach (var profile in this.InternalFindProfilesAsync(targetSignatures, cancellationToken))
             {
                 checkedSignatures.Add(profile.Signature);
-                checkedSignatures.UnionWith(profile.Content.BlockedSignatures);
-                nextTargetSignatures.UnionWith(profile.Content.TrustedSignatures);
+                checkedSignatures.UnionWith(profile.Value.BlockedSignatures);
+                nextTargetSignatures.UnionWith(profile.Value.TrustedSignatures);
 
                 yield return profile;
 
@@ -205,13 +206,13 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
         }
     }
 
-    private async IAsyncEnumerable<CachedProfile> InternalFindProfilesAsync(IEnumerable<OmniSignature> signatures, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    private async IAsyncEnumerable<CachedProfileContent> InternalFindProfilesAsync(IEnumerable<OmniSignature> signatures, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         foreach (var signature in signatures)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var cachedProfile = await _cachedProfileStorage.TryReadAsync<CachedProfile>(StringConverter.SignatureToString(signature), cancellationToken);
+            var cachedProfile = await _cachedProfileStorage.TryReadAsync<CachedProfileContent>(StringConverter.SignatureToString(signature), cancellationToken);
             var downloadedProfile = await this.InternalExportAsync(signature, cancellationToken);
 
             if (cachedProfile is not null)
@@ -232,21 +233,21 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
         }
     }
 
-    private async ValueTask<CachedProfile?> InternalExportAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+    private async ValueTask<CachedProfileContent?> InternalExportAsync(OmniSignature signature, CancellationToken cancellationToken = default)
     {
         await Task.Delay(0, cancellationToken).ConfigureAwait(false);
 
-        using var shout = await _serviceController.TryExportShoutAsync(signature, cancellationToken);
+        using var shout = await _serviceMediator.TryExportShoutAsync(signature, Channel, cancellationToken);
         if (shout is null) return null;
 
         var contentRootHash = RocketMessage.FromBytes<OmniHash>(shout.Value.Memory);
 
-        using var contentBytes = await _serviceController.TryExportFileToMemoryAsync(contentRootHash, cancellationToken);
+        using var contentBytes = await _serviceMediator.TryExportFileToMemoryAsync(contentRootHash, cancellationToken);
         if (contentBytes is null) return null;
 
         var content = RocketMessage.FromBytes<ProfileContent>(contentBytes.Memory);
 
-        return new CachedProfile(signature, shout.CreatedTime, content);
+        return new CachedProfileContent(signature, shout.CreatedTime, content);
     }
 
     private async ValueTask ShrinkCachedProfileStorage(ImmutableHashSet<OmniSignature> allTargetSignatures, CancellationToken cancellationToken = default)
@@ -281,18 +282,18 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
         }
     }
 
-    public async ValueTask<IEnumerable<ProfileMessage>> FindAllAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<ProfileReport>> FindAllAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var results = new List<ProfileMessage>();
+            var results = new List<ProfileReport>();
 
             await foreach (var key in _cachedProfileStorage.GetKeysAsync(cancellationToken))
             {
-                var value = await _cachedProfileStorage.TryReadAsync<CachedProfile>(key, cancellationToken);
-                if (value is null) continue;
+                var cachedProfile = await _cachedProfileStorage.TryReadAsync<CachedProfileContent>(key, cancellationToken);
+                if (cachedProfile is null) continue;
 
-                var message = new ProfileMessage(value.Signature, value.CreatedTime.ToDateTime(), value.Content.TrustedSignatures, value.Content.BlockedSignatures);
+                var message = new ProfileReport(cachedProfile.Signature, cachedProfile.CreatedTime.ToDateTime(), cachedProfile.Value.TrustedSignatures, cachedProfile.Value.BlockedSignatures);
                 results.Add(message);
             }
 
@@ -300,14 +301,14 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
         }
     }
 
-    public async ValueTask<ProfileMessage?> FindBySignatureAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+    public async ValueTask<ProfileReport?> FindBySignatureAsync(OmniSignature signature, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var value = await _cachedProfileStorage.TryReadAsync<CachedProfile>(StringConverter.SignatureToString(signature), cancellationToken);
-            if (value is null) return null;
+            var cachedProfile = await _cachedProfileStorage.TryReadAsync<CachedProfileContent>(StringConverter.SignatureToString(signature), cancellationToken);
+            if (cachedProfile is null) return null;
 
-            var message = new ProfileMessage(value.Signature, value.CreatedTime.ToDateTime(), value.Content.TrustedSignatures, value.Content.BlockedSignatures);
+            var message = new ProfileReport(cachedProfile.Signature, cachedProfile.CreatedTime.ToDateTime(), cachedProfile.Value.TrustedSignatures, cachedProfile.Value.BlockedSignatures);
             return message;
         }
     }

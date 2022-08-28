@@ -11,7 +11,7 @@ public class StatusViewViewModel : AsyncDisposableBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IAxusServiceMediator _axusServiceMediator;
+    private readonly IServiceMediator _axusServiceMediator;
     private readonly IClipboardService _clipboardService;
 
     private readonly Task _refreshTask;
@@ -20,7 +20,7 @@ public class StatusViewViewModel : AsyncDisposableBase
 
     private readonly CompositeDisposable _disposable = new();
 
-    public StatusViewViewModel(IAxusServiceMediator axusServiceMediator, IClipboardService clipboardService)
+    public StatusViewViewModel(IServiceMediator axusServiceMediator, IClipboardService clipboardService)
     {
         _axusServiceMediator = axusServiceMediator;
         _clipboardService = clipboardService;

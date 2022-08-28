@@ -6,9 +6,7 @@ namespace Omnius.Axus.Engines.Internal.Entities;
 internal record CachedNodeLocationEntity
 {
     public NodeLocationEntity? Value { get; set; }
-
     public DateTime CreatedTime { get; set; }
-
     public DateTime LastConnectionTime { get; set; }
 
     public static CachedNodeLocationEntity Import(CachedNodeLocation item)

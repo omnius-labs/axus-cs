@@ -7,7 +7,7 @@ public class InitialNodesFetcher : AsyncDisposableBase, IInitialNodesFetcher
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IAxusServiceMediator _axusServiceMediator;
+    private readonly IServiceMediator _axusServiceMediator;
 
     private Task _fetchTask = null!;
 
@@ -15,14 +15,14 @@ public class InitialNodesFetcher : AsyncDisposableBase, IInitialNodesFetcher
 
     private const string URL = "http://app.omnius-labs.com/axus/v1/nodes.txt";
 
-    public static async ValueTask<InitialNodesFetcher> CreateAsync(IAxusServiceMediator axusServiceMediator, CancellationToken cancellationToken = default)
+    public static async ValueTask<InitialNodesFetcher> CreateAsync(IServiceMediator axusServiceMediator, CancellationToken cancellationToken = default)
     {
         var initialNodesFetcher = new InitialNodesFetcher(axusServiceMediator);
         await initialNodesFetcher.InitAsync(cancellationToken);
         return initialNodesFetcher;
     }
 
-    private InitialNodesFetcher(IAxusServiceMediator axusServiceMediator)
+    private InitialNodesFetcher(IServiceMediator axusServiceMediator)
     {
         _axusServiceMediator = axusServiceMediator;
     }
@@ -82,6 +82,4 @@ public class InitialNodesFetcher : AsyncDisposableBase, IInitialNodesFetcher
 
         return Enumerable.Empty<NodeLocation>();
     }
-
-    public new ValueTask DisposeAsync() => throw new NotImplementedException();
 }

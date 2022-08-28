@@ -15,20 +15,20 @@ public class ShoutExchangerTest
 {
     public static IEnumerable<object[]> GetPublishAndSubscribeTestCases()
     {
-        var results = new List<(OmniAddress, OmniAddress, TimeSpan)>{
-            (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback,40011), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 40012), TimeSpan.FromMinutes(3)),
-            // (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50031), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50032), TimeSpan.FromMinutes(3)),
-            // (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50051), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50052), TimeSpan.FromMinutes(3)),
+        var results = new List<(OmniAddress, OmniAddress, int, TimeSpan)>{
+            (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 40011), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 40012), 1, TimeSpan.FromMinutes(3)),
+            (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 40021), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 40022), 8192, TimeSpan.FromMinutes(3)),
+            (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 40031), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 40032), 1024 * 1024 * 32, TimeSpan.FromMinutes(10)),
         };
-        return results.Select(n => new object[] { n.Item1, n.Item2, n.Item3 });
+        return results.Select(n => new object[] { n.Item1, n.Item2, n.Item3, n.Item4 });
     }
 
     [Theory]
     [MemberData(nameof(GetPublishAndSubscribeTestCases))]
-    public async Task PublishAndSubscribeTest(OmniAddress publisherListenPort, OmniAddress subscriberListenPort, TimeSpan timeout)
+    public async Task PublishAndSubscribeTest(OmniAddress publisherListenAddress, OmniAddress subscriberListenAddress, int fileSize, TimeSpan timeout)
     {
-        await using var shoutExchanger1 = await ShoutExchangerNode.CreateAsync(publisherListenPort);
-        await using var shoutExchanger2 = await ShoutExchangerNode.CreateAsync(subscriberListenPort);
+        await using var shoutExchanger1 = await ShoutExchangerNode.CreateAsync(publisherListenAddress);
+        await using var shoutExchanger2 = await ShoutExchangerNode.CreateAsync(subscriberListenAddress);
 
         var nodeFinder1 = shoutExchanger1.GetNodeFinder();
         var nodeFinder2 = shoutExchanger2.GetNodeFinder();
@@ -39,20 +39,20 @@ public class ShoutExchangerTest
         var publishedShoutStorage = shoutExchanger1.GetPublishedShoutStorage();
         var subscribedShoutStorage = shoutExchanger2.GetSubscribedShoutStorage();
 
-        var body = FixtureFactory.GetRandomBytes(10);
+        var body = FixtureFactory.GetRandomBytes(fileSize);
         var digitalSignature = OmniDigitalSignature.Create(FixtureFactory.GetRandomString(10), OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256);
-        var publishedShout = Shout.Create(Timestamp.FromDateTime(DateTime.UtcNow), new MemoryOwner<byte>(body), digitalSignature);
+        var publishedShout = Shout.Create("test_channel", Timestamp64.FromDateTime(DateTime.UtcNow), new MemoryOwner<byte>(body), digitalSignature);
 
         await publishedShoutStorage.PublishShoutAsync(publishedShout, "test");
 
-        var publishedShout2 = await publishedShoutStorage.ReadShoutAsync(digitalSignature.GetOmniSignature());
+        var publishedShout2 = await publishedShoutStorage.ReadShoutAsync(digitalSignature.GetOmniSignature(), "test_channel");
         publishedShout2.Should().Be(publishedShout);
 
-        var publishedShout2CreatedTime = await publishedShoutStorage.ReadShoutCreatedTimeAsync(digitalSignature.GetOmniSignature());
+        var publishedShout2CreatedTime = await publishedShoutStorage.ReadShoutCreatedTimeAsync(digitalSignature.GetOmniSignature(), "test_channel");
         var truncateTimeSpan = TimeSpan.FromTicks(TimeSpan.TicksPerSecond);
         publishedShout2CreatedTime.Value.Truncate(truncateTimeSpan).Should().Be(publishedShout.CreatedTime.ToDateTime().Truncate(truncateTimeSpan));
 
-        await subscribedShoutStorage.SubscribeShoutAsync(digitalSignature.GetOmniSignature(), "test");
+        await subscribedShoutStorage.SubscribeShoutAsync(digitalSignature.GetOmniSignature(), "test_channel", "test");
 
         var sw = Stopwatch.StartNew();
 
@@ -60,13 +60,13 @@ public class ShoutExchangerTest
         {
             await Task.Delay(TimeSpan.FromSeconds(1));
 
-            var createdTime = await subscribedShoutStorage.ReadShoutCreatedTimeAsync(digitalSignature.GetOmniSignature());
+            var createdTime = await subscribedShoutStorage.ReadShoutCreatedTimeAsync(digitalSignature.GetOmniSignature(), "test_channel");
             if (createdTime is not null) break;
 
             if (sw.Elapsed > timeout) throw new TimeoutException();
         }
 
-        var subscribedShout = await subscribedShoutStorage.ReadShoutAsync(digitalSignature.GetOmniSignature());
+        var subscribedShout = await subscribedShoutStorage.ReadShoutAsync(digitalSignature.GetOmniSignature(), "test_channel");
 
         publishedShout.Should().Be(subscribedShout);
     }

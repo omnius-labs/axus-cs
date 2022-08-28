@@ -7,9 +7,7 @@ namespace Omnius.Axus.Engines.Internal.Entities;
 internal record DecodedFileItemEntity
 {
     public OmniHashEntity? RootHash { get; set; }
-
     public MerkleTreeSectionEntity[]? MerkleTreeSections { get; set; }
-
     public int State { get; set; }
 
     public static DecodedFileItemEntity Import(DecodedFileItem item)

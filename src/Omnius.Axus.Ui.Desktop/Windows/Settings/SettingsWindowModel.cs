@@ -53,13 +53,13 @@ public abstract class SettingsWindowModelBase : AsyncDisposableBase
 public class SettingsWindowModel : SettingsWindowModelBase
 {
     private readonly UiStatus _uiState;
-    private readonly IAxusServiceMediator _axusServiceMediator;
+    private readonly IServiceMediator _axusServiceMediator;
     private readonly IInteractorProvider _interactorProvider;
 
     private readonly CompositeDisposable _disposable = new();
     private readonly CompositeAsyncDisposable _asyncDisposable = new();
 
-    public SettingsWindowModel(UiStatus uiState, IAxusServiceMediator axusServiceMediator, IInteractorProvider interactorProvider)
+    public SettingsWindowModel(UiStatus uiState, IServiceMediator axusServiceMediator, IInteractorProvider interactorProvider)
     {
         _uiState = uiState;
         _axusServiceMediator = axusServiceMediator;

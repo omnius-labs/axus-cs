@@ -113,9 +113,7 @@ public sealed class SessionConnector : AsyncDisposableBase, ISessionConnector
             var session = new Session(secureConnection, address, SessionHandshakeType.Connected, secureConnection.Signature, scheme);
             return session;
         }
-        else
-        {
-            throw new NotSupportedException();
-        }
+
+        throw new NotSupportedException();
     }
 }

@@ -8,13 +8,9 @@ namespace Omnius.Axus.Engines.Internal.Entities;
 internal record PublishedFileItemEntity
 {
     public OmniHashEntity? RootHash { get; set; }
-
     public string? FilePath { get; set; }
-
     public string? Registrant { get; set; }
-
     public MerkleTreeSectionEntity[]? MerkleTreeSections { get; set; }
-
     public int MaxBlockLength { get; set; }
 
     public static PublishedFileItemEntity Import(PublishedFileItem item)

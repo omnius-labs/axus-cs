@@ -11,7 +11,7 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IAxusServiceMediator _serviceController;
+    private readonly IServiceMediator _serviceController;
     private readonly IBytesPool _bytesPool;
     private readonly FileUploaderOptions _options;
 
@@ -23,16 +23,16 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
 
     private readonly AsyncLock _asyncLock = new();
 
-    private const string Registrant = "Omnius.Axus.Interactors.FileUploader";
+    private const string Registrant = "file_uploader/v1";
 
-    public static async ValueTask<FileUploader> CreateAsync(IAxusServiceMediator serviceController, IBytesPool bytesPool, FileUploaderOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<FileUploader> CreateAsync(IServiceMediator serviceController, IBytesPool bytesPool, FileUploaderOptions options, CancellationToken cancellationToken = default)
     {
         var fileUploader = new FileUploader(serviceController, bytesPool, options);
         await fileUploader.InitAsync(cancellationToken);
         return fileUploader;
     }
 
-    private FileUploader(IAxusServiceMediator service, IBytesPool bytesPool, FileUploaderOptions options)
+    private FileUploader(IServiceMediator service, IBytesPool bytesPool, FileUploaderOptions options)
     {
         _serviceController = service;
         _bytesPool = bytesPool;
@@ -136,7 +136,7 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
             if (_fileUploaderRepo.Items.Exists(filePath)) return;
 
             var now = DateTime.UtcNow;
-            var fileSeed = new FileSeed(OmniHash.Empty, name, (ulong)new FileInfo(filePath).Length, Timestamp.FromDateTime(now));
+            var fileSeed = new FileSeed(OmniHash.Empty, name, (ulong)new FileInfo(filePath).Length, Timestamp64.FromDateTime(now));
             var item = new UploadingFileItem(filePath, fileSeed, now, UploadingFileState.Waiting);
             _fileUploaderRepo.Items.Upsert(item);
         }

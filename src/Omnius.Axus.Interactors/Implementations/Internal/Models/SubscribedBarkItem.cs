@@ -4,28 +4,16 @@ namespace Omnius.Axus.Interactors.Internal.Models;
 
 internal record SubscribedBarkItem
 {
-    public SubscribedBarkItem(string tag, OmniSignature signature, string comment, OmniHash selfHash, OmniHash? replyHash, DateTime messageCreatedTime, DateTime packageCreatedTime)
+    public SubscribedBarkItem(OmniSignature signature, OmniHash rootHash, DateTime createdTime)
     {
-        this.Tag = tag;
         this.Signature = signature;
-        this.Comment = comment;
-        this.SelfHash = selfHash;
-        this.ReplyHash = replyHash;
-        this.MessageCreatedTime = messageCreatedTime;
-        this.PackageCreatedTime = packageCreatedTime;
+        this.RootHash = rootHash;
+        this.CreatedTime = createdTime;
     }
-
-    public string Tag { get; }
 
     public OmniSignature Signature { get; }
 
-    public string Comment { get; }
+    public OmniHash RootHash { get; }
 
-    public OmniHash SelfHash { get; }
-
-    public OmniHash? ReplyHash { get; }
-
-    public DateTime MessageCreatedTime { get; }
-
-    public DateTime PackageCreatedTime { get; }
+    public DateTime CreatedTime { get; }
 }

@@ -71,14 +71,14 @@ internal sealed partial class SubscribedShoutStorageRepository : DisposableBase
             return col;
         }
 
-        public bool Exists(OmniSignature signature)
+        public bool Exists(OmniSignature signature, string channel)
         {
             lock (_lockObject)
             {
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
                 var col = this.GetCollection();
-                return col.Exists(n => n.Signature == signatureEntity);
+                return col.Exists(n => n.Signature == signatureEntity && n.Channel == channel);
             }
         }
 
@@ -91,25 +91,25 @@ internal sealed partial class SubscribedShoutStorageRepository : DisposableBase
             }
         }
 
-        public IEnumerable<SubscribedShoutItem> Find(OmniSignature signature)
+        public IEnumerable<SubscribedShoutItem> Find(OmniSignature signature, string channel)
         {
             lock (_lockObject)
             {
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
                 var col = this.GetCollection();
-                return col.Find(n => n.Signature == signatureEntity).Select(n => n.Export());
+                return col.Find(n => n.Signature == signatureEntity && n.Channel == channel).Select(n => n.Export());
             }
         }
 
-        public SubscribedShoutItem? FindOne(OmniSignature signature, string registrant)
+        public SubscribedShoutItem? FindOne(OmniSignature signature, string channel, string registrant)
         {
             lock (_lockObject)
             {
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
                 var col = this.GetCollection();
-                return col.FindOne(n => n.Signature == signatureEntity && n.Registrant == registrant)?.Export();
+                return col.FindOne(n => n.Signature == signatureEntity && n.Channel == channel && n.Registrant == registrant)?.Export();
             }
         }
 
@@ -121,20 +121,20 @@ internal sealed partial class SubscribedShoutStorageRepository : DisposableBase
 
                 var col = this.GetCollection();
 
-                if (col.Exists(n => n.Signature == itemEntity.Signature && n.Registrant == itemEntity.Registrant)) return;
+                if (col.Exists(n => n.Signature == itemEntity.Signature && n.Channel == item.Channel && n.Registrant == itemEntity.Registrant)) return;
 
                 col.Insert(itemEntity);
             }
         }
 
-        public void Delete(OmniSignature signature, string registrant)
+        public void Delete(OmniSignature signature, string channel, string registrant)
         {
             lock (_lockObject)
             {
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
                 var col = this.GetCollection();
-                col.DeleteMany(n => n.Signature == signatureEntity && n.Registrant == registrant);
+                col.DeleteMany(n => n.Signature == signatureEntity && n.Channel == channel && n.Registrant == registrant);
             }
         }
     }
@@ -172,14 +172,14 @@ internal sealed partial class SubscribedShoutStorageRepository : DisposableBase
             return col;
         }
 
-        public bool Exists(OmniSignature signature)
+        public bool Exists(OmniSignature signature, string channel)
         {
             lock (_lockObject)
             {
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
                 var col = this.GetCollection();
-                return col.Exists(n => n.Signature == signatureEntity);
+                return col.Exists(n => n.Signature == signatureEntity && n.Channel == channel);
             }
         }
 
@@ -192,14 +192,14 @@ internal sealed partial class SubscribedShoutStorageRepository : DisposableBase
             }
         }
 
-        public WrittenShoutItem? FindOne(OmniSignature signature)
+        public WrittenShoutItem? FindOne(OmniSignature signature, string channel)
         {
             lock (_lockObject)
             {
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
                 var col = this.GetCollection();
-                return col.FindOne(n => n.Signature == signatureEntity)?.Export();
+                return col.FindOne(n => n.Signature == signatureEntity && n.Channel == channel)?.Export();
             }
         }
 
@@ -211,20 +211,20 @@ internal sealed partial class SubscribedShoutStorageRepository : DisposableBase
 
                 var col = this.GetCollection();
 
-                if (col.Exists(n => n.Signature == itemEntity.Signature)) return;
+                if (col.Exists(n => n.Signature == itemEntity.Signature && n.Channel == item.Channel)) return;
 
                 col.Insert(itemEntity);
             }
         }
 
-        public void Delete(OmniSignature signature)
+        public void Delete(OmniSignature signature, string channel)
         {
             lock (_lockObject)
             {
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
                 var col = this.GetCollection();
-                col.DeleteMany(n => n.Signature == signatureEntity);
+                col.DeleteMany(n => n.Signature == signatureEntity && n.Channel == channel);
             }
         }
     }

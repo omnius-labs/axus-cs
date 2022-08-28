@@ -4,7 +4,7 @@ using Omnius.Core.Cryptography;
 
 namespace Omnius.Axus.Interactors;
 
-public interface IAxusServiceMediator
+public interface IServiceMediator
 {
     ValueTask<ServiceConfig> GetConfigAsync(CancellationToken cancellationToken = default);
 
@@ -34,21 +34,21 @@ public interface IAxusServiceMediator
 
     ValueTask SubscribeFileAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default);
 
-    ValueTask SubscribeShoutAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default);
+    ValueTask SubscribeShoutAsync(OmniSignature signature, string channel, string registrant, CancellationToken cancellationToken = default);
 
     ValueTask<IMemoryOwner<byte>?> TryExportFileToMemoryAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
 
     ValueTask<bool> TryExportFileToStorageAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default);
 
-    ValueTask<Shout?> TryExportShoutAsync(OmniSignature signature, CancellationToken cancellationToken = default);
+    ValueTask<Shout?> TryExportShoutAsync(OmniSignature signature, string channel, CancellationToken cancellationToken = default);
 
     ValueTask UnpublishFileFromMemoryAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default);
 
     ValueTask UnpublishFileFromStorageAsync(string filePath, string registrant, CancellationToken cancellationToken = default);
 
-    ValueTask UnpublishShoutAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default);
+    ValueTask UnpublishShoutAsync(OmniSignature signature, string channel, string registrant, CancellationToken cancellationToken = default);
 
     ValueTask UnsubscribeFileAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default);
 
-    ValueTask UnsubscribeShoutAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default);
+    ValueTask UnsubscribeShoutAsync(OmniSignature signature, string channel, string registrant, CancellationToken cancellationToken = default);
 }

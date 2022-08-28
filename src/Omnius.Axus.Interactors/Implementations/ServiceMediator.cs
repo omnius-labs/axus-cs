@@ -5,11 +5,11 @@ using Omnius.Core.Cryptography;
 
 namespace Omnius.Axus.Interactors;
 
-public sealed class AxusServiceMediator : IAxusServiceMediator
+public sealed class ServiceMediator : IServiceMediator
 {
     private readonly IAxusService _axusService;
 
-    public AxusServiceMediator(IAxusService axusService)
+    public ServiceMediator(IAxusService axusService)
     {
         _axusService = axusService;
     }
@@ -120,15 +120,15 @@ public sealed class AxusServiceMediator : IAxusServiceMediator
         return output.PublishedShouts;
     }
 
-    public async ValueTask PublishShoutAsync(Shout message, string registrant, CancellationToken cancellationToken = default)
+    public async ValueTask PublishShoutAsync(Shout shout, string registrant, CancellationToken cancellationToken = default)
     {
-        var input = new PublishShoutRequest(message, registrant);
+        var input = new PublishShoutRequest(shout, registrant);
         await _axusService.PublishShoutAsync(input, cancellationToken);
     }
 
-    public async ValueTask UnpublishShoutAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default)
+    public async ValueTask UnpublishShoutAsync(OmniSignature signature, string channel, string registrant, CancellationToken cancellationToken = default)
     {
-        var input = new UnpublishShoutRequest(signature, registrant);
+        var input = new UnpublishShoutRequest(signature, channel, registrant);
         await _axusService.UnpublishShoutAsync(input, cancellationToken);
     }
 
@@ -138,21 +138,21 @@ public sealed class AxusServiceMediator : IAxusServiceMediator
         return output.SubscribedShouts;
     }
 
-    public async ValueTask SubscribeShoutAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default)
+    public async ValueTask SubscribeShoutAsync(OmniSignature signature, string channel, string registrant, CancellationToken cancellationToken = default)
     {
-        var input = new SubscribeShoutRequest(signature, registrant);
+        var input = new SubscribeShoutRequest(signature, channel, registrant);
         await _axusService.SubscribeShoutAsync(input, cancellationToken);
     }
 
-    public async ValueTask UnsubscribeShoutAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default)
+    public async ValueTask UnsubscribeShoutAsync(OmniSignature signature, string channel, string registrant, CancellationToken cancellationToken = default)
     {
-        var input = new UnsubscribeShoutRequest(signature, registrant);
+        var input = new UnsubscribeShoutRequest(signature, channel, registrant);
         await _axusService.UnsubscribeShoutAsync(input, cancellationToken);
     }
 
-    public async ValueTask<Shout?> TryExportShoutAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+    public async ValueTask<Shout?> TryExportShoutAsync(OmniSignature signature, string channel, CancellationToken cancellationToken = default)
     {
-        var input = new TryExportShoutRequest(signature);
+        var input = new TryExportShoutRequest(signature, channel);
         var output = await _axusService.TryExportShoutAsync(input, cancellationToken);
         return output.Shout;
     }

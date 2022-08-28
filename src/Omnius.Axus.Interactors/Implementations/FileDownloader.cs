@@ -12,7 +12,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IAxusServiceMediator _service;
+    private readonly IServiceMediator _service;
     private readonly IBytesPool _bytesPool;
     private readonly FileDownloaderOptions _options;
 
@@ -25,16 +25,16 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
 
     private readonly AsyncLock _asyncLock = new();
 
-    private const string Registrant = "Omnius.Axus.Interactors.FileDownloader";
+    private const string Registrant = "file_downloader/v1";
 
-    public static async ValueTask<FileDownloader> CreateAsync(IAxusServiceMediator service, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<FileDownloader> CreateAsync(IServiceMediator service, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options, CancellationToken cancellationToken = default)
     {
         var fileDownloader = new FileDownloader(service, singleValueStorageFactory, bytesPool, options);
         await fileDownloader.InitAsync(cancellationToken);
         return fileDownloader;
     }
 
-    private FileDownloader(IAxusServiceMediator service, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options)
+    private FileDownloader(IServiceMediator service, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options)
     {
         _service = service;
         _bytesPool = bytesPool;
@@ -90,7 +90,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
         {
             var reports = await _service.GetSubscribedFileReportsAsync(cancellationToken);
             var hashes = reports
-                .Where(n => n.Registrant == Registrant)
+                .Where(n => n.Authors.Contains(Registrant))
                 .Select(n => n.RootHash)
                 .ToHashSet();
 
@@ -117,7 +117,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
 
             var reports = await _service.GetSubscribedFileReportsAsync(cancellationToken);
             var reportMap = reports
-                .Where(n => n.Registrant == Registrant)
+                .Where(n => n.Authors.Contains(Registrant))
                 .ToDictionary(n => n.RootHash);
 
             foreach (var item in _fileDownloaderRepo.Items.FindAll())
@@ -147,7 +147,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
 
             var reports = await _service.GetSubscribedFileReportsAsync(cancellationToken);
             var reportMap = reports
-                .Where(n => n.Registrant == Registrant)
+                .Where(n => n.Authors.Contains(Registrant))
                 .ToDictionary(n => n.RootHash);
 
             foreach (var item in _fileDownloaderRepo.Items.FindAll())

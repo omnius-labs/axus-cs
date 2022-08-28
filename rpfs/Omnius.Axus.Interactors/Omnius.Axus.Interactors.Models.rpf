@@ -23,16 +23,6 @@ message ProfileSubscriberConfig {
 
 // Bark
 
-message BarkReply {
-    Version: BarkReplyVersion,
-    Hash: OmniHash,
-}
-
-enum BarkReplyVersion : int8 {
-    Unknown = 0,
-    Version1 = 1,
-}
-
 message BarkPublisherConfig {
     DigitalSignature: OmniDigitalSignature,
 }
@@ -48,7 +38,7 @@ message FileSeed {
     RootHash: OmniHash,
     Name: string(capacity: 256),
     Size: uint64,
-    CreatedTime: timestamp,
+    CreatedTime: timestamp64,
 }
 
 message FileDownloaderConfig {

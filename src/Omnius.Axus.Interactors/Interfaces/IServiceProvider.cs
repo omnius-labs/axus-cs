@@ -2,9 +2,9 @@ using Omnius.Axus.Remoting;
 
 namespace Omnius.Axus.Interactors;
 
-internal interface IAxusServiceProvider : IAsyncDisposable
+internal interface IServiceProvider : IAsyncDisposable
 {
     bool IsConnected { get; }
 
-    IAxusService GetService();
+    IAxusService Create();
 }

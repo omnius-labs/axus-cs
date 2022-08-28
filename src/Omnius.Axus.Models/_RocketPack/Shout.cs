@@ -8,20 +8,20 @@ namespace Omnius.Axus.Models;
 
 public sealed partial class Shout
 {
-    public static Shout Create(Timestamp createdTime, IMemoryOwner<byte> value, OmniDigitalSignature digitalSignature)
+    public static Shout Create(string channel, Timestamp64 createdTime, IMemoryOwner<byte> value, OmniDigitalSignature digitalSignature)
     {
         using var bytesPipe = new BytesPipe();
-        var target = new Shout(createdTime, value, null);
+        var target = new Shout(channel, createdTime, value, null);
         target.Export(bytesPipe.Writer, BytesPool.Shared);
 
         var certificate = OmniDigitalSignature.CreateOmniCertificate(digitalSignature, bytesPipe.Reader.GetSequence());
-        return new Shout(createdTime, value, certificate);
+        return new Shout(channel, createdTime, value, certificate);
     }
 
     public bool Verify()
     {
         using var bytesPipe = new BytesPipe();
-        var target = new Shout(this.CreatedTime, this.Value, null);
+        var target = new Shout(this.Channel, this.CreatedTime, this.Value, null);
         target.Export(bytesPipe.Writer, BytesPool.Shared);
 
         return this.Certificate?.Verify(bytesPipe.Reader.GetSequence()) ?? false;

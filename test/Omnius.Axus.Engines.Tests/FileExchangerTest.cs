@@ -14,18 +14,18 @@ public class FileExchangerTest
     {
         var results = new List<(OmniAddress, OmniAddress, long, TimeSpan)>{
             (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50011), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50012), 1, TimeSpan.FromMinutes(3)),
-            // (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50031), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50032), 8192, TimeSpan.FromMinutes(3)),
-            // (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50051), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50052), 1024 * 1024 * 32, TimeSpan.FromMinutes(3)),
+            (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50021), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50022), 8192, TimeSpan.FromMinutes(3)),
+            (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50031), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 50032), 1024 * 1024 * 32, TimeSpan.FromMinutes(10)),
         };
         return results.Select(n => new object[] { n.Item1, n.Item2, n.Item3, n.Item4 });
     }
 
     [Theory]
     [MemberData(nameof(GetPublishAndSubscribeTestCases))]
-    public async Task PublishAndSubscribeTest(OmniAddress publisherListenPort, OmniAddress subscriberListenPort, long fileSize, TimeSpan timeout)
+    public async Task PublishAndSubscribeTest(OmniAddress publisherListenAddress, OmniAddress subscriberListenAddress, long fileSize, TimeSpan timeout)
     {
-        await using var fileExchanger1 = await FileExchangerNode.CreateAsync(publisherListenPort);
-        await using var fileExchanger2 = await FileExchangerNode.CreateAsync(subscriberListenPort);
+        await using var fileExchanger1 = await FileExchangerNode.CreateAsync(publisherListenAddress);
+        await using var fileExchanger2 = await FileExchangerNode.CreateAsync(subscriberListenAddress);
 
         var nodeFinder1 = fileExchanger1.GetNodeFinder();
         var nodeFinder2 = fileExchanger2.GetNodeFinder();

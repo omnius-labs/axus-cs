@@ -24,6 +24,6 @@ internal record FileSeedEntity
 
     public FileSeed Export()
     {
-        return new FileSeed(this.RootHash?.Export() ?? OmniHash.Empty, this.Name ?? string.Empty, this.Size, Timestamp.FromDateTime(this.CreatedTime));
+        return new FileSeed(this.RootHash?.Export() ?? OmniHash.Empty, this.Name ?? string.Empty, this.Size, Timestamp64.FromDateTime(this.CreatedTime));
     }
 }

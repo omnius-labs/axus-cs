@@ -133,6 +133,7 @@ message PublishShoutRequest {
 
 message UnpublishShoutRequest {
     Signature: OmniSignature,
+    Channel: string,
     Registrant: string,
 }
 
@@ -142,16 +143,19 @@ message GetSubscribedShoutsReportResult {
 
 message SubscribeShoutRequest {
     Signature: OmniSignature,
+    Channel: string,
     Registrant: string,
 }
 
 message UnsubscribeShoutRequest {
     Signature: OmniSignature,
+    Channel: string,
     Registrant: string,
 }
 
 message TryExportShoutRequest {
     Signature: OmniSignature,
+    Channel: string,
 }
 
 message TryExportShoutResult {

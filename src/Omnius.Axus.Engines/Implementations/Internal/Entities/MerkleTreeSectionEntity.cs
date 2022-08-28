@@ -6,11 +6,8 @@ namespace Omnius.Axus.Engines.Internal.Entities;
 internal record MerkleTreeSectionEntity
 {
     public int Depth { get; set; }
-
     public uint BlockLength { get; set; }
-
     public ulong Length { get; set; }
-
     public OmniHashEntity[]? Hashes { get; set; }
 
     public static MerkleTreeSectionEntity Import(MerkleTreeSection item)

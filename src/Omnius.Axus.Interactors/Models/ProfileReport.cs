@@ -3,9 +3,9 @@ using Omnius.Core.Cryptography;
 
 namespace Omnius.Axus.Interactors.Models;
 
-public record ProfileMessage
+public record ProfileReport
 {
-    public ProfileMessage(OmniSignature signature, DateTime createdTime, IEnumerable<OmniSignature> trustedSignatures, IEnumerable<OmniSignature> blockedSignatures)
+    public ProfileReport(OmniSignature signature, DateTime createdTime, IEnumerable<OmniSignature> trustedSignatures, IEnumerable<OmniSignature> blockedSignatures)
     {
         this.Signature = signature;
         this.CreatedTime = createdTime;

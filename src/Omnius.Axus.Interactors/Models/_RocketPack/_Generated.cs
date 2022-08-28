@@ -3,11 +3,6 @@
 
 namespace Omnius.Axus.Interactors.Models;
 
-public enum BarkReplyVersion : sbyte
-{
-    Unknown = 0,
-    Version1 = 1,
-}
 public sealed partial class ProfilePublisherConfig : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.ProfilePublisherConfig>
 {
     public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.ProfilePublisherConfig> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.ProfilePublisherConfig>.Formatter;
@@ -359,119 +354,6 @@ public sealed partial class ProfileSubscriberConfig : global::Omnius.Core.Rocket
         }
     }
 }
-public sealed partial class BarkReply : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.BarkReply>
-{
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.BarkReply> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.BarkReply>.Formatter;
-    public static global::Omnius.Axus.Interactors.Models.BarkReply Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.BarkReply>.Empty;
-
-    static BarkReply()
-    {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.BarkReply>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.BarkReply>.Empty = new global::Omnius.Axus.Interactors.Models.BarkReply((global::Omnius.Axus.Interactors.Models.BarkReplyVersion)0, global::Omnius.Core.Cryptography.OmniHash.Empty);
-    }
-
-    private readonly global::System.Lazy<int> ___hashCode;
-
-    public BarkReply(global::Omnius.Axus.Interactors.Models.BarkReplyVersion version, global::Omnius.Core.Cryptography.OmniHash hash)
-    {
-        this.Version = version;
-        this.Hash = hash;
-
-        ___hashCode = new global::System.Lazy<int>(() =>
-        {
-            var ___h = new global::System.HashCode();
-            if (version != default) ___h.Add(version.GetHashCode());
-            if (hash != default) ___h.Add(hash.GetHashCode());
-            return ___h.ToHashCode();
-        });
-    }
-
-    public global::Omnius.Axus.Interactors.Models.BarkReplyVersion Version { get; }
-    public global::Omnius.Core.Cryptography.OmniHash Hash { get; }
-
-    public static global::Omnius.Axus.Interactors.Models.BarkReply Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
-    {
-        var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
-        return Formatter.Deserialize(ref reader, 0);
-    }
-    public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
-    {
-        var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
-        Formatter.Serialize(ref writer, this, 0);
-    }
-
-    public static bool operator ==(global::Omnius.Axus.Interactors.Models.BarkReply? left, global::Omnius.Axus.Interactors.Models.BarkReply? right)
-    {
-        return (right is null) ? (left is null) : right.Equals(left);
-    }
-    public static bool operator !=(global::Omnius.Axus.Interactors.Models.BarkReply? left, global::Omnius.Axus.Interactors.Models.BarkReply? right)
-    {
-        return !(left == right);
-    }
-    public override bool Equals(object? other)
-    {
-        if (other is not global::Omnius.Axus.Interactors.Models.BarkReply) return false;
-        return this.Equals((global::Omnius.Axus.Interactors.Models.BarkReply)other);
-    }
-    public bool Equals(global::Omnius.Axus.Interactors.Models.BarkReply? target)
-    {
-        if (target is null) return false;
-        if (object.ReferenceEquals(this, target)) return true;
-        if (this.Version != target.Version) return false;
-        if (this.Hash != target.Hash) return false;
-
-        return true;
-    }
-    public override int GetHashCode() => ___hashCode.Value;
-
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.BarkReply>
-    {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axus.Interactors.Models.BarkReply value, in int rank)
-        {
-            if (rank > 256) throw new global::System.FormatException();
-
-            if (value.Version != (global::Omnius.Axus.Interactors.Models.BarkReplyVersion)0)
-            {
-                w.Write((uint)1);
-                w.Write((long)value.Version);
-            }
-            if (value.Hash != global::Omnius.Core.Cryptography.OmniHash.Empty)
-            {
-                w.Write((uint)2);
-                global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.Hash, rank + 1);
-            }
-            w.Write((uint)0);
-        }
-        public global::Omnius.Axus.Interactors.Models.BarkReply Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
-        {
-            if (rank > 256) throw new global::System.FormatException();
-
-            global::Omnius.Axus.Interactors.Models.BarkReplyVersion p_version = (global::Omnius.Axus.Interactors.Models.BarkReplyVersion)0;
-            global::Omnius.Core.Cryptography.OmniHash p_hash = global::Omnius.Core.Cryptography.OmniHash.Empty;
-
-            for (; ; )
-            {
-                uint id = r.GetUInt32();
-                if (id == 0) break;
-                switch (id)
-                {
-                    case 1:
-                        {
-                            p_version = (global::Omnius.Axus.Interactors.Models.BarkReplyVersion)r.GetInt64();
-                            break;
-                        }
-                    case 2:
-                        {
-                            p_hash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
-                            break;
-                        }
-                }
-            }
-
-            return new global::Omnius.Axus.Interactors.Models.BarkReply(p_version, p_hash);
-        }
-    }
-}
 public sealed partial class BarkPublisherConfig : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.BarkPublisherConfig>
 {
     public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.BarkPublisherConfig> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.BarkPublisherConfig>.Formatter;
@@ -714,14 +596,14 @@ public sealed partial class FileSeed : global::Omnius.Core.RocketPack.IRocketMes
     static FileSeed()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.FileSeed>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.FileSeed>.Empty = new global::Omnius.Axus.Interactors.Models.FileSeed(global::Omnius.Core.Cryptography.OmniHash.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty, 0, global::Omnius.Core.RocketPack.Timestamp.Zero);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.FileSeed>.Empty = new global::Omnius.Axus.Interactors.Models.FileSeed(global::Omnius.Core.Cryptography.OmniHash.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty, 0, global::Omnius.Core.RocketPack.Timestamp64.Zero);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxNameLength = 256;
 
-    public FileSeed(global::Omnius.Core.Cryptography.OmniHash rootHash, global::Omnius.Core.RocketPack.Utf8String name, ulong size, global::Omnius.Core.RocketPack.Timestamp createdTime)
+    public FileSeed(global::Omnius.Core.Cryptography.OmniHash rootHash, global::Omnius.Core.RocketPack.Utf8String name, ulong size, global::Omnius.Core.RocketPack.Timestamp64 createdTime)
     {
         if (name is null) throw new global::System.ArgumentNullException("name");
         if (name.Length > 256) throw new global::System.ArgumentOutOfRangeException("name");
@@ -744,7 +626,7 @@ public sealed partial class FileSeed : global::Omnius.Core.RocketPack.IRocketMes
     public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
     public global::Omnius.Core.RocketPack.Utf8String Name { get; }
     public ulong Size { get; }
-    public global::Omnius.Core.RocketPack.Timestamp CreatedTime { get; }
+    public global::Omnius.Core.RocketPack.Timestamp64 CreatedTime { get; }
 
     public static global::Omnius.Axus.Interactors.Models.FileSeed Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -804,7 +686,7 @@ public sealed partial class FileSeed : global::Omnius.Core.RocketPack.IRocketMes
                 w.Write((uint)3);
                 w.Write(value.Size);
             }
-            if (value.CreatedTime != global::Omnius.Core.RocketPack.Timestamp.Zero)
+            if (value.CreatedTime != global::Omnius.Core.RocketPack.Timestamp64.Zero)
             {
                 w.Write((uint)4);
                 w.Write(value.CreatedTime);
@@ -818,7 +700,7 @@ public sealed partial class FileSeed : global::Omnius.Core.RocketPack.IRocketMes
             global::Omnius.Core.Cryptography.OmniHash p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
             global::Omnius.Core.RocketPack.Utf8String p_name = global::Omnius.Core.RocketPack.Utf8String.Empty;
             ulong p_size = 0;
-            global::Omnius.Core.RocketPack.Timestamp p_createdTime = global::Omnius.Core.RocketPack.Timestamp.Zero;
+            global::Omnius.Core.RocketPack.Timestamp64 p_createdTime = global::Omnius.Core.RocketPack.Timestamp64.Zero;
 
             for (; ; )
             {
@@ -843,7 +725,7 @@ public sealed partial class FileSeed : global::Omnius.Core.RocketPack.IRocketMes
                         }
                     case 4:
                         {
-                            p_createdTime = r.GetTimestamp();
+                            p_createdTime = r.GetTimestamp64();
                             break;
                         }
                 }

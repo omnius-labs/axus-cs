@@ -11,6 +11,9 @@ using Omnius.Core.Storages;
 
 namespace Omnius.Axus.Engines;
 
+// TODO
+// MerkleTreeSectionをオンメモリで持つ
+// カプセル化する
 public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublishedFileStorage
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
@@ -146,7 +149,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
 
             using (await _asyncLock.LockAsync(cancellationToken))
             {
-                var newPrefix = StringConverter.HashToString(rootHash);
+                var newPrefix = StringConverter.ToString(rootHash);
                 var targetBlockHashes = merkleTreeSections.SkipLast(1).SelectMany(n => n.Hashes).ToArray();
                 await this.RenameBlocksAsync(tempPrefix, newPrefix, targetBlockHashes, cancellationToken);
 
@@ -171,7 +174,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
 
             using (await _asyncLock.LockAsync(cancellationToken))
             {
-                var newPrefix = StringConverter.HashToString(rootHash);
+                var newPrefix = StringConverter.ToString(rootHash);
                 var targetBlockHashes = merkleTreeSections.SelectMany(n => n.Hashes).ToArray();
                 await this.RenameBlocksAsync(tempPrefix, newPrefix, targetBlockHashes, cancellationToken);
 
@@ -350,11 +353,11 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
 
     private static string GenKey(string prefix, OmniHash blockHash)
     {
-        return prefix + "/" + StringConverter.HashToString(blockHash);
+        return prefix + "/" + StringConverter.ToString(blockHash);
     }
 
     private static string GenKey(OmniHash rootHash, OmniHash blockHash)
     {
-        return StringConverter.HashToString(rootHash) + "/" + StringConverter.HashToString(blockHash);
+        return StringConverter.ToString(rootHash) + "/" + StringConverter.ToString(blockHash);
     }
 }
