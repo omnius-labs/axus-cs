@@ -67,7 +67,8 @@ message GetPublishedFilesReportResult {
 
 message PublishFileFromStorageRequest {
     FilePath: string,
-    Registrant: string,
+    MaxBlockSize: int32,
+    Author: string,
 }
 message PublishFileFromStorageResult {
     Hash: OmniHash,
@@ -75,7 +76,8 @@ message PublishFileFromStorageResult {
 
 message PublishFileFromMemoryRequest {
     Memory: bytes(capacity: 32 * 1024 * 1024),
-    Registrant: string,
+    MaxBlockSize: int32,
+    Author: string,
 }
 message PublishFileFromMemoryResult {
     Hash: OmniHash,
@@ -83,12 +85,12 @@ message PublishFileFromMemoryResult {
 
 message UnpublishFileFromStorageRequest {
     FilePath: string,
-    Registrant: string,
+    Author: string,
 }
 
 message UnpublishFileFromMemoryRequest {
     RootHash: OmniHash,
-    Registrant: string,
+    Author: string,
 }
 
 message GetSubscribedFilesReportResult {
@@ -97,12 +99,12 @@ message GetSubscribedFilesReportResult {
 
 message SubscribeFileRequest {
     RootHash: OmniHash,
-    Registrant: string,
+    Author: string,
 }
 
 message UnsubscribeFileRequest {
     RootHash: OmniHash,
-    Registrant: string,
+    Author: string,
 }
 
 message TryExportFileToStorageRequest {
@@ -128,13 +130,13 @@ message GetPublishedShoutsReportResult {
 
 message PublishShoutRequest {
     Shout: Shout,
-    Registrant: string,
+    Author: string,
 }
 
 message UnpublishShoutRequest {
     Signature: OmniSignature,
     Channel: string,
-    Registrant: string,
+    Author: string,
 }
 
 message GetSubscribedShoutsReportResult {
@@ -144,13 +146,13 @@ message GetSubscribedShoutsReportResult {
 message SubscribeShoutRequest {
     Signature: OmniSignature,
     Channel: string,
-    Registrant: string,
+    Author: string,
 }
 
 message UnsubscribeShoutRequest {
     Signature: OmniSignature,
     Channel: string,
-    Registrant: string,
+    Author: string,
 }
 
 message TryExportShoutRequest {

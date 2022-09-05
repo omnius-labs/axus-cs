@@ -26,15 +26,15 @@ public interface IServiceMediator
 
     ValueTask<IEnumerable<SubscribedShoutReport>> GetSubscribedShoutReportsAsync(CancellationToken cancellationToken = default);
 
-    ValueTask<OmniHash> PublishFileFromMemoryAsync(ReadOnlyMemory<byte> memory, string registrant, CancellationToken cancellationToken = default);
+    ValueTask<OmniHash> PublishFileFromMemoryAsync(ReadOnlyMemory<byte> memory, int maxBlockSize, string author, CancellationToken cancellationToken = default);
 
-    ValueTask<OmniHash> PublishFileFromStorageAsync(string filePath, string registrant, CancellationToken cancellationToken = default);
+    ValueTask<OmniHash> PublishFileFromStorageAsync(string filePath, int maxBlockSize, string author, CancellationToken cancellationToken = default);
 
-    ValueTask PublishShoutAsync(Shout message, string registrant, CancellationToken cancellationToken = default);
+    ValueTask PublishShoutAsync(Shout message, string author, CancellationToken cancellationToken = default);
 
-    ValueTask SubscribeFileAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default);
+    ValueTask SubscribeFileAsync(OmniHash rootHash, string author, CancellationToken cancellationToken = default);
 
-    ValueTask SubscribeShoutAsync(OmniSignature signature, string channel, string registrant, CancellationToken cancellationToken = default);
+    ValueTask SubscribeShoutAsync(OmniSignature signature, string channel, string author, CancellationToken cancellationToken = default);
 
     ValueTask<IMemoryOwner<byte>?> TryExportFileToMemoryAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
 
@@ -42,13 +42,13 @@ public interface IServiceMediator
 
     ValueTask<Shout?> TryExportShoutAsync(OmniSignature signature, string channel, CancellationToken cancellationToken = default);
 
-    ValueTask UnpublishFileFromMemoryAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default);
+    ValueTask UnpublishFileFromMemoryAsync(OmniHash rootHash, string author, CancellationToken cancellationToken = default);
 
-    ValueTask UnpublishFileFromStorageAsync(string filePath, string registrant, CancellationToken cancellationToken = default);
+    ValueTask UnpublishFileFromStorageAsync(string filePath, string author, CancellationToken cancellationToken = default);
 
-    ValueTask UnpublishShoutAsync(OmniSignature signature, string channel, string registrant, CancellationToken cancellationToken = default);
+    ValueTask UnpublishShoutAsync(OmniSignature signature, string channel, string author, CancellationToken cancellationToken = default);
 
-    ValueTask UnsubscribeFileAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default);
+    ValueTask UnsubscribeFileAsync(OmniHash rootHash, string author, CancellationToken cancellationToken = default);
 
-    ValueTask UnsubscribeShoutAsync(OmniSignature signature, string channel, string registrant, CancellationToken cancellationToken = default);
+    ValueTask UnsubscribeShoutAsync(OmniSignature signature, string channel, string author, CancellationToken cancellationToken = default);
 }

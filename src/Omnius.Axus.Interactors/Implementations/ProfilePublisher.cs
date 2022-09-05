@@ -26,7 +26,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
     private readonly AsyncLock _asyncLock = new();
 
     private const string Channel = "profile/v1";
-    private const string Registrant = "profile_publisher/v1";
+    private const string Author = "profile_publisher/v1";
 
     public static async ValueTask<ProfilePublisher> CreateAsync(IServiceMediator serviceController, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, ProfilePublisherOptions options, CancellationToken cancellationToken = default)
     {
@@ -134,13 +134,13 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
         {
             var reports = await _serviceController.GetPublishedShoutReportsAsync(cancellationToken);
             var signatures = reports
-                .Where(n => n.Registrant == Registrant)
+                .Where(n => n.Registrant == Author)
                 .Select(n => n.Signature)
                 .ToHashSet();
 
             foreach (var signature in signatures)
             {
-                await _serviceController.UnpublishShoutAsync(signature, Channel, Registrant, cancellationToken);
+                await _serviceController.UnpublishShoutAsync(signature, Channel, Author, cancellationToken);
             }
         }
     }
@@ -151,7 +151,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
         {
             var reports = await _serviceController.GetPublishedFileReportsAsync(cancellationToken);
             var rootHashes = reports
-                .Where(n => n.Registrant == Registrant)
+                .Where(n => n.Authors.Contains(Author))
                 .Select(n => n.RootHash)
                 .Where(n => n.HasValue)
                 .Select(n => n!.Value)
@@ -159,7 +159,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
 
             foreach (var rootHash in rootHashes)
             {
-                await _serviceController.UnpublishFileFromMemoryAsync(rootHash, Registrant, cancellationToken);
+                await _serviceController.UnpublishFileFromMemoryAsync(rootHash, Author, cancellationToken);
             }
         }
     }
@@ -178,7 +178,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             using var contentBytes = RocketMessage.ToBytes(content);
-            var rootHash = await _serviceController.PublishFileFromMemoryAsync(contentBytes.Memory, Registrant, cancellationToken);
+            var rootHash = await _serviceController.PublishFileFromMemoryAsync(contentBytes.Memory, 8 * 1024 * 1024, Author, cancellationToken);
             return rootHash;
         }
     }
@@ -188,7 +188,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
         var now = DateTime.UtcNow;
 
         using var shout = Shout.Create(Channel, Timestamp64.FromDateTime(now), RocketMessage.ToBytes(rootHash), digitalSignature);
-        await _serviceController.PublishShoutAsync(shout, Registrant, cancellationToken);
+        await _serviceController.PublishShoutAsync(shout, Author, cancellationToken);
     }
 
     public async ValueTask<ProfilePublisherConfig> GetConfigAsync(CancellationToken cancellationToken = default)

@@ -701,11 +701,11 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
             if (await _publishedFileStorage.ContainsPushBlockAsync(sessionStatus.RootHash, blockHash, cancellationToken))
             {
-                value = await _publishedFileStorage.ReadBlockAsync(sessionStatus.RootHash, blockHash, cancellationToken);
+                value = await _publishedFileStorage.TryReadBlockAsync(sessionStatus.RootHash, blockHash, cancellationToken);
             }
             else if (await _subscribedFileStorage.ContainsWantBlockAsync(sessionStatus.RootHash, blockHash, cancellationToken))
             {
-                value = await _subscribedFileStorage.ReadBlockAsync(sessionStatus.RootHash, blockHash, cancellationToken);
+                value = await _subscribedFileStorage.TryReadBlockAsync(sessionStatus.RootHash, blockHash, cancellationToken);
             }
 
             if (value is null) continue;

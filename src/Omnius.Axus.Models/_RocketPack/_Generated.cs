@@ -1549,37 +1549,45 @@ public sealed partial class PublishedFileReport : global::Omnius.Core.RocketPack
     static PublishedFileReport()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Models.PublishedFileReport>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Models.PublishedFileReport>.Empty = new global::Omnius.Axus.Models.PublishedFileReport(null, null, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Models.PublishedFileReport>.Empty = new global::Omnius.Axus.Models.PublishedFileReport(null, null, global::System.Array.Empty<global::Omnius.Core.RocketPack.Utf8String>());
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxFilePathLength = 2147483647;
-    public static readonly int MaxRegistrantLength = 2147483647;
+    public static readonly int MaxAuthorsCount = 2147483647;
 
-    public PublishedFileReport(global::Omnius.Core.RocketPack.Utf8String? filePath, global::Omnius.Core.Cryptography.OmniHash? rootHash, global::Omnius.Core.RocketPack.Utf8String registrant)
+    public PublishedFileReport(global::Omnius.Core.RocketPack.Utf8String? filePath, global::Omnius.Core.Cryptography.OmniHash? rootHash, global::Omnius.Core.RocketPack.Utf8String[] authors)
     {
         if (filePath is not null && filePath.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("filePath");
-        if (registrant is null) throw new global::System.ArgumentNullException("registrant");
-        if (registrant.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("registrant");
+        if (authors is null) throw new global::System.ArgumentNullException("authors");
+        if (authors.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("authors");
+        foreach (var n in authors)
+        {
+            if (n is null) throw new global::System.ArgumentNullException("n");
+            if (n.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("n");
+        }
 
         this.FilePath = filePath;
         this.RootHash = rootHash;
-        this.Registrant = registrant;
+        this.Authors = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.RocketPack.Utf8String>(authors);
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (filePath is not null && !filePath.IsEmpty) ___h.Add(filePath.GetHashCode());
             if (rootHash is not null) ___h.Add(rootHash.Value.GetHashCode());
-            if (!registrant.IsEmpty) ___h.Add(registrant.GetHashCode());
+            foreach (var n in authors)
+            {
+                if (!n.IsEmpty) ___h.Add(n.GetHashCode());
+            }
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Core.RocketPack.Utf8String? FilePath { get; }
     public global::Omnius.Core.Cryptography.OmniHash? RootHash { get; }
-    public global::Omnius.Core.RocketPack.Utf8String Registrant { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.RocketPack.Utf8String> Authors { get; }
 
     public static global::Omnius.Axus.Models.PublishedFileReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -1612,7 +1620,7 @@ public sealed partial class PublishedFileReport : global::Omnius.Core.RocketPack
         if (this.FilePath != target.FilePath) return false;
         if ((this.RootHash is null) != (target.RootHash is null)) return false;
         if ((this.RootHash is not null) && (target.RootHash is not null) && this.RootHash != target.RootHash) return false;
-        if (this.Registrant != target.Registrant) return false;
+        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Authors, target.Authors)) return false;
 
         return true;
     }
@@ -1634,10 +1642,14 @@ public sealed partial class PublishedFileReport : global::Omnius.Core.RocketPack
                 w.Write((uint)2);
                 global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.RootHash.Value, rank + 1);
             }
-            if (value.Registrant != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            if (value.Authors.Count != 0)
             {
                 w.Write((uint)3);
-                w.Write(value.Registrant);
+                w.Write((uint)value.Authors.Count);
+                foreach (var n in value.Authors)
+                {
+                    w.Write(n);
+                }
             }
             w.Write((uint)0);
         }
@@ -1647,7 +1659,7 @@ public sealed partial class PublishedFileReport : global::Omnius.Core.RocketPack
 
             global::Omnius.Core.RocketPack.Utf8String? p_filePath = null;
             global::Omnius.Core.Cryptography.OmniHash? p_rootHash = null;
-            global::Omnius.Core.RocketPack.Utf8String p_registrant = global::Omnius.Core.RocketPack.Utf8String.Empty;
+            global::Omnius.Core.RocketPack.Utf8String[] p_authors = global::System.Array.Empty<global::Omnius.Core.RocketPack.Utf8String>();
 
             for (; ; )
             {
@@ -1667,13 +1679,18 @@ public sealed partial class PublishedFileReport : global::Omnius.Core.RocketPack
                         }
                     case 3:
                         {
-                            p_registrant = r.GetString(2147483647);
+                            var length = r.GetUInt32();
+                            p_authors = new global::Omnius.Core.RocketPack.Utf8String[length];
+                            for (int i = 0; i < p_authors.Length; i++)
+                            {
+                                p_authors[i] = r.GetString(2147483647);
+                            }
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axus.Models.PublishedFileReport(p_filePath, p_rootHash, p_registrant);
+            return new global::Omnius.Axus.Models.PublishedFileReport(p_filePath, p_rootHash, p_authors);
         }
     }
 }

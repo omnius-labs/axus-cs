@@ -17,11 +17,11 @@ public interface IPublishedFileStorage : IReadOnlyFileStorage, IAsyncDisposable
 
     ValueTask<bool> ContainsPushBlockAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default);
 
-    ValueTask<OmniHash> PublishFileAsync(string filePath, string registrant, CancellationToken cancellationToken = default);
+    ValueTask<OmniHash> PublishFileAsync(string filePath, int maxBlockSize, string author, CancellationToken cancellationToken = default);
 
-    ValueTask<OmniHash> PublishFileAsync(ReadOnlySequence<byte> sequence, string registrant, CancellationToken cancellationToken = default);
+    ValueTask<OmniHash> PublishFileAsync(ReadOnlySequence<byte> sequence, int maxBlockSize, string author, CancellationToken cancellationToken = default);
 
-    ValueTask UnpublishFileAsync(string filePath, string registrant, CancellationToken cancellationToken = default);
+    ValueTask UnpublishFileAsync(string filePath, string author, CancellationToken cancellationToken = default);
 
-    ValueTask UnpublishFileAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default);
+    ValueTask UnpublishFileAsync(OmniHash rootHash, string author, CancellationToken cancellationToken = default);
 }

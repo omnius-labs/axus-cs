@@ -93,7 +93,7 @@ message TcpAccepterConfig {
 message PublishedFileReport {
     FilePath: string?,
     RootHash: OmniHash?,
-    Registrant: string,
+    Authors: vector<string>,
 }
 
 message SubscribedFileReport {

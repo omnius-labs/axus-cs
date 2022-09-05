@@ -354,7 +354,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var rootHash = await _publishedFileStorage.PublishFileAsync(param.FilePath, param.Registrant, cancellationToken);
+            var rootHash = await _publishedFileStorage.PublishFileAsync(param.FilePath, param.MaxBlockSize, param.Author, cancellationToken);
             return new PublishFileFromStorageResult(rootHash);
         }
     }
@@ -363,7 +363,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var rootHash = await _publishedFileStorage.PublishFileAsync(new ReadOnlySequence<byte>(param.Memory), param.Registrant, cancellationToken);
+            var rootHash = await _publishedFileStorage.PublishFileAsync(new ReadOnlySequence<byte>(param.Memory), param.MaxBlockSize, param.Author, cancellationToken);
             return new PublishFileFromMemoryResult(rootHash);
         }
     }
@@ -372,7 +372,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await _publishedFileStorage.UnpublishFileAsync(param.FilePath, param.Registrant, cancellationToken);
+            await _publishedFileStorage.UnpublishFileAsync(param.FilePath, param.Author, cancellationToken);
         }
     }
 
@@ -380,7 +380,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await _publishedFileStorage.UnpublishFileAsync(param.RootHash, param.Registrant, cancellationToken);
+            await _publishedFileStorage.UnpublishFileAsync(param.RootHash, param.Author, cancellationToken);
         }
     }
 
@@ -388,7 +388,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await _subscribedFileStorage.SubscribeFileAsync(param.RootHash, param.Registrant, cancellationToken);
+            await _subscribedFileStorage.SubscribeFileAsync(param.RootHash, param.Author, cancellationToken);
         }
     }
 
@@ -396,7 +396,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await _subscribedFileStorage.UnsubscribeFileAsync(param.RootHash, param.Registrant, cancellationToken);
+            await _subscribedFileStorage.UnsubscribeFileAsync(param.RootHash, param.Author, cancellationToken);
         }
     }
 
@@ -424,7 +424,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await _publishedShoutStorage.PublishShoutAsync(param.Shout, param.Registrant, cancellationToken);
+            await _publishedShoutStorage.PublishShoutAsync(param.Shout, param.Author, cancellationToken);
         }
     }
 
@@ -432,7 +432,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await _publishedShoutStorage.UnpublishShoutAsync(param.Signature, param.Channel, param.Registrant, cancellationToken);
+            await _publishedShoutStorage.UnpublishShoutAsync(param.Signature, param.Channel, param.Author, cancellationToken);
         }
     }
 
@@ -440,7 +440,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await _subscribedShoutStorage.SubscribeShoutAsync(param.Signature, param.Channel, param.Registrant, cancellationToken);
+            await _subscribedShoutStorage.SubscribeShoutAsync(param.Signature, param.Channel, param.Author, cancellationToken);
         }
     }
 
@@ -448,7 +448,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await _subscribedShoutStorage.UnsubscribeShoutAsync(param.Signature, param.Channel, param.Registrant, cancellationToken);
+            await _subscribedShoutStorage.UnsubscribeShoutAsync(param.Signature, param.Channel, param.Author, cancellationToken);
         }
     }
 

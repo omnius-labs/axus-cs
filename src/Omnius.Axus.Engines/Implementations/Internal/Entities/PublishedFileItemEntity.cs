@@ -1,5 +1,3 @@
-using System.Buffers;
-using LiteDB;
 using Omnius.Axus.Engines.Internal.Models;
 using Omnius.Core.Cryptography;
 
@@ -9,9 +7,8 @@ internal record PublishedFileItemEntity
 {
     public OmniHashEntity? RootHash { get; set; }
     public string? FilePath { get; set; }
-    public string? Registrant { get; set; }
-    public MerkleTreeSectionEntity[]? MerkleTreeSections { get; set; }
-    public int MaxBlockLength { get; set; }
+    public int MaxBlockSize { get; set; }
+    public IReadOnlyList<string>? Authors { get; set; }
 
     public static PublishedFileItemEntity Import(PublishedFileItem item)
     {
@@ -19,14 +16,19 @@ internal record PublishedFileItemEntity
         {
             RootHash = OmniHashEntity.Import(item.RootHash),
             FilePath = item.FilePath,
-            Registrant = item.Registrant,
-            MerkleTreeSections = item.MerkleTreeSections?.Select(n => MerkleTreeSectionEntity.Import(n))?.ToArray() ?? Array.Empty<MerkleTreeSectionEntity>(),
-            MaxBlockLength = item.MaxBlockLength,
+            MaxBlockSize = item.MaxBlockSize,
+            Authors = item.Authors,
         };
     }
 
     public PublishedFileItem Export()
     {
-        return new PublishedFileItem(this.RootHash?.Export() ?? OmniHash.Empty, this.FilePath ?? string.Empty, this.Registrant ?? string.Empty, this.MerkleTreeSections?.Select(n => n.Export())?.ToArray() ?? Array.Empty<MerkleTreeSection>(), this.MaxBlockLength);
+        return new PublishedFileItem()
+        {
+            RootHash = this.RootHash?.Export() ?? OmniHash.Empty,
+            FilePath = this.FilePath,
+            MaxBlockSize = this.MaxBlockSize,
+            Authors = this.Authors ?? Array.Empty<string>(),
+        };
     }
 }

@@ -173,6 +173,18 @@ internal sealed partial class SubscribedFileStorageRepository : DisposableBase
             }
         }
 
+        public bool Exists(OmniHash rootHash, OmniHash blockHash)
+        {
+            lock (_lockObject)
+            {
+                var rootHashEntity = OmniHashEntity.Import(rootHash);
+                var blockHashEntity = OmniHashEntity.Import(blockHash);
+
+                var col = this.GetCollection();
+                return col.Exists(n => n.BlockHash == blockHashEntity && n.RootHash == rootHashEntity);
+            }
+        }
+
         public IEnumerable<SubscribedBlockItem> Find(OmniHash rootHash)
         {
             lock (_lockObject)
@@ -184,7 +196,7 @@ internal sealed partial class SubscribedFileStorageRepository : DisposableBase
             }
         }
 
-        public SubscribedBlockItem? FindOne(OmniHash rootHash, OmniHash blockHash)
+        public IEnumerable<SubscribedBlockItem> Find(OmniHash rootHash, OmniHash blockHash)
         {
             lock (_lockObject)
             {
@@ -192,7 +204,7 @@ internal sealed partial class SubscribedFileStorageRepository : DisposableBase
                 var blockHashEntity = OmniHashEntity.Import(blockHash);
 
                 var col = this.GetCollection();
-                return col.FindOne(n => n.BlockHash == blockHashEntity && n.RootHash == rootHashEntity)?.Export();
+                return col.Find(n => n.BlockHash == blockHashEntity && n.RootHash == rootHashEntity).Select(n => n.Export()).ToArray();
             }
         }
 
@@ -212,19 +224,7 @@ internal sealed partial class SubscribedFileStorageRepository : DisposableBase
 
         public void Upsert(SubscribedBlockItem item)
         {
-            lock (_lockObject)
-            {
-                var itemEntity = SubscribedBlockItemEntity.Import(item);
-
-                var col = this.GetCollection();
-
-                _database.BeginTrans();
-
-                col.DeleteMany(n => n.BlockHash == itemEntity.BlockHash && n.RootHash == itemEntity.RootHash);
-                col.Insert(itemEntity);
-
-                _database.Commit();
-            }
+            this.UpsertBulk(new[] { item });
         }
 
         public void UpsertBulk(IEnumerable<SubscribedBlockItem> items)
@@ -239,7 +239,11 @@ internal sealed partial class SubscribedFileStorageRepository : DisposableBase
                 {
                     var itemEntity = SubscribedBlockItemEntity.Import(item);
 
-                    col.DeleteMany(n => n.BlockHash == itemEntity.BlockHash && n.RootHash == itemEntity.RootHash);
+                    col.DeleteMany(n =>
+                        n.BlockHash == itemEntity.BlockHash
+                        && n.RootHash == itemEntity.RootHash
+                        && n.Depth == itemEntity.Depth
+                        && n.Order == itemEntity.Order);
                     col.Insert(itemEntity);
                 }
 

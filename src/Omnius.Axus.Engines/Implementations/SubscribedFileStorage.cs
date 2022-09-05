@@ -229,8 +229,7 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var key = GenKey(rootHash, blockHash);
-            return await _blockStorage.ContainsKeyAsync(key, cancellationToken);
+            return _subscriberRepo.BlockItems.Exists(rootHash, blockHash);
         }
     }
 
@@ -356,7 +355,7 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
         }
     }
 
-    public async ValueTask<IMemoryOwner<byte>?> ReadBlockAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
+    public async ValueTask<IMemoryOwner<byte>?> TryReadBlockAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -369,14 +368,14 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var blockItem = _subscriberRepo.BlockItems.FindOne(rootHash, blockHash);
-            if (blockItem is null || blockItem.IsDownloaded) return;
+            var blockItems = _subscriberRepo.BlockItems.Find(rootHash, blockHash);
+            if (blockItems.Count() == 0) return;
 
             var key = GenKey(rootHash, blockHash);
             await _blockStorage.WriteAsync(key, memory, cancellationToken);
 
-            var newBlockItem = blockItem with { IsDownloaded = true };
-            _subscriberRepo.BlockItems.Upsert(newBlockItem);
+            var newBlockItems = blockItems.Select(n => n with { IsDownloaded = true }).ToArray();
+            _subscriberRepo.BlockItems.UpsertBulk(newBlockItems);
 
             var fileItem = _subscriberRepo.FileItems.FindOne(rootHash);
             if (fileItem is null) return;
@@ -388,6 +387,7 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
                     DownloadedBlockCount = fileItem.Status.DownloadedBlockCount + 1
                 }
             };
+
             _subscriberRepo.FileItems.Upsert(newFileItem);
         }
     }
