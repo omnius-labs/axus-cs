@@ -26,7 +26,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
     private readonly IBytesPool _bytesPool;
     private readonly NodeFinderOptions _options;
 
-    private readonly NodeFinderRepository _nodeFinderRepo;
+    private readonly CachedNodeLocationRepository _cachedNodeLocationRepo;
 
     private readonly FuncPipe<IEnumerable<ContentClue>> _getPushContentCluesFuncPipe = new();
     private readonly FuncPipe<IEnumerable<ContentClue>> _getWantContentCluesFuncPipe = new();
@@ -74,7 +74,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         _options = options;
         _myId = GenId();
 
-        _nodeFinderRepo = new NodeFinderRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
+        _cachedNodeLocationRepo = new CachedNodeLocationRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
 
         _events = new Events(_getPushContentCluesFuncPipe.Listener, _getWantContentCluesFuncPipe.Listener);
 
@@ -86,7 +86,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
     private async ValueTask InitAsync(CancellationToken cancellationToken = default)
     {
-        await _nodeFinderRepo.MigrateAsync(cancellationToken);
+        await _cachedNodeLocationRepo.MigrateAsync(cancellationToken);
 
         _connectLoopTask = this.ConnectLoopAsync(_cancellationTokenSource.Token);
         _acceptLoopTask = this.AcceptLoopAsync(_cancellationTokenSource.Token);
@@ -120,7 +120,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         _receivedPushContentLocationMap.Dispose();
         _receivedGiveContentLocationMap.Dispose();
 
-        _nodeFinderRepo.Dispose();
+        _cachedNodeLocationRepo.Dispose();
     }
 
     public INodeFinderEvents GetEvents() => _events;
@@ -150,7 +150,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
     {
         lock (_lockObject)
         {
-            return _nodeFinderRepo.NodeLocations.FindAll();
+            return _cachedNodeLocationRepo.FindAll();
         }
     }
 
@@ -160,7 +160,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         {
             foreach (var nodeLocation in nodeLocations)
             {
-                _nodeFinderRepo.NodeLocations.TryInsert(nodeLocation, DateTime.UtcNow);
+                _cachedNodeLocationRepo.TryInsert(nodeLocation, DateTime.UtcNow);
             }
         }
     }
@@ -186,7 +186,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
     {
         lock (_lockObject)
         {
-            _nodeFinderRepo.NodeLocations.Upsert(nodeLocation, DateTime.UtcNow, DateTime.UtcNow);
+            _cachedNodeLocationRepo.Upsert(nodeLocation, DateTime.UtcNow, DateTime.UtcNow);
         }
     }
 
@@ -222,7 +222,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
     private async ValueTask<IEnumerable<NodeLocation>> FindNodeLocationsForConnecting(CancellationToken cancellationToken = default)
     {
-        var nodeLocations = _nodeFinderRepo.NodeLocations.FindAll().ToList();
+        var nodeLocations = _cachedNodeLocationRepo.FindAll().ToList();
         _random.Shuffle(nodeLocations);
 
         var ignoredAddressSet = await this.GetIgnoredAddressSet(cancellationToken);
@@ -567,7 +567,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
                 if (nodeLocationsTrimExcessStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromMinutes(1)))
                 {
-                    _nodeFinderRepo.NodeLocations.TrimExcess(MaxNodeLocationCount);
+                    _cachedNodeLocationRepo.Shrink(MaxNodeLocationCount);
                 }
 
                 if (trimDeadSessionsStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromMinutes(1)))
