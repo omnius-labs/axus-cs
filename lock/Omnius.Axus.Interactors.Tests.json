@@ -1466,250 +1466,247 @@
       "omnius.axus.engines": {
         "type": "Project",
         "dependencies": {
-          "LiteDB": "5.0.11",
-          "NLog": "4.7.13",
-          "Omnius.Axus.Models": "0.0.1-alpha.1",
-          "Omnius.Axus.Utils": "0.0.1-alpha.1",
-          "Omnius.Core": "0.0.1-alpha.1",
-          "Omnius.Core.Collections": "0.0.1-alpha.1",
-          "Omnius.Core.Cryptography": "0.0.1-alpha.1",
-          "Omnius.Core.Net": "0.0.1-alpha.1",
-          "Omnius.Core.Net.I2p": "0.0.1-alpha.1",
-          "Omnius.Core.Net.Proxies": "0.0.1-alpha.1",
-          "Omnius.Core.Net.Upnp": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack.Remoting": "0.0.1-alpha.1",
-          "Omnius.Core.Storages": "0.0.1-alpha.1",
-          "SqlKata": "2.3.7",
-          "SqlKata.Execution": "2.3.7",
-          "System.Data.SQLite.Core": "1.0.116"
+          "LiteDB": "[5.0.11, )",
+          "NLog": "[4.7.13, )",
+          "Omnius.Axus.Models": "[0.0.1-alpha.1, )",
+          "Omnius.Axus.Utils": "[0.0.1-alpha.1, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Collections": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Cryptography": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Net": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Net.I2p": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Net.Proxies": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Net.Upnp": "[0.0.1-alpha.1, )",
+          "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )",
+          "Omnius.Core.RocketPack.Remoting": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Storages": "[0.0.1-alpha.1, )"
         }
       },
       "omnius.axus.interactors": {
         "type": "Project",
         "dependencies": {
-          "LiteDB": "5.0.11",
-          "NLog": "4.7.13",
-          "Omnius.Axus.Models": "0.0.1-alpha.1",
-          "Omnius.Axus.Remoting": "0.0.1-alpha.1",
-          "Omnius.Axus.Utils": "0.0.1-alpha.1",
-          "Omnius.Core": "0.0.1-alpha.1",
-          "Omnius.Core.Collections": "0.0.1-alpha.1",
-          "Omnius.Core.Cryptography": "0.0.1-alpha.1",
-          "Omnius.Core.Net": "0.0.1-alpha.1",
-          "Omnius.Core.Net.Proxies": "0.0.1-alpha.1",
-          "Omnius.Core.Net.Upnp": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack.Remoting": "0.0.1-alpha.1",
-          "Omnius.Core.Serialization": "0.0.1-alpha.1",
-          "Omnius.Core.Storages": "0.0.1-alpha.1",
-          "SqlKata": "2.3.7",
-          "SqlKata.Execution": "2.3.7",
-          "System.Data.SQLite.Core": "1.0.116"
+          "LiteDB": "[5.0.11, )",
+          "NLog": "[4.7.13, )",
+          "Omnius.Axus.Models": "[0.0.1-alpha.1, )",
+          "Omnius.Axus.Remoting": "[0.0.1-alpha.1, )",
+          "Omnius.Axus.Utils": "[0.0.1-alpha.1, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Collections": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Cryptography": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Net": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Net.Proxies": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Net.Upnp": "[0.0.1-alpha.1, )",
+          "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )",
+          "Omnius.Core.RocketPack.Remoting": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Serialization": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Storages": "[0.0.1-alpha.1, )",
+          "SqlKata": "[2.3.7, )",
+          "SqlKata.Execution": "[2.3.7, )",
+          "System.Data.SQLite.Core": "[1.0.116, )"
         }
       },
       "omnius.axus.models": {
         "type": "Project",
         "dependencies": {
-          "LiteDB": "5.0.11",
-          "NLog": "4.7.13",
-          "Omnius.Core": "0.0.1-alpha.1",
-          "Omnius.Core.Collections": "0.0.1-alpha.1",
-          "Omnius.Core.Cryptography": "0.0.1-alpha.1",
-          "Omnius.Core.Net": "0.0.1-alpha.1",
-          "Omnius.Core.Pipelines": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack.Remoting": "0.0.1-alpha.1",
-          "Omnius.Core.Utils": "0.0.1-alpha.1"
+          "LiteDB": "[5.0.11, )",
+          "NLog": "[4.7.13, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Collections": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Cryptography": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Net": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Pipelines": "[0.0.1-alpha.1, )",
+          "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )",
+          "Omnius.Core.RocketPack.Remoting": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Utils": "[0.0.1-alpha.1, )"
         }
       },
       "omnius.axus.remoting": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.13",
-          "Omnius.Axus.Models": "0.0.1-alpha.1",
-          "Omnius.Core": "0.0.1-alpha.1",
-          "Omnius.Core.Collections": "0.0.1-alpha.1",
-          "Omnius.Core.Cryptography": "0.0.1-alpha.1",
-          "Omnius.Core.Net": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack.Remoting": "0.0.1-alpha.1"
+          "NLog": "[4.7.13, )",
+          "Omnius.Axus.Models": "[0.0.1-alpha.1, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Collections": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Cryptography": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Net": "[0.0.1-alpha.1, )",
+          "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )",
+          "Omnius.Core.RocketPack.Remoting": "[0.0.1-alpha.1, )"
         }
       },
       "omnius.axus.utils": {
         "type": "Project",
         "dependencies": {
-          "LiteDB": "5.0.11",
-          "NLog": "4.7.13"
+          "LiteDB": "[5.0.11, )",
+          "NLog": "[4.7.13, )"
         }
       },
       "omnius.core": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.13",
-          "NeoSmart.AsyncLock": "3.2.1",
-          "System.IO.Pipelines": "6.0.1"
+          "NLog": "[4.7.13, )",
+          "NeoSmart.AsyncLock": "[3.2.1, )",
+          "System.IO.Pipelines": "[6.0.1, )"
         }
       },
       "omnius.core.collections": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.13",
-          "Omnius.Core": "0.0.1-alpha.1",
-          "Omnius.Core.Tasks": "0.0.1-alpha.1"
+          "NLog": "[4.7.13, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Tasks": "[0.0.1-alpha.1, )"
         }
       },
       "omnius.core.cryptography": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.13",
-          "Omnius.Core": "0.0.1-alpha.1",
-          "Omnius.Core.Collections": "0.0.1-alpha.1",
-          "Omnius.Core.Pipelines": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack": "0.0.1-alpha.1",
-          "Omnius.Core.Serialization": "0.0.1-alpha.1",
-          "Omnius.Core.Streams": "0.0.1-alpha.1"
+          "NLog": "[4.7.13, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Collections": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Pipelines": "[0.0.1-alpha.1, )",
+          "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Serialization": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Streams": "[0.0.1-alpha.1, )"
         }
       },
       "omnius.core.net": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.13",
-          "Omnius.Core": "0.0.1-alpha.1",
-          "Omnius.Core.Collections": "0.0.1-alpha.1",
-          "Omnius.Core.Cryptography": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack": "0.0.1-alpha.1",
-          "Omnius.Core.Serialization": "0.0.1-alpha.1",
-          "Sprache": "2.3.1"
+          "NLog": "[4.7.13, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Collections": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Cryptography": "[0.0.1-alpha.1, )",
+          "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Serialization": "[0.0.1-alpha.1, )",
+          "Sprache": "[2.3.1, )"
         }
       },
       "omnius.core.net.caps": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.13",
-          "Omnius.Core": "0.0.1-alpha.1",
-          "Omnius.Core.Collections": "0.0.1-alpha.1",
-          "Omnius.Core.Cryptography": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack": "0.0.1-alpha.1",
-          "Omnius.Core.Serialization": "0.0.1-alpha.1"
+          "NLog": "[4.7.13, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Collections": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Cryptography": "[0.0.1-alpha.1, )",
+          "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Serialization": "[0.0.1-alpha.1, )"
         }
       },
       "omnius.core.net.connections": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.13",
-          "Omnius.Core": "0.0.1-alpha.1",
-          "Omnius.Core.Collections": "0.0.1-alpha.1",
-          "Omnius.Core.Cryptography": "0.0.1-alpha.1",
-          "Omnius.Core.Net": "0.0.1-alpha.1",
-          "Omnius.Core.Net.Caps": "0.0.1-alpha.1",
-          "Omnius.Core.Pipelines": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack": "0.0.1-alpha.1",
-          "Omnius.Core.Serialization": "0.0.1-alpha.1",
-          "Omnius.Core.Tasks": "0.0.1-alpha.1"
+          "NLog": "[4.7.13, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Collections": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Cryptography": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Net": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Net.Caps": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Pipelines": "[0.0.1-alpha.1, )",
+          "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Serialization": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Tasks": "[0.0.1-alpha.1, )"
         }
       },
       "omnius.core.net.i2p": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.13",
-          "Omnius.Core": "0.0.1-alpha.1",
-          "Omnius.Core.Pipelines": "0.0.1-alpha.1"
+          "NLog": "[4.7.13, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Pipelines": "[0.0.1-alpha.1, )"
         }
       },
       "omnius.core.net.proxies": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.13",
-          "Omnius.Core": "0.0.1-alpha.1"
+          "NLog": "[4.7.13, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )"
         }
       },
       "omnius.core.net.upnp": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.13",
-          "Omnius.Core": "0.0.1-alpha.1"
+          "NLog": "[4.7.13, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )"
         }
       },
       "omnius.core.pipelines": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.13",
-          "Omnius.Core": "0.0.1-alpha.1"
+          "NLog": "[4.7.13, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )"
         }
       },
       "omnius.core.rocketpack": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.13",
-          "Omnius.Core": "0.0.1-alpha.1",
-          "Omnius.Core.Pipelines": "0.0.1-alpha.1"
+          "NLog": "[4.7.13, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Pipelines": "[0.0.1-alpha.1, )"
         }
       },
       "omnius.core.rocketpack.remoting": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.13",
-          "Omnius.Core": "0.0.1-alpha.1",
-          "Omnius.Core.Net": "0.0.1-alpha.1",
-          "Omnius.Core.Net.Caps": "0.0.1-alpha.1",
-          "Omnius.Core.Net.Connections": "0.0.1-alpha.1",
-          "Omnius.Core.Pipelines": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack": "0.0.1-alpha.1",
-          "Omnius.Core.Serialization": "0.0.1-alpha.1"
+          "NLog": "[4.7.13, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Net": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Net.Caps": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Net.Connections": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Pipelines": "[0.0.1-alpha.1, )",
+          "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Serialization": "[0.0.1-alpha.1, )"
         }
       },
       "omnius.core.serialization": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.13",
-          "Omnius.Core": "0.0.1-alpha.1",
-          "Omnius.Core.Pipelines": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack": "0.0.1-alpha.1"
+          "NLog": "[4.7.13, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Pipelines": "[0.0.1-alpha.1, )",
+          "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )"
         }
       },
       "omnius.core.storages": {
         "type": "Project",
         "dependencies": {
-          "LiteDB": "5.0.11",
-          "NLog": "4.7.13",
-          "Nito.AsyncEx": "5.1.2",
-          "Omnius.Core": "0.0.1-alpha.1",
-          "Omnius.Core.Pipelines": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack": "0.0.1-alpha.1",
-          "Omnius.Core.Serialization": "0.0.1-alpha.1"
+          "LiteDB": "[5.0.11, )",
+          "NLog": "[4.7.13, )",
+          "Nito.AsyncEx": "[5.1.2, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Pipelines": "[0.0.1-alpha.1, )",
+          "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Serialization": "[0.0.1-alpha.1, )"
         }
       },
       "omnius.core.streams": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.13",
-          "Omnius.Core": "0.0.1-alpha.1",
-          "Omnius.Core.RocketPack": "0.0.1-alpha.1",
-          "Omnius.Core.Serialization": "0.0.1-alpha.1"
+          "NLog": "[4.7.13, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )",
+          "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Serialization": "[0.0.1-alpha.1, )"
         }
       },
       "omnius.core.tasks": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.13",
-          "Omnius.Core": "0.0.1-alpha.1"
+          "NLog": "[4.7.13, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )"
         }
       },
       "omnius.core.unittesttoolkit": {
         "type": "Project",
         "dependencies": {
-          "DiffPlex": "1.7.0",
-          "NLog": "4.7.13",
-          "System.Text.Json": "6.0.1"
+          "DiffPlex": "[1.7.0, )",
+          "NLog": "[4.7.13, )",
+          "System.Text.Json": "[6.0.1, )"
         }
       },
       "omnius.core.utils": {
         "type": "Project",
         "dependencies": {
-          "NLog": "4.7.13",
-          "Newtonsoft.Json": "13.0.1",
-          "YamlDotNet": "11.2.1"
+          "NLog": "[4.7.13, )",
+          "Newtonsoft.Json": "[13.0.1, )",
+          "YamlDotNet": "[11.2.1, )"
         }
       }
     }

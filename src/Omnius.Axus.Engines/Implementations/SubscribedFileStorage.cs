@@ -299,6 +299,7 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
                 var key = GenKey(rootHash, blockItem.BlockHash);
                 await _blockStorage.TryDeleteAsync(key, cancellationToken);
             }
+
             _subscriberRepo.BlockItems.Delete(rootHash);
         }
     }
