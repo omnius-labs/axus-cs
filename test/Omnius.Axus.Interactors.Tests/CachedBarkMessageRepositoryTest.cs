@@ -27,13 +27,13 @@ public class CachedBarkMessageRepositoryTest
         };
         repo.InsertBulk(insertMessages);
 
-        var fetchedMessages = repo.FetchByTag("tag");
+        var fetchedMessages = repo.FetchMessageByTag("tag");
         insertMessages.Should().BeEquivalentTo(fetchedMessages);
     }
 
-    private static CachedBarkMessage GenRandomCachedBarkMessage()
+    private static CachedBarkContent GenRandomCachedBarkMessage()
     {
-        return new CachedBarkMessage(
+        return new CachedBarkContent(
             OmniDigitalSignature.Create("aaa", OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256).GetOmniSignature(),
             new BarkMessage(
                 "tag",

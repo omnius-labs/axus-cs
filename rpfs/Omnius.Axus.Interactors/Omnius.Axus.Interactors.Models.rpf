@@ -25,11 +25,19 @@ message ProfileSubscriberConfig {
 
 message BarkPublisherConfig {
     DigitalSignature: OmniDigitalSignature,
+    Messages: vector<BarkMessage>(capacity: 8 * 1024),
 }
 
 message BarkSubscriberConfig {
     Tags: vector<string(capacity: 256)>(capacity: 256),
-    MaxBarkCount: uint32,
+    MaxBarkMessageCount: uint32,
+}
+
+message BarkMessage {
+    Tag: string(capacity: 256),
+    CreatedTime: timestamp64,
+    Comment: string(capacity: 1024),
+    AnchorHash: OmniHash,
 }
 
 // File

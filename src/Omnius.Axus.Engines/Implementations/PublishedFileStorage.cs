@@ -138,8 +138,8 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
                 if (fileItem.Authors.Contains(author)) return fileItem.RootHash;
 
                 var authors = fileItem.Authors.Append(author).ToArray();
-                var newFileItem = fileItem with { Authors = authors };
-                _publisherRepo.FileItems.Upsert(newFileItem);
+                fileItem = fileItem with { Authors = authors };
+                _publisherRepo.FileItems.Upsert(fileItem);
 
                 return fileItem.RootHash;
             }
@@ -168,7 +168,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
             allInternalBlockItems = allInternalBlockItems.Select(n => n with { RootHash = rootHash }).ToList();
             externalBlockItems = externalBlockItems.Select(n => n with { RootHash = rootHash }).ToArray();
 
-            fileItem = new PublishedFileItem
+            var newFileItem = new PublishedFileItem
             {
                 RootHash = rootHash,
                 FilePath = filePath,
@@ -182,7 +182,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
                 var targetBlockHashes = allInternalBlockItems.Select(n => n.BlockHash).ToArray();
                 await this.RenameBlocksAsync(tempPrefix, newPrefix, targetBlockHashes, cancellationToken);
 
-                _publisherRepo.FileItems.Upsert(fileItem);
+                _publisherRepo.FileItems.Upsert(newFileItem);
                 _publisherRepo.InternalBlockItems.UpsertBulk(allInternalBlockItems);
                 _publisherRepo.ExternalBlockItems.UpsertBulk(externalBlockItems);
             }
@@ -229,13 +229,13 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
                 if (fileItem.Authors.Contains(author)) return rootHash;
 
                 var authors = fileItem.Authors.Append(author).ToArray();
-                var newFileItem = fileItem with { Authors = authors };
-                _publisherRepo.FileItems.Upsert(newFileItem);
+                fileItem = fileItem with { Authors = authors };
+                _publisherRepo.FileItems.Upsert(fileItem);
 
                 return rootHash;
             }
 
-            fileItem = new PublishedFileItem
+            var newFileItem = new PublishedFileItem
             {
                 RootHash = rootHash,
                 FilePath = null,
@@ -249,7 +249,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
                 var targetBlockHashes = allInternalBlockItems.Select(n => n.BlockHash).ToArray();
                 await this.RenameBlocksAsync(tempPrefix, newPrefix, targetBlockHashes, cancellationToken);
 
-                _publisherRepo.FileItems.Upsert(fileItem);
+                _publisherRepo.FileItems.Upsert(newFileItem);
                 _publisherRepo.InternalBlockItems.UpsertBulk(allInternalBlockItems);
             }
 

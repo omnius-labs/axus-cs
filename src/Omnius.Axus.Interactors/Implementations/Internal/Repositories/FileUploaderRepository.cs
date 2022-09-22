@@ -18,7 +18,7 @@ internal sealed class FileUploaderRepository : DisposableBase
         _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
         _database.UtcDate = true;
 
-        this.Items = new UploadingFileItemRepository(_database);
+        this.FileItems = new UploadingFileItemRepository(_database);
     }
 
     protected override void OnDispose(bool disposing)
@@ -28,10 +28,10 @@ internal sealed class FileUploaderRepository : DisposableBase
 
     public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
     {
-        await this.Items.MigrateAsync(cancellationToken);
+        await this.FileItems.MigrateAsync(cancellationToken);
     }
 
-    public UploadingFileItemRepository Items { get; }
+    public UploadingFileItemRepository FileItems { get; }
 
     public sealed class UploadingFileItemRepository
     {

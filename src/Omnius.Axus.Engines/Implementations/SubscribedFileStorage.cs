@@ -244,33 +244,33 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
                 if (fileItem.Authors.Contains(author)) return;
 
                 var authors = fileItem.Authors.Append(author).ToArray();
-                var newFileItem = fileItem with { Authors = authors };
-                _subscriberRepo.FileItems.Upsert(newFileItem);
-            }
-            else
-            {
-                var newFileItem = new SubscribedFileItem()
-                {
-                    RootHash = rootHash,
-                    Authors = new[] { author },
-                    Status = new SubscribedFileItemStatus()
-                    {
-                        CurrentDepth = -1,
-                        TotalBlockCount = 1,
-                        DownloadedBlockCount = 0,
-                        State = SubscribedFileState.Downloading,
-                    }
-                };
-                var newBlockItem = new SubscribedBlockItem()
-                {
-                    RootHash = rootHash,
-                    BlockHash = rootHash,
-                    Depth = -1,
-                };
+                fileItem = fileItem with { Authors = authors };
+                _subscriberRepo.FileItems.Upsert(fileItem);
 
-                _subscriberRepo.FileItems.Upsert(newFileItem);
-                _subscriberRepo.BlockItems.Upsert(newBlockItem);
+                return;
             }
+
+            var newFileItem = new SubscribedFileItem()
+            {
+                RootHash = rootHash,
+                Authors = new[] { author },
+                Status = new SubscribedFileItemStatus()
+                {
+                    CurrentDepth = -1,
+                    TotalBlockCount = 1,
+                    DownloadedBlockCount = 0,
+                    State = SubscribedFileState.Downloading,
+                },
+            };
+            var newBlockItem = new SubscribedBlockItem()
+            {
+                RootHash = rootHash,
+                BlockHash = rootHash,
+                Depth = -1,
+            };
+
+            _subscriberRepo.FileItems.Upsert(newFileItem);
+            _subscriberRepo.BlockItems.Upsert(newBlockItem);
         }
     }
 
@@ -387,7 +387,6 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
                     DownloadedBlockCount = fileItem.Status.DownloadedBlockCount + 1
                 }
             };
-
             _subscriberRepo.FileItems.Upsert(newFileItem);
         }
     }

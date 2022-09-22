@@ -8,18 +8,18 @@ using Omnius.Core.Helpers;
 
 namespace Omnius.Axus.Interactors.Internal.Repositories;
 
-internal sealed class ProfileSubscriberRepository : DisposableBase
+internal sealed class BarkPublisherRepository : DisposableBase
 {
     private readonly LiteDatabase _database;
 
-    public ProfileSubscriberRepository(string dirPath)
+    public BarkPublisherRepository(string dirPath)
     {
         DirectoryHelper.CreateDirectory(dirPath);
 
         _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
         _database.UtcDate = true;
 
-        this.ProfileItems = new SubscribedProfileItemRepository(_database);
+        this.BarkItems = new PublishedBarkItemRepository(_database);
     }
 
     protected override void OnDispose(bool disposing)
@@ -29,20 +29,20 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
 
     public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
     {
-        await this.ProfileItems.MigrateAsync(cancellationToken);
+        await this.BarkItems.MigrateAsync(cancellationToken);
     }
 
-    public SubscribedProfileItemRepository ProfileItems { get; }
+    public PublishedBarkItemRepository BarkItems { get; }
 
-    public sealed class SubscribedProfileItemRepository
+    public sealed class PublishedBarkItemRepository
     {
-        private const string CollectionName = "subscribed_profile_items";
+        private const string CollectionName = "published_bark_items";
 
         private readonly LiteDatabase _database;
 
         private readonly object _lockObject = new();
 
-        public SubscribedProfileItemRepository(LiteDatabase database)
+        public PublishedBarkItemRepository(LiteDatabase database)
         {
             _database = database;
         }
@@ -62,10 +62,19 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
             }
         }
 
-        private ILiteCollection<SubscribedProfileItemEntity> GetCollection()
+        private ILiteCollection<PublishedBarkItemEntity> GetCollection()
         {
-            var col = _database.GetCollection<SubscribedProfileItemEntity>(CollectionName);
+            var col = _database.GetCollection<PublishedBarkItemEntity>(CollectionName);
             return col;
+        }
+
+        public int Count()
+        {
+            lock (_lockObject)
+            {
+                var col = this.GetCollection();
+                return col.Count();
+            }
         }
 
         public bool Exists(OmniSignature signature)
@@ -90,7 +99,7 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
             }
         }
 
-        public IEnumerable<SubscribedProfileItem> FindAll()
+        public IEnumerable<PublishedBarkItem> FindAll()
         {
             lock (_lockObject)
             {
@@ -99,7 +108,7 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
             }
         }
 
-        public SubscribedProfileItem? FindOne(OmniSignature signature)
+        public PublishedBarkItem? FindOne(OmniSignature signature)
         {
             lock (_lockObject)
             {
@@ -110,11 +119,11 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
             }
         }
 
-        public void Upsert(SubscribedProfileItem item)
+        public void Upsert(PublishedBarkItem item)
         {
             lock (_lockObject)
             {
-                var itemEntity = SubscribedProfileItemEntity.Import(item);
+                var itemEntity = PublishedBarkItemEntity.Import(item);
 
                 var col = this.GetCollection();
 
@@ -142,6 +151,15 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
 
                 var col = this.GetCollection();
                 col.DeleteMany(n => n.RootHash == rootHashEntity);
+            }
+        }
+
+        internal void DeleteAll()
+        {
+            lock (_lockObject)
+            {
+                var col = this.GetCollection();
+                col.DeleteAll();
             }
         }
     }

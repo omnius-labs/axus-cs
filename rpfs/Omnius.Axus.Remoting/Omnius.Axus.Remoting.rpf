@@ -158,6 +158,7 @@ message UnsubscribeShoutRequest {
 message TryExportShoutRequest {
     Signature: OmniSignature,
     Channel: string,
+    UpdatedTime: timestamp64,
 }
 
 message TryExportShoutResult {

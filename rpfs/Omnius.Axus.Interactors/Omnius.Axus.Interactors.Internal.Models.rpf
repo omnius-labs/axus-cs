@@ -11,7 +11,7 @@ namespace "Omnius.Axus.Interactors.Internal.Models";
 
 message CachedProfileContent {
     Signature: OmniSignature,
-    CreatedTime: timestamp64,
+    ShoutUpdatedTime: timestamp64,
     Value: ProfileContent,
 }
 
@@ -22,18 +22,17 @@ message ProfileContent {
 
 // Bark
 
-message CachedBarkMessage {
+message CachedBarkContent {
     Signature: OmniSignature,
-    Value: BarkMessage,
+    ShoutUpdatedTime: timestamp64,
+    Value: BarkContent,
 }
 
 message BarkContent {
-    Messages: vector<BarkMessage>(capacity: 32 * 1024),
+    Messages: vector<BarkMessage>(capacity: 8 * 1024),
 }
 
-message BarkMessage {
-    Tag: string(capacity: 256),
-    CreatedTime: timestamp64,
-    Comment: string(capacity: 1024),
-    AnchorHash: OmniHash,
+message CachedBarkMessage {
+    Signature: OmniSignature,
+    Value: BarkMessage,
 }

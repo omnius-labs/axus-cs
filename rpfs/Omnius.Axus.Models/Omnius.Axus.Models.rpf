@@ -18,7 +18,7 @@ message ContentClue {
 
 message Shout {
     Channel: string(capacity: 256),
-    CreatedTime: timestamp64,
+    UpdatedTime: timestamp64,
     Value: bytes(capacity: 32 * 1024 * 1024, recyclable: true),
     Certificate: OmniCertificate?,
 }
@@ -119,11 +119,11 @@ enum SubscribedFileState : uint8 {
 message PublishedShoutReport {
     Signature: OmniSignature,
     Channel: string,
-    Registrant: string,
+    Authors: vector<string>,
 }
 
 message SubscribedShoutReport {
     Signature: OmniSignature,
     Channel: string,
-    Registrant: string,
+    Authors: vector<string>,
 }

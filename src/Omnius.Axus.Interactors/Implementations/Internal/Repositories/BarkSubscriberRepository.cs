@@ -19,7 +19,7 @@ internal sealed class BarkSubscriberRepository : DisposableBase
         _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
         _database.UtcDate = true;
 
-        this.Items = new SubscribedBarkItemRepository(_database);
+        this.BarkItems = new SubscribedBarkItemRepository(_database);
     }
 
     protected override void OnDispose(bool disposing)
@@ -29,10 +29,10 @@ internal sealed class BarkSubscriberRepository : DisposableBase
 
     public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
     {
-        await this.Items.MigrateAsync(cancellationToken);
+        await this.BarkItems.MigrateAsync(cancellationToken);
     }
 
-    public SubscribedBarkItemRepository Items { get; }
+    public SubscribedBarkItemRepository BarkItems { get; }
 
     public sealed class SubscribedBarkItemRepository
     {

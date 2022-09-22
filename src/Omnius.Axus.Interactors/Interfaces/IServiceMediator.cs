@@ -40,7 +40,7 @@ public interface IServiceMediator
 
     ValueTask<bool> TryExportFileToStorageAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default);
 
-    ValueTask<Shout?> TryExportShoutAsync(OmniSignature signature, string channel, CancellationToken cancellationToken = default);
+    ValueTask<Shout?> TryExportShoutAsync(OmniSignature signature, string channel, DateTime updatedTime, CancellationToken cancellationToken = default);
 
     ValueTask UnpublishFileFromMemoryAsync(OmniHash rootHash, string author, CancellationToken cancellationToken = default);
 

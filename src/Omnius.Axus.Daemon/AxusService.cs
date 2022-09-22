@@ -456,7 +456,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var shout = await _subscribedShoutStorage.ReadShoutAsync(param.Signature, param.Channel, cancellationToken);
+            var shout = await _subscribedShoutStorage.TryReadShoutAsync(param.Signature, param.Channel, param.UpdatedTime.ToDateTime(), cancellationToken);
             return new TryExportShoutResult(shout);
         }
     }

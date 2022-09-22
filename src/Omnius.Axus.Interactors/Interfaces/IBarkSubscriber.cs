@@ -5,9 +5,9 @@ namespace Omnius.Axus.Interactors;
 
 public interface IBarkSubscriber : IAsyncDisposable
 {
-    ValueTask<IEnumerable<BarkMessageReport>> FindByTagAsync(string tag, CancellationToken cancellationToken = default);
+    ValueTask<IEnumerable<BarkMessageReport>> FindMessagesByTagAsync(string tag, CancellationToken cancellationToken = default);
 
-    ValueTask<BarkMessageReport?> FindBySelfHashAsync(OmniHash selfHash, CancellationToken cancellationToken = default);
+    ValueTask<BarkMessageReport?> FindMessagesBySelfHashAsync(OmniHash selfHash, CancellationToken cancellationToken = default);
 
     ValueTask<BarkSubscriberConfig> GetConfigAsync(CancellationToken cancellationToken = default);
 

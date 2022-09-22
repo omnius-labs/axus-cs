@@ -9,15 +9,15 @@ using Omnius.Core.Storages;
 
 namespace Omnius.Axus.Interactors;
 
-public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
+public sealed class BarkPublisher : AsyncDisposableBase, IBarkPublisher
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
     private readonly IServiceMediator _serviceMediator;
     private readonly IBytesPool _bytesPool;
-    private readonly ProfilePublisherOptions _options;
+    private readonly BarkPublisherOptions _options;
 
-    private readonly ProfilePublisherRepository _profilePublisherRepo;
+    private readonly BarkPublisherRepository _barkPublisherRepo;
     private readonly ISingleValueStorage _configStorage;
 
     private Task _watchLoopTask = null!;
@@ -29,20 +29,20 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
     private const string Channel = "profile/v1";
     private const string Author = "profile_publisher/v1";
 
-    public static async ValueTask<ProfilePublisher> CreateAsync(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, ProfilePublisherOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<BarkPublisher> CreateAsync(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, BarkPublisherOptions options, CancellationToken cancellationToken = default)
     {
-        var profilePublisher = new ProfilePublisher(serviceMediator, singleValueStorageFactory, bytesPool, options);
+        var profilePublisher = new BarkPublisher(serviceMediator, singleValueStorageFactory, bytesPool, options);
         await profilePublisher.InitAsync(cancellationToken);
         return profilePublisher;
     }
 
-    private ProfilePublisher(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, ProfilePublisherOptions options)
+    private BarkPublisher(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, BarkPublisherOptions options)
     {
         _serviceMediator = serviceMediator;
         _bytesPool = bytesPool;
         _options = options;
 
-        _profilePublisherRepo = new ProfilePublisherRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
+        _barkPublisherRepo = new BarkPublisherRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
         _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
     }
 
@@ -72,7 +72,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
 
                 var config = await this.GetConfigAsync(cancellationToken);
 
-                await this.SyncProfilePublisherRepo(config, cancellationToken);
+                await this.SyncBarkPublisherRepo(config, cancellationToken);
                 await this.ShrinkPublishedShouts(cancellationToken);
                 await this.ShrinkPublishedFiles(cancellationToken);
 
@@ -81,7 +81,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
 
                 if (!exists)
                 {
-                    await this.PublishProfileContent(config, cancellationToken);
+                    await this.PublishBarkContent(config, cancellationToken);
                 }
             }
         }
@@ -95,23 +95,23 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
         }
     }
 
-    private async ValueTask SyncProfilePublisherRepo(ProfilePublisherConfig config, CancellationToken cancellationToken = default)
+    private async ValueTask SyncBarkPublisherRepo(BarkPublisherConfig config, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            foreach (var profileItem in _profilePublisherRepo.ProfileItems.FindAll())
+            foreach (var profileItem in _barkPublisherRepo.BarkItems.FindAll())
             {
                 if (profileItem.Signature == config.DigitalSignature.GetOmniSignature()) continue;
-                _profilePublisherRepo.ProfileItems.Delete(profileItem.Signature);
+                _barkPublisherRepo.BarkItems.Delete(profileItem.Signature);
             }
 
-            if (_profilePublisherRepo.ProfileItems.Exists(config.DigitalSignature.GetOmniSignature())) return;
+            if (_barkPublisherRepo.BarkItems.Exists(config.DigitalSignature.GetOmniSignature())) return;
 
-            var newProfileItem = new PublishedProfileItem()
+            var newBarkItem = new PublishedBarkItem()
             {
                 Signature = config.DigitalSignature.GetOmniSignature(),
             };
-            _profilePublisherRepo.ProfileItems.Upsert(newProfileItem);
+            _barkPublisherRepo.BarkItems.Upsert(newBarkItem);
         }
     }
 
@@ -127,7 +127,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
 
             foreach (var signature in signatures)
             {
-                if (_profilePublisherRepo.ProfileItems.Exists(signature)) continue;
+                if (_barkPublisherRepo.BarkItems.Exists(signature)) continue;
                 await _serviceMediator.UnsubscribeShoutAsync(signature, Channel, Author, cancellationToken);
             }
         }
@@ -147,7 +147,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
 
             foreach (var rootHash in rootHashes)
             {
-                if (_profilePublisherRepo.ProfileItems.Exists(rootHash)) continue;
+                if (_barkPublisherRepo.BarkItems.Exists(rootHash)) continue;
                 await _serviceMediator.UnpublishFileFromMemoryAsync(rootHash, Author, cancellationToken);
             }
         }
@@ -163,7 +163,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
                 .Select(n => n.Signature)
                 .ToHashSet();
 
-            foreach (var profileItem in _profilePublisherRepo.ProfileItems.FindAll())
+            foreach (var profileItem in _barkPublisherRepo.BarkItems.FindAll())
             {
                 if (signatures.Contains(profileItem.Signature)) continue;
                 return false;
@@ -185,7 +185,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
                 .Select(n => n!.Value)
                 .ToHashSet();
 
-            foreach (var profileItem in _profilePublisherRepo.ProfileItems.FindAll())
+            foreach (var profileItem in _barkPublisherRepo.BarkItems.FindAll())
             {
                 if (rootHashes.Contains(profileItem.RootHash)) continue;
                 return false;
@@ -195,12 +195,12 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
         }
     }
 
-    private async ValueTask PublishProfileContent(ProfilePublisherConfig config, CancellationToken cancellationToken = default)
+    private async ValueTask PublishBarkContent(BarkPublisherConfig config, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var digitalSignature = config.DigitalSignature;
-            var content = new ProfileContent(config.TrustedSignatures.ToArray(), config.BlockedSignatures.ToArray());
+            var content = new BarkContent(config.Messages.ToArray());
 
             using var contentBytes = RocketMessage.ToBytes(content);
             var rootHash = await _serviceMediator.PublishFileFromMemoryAsync(contentBytes.Memory, 8 * 1024 * 1024, Author, cancellationToken);
@@ -211,18 +211,17 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
         }
     }
 
-    public async ValueTask<ProfilePublisherConfig> GetConfigAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<BarkPublisherConfig> GetConfigAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var config = await _configStorage.TryGetValueAsync<ProfilePublisherConfig>(cancellationToken);
+            var config = await _configStorage.TryGetValueAsync<BarkPublisherConfig>(cancellationToken);
 
             if (config is null)
             {
-                config = new ProfilePublisherConfig(
+                config = new BarkPublisherConfig(
                     digitalSignature: OmniDigitalSignature.Create("Anonymous", OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256),
-                    trustedSignatures: Array.Empty<OmniSignature>(),
-                    blockedSignatures: Array.Empty<OmniSignature>()
+                    messages: Array.Empty<BarkMessage>()
                 );
 
                 await _configStorage.TrySetValueAsync(config, cancellationToken);
@@ -232,12 +231,12 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
         }
     }
 
-    public async ValueTask SetConfigAsync(ProfilePublisherConfig config, CancellationToken cancellationToken = default)
+    public async ValueTask SetConfigAsync(BarkPublisherConfig config, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             await _configStorage.TrySetValueAsync(config, cancellationToken);
-            _profilePublisherRepo.ProfileItems.DeleteAll();
+            _barkPublisherRepo.BarkItems.DeleteAll();
         }
     }
 }

@@ -5,9 +5,11 @@ namespace Omnius.Axus.Interactors;
 
 public interface IProfileSubscriber : IAsyncDisposable
 {
-    ValueTask<IEnumerable<ProfileReport>> FindAllAsync(CancellationToken cancellationToken = default);
+    ValueTask<IEnumerable<OmniSignature>> GetSignaturesAsync(CancellationToken cancellationToken = default);
 
-    ValueTask<ProfileReport?> FindBySignatureAsync(OmniSignature signature, CancellationToken cancellationToken = default);
+    ValueTask<IEnumerable<ProfileReport>> FindProfilesAsync(CancellationToken cancellationToken = default);
+
+    ValueTask<ProfileReport?> FindProfileBySignatureAsync(OmniSignature signature, CancellationToken cancellationToken = default);
 
     ValueTask<ProfileSubscriberConfig> GetConfigAsync(CancellationToken cancellationToken = default);
 

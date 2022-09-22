@@ -21,7 +21,7 @@ public sealed partial class Shout
     public bool Verify()
     {
         using var bytesPipe = new BytesPipe();
-        var target = new Shout(this.Channel, this.CreatedTime, this.Value, null);
+        var target = new Shout(this.Channel, this.UpdatedTime, this.Value, null);
         target.Export(bytesPipe.Writer, BytesPool.Shared);
 
         return this.Certificate?.Verify(bytesPipe.Reader.GetSequence()) ?? false;

@@ -2,7 +2,6 @@ using Omnius.Axus.Interactors.Internal.Models;
 using Omnius.Axus.Interactors.Internal.Repositories;
 using Omnius.Axus.Interactors.Models;
 using Omnius.Core;
-using Omnius.Core.Cryptography;
 using Omnius.Core.RocketPack;
 
 namespace Omnius.Axus.Interactors;
@@ -94,19 +93,21 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
 
             foreach (var filePath in filePaths)
             {
-                if (_fileUploaderRepo.Items.Exists(filePath)) continue;
+                if (_fileUploaderRepo.FileItems.Exists(filePath)) continue;
                 await _serviceController.UnpublishFileFromStorageAsync(filePath, Author, cancellationToken);
             }
 
-            foreach (var item in _fileUploaderRepo.Items.FindAll())
+            foreach (var fileItem in _fileUploaderRepo.FileItems.FindAll())
             {
-                if (filePaths.Contains(item.FilePath)) continue;
-                var rootHash = await _serviceController.PublishFileFromStorageAsync(item.FilePath, 8 * 1024 * 1024, Author, cancellationToken);
+                if (filePaths.Contains(fileItem.FilePath)) continue;
+                var rootHash = await _serviceController.PublishFileFromStorageAsync(fileItem.FilePath, 8 * 1024 * 1024, Author, cancellationToken);
 
-                var fileSeed = new FileSeed(rootHash, item.FileSeed.Name, item.FileSeed.Size, item.FileSeed.CreatedTime);
-                var newItem = new UploadingFileItem(item.FilePath, fileSeed, item.CreatedTime, UploadingFileState.Completed);
-
-                _fileUploaderRepo.Items.Upsert(newItem);
+                var fileSeed = new FileSeed(rootHash, fileItem.Name, (ulong)fileItem.Length, Timestamp64.FromDateTime(fileItem.CreatedTime));
+                var newFileItem = fileItem with
+                {
+                    FileSeed = fileSeed,
+                };
+                _fileUploaderRepo.FileItems.Upsert(newFileItem);
             }
         }
     }
@@ -117,12 +118,10 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
         {
             var reports = new List<UploadingFileReport>();
 
-            foreach (var item in _fileUploaderRepo.Items.FindAll())
+            foreach (var item in _fileUploaderRepo.FileItems.FindAll())
             {
-                var seed = (item.State == UploadingFileState.Completed) ? item.FileSeed : null;
-
                 var status = new UploadingFileStatus(item.State);
-                reports.Add(new UploadingFileReport(item.FilePath, seed, item.CreatedTime, status));
+                reports.Add(new UploadingFileReport(item.FilePath, item.FileSeed, item.CreatedTime, status));
             }
 
             return reports;
@@ -133,12 +132,18 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            if (_fileUploaderRepo.Items.Exists(filePath)) return;
+            if (_fileUploaderRepo.FileItems.Exists(filePath)) return;
 
             var now = DateTime.UtcNow;
-            var fileSeed = new FileSeed(OmniHash.Empty, name, (ulong)new FileInfo(filePath).Length, Timestamp64.FromDateTime(now));
-            var item = new UploadingFileItem(filePath, fileSeed, now, UploadingFileState.Waiting);
-            _fileUploaderRepo.Items.Upsert(item);
+            var fileItem = new UploadingFileItem
+            {
+                FilePath = filePath,
+                Name = name,
+                Length = new FileInfo(filePath).Length,
+                State = UploadingFileState.Waiting,
+                CreatedTime = now,
+            };
+            _fileUploaderRepo.FileItems.Upsert(fileItem);
         }
     }
 
@@ -146,11 +151,11 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            if (!_fileUploaderRepo.Items.Exists(filePath)) return;
+            if (!_fileUploaderRepo.FileItems.Exists(filePath)) return;
 
             await _serviceController.UnpublishFileFromStorageAsync(filePath, Author, cancellationToken);
 
-            _fileUploaderRepo.Items.Delete(filePath);
+            _fileUploaderRepo.FileItems.Delete(filePath);
         }
     }
 }

@@ -1,4 +1,5 @@
 using Omnius.Axus.Engines.Internal.Models;
+using Omnius.Core.Cryptography;
 
 namespace Omnius.Axus.Engines.Internal.Entities;
 
@@ -6,8 +7,8 @@ internal record PublishedShoutItemEntity
 {
     public OmniSignatureEntity? Signature { get; set; }
     public string? Channel { get; set; }
-    public DateTime CreatedTime { get; set; }
-    public string? Registrant { get; set; }
+    public IReadOnlyList<string>? Authors { get; set; }
+    public DateTime ShoutUpdatedTime { get; set; }
 
     public static PublishedShoutItemEntity Import(PublishedShoutItem item)
     {
@@ -15,13 +16,19 @@ internal record PublishedShoutItemEntity
         {
             Signature = OmniSignatureEntity.Import(item.Signature),
             Channel = item.Channel,
-            CreatedTime = item.CreatedTime,
-            Registrant = item.Registrant,
+            Authors = item.Authors,
+            ShoutUpdatedTime = item.ShoutUpdatedTime,
         };
     }
 
     public PublishedShoutItem Export()
     {
-        return new PublishedShoutItem(this.Signature!.Export(), this.Channel ?? string.Empty, this.CreatedTime, this.Registrant ?? string.Empty);
+        return new PublishedShoutItem()
+        {
+            Signature = this.Signature?.Export() ?? OmniSignature.Empty,
+            Channel = this.Channel ?? string.Empty,
+            Authors = this.Authors ?? Array.Empty<string>(),
+            ShoutUpdatedTime = this.ShoutUpdatedTime,
+        };
     }
 }

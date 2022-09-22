@@ -245,11 +245,9 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
             if (version == ShoutExchangerVersion.Version1)
             {
-                var shoutCreatedTime = Timestamp64.Zero;
-                var shoutCreatedDateTime = await this.ReadShoutCreatedTimeAsync(signature, channel, cancellationToken);
-                if (shoutCreatedDateTime is not null) shoutCreatedTime = Timestamp64.FromDateTime(shoutCreatedDateTime.Value);
+                var shoutUpdatedTime = await this.ReadShoutUpdatedTimeAsync(signature, channel, cancellationToken);
 
-                var requestMessage = new ShoutExchangerFetchRequestMessage(signature, channel, shoutCreatedTime);
+                var requestMessage = new ShoutExchangerFetchRequestMessage(signature, channel, Timestamp64.FromDateTime(shoutUpdatedTime));
                 var resultMessage = await session.Connection.SendAndReceiveAsync<ShoutExchangerFetchRequestMessage, ShoutExchangerFetchResultMessage>(requestMessage, cancellationToken);
 
                 _logger.Debug($"Send ShoutFetchRequest: (Signature: {requestMessage.Signature.ToString()})");
@@ -264,7 +262,7 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
                 {
                     _logger.Debug($"Receive ShoutFetchResult: (Type: NotFound, Signature: {requestMessage.Signature.ToString()})");
 
-                    var shout = await this.ReadShoutAsync(signature, channel, cancellationToken);
+                    var shout = await this.TryReadShoutAsync(signature, channel, shoutUpdatedTime, cancellationToken);
 
                     if (shout is not null)
                     {
@@ -325,20 +323,18 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
                 _logger.Debug($"Receive ShoutFetchRequest: (Signature: {requestMessage.Signature.ToString()})");
 
-                var shoutCreatedTime = Timestamp64.Zero;
-                var shoutCreatedDateTime = await this.ReadShoutCreatedTimeAsync(requestMessage.Signature, requestMessage.Channel, cancellationToken);
-                if (shoutCreatedDateTime is not null) shoutCreatedTime = Timestamp64.FromDateTime(shoutCreatedDateTime.Value);
+                var shoutUpdatedTime = await this.ReadShoutUpdatedTimeAsync(requestMessage.Signature, requestMessage.Channel, cancellationToken);
 
-                if (requestMessage.CreatedTime == shoutCreatedTime)
+                if (requestMessage.CreatedTime.ToDateTime() == shoutUpdatedTime)
                 {
                     using var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.Same, null);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
 
                     _logger.Debug($"Send ShoutFetchResult: (Type: Same, Signature: {requestMessage.Signature.ToString()})");
                 }
-                else if (requestMessage.CreatedTime < shoutCreatedTime)
+                else if (requestMessage.CreatedTime.ToDateTime() < shoutUpdatedTime)
                 {
-                    using var message = await this.ReadShoutAsync(requestMessage.Signature, requestMessage.Channel, cancellationToken);
+                    using var message = await this.TryReadShoutAsync(requestMessage.Signature, requestMessage.Channel, shoutUpdatedTime, cancellationToken);
                     using var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.Found, message);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
 
@@ -397,36 +393,21 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
         return version ?? ShoutExchangerVersion.Unknown;
     }
 
-    private async ValueTask<DateTime?> ReadShoutCreatedTimeAsync(OmniSignature signature, string channel, CancellationToken cancellationToken)
+    private async ValueTask<DateTime> ReadShoutUpdatedTimeAsync(OmniSignature signature, string channel, CancellationToken cancellationToken)
     {
-        var wantStorageCreatedTime = await _subscribedShoutStorage.ReadShoutCreatedTimeAsync(signature, channel, cancellationToken);
-        var pushStorageCreatedTime = await _publishedShoutStorage.ReadShoutCreatedTimeAsync(signature, channel, cancellationToken);
-        if (wantStorageCreatedTime is null && pushStorageCreatedTime is null) return null;
+        var wantShoutUpdatedTime = await _subscribedShoutStorage.ReadShoutUpdatedTimeAsync(signature, channel, cancellationToken);
+        var pushShoutUpdatedTime = await _publishedShoutStorage.ReadShoutUpdatedTimeAsync(signature, channel, cancellationToken);
 
-        if ((wantStorageCreatedTime ?? DateTime.MinValue) > (pushStorageCreatedTime ?? DateTime.MinValue))
-        {
-            return wantStorageCreatedTime;
-        }
-        else
-        {
-            return pushStorageCreatedTime;
-        }
+        return wantShoutUpdatedTime > pushShoutUpdatedTime ? wantShoutUpdatedTime : pushShoutUpdatedTime;
     }
 
-    public async ValueTask<Shout?> ReadShoutAsync(OmniSignature signature, string channel, CancellationToken cancellationToken)
+    public async ValueTask<Shout?> TryReadShoutAsync(OmniSignature signature, string channel, DateTime updatedTime, CancellationToken cancellationToken)
     {
-        var wantStorageCreatedTime = await _subscribedShoutStorage.ReadShoutCreatedTimeAsync(signature, channel, cancellationToken);
-        var pushStorageCreatedTime = await _publishedShoutStorage.ReadShoutCreatedTimeAsync(signature, channel, cancellationToken);
-        if (wantStorageCreatedTime is null && pushStorageCreatedTime is null) return null;
+        var result = await _subscribedShoutStorage.TryReadShoutAsync(signature, channel, updatedTime, cancellationToken);
+        if (result is not null) return result;
 
-        if ((wantStorageCreatedTime ?? DateTime.MinValue) > (pushStorageCreatedTime ?? DateTime.MinValue))
-        {
-            return await _subscribedShoutStorage.ReadShoutAsync(signature, channel, cancellationToken);
-        }
-        else
-        {
-            return await _publishedShoutStorage.ReadShoutAsync(signature, channel, cancellationToken);
-        }
+        result = await _publishedShoutStorage.TryReadShoutAsync(signature, channel, updatedTime, cancellationToken);
+        return result;
     }
 
     private async Task ComputeLoopAsync(CancellationToken cancellationToken)
@@ -481,5 +462,4 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
         _wantContentClues = builder.ToImmutable();
     }
-
 }

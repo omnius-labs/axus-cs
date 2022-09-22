@@ -45,12 +45,12 @@ public class ShoutExchangerTest
 
         await publishedShoutStorage.PublishShoutAsync(publishedShout, "test");
 
-        var publishedShout2 = await publishedShoutStorage.ReadShoutAsync(digitalSignature.GetOmniSignature(), "test_channel");
+        var publishedShout2 = await publishedShoutStorage.TryReadShoutAsync(digitalSignature.GetOmniSignature(), "test_channel", DateTime.MinValue);
         publishedShout2.Should().Be(publishedShout);
 
-        var publishedShout2CreatedTime = await publishedShoutStorage.ReadShoutCreatedTimeAsync(digitalSignature.GetOmniSignature(), "test_channel");
+        var publishedShout2CreatedTime = await publishedShoutStorage.ReadShoutUpdatedTimeAsync(digitalSignature.GetOmniSignature(), "test_channel");
         var truncateTimeSpan = TimeSpan.FromTicks(TimeSpan.TicksPerSecond);
-        publishedShout2CreatedTime.Value.Truncate(truncateTimeSpan).Should().Be(publishedShout.CreatedTime.ToDateTime().Truncate(truncateTimeSpan));
+        publishedShout2CreatedTime.Truncate(truncateTimeSpan).Should().Be(publishedShout.UpdatedTime.ToDateTime().Truncate(truncateTimeSpan));
 
         await subscribedShoutStorage.SubscribeShoutAsync(digitalSignature.GetOmniSignature(), "test_channel", "test");
 
@@ -60,13 +60,13 @@ public class ShoutExchangerTest
         {
             await Task.Delay(TimeSpan.FromSeconds(1));
 
-            var createdTime = await subscribedShoutStorage.ReadShoutCreatedTimeAsync(digitalSignature.GetOmniSignature(), "test_channel");
-            if (createdTime is not null) break;
+            var updatedTime = await subscribedShoutStorage.ReadShoutUpdatedTimeAsync(digitalSignature.GetOmniSignature(), "test_channel");
+            if (updatedTime == DateTime.MinValue) break;
 
             if (sw.Elapsed > timeout) throw new TimeoutException();
         }
 
-        var subscribedShout = await subscribedShoutStorage.ReadShoutAsync(digitalSignature.GetOmniSignature(), "test_channel");
+        var subscribedShout = await subscribedShoutStorage.TryReadShoutAsync(digitalSignature.GetOmniSignature(), "test_channel", DateTime.MinValue);
 
         publishedShout.Should().Be(subscribedShout);
     }

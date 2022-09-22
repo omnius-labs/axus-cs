@@ -21,27 +21,31 @@ public static partial class Runner
         await using var service = await AxusService.CreateAsync(databaseDirectoryPath, cancellationToken);
         using var tcpListenerManager = new TcpListenerManager(listenAddress, cancellationToken);
 
-        for (; ; )
-        {
-            _logger.Debug("EventLoop: Start");
+        _logger.Debug("EventLoop: Start");
 
-            try
+        try
+        {
+            for (; ; )
             {
-                var socket = await tcpListenerManager.AcceptSocketAsync();
-                await InternalEventLoopAsync(service, socket, cancellationToken);
+                try
+                {
+                    var socket = await tcpListenerManager.AcceptSocketAsync();
+                    await InternalEventLoopAsync(service, socket, cancellationToken);
+                }
+                catch (OperationCanceledException e)
+                {
+                    _logger.Debug(e, "Operation Canceled");
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    _logger.Error(e, "Unexpected Exception");
+                }
             }
-            catch (OperationCanceledException e)
-            {
-                _logger.Debug(e, "Operation Canceled");
-            }
-            catch (Exception e)
-            {
-                _logger.Error(e, "Unexpected Exception");
-            }
-            finally
-            {
-                _logger.Debug("EventLoop: End");
-            }
+        }
+        finally
+        {
+            _logger.Debug("EventLoop: End");
         }
     }
 

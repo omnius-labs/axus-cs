@@ -2,6 +2,7 @@ using System.Buffers;
 using Omnius.Axus.Models;
 using Omnius.Axus.Remoting;
 using Omnius.Core.Cryptography;
+using Omnius.Core.RocketPack;
 
 namespace Omnius.Axus.Interactors;
 
@@ -150,9 +151,9 @@ public sealed class ServiceMediator : IServiceMediator
         await _axusService.UnsubscribeShoutAsync(input, cancellationToken);
     }
 
-    public async ValueTask<Shout?> TryExportShoutAsync(OmniSignature signature, string channel, CancellationToken cancellationToken = default)
+    public async ValueTask<Shout?> TryExportShoutAsync(OmniSignature signature, string channel, DateTime updatedTime, CancellationToken cancellationToken = default)
     {
-        var input = new TryExportShoutRequest(signature, channel);
+        var input = new TryExportShoutRequest(signature, channel, Timestamp64.FromDateTime(updatedTime));
         var output = await _axusService.TryExportShoutAsync(input, cancellationToken);
         return output.Shout;
     }
