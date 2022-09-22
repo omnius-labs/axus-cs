@@ -17,8 +17,8 @@ public class ShoutExchangerTest
     {
         var results = new List<(OmniAddress, OmniAddress, int, TimeSpan)>{
             (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 40011), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 40012), 1, TimeSpan.FromMinutes(3)),
-            (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 40021), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 40022), 8192, TimeSpan.FromMinutes(3)),
-            (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 40031), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 40032), 1024 * 1024 * 32, TimeSpan.FromMinutes(10)),
+            // (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 40021), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 40022), 8192, TimeSpan.FromMinutes(3)),
+            // (OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 40031), OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 40032), 1024 * 1024 * 32, TimeSpan.FromMinutes(10)),
         };
         return results.Select(n => new object[] { n.Item1, n.Item2, n.Item3, n.Item4 });
     }
@@ -61,7 +61,7 @@ public class ShoutExchangerTest
             await Task.Delay(TimeSpan.FromSeconds(1));
 
             var updatedTime = await subscribedShoutStorage.ReadShoutUpdatedTimeAsync(digitalSignature.GetOmniSignature(), "test_channel");
-            if (updatedTime == DateTime.MinValue) break;
+            if (updatedTime != DateTime.MinValue) break;
 
             if (sw.Elapsed > timeout) throw new TimeoutException();
         }
