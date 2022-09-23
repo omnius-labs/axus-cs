@@ -163,7 +163,7 @@ public sealed partial class SubscribedShoutStorage : AsyncDisposableBase, ISubsc
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var shoutItem = _subscriberRepo.ShoutItems.FindOne(signature, channel);
-            if (shoutItem is null || shoutItem.ShoutUpdatedTime >= updatedTime) return null;
+            if (shoutItem is null || shoutItem.ShoutUpdatedTime <= updatedTime) return null;
 
             var blockName = GenKey(signature, channel);
             using var memoryOwner = await _blockStorage.TryReadAsync(blockName, cancellationToken);

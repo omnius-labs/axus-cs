@@ -247,7 +247,7 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
             {
                 var shoutUpdatedTime = await this.ReadShoutUpdatedTimeAsync(signature, channel, cancellationToken);
 
-                var requestMessage = new ShoutExchangerFetchRequestMessage(signature, channel, Timestamp64.FromDateTime(shoutUpdatedTime));
+                var requestMessage = new ShoutExchangerFetchRequestMessage(signature, channel, Timestamp64.FromDateTime(shoutUpdatedTime.ToUniversalTime()));
                 var resultMessage = await session.Connection.SendAndReceiveAsync<ShoutExchangerFetchRequestMessage, ShoutExchangerFetchResultMessage>(requestMessage, cancellationToken);
 
                 _logger.Debug($"Send ShoutFetchRequest: (Signature: {requestMessage.Signature.ToString()})");
@@ -262,7 +262,7 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
                 {
                     _logger.Debug($"Receive ShoutFetchResult: (Type: NotFound, Signature: {requestMessage.Signature.ToString()})");
 
-                    var shout = await this.TryReadShoutAsync(signature, channel, shoutUpdatedTime, cancellationToken);
+                    var shout = await this.TryReadShoutAsync(signature, channel, DateTime.MinValue, cancellationToken);
 
                     if (shout is not null)
                     {
@@ -325,17 +325,17 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
                 var shoutUpdatedTime = await this.ReadShoutUpdatedTimeAsync(requestMessage.Signature, requestMessage.Channel, cancellationToken);
 
-                if (requestMessage.CreatedTime.ToDateTime() == shoutUpdatedTime)
+                if (requestMessage.ShoutUpdatedTime.ToDateTime() == shoutUpdatedTime)
                 {
                     using var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.Same, null);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
 
                     _logger.Debug($"Send ShoutFetchResult: (Type: Same, Signature: {requestMessage.Signature.ToString()})");
                 }
-                else if (requestMessage.CreatedTime.ToDateTime() < shoutUpdatedTime)
+                else if (requestMessage.ShoutUpdatedTime.ToDateTime() < shoutUpdatedTime)
                 {
-                    using var message = await this.TryReadShoutAsync(requestMessage.Signature, requestMessage.Channel, shoutUpdatedTime, cancellationToken);
-                    using var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.Found, message);
+                    using var shout = await this.TryReadShoutAsync(requestMessage.Signature, requestMessage.Channel, requestMessage.ShoutUpdatedTime.ToDateTime(), cancellationToken);
+                    using var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.Found, shout);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
 
                     _logger.Debug($"Send ShoutFetchResult: (Type: Found, Signature: {requestMessage.Signature.ToString()})");

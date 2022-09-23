@@ -146,7 +146,7 @@ public sealed partial class PublishedShoutStorage : AsyncDisposableBase, IPublis
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var shoutItem = _publisherRepo.ShoutItems.FindOne(signature, channel);
-            if (shoutItem is null || shoutItem.ShoutUpdatedTime >= updatedTime) return null;
+            if (shoutItem is null || shoutItem.ShoutUpdatedTime <= updatedTime) return null;
 
             var key = GenKey(signature, channel);
             using var memoryOwner = await _blockStorage.TryReadAsync(key, cancellationToken);
