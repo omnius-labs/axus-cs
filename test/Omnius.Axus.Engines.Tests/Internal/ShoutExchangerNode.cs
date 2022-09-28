@@ -10,7 +10,7 @@ using Omnius.Core.Storages;
 using Omnius.Core.Tasks;
 using Omnius.Core.UnitTestToolkit;
 
-namespace Omnius.Axus.Engines;
+namespace Omnius.Axus.Engines.Internal;
 
 internal class ShoutExchangerNode : AsyncDisposableBase
 {
@@ -151,6 +151,8 @@ internal class ShoutExchangerNode : AsyncDisposableBase
         }
 
         _connectionAcceptors = _connectionAcceptors.Clear();
+
+        _workingDirectoryDeleter.Dispose();
     }
 
     public OmniAddress ListenAddress => _listenAddress;

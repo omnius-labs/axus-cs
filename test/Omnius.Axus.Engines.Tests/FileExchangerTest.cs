@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Net;
 using FluentAssertions;
+using Omnius.Axus.Engines.Internal;
 using Omnius.Core.Cryptography.Functions;
 using Omnius.Core.Net;
 using Omnius.Core.UnitTestToolkit;

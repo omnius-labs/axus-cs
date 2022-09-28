@@ -1,17 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <RootNamespace>Omnius.Axus.Interactors</RootNamespace>
+    <RootNamespace>Omnius.Axus.IntegrationTests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-
-    <ProjectReference Include="..\..\src\Omnius.Axus.Interactors\Omnius.Axus.Interactors.csproj" />
-    <ProjectReference Include="..\..\src\Omnius.Axus.Engines\Omnius.Axus.Engines.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Cryptography\Omnius.Core.Cryptography.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Net.Proxies\Omnius.Core.Net.Proxies.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Net.Upnp\Omnius.Core.Net.Upnp.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.UnitTestToolkit\Omnius.Core.UnitTestToolkit.csproj" />
+    <ProjectReference Include="..\..\src\Omnius.Axus.Daemon\Omnius.Axus.Daemon.csproj" />
+    <ProjectReference Include="..\..\src\Omnius.Axus.Engines\Omnius.Axus.Engines.csproj" />
+    <ProjectReference Include="..\..\src\Omnius.Axus.Interactors\Omnius.Axus.Interactors.csproj" />
   </ItemGroup>
 
   <ItemGroup>
