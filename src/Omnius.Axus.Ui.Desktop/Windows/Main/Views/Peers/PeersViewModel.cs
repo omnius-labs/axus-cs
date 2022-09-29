@@ -21,7 +21,7 @@ public class PeersViewViewModel : PeersViewViewModelBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IServiceMediator _axusServiceMediator;
+    private readonly IServiceMediator _serviceMediator;
     private readonly IApplicationDispatcher _applicationDispatcher;
     private readonly IDialogService _dialogService;
 
@@ -29,9 +29,9 @@ public class PeersViewViewModel : PeersViewViewModelBase
 
     private readonly CompositeDisposable _disposable = new();
 
-    public PeersViewViewModel(IServiceMediator axusServiceMediator, IApplicationDispatcher applicationDispatcher, IDialogService dialogService)
+    public PeersViewViewModel(IServiceMediator serviceMediator, IApplicationDispatcher applicationDispatcher, IDialogService dialogService)
     {
-        _axusServiceMediator = axusServiceMediator;
+        _serviceMediator = serviceMediator;
         _applicationDispatcher = applicationDispatcher;
         _dialogService = dialogService;
 
@@ -50,7 +50,7 @@ public class PeersViewViewModel : PeersViewViewModelBase
 
     private async ValueTask<IEnumerable<SessionReport>> GetSessionReports(CancellationToken cancellationToken)
     {
-        return await _axusServiceMediator.GetSessionReportsAsync(cancellationToken);
+        return await _serviceMediator.GetSessionReportsAsync(cancellationToken);
     }
 
     private class SessionReportEqualityComparer : IEqualityComparer<SessionReport>
@@ -71,7 +71,7 @@ public class PeersViewViewModel : PeersViewViewModelBase
     private async Task AddNodeLocationsAsync()
     {
         var text = await _dialogService.ShowTextEditWindowAsync();
-        await _axusServiceMediator.AddCloudNodeLocationsAsync(ParseNodeLocations(text));
+        await _serviceMediator.AddCloudNodeLocationsAsync(ParseNodeLocations(text));
     }
 
     private static IEnumerable<NodeLocation> ParseNodeLocations(string text)

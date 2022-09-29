@@ -31,17 +31,17 @@ public sealed partial class BarkSubscriber : AsyncDisposableBase, IBarkSubscribe
     private const string Channel = "bark/v1";
     private const string Author = "bark_subscriber/v1";
 
-    public static async ValueTask<BarkSubscriber> CreateAsync(IProfileSubscriber profileSubscriber, IServiceMediator axusServiceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkSubscriberOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<BarkSubscriber> CreateAsync(IProfileSubscriber profileSubscriber, IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkSubscriberOptions options, CancellationToken cancellationToken = default)
     {
-        var barkSubscriber = new BarkSubscriber(profileSubscriber, axusServiceMediator, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
+        var barkSubscriber = new BarkSubscriber(profileSubscriber, serviceMediator, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
         await barkSubscriber.InitAsync(cancellationToken);
         return barkSubscriber;
     }
 
-    private BarkSubscriber(IProfileSubscriber profileSubscriber, IServiceMediator axusServiceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkSubscriberOptions options)
+    private BarkSubscriber(IProfileSubscriber profileSubscriber, IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkSubscriberOptions options)
     {
         _profileSubscriber = profileSubscriber;
-        _serviceMediator = axusServiceMediator;
+        _serviceMediator = serviceMediator;
         _bytesPool = bytesPool;
         _options = options;
 

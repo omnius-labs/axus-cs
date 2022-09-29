@@ -57,43 +57,62 @@ internal sealed class CachedNodeLocationRepository : DisposableBase
         }
     }
 
-    public bool TryInsert(NodeLocation value, DateTime updatedTime)
+    public void Insert(NodeLocation nodeLocation, DateTime updatedTime)
     {
-        lock (_lockObject)
-        {
-            var itemEntity = new CachedNodeLocationEntity()
-            {
-                Value = NodeLocationEntity.Import(value),
-                LastConnectedTime = DateTime.MinValue,
-                UpdatedTime = updatedTime,
-            };
-
-            var col = this.GetCollection();
-
-            if (col.Exists(n => n.Value == itemEntity.Value)) return false;
-
-            col.Insert(itemEntity);
-            return true;
-        }
+        this.InsertBulk(new[] { nodeLocation }, updatedTime);
     }
 
-    public void Upsert(NodeLocation value, DateTime updatedTime, DateTime lastConnectedTime)
+    public void InsertBulk(IEnumerable<NodeLocation> nodeLocations, DateTime updatedTime)
     {
         lock (_lockObject)
         {
-            var itemEntity = new CachedNodeLocationEntity()
-            {
-                Value = NodeLocationEntity.Import(value),
-                LastConnectedTime = lastConnectedTime,
-                UpdatedTime = updatedTime,
-            };
-
             var col = this.GetCollection();
 
             _database.BeginTrans();
 
-            col.DeleteMany(n => n.Value == itemEntity.Value);
-            col.Insert(itemEntity);
+            foreach (var value in nodeLocations)
+            {
+                var itemEntity = new CachedNodeLocationEntity()
+                {
+                    Value = NodeLocationEntity.Import(value),
+                    LastConnectedTime = DateTime.MinValue,
+                    UpdatedTime = updatedTime,
+                };
+
+                if (col.Exists(n => n.Value == itemEntity.Value)) continue;
+
+                col.Insert(itemEntity);
+            }
+
+            _database.Commit();
+        }
+    }
+
+    public void Upsert(NodeLocation nodeLocation, DateTime updatedTime, DateTime lastConnectedTime)
+    {
+        this.UpsertBulk(new[] { nodeLocation }, updatedTime, lastConnectedTime);
+    }
+
+    public void UpsertBulk(IEnumerable<NodeLocation> nodeLocations, DateTime updatedTime, DateTime lastConnectedTime)
+    {
+        lock (_lockObject)
+        {
+            var col = this.GetCollection();
+
+            _database.BeginTrans();
+
+            foreach (var value in nodeLocations)
+            {
+                var itemEntity = new CachedNodeLocationEntity()
+                {
+                    Value = NodeLocationEntity.Import(value),
+                    LastConnectedTime = lastConnectedTime,
+                    UpdatedTime = updatedTime,
+                };
+
+                col.DeleteMany(n => n.Value == itemEntity.Value);
+                col.Insert(itemEntity);
+            }
 
             _database.Commit();
         }
@@ -113,6 +132,15 @@ internal sealed class CachedNodeLocationRepository : DisposableBase
             }
 
             _database.Commit();
+        }
+    }
+
+    public int Count()
+    {
+        lock (_lockObject)
+        {
+            var col = this.GetCollection();
+            return col.Count();
         }
     }
 }

@@ -22,6 +22,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
     private readonly ISessionConnector _sessionConnector;
     private readonly ISessionAccepter _sessionAccepter;
+    private readonly INodeLocationsFetcher _nodeLocationsFetcher;
     private readonly IBatchActionDispatcher _batchActionDispatcher;
     private readonly IBytesPool _bytesPool;
     private readonly NodeFinderOptions _options;
@@ -56,19 +57,20 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
     private const int MaxNodeLocationCount = 1000;
     private const string Schema = "node_finder";
 
-    public static async ValueTask<NodeFinder> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, IBatchActionDispatcher batchActionDispatcher,
+    public static async ValueTask<NodeFinder> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeLocationsFetcher nodeLocationsFetcher, IBatchActionDispatcher batchActionDispatcher,
         IBytesPool bytesPool, NodeFinderOptions options, CancellationToken cancellationToken = default)
     {
-        var nodeFinder = new NodeFinder(sessionConnector, sessionAccepter, batchActionDispatcher, bytesPool, options);
+        var nodeFinder = new NodeFinder(sessionConnector, sessionAccepter, nodeLocationsFetcher, batchActionDispatcher, bytesPool, options);
         await nodeFinder.InitAsync(cancellationToken);
         return nodeFinder;
     }
 
-    private NodeFinder(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, IBatchActionDispatcher batchActionDispatcher,
+    private NodeFinder(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeLocationsFetcher nodeLocationsFetcher, IBatchActionDispatcher batchActionDispatcher,
         IBytesPool bytesPool, NodeFinderOptions options)
     {
         _sessionConnector = sessionConnector;
         _sessionAccepter = sessionAccepter;
+        _nodeLocationsFetcher = nodeLocationsFetcher;
         _batchActionDispatcher = batchActionDispatcher;
         _bytesPool = bytesPool;
         _options = options;
@@ -158,10 +160,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
     {
         lock (_lockObject)
         {
-            foreach (var nodeLocation in nodeLocations)
-            {
-                _cachedNodeLocationRepo.TryInsert(nodeLocation, DateTime.UtcNow);
-            }
+            _cachedNodeLocationRepo.InsertBulk(nodeLocations, DateTime.UtcNow);
         }
     }
 
@@ -553,26 +552,28 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
     private async Task ComputeLoopAsync(CancellationToken cancellationToken)
     {
-        var nodeLocationsTrimExcessStopwatch = new Stopwatch();
-        var trimDeadSessionsStopwatch = new Stopwatch();
+        var shrinkNodeLocationsStopwatch = new Stopwatch();
+        var removeDeadSessionsStopwatch = new Stopwatch();
         var computeSendingDataMessageStopwatch = new Stopwatch();
 
         try
         {
+
+
             for (; ; )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
                 await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken).ConfigureAwait(false);
 
-                if (nodeLocationsTrimExcessStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromMinutes(1)))
+                if (shrinkNodeLocationsStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromMinutes(1)))
                 {
                     _cachedNodeLocationRepo.Shrink(MaxNodeLocationCount);
                 }
 
-                if (trimDeadSessionsStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromMinutes(1)))
+                if (removeDeadSessionsStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromMinutes(1)))
                 {
-                    await this.TrimDeadSessionsAsync(cancellationToken);
+                    await this.RemoveDeadSessionsAsync(cancellationToken);
                 }
 
                 if (computeSendingDataMessageStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromSeconds(10)))
@@ -591,7 +592,17 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         }
     }
 
-    private async ValueTask TrimDeadSessionsAsync(CancellationToken cancellationToken = default)
+    private async ValueTask FetchNodeLocationIfInitialStartupAsync(CancellationToken cancellationToken = default)
+    {
+        if (_cachedNodeLocationRepo.Count() > 0) return;
+
+        var nodeLocations = await _nodeLocationsFetcher.FetchAsync(cancellationToken);
+        if (nodeLocations is null) return;
+
+        _cachedNodeLocationRepo.InsertBulk(nodeLocations, DateTime.UtcNow);
+    }
+
+    private async ValueTask RemoveDeadSessionsAsync(CancellationToken cancellationToken = default)
     {
         var now = DateTime.UtcNow;
 

@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Text;
+using Omnius.Axus.Interactors;
 using Omnius.Axus.Ui.Desktop.Internal;
 using Omnius.Axus.Ui.Desktop.Models;
 using Omnius.Core;

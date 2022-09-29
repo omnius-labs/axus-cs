@@ -1,8 +1,10 @@
 using System.Diagnostics;
 using System.Net;
 using Omnius.Axus.Daemon;
+using Omnius.Axus.Interactors;
 using Omnius.Axus.Models;
 using Omnius.Axus.Remoting;
+using Omnius.Core;
 using Omnius.Core.Net;
 using Omnius.Core.UnitTestToolkit;
 using Xunit;
@@ -14,16 +16,16 @@ public class AxusServiceTest
     [Fact]
     public async Task SimpleTest()
     {
-        using var tempDirectoryDeleter = FixtureFactory.GenTempDirectory(out var tempDirectoryPath);
+        using var tempDirDeleter = FixtureFactory.GenTempDirectory(out var tempDir);
 
-        var serviceConfig1 = this.GenServiceConfig(OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 30001));
-        var service1 = await this.GenServiceAsync(Path.Combine(tempDirectoryPath, "test1"), serviceConfig1);
+        var listenAddress1 = OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 30001);
+        var service1 = await this.GenServiceAsync(Path.Combine(tempDir, "service/1"), listenAddress1);
 
-        var serviceConfig2 = this.GenServiceConfig(OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 30002));
-        var service2 = await this.GenServiceAsync(Path.Combine(tempDirectoryPath, "test2"), serviceConfig2);
+        var listenAddress2 = OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 30002);
+        var service2 = await this.GenServiceAsync(Path.Combine(tempDir, "service/2"), listenAddress2);
 
-        await service1.AddCloudNodeLocationsAsync(new AddCloudNodeLocationsRequest(new[] { new NodeLocation(new[] { serviceConfig2.TcpAccepter!.ListenAddress }) }));
-        await service2.AddCloudNodeLocationsAsync(new AddCloudNodeLocationsRequest(new[] { new NodeLocation(new[] { serviceConfig1.TcpAccepter!.ListenAddress }) }));
+        await service1.AddCloudNodeLocationsAsync(new AddCloudNodeLocationsRequest(new[] { new NodeLocation(new[] { listenAddress2 }) }));
+        await service2.AddCloudNodeLocationsAsync(new AddCloudNodeLocationsRequest(new[] { new NodeLocation(new[] { listenAddress1 }) }));
 
         var sw = Stopwatch.StartNew();
 
@@ -31,17 +33,21 @@ public class AxusServiceTest
         {
             await Task.Delay(TimeSpan.FromSeconds(1));
 
-            var r1 = await service1.GetSessionsReportAsync();
-            var r2 = await service2.GetSessionsReportAsync();
+            var sessionReport1 = await service1.GetSessionsReportAsync();
+            var sessionReport2 = await service2.GetSessionsReportAsync();
 
-            if (r1.Sessions.Count == 1 && r2.Sessions.Count == 1) break;
+            if (sessionReport1.Sessions.Count == 1 && sessionReport2.Sessions.Count == 1) break;
 
             if (sw.Elapsed > TimeSpan.FromSeconds(60)) throw new TimeoutException();
         }
+
+        await using var interactorProvider1 = await InteractorProvider.CreateAsync(Path.Combine(tempDir, "interactor_provider/1"), new ServiceMediator(service1), BytesPool.Shared);
+        await using var interactorProvider2 = await InteractorProvider.CreateAsync(Path.Combine(tempDir, "interactor_provider/2"), new ServiceMediator(service2), BytesPool.Shared);
     }
 
-    private async ValueTask<IAxusService> GenServiceAsync(string databaseDirectoryPath, ServiceConfig config, CancellationToken cancellationToken = default)
+    private async ValueTask<IAxusService> GenServiceAsync(string databaseDirectoryPath, OmniAddress listenAddress, CancellationToken cancellationToken = default)
     {
+        var config = GenServiceConfig(listenAddress);
         var service = await AxusService.CreateAsync(databaseDirectoryPath);
         await service.SetConfigAsync(new SetConfigRequest(config));
         return service;

@@ -87,6 +87,19 @@
           "System.Xml.XmlDocument": "4.3.0"
         }
       },
+      "Cocona.Core": {
+        "type": "Transitive",
+        "resolved": "2.0.2",
+        "contentHash": "wQrVzh0dJFM5FB0hkQse23bmyUtScZSPQeCrSPKzY3z3PTu8+lNmZ95vzF9h+ANTtdYv10qs8K9LbOopfSGcmA=="
+      },
+      "Cocona.Lite": {
+        "type": "Transitive",
+        "resolved": "2.0.2",
+        "contentHash": "V3QPCUpJFYRDTYIn88Z+cU/yD19eZix6i/NRQPjMjwV0gEB7AJ9Cn/K//9p+XA5kudpovNL4sVas82u5snr/GA==",
+        "dependencies": {
+          "Cocona.Core": "2.0.2"
+        }
+      },
       "Dapper": {
         "type": "Transitive",
         "resolved": "1.50.5",
@@ -101,6 +114,11 @@
         "type": "Transitive",
         "resolved": "1.7.0",
         "contentHash": "2Mna9MSihC3tujLJ34+FqhFdsS6xlaMzPd8ywuTz3Qq/Z7vWRKAe18H2R5v69TMbmGyzn3FuIngnhyuNkrfUzQ=="
+      },
+      "GitInfo": {
+        "type": "Transitive",
+        "resolved": "2.2.0",
+        "contentHash": "SKTmjt40sYqoDB3S7HFVUToUN/vl6Zrt+PuSHdjbQDlcBx0JAZBdS7BXVbVKyy+0iaaF3FBd4ZxspIlKQCC9Lw=="
       },
       "Humanizer.Core": {
         "type": "Transitive",
@@ -1462,6 +1480,33 @@
         "type": "Transitive",
         "resolved": "11.2.1",
         "contentHash": "tBt8K+korVfrjH9wyDEhiLKxbs8qoLCLIFwvYgkSUuMC9//w3z0cFQ8LQAI/5MCKq+BMil0cfRTRvPeE7eXhQw=="
+      },
+      "omnius.axus.daemon": {
+        "type": "Project",
+        "dependencies": {
+          "Cocona.Lite": "[2.0.2, )",
+          "GitInfo": "[2.2.0, )",
+          "NLog": "[4.7.13, )",
+          "NLog.Config": "[4.7.13, )",
+          "Omnius.Axus.Engines": "[0.0.1-alpha.1, )",
+          "Omnius.Axus.Models": "[0.0.1-alpha.1, )",
+          "Omnius.Axus.Remoting": "[0.0.1-alpha.1, )",
+          "Omnius.Axus.Utils": "[0.0.1-alpha.1, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Collections": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Cryptography": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Net": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Net.Proxies": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Net.Upnp": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Pipelines": "[0.0.1-alpha.1, )",
+          "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Serialization": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Storages": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Streams": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Tasks": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Utils": "[0.0.1-alpha.1, )",
+          "YamlDotNet": "[11.2.1, )"
+        }
       },
       "omnius.axus.engines": {
         "type": "Project",
