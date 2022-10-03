@@ -4,13 +4,15 @@ using Omnius.Core.Pipelines;
 using Omnius.Core.RocketPack;
 using Omnius.Core.Serialization;
 
-namespace Omnius.Axus.Engines;
+namespace Omnius.Axus.Models;
 
-public static class AxusUriConverter
+public class AxusUriConverter
 {
     private static readonly string _schema = "axus";
 
-    public static string Encode<T>(string path, int version, T message)
+    public static AxusUriConverter Instance { get; } = new AxusUriConverter();
+
+    public string Encode<T>(string path, int version, T message)
         where T : IRocketMessage<T>
     {
         var bytesPool = BytesPool.Shared;
@@ -24,7 +26,7 @@ public static class AxusUriConverter
         return AddSchemaAndPath(path, version, OmniBase.Encode(outBytesPipe.Reader.GetSequence(), ConvertStringType.Base58)!);
     }
 
-    public static bool TryDecode<T>(string path, int version, string text, [NotNullWhen(true)] out T? message)
+    public bool TryDecode<T>(string path, int version, string text, [NotNullWhen(true)] out T? message)
         where T : IRocketMessage<T>
     {
         message = default!;

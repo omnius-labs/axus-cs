@@ -38,6 +38,8 @@ public class AxusService : AsyncDisposableBase, IAxusService
 
     private AsyncLock _asyncLock = new();
 
+    private const string NodeLocationsUri = "http://app.omnius-labs.com/axus/v1/nodes.txt";
+
     public static async ValueTask<AxusService> CreateAsync(string databaseDirectoryPath, CancellationToken cancellationToken = default)
     {
         var axusService = new AxusService(databaseDirectoryPath);
@@ -95,7 +97,8 @@ public class AxusService : AsyncDisposableBase, IAxusService
         var senderBandwidthLimiter = new BandwidthLimiter(config.Bandwidth?.MaxSendBytesPerSeconds ?? int.MaxValue);
         var receiverBandwidthLimiter = new BandwidthLimiter(config.Bandwidth?.MaxReceiveBytesPerSeconds ?? int.MaxValue);
 
-        var nodeLocationsFetcher = new NodeLocationsFetcher();
+        var nodeLocationsFetcherOptions = new NodeLocationsFetcherOptions(NodeLocationsFetcherOperationType.HttpGet, NodeLocationsUri);
+        var nodeLocationsFetcher = NodeLocationsFetcher.Create(nodeLocationsFetcherOptions);
 
         var connectionConnectors = ImmutableList.CreateBuilder<IConnectionConnector>();
 

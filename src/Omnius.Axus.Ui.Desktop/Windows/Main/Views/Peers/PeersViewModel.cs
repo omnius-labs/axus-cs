@@ -80,7 +80,7 @@ public class PeersViewViewModel : PeersViewViewModelBase
 
         foreach (var line in text.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries).Select(n => n.Trim()))
         {
-            if (!AxusMessageConverter.TryStringToNode(line, out var nodeLocation)) continue;
+            if (!AxusUriConverter.Instance.TryStringToNodeLocation(line, out var nodeLocation)) continue;
             results.Add(nodeLocation);
         }
 

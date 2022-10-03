@@ -1,5 +1,6 @@
 using Avalonia.Threading;
 using Omnius.Axus.Interactors;
+using Omnius.Axus.Models;
 using Omnius.Core;
 using Omnius.Core.Avalonia;
 using Reactive.Bindings;
@@ -64,7 +65,7 @@ public class StatusViewViewModel : AsyncDisposableBase
 
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    this.MyNodeLocation.Value = AxusMessageConverter.NodeToString(myNodeLocation);
+                    this.MyNodeLocation.Value = AxusUriConverter.Instance.NodeLocationToString(myNodeLocation);
                 });
             }
         }
