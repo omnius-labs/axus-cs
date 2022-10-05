@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
-using Omnius.Axus.Models;
 using Omnius.Axus.Interactors.Models;
+using Omnius.Axus.Models;
 
 namespace Omnius.Axus.Interactors;
 

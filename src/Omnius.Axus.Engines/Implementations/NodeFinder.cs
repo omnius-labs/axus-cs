@@ -558,8 +558,6 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
         try
         {
-
-
             for (; ; )
             {
                 cancellationToken.ThrowIfCancellationRequested();

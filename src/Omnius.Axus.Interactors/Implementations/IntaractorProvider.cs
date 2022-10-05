@@ -76,8 +76,6 @@ public partial class InteractorProvider : AsyncDisposableBase, IInteractorProvid
 
         if (_profilePublisher is not null) await _profilePublisher.DisposeAsync();
         _profilePublisher = null;
-
-
     }
 
     public IProfilePublisher GetProfilePublisher() => _profilePublisher!;
