@@ -57,6 +57,7 @@ public sealed class BarkPublisher : AsyncDisposableBase, IBarkPublisher
         await _watchLoopTask;
         _cancellationTokenSource.Dispose();
 
+        _barkPublisherRepo.Dispose();
         _configStorage.Dispose();
     }
 

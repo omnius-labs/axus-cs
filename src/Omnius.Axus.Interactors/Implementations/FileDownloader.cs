@@ -16,8 +16,8 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
     private readonly IBytesPool _bytesPool;
     private readonly FileDownloaderOptions _options;
 
-    private readonly ISingleValueStorage _configStorage;
     private readonly FileDownloaderRepository _fileDownloaderRepo;
+    private readonly ISingleValueStorage _configStorage;
 
     private Task _watchLoopTask = null!;
 
@@ -40,8 +40,8 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
         _bytesPool = bytesPool;
         _options = options;
 
-        _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
         _fileDownloaderRepo = new FileDownloaderRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
+        _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
     }
 
     private async ValueTask InitAsync(CancellationToken cancellationToken = default)
@@ -58,6 +58,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
         _cancellationTokenSource.Dispose();
 
         _fileDownloaderRepo.Dispose();
+        _configStorage.Dispose();
     }
 
     private async Task WatchLoopAsync(CancellationToken cancellationToken = default)

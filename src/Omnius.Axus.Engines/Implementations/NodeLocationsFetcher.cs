@@ -11,7 +11,7 @@ public class NodeLocationsFetcher : INodeLocationsFetcher
 
     public static NodeLocationsFetcher Create(NodeLocationsFetcherOptions options)
     {
-        var nodeLocationsFetcher = NodeLocationsFetcher.Create(options);
+        var nodeLocationsFetcher = new NodeLocationsFetcher(options);
         return nodeLocationsFetcher;
     }
 

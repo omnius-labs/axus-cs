@@ -57,6 +57,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
         await _watchLoopTask;
         _cancellationTokenSource.Dispose();
 
+        _profilePublisherRepo.Dispose();
         _configStorage.Dispose();
     }
 

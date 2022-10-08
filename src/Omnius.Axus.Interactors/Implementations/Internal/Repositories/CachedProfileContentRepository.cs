@@ -29,7 +29,6 @@ internal sealed class CachedProfileContentRepository : DisposableBase
 
     protected override void OnDispose(bool disposing)
     {
-        if (disposing) return;
         _storage.Dispose();
     }
 
