@@ -1,6 +1,8 @@
 {
     "cSpell.words": [
+        "Accepters",
         "Avalonia",
+        "Axus",
         "Bootstrapper",
         "Brotli",
         "Bson",
@@ -13,6 +15,7 @@
         "Interactor",
         "Interactors",
         "Kademlia",
+        "Kata",
         "Merkle",
         "metadatas",
         "Nanos",
@@ -23,6 +26,7 @@
         "Sprache",
         "Upnp",
         "Upsert",
-        "Varint"
+        "Varint",
+        "Xunit"
     ]
 }

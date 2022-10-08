@@ -17,9 +17,9 @@ public interface ISubscribedFileStorage : IWritableFileStorage, IAsyncDisposable
 
     ValueTask<bool> ContainsWantBlockAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default);
 
-    ValueTask SubscribeFileAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default);
+    ValueTask SubscribeFileAsync(OmniHash rootHash, string author, CancellationToken cancellationToken = default);
 
-    ValueTask UnsubscribeFileAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default);
+    ValueTask UnsubscribeFileAsync(OmniHash rootHash, string author, CancellationToken cancellationToken = default);
 
     ValueTask<bool> TryExportFileAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default);
 

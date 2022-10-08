@@ -1,16 +1,15 @@
 using System.Collections.Immutable;
 using System.Data;
 using System.Diagnostics;
+using Omnius.Axus.Engines.Internal;
 using Omnius.Axus.Engines.Internal.Models;
 using Omnius.Axus.Models;
 using Omnius.Core;
 using Omnius.Core.Collections;
 using Omnius.Core.Cryptography;
-using Omnius.Core.Cryptography.Functions;
 using Omnius.Core.Helpers;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Connections;
-using Omnius.Core.Pipelines;
 using Omnius.Core.RocketPack;
 using Omnius.Core.Tasks;
 
@@ -130,16 +129,18 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
                     .Where(n => n.Session.HandshakeType == SessionHandshakeType.Connected).ToList();
                 if (sessionStatuses.Count > _options.MaxSessionCount / 4) continue;
 
-                var signatures = await _subscribedShoutStorage.GetSignaturesAsync(cancellationToken);
+                var keys = await _subscribedShoutStorage.GetKeysAsync(cancellationToken);
 
-                var signature = signatures.FirstOrDefault();
-                if (signature is null) continue;
-
-                foreach (var nodeLocation in await this.FindNodeLocationsForConnecting(signature, cancellationToken))
+                foreach (var (signature, channel) in keys.Randomize())
                 {
-                    var success = await this.TryConnectAsync(nodeLocation, signature, cancellationToken);
-                    if (success) break;
+                    foreach (var nodeLocation in await this.FindNodeLocationsForConnecting(signature, channel, cancellationToken))
+                    {
+                        var success = await this.TryConnectAsync(nodeLocation, signature, channel, cancellationToken);
+                        if (success) goto End;
+                    }
                 }
+
+            End:;
             }
         }
         catch (OperationCanceledException e)
@@ -152,9 +153,9 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
         }
     }
 
-    private async ValueTask<IEnumerable<NodeLocation>> FindNodeLocationsForConnecting(OmniSignature signature, CancellationToken cancellationToken)
+    private async ValueTask<IEnumerable<NodeLocation>> FindNodeLocationsForConnecting(OmniSignature signature, string channel, CancellationToken cancellationToken)
     {
-        var contentClue = SignatureToContentClue(signature);
+        var contentClue = ContentClueConverter.ToContentClue(Schema, signature, channel);
 
         var nodeLocations = await _nodeFinder.FindNodeLocationsAsync(contentClue, cancellationToken);
         _random.Shuffle(nodeLocations);
@@ -171,7 +172,6 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
         var myNodeLocation = await _nodeFinder.GetMyNodeLocationAsync();
 
         var set = new HashSet<OmniAddress>();
-
         set.UnionWith(myNodeLocation.Addresses);
         set.UnionWith(_sessionStatusSet.Select(n => n.Session.Address));
         set.UnionWith(_connectedAddressSet);
@@ -179,7 +179,7 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
         return set;
     }
 
-    private async ValueTask<bool> TryConnectAsync(NodeLocation nodeLocation, OmniSignature signature, CancellationToken cancellationToken = default)
+    private async ValueTask<bool> TryConnectAsync(NodeLocation nodeLocation, OmniSignature signature, string channel, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -190,15 +190,10 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
                 var session = await _sessionConnector.ConnectAsync(targetAddress, Schema, cancellationToken);
                 if (session is null) continue;
 
-                var success = await this.TryAddConnectedSessionAsync(session, signature, cancellationToken);
+                var success = await this.TryAddConnectedSessionAsync(session, signature, channel, cancellationToken);
+                if (success) return true;
 
-                if (!success)
-                {
-                    await session.DisposeAsync();
-                    continue;
-                }
-
-                return true;
+                await session.DisposeAsync();
             }
         }
         catch (OperationCanceledException e)
@@ -242,7 +237,7 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
         }
     }
 
-    private async ValueTask<bool> TryAddConnectedSessionAsync(ISession session, OmniSignature signature, CancellationToken cancellationToken = default)
+    private async ValueTask<bool> TryAddConnectedSessionAsync(ISession session, OmniSignature signature, string channel, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -250,11 +245,9 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
             if (version == ShoutExchangerVersion.Version1)
             {
-                var shoutCreatedTime = Timestamp.Zero;
-                var shoutCreatedDateTime = await this.ReadShoutCreatedTimeAsync(signature, cancellationToken);
-                if (shoutCreatedDateTime is not null) shoutCreatedTime = Timestamp.FromDateTime(shoutCreatedDateTime.Value);
+                var shoutUpdatedTime = await this.ReadShoutUpdatedTimeAsync(signature, channel, cancellationToken);
 
-                var requestMessage = new ShoutExchangerFetchRequestMessage(signature, shoutCreatedTime);
+                var requestMessage = new ShoutExchangerFetchRequestMessage(signature, channel, Timestamp64.FromDateTime(shoutUpdatedTime.ToUniversalTime()));
                 var resultMessage = await session.Connection.SendAndReceiveAsync<ShoutExchangerFetchRequestMessage, ShoutExchangerFetchResultMessage>(requestMessage, cancellationToken);
 
                 _logger.Debug($"Send ShoutFetchRequest: (Signature: {requestMessage.Signature.ToString()})");
@@ -269,7 +262,7 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
                 {
                     _logger.Debug($"Receive ShoutFetchResult: (Type: NotFound, Signature: {requestMessage.Signature.ToString()})");
 
-                    var shout = await this.ReadShoutAsync(signature, cancellationToken);
+                    var shout = await this.TryReadShoutAsync(signature, channel, DateTime.MinValue, cancellationToken);
 
                     if (shout is not null)
                     {
@@ -330,21 +323,19 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
                 _logger.Debug($"Receive ShoutFetchRequest: (Signature: {requestMessage.Signature.ToString()})");
 
-                var shoutCreatedTime = Timestamp.Zero;
-                var shoutCreatedDateTime = await this.ReadShoutCreatedTimeAsync(requestMessage.Signature, cancellationToken);
-                if (shoutCreatedDateTime is not null) shoutCreatedTime = Timestamp.FromDateTime(shoutCreatedDateTime.Value);
+                var shoutUpdatedTime = await this.ReadShoutUpdatedTimeAsync(requestMessage.Signature, requestMessage.Channel, cancellationToken);
 
-                if (requestMessage.CreatedTime == shoutCreatedTime)
+                if (requestMessage.ShoutUpdatedTime.ToDateTime() == shoutUpdatedTime)
                 {
                     using var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.Same, null);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
 
                     _logger.Debug($"Send ShoutFetchResult: (Type: Same, Signature: {requestMessage.Signature.ToString()})");
                 }
-                else if (requestMessage.CreatedTime < shoutCreatedTime)
+                else if (requestMessage.ShoutUpdatedTime.ToDateTime() < shoutUpdatedTime)
                 {
-                    using var message = await this.ReadShoutAsync(requestMessage.Signature, cancellationToken);
-                    using var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.Found, message);
+                    using var shout = await this.TryReadShoutAsync(requestMessage.Signature, requestMessage.Channel, requestMessage.ShoutUpdatedTime.ToDateTime(), cancellationToken);
+                    using var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.Found, shout);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
 
                     _logger.Debug($"Send ShoutFetchResult: (Type: Found, Signature: {requestMessage.Signature.ToString()})");
@@ -402,36 +393,21 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
         return version ?? ShoutExchangerVersion.Unknown;
     }
 
-    private async ValueTask<DateTime?> ReadShoutCreatedTimeAsync(OmniSignature signature, CancellationToken cancellationToken)
+    private async ValueTask<DateTime> ReadShoutUpdatedTimeAsync(OmniSignature signature, string channel, CancellationToken cancellationToken)
     {
-        var wantStorageCreatedTime = await _subscribedShoutStorage.ReadShoutCreatedTimeAsync(signature, cancellationToken);
-        var pushStorageCreatedTime = await _publishedShoutStorage.ReadShoutCreatedTimeAsync(signature, cancellationToken);
-        if (wantStorageCreatedTime is null && pushStorageCreatedTime is null) return null;
+        var wantShoutUpdatedTime = await _subscribedShoutStorage.ReadShoutUpdatedTimeAsync(signature, channel, cancellationToken);
+        var pushShoutUpdatedTime = await _publishedShoutStorage.ReadShoutUpdatedTimeAsync(signature, channel, cancellationToken);
 
-        if ((wantStorageCreatedTime ?? DateTime.MinValue) > (pushStorageCreatedTime ?? DateTime.MinValue))
-        {
-            return wantStorageCreatedTime;
-        }
-        else
-        {
-            return pushStorageCreatedTime;
-        }
+        return wantShoutUpdatedTime > pushShoutUpdatedTime ? wantShoutUpdatedTime : pushShoutUpdatedTime;
     }
 
-    public async ValueTask<Shout?> ReadShoutAsync(OmniSignature signature, CancellationToken cancellationToken)
+    public async ValueTask<Shout?> TryReadShoutAsync(OmniSignature signature, string channel, DateTime updatedTime, CancellationToken cancellationToken)
     {
-        var wantStorageCreatedTime = await _subscribedShoutStorage.ReadShoutCreatedTimeAsync(signature, cancellationToken);
-        var pushStorageCreatedTime = await _publishedShoutStorage.ReadShoutCreatedTimeAsync(signature, cancellationToken);
-        if (wantStorageCreatedTime is null && pushStorageCreatedTime is null) return null;
+        var result = await _subscribedShoutStorage.TryReadShoutAsync(signature, channel, updatedTime, cancellationToken);
+        if (result is not null) return result;
 
-        if ((wantStorageCreatedTime ?? DateTime.MinValue) > (pushStorageCreatedTime ?? DateTime.MinValue))
-        {
-            return await _subscribedShoutStorage.ReadShoutAsync(signature, cancellationToken);
-        }
-        else
-        {
-            return await _publishedShoutStorage.ReadShoutAsync(signature, cancellationToken);
-        }
+        result = await _publishedShoutStorage.TryReadShoutAsync(signature, channel, updatedTime, cancellationToken);
+        return result;
     }
 
     private async Task ComputeLoopAsync(CancellationToken cancellationToken)
@@ -465,9 +441,9 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
     {
         var builder = ImmutableHashSet.CreateBuilder<ContentClue>();
 
-        foreach (var rootHash in await _publishedShoutStorage.GetSignaturesAsync(cancellationToken))
+        foreach (var (signature, channel) in await _publishedShoutStorage.GetKeysAsync(cancellationToken))
         {
-            var contentClue = SignatureToContentClue(rootHash);
+            var contentClue = ContentClueConverter.ToContentClue(Schema, signature, channel);
             builder.Add(contentClue);
         }
 
@@ -478,20 +454,12 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
     {
         var builder = ImmutableHashSet.CreateBuilder<ContentClue>();
 
-        foreach (var rootHash in await _subscribedShoutStorage.GetSignaturesAsync(cancellationToken))
+        foreach (var (signature, channel) in await _subscribedShoutStorage.GetKeysAsync(cancellationToken))
         {
-            var contentClue = SignatureToContentClue(rootHash);
+            var contentClue = ContentClueConverter.ToContentClue(Schema, signature, channel);
             builder.Add(contentClue);
         }
 
         _wantContentClues = builder.ToImmutable();
-    }
-
-    private static ContentClue SignatureToContentClue(OmniSignature signature)
-    {
-        using var bytesPipe = new BytesPipe();
-        signature.Export(bytesPipe.Writer, BytesPool.Shared);
-        var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(bytesPipe.Reader.GetSequence()));
-        return new ContentClue(Schema, hash);
     }
 }

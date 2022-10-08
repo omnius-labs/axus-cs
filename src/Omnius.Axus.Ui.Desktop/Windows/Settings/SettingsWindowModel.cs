@@ -2,7 +2,6 @@ using Avalonia.Controls;
 using Omnius.Axus.Interactors;
 using Omnius.Axus.Interactors.Models;
 using Omnius.Axus.Models;
-using Omnius.Axus.Ui.Desktop.Internal;
 using Omnius.Axus.Ui.Desktop.Models;
 using Omnius.Core;
 using Omnius.Core.Net;
@@ -53,16 +52,16 @@ public abstract class SettingsWindowModelBase : AsyncDisposableBase
 public class SettingsWindowModel : SettingsWindowModelBase
 {
     private readonly UiStatus _uiState;
-    private readonly IAxusServiceMediator _axusServiceMediator;
+    private readonly IServiceMediator _serviceMediator;
     private readonly IInteractorProvider _interactorProvider;
 
     private readonly CompositeDisposable _disposable = new();
     private readonly CompositeAsyncDisposable _asyncDisposable = new();
 
-    public SettingsWindowModel(UiStatus uiState, IAxusServiceMediator axusServiceMediator, IInteractorProvider interactorProvider)
+    public SettingsWindowModel(UiStatus uiState, IServiceMediator serviceMediator, IInteractorProvider interactorProvider)
     {
         _uiState = uiState;
-        _axusServiceMediator = axusServiceMediator;
+        _serviceMediator = serviceMediator;
         _interactorProvider = interactorProvider;
 
         this.Status = _uiState.SettingsWindow ??= new SettingsWindowStatus();
@@ -121,7 +120,7 @@ public class SettingsWindowModel : SettingsWindowModelBase
     {
         var fileDownloader = _interactorProvider.GetFileDownloader();
 
-        var serviceConfig = await _axusServiceMediator.GetConfigAsync(cancellationToken);
+        var serviceConfig = await _serviceMediator.GetConfigAsync(cancellationToken);
         var fileDownloaderConfig = await fileDownloader.GetConfigAsync(cancellationToken);
 
         this.NetworkBandwidth!.Value = (((serviceConfig.Bandwidth?.MaxReceiveBytesPerSeconds ?? 0) + (serviceConfig.Bandwidth?.MaxSendBytesPerSeconds ?? 0)) / 2).ToString();
@@ -168,7 +167,7 @@ public class SettingsWindowModel : SettingsWindowModelBase
 
         var fileDownloader = _interactorProvider.GetFileDownloader();
 
-        await _axusServiceMediator.SetConfigAsync(serviceConfig, cancellationToken);
+        await _serviceMediator.SetConfigAsync(serviceConfig, cancellationToken);
         await fileDownloader.SetConfigAsync(fileDownloaderConfig, cancellationToken);
     }
 }

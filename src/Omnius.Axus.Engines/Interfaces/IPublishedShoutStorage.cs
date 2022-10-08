@@ -8,7 +8,7 @@ public interface IPublishedShoutStorage : IReadOnlyShoutStorage, IAsyncDisposabl
 {
     ValueTask<IEnumerable<PublishedShoutReport>> GetPublishedShoutReportsAsync(CancellationToken cancellationToken = default);
 
-    ValueTask PublishShoutAsync(Shout shout, string registrant, CancellationToken cancellationToken = default);
+    ValueTask PublishShoutAsync(Shout shout, string author, CancellationToken cancellationToken = default);
 
-    ValueTask UnpublishShoutAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default);
+    ValueTask UnpublishShoutAsync(OmniSignature signature, string channel, string author, CancellationToken cancellationToken = default);
 }

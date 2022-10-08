@@ -2,7 +2,7 @@ using LiteDB;
 
 namespace Omnius.Axus.Utils;
 
-public static class LiteDatabaseExtentions
+public static class LiteDatabaseExtensions
 {
     public static int GetDocumentVersion(this ILiteDatabase database, string name)
     {

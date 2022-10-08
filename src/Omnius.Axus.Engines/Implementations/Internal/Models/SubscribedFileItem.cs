@@ -1,16 +1,20 @@
+using Omnius.Axus.Models;
 using Omnius.Core.Cryptography;
 
 namespace Omnius.Axus.Engines.Internal.Models;
 
 internal record SubscribedFileItem
 {
-    public SubscribedFileItem(OmniHash rootHash, string registrant)
-    {
-        this.RootHash = rootHash;
-        this.Registrant = registrant;
-    }
+    public OmniHash RootHash { get; init; }
+    public IReadOnlyList<string> Authors { get; init; } = Array.Empty<string>();
+    public SubscribedFileItemStatus Status { get; init; } = SubscribedFileItemStatus.Empty;
+}
 
-    public OmniHash RootHash { get; }
-
-    public string Registrant { get; }
+internal record SubscribedFileItemStatus
+{
+    public static SubscribedFileItemStatus Empty { get; } = new SubscribedFileItemStatus();
+    public int CurrentDepth { get; init; }
+    public int TotalBlockCount { get; init; }
+    public int DownloadedBlockCount { get; init; }
+    public SubscribedFileState State { get; init; }
 }

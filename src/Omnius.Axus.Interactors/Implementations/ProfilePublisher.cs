@@ -4,7 +4,6 @@ using Omnius.Axus.Interactors.Models;
 using Omnius.Axus.Models;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
-using Omnius.Core.Helpers;
 using Omnius.Core.RocketPack;
 using Omnius.Core.Storages;
 
@@ -14,7 +13,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IAxusServiceMediator _serviceController;
+    private readonly IServiceMediator _serviceMediator;
     private readonly IBytesPool _bytesPool;
     private readonly ProfilePublisherOptions _options;
 
@@ -27,18 +26,19 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
 
     private readonly AsyncLock _asyncLock = new();
 
-    private const string Registrant = "Omnius.Axus.Interactors.ProfilePublisher";
+    private const string Channel = "profile/v1";
+    private const string Author = "profile_publisher/v1";
 
-    public static async ValueTask<ProfilePublisher> CreateAsync(IAxusServiceMediator serviceController, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, ProfilePublisherOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<ProfilePublisher> CreateAsync(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, ProfilePublisherOptions options, CancellationToken cancellationToken = default)
     {
-        var profilePublisher = new ProfilePublisher(serviceController, singleValueStorageFactory, bytesPool, options);
+        var profilePublisher = new ProfilePublisher(serviceMediator, singleValueStorageFactory, bytesPool, options);
         await profilePublisher.InitAsync(cancellationToken);
         return profilePublisher;
     }
 
-    private ProfilePublisher(IAxusServiceMediator serviceController, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, ProfilePublisherOptions options)
+    private ProfilePublisher(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, ProfilePublisherOptions options)
     {
-        _serviceController = serviceController;
+        _serviceMediator = serviceMediator;
         _bytesPool = bytesPool;
         _options = options;
 
@@ -48,8 +48,6 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
 
     private async ValueTask InitAsync(CancellationToken cancellationToken = default)
     {
-        await _profilePublisherRepo.MigrateAsync(cancellationToken);
-
         _watchLoopTask = this.WatchLoopAsync(_cancellationTokenSource.Token);
     }
 
@@ -75,11 +73,17 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
 
                 var config = await this.GetConfigAsync(cancellationToken);
 
-                bool exist = await this.ExistsPublishedProfile(config, cancellationToken);
-                if (exist) continue;
+                await this.SyncProfilePublisherRepo(config, cancellationToken);
+                await this.ShrinkPublishedShouts(cancellationToken);
+                await this.ShrinkPublishedFiles(cancellationToken);
 
-                await this.RemovePublishedProfile(cancellationToken);
-                await this.PublishProfile(config, cancellationToken);
+                bool exists = await this.ExistsPublishedShouts(cancellationToken);
+                exists |= await this.ExistsPublishedFiles(cancellationToken);
+
+                if (!exists)
+                {
+                    await this.PublishProfileContent(config, cancellationToken);
+                }
             }
         }
         catch (OperationCanceledException e)
@@ -92,75 +96,51 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
         }
     }
 
-    private async Task<bool> ExistsPublishedProfile(ProfilePublisherConfig config, CancellationToken cancellationToken = default)
-    {
-        var rootHash = await this.FetchPublishedShout(config.DigitalSignature.GetOmniSignature(), cancellationToken);
-        if (rootHash is null) return false;
-
-        var content = await this.FetchPublishedFile(rootHash.Value, cancellationToken);
-        if (content is null) return false;
-
-        var result =
-            CollectionHelper.Equals(config.TrustedSignatures, content.TrustedSignatures)
-            && CollectionHelper.Equals(config.BlockedSignatures, content.BlockedSignatures);
-
-        return result;
-    }
-
-    private async Task<OmniHash?> FetchPublishedShout(OmniSignature signature, CancellationToken cancellationToken = default)
+    private async ValueTask SyncProfilePublisherRepo(ProfilePublisherConfig config, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            using var shout = await _serviceController.TryExportShoutAsync(signature);
-            if (shout is null) return null;
+            foreach (var profileItem in _profilePublisherRepo.ProfileItems.FindAll())
+            {
+                if (profileItem.Signature == config.DigitalSignature.GetOmniSignature()) continue;
+                _profilePublisherRepo.ProfileItems.Delete(profileItem.Signature);
+            }
 
-            var rootHash = RocketMessage.FromBytes<OmniHash>(shout.Value.Memory);
+            if (_profilePublisherRepo.ProfileItems.Exists(config.DigitalSignature.GetOmniSignature())) return;
 
-            return rootHash;
+            var newProfileItem = new PublishedProfileItem()
+            {
+                Signature = config.DigitalSignature.GetOmniSignature(),
+            };
+            _profilePublisherRepo.ProfileItems.Upsert(newProfileItem);
         }
     }
 
-    private async Task<ProfileContent?> FetchPublishedFile(OmniHash rootHash, CancellationToken cancellationToken)
-    {
-        using var contentBytes = await _serviceController.TryExportFileToMemoryAsync(rootHash, cancellationToken);
-        if (contentBytes is null) return null;
-
-        var content = RocketMessage.FromBytes<ProfileContent>(contentBytes.Memory);
-
-        return content;
-    }
-
-    private async Task RemovePublishedProfile(CancellationToken cancellationToken = default)
-    {
-        await this.RemovePublishedShout(cancellationToken);
-        await this.RemovePublishedFile(cancellationToken);
-    }
-
-    private async Task RemovePublishedShout(CancellationToken cancellationToken = default)
+    private async ValueTask ShrinkPublishedShouts(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceController.GetPublishedShoutReportsAsync(cancellationToken);
+            var reports = await _serviceMediator.GetPublishedShoutReportsAsync(cancellationToken);
             var signatures = reports
-                .Where(n => n.Registrant == Registrant)
+                .Where(n => n.Authors.Contains(Author))
                 .Select(n => n.Signature)
                 .ToHashSet();
 
             foreach (var signature in signatures)
             {
-                if (_profilePublisherRepo.Items.Exists(signature)) continue;
-                await _serviceController.UnpublishShoutAsync(signature, Registrant, cancellationToken);
+                if (_profilePublisherRepo.ProfileItems.Exists(signature)) continue;
+                await _serviceMediator.UnsubscribeShoutAsync(signature, Channel, Author, cancellationToken);
             }
         }
     }
 
-    private async Task RemovePublishedFile(CancellationToken cancellationToken = default)
+    private async ValueTask ShrinkPublishedFiles(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceController.GetPublishedFileReportsAsync(cancellationToken);
+            var reports = await _serviceMediator.GetPublishedFileReportsAsync(cancellationToken);
             var rootHashes = reports
-                .Where(n => n.Registrant == Registrant)
+                .Where(n => n.Authors.Contains(Author))
                 .Select(n => n.RootHash)
                 .Where(n => n.HasValue)
                 .Select(n => n!.Value)
@@ -168,37 +148,68 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
 
             foreach (var rootHash in rootHashes)
             {
-                if (_profilePublisherRepo.Items.Exists(rootHash)) continue;
-                await _serviceController.UnpublishFileFromMemoryAsync(rootHash, Registrant, cancellationToken);
+                if (_profilePublisherRepo.ProfileItems.Exists(rootHash)) continue;
+                await _serviceMediator.UnpublishFileFromMemoryAsync(rootHash, Author, cancellationToken);
             }
         }
     }
 
-    private async Task PublishProfile(ProfilePublisherConfig config, CancellationToken cancellationToken = default)
-    {
-        var digitalSignature = config.DigitalSignature;
-        var content = new ProfileContent(config.TrustedSignatures.ToArray(), config.BlockedSignatures.ToArray());
-
-        var rootHash = await this.PublishFile(content, cancellationToken);
-        await this.PublishShout(rootHash, digitalSignature, cancellationToken);
-    }
-
-    private async Task<OmniHash> PublishFile(ProfileContent content, CancellationToken cancellationToken = default)
+    private async ValueTask<bool> ExistsPublishedShouts(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            using var contentBytes = RocketMessage.ToBytes(content);
-            var rootHash = await _serviceController.PublishFileFromMemoryAsync(contentBytes.Memory, Registrant, cancellationToken);
-            return rootHash;
+            var reports = await _serviceMediator.GetPublishedShoutReportsAsync(cancellationToken);
+            var signatures = reports
+                .Where(n => n.Authors.Contains(Author))
+                .Select(n => n.Signature)
+                .ToHashSet();
+
+            foreach (var profileItem in _profilePublisherRepo.ProfileItems.FindAll())
+            {
+                if (signatures.Contains(profileItem.Signature)) continue;
+                return false;
+            }
+
+            return true;
         }
     }
 
-    private async Task PublishShout(OmniHash rootHash, OmniDigitalSignature digitalSignature, CancellationToken cancellationToken = default)
+    private async ValueTask<bool> ExistsPublishedFiles(CancellationToken cancellationToken = default)
     {
-        var now = DateTime.UtcNow;
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
+            var reports = await _serviceMediator.GetPublishedFileReportsAsync(cancellationToken);
+            var rootHashes = reports
+                .Where(n => n.Authors.Contains(Author))
+                .Select(n => n.RootHash)
+                .Where(n => n.HasValue)
+                .Select(n => n!.Value)
+                .ToHashSet();
 
-        using var shout = Shout.Create(Timestamp.FromDateTime(now), RocketMessage.ToBytes(rootHash), digitalSignature);
-        await _serviceController.PublishShoutAsync(shout, Registrant, cancellationToken);
+            foreach (var profileItem in _profilePublisherRepo.ProfileItems.FindAll())
+            {
+                if (rootHashes.Contains(profileItem.RootHash)) continue;
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+    private async ValueTask PublishProfileContent(ProfilePublisherConfig config, CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
+            var digitalSignature = config.DigitalSignature;
+            var content = new ProfileContent(config.TrustedSignatures.ToArray(), config.BlockedSignatures.ToArray());
+
+            using var contentBytes = RocketMessage.ToBytes(content);
+            var rootHash = await _serviceMediator.PublishFileFromMemoryAsync(contentBytes.Memory, 8 * 1024 * 1024, Author, cancellationToken);
+
+            var now = DateTime.UtcNow;
+            using var shout = Shout.Create(Channel, Timestamp64.FromDateTime(now), RocketMessage.ToBytes(rootHash), digitalSignature);
+            await _serviceMediator.PublishShoutAsync(shout, Author, cancellationToken);
+        }
     }
 
     public async ValueTask<ProfilePublisherConfig> GetConfigAsync(CancellationToken cancellationToken = default)
@@ -227,6 +238,7 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             await _configStorage.TrySetValueAsync(config, cancellationToken);
+            _profilePublisherRepo.ProfileItems.DeleteAll();
         }
     }
 }

@@ -19,7 +19,7 @@ internal sealed partial class PublishedShoutStorageRepository : DisposableBase
         _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
         _database.UtcDate = true;
 
-        this.Items = new PublishedShoutItemRepository(_database);
+        this.ShoutItems = new PublishedShoutItemRepository(_database);
     }
 
     protected override void OnDispose(bool disposing)
@@ -29,14 +29,14 @@ internal sealed partial class PublishedShoutStorageRepository : DisposableBase
 
     public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
     {
-        await this.Items.MigrateAsync(cancellationToken);
+        await this.ShoutItems.MigrateAsync(cancellationToken);
     }
 
-    public PublishedShoutItemRepository Items { get; }
+    public PublishedShoutItemRepository ShoutItems { get; }
 
     public sealed class PublishedShoutItemRepository
     {
-        private const string CollectionName = "published_items";
+        private const string CollectionName = "published_shout_items";
 
         private readonly LiteDatabase _database;
 
@@ -67,14 +67,14 @@ internal sealed partial class PublishedShoutStorageRepository : DisposableBase
             return col;
         }
 
-        public bool Exists(OmniSignature signature)
+        public bool Exists(OmniSignature signature, string channel)
         {
             lock (_lockObject)
             {
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
                 var col = this.GetCollection();
-                return col.Exists(n => n.Signature == signatureEntity);
+                return col.Exists(n => n.Signature == signatureEntity && n.Channel == channel);
             }
         }
 
@@ -87,29 +87,18 @@ internal sealed partial class PublishedShoutStorageRepository : DisposableBase
             }
         }
 
-        public IEnumerable<PublishedShoutItem> Find(OmniSignature signature)
+        public PublishedShoutItem? FindOne(OmniSignature signature, string channel)
         {
             lock (_lockObject)
             {
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
                 var col = this.GetCollection();
-                return col.Find(n => n.Signature == signatureEntity).Select(n => n.Export());
+                return col.FindOne(n => n.Signature == signatureEntity && n.Channel == channel)?.Export();
             }
         }
 
-        public PublishedShoutItem? FindOne(OmniSignature signature, string registrant)
-        {
-            lock (_lockObject)
-            {
-                var signatureEntity = OmniSignatureEntity.Import(signature);
-
-                var col = this.GetCollection();
-                return col.FindOne(n => n.Signature == signatureEntity && n.Registrant == registrant)?.Export();
-            }
-        }
-
-        public void Insert(PublishedShoutItem item)
+        public void Upsert(PublishedShoutItem item)
         {
             lock (_lockObject)
             {
@@ -117,20 +106,23 @@ internal sealed partial class PublishedShoutStorageRepository : DisposableBase
 
                 var col = this.GetCollection();
 
-                if (col.Exists(n => n.Signature == itemEntity.Signature && n.Registrant == itemEntity.Registrant)) return;
+                _database.BeginTrans();
 
+                col.DeleteMany(n => n.Signature == itemEntity.Signature && n.Channel == item.Channel);
                 col.Insert(itemEntity);
+
+                _database.Commit();
             }
         }
 
-        public void Delete(OmniSignature signature, string registrant)
+        public void Delete(OmniSignature signature, string channel)
         {
             lock (_lockObject)
             {
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
                 var col = this.GetCollection();
-                col.DeleteMany(n => n.Signature == signatureEntity && n.Registrant == registrant);
+                col.DeleteMany(n => n.Signature == signatureEntity && n.Channel == channel);
             }
         }
     }

@@ -6,6 +6,7 @@ using Omnius.Axus.Models;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Pipelines;
+using Omnius.Core.RocketPack;
 using Omnius.Core.Storages;
 
 namespace Omnius.Axus.Engines;
@@ -58,9 +59,9 @@ public sealed partial class SubscribedShoutStorage : AsyncDisposableBase, ISubsc
         {
             var shoutReports = new List<SubscribedShoutReport>();
 
-            foreach (var item in _subscriberRepo.Items.FindAll())
+            foreach (var item in _subscriberRepo.ShoutItems.FindAll())
             {
-                shoutReports.Add(new SubscribedShoutReport(item.Signature, item.Registrant));
+                shoutReports.Add(new SubscribedShoutReport(item.Signature, item.Channel, item.Authors.Select(n => new Utf8String(n)).ToArray()));
             }
 
             return shoutReports.ToArray();
@@ -71,97 +72,133 @@ public sealed partial class SubscribedShoutStorage : AsyncDisposableBase, ISubsc
     {
     }
 
-    public async ValueTask<IEnumerable<OmniSignature>> GetSignaturesAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<(OmniSignature, string)>> GetKeysAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var results = new List<OmniSignature>();
+            var results = new List<(OmniSignature, string)>();
 
-            foreach (var item in _subscriberRepo.Items.FindAll())
+            foreach (var item in _subscriberRepo.ShoutItems.FindAll())
             {
-                results.Add(item.Signature);
+                results.Add((item.Signature, item.Channel));
             }
 
             return results;
         }
     }
 
-    public async ValueTask<bool> ContainsShoutAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+    public async ValueTask<bool> ContainsShoutAsync(OmniSignature signature, string channel, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            if (_subscriberRepo.Items.Exists(signature)) return false;
-
-            return true;
+            return _subscriberRepo.ShoutItems.Exists(signature, channel);
         }
     }
 
-    public async ValueTask SubscribeShoutAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default)
+    public async ValueTask SubscribeShoutAsync(OmniSignature signature, string channel, string author, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            _subscriberRepo.Items.Insert(new SubscribedShoutItem(signature, registrant));
+            var shoutItem = _subscriberRepo.ShoutItems.FindOne(signature, channel);
+
+            if (shoutItem is not null)
+            {
+                if (shoutItem.Authors.Contains(author)) return;
+
+                var authors = shoutItem.Authors.Append(author).ToArray();
+                shoutItem = shoutItem with { Authors = authors };
+                _subscriberRepo.ShoutItems.Upsert(shoutItem);
+
+                return;
+            }
+
+            var newShoutItem = new SubscribedShoutItem()
+            {
+                Signature = signature,
+                Channel = channel,
+                ShoutUpdatedTime = DateTime.MinValue,
+                Authors = new[] { author }
+            };
+            _subscriberRepo.ShoutItems.Upsert(newShoutItem);
         }
     }
 
-    public async ValueTask UnsubscribeShoutAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default)
+    public async ValueTask UnsubscribeShoutAsync(OmniSignature signature, string channel, string author, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            _subscriberRepo.Items.Delete(signature, registrant);
+            var shoutItem = _subscriberRepo.ShoutItems.FindOne(signature, channel);
+            if (shoutItem is null) return;
+            if (!shoutItem.Authors.Contains(author)) return;
+
+            if (shoutItem.Authors.Count > 1)
+            {
+                var authors = shoutItem.Authors.Where(n => n != author).ToArray();
+                var newShoutItem = shoutItem with { Authors = authors };
+                _subscriberRepo.ShoutItems.Upsert(newShoutItem);
+
+                return;
+            }
+
+            _subscriberRepo.ShoutItems.Delete(signature, channel);
+
+            var key = GenKey(signature, channel);
+            await _blockStorage.TryDeleteAsync(key, cancellationToken);
         }
     }
 
-    public async ValueTask<DateTime?> ReadShoutCreatedTimeAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+    public async ValueTask<DateTime> ReadShoutUpdatedTimeAsync(OmniSignature signature, string channel, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var writtenItem = _subscriberRepo.WrittenItems.FindOne(signature);
-            if (writtenItem == null) return null;
+            var shoutItem = _subscriberRepo.ShoutItems.FindOne(signature, channel);
+            if (shoutItem is null) return DateTime.MinValue;
 
-            return writtenItem.CreatedTime.ToUniversalTime().Truncate(TimeSpan.FromTicks(TimeSpan.TicksPerSecond));
+            return shoutItem.ShoutUpdatedTime;
         }
     }
 
-    public async ValueTask<Shout?> ReadShoutAsync(OmniSignature signature, CancellationToken cancellationToken = default)
+    public async ValueTask<Shout?> TryReadShoutAsync(OmniSignature signature, string channel, DateTime updatedTime, CancellationToken cancellationToken = default)
     {
-        var item = _subscriberRepo.Items.Find(signature).FirstOrDefault();
-        if (item is null) return null;
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
+            var shoutItem = _subscriberRepo.ShoutItems.FindOne(signature, channel);
+            if (shoutItem is null || shoutItem.ShoutUpdatedTime <= updatedTime) return null;
 
-        var writtenItem = _subscriberRepo.WrittenItems.FindOne(signature);
-        if (writtenItem is null) return null;
+            var blockName = GenKey(signature, channel);
+            using var memoryOwner = await _blockStorage.TryReadAsync(blockName, cancellationToken);
+            if (memoryOwner is null) return null;
 
-        var blockName = ComputeBlockName(signature);
-        using var memoryOwner = await _blockStorage.TryReadAsync(blockName, cancellationToken);
-        if (memoryOwner is null) return null;
-
-        var message = Shout.Import(new ReadOnlySequence<byte>(memoryOwner.Memory), _bytesPool);
-        return message;
+            var message = Shout.Import(new ReadOnlySequence<byte>(memoryOwner.Memory), _bytesPool);
+            return message;
+        }
     }
 
-    public async ValueTask WriteShoutAsync(Shout message, CancellationToken cancellationToken = default)
+    public async ValueTask WriteShoutAsync(Shout shout, CancellationToken cancellationToken = default)
     {
-        if (!message.Verify()) return;
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
+            if (!shout.Verify()) return;
 
-        var signature = message.Certificate?.GetOmniSignature();
-        if (signature == null) return;
+            var signature = shout.Certificate?.GetOmniSignature();
+            if (signature == null) return;
 
-        if (!_subscriberRepo.Items.Exists(signature)) return;
+            var shoutItem = _subscriberRepo.ShoutItems.FindOne(signature, shout.Channel);
+            if (shoutItem is null || shoutItem.ShoutUpdatedTime >= shout.UpdatedTime.ToDateTime()) return;
 
-        var writtenItem = _subscriberRepo.WrittenItems.FindOne(signature);
-        if (writtenItem is not null && writtenItem.CreatedTime >= message.CreatedTime.ToDateTime()) return;
+            var newShoutItem = shoutItem with { ShoutUpdatedTime = shout.UpdatedTime.ToDateTime() };
+            _subscriberRepo.ShoutItems.Upsert(newShoutItem);
 
-        using var bytesPise = new BytesPipe(_bytesPool);
-        message.Export(bytesPise.Writer, _bytesPool);
+            using var bytesPipe = new BytesPipe(_bytesPool);
+            shout.Export(bytesPipe.Writer, _bytesPool);
 
-        _subscriberRepo.WrittenItems.Insert(new WrittenShoutItem(signature, message.CreatedTime.ToDateTime()));
-
-        var blockName = ComputeBlockName(signature);
-        await _blockStorage.WriteAsync(blockName, bytesPise.Reader.GetSequence(), cancellationToken);
+            var key = GenKey(signature, shout.Channel);
+            await _blockStorage.WriteAsync(key, bytesPipe.Reader.GetSequence(), cancellationToken);
+        }
     }
 
-    private static string ComputeBlockName(OmniSignature signature)
+    private static string GenKey(OmniSignature signature, string channel)
     {
-        return StringConverter.SignatureToString(signature);
+        return StringConverter.ToString(signature, channel);
     }
 }

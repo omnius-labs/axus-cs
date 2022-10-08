@@ -19,7 +19,7 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
         _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
         _database.UtcDate = true;
 
-        this.Items = new SubscribedProfileItemRepository(_database);
+        this.ProfileItems = new SubscribedProfileItemRepository(_database);
     }
 
     protected override void OnDispose(bool disposing)
@@ -29,14 +29,14 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
 
     public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
     {
-        await this.Items.MigrateAsync(cancellationToken);
+        await this.ProfileItems.MigrateAsync(cancellationToken);
     }
 
-    public SubscribedProfileItemRepository Items { get; }
+    public SubscribedProfileItemRepository ProfileItems { get; }
 
     public sealed class SubscribedProfileItemRepository
     {
-        private const string CollectionName = "subscribed_items";
+        private const string CollectionName = "subscribed_profile_items";
 
         private readonly LiteDatabase _database;
 

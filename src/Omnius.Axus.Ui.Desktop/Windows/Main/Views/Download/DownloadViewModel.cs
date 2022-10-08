@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Omnius.Axus.Interactors;
 using Omnius.Axus.Interactors.Models;
+using Omnius.Axus.Models;
 using Omnius.Axus.Ui.Desktop.Internal;
 using Omnius.Axus.Ui.Desktop.Models;
 using Omnius.Core;
@@ -103,7 +104,7 @@ public class DownloadViewViewModel : AsyncDisposableBase
 
         foreach (var line in text.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries).Select(n => n.Trim()))
         {
-            if (!AxusMessageConverter.TryStringToFileSeed(line, out var seed)) continue;
+            if (!AxusUriConverter.Instance.TryStringToFileSeed(line, out var seed)) continue;
             results.Add(seed);
         }
 
@@ -136,7 +137,7 @@ public class DownloadViewViewModel : AsyncDisposableBase
         foreach (var viewModel in selectedFiles)
         {
             if (viewModel.Model?.FileSeed is null) continue;
-            sb.AppendLine(AxusMessageConverter.FileSeedToString(viewModel.Model.FileSeed));
+            sb.AppendLine(AxusUriConverter.Instance.FileSeedToString(viewModel.Model.FileSeed));
         }
 
         await _clipboardService.SetTextAsync(sb.ToString());

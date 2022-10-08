@@ -1,5 +1,6 @@
 using Avalonia.Threading;
 using Omnius.Axus.Interactors;
+using Omnius.Axus.Models;
 using Omnius.Core;
 using Omnius.Core.Avalonia;
 using Reactive.Bindings;
@@ -11,7 +12,7 @@ public class StatusViewViewModel : AsyncDisposableBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IAxusServiceMediator _axusServiceMediator;
+    private readonly IServiceMediator _serviceMediator;
     private readonly IClipboardService _clipboardService;
 
     private readonly Task _refreshTask;
@@ -20,9 +21,9 @@ public class StatusViewViewModel : AsyncDisposableBase
 
     private readonly CompositeDisposable _disposable = new();
 
-    public StatusViewViewModel(IAxusServiceMediator axusServiceMediator, IClipboardService clipboardService)
+    public StatusViewViewModel(IServiceMediator serviceMediator, IClipboardService clipboardService)
     {
-        _axusServiceMediator = axusServiceMediator;
+        _serviceMediator = serviceMediator;
         _clipboardService = clipboardService;
 
         this.MyNodeLocation = new ReactiveProperty<string>().AddTo(_disposable);
@@ -60,11 +61,11 @@ public class StatusViewViewModel : AsyncDisposableBase
             {
                 await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken).ConfigureAwait(false);
 
-                var myNodeLocation = await _axusServiceMediator.GetMyNodeLocationAsync(cancellationToken);
+                var myNodeLocation = await _serviceMediator.GetMyNodeLocationAsync(cancellationToken);
 
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    this.MyNodeLocation.Value = AxusMessageConverter.NodeToString(myNodeLocation);
+                    this.MyNodeLocation.Value = AxusUriConverter.Instance.NodeLocationToString(myNodeLocation);
                 });
             }
         }

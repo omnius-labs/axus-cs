@@ -4,7 +4,7 @@ using Omnius.Core.Cryptography;
 
 namespace Omnius.Axus.Interactors;
 
-public interface IAxusServiceMediator
+public interface IServiceMediator
 {
     ValueTask<ServiceConfig> GetConfigAsync(CancellationToken cancellationToken = default);
 
@@ -26,29 +26,29 @@ public interface IAxusServiceMediator
 
     ValueTask<IEnumerable<SubscribedShoutReport>> GetSubscribedShoutReportsAsync(CancellationToken cancellationToken = default);
 
-    ValueTask<OmniHash> PublishFileFromMemoryAsync(ReadOnlyMemory<byte> memory, string registrant, CancellationToken cancellationToken = default);
+    ValueTask<OmniHash> PublishFileFromMemoryAsync(ReadOnlyMemory<byte> memory, int maxBlockSize, string author, CancellationToken cancellationToken = default);
 
-    ValueTask<OmniHash> PublishFileFromStorageAsync(string filePath, string registrant, CancellationToken cancellationToken = default);
+    ValueTask<OmniHash> PublishFileFromStorageAsync(string filePath, int maxBlockSize, string author, CancellationToken cancellationToken = default);
 
-    ValueTask PublishShoutAsync(Shout message, string registrant, CancellationToken cancellationToken = default);
+    ValueTask PublishShoutAsync(Shout message, string author, CancellationToken cancellationToken = default);
 
-    ValueTask SubscribeFileAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default);
+    ValueTask SubscribeFileAsync(OmniHash rootHash, string author, CancellationToken cancellationToken = default);
 
-    ValueTask SubscribeShoutAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default);
+    ValueTask SubscribeShoutAsync(OmniSignature signature, string channel, string author, CancellationToken cancellationToken = default);
 
     ValueTask<IMemoryOwner<byte>?> TryExportFileToMemoryAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
 
     ValueTask<bool> TryExportFileToStorageAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default);
 
-    ValueTask<Shout?> TryExportShoutAsync(OmniSignature signature, CancellationToken cancellationToken = default);
+    ValueTask<Shout?> TryExportShoutAsync(OmniSignature signature, string channel, DateTime updatedTime, CancellationToken cancellationToken = default);
 
-    ValueTask UnpublishFileFromMemoryAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default);
+    ValueTask UnpublishFileFromMemoryAsync(OmniHash rootHash, string author, CancellationToken cancellationToken = default);
 
-    ValueTask UnpublishFileFromStorageAsync(string filePath, string registrant, CancellationToken cancellationToken = default);
+    ValueTask UnpublishFileFromStorageAsync(string filePath, string author, CancellationToken cancellationToken = default);
 
-    ValueTask UnpublishShoutAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default);
+    ValueTask UnpublishShoutAsync(OmniSignature signature, string channel, string author, CancellationToken cancellationToken = default);
 
-    ValueTask UnsubscribeFileAsync(OmniHash rootHash, string registrant, CancellationToken cancellationToken = default);
+    ValueTask UnsubscribeFileAsync(OmniHash rootHash, string author, CancellationToken cancellationToken = default);
 
-    ValueTask UnsubscribeShoutAsync(OmniSignature signature, string registrant, CancellationToken cancellationToken = default);
+    ValueTask UnsubscribeShoutAsync(OmniSignature signature, string channel, string author, CancellationToken cancellationToken = default);
 }

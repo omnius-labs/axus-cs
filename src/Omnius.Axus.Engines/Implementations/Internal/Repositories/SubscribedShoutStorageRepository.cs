@@ -19,8 +19,7 @@ internal sealed partial class SubscribedShoutStorageRepository : DisposableBase
         _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
         _database.UtcDate = true;
 
-        this.Items = new SubscribedShoutItemRepository(_database);
-        this.WrittenItems = new WrittenShoutItemRepository(_database);
+        this.ShoutItems = new SubscribedShoutItemRepository(_database);
     }
 
     protected override void OnDispose(bool disposing)
@@ -30,17 +29,14 @@ internal sealed partial class SubscribedShoutStorageRepository : DisposableBase
 
     public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
     {
-        await this.Items.MigrateAsync(cancellationToken);
-        await this.WrittenItems.MigrateAsync(cancellationToken);
+        await this.ShoutItems.MigrateAsync(cancellationToken);
     }
 
-    public SubscribedShoutItemRepository Items { get; }
-
-    public WrittenShoutItemRepository WrittenItems { get; }
+    public SubscribedShoutItemRepository ShoutItems { get; }
 
     public sealed class SubscribedShoutItemRepository
     {
-        private const string CollectionName = "subscribed_items";
+        private const string CollectionName = "subscribed_shout_items";
 
         private readonly LiteDatabase _database;
 
@@ -71,14 +67,14 @@ internal sealed partial class SubscribedShoutStorageRepository : DisposableBase
             return col;
         }
 
-        public bool Exists(OmniSignature signature)
+        public bool Exists(OmniSignature signature, string channel)
         {
             lock (_lockObject)
             {
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
                 var col = this.GetCollection();
-                return col.Exists(n => n.Signature == signatureEntity);
+                return col.Exists(n => n.Signature == signatureEntity && n.Channel == channel);
             }
         }
 
@@ -91,29 +87,18 @@ internal sealed partial class SubscribedShoutStorageRepository : DisposableBase
             }
         }
 
-        public IEnumerable<SubscribedShoutItem> Find(OmniSignature signature)
+        public SubscribedShoutItem? FindOne(OmniSignature signature, string channel)
         {
             lock (_lockObject)
             {
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
                 var col = this.GetCollection();
-                return col.Find(n => n.Signature == signatureEntity).Select(n => n.Export());
+                return col.FindOne(n => n.Signature == signatureEntity && n.Channel == channel)?.Export();
             }
         }
 
-        public SubscribedShoutItem? FindOne(OmniSignature signature, string registrant)
-        {
-            lock (_lockObject)
-            {
-                var signatureEntity = OmniSignatureEntity.Import(signature);
-
-                var col = this.GetCollection();
-                return col.FindOne(n => n.Signature == signatureEntity && n.Registrant == registrant)?.Export();
-            }
-        }
-
-        public void Insert(SubscribedShoutItem item)
+        public void Upsert(SubscribedShoutItem item)
         {
             lock (_lockObject)
             {
@@ -121,110 +106,23 @@ internal sealed partial class SubscribedShoutStorageRepository : DisposableBase
 
                 var col = this.GetCollection();
 
-                if (col.Exists(n => n.Signature == itemEntity.Signature && n.Registrant == itemEntity.Registrant)) return;
+                _database.BeginTrans();
 
+                col.DeleteMany(n => n.Signature == itemEntity.Signature && n.Channel == item.Channel);
                 col.Insert(itemEntity);
+
+                _database.Commit();
             }
         }
 
-        public void Delete(OmniSignature signature, string registrant)
+        public void Delete(OmniSignature signature, string channel)
         {
             lock (_lockObject)
             {
                 var signatureEntity = OmniSignatureEntity.Import(signature);
 
                 var col = this.GetCollection();
-                col.DeleteMany(n => n.Signature == signatureEntity && n.Registrant == registrant);
-            }
-        }
-    }
-
-    public sealed class WrittenShoutItemRepository
-    {
-        private const string CollectionName = "written_items";
-
-        private readonly LiteDatabase _database;
-
-        private readonly object _lockObject = new();
-
-        public WrittenShoutItemRepository(LiteDatabase database)
-        {
-            _database = database;
-        }
-
-        internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
-        {
-            lock (_lockObject)
-            {
-                if (_database.GetDocumentVersion(CollectionName) <= 0)
-                {
-                    var col = this.GetCollection();
-                    col.EnsureIndex(x => x.Signature, true);
-                }
-
-                _database.SetDocumentVersion(CollectionName, 1);
-            }
-        }
-
-        public ILiteCollection<WrittenShoutItemEntity> GetCollection()
-        {
-            var col = _database.GetCollection<WrittenShoutItemEntity>(CollectionName);
-            return col;
-        }
-
-        public bool Exists(OmniSignature signature)
-        {
-            lock (_lockObject)
-            {
-                var signatureEntity = OmniSignatureEntity.Import(signature);
-
-                var col = this.GetCollection();
-                return col.Exists(n => n.Signature == signatureEntity);
-            }
-        }
-
-        public IEnumerable<WrittenShoutItem> FindAll()
-        {
-            lock (_lockObject)
-            {
-                var col = this.GetCollection();
-                return col.FindAll().Select(n => n.Export());
-            }
-        }
-
-        public WrittenShoutItem? FindOne(OmniSignature signature)
-        {
-            lock (_lockObject)
-            {
-                var signatureEntity = OmniSignatureEntity.Import(signature);
-
-                var col = this.GetCollection();
-                return col.FindOne(n => n.Signature == signatureEntity)?.Export();
-            }
-        }
-
-        public void Insert(WrittenShoutItem item)
-        {
-            lock (_lockObject)
-            {
-                var itemEntity = WrittenShoutItemEntity.Import(item);
-
-                var col = this.GetCollection();
-
-                if (col.Exists(n => n.Signature == itemEntity.Signature)) return;
-
-                col.Insert(itemEntity);
-            }
-        }
-
-        public void Delete(OmniSignature signature)
-        {
-            lock (_lockObject)
-            {
-                var signatureEntity = OmniSignatureEntity.Import(signature);
-
-                var col = this.GetCollection();
-                col.DeleteMany(n => n.Signature == signatureEntity);
+                col.DeleteMany(n => n.Signature == signatureEntity && n.Channel == channel);
             }
         }
     }

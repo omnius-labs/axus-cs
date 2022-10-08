@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Omnius.Axus.Interactors;
 using Omnius.Axus.Interactors.Models;
+using Omnius.Axus.Models;
 using Omnius.Axus.Ui.Desktop.Internal;
 using Omnius.Axus.Ui.Desktop.Models;
 using Omnius.Core;
@@ -119,7 +120,7 @@ public class UploadViewViewModel : AsyncDisposableBase
         foreach (var file in selectedFiles)
         {
             if (file.Model?.FileSeed is null) continue;
-            sb.AppendLine(AxusMessageConverter.FileSeedToString(file.Model.FileSeed));
+            sb.AppendLine(AxusUriConverter.Instance.FileSeedToString(file.Model.FileSeed));
         }
 
         await _clipboardService.SetTextAsync(sb.ToString());

@@ -144,10 +144,8 @@ public sealed partial class SessionAccepter : AsyncDisposableBase, ISessionAccep
             var session = new Session(secureConnection, address, SessionHandshakeType.Accepted, secureConnection.Signature, receivedMessage.Scheme);
             return session;
         }
-        else
-        {
-            throw new NotSupportedException();
-        }
+
+        throw new NotSupportedException();
     }
 
     public async ValueTask<ISession> AcceptAsync(string scheme, CancellationToken cancellationToken = default)

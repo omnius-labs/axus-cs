@@ -19,7 +19,7 @@ internal sealed class ProfilePublisherRepository : DisposableBase
         _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
         _database.UtcDate = true;
 
-        this.Items = new PublishedProfileItemRepository(_database);
+        this.ProfileItems = new PublishedProfileItemRepository(_database);
     }
 
     protected override void OnDispose(bool disposing)
@@ -29,14 +29,14 @@ internal sealed class ProfilePublisherRepository : DisposableBase
 
     public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
     {
-        await this.Items.MigrateAsync(cancellationToken);
+        await this.ProfileItems.MigrateAsync(cancellationToken);
     }
 
-    public PublishedProfileItemRepository Items { get; }
+    public PublishedProfileItemRepository ProfileItems { get; }
 
     public sealed class PublishedProfileItemRepository
     {
-        private const string CollectionName = "published_items";
+        private const string CollectionName = "published_profile_items";
 
         private readonly LiteDatabase _database;
 
@@ -66,6 +66,15 @@ internal sealed class ProfilePublisherRepository : DisposableBase
         {
             var col = _database.GetCollection<PublishedProfileItemEntity>(CollectionName);
             return col;
+        }
+
+        public int Count()
+        {
+            lock (_lockObject)
+            {
+                var col = this.GetCollection();
+                return col.Count();
+            }
         }
 
         public bool Exists(OmniSignature signature)
@@ -145,7 +154,7 @@ internal sealed class ProfilePublisherRepository : DisposableBase
             }
         }
 
-        public void DeleteAll()
+        internal void DeleteAll()
         {
             lock (_lockObject)
             {

@@ -10,7 +10,7 @@ using Omnius.Core.Storages;
 using Omnius.Core.Tasks;
 using Omnius.Core.UnitTestToolkit;
 
-namespace Omnius.Axus.Engines;
+namespace Omnius.Axus.Engines.Internal;
 
 internal class FileExchangerNode : AsyncDisposableBase
 {
@@ -58,6 +58,9 @@ internal class FileExchangerNode : AsyncDisposableBase
         var senderBandwidthLimiter = new BandwidthLimiter(int.MaxValue);
         var receiverBandwidthLimiter = new BandwidthLimiter(int.MaxValue);
 
+        var nodeLocationsFetcherOptions = new NodeLocationsFetcherOptions(NodeLocationsFetcherOperationType.None);
+        var nodeLocationsFetcher = NodeLocationsFetcher.Create(nodeLocationsFetcherOptions);
+
         var connectionConnectors = ImmutableList.CreateBuilder<IConnectionConnector>();
 
         {
@@ -88,7 +91,7 @@ internal class FileExchangerNode : AsyncDisposableBase
         _sessionAccepter = await SessionAccepter.CreateAsync(_connectionAcceptors, batchActionDispatcher, bytesPool, sessionAccepterOptions, cancellationToken);
 
         var nodeFinderOptions = new NodeFinderOptions(Path.Combine(_databaseDirectoryPath, "node_finder"), 128);
-        _nodeFinder = await NodeFinder.CreateAsync(_sessionConnector, _sessionAccepter, batchActionDispatcher, bytesPool, nodeFinderOptions, cancellationToken);
+        _nodeFinder = await NodeFinder.CreateAsync(_sessionConnector, _sessionAccepter, nodeLocationsFetcher, batchActionDispatcher, bytesPool, nodeFinderOptions, cancellationToken);
 
         var publishedFileStorageOptions = new PublishedFileStorageOptions(Path.Combine(_databaseDirectoryPath, "published_file_storage"));
         _publishedFileStorage = await PublishedFileStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, publishedFileStorageOptions, cancellationToken);
@@ -151,6 +154,8 @@ internal class FileExchangerNode : AsyncDisposableBase
         }
 
         _connectionAcceptors = _connectionAcceptors.Clear();
+
+        _workingDirectoryDeleter.Dispose();
     }
 
     public OmniAddress ListenAddress => _listenAddress;

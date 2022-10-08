@@ -1,42 +1,18 @@
 using System.Diagnostics.CodeAnalysis;
-using Omnius.Axus.Interactors.Models;
-using Omnius.Axus.Models;
 using Omnius.Core;
 using Omnius.Core.Pipelines;
 using Omnius.Core.RocketPack;
 using Omnius.Core.Serialization;
 
-namespace Omnius.Axus.Interactors;
+namespace Omnius.Axus.Models;
 
-public static class AxusMessageConverter
+public class AxusUriConverter
 {
     private static readonly string _schema = "axus";
-    private static readonly string _nodePath = "node";
-    private static readonly string _seedPath = "seed";
 
-    public static string NodeToString(NodeLocation message)
-    {
-        return MessageToString<NodeLocation>(_nodePath, 1, message);
-    }
+    public static AxusUriConverter Instance { get; } = new AxusUriConverter();
 
-    public static bool TryStringToNode(string text, [NotNullWhen(true)] out NodeLocation? message)
-    {
-        message = null;
-        return TryStringToMessage<NodeLocation>(_nodePath, 1, text, out message);
-    }
-
-    public static string FileSeedToString(FileSeed message)
-    {
-        return MessageToString<FileSeed>(_seedPath, 1, message);
-    }
-
-    public static bool TryStringToFileSeed(string text, [NotNullWhen(true)] out FileSeed? message)
-    {
-        message = null;
-        return TryStringToMessage<FileSeed>(_seedPath, 1, text, out message);
-    }
-
-    private static string MessageToString<T>(string path, int version, T message)
+    public string Encode<T>(string path, int version, T message)
         where T : IRocketMessage<T>
     {
         var bytesPool = BytesPool.Shared;
@@ -50,7 +26,7 @@ public static class AxusMessageConverter
         return AddSchemaAndPath(path, version, OmniBase.Encode(outBytesPipe.Reader.GetSequence(), ConvertStringType.Base58)!);
     }
 
-    private static bool TryStringToMessage<T>(string path, int version, string text, [NotNullWhen(true)] out T? message)
+    public bool TryDecode<T>(string path, int version, string text, [NotNullWhen(true)] out T? message)
         where T : IRocketMessage<T>
     {
         message = default!;

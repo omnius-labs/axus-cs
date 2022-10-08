@@ -38,6 +38,8 @@ public class AxusService : AsyncDisposableBase, IAxusService
 
     private AsyncLock _asyncLock = new();
 
+    private const string NodeLocationsUri = "http://app.omnius-labs.com/axus/v1/nodes.txt";
+
     public static async ValueTask<AxusService> CreateAsync(string databaseDirectoryPath, CancellationToken cancellationToken = default)
     {
         var axusService = new AxusService(databaseDirectoryPath);
@@ -95,6 +97,9 @@ public class AxusService : AsyncDisposableBase, IAxusService
         var senderBandwidthLimiter = new BandwidthLimiter(config.Bandwidth?.MaxSendBytesPerSeconds ?? int.MaxValue);
         var receiverBandwidthLimiter = new BandwidthLimiter(config.Bandwidth?.MaxReceiveBytesPerSeconds ?? int.MaxValue);
 
+        var nodeLocationsFetcherOptions = new NodeLocationsFetcherOptions(NodeLocationsFetcherOperationType.HttpGet, NodeLocationsUri);
+        var nodeLocationsFetcher = NodeLocationsFetcher.Create(nodeLocationsFetcherOptions);
+
         var connectionConnectors = ImmutableList.CreateBuilder<IConnectionConnector>();
 
         if (config.I2pConnector is I2pConnectorConfig i2pConnectorConfig && i2pConnectorConfig.IsEnabled)
@@ -149,7 +154,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
         _sessionAccepter = await SessionAccepter.CreateAsync(_connectionAccepters, batchActionDispatcher, bytesPool, sessionAccepterOptions, cancellationToken);
 
         var nodeFinderOptions = new NodeFinderOptions(Path.Combine(_databaseDirectoryPath, "node_finder"), 128);
-        _nodeFinder = await NodeFinder.CreateAsync(_sessionConnector, _sessionAccepter, batchActionDispatcher, bytesPool, nodeFinderOptions, cancellationToken);
+        _nodeFinder = await NodeFinder.CreateAsync(_sessionConnector, _sessionAccepter, nodeLocationsFetcher, batchActionDispatcher, bytesPool, nodeFinderOptions, cancellationToken);
 
         var publishedFileStorageOptions = new PublishedFileStorageOptions(Path.Combine(_databaseDirectoryPath, "published_file_storage"));
         _publishedFileStorage = await PublishedFileStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, publishedFileStorageOptions, cancellationToken);
@@ -354,7 +359,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var rootHash = await _publishedFileStorage.PublishFileAsync(param.FilePath, param.Registrant, cancellationToken);
+            var rootHash = await _publishedFileStorage.PublishFileAsync(param.FilePath, param.MaxBlockSize, param.Author, cancellationToken);
             return new PublishFileFromStorageResult(rootHash);
         }
     }
@@ -363,7 +368,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var rootHash = await _publishedFileStorage.PublishFileAsync(new ReadOnlySequence<byte>(param.Memory), param.Registrant, cancellationToken);
+            var rootHash = await _publishedFileStorage.PublishFileAsync(new ReadOnlySequence<byte>(param.Memory), param.MaxBlockSize, param.Author, cancellationToken);
             return new PublishFileFromMemoryResult(rootHash);
         }
     }
@@ -372,7 +377,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await _publishedFileStorage.UnpublishFileAsync(param.FilePath, param.Registrant, cancellationToken);
+            await _publishedFileStorage.UnpublishFileAsync(param.FilePath, param.Author, cancellationToken);
         }
     }
 
@@ -380,7 +385,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await _publishedFileStorage.UnpublishFileAsync(param.RootHash, param.Registrant, cancellationToken);
+            await _publishedFileStorage.UnpublishFileAsync(param.RootHash, param.Author, cancellationToken);
         }
     }
 
@@ -388,7 +393,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await _subscribedFileStorage.SubscribeFileAsync(param.RootHash, param.Registrant, cancellationToken);
+            await _subscribedFileStorage.SubscribeFileAsync(param.RootHash, param.Author, cancellationToken);
         }
     }
 
@@ -396,7 +401,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await _subscribedFileStorage.UnsubscribeFileAsync(param.RootHash, param.Registrant, cancellationToken);
+            await _subscribedFileStorage.UnsubscribeFileAsync(param.RootHash, param.Author, cancellationToken);
         }
     }
 
@@ -424,7 +429,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await _publishedShoutStorage.PublishShoutAsync(param.Shout, param.Registrant, cancellationToken);
+            await _publishedShoutStorage.PublishShoutAsync(param.Shout, param.Author, cancellationToken);
         }
     }
 
@@ -432,7 +437,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await _publishedShoutStorage.UnpublishShoutAsync(param.Signature, param.Registrant, cancellationToken);
+            await _publishedShoutStorage.UnpublishShoutAsync(param.Signature, param.Channel, param.Author, cancellationToken);
         }
     }
 
@@ -440,7 +445,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await _subscribedShoutStorage.SubscribeShoutAsync(param.Signature, param.Registrant, cancellationToken);
+            await _subscribedShoutStorage.SubscribeShoutAsync(param.Signature, param.Channel, param.Author, cancellationToken);
         }
     }
 
@@ -448,7 +453,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await _subscribedShoutStorage.UnsubscribeShoutAsync(param.Signature, param.Registrant, cancellationToken);
+            await _subscribedShoutStorage.UnsubscribeShoutAsync(param.Signature, param.Channel, param.Author, cancellationToken);
         }
     }
 
@@ -456,7 +461,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var shout = await _subscribedShoutStorage.ReadShoutAsync(param.Signature, cancellationToken);
+            var shout = await _subscribedShoutStorage.TryReadShoutAsync(param.Signature, param.Channel, param.UpdatedTime.ToDateTime(), cancellationToken);
             return new TryExportShoutResult(shout);
         }
     }

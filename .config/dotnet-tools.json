@@ -8,10 +8,6 @@
         "dotnet-reportgenerator-globaltool": {
             "commands": ["reportgenerator"],
             "version": "4.8.13"
-        },
-        "nukeeper": {
-            "commands": ["nukeeper"],
-            "version": "0.35.0"
         }
     },
     "version": 1

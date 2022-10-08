@@ -21,7 +21,7 @@ public class PeersViewViewModel : PeersViewViewModelBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IAxusServiceMediator _axusServiceMediator;
+    private readonly IServiceMediator _serviceMediator;
     private readonly IApplicationDispatcher _applicationDispatcher;
     private readonly IDialogService _dialogService;
 
@@ -29,9 +29,9 @@ public class PeersViewViewModel : PeersViewViewModelBase
 
     private readonly CompositeDisposable _disposable = new();
 
-    public PeersViewViewModel(IAxusServiceMediator axusServiceMediator, IApplicationDispatcher applicationDispatcher, IDialogService dialogService)
+    public PeersViewViewModel(IServiceMediator serviceMediator, IApplicationDispatcher applicationDispatcher, IDialogService dialogService)
     {
-        _axusServiceMediator = axusServiceMediator;
+        _serviceMediator = serviceMediator;
         _applicationDispatcher = applicationDispatcher;
         _dialogService = dialogService;
 
@@ -50,7 +50,7 @@ public class PeersViewViewModel : PeersViewViewModelBase
 
     private async ValueTask<IEnumerable<SessionReport>> GetSessionReports(CancellationToken cancellationToken)
     {
-        return await _axusServiceMediator.GetSessionReportsAsync(cancellationToken);
+        return await _serviceMediator.GetSessionReportsAsync(cancellationToken);
     }
 
     private class SessionReportEqualityComparer : IEqualityComparer<SessionReport>
@@ -59,7 +59,7 @@ public class PeersViewViewModel : PeersViewViewModelBase
 
         public bool Equals(SessionReport? x, SessionReport? y)
         {
-            return (x?.ServiceName == y?.ServiceName) && (x?.HandshakeType == y?.HandshakeType) && (x?.Address == y?.Address);
+            return (x?.Scheme == y?.Scheme) && (x?.HandshakeType == y?.HandshakeType) && (x?.Address == y?.Address);
         }
 
         public int GetHashCode([DisallowNull] SessionReport obj)
@@ -71,7 +71,7 @@ public class PeersViewViewModel : PeersViewViewModelBase
     private async Task AddNodeLocationsAsync()
     {
         var text = await _dialogService.ShowTextEditWindowAsync();
-        await _axusServiceMediator.AddCloudNodeLocationsAsync(ParseNodeLocations(text));
+        await _serviceMediator.AddCloudNodeLocationsAsync(ParseNodeLocations(text));
     }
 
     private static IEnumerable<NodeLocation> ParseNodeLocations(string text)
@@ -80,7 +80,7 @@ public class PeersViewViewModel : PeersViewViewModelBase
 
         foreach (var line in text.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries).Select(n => n.Trim()))
         {
-            if (!AxusMessageConverter.TryStringToNode(line, out var nodeLocation)) continue;
+            if (!AxusUriConverter.Instance.TryStringToNodeLocation(line, out var nodeLocation)) continue;
             results.Add(nodeLocation);
         }
 

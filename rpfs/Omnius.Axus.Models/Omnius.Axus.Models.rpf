@@ -17,7 +17,8 @@ message ContentClue {
 }
 
 message Shout {
-    CreatedTime: timestamp,
+    Channel: string(capacity: 256),
+    UpdatedTime: timestamp64,
     Value: bytes(capacity: 32 * 1024 * 1024, recyclable: true),
     Certificate: OmniCertificate?,
 }
@@ -29,7 +30,7 @@ message ConsistencyReport {
 }
 
 message SessionReport {
-    ServiceName: string(capacity: 256),
+    Scheme: string(capacity: 256),
     HandshakeType: SessionHandshakeType,
     Address: OmniAddress,
 }
@@ -92,12 +93,12 @@ message TcpAccepterConfig {
 message PublishedFileReport {
     FilePath: string?,
     RootHash: OmniHash?,
-    Registrant: string,
+    Authors: vector<string>,
 }
 
 message SubscribedFileReport {
     RootHash: OmniHash,
-    Registrant: string,
+    Authors: vector<string>,
     Status: SubscribedFileStatus,
 }
 
@@ -117,10 +118,12 @@ enum SubscribedFileState : uint8 {
 
 message PublishedShoutReport {
     Signature: OmniSignature,
-    Registrant: string,
+    Channel: string,
+    Authors: vector<string>,
 }
 
 message SubscribedShoutReport {
     Signature: OmniSignature,
-    Registrant: string,
+    Channel: string,
+    Authors: vector<string>,
 }

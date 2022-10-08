@@ -22,11 +22,7 @@ public class App : Application
     public override void Initialize()
     {
         AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler((_, e) => _logger.Error(e));
-
-        if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
-        {
-            lifetime.Exit += (_, _) => this.Exit();
-        }
+        this.ApplicationLifetime!.Exit += (_, _) => this.Exit();
 
         AvaloniaXamlLoader.Load(this);
     }

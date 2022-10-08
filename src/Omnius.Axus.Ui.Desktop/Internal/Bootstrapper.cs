@@ -36,16 +36,16 @@ public partial class Bootstrapper : AsyncDisposableBase
 
             var uiState = await UiStatus.LoadAsync(Path.Combine(_axusEnvironment.DatabaseDirectoryPath, UI_STATUS_FILE_NAME));
 
-            var axusServiceProvider = await AxusServiceProvider.CreateAsync(axusEnvironment.ListenAddress, cancellationToken);
-            var axusServiceMediator = new AxusServiceMediator(axusServiceProvider.GetService());
-            var interactorProvider = await InteractorProvider.CreateAsync(_axusEnvironment.DatabaseDirectoryPath, axusServiceMediator, bytesPool, cancellationToken);
+            var serviceFactory = await ServiceFactory.CreateAsync(axusEnvironment.ListenAddress, cancellationToken);
+            var serviceMediator = new ServiceMediator(serviceFactory.Create());
+            var interactorProvider = await InteractorProvider.CreateAsync(_axusEnvironment.DatabaseDirectoryPath, serviceMediator, bytesPool, cancellationToken);
 
             var serviceCollection = new ServiceCollection();
 
             serviceCollection.AddSingleton(_axusEnvironment);
             serviceCollection.AddSingleton<IBytesPool>(bytesPool);
             serviceCollection.AddSingleton(uiState);
-            serviceCollection.AddSingleton<IAxusServiceMediator>(axusServiceMediator);
+            serviceCollection.AddSingleton<IServiceMediator>(serviceMediator);
             serviceCollection.AddSingleton<IInteractorProvider>(interactorProvider);
 
             serviceCollection.AddSingleton<IApplicationDispatcher, ApplicationDispatcher>();

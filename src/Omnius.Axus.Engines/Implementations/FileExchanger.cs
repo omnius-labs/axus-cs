@@ -1,6 +1,7 @@
 using System.Buffers;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using Omnius.Axus.Engines.Internal;
 using Omnius.Axus.Engines.Internal.Models;
 using Omnius.Axus.Models;
 using Omnius.Core;
@@ -136,14 +137,18 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
                 var rootHashes = await _publishedFileStorage.GetPushRootHashesAsync(cancellationToken);
 
-                var rootHash = rootHashes.FirstOrDefault();
-                if (rootHash == default) continue;
-
-                foreach (var nodeLocation in await this.FindNodeLocationsForConnecting(rootHash, cancellationToken))
+                foreach (var rootHash in rootHashes.Randomize())
                 {
-                    var success = await this.TryConnectAsync(nodeLocation, ExchangeType.Published, rootHash, cancellationToken);
-                    if (success) break;
+                    foreach (var nodeLocation in await this.FindNodeLocationsForConnecting(rootHash, cancellationToken))
+                    {
+                        var success = await this.TryConnectAsync(nodeLocation, ExchangeType.Published, rootHash, cancellationToken);
+                        if (success) break;
+                    }
+
+                    goto End;
                 }
+
+            End:;
             }
         }
         catch (OperationCanceledException e)
@@ -171,14 +176,18 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
                 var rootHashes = await _subscribedFileStorage.GetWantRootHashesAsync(cancellationToken);
 
-                var rootHash = rootHashes.FirstOrDefault();
-                if (rootHash == default) continue;
-
-                foreach (var nodeLocation in await this.FindNodeLocationsForConnecting(rootHash, cancellationToken))
+                foreach (var rootHash in rootHashes.Randomize())
                 {
-                    var success = await this.TryConnectAsync(nodeLocation, ExchangeType.Subscribed, rootHash, cancellationToken);
-                    if (success) break;
+                    foreach (var nodeLocation in await this.FindNodeLocationsForConnecting(rootHash, cancellationToken))
+                    {
+                        var success = await this.TryConnectAsync(nodeLocation, ExchangeType.Subscribed, rootHash, cancellationToken);
+                        if (success) break;
+                    }
+
+                    goto End;
                 }
+
+            End:;
             }
         }
         catch (OperationCanceledException e)
@@ -193,7 +202,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
     private async ValueTask<IEnumerable<NodeLocation>> FindNodeLocationsForConnecting(OmniHash rootHash, CancellationToken cancellationToken)
     {
-        var contentClue = RootHashToContentClue(rootHash);
+        var contentClue = ContentClueConverter.ToContentClue(Schema, rootHash);
 
         var nodeLocations = await _nodeFinder.FindNodeLocationsAsync(contentClue, cancellationToken);
         _random.Shuffle(nodeLocations);
@@ -230,14 +239,9 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                 if (session is null) continue;
 
                 var success = await this.TryAddConnectedSessionAsync(session, exchangeType, rootHash, cancellationToken);
+                if (success) return true;
 
-                if (!success)
-                {
-                    await session.DisposeAsync();
-                    continue;
-                }
-
-                return true;
+                await session.DisposeAsync();
             }
         }
         catch (OperationCanceledException e)
@@ -643,7 +647,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
         foreach (var rootHash in await _publishedFileStorage.GetPushRootHashesAsync(cancellationToken))
         {
-            var contentClue = RootHashToContentClue(rootHash);
+            var contentClue = ContentClueConverter.ToContentClue(Schema, rootHash);
             builder.Add(contentClue);
         }
 
@@ -656,7 +660,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
         foreach (var rootHash in await _subscribedFileStorage.GetWantRootHashesAsync(cancellationToken))
         {
-            var contentClue = RootHashToContentClue(rootHash);
+            var contentClue = ContentClueConverter.ToContentClue(Schema, rootHash);
             builder.Add(contentClue);
         }
 
@@ -697,11 +701,11 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
             if (await _publishedFileStorage.ContainsPushBlockAsync(sessionStatus.RootHash, blockHash, cancellationToken))
             {
-                value = await _publishedFileStorage.ReadBlockAsync(sessionStatus.RootHash, blockHash, cancellationToken);
+                value = await _publishedFileStorage.TryReadBlockAsync(sessionStatus.RootHash, blockHash, cancellationToken);
             }
             else if (await _subscribedFileStorage.ContainsWantBlockAsync(sessionStatus.RootHash, blockHash, cancellationToken))
             {
-                value = await _subscribedFileStorage.ReadBlockAsync(sessionStatus.RootHash, blockHash, cancellationToken);
+                value = await _subscribedFileStorage.TryReadBlockAsync(sessionStatus.RootHash, blockHash, cancellationToken);
             }
 
             if (value is null) continue;
@@ -717,10 +721,5 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
         receivedWantBlockHashSet.ExceptWith(results.Select(n => n.Hash));
 
         return results.ToArray();
-    }
-
-    private static ContentClue RootHashToContentClue(OmniHash rootHash)
-    {
-        return new ContentClue(Schema, rootHash);
     }
 }

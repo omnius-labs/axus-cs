@@ -6,23 +6,26 @@ namespace Omnius.Axus.Engines.Internal.Entities;
 internal record CachedNodeLocationEntity
 {
     public NodeLocationEntity? Value { get; set; }
-
-    public DateTime CreatedTime { get; set; }
-
-    public DateTime LastConnectionTime { get; set; }
+    public DateTime LastConnectedTime { get; set; }
+    public DateTime UpdatedTime { get; set; }
 
     public static CachedNodeLocationEntity Import(CachedNodeLocation item)
     {
         return new CachedNodeLocationEntity()
         {
             Value = NodeLocationEntity.Import(item.Value),
-            CreatedTime = item.CreatedTime,
-            LastConnectionTime = item.LastConnectionTime,
+            LastConnectedTime = item.LastConnectedTime,
+            UpdatedTime = item.UpdatedTime,
         };
     }
 
     public CachedNodeLocation Export()
     {
-        return new CachedNodeLocation(this.Value?.Export() ?? NodeLocation.Empty, this.CreatedTime, this.LastConnectionTime);
+        return new CachedNodeLocation
+        {
+            Value = this.Value?.Export() ?? NodeLocation.Empty,
+            LastConnectedTime = this.LastConnectedTime,
+            UpdatedTime = this.UpdatedTime,
+        };
     }
 }

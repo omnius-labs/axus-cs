@@ -44,8 +44,8 @@
             Items="{Binding SessionReports}">
             <DataGrid.Columns>
                 <DataGridTextColumn
-                    Header="ServiceName"
-                    Binding="{ReflectionBinding ServiceName}"
+                    Header="Scheme"
+                    Binding="{ReflectionBinding Scheme}"
                     Width="Auto" />
                 <DataGridTextColumn
                     Header="HandshakeType"
