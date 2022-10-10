@@ -5,29 +5,26 @@ using Omnius.Core.Avalonia;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
 
-namespace Omnius.Axus.Ui.Desktop.Windows.TextEdit;
+namespace Omnius.Axus.Ui.Desktop.Windows.Dialogs.SinglelineTextEdit;
 
-public abstract class TextEditWindowModelBase : AsyncDisposableBase
+public abstract class SinglelineTextEditWindowModelBase : AsyncDisposableBase
 {
     public TextEditWindowStatus? Status { get; protected set; }
-
     public ReactivePropertySlim<string>? Text { get; protected set; }
-
     public AsyncReactiveCommand? OkCommand { get; protected set; }
-
     public AsyncReactiveCommand? CancelCommand { get; protected set; }
 
     public abstract string GetResult();
 }
 
-public class TextEditWindowModel : TextEditWindowModelBase
+public class SinglelineTextEditWindowModel : SinglelineTextEditWindowModelBase
 {
     private readonly UiStatus _uiState;
     private readonly IClipboardService _clipboardService;
 
     private readonly CompositeDisposable _disposable = new();
 
-    public TextEditWindowModel(UiStatus uiState, IClipboardService clipboardService)
+    public SinglelineTextEditWindowModel(UiStatus uiState, IClipboardService clipboardService)
     {
         _uiState = uiState;
         _clipboardService = clipboardService;

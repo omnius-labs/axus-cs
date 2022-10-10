@@ -8,13 +8,9 @@ public sealed class UiStatus
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
     public int Version { get; set; }
-
     public MainWindowStatus? MainWindow { get; set; }
-
     public SettingsWindowStatus? SettingsWindow { get; set; }
-
     public TextEditWindowStatus? TextEditWindow { get; set; }
-
     public DownloadViewStatus? DownloadView { get; set; }
 
     public static async ValueTask<UiStatus> LoadAsync(string configPath)

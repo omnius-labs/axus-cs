@@ -2,19 +2,19 @@ using Avalonia;
 using Avalonia.Markup.Xaml;
 using Omnius.Core.Avalonia;
 
-namespace Omnius.Axus.Ui.Desktop.Windows.TextEdit;
+namespace Omnius.Axus.Ui.Desktop.Windows.Dialogs.SinglelineTextEdit;
 
-public partial class TextEditWindow : StatefulWindowBase<TextEditWindowModelBase>
+public partial class SinglelineTextEditWindow : StatefulWindowBase<SinglelineTextEditWindowModelBase>
 {
     private string? _result = null;
 
-    public TextEditWindow()
+    public SinglelineTextEditWindow()
         : base()
     {
         this.InitializeComponent();
     }
 
-    public TextEditWindow(string configDirectoryPath)
+    public SinglelineTextEditWindow(string configDirectoryPath)
         : base(configDirectoryPath)
     {
         this.InitializeComponent();

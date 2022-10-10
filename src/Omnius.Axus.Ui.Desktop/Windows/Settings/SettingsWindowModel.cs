@@ -1,9 +1,12 @@
 using Avalonia.Controls;
+using Microsoft.Extensions.DependencyInjection;
 using Omnius.Axus.Interactors;
 using Omnius.Axus.Interactors.Models;
 using Omnius.Axus.Models;
+using Omnius.Axus.Ui.Desktop.Internal;
 using Omnius.Axus.Ui.Desktop.Models;
 using Omnius.Core;
+using Omnius.Core.Cryptography;
 using Omnius.Core.Net;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
@@ -15,37 +18,25 @@ public abstract class SettingsWindowModelBase : AsyncDisposableBase
     public abstract ValueTask InitializeAsync(CancellationToken cancellationToken = default);
 
     public SettingsWindowStatus? Status { get; protected set; }
-
     public ReactiveProperty<string>? NetworkBandwidth { get; protected set; }
-
     public ReactiveProperty<bool>? I2pConnectorIsEnabled { get; protected set; }
-
     public ReactiveProperty<string>? I2pConnectorSamBridgeAddress { get; protected set; }
-
     public ReactiveProperty<bool>? I2pAccepterIsEnabled { get; protected set; }
-
     public ReactiveProperty<string>? I2pAccepterSamBridgeAddress { get; protected set; }
-
     public ReactiveProperty<bool>? TcpConnectorIsEnabled { get; protected set; }
-
     public IEnumerable<TcpProxyType>? TcpConnectorTcpProxyTypes { get; protected set; }
-
     public ReactiveProperty<TcpProxyType>? TcpConnectorSelectedProxyType { get; protected set; }
-
     public ReactiveProperty<string>? TcpConnectorProxyAddress { get; protected set; }
-
     public ReactiveProperty<bool>? TcpAccepterIsEnabled { get; protected set; }
-
     public ReactiveProperty<bool>? TcpAccepterUseUpnp { get; protected set; }
-
     public ReactiveProperty<string>? TcpAccepterListenAddress { get; protected set; }
-
+    public ReactiveProperty<OmniDigitalSignature>? ProfileDigitalSignature { get; protected set; }
+    public AsyncReactiveCommand? NewProfileSignatureCommand { get; protected set; }
+    public SignaturesViewModelBase? TrustedSignaturesViewModel { get; protected set; }
+    public SignaturesViewModelBase? BlockedSignaturesViewModel { get; protected set; }
     public ReactiveProperty<string>? FileDownloadDirectory { get; protected set; }
-
     public AsyncReactiveCommand? OpenFileDownloadDirectoryCommand { get; protected set; }
-
     public AsyncReactiveCommand? OkCommand { get; protected set; }
-
     public AsyncReactiveCommand? CancelCommand { get; protected set; }
 }
 
@@ -54,17 +45,20 @@ public class SettingsWindowModel : SettingsWindowModelBase
     private readonly UiStatus _uiState;
     private readonly IServiceMediator _serviceMediator;
     private readonly IInteractorProvider _interactorProvider;
+    private readonly IDialogService _dialogService;
 
     private readonly CompositeDisposable _disposable = new();
-    private readonly CompositeAsyncDisposable _asyncDisposable = new();
 
-    public SettingsWindowModel(UiStatus uiState, IServiceMediator serviceMediator, IInteractorProvider interactorProvider)
+    public SettingsWindowModel(UiStatus uiState, IServiceMediator serviceMediator, IInteractorProvider interactorProvider, IDialogService dialogService)
     {
         _uiState = uiState;
         _serviceMediator = serviceMediator;
         _interactorProvider = interactorProvider;
+        _dialogService = dialogService;
 
         this.Status = _uiState.SettingsWindow ??= new SettingsWindowStatus();
+
+        var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
 
         this.NetworkBandwidth = new ReactiveProperty<string>().AddTo(_disposable);
         this.I2pAccepterIsEnabled = new ReactiveProperty<bool>().AddTo(_disposable);
@@ -78,6 +72,11 @@ public class SettingsWindowModel : SettingsWindowModelBase
         this.TcpAccepterIsEnabled = new ReactiveProperty<bool>().AddTo(_disposable);
         this.TcpAccepterUseUpnp = new ReactiveProperty<bool>().AddTo(_disposable);
         this.TcpAccepterListenAddress = new ReactiveProperty<string>().AddTo(_disposable);
+        this.ProfileDigitalSignature = new ReactiveProperty<OmniDigitalSignature>().AddTo(_disposable);
+        this.NewProfileSignatureCommand = new AsyncReactiveCommand().AddTo(_disposable);
+        this.NewProfileSignatureCommand.Subscribe(async () => await this.NewProfileSignatureAsync()).AddTo(_disposable);
+        this.TrustedSignaturesViewModel = serviceProvider.GetRequiredService<SignaturesViewModel>();
+        this.BlockedSignaturesViewModel = serviceProvider.GetRequiredService<SignaturesViewModel>();
         this.FileDownloadDirectory = new ReactiveProperty<string>().AddTo(_disposable);
         this.OpenFileDownloadDirectoryCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.OpenFileDownloadDirectoryCommand.Subscribe(async () => await this.OpenDownloadDirectoryAsync()).AddTo(_disposable);
@@ -95,11 +94,22 @@ public class SettingsWindowModel : SettingsWindowModelBase
     protected override async ValueTask OnDisposeAsync()
     {
         _disposable.Dispose();
-        await _asyncDisposable.DisposeAsync();
+
+        await this.TrustedSignaturesViewModel!.DisposeAsync();
+        await this.BlockedSignaturesViewModel!.DisposeAsync();
+    }
+
+    private async Task NewProfileSignatureAsync()
+    {
+        var name = await _dialogService.ShowSinglelineTextEditAsync();
+        var digitalSignature = OmniDigitalSignature.Create(name, OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256);
+        this.ProfileDigitalSignature!.Value = digitalSignature;
     }
 
     private async Task OpenDownloadDirectoryAsync()
     {
+        var path = await _dialogService.ShowOpenDirectoryWindowAsync();
+        this.FileDownloadDirectory!.Value = path ?? string.Empty;
     }
 
     private async Task OkAsync(object state)
@@ -118,9 +128,12 @@ public class SettingsWindowModel : SettingsWindowModelBase
 
     private async ValueTask LoadAsync(CancellationToken cancellationToken = default)
     {
-        var fileDownloader = _interactorProvider.GetFileDownloader();
-
         var serviceConfig = await _serviceMediator.GetConfigAsync(cancellationToken);
+
+        var profilePublisher = _interactorProvider.GetProfilePublisher();
+        var profilePublisherConfig = await profilePublisher.GetConfigAsync(cancellationToken);
+
+        var fileDownloader = _interactorProvider.GetFileDownloader();
         var fileDownloaderConfig = await fileDownloader.GetConfigAsync(cancellationToken);
 
         this.NetworkBandwidth!.Value = (((serviceConfig.Bandwidth?.MaxReceiveBytesPerSeconds ?? 0) + (serviceConfig.Bandwidth?.MaxSendBytesPerSeconds ?? 0)) / 2).ToString();
@@ -134,6 +147,9 @@ public class SettingsWindowModel : SettingsWindowModelBase
         this.TcpAccepterIsEnabled!.Value = serviceConfig.TcpAccepter?.IsEnabled ?? false;
         this.TcpAccepterUseUpnp!.Value = serviceConfig.TcpAccepter?.UseUpnp ?? false;
         this.TcpAccepterListenAddress!.Value = serviceConfig.TcpAccepter?.ListenAddress?.ToString() ?? string.Empty;
+        this.ProfileDigitalSignature!.Value = profilePublisherConfig.DigitalSignature;
+        this.TrustedSignaturesViewModel!.Signatures!.AddRange(profilePublisherConfig.TrustedSignatures);
+        this.BlockedSignaturesViewModel!.Signatures!.AddRange(profilePublisherConfig.BlockedSignatures);
         this.FileDownloadDirectory!.Value = fileDownloaderConfig?.DestinationDirectory ?? string.Empty;
     }
 
@@ -163,11 +179,19 @@ public class SettingsWindowModel : SettingsWindowModelBase
                 useUpnp: this.TcpAccepterUseUpnp!.Value,
                 listenAddress: OmniAddress.Parse(this.TcpAccepterListenAddress!.Value)
             ));
+        var profilePublisherConfig = new ProfilePublisherConfig(
+            this.ProfileDigitalSignature!.Value,
+            this.TrustedSignaturesViewModel!.Signatures!.ToArray(),
+            this.BlockedSignaturesViewModel!.Signatures!.ToArray()
+        );
         var fileDownloaderConfig = new FileDownloaderConfig(this.FileDownloadDirectory!.Value);
 
-        var fileDownloader = _interactorProvider.GetFileDownloader();
-
         await _serviceMediator.SetConfigAsync(serviceConfig, cancellationToken);
+
+        var profilePublisher = _interactorProvider.GetProfilePublisher();
+        await profilePublisher.SetConfigAsync(profilePublisherConfig, cancellationToken);
+
+        var fileDownloader = _interactorProvider.GetFileDownloader();
         await fileDownloader.SetConfigAsync(fileDownloaderConfig, cancellationToken);
     }
 }

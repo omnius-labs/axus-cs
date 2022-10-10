@@ -70,7 +70,7 @@ public class PeersViewViewModel : PeersViewViewModelBase
 
     private async Task AddNodeLocationsAsync()
     {
-        var text = await _dialogService.ShowTextEditWindowAsync();
+        var text = await _dialogService.ShowMultilineTextEditAsync();
         await _serviceMediator.AddCloudNodeLocationsAsync(ParseNodeLocations(text));
     }
 

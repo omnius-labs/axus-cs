@@ -3,7 +3,8 @@ using Omnius.Axus.Interactors;
 using Omnius.Axus.Ui.Desktop.Models;
 using Omnius.Axus.Ui.Desktop.Windows.Main;
 using Omnius.Axus.Ui.Desktop.Windows.Settings;
-using Omnius.Axus.Ui.Desktop.Windows.TextEdit;
+using Omnius.Axus.Ui.Desktop.Windows.Dialogs.MultilineTextEdit;
+using Omnius.Axus.Ui.Desktop.Windows.Dialogs.SinglelineTextEdit;
 using Omnius.Core;
 using Omnius.Core.Avalonia;
 
@@ -54,13 +55,14 @@ public partial class Bootstrapper : AsyncDisposableBase
             serviceCollection.AddSingleton<IDialogService, DialogService>();
 
             serviceCollection.AddTransient<MainWindowModel>();
-            serviceCollection.AddTransient<SettingsWindowModel>();
-            serviceCollection.AddTransient<TextEditWindowModel>();
             serviceCollection.AddTransient<StatusViewViewModel>();
             serviceCollection.AddTransient<PeersViewViewModel>();
             serviceCollection.AddTransient<DownloadViewViewModel>();
             serviceCollection.AddTransient<UploadViewViewModel>();
-            serviceCollection.AddTransient<SignaturesViewViewModel>();
+            serviceCollection.AddTransient<SettingsWindowModel>();
+            serviceCollection.AddTransient<SignaturesViewModel>();
+            serviceCollection.AddTransient<MultilineTextEditWindowModel>();
+            serviceCollection.AddTransient<SinglelineTextEditWindowModel>();
 
             _serviceProvider = serviceCollection.BuildServiceProvider();
         }

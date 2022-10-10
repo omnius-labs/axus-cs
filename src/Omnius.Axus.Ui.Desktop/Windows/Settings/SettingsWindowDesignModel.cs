@@ -14,10 +14,8 @@ public class SettingsWindowDesignModel : SettingsWindowModelBase
     {
         this.Status = new SettingsWindowStatus();
 
-        this.FileDownloadDirectory = new ReactiveProperty<string>().AddTo(_disposable);
-
-        this.OpenFileDownloadDirectoryCommand = new AsyncReactiveCommand().AddTo(_disposable);
-        this.OpenFileDownloadDirectoryCommand.Subscribe(async () => await this.EditDownloadDirectoryAsync()).AddTo(_disposable);
+        this.TrustedSignaturesViewModel = new SignaturesViewDesignModel();
+        this.BlockedSignaturesViewModel = new SignaturesViewDesignModel();
 
         this.OkCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.OkCommand.Subscribe(async (state) => await this.OkAsync(state)).AddTo(_disposable);
@@ -33,10 +31,6 @@ public class SettingsWindowDesignModel : SettingsWindowModelBase
     protected override async ValueTask OnDisposeAsync()
     {
         _disposable.Dispose();
-    }
-
-    private async Task EditDownloadDirectoryAsync()
-    {
     }
 
     private async Task OkAsync(object state)

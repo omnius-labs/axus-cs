@@ -5,11 +5,11 @@ using Reactive.Bindings.Extensions;
 
 namespace Omnius.Axus.Ui.Desktop.Windows.Settings;
 
-public class SignaturesViewDesignViewModel : SignaturesViewViewModelBase
+public class SignaturesViewDesignModel : SignaturesViewModelBase
 {
     private readonly CompositeDisposable _disposable = new();
 
-    public SignaturesViewDesignViewModel()
+    public SignaturesViewDesignModel()
     {
         this.AddCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.AddCommand.Subscribe(async () => await this.RegisterAsync()).AddTo(_disposable);

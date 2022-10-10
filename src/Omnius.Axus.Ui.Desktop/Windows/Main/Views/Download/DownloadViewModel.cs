@@ -90,7 +90,7 @@ public class DownloadViewViewModel : AsyncDisposableBase
     {
         var fileDownloader = _interactorProvider.GetFileDownloader();
 
-        var text = await _dialogService.ShowTextEditWindowAsync();
+        var text = await _dialogService.ShowMultilineTextEditAsync();
 
         foreach (var seed in ParseFileSeeds(text))
         {

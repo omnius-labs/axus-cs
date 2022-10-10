@@ -9,6 +9,5 @@ public enum FileSearchConditionType
 public interface IFileSearchCondition<T>
 {
     FileSearchConditionType Type { get; }
-
     bool IsMatch(T value);
 }

@@ -1,19 +1,20 @@
 using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Omnius.Axus.Ui.Desktop.Models;
+using Omnius.Axus.Ui.Desktop.Windows.Dialogs.MultilineTextEdit;
+using Omnius.Axus.Ui.Desktop.Windows.Dialogs.SinglelineTextEdit;
 using Omnius.Axus.Ui.Desktop.Windows.Settings;
-using Omnius.Axus.Ui.Desktop.Windows.TextEdit;
 using Omnius.Core.Avalonia;
 
 namespace Omnius.Axus.Ui.Desktop.Internal;
 
 public interface IDialogService
 {
-    ValueTask<string> ShowTextEditWindowAsync();
-
+    ValueTask<string> ShowMultilineTextEditAsync();
+    ValueTask<string> ShowSinglelineTextEditAsync();
     ValueTask ShowSettingsWindowAsync();
-
     ValueTask<IEnumerable<string>> ShowOpenFileWindowAsync();
+    ValueTask<string?> ShowOpenDirectoryWindowAsync();
 }
 
 public class DialogService : IDialogService
@@ -31,14 +32,29 @@ public class DialogService : IDialogService
         _clipboardService = clipboardService;
     }
 
-    public async ValueTask<string> ShowTextEditWindowAsync()
+    public async ValueTask<string> ShowMultilineTextEditAsync()
     {
         return await _applicationDispatcher.InvokeAsync(async () =>
         {
-            var window = new TextEditWindow(Path.Combine(_axusEnvironment.DatabaseDirectoryPath, "windows", "text_edit"));
+            var window = new MultilineTextEditWindow(Path.Combine(_axusEnvironment.DatabaseDirectoryPath, "windows", "multiline_text_edit"));
             var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
 
-            var viewModel = serviceProvider.GetRequiredService<TextEditWindowModel>();
+            var viewModel = serviceProvider.GetRequiredService<MultilineTextEditWindowModel>();
+            window.ViewModel = viewModel;
+
+            await window.ShowDialog(_mainWindowProvider.GetMainWindow());
+            return window.GetResult() ?? string.Empty;
+        });
+    }
+
+    public async ValueTask<string> ShowSinglelineTextEditAsync()
+    {
+        return await _applicationDispatcher.InvokeAsync(async () =>
+        {
+            var window = new SinglelineTextEditWindow(Path.Combine(_axusEnvironment.DatabaseDirectoryPath, "windows", "singleline_text_edit"));
+            var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
+
+            var viewModel = serviceProvider.GetRequiredService<SinglelineTextEditWindowModel>();
             window.ViewModel = viewModel;
 
             await window.ShowDialog(_mainWindowProvider.GetMainWindow());
@@ -70,5 +86,15 @@ public class DialogService : IDialogService
 
             return await dialog.ShowAsync(_mainWindowProvider.GetMainWindow());
         }) ?? Enumerable.Empty<string>();
+    }
+
+    public async ValueTask<string?> ShowOpenDirectoryWindowAsync()
+    {
+        return await _applicationDispatcher.InvokeAsync(async () =>
+        {
+            var dialog = new OpenFolderDialog();
+
+            return await dialog.ShowAsync(_mainWindowProvider.GetMainWindow());
+        });
     }
 }

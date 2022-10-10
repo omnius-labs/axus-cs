@@ -11,24 +11,19 @@ using Reactive.Bindings.Extensions;
 
 namespace Omnius.Axus.Ui.Desktop.Windows.Settings;
 
-public abstract class SignaturesViewViewModelBase : AsyncDisposableBase
+public abstract class SignaturesViewModelBase : AsyncDisposableBase
 {
     public AsyncReactiveCommand? AddCommand { get; protected set; }
-
     public ObservableCollection<OmniSignature>? Signatures { get; protected set; }
-
     public ObservableCollection<OmniSignature>? SelectedSignatures { get; protected set; }
-
     public AsyncReactiveCommand? ItemDeleteCommand { get; protected set; }
-
     public AsyncReactiveCommand? ItemCopySignatureCommand { get; protected set; }
 
     public abstract IEnumerable<OmniSignature> GetSignatures();
-
     public abstract void SetSignatures(IEnumerable<OmniSignature> signatures);
 }
 
-public class SignaturesViewViewModel : SignaturesViewViewModelBase
+public class SignaturesViewModel : SignaturesViewModelBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
     private readonly UiStatus _uiState;
@@ -38,9 +33,8 @@ public class SignaturesViewViewModel : SignaturesViewViewModelBase
     private readonly IClipboardService _clipboardService;
 
     private readonly CompositeDisposable _disposable = new();
-    private readonly CompositeAsyncDisposable _asyncDisposable = new();
 
-    public SignaturesViewViewModel(UiStatus uiState, IInteractorProvider interactorProvider, IApplicationDispatcher applicationDispatcher, IDialogService dialogService, IClipboardService clipboardService)
+    public SignaturesViewModel(UiStatus uiState, IInteractorProvider interactorProvider, IApplicationDispatcher applicationDispatcher, IDialogService dialogService, IClipboardService clipboardService)
     {
         _uiState = uiState;
         _interactorProvider = interactorProvider;
@@ -61,7 +55,6 @@ public class SignaturesViewViewModel : SignaturesViewViewModelBase
     protected override async ValueTask OnDisposeAsync()
     {
         _disposable.Dispose();
-        await _asyncDisposable.DisposeAsync();
     }
 
     public override IEnumerable<OmniSignature> GetSignatures()
@@ -77,21 +70,21 @@ public class SignaturesViewViewModel : SignaturesViewViewModelBase
 
     private async Task RegisterAsync()
     {
-        var text = await _dialogService.ShowTextEditWindowAsync();
+        var text = await _dialogService.ShowMultilineTextEditAsync();
 
-        foreach (var item in ParseSignateres(text))
+        foreach (var item in ParseSignatures(text))
         {
             this.Signatures!.Add(item);
         }
     }
 
-    private static IEnumerable<OmniSignature> ParseSignateres(string text)
+    private static IEnumerable<OmniSignature> ParseSignatures(string text)
     {
         var results = new List<OmniSignature>();
 
         foreach (var line in text.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries).Select(n => n.Trim()))
         {
-            if (OmniSignature.TryParse(line, out var signature)) continue;
+            if (!OmniSignature.TryParse(line, out var signature)) continue;
             results.Add(signature!);
         }
 

@@ -76,7 +76,13 @@ public class App : Application
         {
             DirectoryHelper.CreateDirectory(options.StorageDirectoryPath);
 
-            var axusEnvironment = new AxusEnvironment(options.StorageDirectoryPath, Path.Combine(options.StorageDirectoryPath, "db"), Path.Combine(options.StorageDirectoryPath, "logs"), OmniAddress.Parse(options.ListenAddress));
+            var axusEnvironment = new AxusEnvironment()
+            {
+                StorageDirectoryPath = options.StorageDirectoryPath,
+                DatabaseDirectoryPath = Path.Combine(options.StorageDirectoryPath, "db"),
+                LogsDirectoryPath = Path.Combine(options.StorageDirectoryPath, "logs"),
+                ListenAddress = OmniAddress.Parse(options.ListenAddress),
+            };
 
             DirectoryHelper.CreateDirectory(axusEnvironment.DatabaseDirectoryPath);
             DirectoryHelper.CreateDirectory(axusEnvironment.LogsDirectoryPath);

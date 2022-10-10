@@ -6,6 +6,7 @@
     xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
     xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
     xmlns:local="clr-namespace:Omnius.Axus.Ui.Desktop.Windows.Settings"
+    xmlns:c="clr-namespace:Omnius.Axus.Ui.Desktop.Converters"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:skp="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia"
     Title="Settings"
@@ -24,6 +25,10 @@
     <Design.DataContext>
         <local:SettingsWindowDesignModel />
     </Design.DataContext>
+
+    <Window.Resources>
+        <c:OmniDigitalSignatureToStringConverter x:Key="OmniDigitalSignatureToStringConverter" />
+    </Window.Resources>
 
     <Panel Margin="{Binding $parent[Window].OffScreenMargin}">
         <ExperimentalAcrylicBorder IsHitTestVisible="False">
@@ -50,6 +55,10 @@
                         <TreeViewItem Name="I2pAccepterTreeViewItem" Header="I2p Accepter" />
                         <TreeViewItem Name="TcpConnectorTreeViewItem" Header="Tcp Connector" />
                         <TreeViewItem Name="TcpAccepterTreeViewItem" Header="Tcp Accepter" />
+                    </TreeViewItem>
+                    <TreeViewItem Name="ProfileTreeViewItem" Header="Profile" IsExpanded="True" >
+                        <TreeViewItem Name="TrustedSignaturesTreeViewItem" Header="Trusted signatures" />
+                        <TreeViewItem Name="BlockedSignaturesTreeViewItem" Header="Blocked signatures" />
                     </TreeViewItem>
                     <TreeViewItem Name="FileTreeViewItem" Header="File" IsExpanded="True" IsSelected="True" />
                 </TreeView>
@@ -118,6 +127,32 @@
                                 <TextBox Text="{Binding TcpAccepterListenAddress.Value}" Margin="8,0"
                                         TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
                             </DockPanel>
+                        </StackPanel>
+                    </DockPanel>
+                    <!-- Profile -->
+                    <DockPanel IsVisible="{Binding #ProfileTreeViewItem.IsSelected}" >
+                        <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="Profile" />
+                        <StackPanel Orientation="Vertical" Spacing="8" Margin="8">
+                            <DockPanel>
+                                <Label DockPanel.Dock="Left" Content="Signature:" VerticalAlignment="Center" />
+                                <Button Classes="Flat" DockPanel.Dock="Right" Content="New" MinWidth="64" Command="{Binding NewProfileSignatureCommand}" />
+                                <TextBox Text="{Binding ProfileDigitalSignature.Value, Mode=OneWay, Converter={StaticResource OmniDigitalSignatureToStringConverter}}" Margin="8,0"
+                                        TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" IsReadOnly="True" />
+                            </DockPanel>
+                        </StackPanel>
+                    </DockPanel>
+                    <!-- TrustedSignatures -->
+                    <DockPanel IsVisible="{Binding #TrustedSignaturesTreeViewItem.IsSelected}" >
+                        <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="Trusted signatures" />
+                        <StackPanel Orientation="Vertical" Spacing="8" Margin="8">
+                            <local:SignaturesView DataContext="{Binding TrustedSignaturesViewModel}" />
+                        </StackPanel>
+                    </DockPanel>
+                    <!-- BlockedSignatures -->
+                    <DockPanel IsVisible="{Binding #BlockedSignaturesTreeViewItem.IsSelected}" >
+                        <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="Blocked signatures" />
+                        <StackPanel Orientation="Vertical" Spacing="8" Margin="8">
+                            <local:SignaturesView DataContext="{Binding BlockedSignaturesViewModel}" />
                         </StackPanel>
                     </DockPanel>
                     <!-- File -->

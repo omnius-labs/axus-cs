@@ -9,7 +9,6 @@ namespace Omnius.Axus.Ui.Desktop.Windows.Main;
 public class MainWindowDesignModel : MainWindowModelBase
 {
     private readonly CompositeDisposable _disposable = new();
-    private readonly CompositeAsyncDisposable _asyncDisposable = new();
 
     public MainWindowDesignModel()
     {
