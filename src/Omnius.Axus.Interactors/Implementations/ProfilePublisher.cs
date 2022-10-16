@@ -78,12 +78,9 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
                 await this.ShrinkPublishedFiles(cancellationToken);
 
                 bool exists = await this.ExistsPublishedShouts(cancellationToken);
-                exists |= await this.ExistsPublishedFiles(cancellationToken);
+                if (exists) exists = await this.ExistsPublishedFiles(cancellationToken);
 
-                if (!exists)
-                {
-                    await this.PublishProfileContent(config, cancellationToken);
-                }
+                if (!exists) await this.PublishProfileContent(config, cancellationToken);
             }
         }
         catch (OperationCanceledException e)

@@ -31,7 +31,6 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
     private readonly FuncPipe<IEnumerable<ContentClue>> _getPushContentCluesFuncPipe = new();
     private readonly FuncPipe<IEnumerable<ContentClue>> _getWantContentCluesFuncPipe = new();
-    private readonly Events _events;
 
     private readonly byte[] _myId;
 
@@ -78,8 +77,6 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
         _cachedNodeLocationRepo = new CachedNodeLocationRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
 
-        _events = new Events(_getPushContentCluesFuncPipe.Listener, _getWantContentCluesFuncPipe.Listener);
-
         _connectedAddressSet = new VolatileHashSet<OmniAddress>(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(10), _batchActionDispatcher);
 
         _receivedPushContentLocationMap = new VolatileListDictionary<ContentClue, NodeLocation>(TimeSpan.FromMinutes(30), TimeSpan.FromSeconds(30), _batchActionDispatcher);
@@ -125,7 +122,8 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         _cachedNodeLocationRepo.Dispose();
     }
 
-    public INodeFinderEvents GetEvents() => _events;
+    public IFuncListener<IEnumerable<ContentClue>> OnGetPushContentClues => _getPushContentCluesFuncPipe.Listener;
+    public IFuncListener<IEnumerable<ContentClue>> OnGetWantContentClues => _getWantContentCluesFuncPipe.Listener;
 
     public async ValueTask<IEnumerable<SessionReport>> GetSessionReportsAsync(CancellationToken cancellationToken = default)
     {

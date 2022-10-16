@@ -15,6 +15,7 @@ public partial class InteractorProvider : AsyncDisposableBase, IInteractorProvid
     private IProfileSubscriber? _profileSubscriber;
     private IBarkPublisher? _barkPublisher;
     private IBarkSubscriber? _barkSubscriber;
+    private IDisposable? _barkSubscriberOnGetTrustedSignaturesRegister;
     private IFileUploader? _fileUploader;
     private IFileDownloader? _fileDownloader;
 
@@ -48,7 +49,8 @@ public partial class InteractorProvider : AsyncDisposableBase, IInteractorProvid
         _barkPublisher = await BarkPublisher.CreateAsync(_serviceMediator, SingleValueFileStorage.Factory, _bytesPool, barkPublisherOptions, cancellationToken);
 
         var barkSubscriberOptions = new BarkSubscriberOptions(Path.Combine(_databaseDirectoryPath, "bark_subscriber"));
-        _barkSubscriber = await BarkSubscriber.CreateAsync(_profileSubscriber, _serviceMediator, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, barkSubscriberOptions, cancellationToken);
+        _barkSubscriber = await BarkSubscriber.CreateAsync(_serviceMediator, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, barkSubscriberOptions, cancellationToken);
+        _barkSubscriberOnGetTrustedSignaturesRegister = _barkSubscriber.OnGetTrustedSignatures.Listen(() => _profileSubscriber.GetSignaturesAsync());
 
         var fileUploaderOptions = new FileUploaderOptions(Path.Combine(_databaseDirectoryPath, "file_uploader"));
         _fileUploader = await FileUploader.CreateAsync(_serviceMediator, _bytesPool, fileUploaderOptions, cancellationToken);
@@ -73,6 +75,9 @@ public partial class InteractorProvider : AsyncDisposableBase, IInteractorProvid
 
         if (_profileSubscriber is not null) await _profileSubscriber.DisposeAsync();
         _profileSubscriber = null;
+
+        _barkSubscriberOnGetTrustedSignaturesRegister?.Dispose();
+        _barkSubscriberOnGetTrustedSignaturesRegister = null;
 
         if (_profilePublisher is not null) await _profilePublisher.DisposeAsync();
         _profilePublisher = null;

@@ -78,7 +78,7 @@ public sealed class BarkPublisher : AsyncDisposableBase, IBarkPublisher
                 await this.ShrinkPublishedFiles(cancellationToken);
 
                 bool exists = await this.ExistsPublishedShouts(cancellationToken);
-                exists &= await this.ExistsPublishedFiles(cancellationToken);
+                if (exists) exists = await this.ExistsPublishedFiles(cancellationToken);
 
                 if (!exists) await this.PublishBarkContent(config, cancellationToken);
             }

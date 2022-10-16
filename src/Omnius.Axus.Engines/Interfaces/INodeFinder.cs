@@ -1,10 +1,13 @@
 using Omnius.Axus.Models;
+using Omnius.Core.Pipelines;
 
 namespace Omnius.Axus.Engines;
 
 public interface INodeFinder : IAsyncDisposable
 {
-    INodeFinderEvents GetEvents();
+    IFuncListener<IEnumerable<ContentClue>> OnGetPushContentClues { get; }
+    IFuncListener<IEnumerable<ContentClue>> OnGetWantContentClues { get; }
+
     ValueTask<IEnumerable<SessionReport>> GetSessionReportsAsync(CancellationToken cancellationToken = default);
     ValueTask<IEnumerable<NodeLocation>> GetCloudNodeLocationsAsync(CancellationToken cancellationToken);
     ValueTask<NodeLocation> GetMyNodeLocationAsync(CancellationToken cancellationToken = default);

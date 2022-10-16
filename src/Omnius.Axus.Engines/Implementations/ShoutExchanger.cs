@@ -75,8 +75,8 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
         _connectedAddressSet = new VolatileHashSet<OmniAddress>(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), _batchActionDispatcher);
 
-        _getPushContentCluesListenerRegister = _nodeFinder.GetEvents().GetPushContentCluesListener.Listen(() => _pushContentClues);
-        _getWantContentCluesListenerRegister = _nodeFinder.GetEvents().GetWantContentCluesListener.Listen(() => _wantContentClues);
+        _getPushContentCluesListenerRegister = _nodeFinder.OnGetPushContentClues.Listen(() => _pushContentClues);
+        _getWantContentCluesListenerRegister = _nodeFinder.OnGetWantContentClues.Listen(() => _wantContentClues);
     }
 
     private async ValueTask InitAsync(CancellationToken cancellationToken = default)

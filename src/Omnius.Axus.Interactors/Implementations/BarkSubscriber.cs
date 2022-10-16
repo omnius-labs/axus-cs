@@ -4,6 +4,7 @@ using Omnius.Axus.Interactors.Internal.Repositories;
 using Omnius.Axus.Interactors.Models;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
+using Omnius.Core.Pipelines;
 using Omnius.Core.RocketPack;
 using Omnius.Core.Storages;
 
@@ -13,7 +14,6 @@ public sealed partial class BarkSubscriber : AsyncDisposableBase, IBarkSubscribe
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IProfileSubscriber _profileSubscriber;
     private readonly IServiceMediator _serviceMediator;
     private readonly IBytesPool _bytesPool;
     private readonly BarkSubscriberOptions _options;
@@ -21,6 +21,8 @@ public sealed partial class BarkSubscriber : AsyncDisposableBase, IBarkSubscribe
     private readonly BarkSubscriberRepository _barkSubscriberRepo;
     private readonly CachedBarkMessageRepository _cachedBarkMessageRepo;
     private readonly ISingleValueStorage _configStorage;
+
+    private readonly AsyncFuncPipe<IEnumerable<OmniSignature>> _getTrustedSignatureFuncPipe = new();
 
     private Task _watchLoopTask = null!;
 
@@ -31,16 +33,15 @@ public sealed partial class BarkSubscriber : AsyncDisposableBase, IBarkSubscribe
     private const string Channel = "bark/v1";
     private const string Author = "bark_subscriber/v1";
 
-    public static async ValueTask<BarkSubscriber> CreateAsync(IProfileSubscriber profileSubscriber, IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkSubscriberOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<BarkSubscriber> CreateAsync(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkSubscriberOptions options, CancellationToken cancellationToken = default)
     {
-        var barkSubscriber = new BarkSubscriber(profileSubscriber, serviceMediator, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
+        var barkSubscriber = new BarkSubscriber(serviceMediator, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
         await barkSubscriber.InitAsync(cancellationToken);
         return barkSubscriber;
     }
 
-    private BarkSubscriber(IProfileSubscriber profileSubscriber, IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkSubscriberOptions options)
+    private BarkSubscriber(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkSubscriberOptions options)
     {
-        _profileSubscriber = profileSubscriber;
         _serviceMediator = serviceMediator;
         _bytesPool = bytesPool;
         _options = options;
@@ -66,6 +67,8 @@ public sealed partial class BarkSubscriber : AsyncDisposableBase, IBarkSubscribe
         _barkSubscriberRepo.Dispose();
         _configStorage.Dispose();
     }
+
+    public IAsyncFuncListener<IEnumerable<OmniSignature>> OnGetTrustedSignatures => _getTrustedSignatureFuncPipe.Listener;
 
     private async Task WatchLoopAsync(CancellationToken cancellationToken = default)
     {
@@ -101,8 +104,17 @@ public sealed partial class BarkSubscriber : AsyncDisposableBase, IBarkSubscribe
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var signatures = await _profileSubscriber.GetSignaturesAsync(cancellationToken);
-            return signatures.ToImmutableHashSet();
+            var builder = ImmutableHashSet.CreateBuilder<OmniSignature>();
+
+            await foreach (var signatures in _getTrustedSignatureFuncPipe.Caller.CallAsync())
+            {
+                foreach (var signature in signatures)
+                {
+                    builder.Add(signature);
+                }
+            }
+
+            return builder.ToImmutable();
         }
     }
 
