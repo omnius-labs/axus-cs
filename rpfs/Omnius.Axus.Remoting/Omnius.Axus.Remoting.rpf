@@ -164,3 +164,50 @@ message TryExportShoutRequest {
 message TryExportShoutResult {
     Shout: Shout?,
 }
+
+// Config
+
+message ServiceConfig {
+    Bandwidth: BandwidthConfig?,
+    I2pConnector: I2pConnectorConfig?,
+    I2pAccepter: I2pAccepterConfig?,
+    TcpConnector: TcpConnectorConfig?,
+    TcpAccepter: TcpAccepterConfig?,
+}
+
+message BandwidthConfig {
+    MaxSendBytesPerSeconds: int32,
+    MaxReceiveBytesPerSeconds: int32,
+}
+
+message I2pConnectorConfig {
+    IsEnabled: bool,
+    SamBridgeAddress: OmniAddress,
+}
+
+message I2pAccepterConfig {
+    IsEnabled: bool,
+    SamBridgeAddress: OmniAddress,
+}
+
+message TcpConnectorConfig {
+    IsEnabled: bool,
+    Proxy: TcpProxyConfig?,
+}
+
+message TcpProxyConfig {
+    Type: TcpProxyType,
+    Address: OmniAddress,
+}
+
+enum TcpProxyType : uint8 {
+    None = 0,
+    HttpProxy = 1,
+    Socks5Proxy = 2,
+}
+
+message TcpAccepterConfig {
+    IsEnabled: bool,
+    UseUpnp: bool,
+    ListenAddress: OmniAddress,
+}

@@ -2,7 +2,7 @@ using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Omnius.Axus.Interactors;
 using Omnius.Axus.Interactors.Models;
-using Omnius.Axus.Models;
+using Omnius.Axus.Remoting;
 using Omnius.Axus.Ui.Desktop.Internal;
 using Omnius.Axus.Ui.Desktop.Models;
 using Omnius.Core;

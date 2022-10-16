@@ -8,12 +8,8 @@ namespace Omnius.Axus.Engines;
 public interface ISession : IAsyncDisposable
 {
     IConnection Connection { get; }
-
     OmniAddress Address { get; }
-
     SessionHandshakeType HandshakeType { get; }
-
     OmniSignature Signature { get; }
-
     string Scheme { get; }
 }

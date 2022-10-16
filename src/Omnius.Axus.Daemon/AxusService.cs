@@ -113,9 +113,9 @@ public class AxusService : AsyncDisposableBase, IAxusService
         {
             var tcpProxyType = tcpConnectorConfig.Proxy?.Type switch
             {
-                Models.TcpProxyType.None => Engines.TcpProxyType.None,
-                Models.TcpProxyType.HttpProxy => Engines.TcpProxyType.HttpProxy,
-                Models.TcpProxyType.Socks5Proxy => Engines.TcpProxyType.Socks5Proxy,
+                Remoting.TcpProxyType.None => Engines.TcpProxyType.None,
+                Remoting.TcpProxyType.HttpProxy => Engines.TcpProxyType.HttpProxy,
+                Remoting.TcpProxyType.Socks5Proxy => Engines.TcpProxyType.Socks5Proxy,
                 _ => Engines.TcpProxyType.None,
             };
             var tcpProxyAddress = tcpConnectorConfig.Proxy?.Address ?? OmniAddress.Empty;

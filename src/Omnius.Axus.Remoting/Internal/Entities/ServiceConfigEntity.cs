@@ -1,6 +1,6 @@
 using Omnius.Core.Net;
 
-namespace Omnius.Axus.Models.Internal.Entities;
+namespace Omnius.Axus.Remoting.Internal.Entities;
 
 internal record ServiceConfigEntity
 {
