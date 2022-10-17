@@ -6,7 +6,7 @@ namespace Omnius.Axus.Interactors.Internal.Entities;
 internal record UploadingFileItemEntity
 {
     public string? FilePath { get; set; }
-    public FileSeedEntity? FileSeed { get; set; }
+    public SeedEntity? Seed { get; set; }
     public int State { get; set; }
     public DateTime CreatedTime { get; set; }
     public DateTime UpdatedTime { get; set; }
@@ -15,7 +15,7 @@ internal record UploadingFileItemEntity
     {
         return new UploadingFileItemEntity()
         {
-            FileSeed = FileSeedEntity.Import(item.FileSeed),
+            Seed = SeedEntity.Import(item.Seed),
             FilePath = item.FilePath,
             State = (int)item.State,
             CreatedTime = item.CreatedTime,
@@ -27,7 +27,7 @@ internal record UploadingFileItemEntity
         return new UploadingFileItem()
         {
             FilePath = this.FilePath ?? string.Empty,
-            FileSeed = this.FileSeed?.Export() ?? Interactors.Models.FileSeed.Empty,
+            Seed = this.Seed?.Export() ?? Interactors.Models.Seed.Empty,
             State = (UploadingFileState)this.State,
             CreatedTime = this.CreatedTime,
         };

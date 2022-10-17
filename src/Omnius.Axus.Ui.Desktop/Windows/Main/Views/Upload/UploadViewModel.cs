@@ -119,8 +119,8 @@ public class UploadViewViewModel : AsyncDisposableBase
         var sb = new StringBuilder();
         foreach (var file in selectedFiles)
         {
-            if (file.Model?.FileSeed is null) continue;
-            sb.AppendLine(AxusUriConverter.Instance.FileSeedToString(file.Model.FileSeed));
+            if (file.Model?.Seed is null) continue;
+            sb.AppendLine(AxusUriConverter.Instance.SeedToString(file.Model.Seed));
         }
 
         await _clipboardService.SetTextAsync(sb.ToString());

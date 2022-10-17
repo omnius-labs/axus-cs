@@ -2,16 +2,16 @@ namespace Omnius.Axus.Interactors.Models;
 
 public record UploadingFileReport
 {
-    public UploadingFileReport(string filePath, FileSeed? fileSeed, DateTime createdTime, UploadingFileStatus status)
+    public UploadingFileReport(string filePath, Seed? seed, DateTime createdTime, UploadingFileStatus status)
     {
         this.FilePath = filePath;
-        this.FileSeed = fileSeed;
+        this.Seed = seed;
         this.CreatedTime = createdTime;
         this.Status = status;
     }
 
     public string FilePath { get; }
-    public FileSeed? FileSeed { get; }
+    public Seed? Seed { get; }
     public DateTime CreatedTime { get; }
     public UploadingFileStatus Status { get; }
 }

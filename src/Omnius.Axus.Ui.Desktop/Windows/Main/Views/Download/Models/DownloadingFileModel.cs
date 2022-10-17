@@ -24,7 +24,7 @@ public partial class DownloadingFileViewModel : BindableBase, ICollectionViewMod
         }
     }
 
-    public string Name => this.Model?.FileSeed.Name ?? "";
+    public string Name => this.Model?.Seed.Name ?? "";
 
     public DateTime CreatedTime => this.Model?.CreatedTime ?? DateTime.MinValue;
 
