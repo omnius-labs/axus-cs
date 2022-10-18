@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using Omnius.Axus.Engines.Models;
 using Omnius.Core;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Caps;

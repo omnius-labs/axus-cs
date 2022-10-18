@@ -101,7 +101,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
                 await _service.UnsubscribeFileAsync(hash, Author, cancellationToken);
             }
 
-            foreach (var seed in _fileDownloaderRepo.FileItems.FindAll().Select(n => n.FileSeed))
+            foreach (var seed in _fileDownloaderRepo.FileItems.FindAll().Select(n => n.Seed))
             {
                 if (hashes.Contains(seed.RootHash)) continue;
                 await _service.SubscribeFileAsync(seed.RootHash, Author, cancellationToken);
@@ -125,13 +125,13 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
             {
                 if (fileItem.State == DownloadingFileState.Completed) continue;
 
-                if (!reportMap.TryGetValue(fileItem.FileSeed.RootHash, out var report)) continue;
+                if (!reportMap.TryGetValue(fileItem.Seed.RootHash, out var report)) continue;
                 if (report.Status.State != SubscribedFileState.Downloaded) continue;
 
                 DirectoryHelper.CreateDirectory(basePath);
-                var filePath = Path.Combine(basePath, fileItem.FileSeed.Name);
+                var filePath = Path.Combine(basePath, fileItem.Seed.Name);
 
-                if (await _service.TryExportFileToStorageAsync(fileItem.FileSeed.RootHash, filePath, cancellationToken))
+                if (await _service.TryExportFileToStorageAsync(fileItem.Seed.RootHash, filePath, cancellationToken))
                 {
                     var newFileItem = fileItem with
                     {
@@ -157,27 +157,27 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
 
             foreach (var item in _fileDownloaderRepo.FileItems.FindAll())
             {
-                if (!reportMap.TryGetValue(item.FileSeed.RootHash, out var report)) continue;
+                if (!reportMap.TryGetValue(item.Seed.RootHash, out var report)) continue;
 
                 var status = new DownloadingFileStatus(report.Status.CurrentDepth, report.Status.DownloadedBlockCount,
                     report.Status.TotalBlockCount, item.State);
-                results.Add(new DownloadingFileReport(item.FileSeed, item.FilePath, item.CreatedTime, status));
+                results.Add(new DownloadingFileReport(item.Seed, item.FilePath, item.CreatedTime, status));
             }
 
             return results;
         }
     }
 
-    public async ValueTask RegisterAsync(FileSeed fileSeed, CancellationToken cancellationToken = default)
+    public async ValueTask RegisterAsync(Seed seed, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            if (_fileDownloaderRepo.FileItems.Exists(fileSeed)) return;
+            if (_fileDownloaderRepo.FileItems.Exists(seed)) return;
 
             var now = DateTime.UtcNow;
             var fileItem = new DownloadingFileItem()
             {
-                FileSeed = fileSeed,
+                Seed = seed,
                 State = DownloadingFileState.Downloading,
                 CreatedTime = now,
             };
@@ -185,13 +185,13 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
         }
     }
 
-    public async ValueTask UnregisterAsync(FileSeed fileSeed, CancellationToken cancellationToken = default)
+    public async ValueTask UnregisterAsync(Seed seed, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            if (!_fileDownloaderRepo.FileItems.Exists(fileSeed)) return;
+            if (!_fileDownloaderRepo.FileItems.Exists(seed)) return;
 
-            _fileDownloaderRepo.FileItems.Delete(fileSeed);
+            _fileDownloaderRepo.FileItems.Delete(seed);
         }
     }
 

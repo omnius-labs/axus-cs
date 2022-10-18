@@ -4,6 +4,8 @@
   CompileTargets:
     - Input: ./rpfs/Omnius.Axus.Models/Omnius.Axus.Models.rpf
       Output: ./src/Omnius.Axus.Models/_RocketPack/_Generated.cs
+    - Input: ./rpfs/Omnius.Axus.Engines/Omnius.Axus.Engines.Models.rpf
+      Output: ./src/Omnius.Axus.Engines/Models/_RocketPack/_Generated.cs
     - Input: ./rpfs/Omnius.Axus.Engines/Omnius.Axus.Engines.Internal.Models.rpf
       Output: ./src/Omnius.Axus.Engines/Implementations/Internal/Models/_RocketPack/_Generated.cs
     - Input: ./rpfs/Omnius.Axus.Remoting/Omnius.Axus.Remoting.rpf

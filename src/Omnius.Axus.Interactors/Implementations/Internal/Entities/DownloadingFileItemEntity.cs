@@ -5,7 +5,7 @@ namespace Omnius.Axus.Interactors.Internal.Entities;
 
 internal record DownloadingFileItemEntity
 {
-    public FileSeedEntity? FileSeed { get; set; }
+    public SeedEntity? Seed { get; set; }
     public string? FilePath { get; set; }
     public int State { get; set; }
     public DateTime CreatedTime { get; set; }
@@ -14,7 +14,7 @@ internal record DownloadingFileItemEntity
     {
         return new DownloadingFileItemEntity()
         {
-            FileSeed = FileSeedEntity.Import(item.FileSeed),
+            Seed = SeedEntity.Import(item.Seed),
             FilePath = item.FilePath,
             State = (int)item.State,
             CreatedTime = item.CreatedTime,
@@ -25,7 +25,7 @@ internal record DownloadingFileItemEntity
     {
         return new DownloadingFileItem()
         {
-            FileSeed = this.FileSeed?.Export() ?? Interactors.Models.FileSeed.Empty,
+            Seed = this.Seed?.Export() ?? Interactors.Models.Seed.Empty,
             FilePath = this.FilePath,
             State = (DownloadingFileState)this.State,
             CreatedTime = this.CreatedTime,

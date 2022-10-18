@@ -11,11 +11,6 @@ message NodeLocation {
     Addresses: vector<OmniAddress>(capacity: 32),
 }
 
-message ContentClue {
-    Scheme: string(capacity: 256),
-    RootHash: OmniHash,
-}
-
 message Shout {
     Channel: string(capacity: 256),
     UpdatedTime: timestamp64,

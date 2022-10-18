@@ -102,10 +102,10 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
                 if (filePaths.Contains(fileItem.FilePath)) continue;
                 var rootHash = await _serviceController.PublishFileFromStorageAsync(fileItem.FilePath, 8 * 1024 * 1024, Author, cancellationToken);
 
-                var fileSeed = new FileSeed(rootHash, fileItem.Name, (ulong)fileItem.Length, Timestamp64.FromDateTime(fileItem.CreatedTime));
+                var seed = new Seed(rootHash, fileItem.Name, (ulong)fileItem.Length, Timestamp64.FromDateTime(fileItem.CreatedTime));
                 var newFileItem = fileItem with
                 {
-                    FileSeed = fileSeed,
+                    Seed = seed,
                 };
                 _fileUploaderRepo.FileItems.Upsert(newFileItem);
             }
@@ -121,7 +121,7 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
             foreach (var item in _fileUploaderRepo.FileItems.FindAll())
             {
                 var status = new UploadingFileStatus(item.State);
-                reports.Add(new UploadingFileReport(item.FilePath, item.FileSeed, item.CreatedTime, status));
+                reports.Add(new UploadingFileReport(item.FilePath, item.Seed, item.CreatedTime, status));
             }
 
             return reports;

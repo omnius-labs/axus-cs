@@ -1,3 +1,4 @@
+using Omnius.Axus.Engines.Models;
 using Omnius.Core;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Caps;

@@ -6,6 +6,15 @@ using "Omnius.Axus.Models";
 
 namespace "Omnius.Axus.Interactors.Models";
 
+// Common
+
+message Seed {
+    RootHash: OmniHash,
+    Name: string(capacity: 256),
+    Size: uint64,
+    CreatedTime: timestamp64,
+}
+
 // Profile
 
 message ProfilePublisherConfig {
@@ -40,14 +49,18 @@ message BarkMessage {
     AnchorHash: OmniHash,
 }
 
-// File
+// Seed
 
-message FileSeed {
-    RootHash: OmniHash,
-    Name: string(capacity: 256),
-    Size: uint64,
-    CreatedTime: timestamp64,
+message SeedPublisherConfig {
+    DigitalSignature: OmniDigitalSignature,
+    Seeds: vector<Seed>(capacity: 8 * 1024),
 }
+
+message SeedSubscriberConfig {
+    MaxSeedCount: uint32,
+}
+
+// File
 
 message FileDownloaderConfig {
     DestinationDirectory: string,
