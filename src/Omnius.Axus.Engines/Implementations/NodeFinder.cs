@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using Omnius.Axus.Engines.Internal;
 using Omnius.Axus.Engines.Internal.Models;
 using Omnius.Axus.Engines.Internal.Repositories;
+using Omnius.Axus.Engines.Models;
 using Omnius.Axus.Models;
 using Omnius.Core;
 using Omnius.Core.Collections;
