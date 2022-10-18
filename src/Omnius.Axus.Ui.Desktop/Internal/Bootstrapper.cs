@@ -1,10 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Omnius.Axus.Interactors;
 using Omnius.Axus.Ui.Desktop.Models;
-using Omnius.Axus.Ui.Desktop.Windows.Main;
-using Omnius.Axus.Ui.Desktop.Windows.Settings;
 using Omnius.Axus.Ui.Desktop.Windows.Dialogs.MultilineTextEdit;
 using Omnius.Axus.Ui.Desktop.Windows.Dialogs.SinglelineTextEdit;
+using Omnius.Axus.Ui.Desktop.Windows.Main;
+using Omnius.Axus.Ui.Desktop.Windows.Settings;
 using Omnius.Core;
 using Omnius.Core.Avalonia;
 
