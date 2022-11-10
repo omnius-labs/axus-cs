@@ -1,0 +1,6 @@
+== Requirements
+
+[plantuml]
+----
+include::requirements.puml[]
+----

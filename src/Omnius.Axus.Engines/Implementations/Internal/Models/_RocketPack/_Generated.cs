@@ -126,7 +126,7 @@ internal sealed partial class Block : global::Omnius.Core.RocketPack.IRocketMess
 
     private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Engines.Internal.Models.Block>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axus.Engines.Internal.Models.Block value, in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Engines.Internal.Models.Block value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -142,7 +142,7 @@ internal sealed partial class Block : global::Omnius.Core.RocketPack.IRocketMess
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Engines.Internal.Models.Block Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        public global::Omnius.Axus.Engines.Internal.Models.Block Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -247,7 +247,7 @@ internal sealed partial class MerkleTreeSection : global::Omnius.Core.RocketPack
 
     private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Engines.Internal.Models.MerkleTreeSection>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axus.Engines.Internal.Models.MerkleTreeSection value, in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Engines.Internal.Models.MerkleTreeSection value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -267,7 +267,7 @@ internal sealed partial class MerkleTreeSection : global::Omnius.Core.RocketPack
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Engines.Internal.Models.MerkleTreeSection Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        public global::Omnius.Axus.Engines.Internal.Models.MerkleTreeSection Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -373,7 +373,7 @@ internal sealed partial class SessionManagerHelloMessage : global::Omnius.Core.R
 
     private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Engines.Internal.Models.SessionManagerHelloMessage>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axus.Engines.Internal.Models.SessionManagerHelloMessage value, in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Engines.Internal.Models.SessionManagerHelloMessage value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -388,7 +388,7 @@ internal sealed partial class SessionManagerHelloMessage : global::Omnius.Core.R
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Engines.Internal.Models.SessionManagerHelloMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        public global::Omnius.Axus.Engines.Internal.Models.SessionManagerHelloMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -485,7 +485,7 @@ internal sealed partial class SessionManagerSessionRequestMessage : global::Omni
 
     private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Engines.Internal.Models.SessionManagerSessionRequestMessage>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axus.Engines.Internal.Models.SessionManagerSessionRequestMessage value, in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Engines.Internal.Models.SessionManagerSessionRequestMessage value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -496,7 +496,7 @@ internal sealed partial class SessionManagerSessionRequestMessage : global::Omni
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Engines.Internal.Models.SessionManagerSessionRequestMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        public global::Omnius.Axus.Engines.Internal.Models.SessionManagerSessionRequestMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -583,7 +583,7 @@ internal sealed partial class SessionManagerSessionResultMessage : global::Omniu
 
     private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Engines.Internal.Models.SessionManagerSessionResultMessage>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axus.Engines.Internal.Models.SessionManagerSessionResultMessage value, in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Engines.Internal.Models.SessionManagerSessionResultMessage value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -594,7 +594,7 @@ internal sealed partial class SessionManagerSessionResultMessage : global::Omniu
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Engines.Internal.Models.SessionManagerSessionResultMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        public global::Omnius.Axus.Engines.Internal.Models.SessionManagerSessionResultMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -689,7 +689,7 @@ internal sealed partial class NodeFinderHelloMessage : global::Omnius.Core.Rocke
 
     private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Engines.Internal.Models.NodeFinderHelloMessage>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axus.Engines.Internal.Models.NodeFinderHelloMessage value, in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Engines.Internal.Models.NodeFinderHelloMessage value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -704,7 +704,7 @@ internal sealed partial class NodeFinderHelloMessage : global::Omnius.Core.Rocke
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Engines.Internal.Models.NodeFinderHelloMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        public global::Omnius.Axus.Engines.Internal.Models.NodeFinderHelloMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -805,7 +805,7 @@ internal sealed partial class NodeFinderProfileMessage : global::Omnius.Core.Roc
 
     private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Engines.Internal.Models.NodeFinderProfileMessage>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axus.Engines.Internal.Models.NodeFinderProfileMessage value, in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Engines.Internal.Models.NodeFinderProfileMessage value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -821,7 +821,7 @@ internal sealed partial class NodeFinderProfileMessage : global::Omnius.Core.Roc
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Engines.Internal.Models.NodeFinderProfileMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        public global::Omnius.Axus.Engines.Internal.Models.NodeFinderProfileMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -968,7 +968,7 @@ internal sealed partial class NodeFinderDataMessage : global::Omnius.Core.Rocket
 
     private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Engines.Internal.Models.NodeFinderDataMessage>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axus.Engines.Internal.Models.NodeFinderDataMessage value, in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Engines.Internal.Models.NodeFinderDataMessage value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1010,7 +1010,7 @@ internal sealed partial class NodeFinderDataMessage : global::Omnius.Core.Rocket
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Engines.Internal.Models.NodeFinderDataMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        public global::Omnius.Axus.Engines.Internal.Models.NodeFinderDataMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1152,7 +1152,7 @@ internal sealed partial class ContentLocation : global::Omnius.Core.RocketPack.I
 
     private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Engines.Internal.Models.ContentLocation>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axus.Engines.Internal.Models.ContentLocation value, in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Engines.Internal.Models.ContentLocation value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1172,7 +1172,7 @@ internal sealed partial class ContentLocation : global::Omnius.Core.RocketPack.I
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Engines.Internal.Models.ContentLocation Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        public global::Omnius.Axus.Engines.Internal.Models.ContentLocation Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1278,7 +1278,7 @@ internal sealed partial class FileExchangerHelloMessage : global::Omnius.Core.Ro
 
     private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Engines.Internal.Models.FileExchangerHelloMessage>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axus.Engines.Internal.Models.FileExchangerHelloMessage value, in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Engines.Internal.Models.FileExchangerHelloMessage value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1293,7 +1293,7 @@ internal sealed partial class FileExchangerHelloMessage : global::Omnius.Core.Ro
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Engines.Internal.Models.FileExchangerHelloMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        public global::Omnius.Axus.Engines.Internal.Models.FileExchangerHelloMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1385,7 +1385,7 @@ internal sealed partial class FileExchangerHandshakeRequestMessage : global::Omn
 
     private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Engines.Internal.Models.FileExchangerHandshakeRequestMessage>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axus.Engines.Internal.Models.FileExchangerHandshakeRequestMessage value, in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Engines.Internal.Models.FileExchangerHandshakeRequestMessage value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1396,7 +1396,7 @@ internal sealed partial class FileExchangerHandshakeRequestMessage : global::Omn
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Engines.Internal.Models.FileExchangerHandshakeRequestMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        public global::Omnius.Axus.Engines.Internal.Models.FileExchangerHandshakeRequestMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1483,7 +1483,7 @@ internal sealed partial class FileExchangerHandshakeResultMessage : global::Omni
 
     private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Engines.Internal.Models.FileExchangerHandshakeResultMessage>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axus.Engines.Internal.Models.FileExchangerHandshakeResultMessage value, in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Engines.Internal.Models.FileExchangerHandshakeResultMessage value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1494,7 +1494,7 @@ internal sealed partial class FileExchangerHandshakeResultMessage : global::Omni
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Engines.Internal.Models.FileExchangerHandshakeResultMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        public global::Omnius.Axus.Engines.Internal.Models.FileExchangerHandshakeResultMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1603,7 +1603,7 @@ internal sealed partial class FileExchangerDataMessage : global::Omnius.Core.Roc
 
     private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Engines.Internal.Models.FileExchangerDataMessage>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axus.Engines.Internal.Models.FileExchangerDataMessage value, in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Engines.Internal.Models.FileExchangerDataMessage value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1627,7 +1627,7 @@ internal sealed partial class FileExchangerDataMessage : global::Omnius.Core.Roc
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Engines.Internal.Models.FileExchangerDataMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        public global::Omnius.Axus.Engines.Internal.Models.FileExchangerDataMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1738,7 +1738,7 @@ internal sealed partial class ShoutExchangerHelloMessage : global::Omnius.Core.R
 
     private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Engines.Internal.Models.ShoutExchangerHelloMessage>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axus.Engines.Internal.Models.ShoutExchangerHelloMessage value, in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Engines.Internal.Models.ShoutExchangerHelloMessage value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1753,7 +1753,7 @@ internal sealed partial class ShoutExchangerHelloMessage : global::Omnius.Core.R
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Engines.Internal.Models.ShoutExchangerHelloMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        public global::Omnius.Axus.Engines.Internal.Models.ShoutExchangerHelloMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1858,7 +1858,7 @@ internal sealed partial class ShoutExchangerFetchRequestMessage : global::Omnius
 
     private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Engines.Internal.Models.ShoutExchangerFetchRequestMessage>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axus.Engines.Internal.Models.ShoutExchangerFetchRequestMessage value, in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Engines.Internal.Models.ShoutExchangerFetchRequestMessage value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1879,7 +1879,7 @@ internal sealed partial class ShoutExchangerFetchRequestMessage : global::Omnius
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Engines.Internal.Models.ShoutExchangerFetchRequestMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        public global::Omnius.Axus.Engines.Internal.Models.ShoutExchangerFetchRequestMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1988,7 +1988,7 @@ internal sealed partial class ShoutExchangerFetchResultMessage : global::Omnius.
 
     private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Engines.Internal.Models.ShoutExchangerFetchResultMessage>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axus.Engines.Internal.Models.ShoutExchangerFetchResultMessage value, in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Engines.Internal.Models.ShoutExchangerFetchResultMessage value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -2004,7 +2004,7 @@ internal sealed partial class ShoutExchangerFetchResultMessage : global::Omnius.
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Engines.Internal.Models.ShoutExchangerFetchResultMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        public global::Omnius.Axus.Engines.Internal.Models.ShoutExchangerFetchResultMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -2107,7 +2107,7 @@ internal sealed partial class ShoutExchangerPostMessage : global::Omnius.Core.Ro
 
     private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Engines.Internal.Models.ShoutExchangerPostMessage>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, in global::Omnius.Axus.Engines.Internal.Models.ShoutExchangerPostMessage value, in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Engines.Internal.Models.ShoutExchangerPostMessage value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -2123,7 +2123,7 @@ internal sealed partial class ShoutExchangerPostMessage : global::Omnius.Core.Ro
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Engines.Internal.Models.ShoutExchangerPostMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, in int rank)
+        public global::Omnius.Axus.Engines.Internal.Models.ShoutExchangerPostMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 

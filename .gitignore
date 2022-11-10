@@ -4,6 +4,10 @@ pub/
 patch.txt
 demo/*/storage/
 
+# Documents
+docs/*/.asciidoctor
+docs/*/.images
+
 # Environment
 .env
 
