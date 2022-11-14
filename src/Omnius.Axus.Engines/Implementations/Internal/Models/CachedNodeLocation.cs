@@ -1,4 +1,4 @@
-using Omnius.Axus.Models;
+using Omnius.Axus.Messages;
 
 namespace Omnius.Axus.Engines.Internal.Models;
 

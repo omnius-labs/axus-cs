@@ -1,5 +1,5 @@
 using System.Collections.ObjectModel;
-using Omnius.Axus.Models;
+using Omnius.Axus.Messages;
 using Omnius.Core;
 using Omnius.Core.Net;
 

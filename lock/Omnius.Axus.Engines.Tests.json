@@ -1355,7 +1355,7 @@
         "dependencies": {
           "LiteDB": "[5.0.11, )",
           "NLog": "[4.7.13, )",
-          "Omnius.Axus.Models": "[0.0.1-alpha.1, )",
+          "Omnius.Axus.Messages": "[0.0.1-alpha.1, )",
           "Omnius.Axus.Utils": "[0.0.1-alpha.1, )",
           "Omnius.Core": "[0.0.1-alpha.1, )",
           "Omnius.Core.Collections": "[0.0.1-alpha.1, )",
@@ -1369,7 +1369,7 @@
           "Omnius.Core.Storages": "[0.0.1-alpha.1, )"
         }
       },
-      "omnius.axus.models": {
+      "omnius.axus.messages": {
         "type": "Project",
         "dependencies": {
           "LiteDB": "[5.0.11, )",

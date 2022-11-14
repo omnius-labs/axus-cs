@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace Omnius.Axus.Models;
+namespace Omnius.Axus.Messages;
 
 public static class AxusUriConverterNodeLocationExtensions
 {

@@ -4,7 +4,7 @@ using Omnius.Core.Pipelines;
 using Omnius.Core.RocketPack;
 using Omnius.Core.Serialization;
 
-namespace Omnius.Axus.Models;
+namespace Omnius.Axus.Messages;
 
 public class AxusUriConverter
 {

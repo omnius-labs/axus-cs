@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Net;
 using Omnius.Axus.Daemon;
 using Omnius.Axus.Interactors;
-using Omnius.Axus.Models;
+using Omnius.Axus.Messages;
 using Omnius.Axus.Remoting;
 using Omnius.Core;
 using Omnius.Core.Net;

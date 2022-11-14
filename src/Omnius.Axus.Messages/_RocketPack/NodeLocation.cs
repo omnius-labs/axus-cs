@@ -1,4 +1,4 @@
-namespace Omnius.Axus.Models;
+namespace Omnius.Axus.Messages;
 
 public sealed partial class NodeLocation
 {

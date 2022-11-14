@@ -1,5 +1,5 @@
 using Omnius.Axus.Engines.Models;
-using Omnius.Axus.Models;
+using Omnius.Axus.Messages;
 using Omnius.Core.Pipelines;
 
 namespace Omnius.Axus.Engines;

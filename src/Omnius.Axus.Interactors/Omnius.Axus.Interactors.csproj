@@ -11,7 +11,7 @@
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Storages\Omnius.Core.Storages.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Serialization\Omnius.Core.Serialization.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core\Omnius.Core.csproj" />
-    <ProjectReference Include="..\Omnius.Axus.Models\Omnius.Axus.Models.csproj" />
+    <ProjectReference Include="..\Omnius.Axus.Messages\Omnius.Axus.Messages.csproj" />
     <ProjectReference Include="..\Omnius.Axus.Remoting\Omnius.Axus.Remoting.csproj" />
     <ProjectReference Include="..\Omnius.Axus.Utils\Omnius.Axus.Utils.csproj" />
   </ItemGroup>

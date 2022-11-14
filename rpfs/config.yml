@@ -2,8 +2,8 @@
     - ./refs/core/rpfs/**/*.rpf
     - ./rpfs/**/*.rpf
   CompileTargets:
-    - Input: ./rpfs/Omnius.Axus.Models/Omnius.Axus.Models.rpf
-      Output: ./src/Omnius.Axus.Models/_RocketPack/_Generated.cs
+    - Input: ./rpfs/Omnius.Axus.Messages/Omnius.Axus.Messages.rpf
+      Output: ./src/Omnius.Axus.Messages/_RocketPack/_Generated.cs
     - Input: ./rpfs/Omnius.Axus.Engines/Omnius.Axus.Engines.Models.rpf
       Output: ./src/Omnius.Axus.Engines/Models/_RocketPack/_Generated.cs
     - Input: ./rpfs/Omnius.Axus.Engines/Omnius.Axus.Engines.Internal.Models.rpf

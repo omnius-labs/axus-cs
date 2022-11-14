@@ -1,6 +1,6 @@
 using Omnius.Axus.Engines.Internal;
 using Omnius.Axus.Engines.Internal.Models;
-using Omnius.Axus.Models;
+using Omnius.Axus.Messages;
 using Omnius.Core;
 using Omnius.Core.Helpers;
 using Omnius.Core.Net;

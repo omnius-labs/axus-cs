@@ -1,5 +1,5 @@
 using System.Buffers;
-using Omnius.Axus.Models;
+using Omnius.Axus.Messages;
 using Omnius.Core.Cryptography;
 
 namespace Omnius.Axus.Engines.Primitives;

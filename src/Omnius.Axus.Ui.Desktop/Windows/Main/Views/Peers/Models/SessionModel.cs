@@ -1,5 +1,5 @@
 using Generator.Equals;
-using Omnius.Axus.Models;
+using Omnius.Axus.Messages;
 using Omnius.Core.Avalonia;
 
 namespace Omnius.Axus.Ui.Desktop.Windows.Main;

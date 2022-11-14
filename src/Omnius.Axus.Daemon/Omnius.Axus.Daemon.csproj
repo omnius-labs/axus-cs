@@ -23,7 +23,7 @@
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Pipelines\Omnius.Core.Pipelines.csproj" />
     <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Tasks\Omnius.Core.Tasks.csproj" />
     <ProjectReference Include="..\Omnius.Axus.Remoting\Omnius.Axus.Remoting.csproj" />
-    <ProjectReference Include="..\Omnius.Axus.Models\Omnius.Axus.Models.csproj" />
+    <ProjectReference Include="..\Omnius.Axus.Messages\Omnius.Axus.Messages.csproj" />
     <ProjectReference Include="..\Omnius.Axus.Engines\Omnius.Axus.Engines.csproj" />
     <ProjectReference Include="..\Omnius.Axus.Utils\Omnius.Axus.Utils.csproj" />
   </ItemGroup>

@@ -1,5 +1,5 @@
 using System.Buffers;
-using Omnius.Axus.Models;
+using Omnius.Axus.Messages;
 using Omnius.Axus.Remoting;
 using Omnius.Core.Cryptography;
 using Omnius.Core.RocketPack;

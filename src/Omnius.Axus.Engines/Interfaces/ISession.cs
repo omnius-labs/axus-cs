@@ -1,4 +1,4 @@
-using Omnius.Axus.Models;
+using Omnius.Axus.Messages;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Connections;

@@ -1,6 +1,6 @@
 using System.Buffers;
 using Omnius.Axus.Engines.Primitives;
-using Omnius.Axus.Models;
+using Omnius.Axus.Messages;
 using Omnius.Core.Cryptography;
 
 namespace Omnius.Axus.Engines;

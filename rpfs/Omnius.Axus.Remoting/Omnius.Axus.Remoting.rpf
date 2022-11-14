@@ -1,6 +1,6 @@
 syntax v1.0;
 
-using "Omnius.Axus.Models";
+using "Omnius.Axus.Messages";
 
 namespace "Omnius.Axus.Remoting";
 

@@ -199,7 +199,7 @@
         "resolved": "11.2.1",
         "contentHash": "tBt8K+korVfrjH9wyDEhiLKxbs8qoLCLIFwvYgkSUuMC9//w3z0cFQ8LQAI/5MCKq+BMil0cfRTRvPeE7eXhQw=="
       },
-      "omnius.axus.models": {
+      "omnius.axus.messages": {
         "type": "Project",
         "dependencies": {
           "LiteDB": "[5.0.11, )",

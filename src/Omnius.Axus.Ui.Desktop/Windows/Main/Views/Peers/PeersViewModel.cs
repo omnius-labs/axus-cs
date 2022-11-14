@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using Omnius.Axus.Interactors;
-using Omnius.Axus.Models;
+using Omnius.Axus.Messages;
 using Omnius.Axus.Ui.Desktop.Internal;
 using Omnius.Core;
 using Omnius.Core.Avalonia;

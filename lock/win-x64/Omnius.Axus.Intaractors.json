@@ -219,7 +219,7 @@
                 "type": "Project",
                 "dependencies": {
                     "NLog": "4.7.13",
-                    "Omnius.Axus.Models": "0.0.1-alpha.1",
+                    "Omnius.Axus.Messages": "0.0.1-alpha.1",
                     "Omnius.Core": "0.0.1-alpha.1",
                     "Omnius.Core.Collections": "0.0.1-alpha.1",
                     "Omnius.Core.Cryptography": "0.0.1-alpha.1",

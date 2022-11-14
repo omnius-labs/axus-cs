@@ -1,6 +1,6 @@
 using Avalonia.Threading;
 using Omnius.Axus.Interactors;
-using Omnius.Axus.Models;
+using Omnius.Axus.Messages;
 using Omnius.Core;
 using Omnius.Core.Avalonia;
 using Reactive.Bindings;

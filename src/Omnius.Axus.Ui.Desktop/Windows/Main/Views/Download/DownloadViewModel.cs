@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Omnius.Axus.Interactors;
 using Omnius.Axus.Interactors.Models;
-using Omnius.Axus.Models;
+using Omnius.Axus.Messages;
 using Omnius.Axus.Ui.Desktop.Internal;
 using Omnius.Axus.Ui.Desktop.Models;
 using Omnius.Core;

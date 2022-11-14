@@ -1,7 +1,7 @@
 using Omnius.Axus.Interactors.Internal.Models;
 using Omnius.Axus.Interactors.Internal.Repositories;
 using Omnius.Axus.Interactors.Models;
-using Omnius.Axus.Models;
+using Omnius.Axus.Messages;
 using Omnius.Core;
 using Omnius.Core.Helpers;
 using Omnius.Core.Storages;

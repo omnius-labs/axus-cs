@@ -1,4 +1,4 @@
-using Omnius.Axus.Models;
+using Omnius.Axus.Messages;
 using Omnius.Core.Net;
 
 namespace Omnius.Axus.Engines.Internal.Entities;

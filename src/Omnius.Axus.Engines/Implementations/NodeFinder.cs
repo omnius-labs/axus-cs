@@ -6,7 +6,7 @@ using Omnius.Axus.Engines.Internal;
 using Omnius.Axus.Engines.Internal.Models;
 using Omnius.Axus.Engines.Internal.Repositories;
 using Omnius.Axus.Engines.Models;
-using Omnius.Axus.Models;
+using Omnius.Axus.Messages;
 using Omnius.Core;
 using Omnius.Core.Collections;
 using Omnius.Core.Helpers;

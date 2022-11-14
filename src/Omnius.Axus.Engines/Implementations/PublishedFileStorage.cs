@@ -2,7 +2,7 @@ using System.Buffers;
 using Omnius.Axus.Engines.Internal;
 using Omnius.Axus.Engines.Internal.Models;
 using Omnius.Axus.Engines.Internal.Repositories;
-using Omnius.Axus.Models;
+using Omnius.Axus.Messages;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Cryptography.Functions;

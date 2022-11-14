@@ -87,7 +87,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Axus.Interactors", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Axus.Launcher", "src\Omnius.Axus.Launcher\Omnius.Axus.Launcher.csproj", "{EB6E115B-6309-4287-8673-A1324AA9EE82}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Axus.Models", "src\Omnius.Axus.Models\Omnius.Axus.Models.csproj", "{31868DF3-F492-4B32-B188-EDA692B02726}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Axus.Messages", "src\Omnius.Axus.Messages\Omnius.Axus.Messages.csproj", "{31868DF3-F492-4B32-B188-EDA692B02726}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnius.Axus.Remoting", "src\Omnius.Axus.Remoting\Omnius.Axus.Remoting.csproj", "{06901A04-E15F-46E6-AC2B-5643AD27E65B}"
 EndProject

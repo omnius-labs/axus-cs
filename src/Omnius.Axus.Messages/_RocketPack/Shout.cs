@@ -4,7 +4,7 @@ using Omnius.Core.Cryptography;
 using Omnius.Core.Pipelines;
 using Omnius.Core.RocketPack;
 
-namespace Omnius.Axus.Models;
+namespace Omnius.Axus.Messages;
 
 public sealed partial class Shout
 {

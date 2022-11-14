@@ -217,14 +217,14 @@ public sealed partial class GetSessionsReportResult : global::Omnius.Core.Rocket
     static GetSessionsReportResult()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSessionsReportResult>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSessionsReportResult>.Empty = new global::Omnius.Axus.Remoting.GetSessionsReportResult(global::System.Array.Empty<global::Omnius.Axus.Models.SessionReport>());
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSessionsReportResult>.Empty = new global::Omnius.Axus.Remoting.GetSessionsReportResult(global::System.Array.Empty<global::Omnius.Axus.Messages.SessionReport>());
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxSessionsCount = 8192;
 
-    public GetSessionsReportResult(global::Omnius.Axus.Models.SessionReport[] sessions)
+    public GetSessionsReportResult(global::Omnius.Axus.Messages.SessionReport[] sessions)
     {
         if (sessions is null) throw new global::System.ArgumentNullException("sessions");
         if (sessions.Length > 8192) throw new global::System.ArgumentOutOfRangeException("sessions");
@@ -233,7 +233,7 @@ public sealed partial class GetSessionsReportResult : global::Omnius.Core.Rocket
             if (n is null) throw new global::System.ArgumentNullException("n");
         }
 
-        this.Sessions = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Models.SessionReport>(sessions);
+        this.Sessions = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.SessionReport>(sessions);
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
@@ -246,7 +246,7 @@ public sealed partial class GetSessionsReportResult : global::Omnius.Core.Rocket
         });
     }
 
-    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Models.SessionReport> Sessions { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.SessionReport> Sessions { get; }
 
     public static global::Omnius.Axus.Remoting.GetSessionsReportResult Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -294,7 +294,7 @@ public sealed partial class GetSessionsReportResult : global::Omnius.Core.Rocket
                 w.Write((uint)value.Sessions.Count);
                 foreach (var n in value.Sessions)
                 {
-                    global::Omnius.Axus.Models.SessionReport.Formatter.Serialize(ref w, n, rank + 1);
+                    global::Omnius.Axus.Messages.SessionReport.Formatter.Serialize(ref w, n, rank + 1);
                 }
             }
             w.Write((uint)0);
@@ -303,7 +303,7 @@ public sealed partial class GetSessionsReportResult : global::Omnius.Core.Rocket
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            global::Omnius.Axus.Models.SessionReport[] p_sessions = global::System.Array.Empty<global::Omnius.Axus.Models.SessionReport>();
+            global::Omnius.Axus.Messages.SessionReport[] p_sessions = global::System.Array.Empty<global::Omnius.Axus.Messages.SessionReport>();
 
             for (; ; )
             {
@@ -314,10 +314,10 @@ public sealed partial class GetSessionsReportResult : global::Omnius.Core.Rocket
                     case 1:
                         {
                             var length = r.GetUInt32();
-                            p_sessions = new global::Omnius.Axus.Models.SessionReport[length];
+                            p_sessions = new global::Omnius.Axus.Messages.SessionReport[length];
                             for (int i = 0; i < p_sessions.Length; i++)
                             {
-                                p_sessions[i] = global::Omnius.Axus.Models.SessionReport.Formatter.Deserialize(ref r, rank + 1);
+                                p_sessions[i] = global::Omnius.Axus.Messages.SessionReport.Formatter.Deserialize(ref r, rank + 1);
                             }
                             break;
                         }
@@ -336,12 +336,12 @@ public sealed partial class GetMyNodeLocationResult : global::Omnius.Core.Rocket
     static GetMyNodeLocationResult()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetMyNodeLocationResult>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetMyNodeLocationResult>.Empty = new global::Omnius.Axus.Remoting.GetMyNodeLocationResult(global::Omnius.Axus.Models.NodeLocation.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetMyNodeLocationResult>.Empty = new global::Omnius.Axus.Remoting.GetMyNodeLocationResult(global::Omnius.Axus.Messages.NodeLocation.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public GetMyNodeLocationResult(global::Omnius.Axus.Models.NodeLocation nodeLocation)
+    public GetMyNodeLocationResult(global::Omnius.Axus.Messages.NodeLocation nodeLocation)
     {
         if (nodeLocation is null) throw new global::System.ArgumentNullException("nodeLocation");
 
@@ -355,7 +355,7 @@ public sealed partial class GetMyNodeLocationResult : global::Omnius.Core.Rocket
         });
     }
 
-    public global::Omnius.Axus.Models.NodeLocation NodeLocation { get; }
+    public global::Omnius.Axus.Messages.NodeLocation NodeLocation { get; }
 
     public static global::Omnius.Axus.Remoting.GetMyNodeLocationResult Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -397,10 +397,10 @@ public sealed partial class GetMyNodeLocationResult : global::Omnius.Core.Rocket
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            if (value.NodeLocation != global::Omnius.Axus.Models.NodeLocation.Empty)
+            if (value.NodeLocation != global::Omnius.Axus.Messages.NodeLocation.Empty)
             {
                 w.Write((uint)1);
-                global::Omnius.Axus.Models.NodeLocation.Formatter.Serialize(ref w, value.NodeLocation, rank + 1);
+                global::Omnius.Axus.Messages.NodeLocation.Formatter.Serialize(ref w, value.NodeLocation, rank + 1);
             }
             w.Write((uint)0);
         }
@@ -408,7 +408,7 @@ public sealed partial class GetMyNodeLocationResult : global::Omnius.Core.Rocket
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            global::Omnius.Axus.Models.NodeLocation p_nodeLocation = global::Omnius.Axus.Models.NodeLocation.Empty;
+            global::Omnius.Axus.Messages.NodeLocation p_nodeLocation = global::Omnius.Axus.Messages.NodeLocation.Empty;
 
             for (; ; )
             {
@@ -418,7 +418,7 @@ public sealed partial class GetMyNodeLocationResult : global::Omnius.Core.Rocket
                 {
                     case 1:
                         {
-                            p_nodeLocation = global::Omnius.Axus.Models.NodeLocation.Formatter.Deserialize(ref r, rank + 1);
+                            p_nodeLocation = global::Omnius.Axus.Messages.NodeLocation.Formatter.Deserialize(ref r, rank + 1);
                             break;
                         }
                 }
@@ -436,14 +436,14 @@ public sealed partial class GetCloudNodeLocationsResult : global::Omnius.Core.Ro
     static GetCloudNodeLocationsResult()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetCloudNodeLocationsResult>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetCloudNodeLocationsResult>.Empty = new global::Omnius.Axus.Remoting.GetCloudNodeLocationsResult(global::System.Array.Empty<global::Omnius.Axus.Models.NodeLocation>());
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetCloudNodeLocationsResult>.Empty = new global::Omnius.Axus.Remoting.GetCloudNodeLocationsResult(global::System.Array.Empty<global::Omnius.Axus.Messages.NodeLocation>());
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxNodeLocationsCount = 8192;
 
-    public GetCloudNodeLocationsResult(global::Omnius.Axus.Models.NodeLocation[] nodeLocations)
+    public GetCloudNodeLocationsResult(global::Omnius.Axus.Messages.NodeLocation[] nodeLocations)
     {
         if (nodeLocations is null) throw new global::System.ArgumentNullException("nodeLocations");
         if (nodeLocations.Length > 8192) throw new global::System.ArgumentOutOfRangeException("nodeLocations");
@@ -452,7 +452,7 @@ public sealed partial class GetCloudNodeLocationsResult : global::Omnius.Core.Ro
             if (n is null) throw new global::System.ArgumentNullException("n");
         }
 
-        this.NodeLocations = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Models.NodeLocation>(nodeLocations);
+        this.NodeLocations = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.NodeLocation>(nodeLocations);
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
@@ -465,7 +465,7 @@ public sealed partial class GetCloudNodeLocationsResult : global::Omnius.Core.Ro
         });
     }
 
-    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Models.NodeLocation> NodeLocations { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.NodeLocation> NodeLocations { get; }
 
     public static global::Omnius.Axus.Remoting.GetCloudNodeLocationsResult Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -513,7 +513,7 @@ public sealed partial class GetCloudNodeLocationsResult : global::Omnius.Core.Ro
                 w.Write((uint)value.NodeLocations.Count);
                 foreach (var n in value.NodeLocations)
                 {
-                    global::Omnius.Axus.Models.NodeLocation.Formatter.Serialize(ref w, n, rank + 1);
+                    global::Omnius.Axus.Messages.NodeLocation.Formatter.Serialize(ref w, n, rank + 1);
                 }
             }
             w.Write((uint)0);
@@ -522,7 +522,7 @@ public sealed partial class GetCloudNodeLocationsResult : global::Omnius.Core.Ro
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            global::Omnius.Axus.Models.NodeLocation[] p_nodeLocations = global::System.Array.Empty<global::Omnius.Axus.Models.NodeLocation>();
+            global::Omnius.Axus.Messages.NodeLocation[] p_nodeLocations = global::System.Array.Empty<global::Omnius.Axus.Messages.NodeLocation>();
 
             for (; ; )
             {
@@ -533,10 +533,10 @@ public sealed partial class GetCloudNodeLocationsResult : global::Omnius.Core.Ro
                     case 1:
                         {
                             var length = r.GetUInt32();
-                            p_nodeLocations = new global::Omnius.Axus.Models.NodeLocation[length];
+                            p_nodeLocations = new global::Omnius.Axus.Messages.NodeLocation[length];
                             for (int i = 0; i < p_nodeLocations.Length; i++)
                             {
-                                p_nodeLocations[i] = global::Omnius.Axus.Models.NodeLocation.Formatter.Deserialize(ref r, rank + 1);
+                                p_nodeLocations[i] = global::Omnius.Axus.Messages.NodeLocation.Formatter.Deserialize(ref r, rank + 1);
                             }
                             break;
                         }
@@ -555,14 +555,14 @@ public sealed partial class AddCloudNodeLocationsRequest : global::Omnius.Core.R
     static AddCloudNodeLocationsRequest()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest>.Empty = new global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest(global::System.Array.Empty<global::Omnius.Axus.Models.NodeLocation>());
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest>.Empty = new global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest(global::System.Array.Empty<global::Omnius.Axus.Messages.NodeLocation>());
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxNodeLocationsCount = 8192;
 
-    public AddCloudNodeLocationsRequest(global::Omnius.Axus.Models.NodeLocation[] nodeLocations)
+    public AddCloudNodeLocationsRequest(global::Omnius.Axus.Messages.NodeLocation[] nodeLocations)
     {
         if (nodeLocations is null) throw new global::System.ArgumentNullException("nodeLocations");
         if (nodeLocations.Length > 8192) throw new global::System.ArgumentOutOfRangeException("nodeLocations");
@@ -571,7 +571,7 @@ public sealed partial class AddCloudNodeLocationsRequest : global::Omnius.Core.R
             if (n is null) throw new global::System.ArgumentNullException("n");
         }
 
-        this.NodeLocations = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Models.NodeLocation>(nodeLocations);
+        this.NodeLocations = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.NodeLocation>(nodeLocations);
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
@@ -584,7 +584,7 @@ public sealed partial class AddCloudNodeLocationsRequest : global::Omnius.Core.R
         });
     }
 
-    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Models.NodeLocation> NodeLocations { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.NodeLocation> NodeLocations { get; }
 
     public static global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -632,7 +632,7 @@ public sealed partial class AddCloudNodeLocationsRequest : global::Omnius.Core.R
                 w.Write((uint)value.NodeLocations.Count);
                 foreach (var n in value.NodeLocations)
                 {
-                    global::Omnius.Axus.Models.NodeLocation.Formatter.Serialize(ref w, n, rank + 1);
+                    global::Omnius.Axus.Messages.NodeLocation.Formatter.Serialize(ref w, n, rank + 1);
                 }
             }
             w.Write((uint)0);
@@ -641,7 +641,7 @@ public sealed partial class AddCloudNodeLocationsRequest : global::Omnius.Core.R
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            global::Omnius.Axus.Models.NodeLocation[] p_nodeLocations = global::System.Array.Empty<global::Omnius.Axus.Models.NodeLocation>();
+            global::Omnius.Axus.Messages.NodeLocation[] p_nodeLocations = global::System.Array.Empty<global::Omnius.Axus.Messages.NodeLocation>();
 
             for (; ; )
             {
@@ -652,10 +652,10 @@ public sealed partial class AddCloudNodeLocationsRequest : global::Omnius.Core.R
                     case 1:
                         {
                             var length = r.GetUInt32();
-                            p_nodeLocations = new global::Omnius.Axus.Models.NodeLocation[length];
+                            p_nodeLocations = new global::Omnius.Axus.Messages.NodeLocation[length];
                             for (int i = 0; i < p_nodeLocations.Length; i++)
                             {
-                                p_nodeLocations[i] = global::Omnius.Axus.Models.NodeLocation.Formatter.Deserialize(ref r, rank + 1);
+                                p_nodeLocations[i] = global::Omnius.Axus.Messages.NodeLocation.Formatter.Deserialize(ref r, rank + 1);
                             }
                             break;
                         }
@@ -674,14 +674,14 @@ public sealed partial class GetPublishedFilesReportResult : global::Omnius.Core.
     static GetPublishedFilesReportResult()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedFilesReportResult>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedFilesReportResult>.Empty = new global::Omnius.Axus.Remoting.GetPublishedFilesReportResult(global::System.Array.Empty<global::Omnius.Axus.Models.PublishedFileReport>());
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedFilesReportResult>.Empty = new global::Omnius.Axus.Remoting.GetPublishedFilesReportResult(global::System.Array.Empty<global::Omnius.Axus.Messages.PublishedFileReport>());
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxPublishedFilesCount = 2147483647;
 
-    public GetPublishedFilesReportResult(global::Omnius.Axus.Models.PublishedFileReport[] publishedFiles)
+    public GetPublishedFilesReportResult(global::Omnius.Axus.Messages.PublishedFileReport[] publishedFiles)
     {
         if (publishedFiles is null) throw new global::System.ArgumentNullException("publishedFiles");
         if (publishedFiles.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("publishedFiles");
@@ -690,7 +690,7 @@ public sealed partial class GetPublishedFilesReportResult : global::Omnius.Core.
             if (n is null) throw new global::System.ArgumentNullException("n");
         }
 
-        this.PublishedFiles = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Models.PublishedFileReport>(publishedFiles);
+        this.PublishedFiles = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.PublishedFileReport>(publishedFiles);
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
@@ -703,7 +703,7 @@ public sealed partial class GetPublishedFilesReportResult : global::Omnius.Core.
         });
     }
 
-    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Models.PublishedFileReport> PublishedFiles { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.PublishedFileReport> PublishedFiles { get; }
 
     public static global::Omnius.Axus.Remoting.GetPublishedFilesReportResult Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -751,7 +751,7 @@ public sealed partial class GetPublishedFilesReportResult : global::Omnius.Core.
                 w.Write((uint)value.PublishedFiles.Count);
                 foreach (var n in value.PublishedFiles)
                 {
-                    global::Omnius.Axus.Models.PublishedFileReport.Formatter.Serialize(ref w, n, rank + 1);
+                    global::Omnius.Axus.Messages.PublishedFileReport.Formatter.Serialize(ref w, n, rank + 1);
                 }
             }
             w.Write((uint)0);
@@ -760,7 +760,7 @@ public sealed partial class GetPublishedFilesReportResult : global::Omnius.Core.
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            global::Omnius.Axus.Models.PublishedFileReport[] p_publishedFiles = global::System.Array.Empty<global::Omnius.Axus.Models.PublishedFileReport>();
+            global::Omnius.Axus.Messages.PublishedFileReport[] p_publishedFiles = global::System.Array.Empty<global::Omnius.Axus.Messages.PublishedFileReport>();
 
             for (; ; )
             {
@@ -771,10 +771,10 @@ public sealed partial class GetPublishedFilesReportResult : global::Omnius.Core.
                     case 1:
                         {
                             var length = r.GetUInt32();
-                            p_publishedFiles = new global::Omnius.Axus.Models.PublishedFileReport[length];
+                            p_publishedFiles = new global::Omnius.Axus.Messages.PublishedFileReport[length];
                             for (int i = 0; i < p_publishedFiles.Length; i++)
                             {
-                                p_publishedFiles[i] = global::Omnius.Axus.Models.PublishedFileReport.Formatter.Deserialize(ref r, rank + 1);
+                                p_publishedFiles[i] = global::Omnius.Axus.Messages.PublishedFileReport.Formatter.Deserialize(ref r, rank + 1);
                             }
                             break;
                         }
@@ -1499,14 +1499,14 @@ public sealed partial class GetSubscribedFilesReportResult : global::Omnius.Core
     static GetSubscribedFilesReportResult()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedFilesReportResult>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedFilesReportResult>.Empty = new global::Omnius.Axus.Remoting.GetSubscribedFilesReportResult(global::System.Array.Empty<global::Omnius.Axus.Models.SubscribedFileReport>());
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedFilesReportResult>.Empty = new global::Omnius.Axus.Remoting.GetSubscribedFilesReportResult(global::System.Array.Empty<global::Omnius.Axus.Messages.SubscribedFileReport>());
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxSubscribedFilesCount = 2147483647;
 
-    public GetSubscribedFilesReportResult(global::Omnius.Axus.Models.SubscribedFileReport[] subscribedFiles)
+    public GetSubscribedFilesReportResult(global::Omnius.Axus.Messages.SubscribedFileReport[] subscribedFiles)
     {
         if (subscribedFiles is null) throw new global::System.ArgumentNullException("subscribedFiles");
         if (subscribedFiles.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("subscribedFiles");
@@ -1515,7 +1515,7 @@ public sealed partial class GetSubscribedFilesReportResult : global::Omnius.Core
             if (n is null) throw new global::System.ArgumentNullException("n");
         }
 
-        this.SubscribedFiles = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Models.SubscribedFileReport>(subscribedFiles);
+        this.SubscribedFiles = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.SubscribedFileReport>(subscribedFiles);
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
@@ -1528,7 +1528,7 @@ public sealed partial class GetSubscribedFilesReportResult : global::Omnius.Core
         });
     }
 
-    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Models.SubscribedFileReport> SubscribedFiles { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.SubscribedFileReport> SubscribedFiles { get; }
 
     public static global::Omnius.Axus.Remoting.GetSubscribedFilesReportResult Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -1576,7 +1576,7 @@ public sealed partial class GetSubscribedFilesReportResult : global::Omnius.Core
                 w.Write((uint)value.SubscribedFiles.Count);
                 foreach (var n in value.SubscribedFiles)
                 {
-                    global::Omnius.Axus.Models.SubscribedFileReport.Formatter.Serialize(ref w, n, rank + 1);
+                    global::Omnius.Axus.Messages.SubscribedFileReport.Formatter.Serialize(ref w, n, rank + 1);
                 }
             }
             w.Write((uint)0);
@@ -1585,7 +1585,7 @@ public sealed partial class GetSubscribedFilesReportResult : global::Omnius.Core
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            global::Omnius.Axus.Models.SubscribedFileReport[] p_subscribedFiles = global::System.Array.Empty<global::Omnius.Axus.Models.SubscribedFileReport>();
+            global::Omnius.Axus.Messages.SubscribedFileReport[] p_subscribedFiles = global::System.Array.Empty<global::Omnius.Axus.Messages.SubscribedFileReport>();
 
             for (; ; )
             {
@@ -1596,10 +1596,10 @@ public sealed partial class GetSubscribedFilesReportResult : global::Omnius.Core
                     case 1:
                         {
                             var length = r.GetUInt32();
-                            p_subscribedFiles = new global::Omnius.Axus.Models.SubscribedFileReport[length];
+                            p_subscribedFiles = new global::Omnius.Axus.Messages.SubscribedFileReport[length];
                             for (int i = 0; i < p_subscribedFiles.Length; i++)
                             {
-                                p_subscribedFiles[i] = global::Omnius.Axus.Models.SubscribedFileReport.Formatter.Deserialize(ref r, rank + 1);
+                                p_subscribedFiles[i] = global::Omnius.Axus.Messages.SubscribedFileReport.Formatter.Deserialize(ref r, rank + 1);
                             }
                             break;
                         }
@@ -2276,14 +2276,14 @@ public sealed partial class GetPublishedShoutsReportResult : global::Omnius.Core
     static GetPublishedShoutsReportResult()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedShoutsReportResult>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedShoutsReportResult>.Empty = new global::Omnius.Axus.Remoting.GetPublishedShoutsReportResult(global::System.Array.Empty<global::Omnius.Axus.Models.PublishedShoutReport>());
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedShoutsReportResult>.Empty = new global::Omnius.Axus.Remoting.GetPublishedShoutsReportResult(global::System.Array.Empty<global::Omnius.Axus.Messages.PublishedShoutReport>());
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxPublishedShoutsCount = 2147483647;
 
-    public GetPublishedShoutsReportResult(global::Omnius.Axus.Models.PublishedShoutReport[] publishedShouts)
+    public GetPublishedShoutsReportResult(global::Omnius.Axus.Messages.PublishedShoutReport[] publishedShouts)
     {
         if (publishedShouts is null) throw new global::System.ArgumentNullException("publishedShouts");
         if (publishedShouts.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("publishedShouts");
@@ -2292,7 +2292,7 @@ public sealed partial class GetPublishedShoutsReportResult : global::Omnius.Core
             if (n is null) throw new global::System.ArgumentNullException("n");
         }
 
-        this.PublishedShouts = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Models.PublishedShoutReport>(publishedShouts);
+        this.PublishedShouts = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.PublishedShoutReport>(publishedShouts);
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
@@ -2305,7 +2305,7 @@ public sealed partial class GetPublishedShoutsReportResult : global::Omnius.Core
         });
     }
 
-    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Models.PublishedShoutReport> PublishedShouts { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.PublishedShoutReport> PublishedShouts { get; }
 
     public static global::Omnius.Axus.Remoting.GetPublishedShoutsReportResult Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -2353,7 +2353,7 @@ public sealed partial class GetPublishedShoutsReportResult : global::Omnius.Core
                 w.Write((uint)value.PublishedShouts.Count);
                 foreach (var n in value.PublishedShouts)
                 {
-                    global::Omnius.Axus.Models.PublishedShoutReport.Formatter.Serialize(ref w, n, rank + 1);
+                    global::Omnius.Axus.Messages.PublishedShoutReport.Formatter.Serialize(ref w, n, rank + 1);
                 }
             }
             w.Write((uint)0);
@@ -2362,7 +2362,7 @@ public sealed partial class GetPublishedShoutsReportResult : global::Omnius.Core
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            global::Omnius.Axus.Models.PublishedShoutReport[] p_publishedShouts = global::System.Array.Empty<global::Omnius.Axus.Models.PublishedShoutReport>();
+            global::Omnius.Axus.Messages.PublishedShoutReport[] p_publishedShouts = global::System.Array.Empty<global::Omnius.Axus.Messages.PublishedShoutReport>();
 
             for (; ; )
             {
@@ -2373,10 +2373,10 @@ public sealed partial class GetPublishedShoutsReportResult : global::Omnius.Core
                     case 1:
                         {
                             var length = r.GetUInt32();
-                            p_publishedShouts = new global::Omnius.Axus.Models.PublishedShoutReport[length];
+                            p_publishedShouts = new global::Omnius.Axus.Messages.PublishedShoutReport[length];
                             for (int i = 0; i < p_publishedShouts.Length; i++)
                             {
-                                p_publishedShouts[i] = global::Omnius.Axus.Models.PublishedShoutReport.Formatter.Deserialize(ref r, rank + 1);
+                                p_publishedShouts[i] = global::Omnius.Axus.Messages.PublishedShoutReport.Formatter.Deserialize(ref r, rank + 1);
                             }
                             break;
                         }
@@ -2395,14 +2395,14 @@ public sealed partial class PublishShoutRequest : global::Omnius.Core.RocketPack
     static PublishShoutRequest()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishShoutRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishShoutRequest>.Empty = new global::Omnius.Axus.Remoting.PublishShoutRequest(global::Omnius.Axus.Models.Shout.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishShoutRequest>.Empty = new global::Omnius.Axus.Remoting.PublishShoutRequest(global::Omnius.Axus.Messages.Shout.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxAuthorLength = 2147483647;
 
-    public PublishShoutRequest(global::Omnius.Axus.Models.Shout shout, global::Omnius.Core.RocketPack.Utf8String author)
+    public PublishShoutRequest(global::Omnius.Axus.Messages.Shout shout, global::Omnius.Core.RocketPack.Utf8String author)
     {
         if (shout is null) throw new global::System.ArgumentNullException("shout");
         if (author is null) throw new global::System.ArgumentNullException("author");
@@ -2425,7 +2425,7 @@ public sealed partial class PublishShoutRequest : global::Omnius.Core.RocketPack
         this.Shout.Dispose();
     }
 
-    public global::Omnius.Axus.Models.Shout Shout { get; }
+    public global::Omnius.Axus.Messages.Shout Shout { get; }
     public global::Omnius.Core.RocketPack.Utf8String Author { get; }
 
     public static global::Omnius.Axus.Remoting.PublishShoutRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -2469,10 +2469,10 @@ public sealed partial class PublishShoutRequest : global::Omnius.Core.RocketPack
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            if (value.Shout != global::Omnius.Axus.Models.Shout.Empty)
+            if (value.Shout != global::Omnius.Axus.Messages.Shout.Empty)
             {
                 w.Write((uint)1);
-                global::Omnius.Axus.Models.Shout.Formatter.Serialize(ref w, value.Shout, rank + 1);
+                global::Omnius.Axus.Messages.Shout.Formatter.Serialize(ref w, value.Shout, rank + 1);
             }
             if (value.Author != global::Omnius.Core.RocketPack.Utf8String.Empty)
             {
@@ -2485,7 +2485,7 @@ public sealed partial class PublishShoutRequest : global::Omnius.Core.RocketPack
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            global::Omnius.Axus.Models.Shout p_shout = global::Omnius.Axus.Models.Shout.Empty;
+            global::Omnius.Axus.Messages.Shout p_shout = global::Omnius.Axus.Messages.Shout.Empty;
             global::Omnius.Core.RocketPack.Utf8String p_author = global::Omnius.Core.RocketPack.Utf8String.Empty;
 
             for (; ; )
@@ -2496,7 +2496,7 @@ public sealed partial class PublishShoutRequest : global::Omnius.Core.RocketPack
                 {
                     case 1:
                         {
-                            p_shout = global::Omnius.Axus.Models.Shout.Formatter.Deserialize(ref r, rank + 1);
+                            p_shout = global::Omnius.Axus.Messages.Shout.Formatter.Deserialize(ref r, rank + 1);
                             break;
                         }
                     case 2:
@@ -2656,14 +2656,14 @@ public sealed partial class GetSubscribedShoutsReportResult : global::Omnius.Cor
     static GetSubscribedShoutsReportResult()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportResult>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportResult>.Empty = new global::Omnius.Axus.Remoting.GetSubscribedShoutsReportResult(global::System.Array.Empty<global::Omnius.Axus.Models.SubscribedShoutReport>());
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportResult>.Empty = new global::Omnius.Axus.Remoting.GetSubscribedShoutsReportResult(global::System.Array.Empty<global::Omnius.Axus.Messages.SubscribedShoutReport>());
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxSubscribedShoutsCount = 2147483647;
 
-    public GetSubscribedShoutsReportResult(global::Omnius.Axus.Models.SubscribedShoutReport[] subscribedShouts)
+    public GetSubscribedShoutsReportResult(global::Omnius.Axus.Messages.SubscribedShoutReport[] subscribedShouts)
     {
         if (subscribedShouts is null) throw new global::System.ArgumentNullException("subscribedShouts");
         if (subscribedShouts.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("subscribedShouts");
@@ -2672,7 +2672,7 @@ public sealed partial class GetSubscribedShoutsReportResult : global::Omnius.Cor
             if (n is null) throw new global::System.ArgumentNullException("n");
         }
 
-        this.SubscribedShouts = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Models.SubscribedShoutReport>(subscribedShouts);
+        this.SubscribedShouts = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.SubscribedShoutReport>(subscribedShouts);
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
@@ -2685,7 +2685,7 @@ public sealed partial class GetSubscribedShoutsReportResult : global::Omnius.Cor
         });
     }
 
-    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Models.SubscribedShoutReport> SubscribedShouts { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.SubscribedShoutReport> SubscribedShouts { get; }
 
     public static global::Omnius.Axus.Remoting.GetSubscribedShoutsReportResult Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -2733,7 +2733,7 @@ public sealed partial class GetSubscribedShoutsReportResult : global::Omnius.Cor
                 w.Write((uint)value.SubscribedShouts.Count);
                 foreach (var n in value.SubscribedShouts)
                 {
-                    global::Omnius.Axus.Models.SubscribedShoutReport.Formatter.Serialize(ref w, n, rank + 1);
+                    global::Omnius.Axus.Messages.SubscribedShoutReport.Formatter.Serialize(ref w, n, rank + 1);
                 }
             }
             w.Write((uint)0);
@@ -2742,7 +2742,7 @@ public sealed partial class GetSubscribedShoutsReportResult : global::Omnius.Cor
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            global::Omnius.Axus.Models.SubscribedShoutReport[] p_subscribedShouts = global::System.Array.Empty<global::Omnius.Axus.Models.SubscribedShoutReport>();
+            global::Omnius.Axus.Messages.SubscribedShoutReport[] p_subscribedShouts = global::System.Array.Empty<global::Omnius.Axus.Messages.SubscribedShoutReport>();
 
             for (; ; )
             {
@@ -2753,10 +2753,10 @@ public sealed partial class GetSubscribedShoutsReportResult : global::Omnius.Cor
                     case 1:
                         {
                             var length = r.GetUInt32();
-                            p_subscribedShouts = new global::Omnius.Axus.Models.SubscribedShoutReport[length];
+                            p_subscribedShouts = new global::Omnius.Axus.Messages.SubscribedShoutReport[length];
                             for (int i = 0; i < p_subscribedShouts.Length; i++)
                             {
-                                p_subscribedShouts[i] = global::Omnius.Axus.Models.SubscribedShoutReport.Formatter.Deserialize(ref r, rank + 1);
+                                p_subscribedShouts[i] = global::Omnius.Axus.Messages.SubscribedShoutReport.Formatter.Deserialize(ref r, rank + 1);
                             }
                             break;
                         }
@@ -3187,7 +3187,7 @@ public sealed partial class TryExportShoutResult : global::Omnius.Core.RocketPac
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public TryExportShoutResult(global::Omnius.Axus.Models.Shout? shout)
+    public TryExportShoutResult(global::Omnius.Axus.Messages.Shout? shout)
     {
         this.Shout = shout;
 
@@ -3204,7 +3204,7 @@ public sealed partial class TryExportShoutResult : global::Omnius.Core.RocketPac
         if (this.Shout is not null) this.Shout.Dispose();
     }
 
-    public global::Omnius.Axus.Models.Shout? Shout { get; }
+    public global::Omnius.Axus.Messages.Shout? Shout { get; }
 
     public static global::Omnius.Axus.Remoting.TryExportShoutResult Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -3250,7 +3250,7 @@ public sealed partial class TryExportShoutResult : global::Omnius.Core.RocketPac
             if (value.Shout != null)
             {
                 w.Write((uint)1);
-                global::Omnius.Axus.Models.Shout.Formatter.Serialize(ref w, value.Shout, rank + 1);
+                global::Omnius.Axus.Messages.Shout.Formatter.Serialize(ref w, value.Shout, rank + 1);
             }
             w.Write((uint)0);
         }
@@ -3258,7 +3258,7 @@ public sealed partial class TryExportShoutResult : global::Omnius.Core.RocketPac
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            global::Omnius.Axus.Models.Shout? p_shout = null;
+            global::Omnius.Axus.Messages.Shout? p_shout = null;
 
             for (; ; )
             {
@@ -3268,7 +3268,7 @@ public sealed partial class TryExportShoutResult : global::Omnius.Core.RocketPac
                 {
                     case 1:
                         {
-                            p_shout = global::Omnius.Axus.Models.Shout.Formatter.Deserialize(ref r, rank + 1);
+                            p_shout = global::Omnius.Axus.Messages.Shout.Formatter.Deserialize(ref r, rank + 1);
                             break;
                         }
                 }

@@ -1,6 +1,6 @@
 using LiteDB;
 using Omnius.Axus.Engines.Internal.Entities;
-using Omnius.Axus.Models;
+using Omnius.Axus.Messages;
 using Omnius.Axus.Utils;
 using Omnius.Core;
 using Omnius.Core.Helpers;
