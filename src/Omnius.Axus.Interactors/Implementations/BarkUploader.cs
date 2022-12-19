@@ -9,13 +9,13 @@ using Omnius.Core.Storages;
 
 namespace Omnius.Axus.Interactors;
 
-public sealed class BarkPublisher : AsyncDisposableBase, IBarkPublisher
+public sealed class BarkUploader : AsyncDisposableBase, IBarkUploader
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
     private readonly IServiceMediator _serviceMediator;
     private readonly IBytesPool _bytesPool;
-    private readonly BarkPublisherOptions _options;
+    private readonly BarkUploaderOptions _options;
 
     private readonly BarkPublisherRepository _barkPublisherRepo;
     private readonly ISingleValueStorage _configStorage;
@@ -29,14 +29,14 @@ public sealed class BarkPublisher : AsyncDisposableBase, IBarkPublisher
     private const string Channel = "profile/v1";
     private const string Author = "profile_publisher/v1";
 
-    public static async ValueTask<BarkPublisher> CreateAsync(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, BarkPublisherOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<BarkUploader> CreateAsync(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, BarkUploaderOptions options, CancellationToken cancellationToken = default)
     {
-        var profilePublisher = new BarkPublisher(serviceMediator, singleValueStorageFactory, bytesPool, options);
+        var profilePublisher = new BarkUploader(serviceMediator, singleValueStorageFactory, bytesPool, options);
         await profilePublisher.InitAsync(cancellationToken);
         return profilePublisher;
     }
 
-    private BarkPublisher(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, BarkPublisherOptions options)
+    private BarkUploader(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, BarkUploaderOptions options)
     {
         _serviceMediator = serviceMediator;
         _bytesPool = bytesPool;
@@ -117,11 +117,8 @@ public sealed class BarkPublisher : AsyncDisposableBase, IBarkPublisher
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetPublishedShoutReportsAsync(cancellationToken);
-            var signatures = reports
-                .Where(n => n.Authors.Contains(Author))
-                .Select(n => n.Signature)
-                .ToHashSet();
+            var reports = await _serviceMediator.GetPublishedShoutReportsAsync(Author, cancellationToken);
+            var signatures = reports.Select(n => n.Signature).ToHashSet();
 
             foreach (var signature in signatures)
             {
@@ -135,13 +132,8 @@ public sealed class BarkPublisher : AsyncDisposableBase, IBarkPublisher
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetPublishedFileReportsAsync(cancellationToken);
-            var rootHashes = reports
-                .Where(n => n.Authors.Contains(Author))
-                .Select(n => n.RootHash)
-                .Where(n => n.HasValue)
-                .Select(n => n!.Value)
-                .ToHashSet();
+            var reports = await _serviceMediator.GetPublishedFileReportsAsync(Author, cancellationToken);
+            var rootHashes = reports.Select(n => n.RootHash).Where(n => n.HasValue).Select(n => n!.Value).ToHashSet();
 
             foreach (var rootHash in rootHashes)
             {
@@ -155,11 +147,8 @@ public sealed class BarkPublisher : AsyncDisposableBase, IBarkPublisher
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetPublishedShoutReportsAsync(cancellationToken);
-            var signatures = reports
-                .Where(n => n.Authors.Contains(Author))
-                .Select(n => n.Signature)
-                .ToHashSet();
+            var reports = await _serviceMediator.GetPublishedShoutReportsAsync(Author, cancellationToken);
+            var signatures = reports.Select(n => n.Signature).ToHashSet();
 
             foreach (var profileItem in _barkPublisherRepo.BarkItems.FindAll())
             {
@@ -175,13 +164,8 @@ public sealed class BarkPublisher : AsyncDisposableBase, IBarkPublisher
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetPublishedFileReportsAsync(cancellationToken);
-            var rootHashes = reports
-                .Where(n => n.Authors.Contains(Author))
-                .Select(n => n.RootHash)
-                .Where(n => n.HasValue)
-                .Select(n => n!.Value)
-                .ToHashSet();
+            var reports = await _serviceMediator.GetPublishedFileReportsAsync(Author, cancellationToken);
+            var rootHashes = reports.Select(n => n.RootHash).Where(n => n.HasValue).Select(n => n!.Value).ToHashSet();
 
             foreach (var profileItem in _barkPublisherRepo.BarkItems.FindAll())
             {

@@ -9,13 +9,13 @@ using Omnius.Core.Storages;
 
 namespace Omnius.Axus.Interactors;
 
-public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
+public sealed class ProfileUploader : AsyncDisposableBase, IProfilePublisher
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
     private readonly IServiceMediator _serviceMediator;
     private readonly IBytesPool _bytesPool;
-    private readonly ProfilePublisherOptions _options;
+    private readonly ProfileUploaderOptions _options;
 
     private readonly ProfilePublisherRepository _profilePublisherRepo;
     private readonly ISingleValueStorage _configStorage;
@@ -29,14 +29,14 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
     private const string Channel = "profile/v1";
     private const string Author = "profile_publisher/v1";
 
-    public static async ValueTask<ProfilePublisher> CreateAsync(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, ProfilePublisherOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<ProfileUploader> CreateAsync(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, ProfileUploaderOptions options, CancellationToken cancellationToken = default)
     {
-        var profilePublisher = new ProfilePublisher(serviceMediator, singleValueStorageFactory, bytesPool, options);
+        var profilePublisher = new ProfileUploader(serviceMediator, singleValueStorageFactory, bytesPool, options);
         await profilePublisher.InitAsync(cancellationToken);
         return profilePublisher;
     }
 
-    private ProfilePublisher(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, ProfilePublisherOptions options)
+    private ProfileUploader(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, ProfileUploaderOptions options)
     {
         _serviceMediator = serviceMediator;
         _bytesPool = bytesPool;
@@ -117,11 +117,8 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetPublishedShoutReportsAsync(cancellationToken);
-            var signatures = reports
-                .Where(n => n.Authors.Contains(Author))
-                .Select(n => n.Signature)
-                .ToHashSet();
+            var reports = await _serviceMediator.GetPublishedShoutReportsAsync(Author, cancellationToken);
+            var signatures = reports.Select(n => n.Signature).ToHashSet();
 
             foreach (var signature in signatures)
             {
@@ -135,13 +132,8 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetPublishedFileReportsAsync(cancellationToken);
-            var rootHashes = reports
-                .Where(n => n.Authors.Contains(Author))
-                .Select(n => n.RootHash)
-                .Where(n => n.HasValue)
-                .Select(n => n!.Value)
-                .ToHashSet();
+            var reports = await _serviceMediator.GetPublishedFileReportsAsync(Author, cancellationToken);
+            var rootHashes = reports.Select(n => n.RootHash).Where(n => n.HasValue).Select(n => n!.Value).ToHashSet();
 
             foreach (var rootHash in rootHashes)
             {
@@ -155,11 +147,8 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetPublishedShoutReportsAsync(cancellationToken);
-            var signatures = reports
-                .Where(n => n.Authors.Contains(Author))
-                .Select(n => n.Signature)
-                .ToHashSet();
+            var reports = await _serviceMediator.GetPublishedShoutReportsAsync(Author, cancellationToken);
+            var signatures = reports.Select(n => n.Signature).ToHashSet();
 
             foreach (var profileItem in _profilePublisherRepo.ProfileItems.FindAll())
             {
@@ -175,13 +164,8 @@ public sealed class ProfilePublisher : AsyncDisposableBase, IProfilePublisher
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetPublishedFileReportsAsync(cancellationToken);
-            var rootHashes = reports
-                .Where(n => n.Authors.Contains(Author))
-                .Select(n => n.RootHash)
-                .Where(n => n.HasValue)
-                .Select(n => n!.Value)
-                .ToHashSet();
+            var reports = await _serviceMediator.GetPublishedFileReportsAsync(Author, cancellationToken);
+            var rootHashes = reports.Select(n => n.RootHash).Where(n => n.HasValue).Select(n => n!.Value).ToHashSet();
 
             foreach (var profileItem in _profilePublisherRepo.ProfileItems.FindAll())
             {

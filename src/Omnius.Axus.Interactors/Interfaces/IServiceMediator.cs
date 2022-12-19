@@ -12,11 +12,11 @@ public interface IServiceMediator
     ValueTask<IEnumerable<NodeLocation>> GetCloudNodeLocationsAsync(CancellationToken cancellationToken = default);
     ValueTask AddCloudNodeLocationsAsync(IEnumerable<NodeLocation> nodeLocations, CancellationToken cancellationToken = default);
     ValueTask<NodeLocation> GetMyNodeLocationAsync(CancellationToken cancellationToken = default);
-    ValueTask<IEnumerable<PublishedFileReport>> GetPublishedFileReportsAsync(CancellationToken cancellationToken = default);
-    ValueTask<IEnumerable<PublishedShoutReport>> GetPublishedShoutReportsAsync(CancellationToken cancellationToken = default);
+    ValueTask<IEnumerable<PublishedFileReport>> GetPublishedFileReportsAsync(string author, CancellationToken cancellationToken = default);
+    ValueTask<IEnumerable<PublishedShoutReport>> GetPublishedShoutReportsAsync(string author, CancellationToken cancellationToken = default);
     ValueTask<IEnumerable<SessionReport>> GetSessionReportsAsync(CancellationToken cancellationToken = default);
-    ValueTask<IEnumerable<SubscribedFileReport>> GetSubscribedFileReportsAsync(CancellationToken cancellationToken = default);
-    ValueTask<IEnumerable<SubscribedShoutReport>> GetSubscribedShoutReportsAsync(CancellationToken cancellationToken = default);
+    ValueTask<IEnumerable<SubscribedFileReport>> GetSubscribedFileReportsAsync(string author, CancellationToken cancellationToken = default);
+    ValueTask<IEnumerable<SubscribedShoutReport>> GetSubscribedShoutReportsAsync(string author, CancellationToken cancellationToken = default);
     ValueTask<OmniHash> PublishFileFromMemoryAsync(ReadOnlyMemory<byte> memory, int maxBlockSize, string author, CancellationToken cancellationToken = default);
     ValueTask<OmniHash> PublishFileFromStorageAsync(string filePath, int maxBlockSize, string author, CancellationToken cancellationToken = default);
     ValueTask PublishShoutAsync(Shout message, string author, CancellationToken cancellationToken = default);

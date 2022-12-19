@@ -41,12 +41,10 @@ enum SessionHandshakeType : uint8 {
 message PublishedFileReport {
     FilePath: string?,
     RootHash: OmniHash?,
-    Authors: vector<string>,
 }
 
 message SubscribedFileReport {
     RootHash: OmniHash,
-    Authors: vector<string>,
     Status: SubscribedFileStatus,
 }
 
@@ -67,11 +65,9 @@ enum SubscribedFileState : uint8 {
 message PublishedShoutReport {
     Signature: OmniSignature,
     Channel: string,
-    Authors: vector<string>,
 }
 
 message SubscribedShoutReport {
     Signature: OmniSignature,
     Channel: string,
-    Authors: vector<string>,
 }

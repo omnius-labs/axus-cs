@@ -1,8 +1,8 @@
 namespace Omnius.Axus.Interactors;
 
-public record ProfilePublisherOptions
+public record BarkUploaderOptions
 {
-    public ProfilePublisherOptions(string configDirectoryPath)
+    public BarkUploaderOptions(string configDirectoryPath)
     {
         this.ConfigDirectoryPath = configDirectoryPath;
     }

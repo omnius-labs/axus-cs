@@ -15,23 +15,23 @@ service AxusService {
     GetCloudNodeLocations: () -> (GetCloudNodeLocationsResult),
     AddCloudNodeLocations: (AddCloudNodeLocationsRequest) -> (),
 
-    GetPublishedFilesReport: () -> (GetPublishedFilesReportResult),
+    GetPublishedFilesReport: (GetPublishedFilesReportRequest) -> (GetPublishedFilesReportResult),
     PublishFileFromStorage: (PublishFileFromStorageRequest) -> (PublishFileFromStorageResult),
     PublishFileFromMemory: (PublishFileFromMemoryRequest) -> (PublishFileFromMemoryResult),
     UnpublishFileFromStorage: (UnpublishFileFromStorageRequest) -> (),
     UnpublishFileFromMemory: (UnpublishFileFromMemoryRequest) -> (),
 
-    GetSubscribedFilesReport: () -> (GetSubscribedFilesReportResult),
+    GetSubscribedFilesReport: (GetSubscribedFilesReportRequest) -> (GetSubscribedFilesReportResult),
     SubscribeFile: (SubscribeFileRequest) -> (),
     UnsubscribeFile: (UnsubscribeFileRequest) -> (),
     TryExportFileToStorage: (TryExportFileToStorageRequest) -> (TryExportFileToStorageResult),
     TryExportFileToMemory: (TryExportFileToMemoryRequest) -> (TryExportFileToMemoryResult),
 
-    GetPublishedShoutsReport: () -> (GetPublishedShoutsReportResult),
+    GetPublishedShoutsReport: (GetPublishedShoutsReportRequest) -> (GetPublishedShoutsReportResult),
     PublishShout: (PublishShoutRequest) -> (),
     UnpublishShout: (UnpublishShoutRequest) -> (),
 
-    GetSubscribedShoutsReport: () -> (GetSubscribedShoutsReportResult),
+    GetSubscribedShoutsReport: (GetSubscribedShoutsReportRequest) -> (GetSubscribedShoutsReportResult),
     SubscribeShout: (SubscribeShoutRequest) -> (),
     UnsubscribeShout: (UnsubscribeShoutRequest) -> (),
     TryExportShout: (TryExportShoutRequest) -> (TryExportShoutResult),
@@ -59,6 +59,10 @@ message GetCloudNodeLocationsResult {
 
 message AddCloudNodeLocationsRequest {
     NodeLocations: vector<NodeLocation>(capacity: 8192),
+}
+
+message GetPublishedFilesReportRequest {
+    Author: string,
 }
 
 message GetPublishedFilesReportResult {
@@ -93,6 +97,10 @@ message UnpublishFileFromMemoryRequest {
     Author: string,
 }
 
+message GetSubscribedFilesReportRequest {
+    Author: string,
+}
+
 message GetSubscribedFilesReportResult {
     SubscribedFiles: vector<SubscribedFileReport>,
 }
@@ -124,6 +132,10 @@ message TryExportFileToMemoryResult {
     Memory: bytes?(capacity: 32 * 1024 * 1024, recyclable: true),
 }
 
+message GetPublishedShoutsReportRequest {
+    Author: string,
+}
+
 message GetPublishedShoutsReportResult {
     PublishedShouts: vector<PublishedShoutReport>,
 }
@@ -136,6 +148,10 @@ message PublishShoutRequest {
 message UnpublishShoutRequest {
     Signature: OmniSignature,
     Channel: string,
+    Author: string,
+}
+
+message GetSubscribedShoutsReportRequest {
     Author: string,
 }
 
@@ -165,7 +181,7 @@ message TryExportShoutResult {
     Shout: Shout?,
 }
 
-// Config
+// ServiceConfig
 
 message ServiceConfig {
     Bandwidth: BandwidthConfig?,

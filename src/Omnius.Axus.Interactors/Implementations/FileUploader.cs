@@ -83,13 +83,8 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceController.GetPublishedFileReportsAsync(cancellationToken);
-            var filePaths = reports
-                .Where(n => n.Authors.Contains(Author))
-                .Select(n => n.FilePath)
-                .Where(n => n is not null)
-                .Select(n => n!.ToString())
-                .ToHashSet();
+            var reports = await _serviceController.GetPublishedFileReportsAsync(Author, cancellationToken);
+            var filePaths = reports.Select(n => n.FilePath).Where(n => n is not null).Select(n => n!.ToString()).ToHashSet();
 
             foreach (var filePath in filePaths)
             {

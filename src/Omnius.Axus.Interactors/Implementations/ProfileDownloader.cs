@@ -10,13 +10,13 @@ using Omnius.Core.Storages;
 
 namespace Omnius.Axus.Interactors;
 
-public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSubscriber
+public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileSubscriber
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
     private readonly IServiceMediator _serviceMediator;
     private readonly IBytesPool _bytesPool;
-    private readonly ProfileSubscriberOptions _options;
+    private readonly ProfileDownloaderOptions _options;
 
     private readonly ProfileSubscriberRepository _profileSubscriberRepo;
     private readonly ISingleValueStorage _configStorage;
@@ -31,14 +31,14 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
     private const string Channel = "profile/v1";
     private const string Author = "profile_subscriber/v1";
 
-    public static async ValueTask<ProfileSubscriber> CreateAsync(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ProfileSubscriberOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<ProfileDownloader> CreateAsync(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ProfileDownloaderOptions options, CancellationToken cancellationToken = default)
     {
-        var profileSubscriber = new ProfileSubscriber(serviceMediator, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
+        var profileSubscriber = new ProfileDownloader(serviceMediator, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
         await profileSubscriber.InitAsync(cancellationToken);
         return profileSubscriber;
     }
 
-    private ProfileSubscriber(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ProfileSubscriberOptions options)
+    private ProfileDownloader(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ProfileDownloaderOptions options)
     {
         _serviceMediator = serviceMediator;
         _bytesPool = bytesPool;
@@ -205,11 +205,8 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetSubscribedShoutReportsAsync(cancellationToken);
-            var signatures = reports
-                .Where(n => n.Authors.Contains(Author))
-                .Select(n => n.Signature)
-                .ToHashSet();
+            var reports = await _serviceMediator.GetSubscribedShoutReportsAsync(Author, cancellationToken);
+            var signatures = reports.Select(n => n.Signature).ToHashSet();
 
             foreach (var signature in signatures)
             {
@@ -244,11 +241,8 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetSubscribedFileReportsAsync(cancellationToken);
-            var rootHashes = reports
-                .Where(n => n.Authors.Contains(Author))
-                .Select(n => n.RootHash)
-                .ToHashSet();
+            var reports = await _serviceMediator.GetSubscribedFileReportsAsync(Author, cancellationToken);
+            var rootHashes = reports.Select(n => n.RootHash).ToHashSet();
 
             foreach (var rootHash in rootHashes)
             {
@@ -274,25 +268,6 @@ public sealed partial class ProfileSubscriber : AsyncDisposableBase, IProfileSub
             await foreach (var signature in _cachedProfileContentRepo.GetSignaturesAsync(cancellationToken))
             {
                 results.Add(signature);
-            }
-
-            return results;
-        }
-    }
-
-    public async ValueTask<IEnumerable<ProfileReport>> FindProfilesAsync(CancellationToken cancellationToken = default)
-    {
-        using (await _asyncLock.LockAsync(cancellationToken))
-        {
-            var results = new List<ProfileReport>();
-
-            await foreach (var signature in _cachedProfileContentRepo.GetSignaturesAsync(cancellationToken))
-            {
-                var cachedProfile = await _cachedProfileContentRepo.TryReadAsync(signature, cancellationToken);
-                if (cachedProfile is null) continue;
-
-                var message = new ProfileReport(cachedProfile.Signature, cachedProfile.ShoutUpdatedTime.ToDateTime(), cachedProfile.Value.TrustedSignatures, cachedProfile.Value.BlockedSignatures);
-                results.Add(message);
             }
 
             return results;

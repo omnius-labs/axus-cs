@@ -7,7 +7,7 @@ namespace Omnius.Axus.Engines;
 
 public interface IPublishedFileStorage : IReadOnlyFileStorage, IAsyncDisposable
 {
-    ValueTask<IEnumerable<PublishedFileReport>> GetPublishedFileReportsAsync(CancellationToken cancellationToken = default);
+    ValueTask<IEnumerable<PublishedFileReport>> GetPublishedFileReportsAsync(string author, CancellationToken cancellationToken = default);
     ValueTask<IEnumerable<OmniHash>> GetPushRootHashesAsync(CancellationToken cancellationToken = default);
     ValueTask<IEnumerable<OmniHash>> GetPushBlockHashesAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
     ValueTask<bool> ContainsPushContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default);

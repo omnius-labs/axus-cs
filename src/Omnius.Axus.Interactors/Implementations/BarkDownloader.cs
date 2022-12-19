@@ -10,13 +10,13 @@ using Omnius.Core.Storages;
 
 namespace Omnius.Axus.Interactors;
 
-public sealed partial class BarkSubscriber : AsyncDisposableBase, IBarkSubscriber
+public sealed partial class BarkDownloader : AsyncDisposableBase, IBarkDownloader
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
     private readonly IServiceMediator _serviceMediator;
     private readonly IBytesPool _bytesPool;
-    private readonly BarkSubscriberOptions _options;
+    private readonly BarkDownloaderOptions _options;
 
     private readonly BarkSubscriberRepository _barkSubscriberRepo;
     private readonly CachedBarkMessageRepository _cachedBarkMessageRepo;
@@ -33,14 +33,14 @@ public sealed partial class BarkSubscriber : AsyncDisposableBase, IBarkSubscribe
     private const string Channel = "bark/v1";
     private const string Author = "bark_subscriber/v1";
 
-    public static async ValueTask<BarkSubscriber> CreateAsync(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkSubscriberOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<BarkDownloader> CreateAsync(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkDownloaderOptions options, CancellationToken cancellationToken = default)
     {
-        var barkSubscriber = new BarkSubscriber(serviceMediator, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
+        var barkSubscriber = new BarkDownloader(serviceMediator, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
         await barkSubscriber.InitAsync(cancellationToken);
         return barkSubscriber;
     }
 
-    private BarkSubscriber(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkSubscriberOptions options)
+    private BarkDownloader(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkDownloaderOptions options)
     {
         _serviceMediator = serviceMediator;
         _bytesPool = bytesPool;
@@ -146,11 +146,8 @@ public sealed partial class BarkSubscriber : AsyncDisposableBase, IBarkSubscribe
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetSubscribedShoutReportsAsync(cancellationToken);
-            var signatures = reports
-                .Where(n => n.Authors.Contains(Author))
-                .Select(n => n.Signature)
-                .ToHashSet();
+            var reports = await _serviceMediator.GetSubscribedShoutReportsAsync(Author, cancellationToken);
+            var signatures = reports.Select(n => n.Signature).ToHashSet();
 
             foreach (var signature in signatures)
             {
@@ -185,11 +182,8 @@ public sealed partial class BarkSubscriber : AsyncDisposableBase, IBarkSubscribe
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetSubscribedFileReportsAsync(cancellationToken);
-            var rootHashes = reports
-                .Where(n => n.Authors.Contains(Author))
-                .Select(n => n.RootHash)
-                .ToHashSet();
+            var reports = await _serviceMediator.GetSubscribedFileReportsAsync(Author, cancellationToken);
+            var rootHashes = reports.Select(n => n.RootHash).ToHashSet();
 
             foreach (var rootHash in rootHashes)
             {
@@ -250,7 +244,7 @@ public sealed partial class BarkSubscriber : AsyncDisposableBase, IBarkSubscribe
         }
     }
 
-    public async ValueTask<BarkMessageReport?> FindMessagesBySelfHashAsync(OmniHash selfHash, CancellationToken cancellationToken = default)
+    public async ValueTask<BarkMessageReport?> FindMessageBySelfHashAsync(OmniHash selfHash, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {

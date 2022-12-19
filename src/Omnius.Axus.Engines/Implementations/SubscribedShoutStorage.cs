@@ -6,7 +6,6 @@ using Omnius.Axus.Messages;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Pipelines;
-using Omnius.Core.RocketPack;
 using Omnius.Core.Storages;
 
 namespace Omnius.Axus.Engines;
@@ -53,15 +52,15 @@ public sealed partial class SubscribedShoutStorage : AsyncDisposableBase, ISubsc
         _blockStorage.Dispose();
     }
 
-    public async ValueTask<IEnumerable<SubscribedShoutReport>> GetSubscribedShoutReportsAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<SubscribedShoutReport>> GetSubscribedShoutReportsAsync(string author, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var shoutReports = new List<SubscribedShoutReport>();
 
-            foreach (var item in _subscriberRepo.ShoutItems.FindAll())
+            foreach (var item in _subscriberRepo.ShoutItems.Find(author))
             {
-                shoutReports.Add(new SubscribedShoutReport(item.Signature, item.Channel, item.Authors.Select(n => new Utf8String(n)).ToArray()));
+                shoutReports.Add(new SubscribedShoutReport(item.Signature, item.Channel));
             }
 
             return shoutReports.ToArray();

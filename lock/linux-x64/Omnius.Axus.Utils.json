@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net6.0": {
+    "net7.0": {
       "LiteDB": {
         "type": "Direct",
         "requested": "[5.0.11, )",
@@ -15,6 +15,6 @@
         "contentHash": "AvoGpCuq36B+0wY313XA6gC+YeMvk24rqF8P+HS9fInBGOjCzPjpXp2ln9ATZjPOJtXgHfc8zNmTjyswFGLxvg=="
       }
     },
-    "net6.0/linux-x64": {}
+    "net7.0/linux-x64": {}
   }
 }

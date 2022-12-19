@@ -87,6 +87,15 @@ internal sealed partial class SubscribedShoutStorageRepository : DisposableBase
             }
         }
 
+        public IEnumerable<SubscribedShoutItem> Find(string author)
+        {
+            lock (_lockObject)
+            {
+                var col = this.GetCollection();
+                return col.Find(n => n.Authors!.Contains(author)).Select(n => n.Export());
+            }
+        }
+
         public SubscribedShoutItem? FindOne(OmniSignature signature, string channel)
         {
             lock (_lockObject)

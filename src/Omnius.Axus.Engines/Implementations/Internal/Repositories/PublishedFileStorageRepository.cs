@@ -101,6 +101,15 @@ internal sealed class PublishedFileStorageRepository : DisposableBase
             }
         }
 
+        public IEnumerable<PublishedFileItem> Find(string author)
+        {
+            lock (_lockObject)
+            {
+                var col = this.GetCollection();
+                return col.Find(n => n.Authors!.Contains(author)).Select(n => n.Export()).ToArray();
+            }
+        }
+
         public IEnumerable<PublishedFileItem> Find(OmniHash rootHash)
         {
             lock (_lockObject)

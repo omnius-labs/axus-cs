@@ -293,38 +293,38 @@ public class AxusService : AsyncDisposableBase, IAxusService
         }
     }
 
-    public async ValueTask<GetPublishedFilesReportResult> GetPublishedFilesReportAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<GetPublishedFilesReportResult> GetPublishedFilesReportAsync(GetPublishedFilesReportRequest param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _publishedFileStorage.GetPublishedFileReportsAsync(cancellationToken);
+            var reports = await _publishedFileStorage.GetPublishedFileReportsAsync(param.Author, cancellationToken);
             return new GetPublishedFilesReportResult(reports.ToArray());
         }
     }
 
-    public async ValueTask<GetSubscribedFilesReportResult> GetSubscribedFilesReportAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<GetSubscribedFilesReportResult> GetSubscribedFilesReportAsync(GetSubscribedFilesReportRequest param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _subscribedFileStorage.GetSubscribedFileReportsAsync(cancellationToken);
+            var reports = await _subscribedFileStorage.GetSubscribedFileReportsAsync(param.Author, cancellationToken);
             return new GetSubscribedFilesReportResult(reports.ToArray());
         }
     }
 
-    public async ValueTask<GetPublishedShoutsReportResult> GetPublishedShoutsReportAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<GetPublishedShoutsReportResult> GetPublishedShoutsReportAsync(GetPublishedShoutsReportRequest param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _publishedShoutStorage.GetPublishedShoutReportsAsync(cancellationToken);
+            var reports = await _publishedShoutStorage.GetPublishedShoutReportsAsync(param.Author, cancellationToken);
             return new GetPublishedShoutsReportResult(reports.ToArray());
         }
     }
 
-    public async ValueTask<GetSubscribedShoutsReportResult> GetSubscribedShoutsReportAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<GetSubscribedShoutsReportResult> GetSubscribedShoutsReportAsync(GetSubscribedShoutsReportRequest param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _subscribedShoutStorage.GetSubscribedShoutReportsAsync(cancellationToken);
+            var reports = await _subscribedShoutStorage.GetSubscribedShoutReportsAsync(param.Author, cancellationToken);
             return new GetSubscribedShoutsReportResult(reports.ToArray());
         }
     }

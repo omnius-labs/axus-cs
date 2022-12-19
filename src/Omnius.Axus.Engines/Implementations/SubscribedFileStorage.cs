@@ -8,7 +8,6 @@ using Omnius.Axus.Messages;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Pipelines;
-using Omnius.Core.RocketPack;
 using Omnius.Core.Storages;
 
 namespace Omnius.Axus.Engines;
@@ -164,16 +163,16 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
         return MerkleTreeSection.Import(bytesPipe.Reader.GetSequence(), _bytesPool);
     }
 
-    public async ValueTask<IEnumerable<SubscribedFileReport>> GetSubscribedFileReportsAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<SubscribedFileReport>> GetSubscribedFileReportsAsync(string author, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var results = new List<SubscribedFileReport>();
 
-            foreach (var fileItem in _subscriberRepo.FileItems.FindAll())
+            foreach (var fileItem in _subscriberRepo.FileItems.Find(author))
             {
                 var status = new SubscribedFileStatus(fileItem.Status.CurrentDepth, (uint)fileItem.Status.DownloadedBlockCount, (uint)fileItem.Status.TotalBlockCount, fileItem.Status.State);
-                var report = new SubscribedFileReport(fileItem.RootHash, fileItem.Authors.Select(n => new Utf8String(n)).ToArray(), status);
+                var report = new SubscribedFileReport(fileItem.RootHash, status);
                 results.Add(report);
             }
 

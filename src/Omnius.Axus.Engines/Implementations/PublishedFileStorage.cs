@@ -7,7 +7,6 @@ using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Cryptography.Functions;
 using Omnius.Core.Pipelines;
-using Omnius.Core.RocketPack;
 using Omnius.Core.Storages;
 
 namespace Omnius.Axus.Engines;
@@ -63,7 +62,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
 
             foreach (var item in _publisherRepo.FileItems.FindAll())
             {
-                fileReports.Add(new PublishedFileReport(item.FilePath, item.RootHash, item.Authors.Select(n => new Utf8String(n)).ToArray()));
+                fileReports.Add(new PublishedFileReport(item.FilePath, item.RootHash));
             }
 
             return fileReports.ToArray();
@@ -444,4 +443,6 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
     {
         return StringConverter.ToString(rootHash) + "/" + StringConverter.ToString(blockHash);
     }
+
+    public ValueTask<IEnumerable<PublishedFileReport>> GetPublishedFileReportsAsync(string author, CancellationToken cancellationToken = default) => throw new NotImplementedException();
 }

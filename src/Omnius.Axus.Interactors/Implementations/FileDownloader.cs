@@ -89,11 +89,8 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _service.GetSubscribedFileReportsAsync(cancellationToken);
-            var hashes = reports
-                .Where(n => n.Authors.Contains(Author))
-                .Select(n => n.RootHash)
-                .ToHashSet();
+            var reports = await _service.GetSubscribedFileReportsAsync(Author, cancellationToken);
+            var hashes = reports.Select(n => n.RootHash).ToHashSet();
 
             foreach (var hash in hashes)
             {
@@ -116,10 +113,8 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
             var config = await this.GetConfigAsync(cancellationToken);
             var basePath = Path.GetFullPath(config.DestinationDirectory);
 
-            var reports = await _service.GetSubscribedFileReportsAsync(cancellationToken);
-            var reportMap = reports
-                .Where(n => n.Authors.Contains(Author))
-                .ToDictionary(n => n.RootHash);
+            var reports = await _service.GetSubscribedFileReportsAsync(Author, cancellationToken);
+            var reportMap = reports.ToDictionary(n => n.RootHash);
 
             foreach (var fileItem in _fileDownloaderRepo.FileItems.FindAll())
             {
@@ -150,10 +145,8 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
         {
             var results = new List<DownloadingFileReport>();
 
-            var reports = await _service.GetSubscribedFileReportsAsync(cancellationToken);
-            var reportMap = reports
-                .Where(n => n.Authors.Contains(Author))
-                .ToDictionary(n => n.RootHash);
+            var reports = await _service.GetSubscribedFileReportsAsync(Author, cancellationToken);
+            var reportMap = reports.ToDictionary(n => n.RootHash);
 
             foreach (var item in _fileDownloaderRepo.FileItems.FindAll())
             {

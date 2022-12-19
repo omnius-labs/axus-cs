@@ -51,9 +51,10 @@ public sealed class ServiceMediator : IServiceMediator
         await _axusService.AddCloudNodeLocationsAsync(input, cancellationToken);
     }
 
-    public async ValueTask<IEnumerable<PublishedFileReport>> GetPublishedFileReportsAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<PublishedFileReport>> GetPublishedFileReportsAsync(string author, CancellationToken cancellationToken = default)
     {
-        var output = await _axusService.GetPublishedFilesReportAsync(cancellationToken);
+        var input = new GetPublishedFilesReportRequest(author);
+        var output = await _axusService.GetPublishedFilesReportAsync(input, cancellationToken);
         return output.PublishedFiles;
     }
 
@@ -83,9 +84,10 @@ public sealed class ServiceMediator : IServiceMediator
         await _axusService.UnpublishFileFromMemoryAsync(input, cancellationToken);
     }
 
-    public async ValueTask<IEnumerable<SubscribedFileReport>> GetSubscribedFileReportsAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<SubscribedFileReport>> GetSubscribedFileReportsAsync(string author, CancellationToken cancellationToken = default)
     {
-        var output = await _axusService.GetSubscribedFilesReportAsync(cancellationToken);
+        var input = new GetSubscribedFilesReportRequest(author);
+        var output = await _axusService.GetSubscribedFilesReportAsync(input, cancellationToken);
         return output.SubscribedFiles;
     }
 
@@ -115,9 +117,10 @@ public sealed class ServiceMediator : IServiceMediator
         return output.Memory;
     }
 
-    public async ValueTask<IEnumerable<PublishedShoutReport>> GetPublishedShoutReportsAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<PublishedShoutReport>> GetPublishedShoutReportsAsync(string author, CancellationToken cancellationToken = default)
     {
-        var output = await _axusService.GetPublishedShoutsReportAsync(cancellationToken);
+        var input = new GetPublishedShoutsReportRequest(author);
+        var output = await _axusService.GetPublishedShoutsReportAsync(input, cancellationToken);
         return output.PublishedShouts;
     }
 
@@ -133,9 +136,10 @@ public sealed class ServiceMediator : IServiceMediator
         await _axusService.UnpublishShoutAsync(input, cancellationToken);
     }
 
-    public async ValueTask<IEnumerable<SubscribedShoutReport>> GetSubscribedShoutReportsAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<SubscribedShoutReport>> GetSubscribedShoutReportsAsync(string author, CancellationToken cancellationToken = default)
     {
-        var output = await _axusService.GetSubscribedShoutsReportAsync(cancellationToken);
+        var input = new GetSubscribedShoutsReportRequest(author);
+        var output = await _axusService.GetSubscribedShoutsReportAsync(input, cancellationToken);
         return output.SubscribedShouts;
     }
 
