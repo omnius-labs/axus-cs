@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Omnius.Axus.Ui.Desktop.Internal;
-using Omnius.Axus.Ui.Desktop.Models;
+using Omnius.Axus.Ui.Desktop.Configuration;
 using Omnius.Core;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
@@ -10,10 +10,10 @@ namespace Omnius.Axus.Ui.Desktop.Windows.Main;
 public abstract class MainWindowModelBase : AsyncDisposableBase
 {
     public MainWindowStatus? Status { get; protected set; }
-    public StatusViewViewModel? StatusViewViewModel { get; protected set; }
-    public PeersViewViewModelBase? PeersViewViewModel { get; protected set; }
-    public DownloadViewViewModel? DownloadViewViewModel { get; protected set; }
-    public UploadViewViewModel? UploadViewViewModel { get; protected set; }
+    public StatusViewModel? StatusViewModel { get; protected set; }
+    public PeersViewModelBase? PeersViewModel { get; protected set; }
+    public DownloadViewModel? DownloadViewModel { get; protected set; }
+    public UploadViewModel? UploadViewModel { get; protected set; }
     public AsyncReactiveCommand? SettingsCommand { get; protected set; }
 }
 
@@ -33,10 +33,10 @@ public class MainWindowModel : MainWindowModelBase
 
         var serviceProvider = Bootstrapper.Instance.GetServiceProvider();
 
-        this.StatusViewViewModel = serviceProvider.GetRequiredService<StatusViewViewModel>();
-        this.PeersViewViewModel = serviceProvider.GetRequiredService<PeersViewViewModel>();
-        this.DownloadViewViewModel = serviceProvider.GetRequiredService<DownloadViewViewModel>();
-        this.UploadViewViewModel = serviceProvider.GetRequiredService<UploadViewViewModel>();
+        this.StatusViewModel = serviceProvider.GetRequiredService<StatusViewModel>();
+        this.PeersViewModel = serviceProvider.GetRequiredService<PeersViewModel>();
+        this.DownloadViewModel = serviceProvider.GetRequiredService<DownloadViewModel>();
+        this.UploadViewModel = serviceProvider.GetRequiredService<UploadViewModel>();
         this.SettingsCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.SettingsCommand.Subscribe(async () => await this.SettingsAsync()).AddTo(_disposable);
     }
@@ -45,10 +45,10 @@ public class MainWindowModel : MainWindowModelBase
     {
         _disposable.Dispose();
 
-        await this.StatusViewViewModel!.DisposeAsync();
-        await this.PeersViewViewModel!.DisposeAsync();
-        await this.DownloadViewViewModel!.DisposeAsync();
-        await this.UploadViewViewModel!.DisposeAsync();
+        await this.StatusViewModel!.DisposeAsync();
+        await this.PeersViewModel!.DisposeAsync();
+        await this.DownloadViewModel!.DisposeAsync();
+        await this.UploadViewModel!.DisposeAsync();
     }
 
     private async Task SettingsAsync()

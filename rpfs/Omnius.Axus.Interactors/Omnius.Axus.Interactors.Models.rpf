@@ -17,13 +17,13 @@ message Seed {
 
 // Profile
 
-message ProfilePublisherConfig {
+message ProfileUploaderConfig {
     DigitalSignature: OmniDigitalSignature,
     TrustedSignatures: vector<OmniSignature>(capacity: 1024),
     BlockedSignatures: vector<OmniSignature>(capacity: 1024),
 }
 
-message ProfileSubscriberConfig {
+message ProfileDownloaderConfig {
     TrustedSignatures: vector<OmniSignature>(capacity: 1024),
     BlockedSignatures: vector<OmniSignature>(capacity: 1024),
     SearchDepth: uint32,
@@ -32,12 +32,12 @@ message ProfileSubscriberConfig {
 
 // Bark
 
-message BarkPublisherConfig {
+message BarkUploaderConfig {
     DigitalSignature: OmniDigitalSignature,
     Messages: vector<BarkMessage>(capacity: 8 * 1024),
 }
 
-message BarkSubscriberConfig {
+message BarkDownloaderConfig {
     Tags: vector<string(capacity: 256)>(capacity: 256),
     MaxBarkMessageCount: uint32,
 }
@@ -51,12 +51,11 @@ message BarkMessage {
 
 // Seed
 
-message SeedPublisherConfig {
+message SeedUploaderConfig {
     DigitalSignature: OmniDigitalSignature,
-    Seeds: vector<Seed>(capacity: 8 * 1024),
 }
 
-message SeedSubscriberConfig {
+message SeedDownloaderConfig {
     MaxSeedCount: uint32,
 }
 
@@ -64,4 +63,7 @@ message SeedSubscriberConfig {
 
 message FileDownloaderConfig {
     DestinationDirectory: string,
+}
+
+message FileUploaderConfig {
 }

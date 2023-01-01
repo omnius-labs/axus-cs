@@ -8,11 +8,11 @@ using Reactive.Bindings.Extensions;
 
 namespace Omnius.Axus.Ui.Desktop.Windows.Main;
 
-public class StatusViewViewModel : AsyncDisposableBase
+public class StatusViewModel : AsyncDisposableBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IServiceMediator _serviceMediator;
+    private readonly IAxusServiceMediator _serviceMediator;
     private readonly IClipboardService _clipboardService;
 
     private readonly Task _refreshTask;
@@ -21,7 +21,7 @@ public class StatusViewViewModel : AsyncDisposableBase
 
     private readonly CompositeDisposable _disposable = new();
 
-    public StatusViewViewModel(IServiceMediator serviceMediator, IClipboardService clipboardService)
+    public StatusViewModel(IAxusServiceMediator serviceMediator, IClipboardService clipboardService)
     {
         _serviceMediator = serviceMediator;
         _clipboardService = clipboardService;

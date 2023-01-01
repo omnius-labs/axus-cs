@@ -41,8 +41,8 @@ public class AxusServiceTest
                 if (sw.Elapsed > TimeSpan.FromSeconds(60)) throw new TimeoutException();
             }
 
-            await using var interactorProvider1 = await InteractorProvider.CreateAsync(Path.Combine(tempDir, "interactor_provider/1"), new ServiceMediator(service1), BytesPool.Shared);
-            await using var interactorProvider2 = await InteractorProvider.CreateAsync(Path.Combine(tempDir, "interactor_provider/2"), new ServiceMediator(service2), BytesPool.Shared);
+            await using var interactorProvider1 = await InteractorProvider.CreateAsync(Path.Combine(tempDir, "interactor_provider/1"), new AxusServiceMediator(service1), BytesPool.Shared);
+            await using var interactorProvider2 = await InteractorProvider.CreateAsync(Path.Combine(tempDir, "interactor_provider/2"), new AxusServiceMediator(service2), BytesPool.Shared);
         }
     }
 

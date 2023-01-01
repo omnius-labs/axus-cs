@@ -8,18 +8,18 @@ using Omnius.Core.Helpers;
 
 namespace Omnius.Axus.Interactors.Internal.Repositories;
 
-internal sealed class BarkPublisherRepository : DisposableBase
+internal sealed class BarkDownloaderRepository : DisposableBase
 {
     private readonly LiteDatabase _database;
 
-    public BarkPublisherRepository(string dirPath)
+    public BarkDownloaderRepository(string dirPath)
     {
         DirectoryHelper.CreateDirectory(dirPath);
 
         _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
         _database.UtcDate = true;
 
-        this.BarkItems = new PublishedBarkItemRepository(_database);
+        this.BarkItems = new SubscribedBarkItemRepository(_database);
     }
 
     protected override void OnDispose(bool disposing)
@@ -32,17 +32,17 @@ internal sealed class BarkPublisherRepository : DisposableBase
         await this.BarkItems.MigrateAsync(cancellationToken);
     }
 
-    public PublishedBarkItemRepository BarkItems { get; }
+    public SubscribedBarkItemRepository BarkItems { get; }
 
-    public sealed class PublishedBarkItemRepository
+    public sealed class SubscribedBarkItemRepository
     {
-        private const string CollectionName = "published_bark_items";
+        private const string CollectionName = "subscribed_items";
 
         private readonly LiteDatabase _database;
 
         private readonly object _lockObject = new();
 
-        public PublishedBarkItemRepository(LiteDatabase database)
+        public SubscribedBarkItemRepository(LiteDatabase database)
         {
             _database = database;
         }
@@ -62,19 +62,10 @@ internal sealed class BarkPublisherRepository : DisposableBase
             }
         }
 
-        private ILiteCollection<PublishedBarkItemEntity> GetCollection()
+        private ILiteCollection<DownloadingBarkItemEntity> GetCollection()
         {
-            var col = _database.GetCollection<PublishedBarkItemEntity>(CollectionName);
+            var col = _database.GetCollection<DownloadingBarkItemEntity>(CollectionName);
             return col;
-        }
-
-        public int Count()
-        {
-            lock (_lockObject)
-            {
-                var col = this.GetCollection();
-                return col.Count();
-            }
         }
 
         public bool Exists(OmniSignature signature)
@@ -99,7 +90,7 @@ internal sealed class BarkPublisherRepository : DisposableBase
             }
         }
 
-        public IEnumerable<PublishedBarkItem> FindAll()
+        public IEnumerable<DownloadingBarkItem> FindAll()
         {
             lock (_lockObject)
             {
@@ -108,7 +99,7 @@ internal sealed class BarkPublisherRepository : DisposableBase
             }
         }
 
-        public PublishedBarkItem? FindOne(OmniSignature signature)
+        public DownloadingBarkItem? FindOne(OmniSignature signature)
         {
             lock (_lockObject)
             {
@@ -119,15 +110,15 @@ internal sealed class BarkPublisherRepository : DisposableBase
             }
         }
 
-        public void Upsert(PublishedBarkItem item)
+        public void Upsert(DownloadingBarkItem item)
         {
             lock (_lockObject)
             {
-                var itemEntity = PublishedBarkItemEntity.Import(item);
+                var itemEntity = DownloadingBarkItemEntity.Import(item);
 
                 var col = this.GetCollection();
 
-                col.DeleteMany(n => n.Signature == itemEntity.Signature && n.RootHash == itemEntity.RootHash);
+                col.DeleteMany(n => n.Signature == itemEntity.Signature);
                 col.Insert(itemEntity);
             }
         }
@@ -154,12 +145,20 @@ internal sealed class BarkPublisherRepository : DisposableBase
             }
         }
 
-        internal void DeleteAll()
+        public void Shrink(IEnumerable<OmniSignature> excludedSignatures)
         {
             lock (_lockObject)
             {
                 var col = this.GetCollection();
-                col.DeleteAll();
+
+                var allSignatureSet = col.FindAll().Select(n => n.Signature!.Export()).ToHashSet();
+                allSignatureSet.ExceptWith(excludedSignatures);
+
+                foreach (var signature in allSignatureSet)
+                {
+                    var signatureEntity = OmniSignatureEntity.Import(signature);
+                    col.DeleteMany(n => n.Signature == signatureEntity);
+                }
             }
         }
     }

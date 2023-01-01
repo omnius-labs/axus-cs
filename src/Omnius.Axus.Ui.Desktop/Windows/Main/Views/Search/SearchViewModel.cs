@@ -2,11 +2,11 @@ using Omnius.Core;
 
 namespace Omnius.Axus.Ui.Desktop.Windows.Main;
 
-public class SearchViewViewModel : AsyncDisposableBase
+public class SearchViewModel : AsyncDisposableBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    public SearchViewViewModel()
+    public SearchViewModel()
     {
     }
 

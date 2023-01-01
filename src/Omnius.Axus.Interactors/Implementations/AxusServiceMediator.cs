@@ -6,11 +6,11 @@ using Omnius.Core.RocketPack;
 
 namespace Omnius.Axus.Interactors;
 
-public sealed class ServiceMediator : IServiceMediator
+public sealed class AxusServiceMediator : IAxusServiceMediator
 {
     private readonly IAxusService _axusService;
 
-    public ServiceMediator(IAxusService axusService)
+    public AxusServiceMediator(IAxusService axusService)
     {
         _axusService = axusService;
     }

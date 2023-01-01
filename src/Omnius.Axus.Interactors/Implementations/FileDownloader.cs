@@ -12,7 +12,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IServiceMediator _service;
+    private readonly IAxusServiceMediator _service;
     private readonly IBytesPool _bytesPool;
     private readonly FileDownloaderOptions _options;
 
@@ -27,14 +27,14 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
 
     private const string Author = "file_downloader/v1";
 
-    public static async ValueTask<FileDownloader> CreateAsync(IServiceMediator service, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<FileDownloader> CreateAsync(IAxusServiceMediator service, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options, CancellationToken cancellationToken = default)
     {
         var fileDownloader = new FileDownloader(service, singleValueStorageFactory, bytesPool, options);
         await fileDownloader.InitAsync(cancellationToken);
         return fileDownloader;
     }
 
-    private FileDownloader(IServiceMediator service, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options)
+    private FileDownloader(IAxusServiceMediator service, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options)
     {
         _service = service;
         _bytesPool = bytesPool;

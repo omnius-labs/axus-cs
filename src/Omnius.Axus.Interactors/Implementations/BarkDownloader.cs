@@ -4,7 +4,6 @@ using Omnius.Axus.Interactors.Internal.Repositories;
 using Omnius.Axus.Interactors.Models;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
-using Omnius.Core.Pipelines;
 using Omnius.Core.RocketPack;
 using Omnius.Core.Storages;
 
@@ -14,15 +13,14 @@ public sealed partial class BarkDownloader : AsyncDisposableBase, IBarkDownloade
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IServiceMediator _serviceMediator;
+    private readonly IProfileDownloader _profileDownloader;
+    private readonly IAxusServiceMediator _serviceMediator;
     private readonly IBytesPool _bytesPool;
     private readonly BarkDownloaderOptions _options;
 
-    private readonly BarkSubscriberRepository _barkSubscriberRepo;
+    private readonly BarkDownloaderRepository _barkDownloaderRepo;
     private readonly CachedBarkMessageRepository _cachedBarkMessageRepo;
     private readonly ISingleValueStorage _configStorage;
-
-    private readonly AsyncFuncPipe<IEnumerable<OmniSignature>> _getTrustedSignatureFuncPipe = new();
 
     private Task _watchLoopTask = null!;
 
@@ -31,29 +29,30 @@ public sealed partial class BarkDownloader : AsyncDisposableBase, IBarkDownloade
     private readonly AsyncLock _asyncLock = new();
 
     private const string Channel = "bark/v1";
-    private const string Author = "bark_subscriber/v1";
+    private const string Author = "bark_downloader/v1";
 
-    public static async ValueTask<BarkDownloader> CreateAsync(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkDownloaderOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<BarkDownloader> CreateAsync(IProfileDownloader profileDownloader, IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkDownloaderOptions options, CancellationToken cancellationToken = default)
     {
-        var barkSubscriber = new BarkDownloader(serviceMediator, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
-        await barkSubscriber.InitAsync(cancellationToken);
-        return barkSubscriber;
+        var BarkDownloader = new BarkDownloader(profileDownloader, serviceMediator, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
+        await BarkDownloader.InitAsync(cancellationToken);
+        return BarkDownloader;
     }
 
-    private BarkDownloader(IServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkDownloaderOptions options)
+    private BarkDownloader(IProfileDownloader profileDownloader, IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkDownloaderOptions options)
     {
+        _profileDownloader = profileDownloader;
         _serviceMediator = serviceMediator;
         _bytesPool = bytesPool;
         _options = options;
 
-        _barkSubscriberRepo = new BarkSubscriberRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
+        _barkDownloaderRepo = new BarkDownloaderRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
         _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
         _cachedBarkMessageRepo = new CachedBarkMessageRepository(Path.Combine(_options.ConfigDirectoryPath, "cached_bark_messages"), _bytesPool);
     }
 
     internal async ValueTask InitAsync(CancellationToken cancellationToken = default)
     {
-        await _barkSubscriberRepo.MigrateAsync(cancellationToken);
+        await _barkDownloaderRepo.MigrateAsync(cancellationToken);
 
         _watchLoopTask = this.WatchLoopAsync(_cancellationTokenSource.Token);
     }
@@ -64,11 +63,9 @@ public sealed partial class BarkDownloader : AsyncDisposableBase, IBarkDownloade
         await _watchLoopTask;
         _cancellationTokenSource.Dispose();
 
-        _barkSubscriberRepo.Dispose();
+        _barkDownloaderRepo.Dispose();
         _configStorage.Dispose();
     }
-
-    public IAsyncFuncListener<IEnumerable<OmniSignature>> OnGetTrustedSignatures => _getTrustedSignatureFuncPipe.Listener;
 
     private async Task WatchLoopAsync(CancellationToken cancellationToken = default)
     {
@@ -82,7 +79,7 @@ public sealed partial class BarkDownloader : AsyncDisposableBase, IBarkDownloade
 
                 var signatures = await this.GetSignaturesAsync(cancellationToken);
 
-                await this.SyncBarkSubscriberRepo(signatures, cancellationToken);
+                await this.SyncBarkDownloaderRepo(signatures, cancellationToken);
                 await this.SyncSubscribedShouts(cancellationToken);
                 await this.SyncSubscribedFiles(cancellationToken);
 
@@ -106,38 +103,35 @@ public sealed partial class BarkDownloader : AsyncDisposableBase, IBarkDownloade
         {
             var builder = ImmutableHashSet.CreateBuilder<OmniSignature>();
 
-            await foreach (var signatures in _getTrustedSignatureFuncPipe.Caller.CallAsync())
+            foreach (var signature in await _profileDownloader.GetSignaturesAsync(cancellationToken))
             {
-                foreach (var signature in signatures)
-                {
-                    builder.Add(signature);
-                }
+                builder.Add(signature);
             }
 
             return builder.ToImmutable();
         }
     }
 
-    private async ValueTask SyncBarkSubscriberRepo(ImmutableHashSet<OmniSignature> targetSignatures, CancellationToken cancellationToken = default)
+    private async ValueTask SyncBarkDownloaderRepo(ImmutableHashSet<OmniSignature> targetSignatures, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            foreach (var profileItem in _barkSubscriberRepo.BarkItems.FindAll())
+            foreach (var profileItem in _barkDownloaderRepo.BarkItems.FindAll())
             {
                 if (targetSignatures.Contains(profileItem.Signature)) continue;
-                _barkSubscriberRepo.BarkItems.Delete(profileItem.Signature);
+                _barkDownloaderRepo.BarkItems.Delete(profileItem.Signature);
             }
 
             foreach (var signature in targetSignatures)
             {
-                if (_barkSubscriberRepo.BarkItems.Exists(signature)) continue;
+                if (_barkDownloaderRepo.BarkItems.Exists(signature)) continue;
 
-                var newBarkItem = new SubscribedBarkItem()
+                var newBarkItem = new DownloadingBarkItem()
                 {
                     Signature = signature,
                     ShoutUpdatedTime = DateTime.MinValue,
                 };
-                _barkSubscriberRepo.BarkItems.Upsert(newBarkItem);
+                _barkDownloaderRepo.BarkItems.Upsert(newBarkItem);
             }
         }
     }
@@ -151,17 +145,17 @@ public sealed partial class BarkDownloader : AsyncDisposableBase, IBarkDownloade
 
             foreach (var signature in signatures)
             {
-                if (_barkSubscriberRepo.BarkItems.Exists(signature)) continue;
+                if (_barkDownloaderRepo.BarkItems.Exists(signature)) continue;
                 await _serviceMediator.UnsubscribeShoutAsync(signature, Channel, Author, cancellationToken);
             }
 
-            foreach (var barkItem in _barkSubscriberRepo.BarkItems.FindAll())
+            foreach (var barkItem in _barkDownloaderRepo.BarkItems.FindAll())
             {
                 if (signatures.Contains(barkItem.Signature)) continue;
                 await _serviceMediator.SubscribeShoutAsync(barkItem.Signature, Channel, Author, cancellationToken);
             }
 
-            foreach (var barkItem in _barkSubscriberRepo.BarkItems.FindAll())
+            foreach (var barkItem in _barkDownloaderRepo.BarkItems.FindAll())
             {
                 using var shout = await _serviceMediator.TryExportShoutAsync(barkItem.Signature, Channel, barkItem.ShoutUpdatedTime, cancellationToken);
                 if (shout is null) continue;
@@ -173,7 +167,7 @@ public sealed partial class BarkDownloader : AsyncDisposableBase, IBarkDownloade
                     RootHash = rootHash,
                     ShoutUpdatedTime = shout.UpdatedTime.ToDateTime(),
                 };
-                _barkSubscriberRepo.BarkItems.Upsert(newBarkItem);
+                _barkDownloaderRepo.BarkItems.Upsert(newBarkItem);
             }
         }
     }
@@ -187,11 +181,11 @@ public sealed partial class BarkDownloader : AsyncDisposableBase, IBarkDownloade
 
             foreach (var rootHash in rootHashes)
             {
-                if (_barkSubscriberRepo.BarkItems.Exists(rootHash)) continue;
+                if (_barkDownloaderRepo.BarkItems.Exists(rootHash)) continue;
                 await _serviceMediator.UnpublishFileFromMemoryAsync(rootHash, Author, cancellationToken);
             }
 
-            foreach (var rootHash in _barkSubscriberRepo.BarkItems.FindAll().Select(n => n.RootHash))
+            foreach (var rootHash in _barkDownloaderRepo.BarkItems.FindAll().Select(n => n.RootHash))
             {
                 if (rootHash == OmniHash.Empty) continue;
                 if (rootHashes.Contains(rootHash)) continue;
@@ -222,7 +216,7 @@ public sealed partial class BarkDownloader : AsyncDisposableBase, IBarkDownloade
         {
             await Task.Delay(0, cancellationToken).ConfigureAwait(false);
 
-            var barkItem = _barkSubscriberRepo.BarkItems.FindOne(signature);
+            var barkItem = _barkDownloaderRepo.BarkItems.FindOne(signature);
             if (barkItem is null || barkItem.RootHash == OmniHash.Empty || barkItem.ShoutUpdatedTime <= cachedContentShoutUpdatedTime) return null;
 
             using var contentBytes = await _serviceMediator.TryExportFileToMemoryAsync(barkItem.RootHash, cancellationToken);
@@ -253,15 +247,15 @@ public sealed partial class BarkDownloader : AsyncDisposableBase, IBarkDownloade
         }
     }
 
-    public async ValueTask<BarkSubscriberConfig> GetConfigAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<BarkDownloaderConfig> GetConfigAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var config = await _configStorage.TryGetValueAsync<BarkSubscriberConfig>(cancellationToken);
+            var config = await _configStorage.TryGetValueAsync<BarkDownloaderConfig>(cancellationToken);
 
             if (config is null)
             {
-                config = new BarkSubscriberConfig(
+                config = new BarkDownloaderConfig(
                     tags: Array.Empty<Utf8String>(),
                     maxBarkMessageCount: 10000
                 );
@@ -273,7 +267,7 @@ public sealed partial class BarkDownloader : AsyncDisposableBase, IBarkDownloade
         }
     }
 
-    public async ValueTask SetConfigAsync(BarkSubscriberConfig config, CancellationToken cancellationToken = default)
+    public async ValueTask SetConfigAsync(BarkDownloaderConfig config, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {

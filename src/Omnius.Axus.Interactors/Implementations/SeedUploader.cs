@@ -9,15 +9,16 @@ using Omnius.Core.Storages;
 
 namespace Omnius.Axus.Interactors;
 
-public sealed class BarkUploader : AsyncDisposableBase, IBarkUploader
+public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
+    private readonly IFileUploader _fileUploader;
     private readonly IAxusServiceMediator _serviceMediator;
     private readonly IBytesPool _bytesPool;
-    private readonly BarkUploaderOptions _options;
+    private readonly SeedUploaderOptions _options;
 
-    private readonly BarkUploaderRepository _barkUploaderRepo;
+    private readonly SeedUploaderRepository _seedUploaderRepo;
     private readonly ISingleValueStorage _configStorage;
 
     private Task _watchLoopTask = null!;
@@ -29,20 +30,21 @@ public sealed class BarkUploader : AsyncDisposableBase, IBarkUploader
     private const string Channel = "profile/v1";
     private const string Author = "profile_uploader/v1";
 
-    public static async ValueTask<BarkUploader> CreateAsync(IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, BarkUploaderOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<SeedUploader> CreateAsync(IFileUploader fileUploader, IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, SeedUploaderOptions options, CancellationToken cancellationToken = default)
     {
-        var ProfileUploader = new BarkUploader(serviceMediator, singleValueStorageFactory, bytesPool, options);
+        var ProfileUploader = new SeedUploader(fileUploader, serviceMediator, singleValueStorageFactory, bytesPool, options);
         await ProfileUploader.InitAsync(cancellationToken);
         return ProfileUploader;
     }
 
-    private BarkUploader(IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, BarkUploaderOptions options)
+    private SeedUploader(IFileUploader fileUploader, IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, SeedUploaderOptions options)
     {
+        _fileUploader = fileUploader;
         _serviceMediator = serviceMediator;
         _bytesPool = bytesPool;
         _options = options;
 
-        _barkUploaderRepo = new BarkUploaderRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
+        _seedUploaderRepo = new SeedUploaderRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
         _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
     }
 
@@ -57,7 +59,7 @@ public sealed class BarkUploader : AsyncDisposableBase, IBarkUploader
         await _watchLoopTask;
         _cancellationTokenSource.Dispose();
 
-        _barkUploaderRepo.Dispose();
+        _seedUploaderRepo.Dispose();
         _configStorage.Dispose();
     }
 
@@ -73,13 +75,13 @@ public sealed class BarkUploader : AsyncDisposableBase, IBarkUploader
 
                 var config = await this.GetConfigAsync(cancellationToken);
 
-                await this.SyncBarkUploaderRepo(config, cancellationToken);
+                await this.SyncSeedUploaderRepo(config, cancellationToken);
                 await this.ShrinkPublishedShouts(cancellationToken);
                 await this.ShrinkPublishedFiles(cancellationToken);
 
                 if (!await this.ExistsPublishedShouts(cancellationToken) || !await this.ExistsPublishedFiles(cancellationToken))
                 {
-                    await this.PublishBarkContent(config, cancellationToken);
+                    await this.PublishContent(config, cancellationToken);
                 }
             }
         }
@@ -93,23 +95,23 @@ public sealed class BarkUploader : AsyncDisposableBase, IBarkUploader
         }
     }
 
-    private async ValueTask SyncBarkUploaderRepo(BarkUploaderConfig config, CancellationToken cancellationToken = default)
+    private async ValueTask SyncSeedUploaderRepo(SeedUploaderConfig config, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            foreach (var profileItem in _barkUploaderRepo.BarkItems.FindAll())
+            foreach (var item in _seedUploaderRepo.Items.FindAll())
             {
-                if (profileItem.Signature == config.DigitalSignature.GetOmniSignature()) continue;
-                _barkUploaderRepo.BarkItems.Delete(profileItem.Signature);
+                if (item.Signature == config.DigitalSignature.GetOmniSignature()) continue;
+                _seedUploaderRepo.Items.Delete(item.Signature);
             }
 
-            if (_barkUploaderRepo.BarkItems.Exists(config.DigitalSignature.GetOmniSignature())) return;
+            if (_seedUploaderRepo.Items.Exists(config.DigitalSignature.GetOmniSignature())) return;
 
-            var newBarkItem = new UploadingBarkItem()
+            var newItem = new UploadingSeedItem()
             {
                 Signature = config.DigitalSignature.GetOmniSignature(),
             };
-            _barkUploaderRepo.BarkItems.Upsert(newBarkItem);
+            _seedUploaderRepo.Items.Upsert(newItem);
         }
     }
 
@@ -122,7 +124,7 @@ public sealed class BarkUploader : AsyncDisposableBase, IBarkUploader
 
             foreach (var signature in signatures)
             {
-                if (_barkUploaderRepo.BarkItems.Exists(signature)) continue;
+                if (_seedUploaderRepo.Items.Exists(signature)) continue;
                 await _serviceMediator.UnsubscribeShoutAsync(signature, Channel, Author, cancellationToken);
             }
         }
@@ -137,7 +139,7 @@ public sealed class BarkUploader : AsyncDisposableBase, IBarkUploader
 
             foreach (var rootHash in rootHashes)
             {
-                if (_barkUploaderRepo.BarkItems.Exists(rootHash)) continue;
+                if (_seedUploaderRepo.Items.Exists(rootHash)) continue;
                 await _serviceMediator.UnpublishFileFromMemoryAsync(rootHash, Author, cancellationToken);
             }
         }
@@ -150,9 +152,9 @@ public sealed class BarkUploader : AsyncDisposableBase, IBarkUploader
             var reports = await _serviceMediator.GetPublishedShoutReportsAsync(Author, cancellationToken);
             var signatures = reports.Select(n => n.Signature).ToHashSet();
 
-            foreach (var profileItem in _barkUploaderRepo.BarkItems.FindAll())
+            foreach (var item in _seedUploaderRepo.Items.FindAll())
             {
-                if (signatures.Contains(profileItem.Signature)) continue;
+                if (signatures.Contains(item.Signature)) continue;
                 return false;
             }
 
@@ -167,9 +169,9 @@ public sealed class BarkUploader : AsyncDisposableBase, IBarkUploader
             var reports = await _serviceMediator.GetPublishedFileReportsAsync(Author, cancellationToken);
             var rootHashes = reports.Select(n => n.RootHash).WhereNotNull().ToHashSet();
 
-            foreach (var profileItem in _barkUploaderRepo.BarkItems.FindAll())
+            foreach (var item in _seedUploaderRepo.Items.FindAll())
             {
-                if (rootHashes.Contains(profileItem.RootHash)) continue;
+                if (rootHashes.Contains(item.RootHash)) continue;
                 return false;
             }
 
@@ -177,12 +179,15 @@ public sealed class BarkUploader : AsyncDisposableBase, IBarkUploader
         }
     }
 
-    private async ValueTask PublishBarkContent(BarkUploaderConfig config, CancellationToken cancellationToken = default)
+    private async ValueTask PublishContent(SeedUploaderConfig config, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
+            var reports = await _fileUploader.GetUploadingFileReportsAsync(cancellationToken);
+            var seeds = reports.Select(n => n.Seed).WhereNotNull().ToArray();
+
             var digitalSignature = config.DigitalSignature;
-            var content = new BarkContent(config.Messages.ToArray());
+            var content = new SeedContent(seeds);
 
             using var contentBytes = RocketMessage.ToBytes(content);
             var rootHash = await _serviceMediator.PublishFileFromMemoryAsync(contentBytes.Memory, 8 * 1024 * 1024, Author, cancellationToken);
@@ -193,17 +198,16 @@ public sealed class BarkUploader : AsyncDisposableBase, IBarkUploader
         }
     }
 
-    public async ValueTask<BarkUploaderConfig> GetConfigAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<SeedUploaderConfig> GetConfigAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var config = await _configStorage.TryGetValueAsync<BarkUploaderConfig>(cancellationToken);
+            var config = await _configStorage.TryGetValueAsync<SeedUploaderConfig>(cancellationToken);
 
             if (config is null)
             {
-                config = new BarkUploaderConfig(
-                    digitalSignature: OmniDigitalSignature.Create("Anonymous", OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256),
-                    messages: Array.Empty<BarkMessage>()
+                config = new SeedUploaderConfig(
+                    digitalSignature: OmniDigitalSignature.Create("Anonymous", OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256)
                 );
 
                 await _configStorage.TrySetValueAsync(config, cancellationToken);
@@ -213,12 +217,12 @@ public sealed class BarkUploader : AsyncDisposableBase, IBarkUploader
         }
     }
 
-    public async ValueTask SetConfigAsync(BarkUploaderConfig config, CancellationToken cancellationToken = default)
+    public async ValueTask SetConfigAsync(SeedUploaderConfig config, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             await _configStorage.TrySetValueAsync(config, cancellationToken);
-            _barkUploaderRepo.BarkItems.DeleteAll();
+            _seedUploaderRepo.Items.DeleteAll();
         }
     }
 }

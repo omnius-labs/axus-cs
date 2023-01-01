@@ -5,7 +5,7 @@ using Omnius.Core.Net;
 
 namespace Omnius.Axus.Ui.Desktop.Windows.Main;
 
-public class PeersViewDesignViewModel : PeersViewViewModelBase
+public class PeersViewDesignViewModel : PeersViewModelBase
 {
     private ObservableCollection<SessionViewModel> _sessionReports = new();
 

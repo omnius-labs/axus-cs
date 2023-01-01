@@ -8,27 +8,26 @@ public partial class InteractorProvider : AsyncDisposableBase, IInteractorProvid
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
     private string _databaseDirectoryPath;
-    private IServiceMediator? _serviceMediator;
+    private IAxusServiceMediator? _serviceMediator;
     private readonly IBytesPool _bytesPool;
 
-    private IProfilePublisher? _profilePublisher;
-    private IProfileSubscriber? _profileSubscriber;
-    private IBarkUploader? _barkPublisher;
-    private IBarkDownloader? _barkSubscriber;
-    private IDisposable? _barkSubscriberOnGetTrustedSignaturesRegister;
+    private IProfileUploader? _profileUploader;
+    private IProfileDownloader? _profileDownloader;
+    private IBarkUploader? _barkUploader;
+    private IBarkDownloader? _barkDownloader;
     private IFileUploader? _fileUploader;
     private IFileDownloader? _fileDownloader;
 
     private readonly AsyncLock _asyncLock = new();
 
-    public static async ValueTask<InteractorProvider> CreateAsync(string databaseDirectoryPath, IServiceMediator serviceMediator, IBytesPool bytesPool, CancellationToken cancellationToken = default)
+    public static async ValueTask<InteractorProvider> CreateAsync(string databaseDirectoryPath, IAxusServiceMediator serviceMediator, IBytesPool bytesPool, CancellationToken cancellationToken = default)
     {
         var result = new InteractorProvider(databaseDirectoryPath, serviceMediator, bytesPool);
         await result.InitAsync(cancellationToken);
         return result;
     }
 
-    internal InteractorProvider(string databaseDirectoryPath, IServiceMediator serviceMediator, IBytesPool bytesPool)
+    internal InteractorProvider(string databaseDirectoryPath, IAxusServiceMediator serviceMediator, IBytesPool bytesPool)
     {
         _databaseDirectoryPath = databaseDirectoryPath;
         _serviceMediator = serviceMediator;
@@ -39,21 +38,20 @@ public partial class InteractorProvider : AsyncDisposableBase, IInteractorProvid
     {
         if (_serviceMediator is null) throw new NullReferenceException(nameof(_serviceMediator));
 
-        var profilePublisherOptions = new ProfileUploaderOptions(Path.Combine(_databaseDirectoryPath, "profile_publisher"));
-        _profilePublisher = await ProfileUploader.CreateAsync(_serviceMediator, SingleValueFileStorage.Factory, _bytesPool, profilePublisherOptions, cancellationToken);
+        var profileUploaderOptions = new ProfileUploaderOptions(Path.Combine(_databaseDirectoryPath, "profile_uploader"));
+        _profileUploader = await ProfileUploader.CreateAsync(_serviceMediator, SingleValueFileStorage.Factory, _bytesPool, profileUploaderOptions, cancellationToken);
 
-        var profileSubscriberOptions = new ProfileDownloaderOptions(Path.Combine(_databaseDirectoryPath, "profile_subscriber"));
-        _profileSubscriber = await ProfileDownloader.CreateAsync(_serviceMediator, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, profileSubscriberOptions, cancellationToken);
+        var profileDownloaderOptions = new ProfileDownloaderOptions(Path.Combine(_databaseDirectoryPath, "profile_downloader"));
+        _profileDownloader = await ProfileDownloader.CreateAsync(_serviceMediator, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, profileDownloaderOptions, cancellationToken);
 
-        var barkPublisherOptions = new BarkUploaderOptions(Path.Combine(_databaseDirectoryPath, "bark_publisher"));
-        _barkPublisher = await BarkUploader.CreateAsync(_serviceMediator, SingleValueFileStorage.Factory, _bytesPool, barkPublisherOptions, cancellationToken);
+        var barkUploaderOptions = new BarkUploaderOptions(Path.Combine(_databaseDirectoryPath, "bark_uploader"));
+        _barkUploader = await BarkUploader.CreateAsync(_serviceMediator, SingleValueFileStorage.Factory, _bytesPool, barkUploaderOptions, cancellationToken);
 
-        var barkSubscriberOptions = new BarkDownloaderOptions(Path.Combine(_databaseDirectoryPath, "bark_subscriber"));
-        _barkSubscriber = await BarkDownloader.CreateAsync(_serviceMediator, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, barkSubscriberOptions, cancellationToken);
-        _barkSubscriberOnGetTrustedSignaturesRegister = _barkSubscriber.OnGetTrustedSignatures.Listen(() => _profileSubscriber.GetSignaturesAsync());
+        var barkDownloaderOptions = new BarkDownloaderOptions(Path.Combine(_databaseDirectoryPath, "bark_downloader"));
+        _barkDownloader = await BarkDownloader.CreateAsync(_profileDownloader, _serviceMediator, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, barkDownloaderOptions, cancellationToken);
 
         var fileUploaderOptions = new FileUploaderOptions(Path.Combine(_databaseDirectoryPath, "file_uploader"));
-        _fileUploader = await FileUploader.CreateAsync(_serviceMediator, _bytesPool, fileUploaderOptions, cancellationToken);
+        _fileUploader = await FileUploader.CreateAsync(_serviceMediator, SingleValueFileStorage.Factory, _bytesPool, fileUploaderOptions, cancellationToken);
 
         var fileDownloaderOptions = new FileDownloaderOptions(Path.Combine(_databaseDirectoryPath, "file_downloader"));
         _fileDownloader = await FileDownloader.CreateAsync(_serviceMediator, SingleValueFileStorage.Factory, _bytesPool, fileDownloaderOptions, cancellationToken);
@@ -67,26 +65,25 @@ public partial class InteractorProvider : AsyncDisposableBase, IInteractorProvid
         if (_fileUploader is not null) await _fileUploader.DisposeAsync();
         _fileUploader = null;
 
-        if (_barkSubscriber is not null) await _barkSubscriber.DisposeAsync();
-        _barkSubscriber = null;
+        if (_barkDownloader is not null) await _barkDownloader.DisposeAsync();
+        _barkDownloader = null;
 
-        if (_barkPublisher is not null) await _barkPublisher.DisposeAsync();
-        _barkPublisher = null;
+        if (_barkUploader is not null) await _barkUploader.DisposeAsync();
+        _barkUploader = null;
 
-        if (_profileSubscriber is not null) await _profileSubscriber.DisposeAsync();
-        _profileSubscriber = null;
+        if (_profileDownloader is not null) await _profileDownloader.DisposeAsync();
+        _profileDownloader = null;
 
-        _barkSubscriberOnGetTrustedSignaturesRegister?.Dispose();
-        _barkSubscriberOnGetTrustedSignaturesRegister = null;
-
-        if (_profilePublisher is not null) await _profilePublisher.DisposeAsync();
-        _profilePublisher = null;
+        if (_profileUploader is not null) await _profileUploader.DisposeAsync();
+        _profileUploader = null;
     }
 
-    public IProfilePublisher GetProfilePublisher() => _profilePublisher!;
-    public IProfileSubscriber GetProfileSubscriber() => _profileSubscriber!;
-    public IBarkUploader GetBarkPublisher() => _barkPublisher!;
-    public IBarkDownloader GetBarkSubscriber() => _barkSubscriber!;
+    public IProfileUploader GetProfileUploader() => _profileUploader!;
+    public IProfileDownloader GetProfileDownloader() => _profileDownloader!;
+    public IBarkUploader GetBarkUploader() => _barkUploader!;
+    public IBarkDownloader GetBarkDownloader() => _barkDownloader!;
+    public ISeedUploader GetSeedUploader() => throw new NotImplementedException();
+    public ISeedDownloader GetSeedDownloader() => throw new NotImplementedException();
     public IFileUploader GetFileUploader() => _fileUploader!;
     public IFileDownloader GetFileDownloader() => _fileDownloader!;
 }

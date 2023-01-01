@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\Directory.Build.props" Condition="Exists('..\Directory.Build.props')" />
+
+  <!-- https://developercommunity.visualstudio.com/t/xunit-tests-cannot-run-because-visual-studio-gets/1270327 -->
+  <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+
 </Project>

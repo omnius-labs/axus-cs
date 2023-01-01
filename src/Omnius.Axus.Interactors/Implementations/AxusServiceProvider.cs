@@ -12,7 +12,7 @@ using MultiplexerV1 = Omnius.Core.Net.Connections.Multiplexer.V1;
 
 namespace Omnius.Axus.Interactors;
 
-public sealed class ServiceFactory : AsyncDisposableBase, IServiceProvider
+public sealed class AxusServiceProvider : AsyncDisposableBase, IAxusServiceProvider
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -27,14 +27,14 @@ public sealed class ServiceFactory : AsyncDisposableBase, IServiceProvider
 
     public bool IsConnected => _multiplexer?.IsConnected ?? false;
 
-    public static async ValueTask<ServiceFactory> CreateAsync(OmniAddress listenAddress, CancellationToken cancellationToken = default)
+    public static async ValueTask<AxusServiceProvider> CreateAsync(OmniAddress listenAddress, CancellationToken cancellationToken = default)
     {
-        var result = new ServiceFactory(listenAddress);
+        var result = new AxusServiceProvider(listenAddress);
         await result.InitAsync(cancellationToken);
         return result;
     }
 
-    private ServiceFactory(OmniAddress listenAddress)
+    private AxusServiceProvider(OmniAddress listenAddress)
     {
         _listenAddress = listenAddress;
     }

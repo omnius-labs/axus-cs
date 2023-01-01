@@ -30,7 +30,7 @@
     <PackageProjectUrl>https://github.com/omnius-labs/axus</PackageProjectUrl>
     <RepositoryUrl>https://github.com/omnius-labs/axus</RepositoryUrl>
     <PackageTags>Axus</PackageTags>
-    <Copyright>Copyright (c) 2019 Lyrise</Copyright>
+    <Copyright>Copyright (c) 2023 Lyrise</Copyright>
     <RepositoryType>git</RepositoryType>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>

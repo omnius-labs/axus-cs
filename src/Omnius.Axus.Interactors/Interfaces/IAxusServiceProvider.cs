@@ -2,7 +2,7 @@ using Omnius.Axus.Remoting;
 
 namespace Omnius.Axus.Interactors;
 
-internal interface IServiceProvider
+internal interface IAxusServiceProvider
 {
     bool IsConnected { get; }
 

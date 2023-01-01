@@ -3,23 +3,23 @@ using Omnius.Core.Cryptography;
 
 namespace Omnius.Axus.Interactors.Internal.Entities;
 
-internal record PublishedProfileItemEntity
+internal record UploadingProfileItemEntity
 {
     public OmniSignatureEntity? Signature { get; set; }
     public OmniHashEntity? RootHash { get; set; }
 
-    public static PublishedProfileItemEntity Import(PublishedProfileItem item)
+    public static UploadingProfileItemEntity Import(UploadingProfileItem item)
     {
-        return new PublishedProfileItemEntity()
+        return new UploadingProfileItemEntity()
         {
             Signature = OmniSignatureEntity.Import(item.Signature),
             RootHash = OmniHashEntity.Import(item.RootHash),
         };
     }
 
-    public PublishedProfileItem Export()
+    public UploadingProfileItem Export()
     {
-        return new PublishedProfileItem
+        return new UploadingProfileItem
         {
             Signature = this.Signature?.Export() ?? OmniSignature.Empty,
             RootHash = this.RootHash?.Export() ?? OmniHash.Empty,

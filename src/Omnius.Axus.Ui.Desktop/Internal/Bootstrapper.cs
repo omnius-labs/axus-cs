@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Omnius.Axus.Interactors;
-using Omnius.Axus.Ui.Desktop.Models;
+using Omnius.Axus.Ui.Desktop.Configuration;
 using Omnius.Axus.Ui.Desktop.Windows.Dialogs.MultilineTextEdit;
 using Omnius.Axus.Ui.Desktop.Windows.Dialogs.SinglelineTextEdit;
 using Omnius.Axus.Ui.Desktop.Windows.Main;
@@ -37,8 +37,8 @@ public partial class Bootstrapper : AsyncDisposableBase
 
             var uiState = await UiStatus.LoadAsync(Path.Combine(_axusEnvironment.DatabaseDirectoryPath, UI_STATUS_FILE_NAME));
 
-            var serviceFactory = await ServiceFactory.CreateAsync(axusEnvironment.ListenAddress, cancellationToken);
-            var serviceMediator = new ServiceMediator(serviceFactory.Create());
+            var serviceFactory = await AxusServiceProvider.CreateAsync(axusEnvironment.ListenAddress, cancellationToken);
+            var serviceMediator = new AxusServiceMediator(serviceFactory.Create());
             var interactorProvider = await InteractorProvider.CreateAsync(_axusEnvironment.DatabaseDirectoryPath, serviceMediator, bytesPool, cancellationToken);
 
             var serviceCollection = new ServiceCollection();
@@ -46,7 +46,7 @@ public partial class Bootstrapper : AsyncDisposableBase
             serviceCollection.AddSingleton(_axusEnvironment);
             serviceCollection.AddSingleton<IBytesPool>(bytesPool);
             serviceCollection.AddSingleton(uiState);
-            serviceCollection.AddSingleton<IServiceMediator>(serviceMediator);
+            serviceCollection.AddSingleton<IAxusServiceMediator>(serviceMediator);
             serviceCollection.AddSingleton<IInteractorProvider>(interactorProvider);
 
             serviceCollection.AddSingleton<IApplicationDispatcher, ApplicationDispatcher>();
@@ -55,10 +55,10 @@ public partial class Bootstrapper : AsyncDisposableBase
             serviceCollection.AddSingleton<IDialogService, DialogService>();
 
             serviceCollection.AddTransient<MainWindowModel>();
-            serviceCollection.AddTransient<StatusViewViewModel>();
-            serviceCollection.AddTransient<PeersViewViewModel>();
-            serviceCollection.AddTransient<DownloadViewViewModel>();
-            serviceCollection.AddTransient<UploadViewViewModel>();
+            serviceCollection.AddTransient<StatusViewModel>();
+            serviceCollection.AddTransient<PeersViewModel>();
+            serviceCollection.AddTransient<DownloadViewModel>();
+            serviceCollection.AddTransient<UploadViewModel>();
             serviceCollection.AddTransient<SettingsWindowModel>();
             serviceCollection.AddTransient<SignaturesViewModel>();
             serviceCollection.AddTransient<MultilineTextEditWindowModel>();

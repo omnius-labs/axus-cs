@@ -10,18 +10,18 @@ using Reactive.Bindings.Extensions;
 
 namespace Omnius.Axus.Ui.Desktop.Windows.Main;
 
-public abstract class PeersViewViewModelBase : AsyncDisposableBase
+public abstract class PeersViewModelBase : AsyncDisposableBase
 {
     public AsyncReactiveCommand? AddCommand { get; protected set; }
 
     public ReadOnlyObservableCollection<SessionViewModel>? SessionReports { get; protected set; }
 }
 
-public class PeersViewViewModel : PeersViewViewModelBase
+public class PeersViewModel : PeersViewModelBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IServiceMediator _serviceMediator;
+    private readonly IAxusServiceMediator _serviceMediator;
     private readonly IApplicationDispatcher _applicationDispatcher;
     private readonly IDialogService _dialogService;
 
@@ -29,7 +29,7 @@ public class PeersViewViewModel : PeersViewViewModelBase
 
     private readonly CompositeDisposable _disposable = new();
 
-    public PeersViewViewModel(IServiceMediator serviceMediator, IApplicationDispatcher applicationDispatcher, IDialogService dialogService)
+    public PeersViewModel(IAxusServiceMediator serviceMediator, IApplicationDispatcher applicationDispatcher, IDialogService dialogService)
     {
         _serviceMediator = serviceMediator;
         _applicationDispatcher = applicationDispatcher;

@@ -3,6 +3,7 @@ using Omnius.Axus.Interactors.Internal.Repositories;
 using Omnius.Axus.Interactors.Models;
 using Omnius.Core;
 using Omnius.Core.RocketPack;
+using Omnius.Core.Storages;
 
 namespace Omnius.Axus.Interactors;
 
@@ -10,11 +11,12 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IServiceMediator _serviceController;
+    private readonly IAxusServiceMediator _serviceController;
     private readonly IBytesPool _bytesPool;
     private readonly FileUploaderOptions _options;
 
     private readonly FileUploaderRepository _fileUploaderRepo;
+    private readonly ISingleValueStorage _configStorage;
 
     private Task _watchLoopTask = null!;
 
@@ -24,20 +26,21 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
 
     private const string Author = "file_uploader/v1";
 
-    public static async ValueTask<FileUploader> CreateAsync(IServiceMediator serviceController, IBytesPool bytesPool, FileUploaderOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<FileUploader> CreateAsync(IAxusServiceMediator serviceController, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, FileUploaderOptions options, CancellationToken cancellationToken = default)
     {
-        var fileUploader = new FileUploader(serviceController, bytesPool, options);
+        var fileUploader = new FileUploader(serviceController, singleValueStorageFactory, bytesPool, options);
         await fileUploader.InitAsync(cancellationToken);
         return fileUploader;
     }
 
-    private FileUploader(IServiceMediator service, IBytesPool bytesPool, FileUploaderOptions options)
+    private FileUploader(IAxusServiceMediator service, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, FileUploaderOptions options)
     {
         _serviceController = service;
         _bytesPool = bytesPool;
         _options = options;
 
         _fileUploaderRepo = new FileUploaderRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
+        _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
     }
 
     private async ValueTask InitAsync(CancellationToken cancellationToken = default)
@@ -151,6 +154,31 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
             await _serviceController.UnpublishFileFromStorageAsync(filePath, Author, cancellationToken);
 
             _fileUploaderRepo.FileItems.Delete(filePath);
+        }
+    }
+
+    public async ValueTask<FileUploaderConfig> GetConfigAsync(CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
+            var config = await _configStorage.TryGetValueAsync<FileUploaderConfig>(cancellationToken);
+
+            if (config is null)
+            {
+                config = new FileUploaderConfig();
+
+                await _configStorage.TrySetValueAsync(config, cancellationToken);
+            }
+
+            return config;
+        }
+    }
+
+    public async ValueTask SetConfigAsync(FileUploaderConfig config, CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
+            await _configStorage.TrySetValueAsync(config, cancellationToken);
         }
     }
 }

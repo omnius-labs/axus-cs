@@ -4,7 +4,7 @@ using Omnius.Axus.Interactors;
 using Omnius.Axus.Interactors.Models;
 using Omnius.Axus.Remoting;
 using Omnius.Axus.Ui.Desktop.Internal;
-using Omnius.Axus.Ui.Desktop.Models;
+using Omnius.Axus.Ui.Desktop.Configuration;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Net;
@@ -43,13 +43,13 @@ public abstract class SettingsWindowModelBase : AsyncDisposableBase
 public class SettingsWindowModel : SettingsWindowModelBase
 {
     private readonly UiStatus _uiState;
-    private readonly IServiceMediator _serviceMediator;
+    private readonly IAxusServiceMediator _serviceMediator;
     private readonly IInteractorProvider _interactorProvider;
     private readonly IDialogService _dialogService;
 
     private readonly CompositeDisposable _disposable = new();
 
-    public SettingsWindowModel(UiStatus uiState, IServiceMediator serviceMediator, IInteractorProvider interactorProvider, IDialogService dialogService)
+    public SettingsWindowModel(UiStatus uiState, IAxusServiceMediator serviceMediator, IInteractorProvider interactorProvider, IDialogService dialogService)
     {
         _uiState = uiState;
         _serviceMediator = serviceMediator;
@@ -130,8 +130,8 @@ public class SettingsWindowModel : SettingsWindowModelBase
     {
         var serviceConfig = await _serviceMediator.GetConfigAsync(cancellationToken);
 
-        var profilePublisher = _interactorProvider.GetProfilePublisher();
-        var profilePublisherConfig = await profilePublisher.GetConfigAsync(cancellationToken);
+        var ProfileUploader = _interactorProvider.GetProfileUploader();
+        var ProfileUploaderConfig = await ProfileUploader.GetConfigAsync(cancellationToken);
 
         var fileDownloader = _interactorProvider.GetFileDownloader();
         var fileDownloaderConfig = await fileDownloader.GetConfigAsync(cancellationToken);
@@ -147,9 +147,9 @@ public class SettingsWindowModel : SettingsWindowModelBase
         this.TcpAccepterIsEnabled!.Value = serviceConfig.TcpAccepter?.IsEnabled ?? false;
         this.TcpAccepterUseUpnp!.Value = serviceConfig.TcpAccepter?.UseUpnp ?? false;
         this.TcpAccepterListenAddress!.Value = serviceConfig.TcpAccepter?.ListenAddress?.ToString() ?? string.Empty;
-        this.ProfileDigitalSignature!.Value = profilePublisherConfig.DigitalSignature;
-        this.TrustedSignaturesViewModel!.Signatures!.AddRange(profilePublisherConfig.TrustedSignatures);
-        this.BlockedSignaturesViewModel!.Signatures!.AddRange(profilePublisherConfig.BlockedSignatures);
+        this.ProfileDigitalSignature!.Value = ProfileUploaderConfig.DigitalSignature;
+        this.TrustedSignaturesViewModel!.Signatures!.AddRange(ProfileUploaderConfig.TrustedSignatures);
+        this.BlockedSignaturesViewModel!.Signatures!.AddRange(ProfileUploaderConfig.BlockedSignatures);
         this.FileDownloadDirectory!.Value = fileDownloaderConfig?.DestinationDirectory ?? string.Empty;
     }
 
@@ -179,7 +179,7 @@ public class SettingsWindowModel : SettingsWindowModelBase
                 useUpnp: this.TcpAccepterUseUpnp!.Value,
                 listenAddress: OmniAddress.Parse(this.TcpAccepterListenAddress!.Value)
             ));
-        var profilePublisherConfig = new ProfilePublisherConfig(
+        var ProfileUploaderConfig = new ProfileUploaderConfig(
             this.ProfileDigitalSignature!.Value,
             this.TrustedSignaturesViewModel!.Signatures!.ToArray(),
             this.BlockedSignaturesViewModel!.Signatures!.ToArray()
@@ -188,8 +188,8 @@ public class SettingsWindowModel : SettingsWindowModelBase
 
         await _serviceMediator.SetConfigAsync(serviceConfig, cancellationToken);
 
-        var profilePublisher = _interactorProvider.GetProfilePublisher();
-        await profilePublisher.SetConfigAsync(profilePublisherConfig, cancellationToken);
+        var ProfileUploader = _interactorProvider.GetProfileUploader();
+        await ProfileUploader.SetConfigAsync(ProfileUploaderConfig, cancellationToken);
 
         var fileDownloader = _interactorProvider.GetFileDownloader();
         await fileDownloader.SetConfigAsync(fileDownloaderConfig, cancellationToken);

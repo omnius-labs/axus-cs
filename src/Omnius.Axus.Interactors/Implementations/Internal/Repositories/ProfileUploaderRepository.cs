@@ -8,18 +8,18 @@ using Omnius.Core.Helpers;
 
 namespace Omnius.Axus.Interactors.Internal.Repositories;
 
-internal sealed class ProfileSubscriberRepository : DisposableBase
+internal sealed class ProfileUploaderRepository : DisposableBase
 {
     private readonly LiteDatabase _database;
 
-    public ProfileSubscriberRepository(string dirPath)
+    public ProfileUploaderRepository(string dirPath)
     {
         DirectoryHelper.CreateDirectory(dirPath);
 
         _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
         _database.UtcDate = true;
 
-        this.ProfileItems = new SubscribedProfileItemRepository(_database);
+        this.ProfileItems = new PublishedProfileItemRepository(_database);
     }
 
     protected override void OnDispose(bool disposing)
@@ -32,17 +32,17 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
         await this.ProfileItems.MigrateAsync(cancellationToken);
     }
 
-    public SubscribedProfileItemRepository ProfileItems { get; }
+    public PublishedProfileItemRepository ProfileItems { get; }
 
-    public sealed class SubscribedProfileItemRepository
+    public sealed class PublishedProfileItemRepository
     {
-        private const string CollectionName = "subscribed_profile_items";
+        private const string CollectionName = "published_profile_items";
 
         private readonly LiteDatabase _database;
 
         private readonly object _lockObject = new();
 
-        public SubscribedProfileItemRepository(LiteDatabase database)
+        public PublishedProfileItemRepository(LiteDatabase database)
         {
             _database = database;
         }
@@ -62,10 +62,19 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
             }
         }
 
-        private ILiteCollection<SubscribedProfileItemEntity> GetCollection()
+        private ILiteCollection<UploadingProfileItemEntity> GetCollection()
         {
-            var col = _database.GetCollection<SubscribedProfileItemEntity>(CollectionName);
+            var col = _database.GetCollection<UploadingProfileItemEntity>(CollectionName);
             return col;
+        }
+
+        public int Count()
+        {
+            lock (_lockObject)
+            {
+                var col = this.GetCollection();
+                return col.Count();
+            }
         }
 
         public bool Exists(OmniSignature signature)
@@ -90,7 +99,7 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
             }
         }
 
-        public IEnumerable<SubscribedProfileItem> FindAll()
+        public IEnumerable<UploadingProfileItem> FindAll()
         {
             lock (_lockObject)
             {
@@ -99,7 +108,7 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
             }
         }
 
-        public SubscribedProfileItem? FindOne(OmniSignature signature)
+        public UploadingProfileItem? FindOne(OmniSignature signature)
         {
             lock (_lockObject)
             {
@@ -110,11 +119,11 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
             }
         }
 
-        public void Upsert(SubscribedProfileItem item)
+        public void Upsert(UploadingProfileItem item)
         {
             lock (_lockObject)
             {
-                var itemEntity = SubscribedProfileItemEntity.Import(item);
+                var itemEntity = UploadingProfileItemEntity.Import(item);
 
                 var col = this.GetCollection();
 
@@ -142,6 +151,15 @@ internal sealed class ProfileSubscriberRepository : DisposableBase
 
                 var col = this.GetCollection();
                 col.DeleteMany(n => n.RootHash == rootHashEntity);
+            }
+        }
+
+        internal void DeleteAll()
+        {
+            lock (_lockObject)
+            {
+                var col = this.GetCollection();
+                col.DeleteAll();
             }
         }
     }

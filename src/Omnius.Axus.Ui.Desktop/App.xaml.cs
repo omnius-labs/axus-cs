@@ -6,7 +6,7 @@ using Avalonia.Markup.Xaml;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Omnius.Axus.Ui.Desktop.Internal;
-using Omnius.Axus.Ui.Desktop.Models;
+using Omnius.Axus.Ui.Desktop.Configuration;
 using Omnius.Axus.Ui.Desktop.Windows.Main;
 using Omnius.Core.Helpers;
 using Omnius.Core.Net;
@@ -56,32 +56,66 @@ public class App : Application
     {
         if (this.IsDesignMode)
         {
+            var parsedResult = CommandLine.Parser.Default.ParseArguments<DesignModeArgs>(Environment.GetCommandLineArgs());
+            parsedResult.WithParsed(this.OnDesignModeArgsParsed);
+        }
+        else
+        {
+            var parsedResult = CommandLine.Parser.Default.ParseArguments<NormalModeArgs>(Environment.GetCommandLineArgs());
+            parsedResult.WithParsed(this.OnNormalModeArgsParsed);
+        }
+    }
+
+    public class DesignModeArgs
+    {
+        [Option('d', "design")]
+        public string DesignTargetName { get; set; } = "Main";
+    }
+
+    private async void OnDesignModeArgsParsed(DesignModeArgs args)
+    {
+        if (this.IsDesignMode)
+        {
             if (this.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifeTime)
             {
-                var mainWindow = new MainWindow();
-                mainWindow.ViewModel = new MainWindowDesignModel();
-                lifeTime.MainWindow = mainWindow;
+                switch (args.DesignTargetName)
+                {
+                    case "Main":
+                        var mainWindow = new MainWindow();
+                        mainWindow.ViewModel = new MainWindowDesignModel();
+                        lifeTime.MainWindow = mainWindow;
+                        break;
+                }
             }
 
             return;
         }
-
-        var parsedResult = CommandLine.Parser.Default.ParseArguments<Options>(Environment.GetCommandLineArgs());
-        parsedResult.WithParsed(this.OnParsed);
     }
 
-    private async void OnParsed(Options options)
+    public class NormalModeArgs
+    {
+        [Option('l', "listen")]
+        public string ListenAddress { get; set; } = OmniAddress.Empty.ToString();
+
+        [Option('s', "storage")]
+        public string StorageDirectoryPath { get; set; } = "../storage";
+
+        [Option('v', "verbose")]
+        public bool Verbose { get; set; } = false;
+    }
+
+    private async void OnNormalModeArgsParsed(NormalModeArgs args)
     {
         try
         {
-            DirectoryHelper.CreateDirectory(options.StorageDirectoryPath);
+            DirectoryHelper.CreateDirectory(args.StorageDirectoryPath);
 
             var axusEnvironment = new AxusEnvironment()
             {
-                StorageDirectoryPath = options.StorageDirectoryPath,
-                DatabaseDirectoryPath = Path.Combine(options.StorageDirectoryPath, "db"),
-                LogsDirectoryPath = Path.Combine(options.StorageDirectoryPath, "logs"),
-                ListenAddress = OmniAddress.Parse(options.ListenAddress),
+                StorageDirectoryPath = args.StorageDirectoryPath,
+                DatabaseDirectoryPath = Path.Combine(args.StorageDirectoryPath, "db"),
+                LogsDirectoryPath = Path.Combine(args.StorageDirectoryPath, "logs"),
+                ListenAddress = OmniAddress.Parse(args.ListenAddress),
             };
 
             DirectoryHelper.CreateDirectory(axusEnvironment.DatabaseDirectoryPath);
@@ -89,9 +123,9 @@ public class App : Application
 
             SetLogsDirectory(axusEnvironment.LogsDirectoryPath);
 
-            if (options.Verbose) ChangeLogLevel(NLog.LogLevel.Trace);
+            if (args.Verbose) ChangeLogLevel(NLog.LogLevel.Trace);
 
-            _lockFileStream = new FileStream(Path.Combine(options.StorageDirectoryPath, "lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 1, FileOptions.DeleteOnClose);
+            _lockFileStream = new FileStream(Path.Combine(args.StorageDirectoryPath, "lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 1, FileOptions.DeleteOnClose);
 
             _logger.Info("Starting...");
             _logger.Info("AssemblyInformationalVersion: {0}", Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion);

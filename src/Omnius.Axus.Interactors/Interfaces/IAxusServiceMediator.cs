@@ -5,7 +5,7 @@ using Omnius.Core.Cryptography;
 
 namespace Omnius.Axus.Interactors;
 
-public interface IServiceMediator
+public interface IAxusServiceMediator
 {
     ValueTask<ServiceConfig> GetConfigAsync(CancellationToken cancellationToken = default);
     ValueTask SetConfigAsync(ServiceConfig config, CancellationToken cancellationToken = default);

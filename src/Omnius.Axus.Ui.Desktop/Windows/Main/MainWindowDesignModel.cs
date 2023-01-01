@@ -1,4 +1,4 @@
-using Omnius.Axus.Ui.Desktop.Models;
+using Omnius.Axus.Ui.Desktop.Configuration;
 using Omnius.Axus.Ui.Desktop.Windows.Settings;
 using Omnius.Core;
 using Reactive.Bindings;
@@ -14,7 +14,7 @@ public class MainWindowDesignModel : MainWindowModelBase
     {
         this.Status = new MainWindowStatus();
 
-        this.PeersViewViewModel = new PeersViewDesignViewModel();
+        this.PeersViewModel = new PeersViewDesignViewModel();
 
         this.SettingsCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.SettingsCommand.Subscribe(async () => await this.SettingsAsync()).AddTo(_disposable);
@@ -24,7 +24,7 @@ public class MainWindowDesignModel : MainWindowModelBase
     {
         _disposable.Dispose();
 
-        await this.PeersViewViewModel!.DisposeAsync();
+        await this.PeersViewModel!.DisposeAsync();
     }
 
     private async Task SettingsAsync()

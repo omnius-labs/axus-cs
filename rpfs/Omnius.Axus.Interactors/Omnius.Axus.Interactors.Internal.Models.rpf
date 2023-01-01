@@ -36,3 +36,15 @@ message CachedBarkMessage {
     Signature: OmniSignature,
     Value: BarkMessage,
 }
+
+// Seed
+
+message CachedSeedContent {
+    Signature: OmniSignature,
+    ShoutUpdatedTime: timestamp64,
+    Value: SeedContent,
+}
+
+message SeedContent {
+    Seeds: vector<Seed>(capacity: 1024 * 32),
+}

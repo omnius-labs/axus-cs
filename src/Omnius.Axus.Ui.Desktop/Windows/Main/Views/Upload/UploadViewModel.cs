@@ -5,7 +5,7 @@ using Omnius.Axus.Interactors;
 using Omnius.Axus.Interactors.Models;
 using Omnius.Axus.Messages;
 using Omnius.Axus.Ui.Desktop.Internal;
-using Omnius.Axus.Ui.Desktop.Models;
+using Omnius.Axus.Ui.Desktop.Configuration;
 using Omnius.Core;
 using Omnius.Core.Avalonia;
 using Reactive.Bindings;
@@ -13,7 +13,7 @@ using Reactive.Bindings.Extensions;
 
 namespace Omnius.Axus.Ui.Desktop.Windows.Main;
 
-public class UploadViewViewModel : AsyncDisposableBase
+public class UploadViewModel : AsyncDisposableBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
     private readonly UiStatus _uiState;
@@ -27,7 +27,7 @@ public class UploadViewViewModel : AsyncDisposableBase
 
     private readonly CompositeDisposable _disposable = new();
 
-    public UploadViewViewModel(UiStatus uiState, IInteractorProvider interactorProvider, IApplicationDispatcher applicationDispatcher, IDialogService dialogService, IClipboardService clipboardService)
+    public UploadViewModel(UiStatus uiState, IInteractorProvider interactorProvider, IApplicationDispatcher applicationDispatcher, IDialogService dialogService, IClipboardService clipboardService)
     {
         _uiState = uiState;
         _interactorProvider = interactorProvider;

@@ -2,10 +2,12 @@ namespace Omnius.Axus.Interactors;
 
 public interface IInteractorProvider : IAsyncDisposable
 {
-    IProfilePublisher GetProfilePublisher();
-    IProfileSubscriber GetProfileSubscriber();
-    IBarkUploader GetBarkPublisher();
-    IBarkDownloader GetBarkSubscriber();
+    IProfileUploader GetProfileUploader();
+    IProfileDownloader GetProfileDownloader();
+    IBarkUploader GetBarkUploader();
+    IBarkDownloader GetBarkDownloader();
+    ISeedUploader GetSeedUploader();
+    ISeedDownloader GetSeedDownloader();
     IFileUploader GetFileUploader();
     IFileDownloader GetFileDownloader();
 }

@@ -100,10 +100,10 @@
             </DockPanel>
 
             <Panel DockPanel.Dock="Right">
-                <local:StatusView DataContext="{Binding StatusViewViewModel}" IsVisible="{Binding #StatusListBoxItem.IsSelected}" />
-                <local:PeersView DataContext="{Binding PeersViewViewModel}" IsVisible="{Binding #PeersListBoxItem.IsSelected}" />
-                <local:DownloadView DataContext="{Binding DownloadViewViewModel}" IsVisible="{Binding #DownloadListBoxItem.IsSelected}" />
-                <local:UploadView DataContext="{Binding UploadViewViewModel}" IsVisible="{Binding #UploadListBoxItem.IsSelected}" />
+                <local:StatusView DataContext="{Binding StatusViewModel}" IsVisible="{Binding #StatusListBoxItem.IsSelected}" />
+                <local:PeersView DataContext="{Binding PeersViewModel}" IsVisible="{Binding #PeersListBoxItem.IsSelected}" />
+                <local:DownloadView DataContext="{Binding DownloadViewModel}" IsVisible="{Binding #DownloadListBoxItem.IsSelected}" />
+                <local:UploadView DataContext="{Binding UploadViewModel}" IsVisible="{Binding #UploadListBoxItem.IsSelected}" />
             </Panel>
         </DockPanel>
     </Panel>

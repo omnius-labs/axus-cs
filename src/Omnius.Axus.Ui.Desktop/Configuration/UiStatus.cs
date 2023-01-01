@@ -1,7 +1,7 @@
 using Omnius.Core.Helpers;
 using Omnius.Core.Utils;
 
-namespace Omnius.Axus.Ui.Desktop.Models;
+namespace Omnius.Axus.Ui.Desktop.Configuration;
 
 public sealed class UiStatus
 {
