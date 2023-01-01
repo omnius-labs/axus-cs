@@ -1,8 +1,8 @@
 using System.Collections.ObjectModel;
 using System.Text;
 using Omnius.Axus.Interactors;
-using Omnius.Axus.Ui.Desktop.Internal;
 using Omnius.Axus.Ui.Desktop.Configuration;
+using Omnius.Axus.Ui.Desktop.Internal;
 using Omnius.Core;
 using Omnius.Core.Avalonia;
 using Omnius.Core.Cryptography;

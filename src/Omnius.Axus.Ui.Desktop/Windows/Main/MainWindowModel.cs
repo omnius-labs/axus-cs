@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
-using Omnius.Axus.Ui.Desktop.Internal;
 using Omnius.Axus.Ui.Desktop.Configuration;
+using Omnius.Axus.Ui.Desktop.Internal;
 using Omnius.Core;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
