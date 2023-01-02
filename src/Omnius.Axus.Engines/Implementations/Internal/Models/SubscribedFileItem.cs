@@ -5,16 +5,15 @@ namespace Omnius.Axus.Engines.Internal.Models;
 
 internal record SubscribedFileItem
 {
-    public OmniHash RootHash { get; init; }
-    public IReadOnlyList<string> Authors { get; init; } = Array.Empty<string>();
-    public SubscribedFileItemStatus Status { get; init; } = SubscribedFileItemStatus.Empty;
+    public required OmniHash RootHash { get; init; }
+    public required IReadOnlyList<string> Authors { get; init; }
+    public required SubscribedFileItemStatus Status { get; init; }
 }
 
 internal record SubscribedFileItemStatus
 {
-    public static SubscribedFileItemStatus Empty { get; } = new SubscribedFileItemStatus();
-    public int CurrentDepth { get; init; }
-    public int TotalBlockCount { get; init; }
-    public int DownloadedBlockCount { get; init; }
-    public SubscribedFileState State { get; init; }
+    public required int CurrentDepth { get; init; }
+    public required int TotalBlockCount { get; init; }
+    public required int DownloadedBlockCount { get; init; }
+    public required SubscribedFileState State { get; init; }
 }

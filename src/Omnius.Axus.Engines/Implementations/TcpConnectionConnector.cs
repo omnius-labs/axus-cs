@@ -18,25 +18,25 @@ public sealed partial class TcpConnectionConnector : AsyncDisposableBase, IConne
     private readonly IBandwidthLimiter _receiverBandwidthLimiter;
     private readonly ISocks5ProxyClientFactory _socks5ProxyClientFactory;
     private readonly IHttpProxyClientFactory _httpProxyClientFactory;
-    private readonly IBatchActionDispatcher _batchActionDispatcher;
     private readonly IBytesPool _bytesPool;
     private readonly TcpConnectionConnectorOptions _options;
 
+    private readonly IBatchActionDispatcher _batchActionDispatcher = new BatchActionDispatcher(TimeSpan.FromTicks(100));
+
     private const int MaxReceiveByteCount = 1024 * 1024 * 256;
 
-    public static async ValueTask<TcpConnectionConnector> CreateAsync(IBandwidthLimiter senderBandwidthLimiter, IBandwidthLimiter receiverBandwidthLimiter, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, TcpConnectionConnectorOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<TcpConnectionConnector> CreateAsync(IBandwidthLimiter senderBandwidthLimiter, IBandwidthLimiter receiverBandwidthLimiter, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IBytesPool bytesPool, TcpConnectionConnectorOptions options, CancellationToken cancellationToken = default)
     {
-        var tcpConnectionConnector = new TcpConnectionConnector(senderBandwidthLimiter, receiverBandwidthLimiter, socks5ProxyClientFactory, httpProxyClientFactory, batchActionDispatcher, bytesPool, options);
+        var tcpConnectionConnector = new TcpConnectionConnector(senderBandwidthLimiter, receiverBandwidthLimiter, socks5ProxyClientFactory, httpProxyClientFactory, bytesPool, options);
         return tcpConnectionConnector;
     }
 
-    private TcpConnectionConnector(IBandwidthLimiter senderBandwidthLimiter, IBandwidthLimiter receiverBandwidthLimiter, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, TcpConnectionConnectorOptions options)
+    private TcpConnectionConnector(IBandwidthLimiter senderBandwidthLimiter, IBandwidthLimiter receiverBandwidthLimiter, ISocks5ProxyClientFactory socks5ProxyClientFactory, IHttpProxyClientFactory httpProxyClientFactory, IBytesPool bytesPool, TcpConnectionConnectorOptions options)
     {
         _senderBandwidthLimiter = senderBandwidthLimiter;
         _receiverBandwidthLimiter = receiverBandwidthLimiter;
         _socks5ProxyClientFactory = socks5ProxyClientFactory;
         _httpProxyClientFactory = httpProxyClientFactory;
-        _batchActionDispatcher = batchActionDispatcher;
         _bytesPool = bytesPool;
         _options = options;
     }

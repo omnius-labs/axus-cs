@@ -13,7 +13,6 @@ using Omnius.Core.Net.Proxies;
 using Omnius.Core.Net.Upnp;
 using Omnius.Core.Pipelines;
 using Omnius.Core.Storages;
-using Omnius.Core.Tasks;
 
 namespace Omnius.Axus.Daemon;
 
@@ -38,7 +37,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
 
     private AsyncLock _asyncLock = new();
 
-    private const string NodeLocationsUri = "http://app.omnius-labs.com/axus/v1/nodes.txt";
+    private const string NODES_URI = "http://app.omnius-labs.com/axus/v1/nodes.txt";
 
     public static async ValueTask<AxusService> CreateAsync(string databaseDirectoryPath, CancellationToken cancellationToken = default)
     {
@@ -92,87 +91,130 @@ public class AxusService : AsyncDisposableBase, IAxusService
         var digitalSignature = OmniDigitalSignature.Create(Guid.NewGuid().ToString("N"), OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256);
 
         var bytesPool = BytesPool.Shared;
-        var batchActionDispatcher = new BatchActionDispatcher(TimeSpan.FromMilliseconds(10));
 
         var senderBandwidthLimiter = new BandwidthLimiter(config.Bandwidth?.MaxSendBytesPerSeconds ?? int.MaxValue);
         var receiverBandwidthLimiter = new BandwidthLimiter(config.Bandwidth?.MaxReceiveBytesPerSeconds ?? int.MaxValue);
 
-        var nodeLocationsFetcherOptions = new NodeLocationsFetcherOptions(NodeLocationsFetcherOperationType.HttpGet, NodeLocationsUri);
+        var nodeLocationsFetcherOptions = new NodeLocationsFetcherOptions
+        {
+            Uri = NODES_URI,
+            OperationType = NodeLocationsFetcherOperationType.HttpGet
+        };
         var nodeLocationsFetcher = NodeLocationsFetcher.Create(nodeLocationsFetcherOptions);
 
         var connectionConnectors = ImmutableList.CreateBuilder<IConnectionConnector>();
 
         if (config.I2pConnector is I2pConnectorConfig i2pConnectorConfig && i2pConnectorConfig.IsEnabled)
         {
-            var i2pConnectionConnectorOptions = new I2pConnectionConnectorOptions(i2pConnectorConfig.SamBridgeAddress);
-            var i2pConnectionConnector = await I2pConnectionConnector.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, batchActionDispatcher, bytesPool, i2pConnectionConnectorOptions, cancellationToken);
+            var i2pConnectionConnectorOptions = new I2pConnectionConnectorOptions
+            {
+                SamBridgeAddress = i2pConnectorConfig.SamBridgeAddress
+            };
+            var i2pConnectionConnector = await I2pConnectionConnector.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, bytesPool, i2pConnectionConnectorOptions, cancellationToken);
             connectionConnectors.Add(i2pConnectionConnector);
         }
 
         if (config.TcpConnector is TcpConnectorConfig tcpConnectorConfig && tcpConnectorConfig.IsEnabled)
         {
-            var tcpProxyType = tcpConnectorConfig.Proxy?.Type switch
+            var tcpConnectionConnectorOptions = new TcpConnectionConnectorOptions
             {
-                Remoting.TcpProxyType.None => Engines.TcpProxyType.None,
-                Remoting.TcpProxyType.HttpProxy => Engines.TcpProxyType.HttpProxy,
-                Remoting.TcpProxyType.Socks5Proxy => Engines.TcpProxyType.Socks5Proxy,
-                _ => Engines.TcpProxyType.None,
+                Proxy = new TcpProxyOptions
+                {
+                    Type = tcpConnectorConfig.Proxy?.Type switch
+                    {
+                        Remoting.TcpProxyType.None => Engines.TcpProxyType.None,
+                        Remoting.TcpProxyType.HttpProxy => Engines.TcpProxyType.HttpProxy,
+                        Remoting.TcpProxyType.Socks5Proxy => Engines.TcpProxyType.Socks5Proxy,
+                        _ => Engines.TcpProxyType.None,
+                    },
+                    Address = tcpConnectorConfig.Proxy?.Address ?? OmniAddress.Empty
+                }
             };
-            var tcpProxyAddress = tcpConnectorConfig.Proxy?.Address ?? OmniAddress.Empty;
-            var tcpProxyOptions = new TcpProxyOptions(tcpProxyType, tcpProxyAddress);
-            var tcpConnectionConnectorOptions = new TcpConnectionConnectorOptions(tcpProxyOptions);
-            var tcpConnectionConnector = await TcpConnectionConnector.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, Socks5ProxyClient.Factory, HttpProxyClient.Factory, batchActionDispatcher, bytesPool, tcpConnectionConnectorOptions, cancellationToken);
+            var tcpConnectionConnector = await TcpConnectionConnector.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, Socks5ProxyClient.Factory, HttpProxyClient.Factory, bytesPool, tcpConnectionConnectorOptions, cancellationToken);
             connectionConnectors.Add(tcpConnectionConnector);
         }
 
         _connectionConnectors = connectionConnectors.ToImmutable();
 
-        var sessionConnectorOptions = new SessionConnectorOptions(digitalSignature);
-        _sessionConnector = await SessionConnector.CreateAsync(_connectionConnectors, batchActionDispatcher, bytesPool, sessionConnectorOptions, cancellationToken);
+        var sessionConnectorOptions = new SessionConnectorOptions
+        {
+            DigitalSignature = digitalSignature
+        };
+        _sessionConnector = await SessionConnector.CreateAsync(_connectionConnectors, bytesPool, sessionConnectorOptions, cancellationToken);
 
         var connectionAccepters = ImmutableList.CreateBuilder<IConnectionAccepter>();
 
         if (config.I2pAccepter is I2pAccepterConfig i2pAccepterConfig && i2pAccepterConfig.IsEnabled)
         {
-            var i2pConnectionAccepterOptions = new I2pConnectionAccepterOptions(i2pAccepterConfig.SamBridgeAddress);
-            var i2pConnectionAccepter = await I2pConnectionAccepter.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, batchActionDispatcher, bytesPool, i2pConnectionAccepterOptions, cancellationToken);
+            var i2pConnectionAccepterOptions = new I2pConnectionAccepterOptions
+            {
+                SamBridgeAddress = i2pAccepterConfig.SamBridgeAddress
+            };
+            var i2pConnectionAccepter = await I2pConnectionAccepter.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, bytesPool, i2pConnectionAccepterOptions, cancellationToken);
             connectionAccepters.Add(i2pConnectionAccepter);
         }
 
         if (config.TcpAccepter is TcpAccepterConfig tcpAccepterConfig && tcpAccepterConfig.IsEnabled)
         {
-            var useUpnp = tcpAccepterConfig.UseUpnp;
-            var listenAddress = tcpAccepterConfig.ListenAddress;
-            var tcpConnectionAccepterOption = new TcpConnectionAccepterOptions(useUpnp, listenAddress);
-            var tcpConnectionAccepter = await TcpConnectionAccepter.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, UpnpClient.Factory, batchActionDispatcher, bytesPool, tcpConnectionAccepterOption, cancellationToken);
+            var tcpConnectionAccepterOption = new TcpConnectionAccepterOptions
+            {
+                UseUpnp = tcpAccepterConfig.UseUpnp,
+                ListenAddress = tcpAccepterConfig.ListenAddress
+            };
+            var tcpConnectionAccepter = await TcpConnectionAccepter.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, UpnpClient.Factory, bytesPool, tcpConnectionAccepterOption, cancellationToken);
             connectionAccepters.Add(tcpConnectionAccepter);
         }
 
         _connectionAccepters = connectionAccepters.ToImmutable();
 
-        var sessionAccepterOptions = new SessionAccepterOptions(digitalSignature);
-        _sessionAccepter = await SessionAccepter.CreateAsync(_connectionAccepters, batchActionDispatcher, bytesPool, sessionAccepterOptions, cancellationToken);
+        var sessionAccepterOptions = new SessionAccepterOptions
+        {
+            DigitalSignature = digitalSignature
+        };
+        _sessionAccepter = await SessionAccepter.CreateAsync(_connectionAccepters, bytesPool, sessionAccepterOptions, cancellationToken);
 
-        var nodeFinderOptions = new NodeFinderOptions(Path.Combine(_databaseDirectoryPath, "node_finder"), 128);
-        _nodeFinder = await NodeFinder.CreateAsync(_sessionConnector, _sessionAccepter, nodeLocationsFetcher, batchActionDispatcher, bytesPool, nodeFinderOptions, cancellationToken);
+        var nodeFinderOptions = new NodeFinderOptions
+        {
+            ConfigDirectoryPath = Path.Combine(_databaseDirectoryPath, "node_finder"),
+            MaxSessionCount = 128
+        };
+        _nodeFinder = await NodeFinder.CreateAsync(_sessionConnector, _sessionAccepter, nodeLocationsFetcher, bytesPool, nodeFinderOptions, cancellationToken);
 
-        var publishedFileStorageOptions = new PublishedFileStorageOptions(Path.Combine(_databaseDirectoryPath, "published_file_storage"));
+        var publishedFileStorageOptions = new PublishedFileStorageOptions
+        {
+            ConfigDirectoryPath = Path.Combine(_databaseDirectoryPath, "published_file_storage")
+        };
         _publishedFileStorage = await PublishedFileStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, publishedFileStorageOptions, cancellationToken);
 
-        var subscribedFileStorageOptions = new SubscribedFileStorageOptions(Path.Combine(_databaseDirectoryPath, "subscribed_file_storage"));
+        var subscribedFileStorageOptions = new SubscribedFileStorageOptions
+        {
+            ConfigDirectoryPath = Path.Combine(_databaseDirectoryPath, "subscribed_file_storage")
+        };
         _subscribedFileStorage = await SubscribedFileStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, subscribedFileStorageOptions, cancellationToken);
 
-        var fileExchangerOptions = new FileExchangerOptions(128);
-        _fileExchanger = await FileExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedFileStorage, _subscribedFileStorage, batchActionDispatcher, bytesPool, fileExchangerOptions, cancellationToken);
+        var fileExchangerOptions = new FileExchangerOptions
+        {
+            MaxSessionCount = 128
+        };
+        _fileExchanger = await FileExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedFileStorage, _subscribedFileStorage, bytesPool, fileExchangerOptions, cancellationToken);
 
-        var publishedShoutStorageOptions = new PublishedShoutStorageOptions(Path.Combine(_databaseDirectoryPath, "published_shout_storage"));
+        var publishedShoutStorageOptions = new PublishedShoutStorageOptions
+        {
+            ConfigDirectoryPath = Path.Combine(_databaseDirectoryPath, "published_shout_storage")
+        };
         _publishedShoutStorage = await PublishedShoutStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, publishedShoutStorageOptions, cancellationToken);
 
-        var subscribedShoutStorageOptions = new SubscribedShoutStorageOptions(Path.Combine(_databaseDirectoryPath, "subscribed_shout_storage"));
+        var subscribedShoutStorageOptions = new SubscribedShoutStorageOptions
+        {
+            ConfigDirectoryPath = Path.Combine(_databaseDirectoryPath, "subscribed_shout_storage")
+        };
         _subscribedShoutStorage = await SubscribedShoutStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, subscribedShoutStorageOptions, cancellationToken);
 
-        var shoutExchangerOptions = new ShoutExchangerOptions(128);
-        _shoutExchanger = await ShoutExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedShoutStorage, _subscribedShoutStorage, batchActionDispatcher, bytesPool, shoutExchangerOptions, cancellationToken);
+        var shoutExchangerOptions = new ShoutExchangerOptions
+        {
+            MaxSessionCount = 128
+        };
+        _shoutExchanger = await ShoutExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedShoutStorage, _subscribedShoutStorage, bytesPool, shoutExchangerOptions, cancellationToken);
     }
 
     private async ValueTask StopAsync(CancellationToken cancellationToken = default)

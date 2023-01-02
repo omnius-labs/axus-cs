@@ -4,9 +4,9 @@ namespace Omnius.Axus.Engines.Internal.Models;
 
 internal record SubscribedBlockItem
 {
-    public OmniHash RootHash { get; init; }
-    public OmniHash BlockHash { get; init; }
-    public int Depth { get; init; }
-    public int Order { get; init; }
-    public bool IsDownloaded { get; init; }
+    public required OmniHash RootHash { get; init; }
+    public required OmniHash BlockHash { get; init; }
+    public required int Depth { get; init; }
+    public required int Order { get; init; }
+    public required bool IsDownloaded { get; init; }
 }

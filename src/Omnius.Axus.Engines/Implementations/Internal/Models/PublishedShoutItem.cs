@@ -4,8 +4,8 @@ namespace Omnius.Axus.Engines.Internal.Models;
 
 internal record PublishedShoutItem
 {
-    public OmniSignature Signature { get; init; } = OmniSignature.Empty;
-    public string Channel { get; init; } = string.Empty;
-    public IReadOnlyList<string> Authors { get; init; } = Array.Empty<string>();
-    public DateTime ShoutUpdatedTime { get; init; }
+    public required OmniSignature Signature { get; init; }
+    public required string Channel { get; init; }
+    public required IReadOnlyList<string> Authors { get; init; }
+    public required DateTime ShoutUpdatedTime { get; init; }
 }

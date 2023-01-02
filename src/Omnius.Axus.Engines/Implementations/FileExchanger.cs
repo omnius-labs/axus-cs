@@ -24,9 +24,10 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
     private readonly INodeFinder _nodeFinder;
     private readonly IPublishedFileStorage _publishedFileStorage;
     private readonly ISubscribedFileStorage _subscribedFileStorage;
-    private readonly IBatchActionDispatcher _batchActionDispatcher;
     private readonly IBytesPool _bytesPool;
     private readonly FileExchangerOptions _options;
+
+    private readonly IBatchActionDispatcher _batchActionDispatcher = new BatchActionDispatcher(TimeSpan.FromTicks(100));
 
     private readonly VolatileHashSet<OmniAddress> _connectedAddressSet;
 
@@ -55,16 +56,16 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
     private const string Schema = "file_exchanger";
 
     public static async ValueTask<FileExchanger> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
-        IPublishedFileStorage publishedFileStorage, ISubscribedFileStorage subscribedFileStorage, IBatchActionDispatcher batchActionDispatcher,
+        IPublishedFileStorage publishedFileStorage, ISubscribedFileStorage subscribedFileStorage,
         IBytesPool bytesPool, FileExchangerOptions options, CancellationToken cancellationToken = default)
     {
-        var fileExchanger = new FileExchanger(sessionConnector, sessionAccepter, nodeFinder, publishedFileStorage, subscribedFileStorage, batchActionDispatcher, bytesPool, options);
+        var fileExchanger = new FileExchanger(sessionConnector, sessionAccepter, nodeFinder, publishedFileStorage, subscribedFileStorage, bytesPool, options);
         await fileExchanger.InitAsync(cancellationToken);
         return fileExchanger;
     }
 
     private FileExchanger(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
-        IPublishedFileStorage publishedFileStorage, ISubscribedFileStorage subscribedFileStorage, IBatchActionDispatcher batchActionDispatcher,
+        IPublishedFileStorage publishedFileStorage, ISubscribedFileStorage subscribedFileStorage,
         IBytesPool bytesPool, FileExchangerOptions options)
     {
         _sessionConnector = sessionConnector;
@@ -72,7 +73,6 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
         _nodeFinder = nodeFinder;
         _publishedFileStorage = publishedFileStorage;
         _subscribedFileStorage = subscribedFileStorage;
-        _batchActionDispatcher = batchActionDispatcher;
         _bytesPool = bytesPool;
         _options = options;
 

@@ -2,14 +2,8 @@ namespace Omnius.Axus.Engines;
 
 public record NodeLocationsFetcherOptions
 {
-    public NodeLocationsFetcherOptions(NodeLocationsFetcherOperationType operationType, string? uri = null)
-    {
-        this.OperationType = operationType;
-        this.Uri = uri;
-    }
-
-    public string? Uri { get; }
-    public NodeLocationsFetcherOperationType OperationType { get; }
+    public string? Uri { get; init; }
+    public required NodeLocationsFetcherOperationType OperationType { get; init; }
 }
 
 public enum NodeLocationsFetcherOperationType : byte

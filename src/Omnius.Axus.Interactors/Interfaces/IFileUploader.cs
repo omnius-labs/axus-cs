@@ -7,6 +7,4 @@ public interface IFileUploader : IAsyncDisposable
     ValueTask<IEnumerable<UploadingFileReport>> GetUploadingFileReportsAsync(CancellationToken cancellationToken = default);
     ValueTask RegisterAsync(string filePath, string name, CancellationToken cancellationToken = default);
     ValueTask UnregisterAsync(string filePath, CancellationToken cancellationToken = default);
-    ValueTask<FileUploaderConfig> GetConfigAsync(CancellationToken cancellationToken = default);
-    ValueTask SetConfigAsync(FileUploaderConfig config, CancellationToken cancellationToken = default);
 }

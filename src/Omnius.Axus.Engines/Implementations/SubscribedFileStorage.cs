@@ -129,12 +129,13 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
                 };
                 var newBlockItems = nextMerkleTreeSection.Hashes
                     .Select((blockHash, order) =>
-                        new SubscribedBlockItem()
+                        new SubscribedBlockItem
                         {
                             RootHash = fileItem.RootHash,
                             BlockHash = blockHash,
                             Depth = nextMerkleTreeSection.Depth,
                             Order = order,
+                            IsDownloaded = false,
                         })
                     .ToArray();
 
@@ -261,11 +262,13 @@ public sealed partial class SubscribedFileStorage : AsyncDisposableBase, ISubscr
                     State = SubscribedFileState.Downloading,
                 },
             };
-            var newBlockItem = new SubscribedBlockItem()
+            var newBlockItem = new SubscribedBlockItem
             {
                 RootHash = rootHash,
                 BlockHash = rootHash,
                 Depth = -1,
+                Order = 0,
+                IsDownloaded = false,
             };
 
             _subscriberRepo.FileItems.Upsert(newFileItem);

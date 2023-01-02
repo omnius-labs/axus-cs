@@ -7,7 +7,6 @@ using Omnius.Core.Net;
 using Omnius.Core.Net.Connections;
 using Omnius.Core.Net.Connections.Secure;
 using Omnius.Core.Net.Connections.Secure.V1;
-using Omnius.Core.Tasks;
 
 namespace Omnius.Axus.Engines;
 
@@ -16,7 +15,6 @@ public sealed class SessionConnector : AsyncDisposableBase, ISessionConnector
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
     private readonly IEnumerable<IConnectionConnector> _connectionConnectors;
-    private readonly IBatchActionDispatcher _batchActionDispatcher;
     private readonly IBytesPool _bytesPool;
     private readonly SessionConnectorOptions _options;
 
@@ -24,16 +22,15 @@ public sealed class SessionConnector : AsyncDisposableBase, ISessionConnector
 
     private const int MaxReceiveByteCount = 1024 * 1024 * 256;
 
-    public static async ValueTask<SessionConnector> CreateAsync(IEnumerable<IConnectionConnector> connectionConnectors, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, SessionConnectorOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<SessionConnector> CreateAsync(IEnumerable<IConnectionConnector> connectionConnectors, IBytesPool bytesPool, SessionConnectorOptions options, CancellationToken cancellationToken = default)
     {
-        var sessionConnector = new SessionConnector(connectionConnectors, batchActionDispatcher, bytesPool, options);
+        var sessionConnector = new SessionConnector(connectionConnectors, bytesPool, options);
         return sessionConnector;
     }
 
-    private SessionConnector(IEnumerable<IConnectionConnector> connectionConnectors, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, SessionConnectorOptions options)
+    private SessionConnector(IEnumerable<IConnectionConnector> connectionConnectors, IBytesPool bytesPool, SessionConnectorOptions options)
     {
         _connectionConnectors = connectionConnectors;
-        _batchActionDispatcher = batchActionDispatcher;
         _bytesPool = bytesPool;
         _options = options;
     }

@@ -2,7 +2,11 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\Directory.Build.props" Condition="Exists('..\Directory.Build.props')" />
 
-  <!-- https://developercommunity.visualstudio.com/t/xunit-tests-cannot-run-because-visual-studio-gets/1270327 -->
-  <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  <PropertyGroup>
+    <!-- https://developercommunity.visualstudio.com/t/xunit-tests-cannot-run-because-visual-studio-gets/1270327 -->
+    <!-- https://stackoverflow.com/questions/71664177/vstest-console-exe-could-not-load-file-or-assembly-microsoft-testplatform-coreut -->
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <GenerateRuntimeConfigDevFile>true</GenerateRuntimeConfigDevFile>
+  </PropertyGroup>
 
 </Project>

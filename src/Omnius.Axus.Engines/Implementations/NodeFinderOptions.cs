@@ -2,13 +2,6 @@ namespace Omnius.Axus.Engines;
 
 public record NodeFinderOptions
 {
-    public NodeFinderOptions(string configDirectoryPath, uint maxSessionCount)
-    {
-        this.ConfigDirectoryPath = configDirectoryPath;
-        this.MaxSessionCount = maxSessionCount;
-    }
-
-    public string ConfigDirectoryPath { get; }
-
-    public uint MaxSessionCount { get; }
+    public required string ConfigDirectoryPath { get; init; }
+    public required uint MaxSessionCount { get; init; }
 }

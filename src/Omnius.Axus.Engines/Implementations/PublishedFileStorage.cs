@@ -292,8 +292,9 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
 
             var blockHash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(memory.Span));
 
-            var blockItem = new PublishedInternalBlockItem()
+            var blockItem = new PublishedInternalBlockItem
             {
+                RootHash = OmniHash.Empty,
                 BlockHash = blockHash,
                 Depth = depth,
                 Order = order++,
@@ -333,9 +334,10 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
 
             var blockHash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(memory.Span));
 
-            var blockItem = new PublishedExternalBlockItem()
+            var blockItem = new PublishedExternalBlockItem
             {
                 FilePath = filePath,
+                RootHash = OmniHash.Empty,
                 BlockHash = blockHash,
                 Order = order++,
                 Offset = stream.Position - blockSize,

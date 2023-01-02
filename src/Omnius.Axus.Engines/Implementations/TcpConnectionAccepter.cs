@@ -18,9 +18,10 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
     private readonly IBandwidthLimiter _senderBandwidthLimiter;
     private readonly IBandwidthLimiter _receiverBandwidthLimiter;
     private readonly IUpnpClientFactory _upnpClientFactory;
-    private readonly IBatchActionDispatcher _batchActionDispatcher;
     private readonly IBytesPool _bytesPool;
     private readonly TcpConnectionAccepterOptions _options;
+
+    private readonly IBatchActionDispatcher _batchActionDispatcher = new BatchActionDispatcher(TimeSpan.FromTicks(100));
 
     private TcpListenerManager? _tcpListenerManager;
 
@@ -28,19 +29,18 @@ public sealed partial class TcpConnectionAccepter : AsyncDisposableBase, IConnec
 
     private const int MaxReceiveByteCount = 1024 * 1024 * 256;
 
-    public static async ValueTask<TcpConnectionAccepter> CreateAsync(IBandwidthLimiter senderBandwidthLimiter, IBandwidthLimiter receiverBandwidthLimiter, IUpnpClientFactory upnpClientFactory, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, TcpConnectionAccepterOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<TcpConnectionAccepter> CreateAsync(IBandwidthLimiter senderBandwidthLimiter, IBandwidthLimiter receiverBandwidthLimiter, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool, TcpConnectionAccepterOptions options, CancellationToken cancellationToken = default)
     {
-        var tcpConnectionAccepter = new TcpConnectionAccepter(senderBandwidthLimiter, receiverBandwidthLimiter, upnpClientFactory, batchActionDispatcher, bytesPool, options);
+        var tcpConnectionAccepter = new TcpConnectionAccepter(senderBandwidthLimiter, receiverBandwidthLimiter, upnpClientFactory, bytesPool, options);
         await tcpConnectionAccepter.InitAsync(cancellationToken);
         return tcpConnectionAccepter;
     }
 
-    private TcpConnectionAccepter(IBandwidthLimiter senderBandwidthLimiter, IBandwidthLimiter receiverBandwidthLimiter, IUpnpClientFactory upnpClientFactory, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, TcpConnectionAccepterOptions options)
+    private TcpConnectionAccepter(IBandwidthLimiter senderBandwidthLimiter, IBandwidthLimiter receiverBandwidthLimiter, IUpnpClientFactory upnpClientFactory, IBytesPool bytesPool, TcpConnectionAccepterOptions options)
     {
         _senderBandwidthLimiter = senderBandwidthLimiter;
         _receiverBandwidthLimiter = receiverBandwidthLimiter;
         _upnpClientFactory = upnpClientFactory;
-        _batchActionDispatcher = batchActionDispatcher;
         _bytesPool = bytesPool;
         _options = options;
     }

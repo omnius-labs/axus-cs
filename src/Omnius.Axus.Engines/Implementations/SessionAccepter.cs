@@ -8,7 +8,6 @@ using Omnius.Core.Net;
 using Omnius.Core.Net.Connections;
 using Omnius.Core.Net.Connections.Secure;
 using Omnius.Core.Net.Connections.Secure.V1;
-using Omnius.Core.Tasks;
 
 namespace Omnius.Axus.Engines;
 
@@ -16,7 +15,6 @@ public sealed partial class SessionAccepter : AsyncDisposableBase, ISessionAccep
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
     private readonly ImmutableArray<IConnectionAccepter> _connectionAccepters;
-    private readonly IBatchActionDispatcher _batchActionDispatcher;
     private readonly IBytesPool _bytesPool;
     private readonly SessionAccepterOptions _options;
 
@@ -28,16 +26,15 @@ public sealed partial class SessionAccepter : AsyncDisposableBase, ISessionAccep
 
     private const int MaxReceiveByteCount = 1024 * 1024 * 256;
 
-    public static async ValueTask<SessionAccepter> CreateAsync(IEnumerable<IConnectionAccepter> connectionAccepters, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, SessionAccepterOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<SessionAccepter> CreateAsync(IEnumerable<IConnectionAccepter> connectionAccepters, IBytesPool bytesPool, SessionAccepterOptions options, CancellationToken cancellationToken = default)
     {
-        var sessionAccepter = new SessionAccepter(connectionAccepters, batchActionDispatcher, bytesPool, options);
+        var sessionAccepter = new SessionAccepter(connectionAccepters, bytesPool, options);
         return sessionAccepter;
     }
 
-    private SessionAccepter(IEnumerable<IConnectionAccepter> connectionAccepters, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, SessionAccepterOptions options)
+    private SessionAccepter(IEnumerable<IConnectionAccepter> connectionAccepters, IBytesPool bytesPool, SessionAccepterOptions options)
     {
         _connectionAccepters = connectionAccepters.ToImmutableArray();
-        _batchActionDispatcher = batchActionDispatcher;
         _bytesPool = bytesPool;
         _options = options;
 

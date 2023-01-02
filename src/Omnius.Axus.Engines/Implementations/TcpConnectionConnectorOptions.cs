@@ -4,25 +4,13 @@ namespace Omnius.Axus.Engines;
 
 public record TcpConnectionConnectorOptions
 {
-    public TcpConnectionConnectorOptions(TcpProxyOptions proxy)
-    {
-        this.Proxy = proxy;
-    }
-
-    public TcpProxyOptions Proxy { get; }
+    public required TcpProxyOptions Proxy { get; init; }
 }
 
 public record TcpProxyOptions
 {
-    public TcpProxyOptions(TcpProxyType type, OmniAddress address)
-    {
-        this.Type = type;
-        this.Address = address;
-    }
-
-    public TcpProxyType Type { get; }
-
-    public OmniAddress Address { get; }
+    public required TcpProxyType Type { get; init; }
+    public required OmniAddress Address { get; init; }
 }
 
 public enum TcpProxyType : byte

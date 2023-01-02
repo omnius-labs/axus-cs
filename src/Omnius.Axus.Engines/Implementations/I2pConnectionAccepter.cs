@@ -15,9 +15,10 @@ public sealed partial class I2pConnectionAccepter : AsyncDisposableBase, IConnec
 
     private readonly IBandwidthLimiter _senderBandwidthLimiter;
     private readonly IBandwidthLimiter _receiverBandwidthLimiter;
-    private readonly IBatchActionDispatcher _batchActionDispatcher;
     private readonly IBytesPool _bytesPool;
     private readonly I2pConnectionAccepterOptions _options;
+
+    private readonly IBatchActionDispatcher _batchActionDispatcher = new BatchActionDispatcher(TimeSpan.FromTicks(100));
 
     private SamBridge? _samBridge;
 
@@ -30,18 +31,17 @@ public sealed partial class I2pConnectionAccepter : AsyncDisposableBase, IConnec
     private const int MaxReceiveByteCount = 1024 * 1024 * 256;
     private const string Caption = "Axus (Accepter)";
 
-    public static async ValueTask<I2pConnectionAccepter> CreateAsync(IBandwidthLimiter senderBandwidthLimiter, IBandwidthLimiter receiverBandwidthLimiter, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, I2pConnectionAccepterOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<I2pConnectionAccepter> CreateAsync(IBandwidthLimiter senderBandwidthLimiter, IBandwidthLimiter receiverBandwidthLimiter, IBytesPool bytesPool, I2pConnectionAccepterOptions options, CancellationToken cancellationToken = default)
     {
-        var i2pConnectionAccepter = new I2pConnectionAccepter(senderBandwidthLimiter, receiverBandwidthLimiter, batchActionDispatcher, bytesPool, options);
+        var i2pConnectionAccepter = new I2pConnectionAccepter(senderBandwidthLimiter, receiverBandwidthLimiter, bytesPool, options);
         await i2pConnectionAccepter.InitAsync(cancellationToken);
         return i2pConnectionAccepter;
     }
 
-    private I2pConnectionAccepter(IBandwidthLimiter senderBandwidthLimiter, IBandwidthLimiter receiverBandwidthLimiter, IBatchActionDispatcher batchActionDispatcher, IBytesPool bytesPool, I2pConnectionAccepterOptions options)
+    private I2pConnectionAccepter(IBandwidthLimiter senderBandwidthLimiter, IBandwidthLimiter receiverBandwidthLimiter, IBytesPool bytesPool, I2pConnectionAccepterOptions options)
     {
         _senderBandwidthLimiter = senderBandwidthLimiter;
         _receiverBandwidthLimiter = receiverBandwidthLimiter;
-        _batchActionDispatcher = batchActionDispatcher;
         _bytesPool = bytesPool;
         _options = options;
     }

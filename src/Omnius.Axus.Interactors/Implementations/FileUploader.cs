@@ -156,29 +156,4 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
             _fileUploaderRepo.FileItems.Delete(filePath);
         }
     }
-
-    public async ValueTask<FileUploaderConfig> GetConfigAsync(CancellationToken cancellationToken = default)
-    {
-        using (await _asyncLock.LockAsync(cancellationToken))
-        {
-            var config = await _configStorage.TryGetValueAsync<FileUploaderConfig>(cancellationToken);
-
-            if (config is null)
-            {
-                config = new FileUploaderConfig();
-
-                await _configStorage.TrySetValueAsync(config, cancellationToken);
-            }
-
-            return config;
-        }
-    }
-
-    public async ValueTask SetConfigAsync(FileUploaderConfig config, CancellationToken cancellationToken = default)
-    {
-        using (await _asyncLock.LockAsync(cancellationToken))
-        {
-            await _configStorage.TrySetValueAsync(config, cancellationToken);
-        }
-    }
 }

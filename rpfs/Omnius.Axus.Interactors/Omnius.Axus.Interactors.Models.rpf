@@ -64,6 +64,3 @@ message SeedDownloaderConfig {
 message FileDownloaderConfig {
     DestinationDirectory: string,
 }
-
-message FileUploaderConfig {
-}

@@ -26,7 +26,13 @@ internal record SubscribedFileItemEntity
         {
             RootHash = this.RootHash?.Export() ?? OmniHash.Empty,
             Authors = this.Authors ?? Array.Empty<string>(),
-            Status = this.Status?.Export() ?? SubscribedFileItemStatus.Empty,
+            Status = this.Status?.Export() ?? new SubscribedFileItemStatus
+            {
+                CurrentDepth = 0,
+                TotalBlockCount = 0,
+                DownloadedBlockCount = 0,
+                State = SubscribedFileState.Unknown
+            },
         };
     }
 }

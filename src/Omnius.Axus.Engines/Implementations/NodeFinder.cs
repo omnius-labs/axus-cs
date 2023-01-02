@@ -24,9 +24,10 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
     private readonly ISessionConnector _sessionConnector;
     private readonly ISessionAccepter _sessionAccepter;
     private readonly INodeLocationsFetcher _nodeLocationsFetcher;
-    private readonly IBatchActionDispatcher _batchActionDispatcher;
     private readonly IBytesPool _bytesPool;
     private readonly NodeFinderOptions _options;
+
+    private readonly IBatchActionDispatcher _batchActionDispatcher = new BatchActionDispatcher(TimeSpan.FromTicks(100));
 
     private readonly CachedNodeLocationRepository _cachedNodeLocationRepo;
 
@@ -57,21 +58,20 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
     private const int MaxNodeLocationCount = 1000;
     private const string Schema = "node_finder";
 
-    public static async ValueTask<NodeFinder> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeLocationsFetcher nodeLocationsFetcher, IBatchActionDispatcher batchActionDispatcher,
+    public static async ValueTask<NodeFinder> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeLocationsFetcher nodeLocationsFetcher,
         IBytesPool bytesPool, NodeFinderOptions options, CancellationToken cancellationToken = default)
     {
-        var nodeFinder = new NodeFinder(sessionConnector, sessionAccepter, nodeLocationsFetcher, batchActionDispatcher, bytesPool, options);
+        var nodeFinder = new NodeFinder(sessionConnector, sessionAccepter, nodeLocationsFetcher, bytesPool, options);
         await nodeFinder.InitAsync(cancellationToken);
         return nodeFinder;
     }
 
-    private NodeFinder(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeLocationsFetcher nodeLocationsFetcher, IBatchActionDispatcher batchActionDispatcher,
+    private NodeFinder(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeLocationsFetcher nodeLocationsFetcher,
         IBytesPool bytesPool, NodeFinderOptions options)
     {
         _sessionConnector = sessionConnector;
         _sessionAccepter = sessionAccepter;
         _nodeLocationsFetcher = nodeLocationsFetcher;
-        _batchActionDispatcher = batchActionDispatcher;
         _bytesPool = bytesPool;
         _options = options;
         _myId = GenId();

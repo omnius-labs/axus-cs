@@ -4,7 +4,7 @@ gen-code:
 	bash ./eng/gen-code.sh
 
 test:
-	dotnet test --filter "FullyQualifiedName~Omnius.Axus"
+	dotnet test --no-restore --filter "FullyQualifiedName~Omnius.Axus"
 
 build:
 	dotnet build

@@ -25,9 +25,10 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
     private readonly INodeFinder _nodeFinder;
     private readonly IPublishedShoutStorage _publishedShoutStorage;
     private readonly ISubscribedShoutStorage _subscribedShoutStorage;
-    private readonly IBatchActionDispatcher _batchActionDispatcher;
     private readonly IBytesPool _bytesPool;
     private readonly ShoutExchangerOptions _options;
+
+    private readonly IBatchActionDispatcher _batchActionDispatcher = new BatchActionDispatcher(TimeSpan.FromTicks(100));
 
     private readonly VolatileHashSet<OmniAddress> _connectedAddressSet;
 
@@ -53,16 +54,16 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
     private const string Schema = "shout_exchanger";
 
     public static async ValueTask<ShoutExchanger> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
-        IPublishedShoutStorage publishedShoutStorage, ISubscribedShoutStorage subscribedShoutStorage, IBatchActionDispatcher batchActionDispatcher,
+        IPublishedShoutStorage publishedShoutStorage, ISubscribedShoutStorage subscribedShoutStorage,
         IBytesPool bytesPool, ShoutExchangerOptions options, CancellationToken cancellationToken = default)
     {
-        var shoutExchanger = new ShoutExchanger(sessionConnector, sessionAccepter, nodeFinder, publishedShoutStorage, subscribedShoutStorage, batchActionDispatcher, bytesPool, options);
+        var shoutExchanger = new ShoutExchanger(sessionConnector, sessionAccepter, nodeFinder, publishedShoutStorage, subscribedShoutStorage, bytesPool, options);
         await shoutExchanger.InitAsync(cancellationToken);
         return shoutExchanger;
     }
 
     private ShoutExchanger(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
-        IPublishedShoutStorage publishedShoutStorage, ISubscribedShoutStorage subscribedShoutStorage, IBatchActionDispatcher batchActionDispatcher,
+        IPublishedShoutStorage publishedShoutStorage, ISubscribedShoutStorage subscribedShoutStorage,
         IBytesPool bytesPool, ShoutExchangerOptions options)
     {
         _sessionConnector = sessionConnector;
@@ -70,7 +71,6 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
         _nodeFinder = nodeFinder;
         _publishedShoutStorage = publishedShoutStorage;
         _subscribedShoutStorage = subscribedShoutStorage;
-        _batchActionDispatcher = batchActionDispatcher;
         _bytesPool = bytesPool;
         _options = options;
 
