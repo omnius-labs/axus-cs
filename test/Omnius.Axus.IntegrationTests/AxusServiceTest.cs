@@ -61,17 +61,17 @@ public class AxusServiceTest
                 maxSendBytesPerSeconds: 1024 * 1024 * 32,
                 maxReceiveBytesPerSeconds: 1024 * 1024 * 32),
             i2pConnector: new I2pConnectorConfig(
-                isEnabled: true,
+                isEnabled: false,
                 samBridgeAddress: OmniAddress.Empty),
             i2pAccepter: new I2pAccepterConfig(
-                isEnabled: true,
+                isEnabled: false,
                 samBridgeAddress: OmniAddress.Empty),
             tcpConnector: new TcpConnectorConfig(
                 isEnabled: true,
                 proxy: null),
             tcpAccepter: new TcpAccepterConfig(
                 isEnabled: true,
-                useUpnp: true,
+                useUpnp: false,
                 listenAddress: listenAddress));
         return config;
     }

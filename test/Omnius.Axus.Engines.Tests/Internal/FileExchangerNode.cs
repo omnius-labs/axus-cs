@@ -7,7 +7,6 @@ using Omnius.Core.Net.Connections;
 using Omnius.Core.Net.Proxies;
 using Omnius.Core.Net.Upnp;
 using Omnius.Core.Storages;
-using Omnius.Core.Tasks;
 using Omnius.Core.UnitTestToolkit;
 
 namespace Omnius.Axus.Engines.Internal;
@@ -53,54 +52,83 @@ internal class FileExchangerNode : AsyncDisposableBase
         var digitalSignature = OmniDigitalSignature.Create(Guid.NewGuid().ToString("N"), OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256);
 
         var bytesPool = BytesPool.Shared;
-        var batchActionDispatcher = new BatchActionDispatcher(TimeSpan.FromMilliseconds(10));
 
         var senderBandwidthLimiter = new BandwidthLimiter(int.MaxValue);
         var receiverBandwidthLimiter = new BandwidthLimiter(int.MaxValue);
 
-        var nodeLocationsFetcherOptions = new NodeLocationsFetcherOptions(NodeLocationsFetcherOperationType.None);
+        var nodeLocationsFetcherOptions = new NodeLocationsFetcherOptions
+        {
+            OperationType = NodeLocationsFetcherOperationType.None
+        };
         var nodeLocationsFetcher = NodeLocationsFetcher.Create(nodeLocationsFetcherOptions);
 
         var connectionConnectors = ImmutableList.CreateBuilder<IConnectionConnector>();
 
         {
-            var tcpProxyType = Engines.TcpProxyType.None;
-            var tcpProxyAddress = OmniAddress.Empty;
-            var tcpProxyOptions = new TcpProxyOptions(tcpProxyType, tcpProxyAddress);
-            var tcpConnectionConnectorOptions = new TcpConnectionConnectorOptions(tcpProxyOptions);
-            var tcpConnectionConnector = await TcpConnectionConnector.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, Socks5ProxyClient.Factory, HttpProxyClient.Factory, batchActionDispatcher, bytesPool, tcpConnectionConnectorOptions, cancellationToken);
+            var tcpConnectionConnectorOptions = new TcpConnectionConnectorOptions
+            {
+                Proxy = new TcpProxyOptions
+                {
+                    Type = TcpProxyType.None,
+                    Address = OmniAddress.Empty,
+                }
+            };
+            var tcpConnectionConnector = await TcpConnectionConnector.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, Socks5ProxyClient.Factory, HttpProxyClient.Factory, bytesPool, tcpConnectionConnectorOptions, cancellationToken);
             connectionConnectors.Add(tcpConnectionConnector);
         }
 
         _connectionConnectors = connectionConnectors.ToImmutable();
 
-        var sessionConnectorOptions = new SessionConnectorOptions(digitalSignature);
-        _sessionConnector = await SessionConnector.CreateAsync(_connectionConnectors, batchActionDispatcher, bytesPool, sessionConnectorOptions, cancellationToken);
+        var sessionConnectorOptions = new SessionConnectorOptions
+        {
+            DigitalSignature = digitalSignature
+        };
+        _sessionConnector = await SessionConnector.CreateAsync(_connectionConnectors, bytesPool, sessionConnectorOptions, cancellationToken);
 
         var connectionAcceptors = ImmutableList.CreateBuilder<IConnectionAccepter>();
 
         {
-            var tcpConnectionAccepterOption = new TcpConnectionAccepterOptions(false, _listenAddress);
-            var tcpConnectionAccepter = await TcpConnectionAccepter.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, UpnpClient.Factory, batchActionDispatcher, bytesPool, tcpConnectionAccepterOption, cancellationToken);
+            var tcpConnectionAccepterOption = new TcpConnectionAccepterOptions
+            {
+                UseUpnp = false,
+                ListenAddress = _listenAddress
+            };
+            var tcpConnectionAccepter = await TcpConnectionAccepter.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, UpnpClient.Factory, bytesPool, tcpConnectionAccepterOption, cancellationToken);
             connectionAcceptors.Add(tcpConnectionAccepter);
         }
 
         _connectionAcceptors = connectionAcceptors.ToImmutable();
 
-        var sessionAccepterOptions = new SessionAccepterOptions(digitalSignature);
-        _sessionAccepter = await SessionAccepter.CreateAsync(_connectionAcceptors, batchActionDispatcher, bytesPool, sessionAccepterOptions, cancellationToken);
+        var sessionAccepterOptions = new SessionAccepterOptions
+        {
+            DigitalSignature = digitalSignature
+        };
+        _sessionAccepter = await SessionAccepter.CreateAsync(_connectionAcceptors, bytesPool, sessionAccepterOptions, cancellationToken);
 
-        var nodeFinderOptions = new NodeFinderOptions(Path.Combine(_databaseDirectoryPath, "node_finder"), 128);
-        _nodeFinder = await NodeFinder.CreateAsync(_sessionConnector, _sessionAccepter, nodeLocationsFetcher, batchActionDispatcher, bytesPool, nodeFinderOptions, cancellationToken);
+        var nodeFinderOptions = new NodeFinderOptions
+        {
+            ConfigDirectoryPath = Path.Combine(_databaseDirectoryPath, "node_finder"),
+            MaxSessionCount = 128
+        };
+        _nodeFinder = await NodeFinder.CreateAsync(_sessionConnector, _sessionAccepter, nodeLocationsFetcher, bytesPool, nodeFinderOptions, cancellationToken);
 
-        var publishedFileStorageOptions = new PublishedFileStorageOptions(Path.Combine(_databaseDirectoryPath, "published_file_storage"));
+        var publishedFileStorageOptions = new PublishedFileStorageOptions
+        {
+            ConfigDirectoryPath = Path.Combine(_databaseDirectoryPath, "published_file_storage")
+        };
         _publishedFileStorage = await PublishedFileStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, publishedFileStorageOptions, cancellationToken);
 
-        var subscribedFileStorageOptions = new SubscribedFileStorageOptions(Path.Combine(_databaseDirectoryPath, "subscribed_file_storage"));
+        var subscribedFileStorageOptions = new SubscribedFileStorageOptions
+        {
+            ConfigDirectoryPath = Path.Combine(_databaseDirectoryPath, "subscribed_file_storage")
+        };
         _subscribedFileStorage = await SubscribedFileStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, subscribedFileStorageOptions, cancellationToken);
 
-        var fileExchangerOptions = new FileExchangerOptions(128);
-        _fileExchanger = await FileExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedFileStorage, _subscribedFileStorage, batchActionDispatcher, bytesPool, fileExchangerOptions, cancellationToken);
+        var fileExchangerOptions = new FileExchangerOptions
+        {
+            MaxSessionCount = 128
+        };
+        _fileExchanger = await FileExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedFileStorage, _subscribedFileStorage, bytesPool, fileExchangerOptions, cancellationToken);
     }
 
     protected override async ValueTask OnDisposeAsync()
@@ -159,10 +187,7 @@ internal class FileExchangerNode : AsyncDisposableBase
     }
 
     public OmniAddress ListenAddress => _listenAddress;
-
     public INodeFinder GetNodeFinder() => _nodeFinder;
-
     public IPublishedFileStorage GetPublishedFileStorage() => _publishedFileStorage;
-
     public ISubscribedFileStorage GetSubscribedFileStorage() => _subscribedFileStorage;
 }
