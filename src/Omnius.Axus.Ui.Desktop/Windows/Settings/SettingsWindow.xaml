@@ -14,12 +14,7 @@
     d:DesignWidth="800"
     x:CompileBindings="True"
     x:DataType="local:SettingsWindowModelBase"
-    Background="{x:Null}"
-    ExtendClientAreaTitleBarHeightHint="-1"
-    ExtendClientAreaToDecorationsHint="True"
-    ExtendClientAreaChromeHints="PreferSystemChrome"
     FontFamily="Meiryo UI, Lucida Grande, Ubuntu"
-    TransparencyLevelHint="AcrylicBlur"
     mc:Ignorable="d">
 
     <Design.DataContext>
@@ -30,145 +25,124 @@
         <c:OmniDigitalSignatureToStringConverter x:Key="OmniDigitalSignatureToStringConverter" />
     </Window.Resources>
 
-    <Panel Margin="{Binding $parent[Window].OffScreenMargin}">
-        <ExperimentalAcrylicBorder IsHitTestVisible="False">
-            <ExperimentalAcrylicBorder.Material>
-                <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1" />
-            </ExperimentalAcrylicBorder.Material>
-        </ExperimentalAcrylicBorder>
-        <DockPanel>
-            <StackPanel Height="32" DockPanel.Dock="Top" HorizontalAlignment="Left" VerticalAlignment="Stretch"
-                Orientation="Horizontal" IsHitTestVisible="False" Background="{x:Null}">
-                <skp:Svg Path="/Assets/axus.svg" Margin="8,4" Width="14" VerticalAlignment="Center"/>
-                <TextBlock Text="{Binding $parent[Window].Title}" VerticalAlignment="Center" FontSize="14"/>
-            </StackPanel>
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Bottom" Margin="16" Spacing="12" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Classes="Flat Accent" Content="Ok" Command="{Binding OkCommand}" CommandParameter="{Binding $parent[Window]}" MinWidth="64" />
+            <Button Classes="Flat" Content="Cancel" Command="{Binding CancelCommand}" CommandParameter="{Binding $parent[Window]}" MinWidth="64" />
+        </StackPanel>
 
-            <DockPanel>
-                <StackPanel DockPanel.Dock="Bottom" Margin="16" Spacing="12" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Classes="Flat Accent" Content="Ok" Command="{Binding OkCommand}" CommandParameter="{Binding $parent[Window]}" MinWidth="64" />
-                    <Button Classes="Flat" Content="Cancel" Command="{Binding CancelCommand}" CommandParameter="{Binding $parent[Window]}" MinWidth="64" />
+        <TreeView DockPanel.Dock="Left">
+            <TreeViewItem Name="NetworkTreeViewItem" Header="Network" IsExpanded="True" >
+                <TreeViewItem Name="I2pConnectorTreeViewItem" Header="I2p Connector" />
+                <TreeViewItem Name="I2pAccepterTreeViewItem" Header="I2p Accepter" />
+                <TreeViewItem Name="TcpConnectorTreeViewItem" Header="Tcp Connector" />
+                <TreeViewItem Name="TcpAccepterTreeViewItem" Header="Tcp Accepter" />
+            </TreeViewItem>
+            <TreeViewItem Name="ProfileTreeViewItem" Header="Profile" IsExpanded="True" >
+                <TreeViewItem Name="TrustedSignaturesTreeViewItem" Header="Trusted signatures" />
+                <TreeViewItem Name="BlockedSignaturesTreeViewItem" Header="Blocked signatures" />
+            </TreeViewItem>
+            <TreeViewItem Name="FileTreeViewItem" Header="File" IsExpanded="True" IsSelected="True" />
+        </TreeView>
+
+        <Panel DockPanel.Dock="Right" Margin="16,16,16,0">
+            <!-- Network -->
+            <DockPanel IsVisible="{Binding #NetworkTreeViewItem.IsSelected}" >
+                <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="Network" />
+                <StackPanel Orientation="Vertical" Spacing="8" Margin="16">
+                    <DockPanel>
+                        <Label DockPanel.Dock="Left" Content="Bandwidth:" VerticalAlignment="Center" />
+                        <TextBox Text="{Binding NetworkBandwidth.Value}" Margin="8,0"
+                                TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
+                    </DockPanel>
                 </StackPanel>
-
-                <TreeView DockPanel.Dock="Left">
-                    <TreeViewItem Name="NetworkTreeViewItem" Header="Network" IsExpanded="True" >
-                        <TreeViewItem Name="I2pConnectorTreeViewItem" Header="I2p Connector" />
-                        <TreeViewItem Name="I2pAccepterTreeViewItem" Header="I2p Accepter" />
-                        <TreeViewItem Name="TcpConnectorTreeViewItem" Header="Tcp Connector" />
-                        <TreeViewItem Name="TcpAccepterTreeViewItem" Header="Tcp Accepter" />
-                    </TreeViewItem>
-                    <TreeViewItem Name="ProfileTreeViewItem" Header="Profile" IsExpanded="True" >
-                        <TreeViewItem Name="TrustedSignaturesTreeViewItem" Header="Trusted signatures" />
-                        <TreeViewItem Name="BlockedSignaturesTreeViewItem" Header="Blocked signatures" />
-                    </TreeViewItem>
-                    <TreeViewItem Name="FileTreeViewItem" Header="File" IsExpanded="True" IsSelected="True" />
-                </TreeView>
-
-                <Panel DockPanel.Dock="Right" Margin="16,16,16,0">
-                    <!-- Network -->
-                    <DockPanel IsVisible="{Binding #NetworkTreeViewItem.IsSelected}" >
-                        <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="Network" />
-                        <StackPanel Orientation="Vertical" Spacing="8" Margin="16">
-                            <DockPanel>
-                                <Label DockPanel.Dock="Left" Content="Bandwidth:" VerticalAlignment="Center" />
-                                <TextBox Text="{Binding NetworkBandwidth.Value}" Margin="8,0"
-                                        TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
-                            </DockPanel>
-                        </StackPanel>
-                    </DockPanel>
-                    <!-- I2pConnector -->
-                    <DockPanel IsVisible="{Binding #I2pConnectorTreeViewItem.IsSelected}" >
-                        <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="I2p Connector" />
-                        <StackPanel Orientation="Vertical" Spacing="8" Margin="16">
-                            <CheckBox Content="Enabled" IsChecked="{Binding I2pConnectorIsEnabled.Value}" />
-                            <DockPanel>
-                                <Label DockPanel.Dock="Left" Content="Sam Bridge address:" VerticalAlignment="Center" />
-                                <TextBox Text="{Binding I2pConnectorSamBridgeAddress.Value}" Margin="8,0"
-                                        TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
-                            </DockPanel>
-                        </StackPanel>
-                    </DockPanel>
-                    <!-- I2pAccepter -->
-                    <DockPanel IsVisible="{Binding #I2pAccepterTreeViewItem.IsSelected}" >
-                        <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="I2p Accepter" />
-                        <StackPanel Orientation="Vertical" Spacing="8" Margin="16">
-                            <CheckBox Content="Enabled" IsChecked="{Binding I2pAccepterIsEnabled.Value}" />
-                            <DockPanel>
-                                <Label DockPanel.Dock="Left" Content="Sam Bridge address:" VerticalAlignment="Center" />
-                                <TextBox Text="{Binding I2pAccepterSamBridgeAddress.Value}" Margin="8,0"
-                                        TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
-                            </DockPanel>
-                        </StackPanel>
-                    </DockPanel>
-                    <!-- TcpConnector -->
-                    <DockPanel IsVisible="{Binding #TcpConnectorTreeViewItem.IsSelected}" >
-                        <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="Tcp Connector" />
-                        <StackPanel Orientation="Vertical" Spacing="8" Margin="16">
-                            <CheckBox Content="Enabled" IsChecked="{Binding TcpConnectorIsEnabled.Value}" />
-                            <DockPanel>
-                                <Label DockPanel.Dock="Left" Content="Proxy type:" VerticalAlignment="Center" />
-                                <ComboBox Margin="8,0" Items="{Binding TcpConnectorTcpProxyTypes}"
-                                        SelectedItem="{Binding TcpConnectorSelectedProxyType.Value}" />
-                            </DockPanel>
-                            <DockPanel>
-                                <Label DockPanel.Dock="Left" Content="Proxy address:" VerticalAlignment="Center" />
-                                <TextBox Text="{Binding TcpConnectorProxyAddress.Value}" Margin="8,0"
-                                        TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
-                            </DockPanel>
-                        </StackPanel>
-                    </DockPanel>
-                    <!-- TcpAccepter -->
-                    <DockPanel IsVisible="{Binding #TcpAccepterTreeViewItem.IsSelected}" >
-                        <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="Tcp Accepter" />
-                        <StackPanel Orientation="Vertical" Spacing="8" Margin="16">
-                            <CheckBox Content="Enabled" IsChecked="{Binding TcpAccepterIsEnabled.Value}" />
-                            <CheckBox Content="Use UPnP" IsChecked="{Binding TcpAccepterUseUpnp.Value}" />
-                            <DockPanel>
-                                <Label DockPanel.Dock="Left" Content="Listen address:" VerticalAlignment="Center" />
-                                <TextBox Text="{Binding TcpAccepterListenAddress.Value}" Margin="8,0"
-                                        TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
-                            </DockPanel>
-                        </StackPanel>
-                    </DockPanel>
-                    <!-- Profile -->
-                    <DockPanel IsVisible="{Binding #ProfileTreeViewItem.IsSelected}" >
-                        <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="Profile" />
-                        <StackPanel Orientation="Vertical" Spacing="8" Margin="8">
-                            <DockPanel>
-                                <Label DockPanel.Dock="Left" Content="Signature:" VerticalAlignment="Center" />
-                                <Button Classes="Flat" DockPanel.Dock="Right" Content="New" MinWidth="64" Command="{Binding NewProfileSignatureCommand}" />
-                                <TextBox Text="{Binding ProfileDigitalSignature.Value, Mode=OneWay, Converter={StaticResource OmniDigitalSignatureToStringConverter}}" Margin="8,0"
-                                        TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" IsReadOnly="True" />
-                            </DockPanel>
-                        </StackPanel>
-                    </DockPanel>
-                    <!-- TrustedSignatures -->
-                    <DockPanel IsVisible="{Binding #TrustedSignaturesTreeViewItem.IsSelected}" >
-                        <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="Trusted signatures" />
-                        <StackPanel Orientation="Vertical" Spacing="8" Margin="8">
-                            <local:SignaturesView DataContext="{Binding TrustedSignaturesViewModel}" />
-                        </StackPanel>
-                    </DockPanel>
-                    <!-- BlockedSignatures -->
-                    <DockPanel IsVisible="{Binding #BlockedSignaturesTreeViewItem.IsSelected}" >
-                        <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="Blocked signatures" />
-                        <StackPanel Orientation="Vertical" Spacing="8" Margin="8">
-                            <local:SignaturesView DataContext="{Binding BlockedSignaturesViewModel}" />
-                        </StackPanel>
-                    </DockPanel>
-                    <!-- File -->
-                    <DockPanel IsVisible="{Binding #FileTreeViewItem.IsSelected}" >
-                        <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="File" />
-                        <StackPanel Orientation="Vertical" Spacing="8" Margin="8">
-                            <DockPanel>
-                                <Label DockPanel.Dock="Left" Content="Download directory:" VerticalAlignment="Center" />
-                                <Button Classes="Flat" DockPanel.Dock="Right" Content="Open" MinWidth="64" Command="{Binding OpenFileDownloadDirectoryCommand}" />
-                                <TextBox Text="{Binding FileDownloadDirectory.Value}" Margin="8,0"
-                                        TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
-                            </DockPanel>
-                        </StackPanel>
-                    </DockPanel>
-                </Panel>
             </DockPanel>
-        </DockPanel>
-    </Panel>
+            <!-- I2pConnector -->
+            <DockPanel IsVisible="{Binding #I2pConnectorTreeViewItem.IsSelected}" >
+                <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="I2p Connector" />
+                <StackPanel Orientation="Vertical" Spacing="8" Margin="16">
+                    <CheckBox Content="Enabled" IsChecked="{Binding I2pConnectorIsEnabled.Value}" />
+                    <DockPanel>
+                        <Label DockPanel.Dock="Left" Content="Sam Bridge address:" VerticalAlignment="Center" />
+                        <TextBox Text="{Binding I2pConnectorSamBridgeAddress.Value}" Margin="8,0"
+                                TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
+                    </DockPanel>
+                </StackPanel>
+            </DockPanel>
+            <!-- I2pAccepter -->
+            <DockPanel IsVisible="{Binding #I2pAccepterTreeViewItem.IsSelected}" >
+                <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="I2p Accepter" />
+                <StackPanel Orientation="Vertical" Spacing="8" Margin="16">
+                    <CheckBox Content="Enabled" IsChecked="{Binding I2pAccepterIsEnabled.Value}" />
+                    <DockPanel>
+                        <Label DockPanel.Dock="Left" Content="Sam Bridge address:" VerticalAlignment="Center" />
+                        <TextBox Text="{Binding I2pAccepterSamBridgeAddress.Value}" Margin="8,0"
+                                TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
+                    </DockPanel>
+                </StackPanel>
+            </DockPanel>
+            <!-- TcpConnector -->
+            <DockPanel IsVisible="{Binding #TcpConnectorTreeViewItem.IsSelected}" >
+                <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="Tcp Connector" />
+                <StackPanel Orientation="Vertical" Spacing="8" Margin="16">
+                    <CheckBox Content="Enabled" IsChecked="{Binding TcpConnectorIsEnabled.Value}" />
+                    <DockPanel>
+                        <Label DockPanel.Dock="Left" Content="Proxy type:" VerticalAlignment="Center" />
+                        <ComboBox Margin="8,0" Items="{Binding TcpConnectorTcpProxyTypes}"
+                                SelectedItem="{Binding TcpConnectorSelectedProxyType.Value}" />
+                    </DockPanel>
+                    <DockPanel>
+                        <Label DockPanel.Dock="Left" Content="Proxy address:" VerticalAlignment="Center" />
+                        <TextBox Text="{Binding TcpConnectorProxyAddress.Value}" Margin="8,0"
+                                TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
+                    </DockPanel>
+                </StackPanel>
+            </DockPanel>
+            <!-- TcpAccepter -->
+            <DockPanel IsVisible="{Binding #TcpAccepterTreeViewItem.IsSelected}" >
+                <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="Tcp Accepter" />
+                <StackPanel Orientation="Vertical" Spacing="8" Margin="16">
+                    <CheckBox Content="Enabled" IsChecked="{Binding TcpAccepterIsEnabled.Value}" />
+                    <CheckBox Content="Use UPnP" IsChecked="{Binding TcpAccepterUseUpnp.Value}" />
+                    <DockPanel>
+                        <Label DockPanel.Dock="Left" Content="Listen address:" VerticalAlignment="Center" />
+                        <TextBox Text="{Binding TcpAccepterListenAddress.Value}" Margin="8,0"
+                                TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
+                    </DockPanel>
+                </StackPanel>
+            </DockPanel>
+            <!-- Profile -->
+            <DockPanel IsVisible="{Binding #ProfileTreeViewItem.IsSelected}" >
+                <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="Profile" />
+                <StackPanel Orientation="Vertical" Spacing="8" Margin="16">
+                    <DockPanel>
+                        <Label DockPanel.Dock="Left" Content="Signature:" VerticalAlignment="Center" />
+                        <Button Classes="Flat" DockPanel.Dock="Right" Content="New" MinWidth="64" Command="{Binding NewProfileSignatureCommand}" />
+                        <TextBox Text="{Binding ProfileDigitalSignature.Value, Mode=OneWay, Converter={StaticResource OmniDigitalSignatureToStringConverter}}" Margin="8,0"
+                                TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" IsReadOnly="True" />
+                    </DockPanel>
+                </StackPanel>
+            </DockPanel>
+            <!-- TrustedSignatures -->
+            <DockPanel IsVisible="{Binding #TrustedSignaturesTreeViewItem.IsSelected}" >
+                <local:SignaturesView DataContext="{Binding TrustedSignaturesViewModel}" />
+            </DockPanel>
+            <!-- BlockedSignatures -->
+            <DockPanel IsVisible="{Binding #BlockedSignaturesTreeViewItem.IsSelected}" >
+                <local:SignaturesView DataContext="{Binding BlockedSignaturesViewModel}" />
+            </DockPanel>
+            <!-- File -->
+            <DockPanel IsVisible="{Binding #FileTreeViewItem.IsSelected}" >
+                <TextBlock DockPanel.Dock="Top" Classes="Headline4" Text="File" />
+                <StackPanel Orientation="Vertical" Spacing="8" Margin="16">
+                    <DockPanel>
+                        <Label DockPanel.Dock="Left" Content="Download directory:" VerticalAlignment="Center" />
+                        <Button Classes="Flat" DockPanel.Dock="Right" Content="Open" MinWidth="64" Command="{Binding OpenFileDownloadDirectoryCommand}" />
+                        <TextBox Text="{Binding FileDownloadDirectory.Value}" Margin="8,0"
+                                TextWrapping="NoWrap" ScrollViewer.VerticalScrollBarVisibility="Hidden" />
+                    </DockPanel>
+                </StackPanel>
+            </DockPanel>
+        </Panel>
+    </DockPanel>
 </Window>

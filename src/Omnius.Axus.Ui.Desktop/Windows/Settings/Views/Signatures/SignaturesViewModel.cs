@@ -13,11 +13,15 @@ namespace Omnius.Axus.Ui.Desktop.Windows.Settings;
 
 public abstract class SignaturesViewModelBase : AsyncDisposableBase
 {
+    public ReactivePropertySlim<string>? Title { get; protected set; }
     public AsyncReactiveCommand? AddCommand { get; protected set; }
     public ObservableCollection<OmniSignature>? Signatures { get; protected set; }
     public ObservableCollection<OmniSignature>? SelectedSignatures { get; protected set; }
     public AsyncReactiveCommand? ItemDeleteCommand { get; protected set; }
     public AsyncReactiveCommand? ItemCopySignatureCommand { get; protected set; }
+
+    public abstract string GetTitle();
+    public abstract void SetTitle(string title);
 
     public abstract IEnumerable<OmniSignature> GetSignatures();
     public abstract void SetSignatures(IEnumerable<OmniSignature> signatures);
@@ -42,6 +46,7 @@ public class SignaturesViewModel : SignaturesViewModelBase
         _dialogService = dialogService;
         _clipboardService = clipboardService;
 
+        this.Title = new ReactivePropertySlim<string>().AddTo(_disposable);
         this.AddCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.AddCommand.Subscribe(async () => await this.RegisterAsync()).AddTo(_disposable);
         this.Signatures = new();
@@ -55,6 +60,16 @@ public class SignaturesViewModel : SignaturesViewModelBase
     protected override async ValueTask OnDisposeAsync()
     {
         _disposable.Dispose();
+    }
+
+    public override string GetTitle()
+    {
+        return this.Title?.Value ?? string.Empty;
+    }
+
+    public override void SetTitle(string title)
+    {
+        this.Title!.Value = title;
     }
 
     public override IEnumerable<OmniSignature> GetSignatures()

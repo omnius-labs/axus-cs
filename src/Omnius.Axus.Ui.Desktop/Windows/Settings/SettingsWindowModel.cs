@@ -76,7 +76,9 @@ public class SettingsWindowModel : SettingsWindowModelBase
         this.NewProfileSignatureCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.NewProfileSignatureCommand.Subscribe(async () => await this.NewProfileSignatureAsync()).AddTo(_disposable);
         this.TrustedSignaturesViewModel = serviceProvider.GetRequiredService<SignaturesViewModel>();
+        this.TrustedSignaturesViewModel.SetTitle("Trusted Signatures");
         this.BlockedSignaturesViewModel = serviceProvider.GetRequiredService<SignaturesViewModel>();
+        this.BlockedSignaturesViewModel.SetTitle("Blocked Signatures");
         this.FileDownloadDirectory = new ReactiveProperty<string>().AddTo(_disposable);
         this.OpenFileDownloadDirectoryCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.OpenFileDownloadDirectoryCommand.Subscribe(async () => await this.OpenDownloadDirectoryAsync()).AddTo(_disposable);

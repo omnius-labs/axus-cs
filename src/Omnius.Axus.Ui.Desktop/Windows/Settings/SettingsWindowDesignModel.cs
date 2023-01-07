@@ -15,7 +15,9 @@ public class SettingsWindowDesignModel : SettingsWindowModelBase
         this.Status = new SettingsWindowStatus();
 
         this.TrustedSignaturesViewModel = new SignaturesViewDesignModel();
+        this.TrustedSignaturesViewModel.SetTitle("Trusted Signatures");
         this.BlockedSignaturesViewModel = new SignaturesViewDesignModel();
+        this.BlockedSignaturesViewModel.SetTitle("Blocked Signatures");
 
         this.OkCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.OkCommand.Subscribe(async (state) => await this.OkAsync(state)).AddTo(_disposable);

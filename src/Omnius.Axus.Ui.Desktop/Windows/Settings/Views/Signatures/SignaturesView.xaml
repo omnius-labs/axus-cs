@@ -17,6 +17,7 @@
 
     <Grid RowDefinitions="Auto,*">
         <DockPanel>
+            <TextBlock Classes="Headline4" Text="{Binding Title.Value}" />
             <Menu Classes="OptionMenu" HorizontalAlignment="Right">
                 <MenuItem>
                     <MenuItem.Header>
@@ -33,6 +34,7 @@
 
         <ListBox
             Grid.Row="1"
+            Margin="16"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             Items="{Binding Signatures}"

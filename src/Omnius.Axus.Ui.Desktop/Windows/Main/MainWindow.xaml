@@ -13,98 +13,80 @@
     d:DesignWidth="800"
     x:CompileBindings="True"
     x:DataType="local:MainWindowModelBase"
-    Background="{x:Null}"
-    ExtendClientAreaTitleBarHeightHint="-1"
-    ExtendClientAreaToDecorationsHint="True"
-    ExtendClientAreaChromeHints="PreferSystemChrome"
     FontFamily="Meiryo UI, Lucida Grande, Ubuntu"
-    TransparencyLevelHint="AcrylicBlur"
     mc:Ignorable="d">
 
     <Design.DataContext>
         <local:MainWindowDesignModel />
     </Design.DataContext>
 
-    <Panel Margin="{Binding $parent[Window].OffScreenMargin}">
-        <ExperimentalAcrylicBorder IsHitTestVisible="False">
-            <ExperimentalAcrylicBorder.Material>
-                <ExperimentalAcrylicMaterial TintColor="Black" MaterialOpacity="0.85" TintOpacity="1" />
-            </ExperimentalAcrylicBorder.Material>
-        </ExperimentalAcrylicBorder>
-        <DockPanel>
-            <StackPanel Height="32" DockPanel.Dock="Top" HorizontalAlignment="Left" VerticalAlignment="Stretch"
-                    Orientation="Horizontal" IsHitTestVisible="False" Background="{x:Null}">
-                <skp:Svg Path="/Assets/axus.svg" Margin="8,4" Width="14" VerticalAlignment="Center"/>
-                <TextBlock Text="{Binding $parent[Window].Title}" VerticalAlignment="Center" FontSize="14"/>
-            </StackPanel>
-
-            <DockPanel Classes="Sidebar">
-                <ListBox x:Name="TabListBox" DockPanel.Dock="Top">
-                    <ListBoxItem Name="StatusListBoxItem" IsSelected="true">
-                        <StackPanel>
-                            <Panel>
-                                <skp:Svg Path="/Assets/status.svg" />
-                            </Panel>
-                            <TextBlock Text="Status" />
-                        </StackPanel>
-                    </ListBoxItem>
-                    <ListBoxItem Name="PeersListBoxItem">
-                        <StackPanel>
-                            <Panel>
-                                <skp:Svg Path="/Assets/peers.svg" />
-                            </Panel>
-                            <TextBlock Text="Peers" />
-                        </StackPanel>
-                    </ListBoxItem>
-                    <ListBoxItem Name="ChatListBoxItem">
-                        <StackPanel>
-                            <Panel>
-                                <skp:Svg Path="/Assets/chat.svg" />
-                            </Panel>
-                            <TextBlock Text="Chat" />
-                        </StackPanel>
-                    </ListBoxItem>
-                    <ListBoxItem Name="SearchListBoxItem">
-                        <StackPanel>
-                            <Panel>
-                                <skp:Svg Path="/Assets/search.svg" />
-                            </Panel>
-                            <TextBlock Text="Search" />
-                        </StackPanel>
-                    </ListBoxItem>
-                    <ListBoxItem Name="DownloadListBoxItem">
-                        <StackPanel>
-                            <Panel>
-                                <skp:Svg Path="/Assets/download.svg" />
-                            </Panel>
-                            <TextBlock Text="Download" />
-                        </StackPanel>
-                    </ListBoxItem>
-                    <ListBoxItem Name="UploadListBoxItem">
-                        <StackPanel>
-                            <Panel>
-                                <skp:Svg Path="/Assets/upload.svg" />
-                            </Panel>
-                            <TextBlock Text="Upload" />
-                        </StackPanel>
-                    </ListBoxItem>
-                </ListBox>
-                <Button Classes="Flat Accent" VerticalAlignment="Bottom" Command="{Binding SettingsCommand}">
+    <DockPanel>
+        <DockPanel Classes="Sidebar">
+            <ListBox x:Name="TabListBox" DockPanel.Dock="Top">
+                <ListBoxItem Name="StatusListBoxItem" IsSelected="true">
                     <StackPanel>
                         <Panel>
-                            <skp:Svg Path="/Assets/settings.svg" />
+                            <skp:Svg Path="/Assets/status.svg" />
                         </Panel>
-                        <TextBlock Text="Settings" />
+                        <TextBlock Text="Status" />
                     </StackPanel>
-                </Button>
-            </DockPanel>
-
-            <Panel DockPanel.Dock="Right">
-                <local:StatusView DataContext="{Binding StatusViewModel}" IsVisible="{Binding #StatusListBoxItem.IsSelected}" />
-                <local:PeersView DataContext="{Binding PeersViewModel}" IsVisible="{Binding #PeersListBoxItem.IsSelected}" />
-                <local:DownloadView DataContext="{Binding DownloadViewModel}" IsVisible="{Binding #DownloadListBoxItem.IsSelected}" />
-                <local:UploadView DataContext="{Binding UploadViewModel}" IsVisible="{Binding #UploadListBoxItem.IsSelected}" />
-            </Panel>
+                </ListBoxItem>
+                <ListBoxItem Name="PeersListBoxItem">
+                    <StackPanel>
+                        <Panel>
+                            <skp:Svg Path="/Assets/peers.svg" />
+                        </Panel>
+                        <TextBlock Text="Peers" />
+                    </StackPanel>
+                </ListBoxItem>
+                <ListBoxItem Name="ChatListBoxItem">
+                    <StackPanel>
+                        <Panel>
+                            <skp:Svg Path="/Assets/chat.svg" />
+                        </Panel>
+                        <TextBlock Text="Chat" />
+                    </StackPanel>
+                </ListBoxItem>
+                <ListBoxItem Name="SearchListBoxItem">
+                    <StackPanel>
+                        <Panel>
+                            <skp:Svg Path="/Assets/search.svg" />
+                        </Panel>
+                        <TextBlock Text="Search" />
+                    </StackPanel>
+                </ListBoxItem>
+                <ListBoxItem Name="DownloadListBoxItem">
+                    <StackPanel>
+                        <Panel>
+                            <skp:Svg Path="/Assets/download.svg" />
+                        </Panel>
+                        <TextBlock Text="Download" />
+                    </StackPanel>
+                </ListBoxItem>
+                <ListBoxItem Name="UploadListBoxItem">
+                    <StackPanel>
+                        <Panel>
+                            <skp:Svg Path="/Assets/upload.svg" />
+                        </Panel>
+                        <TextBlock Text="Upload" />
+                    </StackPanel>
+                </ListBoxItem>
+            </ListBox>
+            <Button Classes="Flat Accent" VerticalAlignment="Bottom" Command="{Binding SettingsCommand}">
+                <StackPanel>
+                    <Panel>
+                        <skp:Svg Path="/Assets/settings.svg" />
+                    </Panel>
+                    <TextBlock Text="Settings" />
+                </StackPanel>
+            </Button>
         </DockPanel>
-    </Panel>
+
+        <Panel DockPanel.Dock="Right">
+            <local:StatusView DataContext="{Binding StatusViewModel}" IsVisible="{Binding #StatusListBoxItem.IsSelected}" />
+            <local:PeersView DataContext="{Binding PeersViewModel}" IsVisible="{Binding #PeersListBoxItem.IsSelected}" />
+            <local:DownloadView DataContext="{Binding DownloadViewModel}" IsVisible="{Binding #DownloadListBoxItem.IsSelected}" />
+            <local:UploadView DataContext="{Binding UploadViewModel}" IsVisible="{Binding #UploadListBoxItem.IsSelected}" />
+        </Panel>
+    </DockPanel>
 </Window>

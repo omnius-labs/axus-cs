@@ -11,6 +11,8 @@ public class SignaturesViewDesignModel : SignaturesViewModelBase
 
     public SignaturesViewDesignModel()
     {
+        this.Title = new ReactivePropertySlim<string>().AddTo(_disposable);
+
         this.AddCommand = new AsyncReactiveCommand().AddTo(_disposable);
         this.AddCommand.Subscribe(async () => await this.RegisterAsync()).AddTo(_disposable);
 
@@ -30,6 +32,16 @@ public class SignaturesViewDesignModel : SignaturesViewModelBase
     protected override async ValueTask OnDisposeAsync()
     {
         _disposable.Dispose();
+    }
+
+    public override string GetTitle()
+    {
+        return this.Title?.Value ?? string.Empty;
+    }
+
+    public override void SetTitle(string title)
+    {
+        this.Title!.Value = title;
     }
 
     public override IEnumerable<OmniSignature> GetSignatures()
