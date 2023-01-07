@@ -117,8 +117,8 @@
       },
       "LiteDB": {
         "type": "Transitive",
-        "resolved": "5.0.11",
-        "contentHash": "6cL4bOmVCUB0gIK+6qIr68HeqjjHZicPDGQjvJ87mIOvkFsEsJWkIps3yoKNeLpHhJQur++yoQ9Q8gxsdos0xQ=="
+        "resolved": "5.0.15",
+        "contentHash": "nucyfCOGSATH553BxplxExP3BOqEwmHt0B57426EIaQjD3CC1Odb52VVCGgTxyYaD2oe3B/cJk8jDo6XiBJqPg=="
       },
       "Microsoft.CodeCoverage": {
         "type": "Transitive",
@@ -1381,7 +1381,7 @@
       "omnius.axus.engines": {
         "type": "Project",
         "dependencies": {
-          "LiteDB": "[5.0.11, )",
+          "LiteDB": "[5.0.15, )",
           "NLog": "[4.7.15, )",
           "Omnius.Axus.Messages": "[0.0.1-alpha.1, )",
           "Omnius.Axus.Utils": "[0.0.1-alpha.1, )",
@@ -1400,7 +1400,7 @@
       "omnius.axus.interactors": {
         "type": "Project",
         "dependencies": {
-          "LiteDB": "[5.0.11, )",
+          "LiteDB": "[5.0.15, )",
           "NLog": "[4.7.15, )",
           "Omnius.Axus.Messages": "[0.0.1-alpha.1, )",
           "Omnius.Axus.Remoting": "[0.0.1-alpha.1, )",
@@ -1423,7 +1423,7 @@
       "omnius.axus.messages": {
         "type": "Project",
         "dependencies": {
-          "LiteDB": "[5.0.11, )",
+          "LiteDB": "[5.0.15, )",
           "NLog": "[4.7.15, )",
           "Omnius.Core": "[0.0.1-alpha.1, )",
           "Omnius.Core.Collections": "[0.0.1-alpha.1, )",
@@ -1451,7 +1451,7 @@
       "omnius.axus.utils": {
         "type": "Project",
         "dependencies": {
-          "LiteDB": "[5.0.11, )",
+          "LiteDB": "[5.0.15, )",
           "NLog": "[4.7.15, )"
         }
       },
@@ -1583,7 +1583,7 @@
       "omnius.core.storages": {
         "type": "Project",
         "dependencies": {
-          "LiteDB": "[5.0.11, )",
+          "LiteDB": "[5.0.15, )",
           "NLog": "[4.7.15, )",
           "Nito.AsyncEx": "[5.1.2, )",
           "Omnius.Core": "[0.0.1-alpha.1, )",

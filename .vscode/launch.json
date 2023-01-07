@@ -44,6 +44,17 @@
             "stopAtEntry": false
         },
         {
+            "name": "design-ui-desktop (linux)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "design-build (Omnius.Axus.Ui.Desktop)",
+            "program": "${workspaceFolder}/tmp/bin/linux-vscode-design-ui-desktop/Omnius.Axus.Ui.Desktop/Debug/net7.0/Omnius.Axus.Ui.Desktop.dll",
+            "cwd": "${workspaceFolder}/demo/0",
+            "envFile": "${workspaceFolder}/.env",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
             "name": "daemon (win)",
             "type": "coreclr",
             "request": "launch",
@@ -130,6 +141,7 @@
                 "true"
             ],
             "cwd": "${workspaceFolder}/demo/0",
+            "envFile": "${workspaceFolder}/.env",
             "console": "internalConsole",
             "stopAtEntry": false
         },

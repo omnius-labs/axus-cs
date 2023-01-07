@@ -3,15 +3,10 @@
 [![Test](https://github.com/omnius-labs/axus/actions/workflows/test.yml/badge.svg)](https://github.com/omnius-labs/axus/actions/workflows/test.yml)
 [![Gitter](https://badges.gitter.im/omnius-labs.svg)](https://gitter.im/omnius-labs/community)
 
-## Usage
-
-### Linux
-
-```sh
-# https://github.com/AvaloniaUI/Avalonia/issues/4427
-export LANG=en_US.UTF-8
-./Omnius.Axus.Launcher
-```
+## Docs
+- [Requirements](./docs/requirements/index.adoc)
+- [Specifications](./docs/specifications/index.adoc)
+- [FAQ](./docs/faq.md)
 
 ## Links
 
