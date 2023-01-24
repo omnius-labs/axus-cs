@@ -2,6 +2,13 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "gen-envfile",
+            "type": "shell",
+            "linux": {
+                "command": "bash ${workspaceFolder}/eng/gen-envfile.sh"
+            }
+        },
+        {
             "label": "design-build (Omnius.Axus.Ui.Desktop)",
             "command": "dotnet",
             "type": "process",
@@ -17,7 +24,8 @@
                     "DesignMode": "true"
                 }
             },
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$msCompile",
+            "dependsOn": "gen-envfile"
         },
         {
             "label": "build (Omnius.Axus.Daemon)",
@@ -51,7 +59,8 @@
                     "BuildTargetName": "vscode-ui-desktop"
                 }
             },
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$msCompile",
+            "dependsOn": "gen-envfile"
         }
     ]
 }
