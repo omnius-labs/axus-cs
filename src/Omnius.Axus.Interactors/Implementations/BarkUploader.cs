@@ -26,14 +26,14 @@ public sealed class BarkUploader : AsyncDisposableBase, IBarkUploader
 
     private readonly AsyncLock _asyncLock = new();
 
-    private const string Channel = "profile/v1";
-    private const string Author = "profile_uploader/v1";
+    private const string Channel = "bark/v1";
+    private const string Author = "bark-uploader-v1";
 
     public static async ValueTask<BarkUploader> CreateAsync(IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, BarkUploaderOptions options, CancellationToken cancellationToken = default)
     {
-        var ProfileUploader = new BarkUploader(serviceMediator, singleValueStorageFactory, bytesPool, options);
-        await ProfileUploader.InitAsync(cancellationToken);
-        return ProfileUploader;
+        var barkUploader = new BarkUploader(serviceMediator, singleValueStorageFactory, bytesPool, options);
+        await barkUploader.InitAsync(cancellationToken);
+        return barkUploader;
     }
 
     private BarkUploader(IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, BarkUploaderOptions options)

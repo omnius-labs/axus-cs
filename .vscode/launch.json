@@ -2,166 +2,88 @@
     "version": "0.2.0",
     "compounds": [
         {
-            "name": "daemon/ui-desktop (win)",
-            "configurations": ["daemon (win)", "ui-desktop (win)"],
+            "name": "daemon/ui-desktop",
+            "configurations": ["daemon", "ui-desktop"],
             "stopAll": true,
             "presentation": {
                 "hidden": false,
                 "group": "daemon/ui-desktop",
                 "order": 1
             }
-        },
-        {
-            "name": "daemon/ui-desktop (linux)",
-            "configurations": ["daemon (linux)", "ui-desktop (linux)"],
-            "stopAll": true,
-            "presentation": {
-                "hidden": false,
-                "group": "daemon/ui-desktop",
-                "order": 2
-            }
-        },
-        {
-            "name": "daemon/ui-desktop (mac)",
-            "configurations": ["daemon (mac)", "ui-desktop (mac)"],
-            "stopAll": true,
-            "presentation": {
-                "hidden": false,
-                "group": "daemon/ui-desktop",
-                "order": 3
-            }
         }
     ],
     "configurations": [
         {
-            "name": "design-ui-desktop (win)",
+            "name": "daemon",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build (Omnius.Axus.Daemon)",
+            "args": [
+                "-s",
+                "./storage/daemon",
+                "-l",
+                "tcp(ip4(127.0.0.1),43200)",
+                "-v",
+                "true"
+            ],
+            "cwd": "${workspaceFolder}/demo/0",
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "windows": {
+                "program": "${workspaceFolder}/tmp/bin/win-vscode-daemon/Omnius.Axus.Daemon/Debug/net7.0/Omnius.Axus.Daemon.dll"
+            },
+            "linux": {
+                "program": "${workspaceFolder}/tmp/bin/linux-vscode-daemon/Omnius.Axus.Daemon/Debug/net7.0/Omnius.Axus.Daemon.dll"
+            },
+            "osx": {
+                "program": "${workspaceFolder}/tmp/bin/mac-vscode-daemon/Omnius.Axus.Daemon/Debug/net7.0/Omnius.Axus.Daemon.dll"
+            }
+        },
+        {
+            "name": "ui-desktop",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build (Omnius.Axus.Ui.Desktop)",
+            "args": [
+                "-s",
+                "./storage/ui-desktop",
+                "-l",
+                "tcp(ip4(127.0.0.1),43200)",
+                "-v",
+                "true"
+            ],
+            "cwd": "${workspaceFolder}/demo/0",
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "windows": {
+                "program": "${workspaceFolder}/tmp/bin/win-vscode-ui-desktop/Omnius.Axus.Ui.Desktop/Debug/net7.0/Omnius.Axus.Ui.Desktop.dll"
+            },
+            "linux": {
+                "program": "${workspaceFolder}/tmp/bin/linux-vscode-ui-desktop/Omnius.Axus.Ui.Desktop/Debug/net7.0/Omnius.Axus.Ui.Desktop.dll",
+                "envFile": "${workspaceFolder}/.env"
+            },
+            "osx": {
+                "program": "${workspaceFolder}/tmp/bin/mac-vscode-ui-desktop/Omnius.Axus.Ui.Desktop/Debug/net7.0/Omnius.Axus.Ui.Desktop.dll"
+            }
+        },
+        {
+            "name": "design-ui-desktop",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "design-build (Omnius.Axus.Ui.Desktop)",
-            "program": "${workspaceFolder}/tmp/bin/win-vscode-design-ui-desktop/Omnius.Axus.Ui.Desktop/Debug/net7.0/Omnius.Axus.Ui.Desktop.dll",
             "cwd": "${workspaceFolder}/demo/0",
             "console": "internalConsole",
-            "stopAtEntry": false
-        },
-        {
-            "name": "design-ui-desktop (linux)",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "design-build (Omnius.Axus.Ui.Desktop)",
-            "program": "${workspaceFolder}/tmp/bin/linux-vscode-design-ui-desktop/Omnius.Axus.Ui.Desktop/Debug/net7.0/Omnius.Axus.Ui.Desktop.dll",
-            "cwd": "${workspaceFolder}/demo/0",
-            "envFile": "${workspaceFolder}/.env",
-            "console": "internalConsole",
-            "stopAtEntry": false
-        },
-        {
-            "name": "daemon (win)",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build (Omnius.Axus.Daemon)",
-            "program": "${workspaceFolder}/tmp/bin/win-vscode-daemon/Omnius.Axus.Daemon/Debug/net7.0/Omnius.Axus.Daemon.dll",
-            "args": [
-                "-s",
-                "./storage/daemon",
-                "-l",
-                "tcp(ip4(127.0.0.1),43200)",
-                "-v",
-                "true"
-            ],
-            "cwd": "${workspaceFolder}/demo/0",
-            "console": "internalConsole",
-            "stopAtEntry": false
-        },
-        {
-            "name": "daemon (linux)",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build (Omnius.Axus.Daemon)",
-            "program": "${workspaceFolder}/tmp/bin/linux-vscode-daemon/Omnius.Axus.Daemon/Debug/net7.0/Omnius.Axus.Daemon.dll",
-            "args": [
-                "-s",
-                "./storage/daemon",
-                "-l",
-                "tcp(ip4(127.0.0.1),43200)",
-                "-v",
-                "true"
-            ],
-            "cwd": "${workspaceFolder}/demo/0",
-            "console": "internalConsole",
-            "stopAtEntry": false
-        },
-        {
-            "name": "daemon (mac)",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build (Omnius.Axus.Daemon)",
-            "program": "${workspaceFolder}/tmp/bin/mac-vscode-daemon/Omnius.Axus.Daemon/Debug/net7.0/Omnius.Axus.Daemon.dll",
-            "args": [
-                "-s",
-                "./storage/daemon",
-                "-l",
-                "tcp(ip4(127.0.0.1),43200)",
-                "-v",
-                "true"
-            ],
-            "cwd": "${workspaceFolder}/demo/0",
-            "console": "internalConsole",
-            "stopAtEntry": false
-        },
-        {
-            "name": "ui-desktop (win)",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build (Omnius.Axus.Ui.Desktop)",
-            "program": "${workspaceFolder}/tmp/bin/win-vscode-ui-desktop/Omnius.Axus.Ui.Desktop/Debug/net7.0/Omnius.Axus.Ui.Desktop.dll",
-            "args": [
-                "-s",
-                "./storage/ui-desktop",
-                "-l",
-                "tcp(ip4(127.0.0.1),43200)",
-                "-v",
-                "true"
-            ],
-            "cwd": "${workspaceFolder}/demo/0",
-            "console": "internalConsole",
-            "stopAtEntry": false
-        },
-        {
-            "name": "ui-desktop (linux)",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build (Omnius.Axus.Ui.Desktop)",
-            "program": "${workspaceFolder}/tmp/bin/linux-vscode-ui-desktop/Omnius.Axus.Ui.Desktop/Debug/net7.0/Omnius.Axus.Ui.Desktop.dll",
-            "args": [
-                "-s",
-                "./storage/ui-desktop",
-                "-l",
-                "tcp(ip4(127.0.0.1),43200)",
-                "-v",
-                "true"
-            ],
-            "cwd": "${workspaceFolder}/demo/0",
-            "envFile": "${workspaceFolder}/.env",
-            "console": "internalConsole",
-            "stopAtEntry": false
-        },
-        {
-            "name": "ui-desktop (mac)",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build (Omnius.Axus.Ui.Desktop)",
-            "program": "${workspaceFolder}/tmp/bin/mac-vscode-ui-desktop/Omnius.Axus.Ui.Desktop/Debug/net7.0/Omnius.Axus.Ui.Desktop.dll",
-            "args": [
-                "-s",
-                "./storage/ui-desktop",
-                "-l",
-                "tcp(ip4(127.0.0.1),43200)",
-                "-v",
-                "true"
-            ],
-            "cwd": "${workspaceFolder}/demo/0",
-            "console": "internalConsole",
-            "stopAtEntry": false
+            "stopAtEntry": false,
+            "windows": {
+                "program": "${workspaceFolder}/tmp/bin/win-vscode-design-ui-desktop/Omnius.Axus.Ui.Desktop/Debug/net7.0/Omnius.Axus.Ui.Desktop.dll"
+            },
+            "linux": {
+                "program": "${workspaceFolder}/tmp/bin/linux-vscode-design-ui-desktop/Omnius.Axus.Ui.Desktop/Debug/net7.0/Omnius.Axus.Ui.Desktop.dll",
+                "envFile": "${workspaceFolder}/.env"
+            },
+            "osx": {
+                "program": "${workspaceFolder}/tmp/bin/mac-vscode-design-ui-desktop/Omnius.Axus.Ui.Desktop/Debug/net7.0/Omnius.Axus.Ui.Desktop.dll"
+            }
         }
     ]
 }

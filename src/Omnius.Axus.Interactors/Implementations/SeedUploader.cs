@@ -27,14 +27,14 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
 
     private readonly AsyncLock _asyncLock = new();
 
-    private const string Channel = "profile/v1";
-    private const string Author = "profile_uploader/v1";
+    private const string Channel = "seed/v1";
+    private const string Author = "seed-uploader-v1";
 
     public static async ValueTask<SeedUploader> CreateAsync(IFileUploader fileUploader, IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, SeedUploaderOptions options, CancellationToken cancellationToken = default)
     {
-        var ProfileUploader = new SeedUploader(fileUploader, serviceMediator, singleValueStorageFactory, bytesPool, options);
-        await ProfileUploader.InitAsync(cancellationToken);
-        return ProfileUploader;
+        var seedUploader = new SeedUploader(fileUploader, serviceMediator, singleValueStorageFactory, bytesPool, options);
+        await seedUploader.InitAsync(cancellationToken);
+        return seedUploader;
     }
 
     private SeedUploader(IFileUploader fileUploader, IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, SeedUploaderOptions options)

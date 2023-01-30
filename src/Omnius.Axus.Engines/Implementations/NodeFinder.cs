@@ -56,7 +56,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
     private const int MaxBucketLength = 20;
     private const int MaxNodeLocationCount = 1000;
-    private const string Schema = "node_finder";
+    private const string Schema = "node-finder-v1";
 
     public static async ValueTask<NodeFinder> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeLocationsFetcher nodeLocationsFetcher,
         IBytesPool bytesPool, NodeFinderOptions options, CancellationToken cancellationToken = default)

@@ -29,13 +29,13 @@ public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileDow
     private readonly AsyncLock _asyncLock = new();
 
     private const string Channel = "profile/v1";
-    private const string Author = "profile_downloader/v1";
+    private const string Author = "profile-downloader-v1";
 
     public static async ValueTask<ProfileDownloader> CreateAsync(IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ProfileDownloaderOptions options, CancellationToken cancellationToken = default)
     {
-        var ProfileDownloader = new ProfileDownloader(serviceMediator, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
-        await ProfileDownloader.InitAsync(cancellationToken);
-        return ProfileDownloader;
+        var profileDownloader = new ProfileDownloader(serviceMediator, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
+        await profileDownloader.InitAsync(cancellationToken);
+        return profileDownloader;
     }
 
     private ProfileDownloader(IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ProfileDownloaderOptions options)

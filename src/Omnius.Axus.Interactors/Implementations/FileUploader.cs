@@ -24,7 +24,7 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
 
     private readonly AsyncLock _asyncLock = new();
 
-    private const string Author = "file_uploader/v1";
+    private const string Author = "file-uploader-v1";
 
     public static async ValueTask<FileUploader> CreateAsync(IAxusServiceMediator serviceController, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, FileUploaderOptions options, CancellationToken cancellationToken = default)
     {

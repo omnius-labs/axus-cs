@@ -29,13 +29,13 @@ public sealed partial class BarkDownloader : AsyncDisposableBase, IBarkDownloade
     private readonly AsyncLock _asyncLock = new();
 
     private const string Channel = "bark/v1";
-    private const string Author = "bark_downloader/v1";
+    private const string Author = "bark-downloader-v1";
 
     public static async ValueTask<BarkDownloader> CreateAsync(IProfileDownloader profileDownloader, IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkDownloaderOptions options, CancellationToken cancellationToken = default)
     {
-        var BarkDownloader = new BarkDownloader(profileDownloader, serviceMediator, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
-        await BarkDownloader.InitAsync(cancellationToken);
-        return BarkDownloader;
+        var barkDownloader = new BarkDownloader(profileDownloader, serviceMediator, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
+        await barkDownloader.InitAsync(cancellationToken);
+        return barkDownloader;
     }
 
     private BarkDownloader(IProfileDownloader profileDownloader, IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkDownloaderOptions options)

@@ -25,7 +25,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
 
     private readonly AsyncLock _asyncLock = new();
 
-    private const string Author = "file_downloader/v1";
+    private const string Author = "file-downloader-v1";
 
     public static async ValueTask<FileDownloader> CreateAsync(IAxusServiceMediator service, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options, CancellationToken cancellationToken = default)
     {

@@ -53,7 +53,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
     private readonly object _lockObject = new();
 
-    private const string Schema = "file_exchanger";
+    private const string Schema = "file-exchanger-v1";
 
     public static async ValueTask<FileExchanger> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
         IPublishedFileStorage publishedFileStorage, ISubscribedFileStorage subscribedFileStorage,

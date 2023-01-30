@@ -51,7 +51,7 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
     private readonly object _lockObject = new();
 
-    private const string Schema = "shout_exchanger";
+    private const string Schema = "shout-exchanger-v1";
 
     public static async ValueTask<ShoutExchanger> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
         IPublishedShoutStorage publishedShoutStorage, ISubscribedShoutStorage subscribedShoutStorage,
