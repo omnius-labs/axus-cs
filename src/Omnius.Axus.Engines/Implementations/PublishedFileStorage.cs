@@ -126,7 +126,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
         }
     }
 
-    public async ValueTask<OmniHash> PublishFileAsync(string filePath, int maxBlockSize, string author, CancellationToken cancellationToken = default)
+    public async ValueTask<OmniHash> PublishFileAsync(string filePath, int maxBlockSize, string zone, CancellationToken cancellationToken = default)
     {
         using (await _publishAsyncLock.LockAsync(cancellationToken))
         {
@@ -134,9 +134,9 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
 
             if (fileItem is not null)
             {
-                if (fileItem.Authors.Contains(author)) return fileItem.RootHash;
+                if (fileItem.Authors.Contains(zone)) return fileItem.RootHash;
 
-                var authors = fileItem.Authors.Append(author).ToArray();
+                var authors = fileItem.Authors.Append(zone).ToArray();
                 fileItem = fileItem with { Authors = authors };
                 _publisherRepo.FileItems.Upsert(fileItem);
 
@@ -171,7 +171,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
             {
                 RootHash = rootHash,
                 FilePath = filePath,
-                Authors = new[] { author },
+                Authors = new[] { zone },
                 MaxBlockSize = maxBlockSize,
             };
 
@@ -190,7 +190,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
         }
     }
 
-    public async ValueTask<OmniHash> PublishFileAsync(ReadOnlySequence<byte> sequence, int maxBlockSize, string author, CancellationToken cancellationToken = default)
+    public async ValueTask<OmniHash> PublishFileAsync(ReadOnlySequence<byte> sequence, int maxBlockSize, string zone, CancellationToken cancellationToken = default)
     {
         using (await _publishAsyncLock.LockAsync(cancellationToken))
         {
@@ -225,9 +225,9 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
                 var targetBlockHashes = allInternalBlockItems.Select(n => n.BlockHash).ToArray();
                 await this.DeleteBlocksAsync(tempPrefix, targetBlockHashes, cancellationToken);
 
-                if (fileItem.Authors.Contains(author)) return rootHash;
+                if (fileItem.Authors.Contains(zone)) return rootHash;
 
-                var authors = fileItem.Authors.Append(author).ToArray();
+                var authors = fileItem.Authors.Append(zone).ToArray();
                 fileItem = fileItem with { Authors = authors };
                 _publisherRepo.FileItems.Upsert(fileItem);
 
@@ -238,7 +238,7 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
             {
                 RootHash = rootHash,
                 FilePath = null,
-                Authors = new[] { author },
+                Authors = new[] { zone },
                 MaxBlockSize = maxBlockSize,
             };
 
@@ -355,28 +355,28 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
         await _blockStorage.WriteAsync(key, memory);
     }
 
-    public async ValueTask UnpublishFileAsync(string filePath, string author, CancellationToken cancellationToken = default)
+    public async ValueTask UnpublishFileAsync(string filePath, string zone, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var fileItem = _publisherRepo.FileItems.FindOne(filePath);
             if (fileItem is null) return;
 
-            await this.UnpublishFileAsync(fileItem.RootHash, author, cancellationToken);
+            await this.UnpublishFileAsync(fileItem.RootHash, zone, cancellationToken);
         }
     }
 
-    public async ValueTask UnpublishFileAsync(OmniHash rootHash, string author, CancellationToken cancellationToken = default)
+    public async ValueTask UnpublishFileAsync(OmniHash rootHash, string zone, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var fileItem = _publisherRepo.FileItems.FindOne(rootHash);
             if (fileItem is null) return;
-            if (!fileItem.Authors.Contains(author)) return;
+            if (!fileItem.Authors.Contains(zone)) return;
 
             if (fileItem.Authors.Count > 1)
             {
-                var authors = fileItem.Authors.Where(n => n != author).ToArray();
+                var authors = fileItem.Authors.Where(n => n != zone).ToArray();
                 var newFileItem = fileItem with { Authors = authors };
                 _publisherRepo.FileItems.Upsert(newFileItem);
 
@@ -446,5 +446,5 @@ public sealed partial class PublishedFileStorage : AsyncDisposableBase, IPublish
         return StringConverter.ToString(rootHash) + "/" + StringConverter.ToString(blockHash);
     }
 
-    public ValueTask<IEnumerable<PublishedFileReport>> GetPublishedFileReportsAsync(string author, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+    public ValueTask<IEnumerable<PublishedFileReport>> GetPublishedFileReportsAsync(string zone, CancellationToken cancellationToken = default) => throw new NotImplementedException();
 }

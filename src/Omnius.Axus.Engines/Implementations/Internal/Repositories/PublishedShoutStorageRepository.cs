@@ -87,12 +87,12 @@ internal sealed partial class PublishedShoutStorageRepository : DisposableBase
             }
         }
 
-        public IEnumerable<PublishedShoutItem> Find(string author)
+        public IEnumerable<PublishedShoutItem> Find(string zone)
         {
             lock (_lockObject)
             {
                 var col = this.GetCollection();
-                return col.Find(n => n.Authors!.Contains(author)).Select(n => n.Export());
+                return col.Find(n => n.Authors!.Contains(zone)).Select(n => n.Export());
             }
         }
 

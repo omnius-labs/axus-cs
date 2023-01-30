@@ -29,7 +29,7 @@ public sealed partial class BarkDownloader : AsyncDisposableBase, IBarkDownloade
     private readonly AsyncLock _asyncLock = new();
 
     private const string Channel = "bark/v1";
-    private const string Author = "bark-downloader-v1";
+    private const string Zone = "bark-downloader-v1";
 
     public static async ValueTask<BarkDownloader> CreateAsync(IProfileDownloader profileDownloader, IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, BarkDownloaderOptions options, CancellationToken cancellationToken = default)
     {
@@ -140,19 +140,19 @@ public sealed partial class BarkDownloader : AsyncDisposableBase, IBarkDownloade
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetSubscribedShoutReportsAsync(Author, cancellationToken);
+            var reports = await _serviceMediator.GetSubscribedShoutReportsAsync(Zone, cancellationToken);
             var signatures = reports.Select(n => n.Signature).ToHashSet();
 
             foreach (var signature in signatures)
             {
                 if (_barkDownloaderRepo.BarkItems.Exists(signature)) continue;
-                await _serviceMediator.UnsubscribeShoutAsync(signature, Channel, Author, cancellationToken);
+                await _serviceMediator.UnsubscribeShoutAsync(signature, Channel, Zone, cancellationToken);
             }
 
             foreach (var barkItem in _barkDownloaderRepo.BarkItems.FindAll())
             {
                 if (signatures.Contains(barkItem.Signature)) continue;
-                await _serviceMediator.SubscribeShoutAsync(barkItem.Signature, Channel, Author, cancellationToken);
+                await _serviceMediator.SubscribeShoutAsync(barkItem.Signature, Channel, Zone, cancellationToken);
             }
 
             foreach (var barkItem in _barkDownloaderRepo.BarkItems.FindAll())
@@ -176,20 +176,20 @@ public sealed partial class BarkDownloader : AsyncDisposableBase, IBarkDownloade
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetSubscribedFileReportsAsync(Author, cancellationToken);
+            var reports = await _serviceMediator.GetSubscribedFileReportsAsync(Zone, cancellationToken);
             var rootHashes = reports.Select(n => n.RootHash).ToHashSet();
 
             foreach (var rootHash in rootHashes)
             {
                 if (_barkDownloaderRepo.BarkItems.Exists(rootHash)) continue;
-                await _serviceMediator.UnpublishFileFromMemoryAsync(rootHash, Author, cancellationToken);
+                await _serviceMediator.UnpublishFileFromMemoryAsync(rootHash, Zone, cancellationToken);
             }
 
             foreach (var rootHash in _barkDownloaderRepo.BarkItems.FindAll().Select(n => n.RootHash))
             {
                 if (rootHash == OmniHash.Empty) continue;
                 if (rootHashes.Contains(rootHash)) continue;
-                await _serviceMediator.SubscribeFileAsync(rootHash, Author, cancellationToken);
+                await _serviceMediator.SubscribeFileAsync(rootHash, Zone, cancellationToken);
             }
         }
     }

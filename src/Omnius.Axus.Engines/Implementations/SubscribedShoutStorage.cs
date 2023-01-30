@@ -52,13 +52,13 @@ public sealed partial class SubscribedShoutStorage : AsyncDisposableBase, ISubsc
         _blockStorage.Dispose();
     }
 
-    public async ValueTask<IEnumerable<SubscribedShoutReport>> GetSubscribedShoutReportsAsync(string author, CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<SubscribedShoutReport>> GetSubscribedShoutReportsAsync(string zone, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var shoutReports = new List<SubscribedShoutReport>();
 
-            foreach (var item in _subscriberRepo.ShoutItems.Find(author))
+            foreach (var item in _subscriberRepo.ShoutItems.Find(zone))
             {
                 shoutReports.Add(new SubscribedShoutReport(item.Signature, item.Channel));
             }
@@ -94,7 +94,7 @@ public sealed partial class SubscribedShoutStorage : AsyncDisposableBase, ISubsc
         }
     }
 
-    public async ValueTask SubscribeShoutAsync(OmniSignature signature, string channel, string author, CancellationToken cancellationToken = default)
+    public async ValueTask SubscribeShoutAsync(OmniSignature signature, string channel, string zone, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -102,9 +102,9 @@ public sealed partial class SubscribedShoutStorage : AsyncDisposableBase, ISubsc
 
             if (shoutItem is not null)
             {
-                if (shoutItem.Authors.Contains(author)) return;
+                if (shoutItem.Authors.Contains(zone)) return;
 
-                var authors = shoutItem.Authors.Append(author).ToArray();
+                var authors = shoutItem.Authors.Append(zone).ToArray();
                 shoutItem = shoutItem with { Authors = authors };
                 _subscriberRepo.ShoutItems.Upsert(shoutItem);
 
@@ -116,23 +116,23 @@ public sealed partial class SubscribedShoutStorage : AsyncDisposableBase, ISubsc
                 Signature = signature,
                 Channel = channel,
                 ShoutUpdatedTime = DateTime.MinValue,
-                Authors = new[] { author }
+                Authors = new[] { zone }
             };
             _subscriberRepo.ShoutItems.Upsert(newShoutItem);
         }
     }
 
-    public async ValueTask UnsubscribeShoutAsync(OmniSignature signature, string channel, string author, CancellationToken cancellationToken = default)
+    public async ValueTask UnsubscribeShoutAsync(OmniSignature signature, string channel, string zone, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var shoutItem = _subscriberRepo.ShoutItems.FindOne(signature, channel);
             if (shoutItem is null) return;
-            if (!shoutItem.Authors.Contains(author)) return;
+            if (!shoutItem.Authors.Contains(zone)) return;
 
             if (shoutItem.Authors.Count > 1)
             {
-                var authors = shoutItem.Authors.Where(n => n != author).ToArray();
+                var authors = shoutItem.Authors.Where(n => n != zone).ToArray();
                 var newShoutItem = shoutItem with { Authors = authors };
                 _subscriberRepo.ShoutItems.Upsert(newShoutItem);
 

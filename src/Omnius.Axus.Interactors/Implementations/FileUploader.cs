@@ -24,7 +24,7 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
 
     private readonly AsyncLock _asyncLock = new();
 
-    private const string Author = "file-uploader-v1";
+    private const string Zone = "file-uploader-v1";
 
     public static async ValueTask<FileUploader> CreateAsync(IAxusServiceMediator serviceController, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, FileUploaderOptions options, CancellationToken cancellationToken = default)
     {
@@ -86,19 +86,19 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceController.GetPublishedFileReportsAsync(Author, cancellationToken);
+            var reports = await _serviceController.GetPublishedFileReportsAsync(Zone, cancellationToken);
             var filePaths = reports.Select(n => n.FilePath).Where(n => n is not null).Select(n => n!.ToString()).ToHashSet();
 
             foreach (var filePath in filePaths)
             {
                 if (_fileUploaderRepo.FileItems.Exists(filePath)) continue;
-                await _serviceController.UnpublishFileFromStorageAsync(filePath, Author, cancellationToken);
+                await _serviceController.UnpublishFileFromStorageAsync(filePath, Zone, cancellationToken);
             }
 
             foreach (var fileItem in _fileUploaderRepo.FileItems.FindAll())
             {
                 if (filePaths.Contains(fileItem.FilePath)) continue;
-                var rootHash = await _serviceController.PublishFileFromStorageAsync(fileItem.FilePath, 8 * 1024 * 1024, Author, cancellationToken);
+                var rootHash = await _serviceController.PublishFileFromStorageAsync(fileItem.FilePath, 8 * 1024 * 1024, Zone, cancellationToken);
 
                 var seed = new Seed(rootHash, fileItem.Name, (ulong)fileItem.Length, Timestamp64.FromDateTime(fileItem.CreatedTime));
                 var newFileItem = fileItem with
@@ -151,7 +151,7 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
         {
             if (!_fileUploaderRepo.FileItems.Exists(filePath)) return;
 
-            await _serviceController.UnpublishFileFromStorageAsync(filePath, Author, cancellationToken);
+            await _serviceController.UnpublishFileFromStorageAsync(filePath, Zone, cancellationToken);
 
             _fileUploaderRepo.FileItems.Delete(filePath);
         }

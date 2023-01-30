@@ -52,13 +52,13 @@ public sealed partial class PublishedShoutStorage : AsyncDisposableBase, IPublis
         _blockStorage.Dispose();
     }
 
-    public async ValueTask<IEnumerable<PublishedShoutReport>> GetPublishedShoutReportsAsync(string author, CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<PublishedShoutReport>> GetPublishedShoutReportsAsync(string zone, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var shoutReports = new List<PublishedShoutReport>();
 
-            foreach (var item in _publisherRepo.ShoutItems.Find(author))
+            foreach (var item in _publisherRepo.ShoutItems.Find(zone))
             {
                 shoutReports.Add(new PublishedShoutReport(item.Signature, item.Channel));
             }
@@ -94,7 +94,7 @@ public sealed partial class PublishedShoutStorage : AsyncDisposableBase, IPublis
         }
     }
 
-    public async ValueTask PublishShoutAsync(Shout shout, string author, CancellationToken cancellationToken = default)
+    public async ValueTask PublishShoutAsync(Shout shout, string zone, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -109,7 +109,7 @@ public sealed partial class PublishedShoutStorage : AsyncDisposableBase, IPublis
                 Signature = signature,
                 Channel = shout.Channel,
                 ShoutUpdatedTime = shout.UpdatedTime.ToDateTime(),
-                Authors = new[] { author }
+                Authors = new[] { zone }
             };
             _publisherRepo.ShoutItems.Upsert(newShoutItem);
 
@@ -118,7 +118,7 @@ public sealed partial class PublishedShoutStorage : AsyncDisposableBase, IPublis
         }
     }
 
-    public async ValueTask UnpublishShoutAsync(OmniSignature signature, string channel, string author, CancellationToken cancellationToken = default)
+    public async ValueTask UnpublishShoutAsync(OmniSignature signature, string channel, string zone, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {

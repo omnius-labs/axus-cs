@@ -25,7 +25,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
 
     private readonly AsyncLock _asyncLock = new();
 
-    private const string Author = "file-downloader-v1";
+    private const string Zone = "file-downloader-v1";
 
     public static async ValueTask<FileDownloader> CreateAsync(IAxusServiceMediator service, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, FileDownloaderOptions options, CancellationToken cancellationToken = default)
     {
@@ -89,19 +89,19 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _service.GetSubscribedFileReportsAsync(Author, cancellationToken);
+            var reports = await _service.GetSubscribedFileReportsAsync(Zone, cancellationToken);
             var hashes = reports.Select(n => n.RootHash).ToHashSet();
 
             foreach (var hash in hashes)
             {
                 if (_fileDownloaderRepo.FileItems.Exists(hash)) continue;
-                await _service.UnsubscribeFileAsync(hash, Author, cancellationToken);
+                await _service.UnsubscribeFileAsync(hash, Zone, cancellationToken);
             }
 
             foreach (var seed in _fileDownloaderRepo.FileItems.FindAll().Select(n => n.Seed))
             {
                 if (hashes.Contains(seed.RootHash)) continue;
-                await _service.SubscribeFileAsync(seed.RootHash, Author, cancellationToken);
+                await _service.SubscribeFileAsync(seed.RootHash, Zone, cancellationToken);
             }
         }
     }
@@ -113,7 +113,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
             var config = await this.GetConfigAsync(cancellationToken);
             var basePath = Path.GetFullPath(config.DestinationDirectory);
 
-            var reports = await _service.GetSubscribedFileReportsAsync(Author, cancellationToken);
+            var reports = await _service.GetSubscribedFileReportsAsync(Zone, cancellationToken);
             var reportMap = reports.ToDictionary(n => n.RootHash);
 
             foreach (var fileItem in _fileDownloaderRepo.FileItems.FindAll())
@@ -145,7 +145,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
         {
             var results = new List<DownloadingFileReport>();
 
-            var reports = await _service.GetSubscribedFileReportsAsync(Author, cancellationToken);
+            var reports = await _service.GetSubscribedFileReportsAsync(Zone, cancellationToken);
             var reportMap = reports.ToDictionary(n => n.RootHash);
 
             foreach (var item in _fileDownloaderRepo.FileItems.FindAll())

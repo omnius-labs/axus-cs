@@ -90,12 +90,12 @@ internal sealed partial class SubscribedFileStorageRepository : DisposableBase
             }
         }
 
-        public IEnumerable<SubscribedFileItem> Find(string author)
+        public IEnumerable<SubscribedFileItem> Find(string zone)
         {
             lock (_lockObject)
             {
                 var col = this.GetCollection();
-                return col.Find(n => n.Authors!.Contains(author)).Select(n => n.Export()).ToArray();
+                return col.Find(n => n.Authors!.Contains(zone)).Select(n => n.Export()).ToArray();
             }
         }
 

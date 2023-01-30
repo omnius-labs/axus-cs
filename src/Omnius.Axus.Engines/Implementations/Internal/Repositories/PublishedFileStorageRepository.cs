@@ -101,12 +101,12 @@ internal sealed class PublishedFileStorageRepository : DisposableBase
             }
         }
 
-        public IEnumerable<PublishedFileItem> Find(string author)
+        public IEnumerable<PublishedFileItem> Find(string zone)
         {
             lock (_lockObject)
             {
                 var col = this.GetCollection();
-                return col.Find(n => n.Authors!.Contains(author)).Select(n => n.Export()).ToArray();
+                return col.Find(n => n.Authors!.Contains(zone)).Select(n => n.Export()).ToArray();
             }
         }
 

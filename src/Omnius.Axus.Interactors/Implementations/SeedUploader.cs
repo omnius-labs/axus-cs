@@ -28,7 +28,7 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
     private readonly AsyncLock _asyncLock = new();
 
     private const string Channel = "seed/v1";
-    private const string Author = "seed-uploader-v1";
+    private const string Zone = "seed-uploader-v1";
 
     public static async ValueTask<SeedUploader> CreateAsync(IFileUploader fileUploader, IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, SeedUploaderOptions options, CancellationToken cancellationToken = default)
     {
@@ -119,13 +119,13 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetPublishedShoutReportsAsync(Author, cancellationToken);
+            var reports = await _serviceMediator.GetPublishedShoutReportsAsync(Zone, cancellationToken);
             var signatures = reports.Select(n => n.Signature).ToHashSet();
 
             foreach (var signature in signatures)
             {
                 if (_seedUploaderRepo.Items.Exists(signature)) continue;
-                await _serviceMediator.UnsubscribeShoutAsync(signature, Channel, Author, cancellationToken);
+                await _serviceMediator.UnsubscribeShoutAsync(signature, Channel, Zone, cancellationToken);
             }
         }
     }
@@ -134,13 +134,13 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetPublishedFileReportsAsync(Author, cancellationToken);
+            var reports = await _serviceMediator.GetPublishedFileReportsAsync(Zone, cancellationToken);
             var rootHashes = reports.Select(n => n.RootHash).WhereNotNull().ToHashSet();
 
             foreach (var rootHash in rootHashes)
             {
                 if (_seedUploaderRepo.Items.Exists(rootHash)) continue;
-                await _serviceMediator.UnpublishFileFromMemoryAsync(rootHash, Author, cancellationToken);
+                await _serviceMediator.UnpublishFileFromMemoryAsync(rootHash, Zone, cancellationToken);
             }
         }
     }
@@ -149,7 +149,7 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetPublishedShoutReportsAsync(Author, cancellationToken);
+            var reports = await _serviceMediator.GetPublishedShoutReportsAsync(Zone, cancellationToken);
             var signatures = reports.Select(n => n.Signature).ToHashSet();
 
             foreach (var item in _seedUploaderRepo.Items.FindAll())
@@ -166,7 +166,7 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetPublishedFileReportsAsync(Author, cancellationToken);
+            var reports = await _serviceMediator.GetPublishedFileReportsAsync(Zone, cancellationToken);
             var rootHashes = reports.Select(n => n.RootHash).WhereNotNull().ToHashSet();
 
             foreach (var item in _seedUploaderRepo.Items.FindAll())
@@ -190,11 +190,11 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
             var content = new SeedContent(seeds);
 
             using var contentBytes = RocketMessage.ToBytes(content);
-            var rootHash = await _serviceMediator.PublishFileFromMemoryAsync(contentBytes.Memory, 8 * 1024 * 1024, Author, cancellationToken);
+            var rootHash = await _serviceMediator.PublishFileFromMemoryAsync(contentBytes.Memory, 8 * 1024 * 1024, Zone, cancellationToken);
 
             var now = DateTime.UtcNow;
             using var shout = Shout.Create(Channel, Timestamp64.FromDateTime(now), RocketMessage.ToBytes(rootHash), digitalSignature);
-            await _serviceMediator.PublishShoutAsync(shout, Author, cancellationToken);
+            await _serviceMediator.PublishShoutAsync(shout, Zone, cancellationToken);
         }
     }
 

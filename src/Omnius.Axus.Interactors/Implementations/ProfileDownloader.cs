@@ -29,7 +29,7 @@ public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileDow
     private readonly AsyncLock _asyncLock = new();
 
     private const string Channel = "profile/v1";
-    private const string Author = "profile-downloader-v1";
+    private const string Zone = "profile-downloader-v1";
 
     public static async ValueTask<ProfileDownloader> CreateAsync(IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ProfileDownloaderOptions options, CancellationToken cancellationToken = default)
     {
@@ -205,19 +205,19 @@ public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileDow
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetSubscribedShoutReportsAsync(Author, cancellationToken);
+            var reports = await _serviceMediator.GetSubscribedShoutReportsAsync(Zone, cancellationToken);
             var signatures = reports.Select(n => n.Signature).ToHashSet();
 
             foreach (var signature in signatures)
             {
                 if (_profileDownloaderRepo.ProfileItems.Exists(signature)) continue;
-                await _serviceMediator.UnsubscribeShoutAsync(signature, Channel, Author, cancellationToken);
+                await _serviceMediator.UnsubscribeShoutAsync(signature, Channel, Zone, cancellationToken);
             }
 
             foreach (var profileItem in _profileDownloaderRepo.ProfileItems.FindAll())
             {
                 if (signatures.Contains(profileItem.Signature)) continue;
-                await _serviceMediator.SubscribeShoutAsync(profileItem.Signature, Channel, Author, cancellationToken);
+                await _serviceMediator.SubscribeShoutAsync(profileItem.Signature, Channel, Zone, cancellationToken);
             }
 
             foreach (var profileItem in _profileDownloaderRepo.ProfileItems.FindAll())
@@ -241,20 +241,20 @@ public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileDow
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetSubscribedFileReportsAsync(Author, cancellationToken);
+            var reports = await _serviceMediator.GetSubscribedFileReportsAsync(Zone, cancellationToken);
             var rootHashes = reports.Select(n => n.RootHash).ToHashSet();
 
             foreach (var rootHash in rootHashes)
             {
                 if (_profileDownloaderRepo.ProfileItems.Exists(rootHash)) continue;
-                await _serviceMediator.UnpublishFileFromMemoryAsync(rootHash, Author, cancellationToken);
+                await _serviceMediator.UnpublishFileFromMemoryAsync(rootHash, Zone, cancellationToken);
             }
 
             foreach (var rootHash in _profileDownloaderRepo.ProfileItems.FindAll().Select(n => n.RootHash))
             {
                 if (rootHash == OmniHash.Empty) continue;
                 if (rootHashes.Contains(rootHash)) continue;
-                await _serviceMediator.SubscribeFileAsync(rootHash, Author, cancellationToken);
+                await _serviceMediator.SubscribeFileAsync(rootHash, Zone, cancellationToken);
             }
         }
     }
