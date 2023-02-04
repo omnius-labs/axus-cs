@@ -79,6 +79,7 @@ VALUES (
     '{signature}',
     '{shout_updated_time}'
 );
+DELETE FROM messages WHERE signature = '{signature}';
 ";
                 command.ExecuteNonQuery();
             }
@@ -98,7 +99,7 @@ VALUES (
 
                 using var command = new SQLiteCommand(connection);
                 command.CommandText =
-    $@"
+$@"
 INSERT OR IGNORE INTO messages (self_hash, signature, tag, created_time, value)
 VALUES (
     '{self_hash}',

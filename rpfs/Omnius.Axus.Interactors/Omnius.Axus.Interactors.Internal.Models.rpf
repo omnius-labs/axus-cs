@@ -48,3 +48,8 @@ message CachedSeedContent {
 message SeedContent {
     Seeds: vector<Seed>(capacity: 1024 * 32),
 }
+
+message CachedSeed {
+    Signature: OmniSignature,
+    Value: Seed,
+}
