@@ -12,7 +12,7 @@ using SqlKata.Execution;
 
 namespace Omnius.Axus.Interactors.Internal.Repositories;
 
-internal sealed class CachedBarkMessageRepository
+internal sealed class CachedSeedRepository
 {
     private readonly string _databasePath;
     private readonly IBytesPool _bytesPool;
@@ -21,7 +21,7 @@ internal sealed class CachedBarkMessageRepository
 
     private readonly object _lockObject = new();
 
-    public CachedBarkMessageRepository(string dirPath, IBytesPool bytesPool)
+    public CachedSeedRepository(string dirPath, IBytesPool bytesPool)
     {
         DirectoryHelper.CreateDirectory(dirPath);
         _databasePath = Path.Combine(dirPath, "sqlite.db");
@@ -38,15 +38,16 @@ CREATE TABLE IF NOT EXISTS contents (
     signature TEXT NOT NULL PRIMARY KEY,
     shout_updated_time INTEGER NOT NULL
 );
-CREATE TABLE IF NOT EXISTS messages (
+CREATE TABLE IF NOT EXISTS seeds (
     self_hash TEXT NOT NULL PRIMARY KEY,
     signature TEXT NOT NULL,
-    tag TEXT NOT NULL,
+    name TEXT NOT NULL,
+    size INTEGER NOT NULL,
     created_time INTEGER NOT NULL,
     value BLOB NOT NULL
 );
-CREATE INDEX IF NOT EXISTS index_signature_for_messages ON messages (signature);
-CREATE INDEX IF NOT EXISTS index_tag_for_messages ON messages (tag, created_time DESC);
+CREATE INDEX IF NOT EXISTS index_signature_for_seeds ON seeds (signature);
+CREATE INDEX IF NOT EXISTS index_size_for_seeds ON seeds (size);
 CREATE INDEX IF NOT EXISTS index_created_time_for_messages ON messages (created_time);
 ";
         command.ExecuteNonQuery();
@@ -60,7 +61,7 @@ CREATE INDEX IF NOT EXISTS index_created_time_for_messages ON messages (created_
         return connection;
     }
 
-    public void UpsertBulk(CachedBarkContent content)
+    public void UpsertBulk(CachedSeedContent content)
     {
         lock (_lockObject)
         {
@@ -80,7 +81,7 @@ VALUES (
     '{signature}',
     '{shout_updated_time}'
 );
-DELETE FROM messages WHERE signature = '{signature}';
+DELETE FROM seeds WHERE signature = '{signature}';
 ";
                 command.ExecuteNonQuery();
             }
@@ -141,7 +142,7 @@ VALUES (
         }
     }
 
-    public IEnumerable<CachedBarkMessage> FetchMessageByTag(string tag)
+    public IEnumerable<CachedSeed> FetchMessageByTag(string tag)
     {
         lock (_lockObject)
         {
@@ -155,11 +156,11 @@ VALUES (
                 .OrderByDesc("created_time")
                 .Get();
 
-            var results = new List<CachedBarkMessage>();
+            var results = new List<CachedSeed>();
 
             foreach (var value in rows.Select(n => n.value).OfType<byte[]>())
             {
-                var result = CachedBarkMessage.Import(new ReadOnlySequence<byte>(value), _bytesPool);
+                var result = CachedSeed.Import(new ReadOnlySequence<byte>(value), _bytesPool);
                 results.Add(result);
             }
 
@@ -167,7 +168,7 @@ VALUES (
         }
     }
 
-    public CachedBarkMessage? FetchMessageBySelfHash(OmniHash selfHash)
+    public CachedSeed? FetchMessageBySelfHash(OmniHash selfHash)
     {
         lock (_lockObject)
         {
@@ -184,7 +185,7 @@ VALUES (
             var value = rows.Select(n => n.value).OfType<byte[]>().FirstOrDefault();
             if (value is null) return null;
 
-            return CachedBarkMessage.Import(new ReadOnlySequence<byte>(value), _bytesPool);
+            return CachedSeed.Import(new ReadOnlySequence<byte>(value), _bytesPool);
         }
     }
 

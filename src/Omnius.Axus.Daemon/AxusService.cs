@@ -73,7 +73,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
         }
     }
 
-    public async ValueTask SetConfigAsync(SetConfigRequest param, CancellationToken cancellationToken = default)
+    public async ValueTask SetConfigAsync(SetConfigParam param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -335,7 +335,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
         }
     }
 
-    public async ValueTask<GetPublishedFilesReportResult> GetPublishedFilesReportAsync(GetPublishedFilesReportRequest param, CancellationToken cancellationToken = default)
+    public async ValueTask<GetPublishedFilesReportResult> GetPublishedFilesReportAsync(GetPublishedFilesReportParam param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -344,7 +344,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
         }
     }
 
-    public async ValueTask<GetSubscribedFilesReportResult> GetSubscribedFilesReportAsync(GetSubscribedFilesReportRequest param, CancellationToken cancellationToken = default)
+    public async ValueTask<GetSubscribedFilesReportResult> GetSubscribedFilesReportAsync(GetSubscribedFilesReportParam param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -353,7 +353,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
         }
     }
 
-    public async ValueTask<GetPublishedShoutsReportResult> GetPublishedShoutsReportAsync(GetPublishedShoutsReportRequest param, CancellationToken cancellationToken = default)
+    public async ValueTask<GetPublishedShoutsReportResult> GetPublishedShoutsReportAsync(GetPublishedShoutsReportParam param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -362,7 +362,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
         }
     }
 
-    public async ValueTask<GetSubscribedShoutsReportResult> GetSubscribedShoutsReportAsync(GetSubscribedShoutsReportRequest param, CancellationToken cancellationToken = default)
+    public async ValueTask<GetSubscribedShoutsReportResult> GetSubscribedShoutsReportAsync(GetSubscribedShoutsReportParam param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -389,7 +389,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
         }
     }
 
-    public async ValueTask AddCloudNodeLocationsAsync(AddCloudNodeLocationsRequest param, CancellationToken cancellationToken = default)
+    public async ValueTask AddCloudNodeLocationsAsync(AddCloudNodeLocationsParam param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -397,7 +397,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
         }
     }
 
-    public async ValueTask<PublishFileFromStorageResult> PublishFileFromStorageAsync(PublishFileFromStorageRequest param, CancellationToken cancellationToken = default)
+    public async ValueTask<PublishFileFromStorageResult> PublishFileFromStorageAsync(PublishFileFromStorageParam param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -406,7 +406,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
         }
     }
 
-    public async ValueTask<PublishFileFromMemoryResult> PublishFileFromMemoryAsync(PublishFileFromMemoryRequest param, CancellationToken cancellationToken = default)
+    public async ValueTask<PublishFileFromMemoryResult> PublishFileFromMemoryAsync(PublishFileFromMemoryParam param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -415,7 +415,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
         }
     }
 
-    public async ValueTask UnpublishFileFromStorageAsync(UnpublishFileFromStorageRequest param, CancellationToken cancellationToken = default)
+    public async ValueTask UnpublishFileFromStorageAsync(UnpublishFileFromStorageParam param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -423,7 +423,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
         }
     }
 
-    public async ValueTask UnpublishFileFromMemoryAsync(UnpublishFileFromMemoryRequest param, CancellationToken cancellationToken = default)
+    public async ValueTask UnpublishFileFromMemoryAsync(UnpublishFileFromMemoryParam param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -431,7 +431,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
         }
     }
 
-    public async ValueTask SubscribeFileAsync(SubscribeFileRequest param, CancellationToken cancellationToken = default)
+    public async ValueTask SubscribeFileAsync(SubscribeFileParam param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -439,7 +439,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
         }
     }
 
-    public async ValueTask UnsubscribeFileAsync(UnsubscribeFileRequest param, CancellationToken cancellationToken = default)
+    public async ValueTask UnsubscribeFileAsync(UnsubscribeFileParam param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -447,7 +447,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
         }
     }
 
-    public async ValueTask<TryExportFileToStorageResult> TryExportFileToStorageAsync(TryExportFileToStorageRequest param, CancellationToken cancellationToken = default)
+    public async ValueTask<TryExportFileToStorageResult> TryExportFileToStorageAsync(TryExportFileToStorageParam param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -456,7 +456,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
         }
     }
 
-    public async ValueTask<TryExportFileToMemoryResult> TryExportFileToMemoryAsync(TryExportFileToMemoryRequest param, CancellationToken cancellationToken = default)
+    public async ValueTask<TryExportFileToMemoryResult> TryExportFileToMemoryAsync(TryExportFileToMemoryParam param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -467,7 +467,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
         }
     }
 
-    public async ValueTask PublishShoutAsync(PublishShoutRequest param, CancellationToken cancellationToken = default)
+    public async ValueTask PublishShoutAsync(PublishShoutParam param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -475,7 +475,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
         }
     }
 
-    public async ValueTask UnpublishShoutAsync(UnpublishShoutRequest param, CancellationToken cancellationToken = default)
+    public async ValueTask UnpublishShoutAsync(UnpublishShoutParam param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -483,7 +483,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
         }
     }
 
-    public async ValueTask SubscribeShoutAsync(SubscribeShoutRequest param, CancellationToken cancellationToken = default)
+    public async ValueTask SubscribeShoutAsync(SubscribeShoutParam param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -491,7 +491,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
         }
     }
 
-    public async ValueTask UnsubscribeShoutAsync(UnsubscribeShoutRequest param, CancellationToken cancellationToken = default)
+    public async ValueTask UnsubscribeShoutAsync(UnsubscribeShoutParam param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -499,7 +499,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
         }
     }
 
-    public async ValueTask<TryExportShoutResult> TryExportShoutAsync(TryExportShoutRequest param, CancellationToken cancellationToken = default)
+    public async ValueTask<TryExportShoutResult> TryExportShoutAsync(TryExportShoutParam param, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {

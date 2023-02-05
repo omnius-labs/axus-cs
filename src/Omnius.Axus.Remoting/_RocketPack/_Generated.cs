@@ -109,20 +109,20 @@ public sealed partial class GetConfigResult : global::Omnius.Core.RocketPack.IRo
         }
     }
 }
-public sealed partial class SetConfigRequest : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SetConfigRequest>
+public sealed partial class SetConfigParam : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SetConfigParam>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.SetConfigRequest> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SetConfigRequest>.Formatter;
-    public static global::Omnius.Axus.Remoting.SetConfigRequest Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SetConfigRequest>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.SetConfigParam> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SetConfigParam>.Formatter;
+    public static global::Omnius.Axus.Remoting.SetConfigParam Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SetConfigParam>.Empty;
 
-    static SetConfigRequest()
+    static SetConfigParam()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SetConfigRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SetConfigRequest>.Empty = new global::Omnius.Axus.Remoting.SetConfigRequest(global::Omnius.Axus.Remoting.ServiceConfig.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SetConfigParam>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SetConfigParam>.Empty = new global::Omnius.Axus.Remoting.SetConfigParam(global::Omnius.Axus.Remoting.ServiceConfig.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public SetConfigRequest(global::Omnius.Axus.Remoting.ServiceConfig config)
+    public SetConfigParam(global::Omnius.Axus.Remoting.ServiceConfig config)
     {
         if (config is null) throw new global::System.ArgumentNullException("config");
 
@@ -138,7 +138,7 @@ public sealed partial class SetConfigRequest : global::Omnius.Core.RocketPack.IR
 
     public global::Omnius.Axus.Remoting.ServiceConfig Config { get; }
 
-    public static global::Omnius.Axus.Remoting.SetConfigRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Remoting.SetConfigParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -149,20 +149,20 @@ public sealed partial class SetConfigRequest : global::Omnius.Core.RocketPack.IR
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Remoting.SetConfigRequest? left, global::Omnius.Axus.Remoting.SetConfigRequest? right)
+    public static bool operator ==(global::Omnius.Axus.Remoting.SetConfigParam? left, global::Omnius.Axus.Remoting.SetConfigParam? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Remoting.SetConfigRequest? left, global::Omnius.Axus.Remoting.SetConfigRequest? right)
+    public static bool operator !=(global::Omnius.Axus.Remoting.SetConfigParam? left, global::Omnius.Axus.Remoting.SetConfigParam? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Remoting.SetConfigRequest) return false;
-        return this.Equals((global::Omnius.Axus.Remoting.SetConfigRequest)other);
+        if (other is not global::Omnius.Axus.Remoting.SetConfigParam) return false;
+        return this.Equals((global::Omnius.Axus.Remoting.SetConfigParam)other);
     }
-    public bool Equals(global::Omnius.Axus.Remoting.SetConfigRequest? target)
+    public bool Equals(global::Omnius.Axus.Remoting.SetConfigParam? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -172,9 +172,9 @@ public sealed partial class SetConfigRequest : global::Omnius.Core.RocketPack.IR
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.SetConfigRequest>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.SetConfigParam>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.SetConfigRequest value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.SetConfigParam value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -185,7 +185,7 @@ public sealed partial class SetConfigRequest : global::Omnius.Core.RocketPack.IR
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Remoting.SetConfigRequest Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Remoting.SetConfigParam Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -205,7 +205,7 @@ public sealed partial class SetConfigRequest : global::Omnius.Core.RocketPack.IR
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.SetConfigRequest(p_config);
+            return new global::Omnius.Axus.Remoting.SetConfigParam(p_config);
         }
     }
 }
@@ -547,22 +547,22 @@ public sealed partial class GetCloudNodeLocationsResult : global::Omnius.Core.Ro
         }
     }
 }
-public sealed partial class AddCloudNodeLocationsRequest : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest>
+public sealed partial class AddCloudNodeLocationsParam : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest>.Formatter;
-    public static global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam>.Formatter;
+    public static global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam>.Empty;
 
-    static AddCloudNodeLocationsRequest()
+    static AddCloudNodeLocationsParam()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest>.Empty = new global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest(global::System.Array.Empty<global::Omnius.Axus.Messages.NodeLocation>());
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam>.Empty = new global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam(global::System.Array.Empty<global::Omnius.Axus.Messages.NodeLocation>());
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxNodeLocationsCount = 8192;
 
-    public AddCloudNodeLocationsRequest(global::Omnius.Axus.Messages.NodeLocation[] nodeLocations)
+    public AddCloudNodeLocationsParam(global::Omnius.Axus.Messages.NodeLocation[] nodeLocations)
     {
         if (nodeLocations is null) throw new global::System.ArgumentNullException("nodeLocations");
         if (nodeLocations.Length > 8192) throw new global::System.ArgumentOutOfRangeException("nodeLocations");
@@ -586,7 +586,7 @@ public sealed partial class AddCloudNodeLocationsRequest : global::Omnius.Core.R
 
     public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.NodeLocation> NodeLocations { get; }
 
-    public static global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -597,20 +597,20 @@ public sealed partial class AddCloudNodeLocationsRequest : global::Omnius.Core.R
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest? left, global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest? right)
+    public static bool operator ==(global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam? left, global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest? left, global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest? right)
+    public static bool operator !=(global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam? left, global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest) return false;
-        return this.Equals((global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest)other);
+        if (other is not global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam) return false;
+        return this.Equals((global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam)other);
     }
-    public bool Equals(global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest? target)
+    public bool Equals(global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -620,9 +620,9 @@ public sealed partial class AddCloudNodeLocationsRequest : global::Omnius.Core.R
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -637,7 +637,7 @@ public sealed partial class AddCloudNodeLocationsRequest : global::Omnius.Core.R
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -662,26 +662,26 @@ public sealed partial class AddCloudNodeLocationsRequest : global::Omnius.Core.R
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest(p_nodeLocations);
+            return new global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam(p_nodeLocations);
         }
     }
 }
-public sealed partial class GetPublishedFilesReportRequest : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest>
+public sealed partial class GetPublishedFilesReportParam : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedFilesReportParam>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest>.Formatter;
-    public static global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.GetPublishedFilesReportParam> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedFilesReportParam>.Formatter;
+    public static global::Omnius.Axus.Remoting.GetPublishedFilesReportParam Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedFilesReportParam>.Empty;
 
-    static GetPublishedFilesReportRequest()
+    static GetPublishedFilesReportParam()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest>.Empty = new global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest(global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedFilesReportParam>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedFilesReportParam>.Empty = new global::Omnius.Axus.Remoting.GetPublishedFilesReportParam(global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxZoneLength = 2147483647;
 
-    public GetPublishedFilesReportRequest(global::Omnius.Core.RocketPack.Utf8String zone)
+    public GetPublishedFilesReportParam(global::Omnius.Core.RocketPack.Utf8String zone)
     {
         if (zone is null) throw new global::System.ArgumentNullException("zone");
         if (zone.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("zone");
@@ -698,7 +698,7 @@ public sealed partial class GetPublishedFilesReportRequest : global::Omnius.Core
 
     public global::Omnius.Core.RocketPack.Utf8String Zone { get; }
 
-    public static global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Remoting.GetPublishedFilesReportParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -709,20 +709,20 @@ public sealed partial class GetPublishedFilesReportRequest : global::Omnius.Core
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest? left, global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest? right)
+    public static bool operator ==(global::Omnius.Axus.Remoting.GetPublishedFilesReportParam? left, global::Omnius.Axus.Remoting.GetPublishedFilesReportParam? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest? left, global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest? right)
+    public static bool operator !=(global::Omnius.Axus.Remoting.GetPublishedFilesReportParam? left, global::Omnius.Axus.Remoting.GetPublishedFilesReportParam? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest) return false;
-        return this.Equals((global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest)other);
+        if (other is not global::Omnius.Axus.Remoting.GetPublishedFilesReportParam) return false;
+        return this.Equals((global::Omnius.Axus.Remoting.GetPublishedFilesReportParam)other);
     }
-    public bool Equals(global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest? target)
+    public bool Equals(global::Omnius.Axus.Remoting.GetPublishedFilesReportParam? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -732,9 +732,9 @@ public sealed partial class GetPublishedFilesReportRequest : global::Omnius.Core
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.GetPublishedFilesReportParam>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.GetPublishedFilesReportParam value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -745,7 +745,7 @@ public sealed partial class GetPublishedFilesReportRequest : global::Omnius.Core
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Remoting.GetPublishedFilesReportParam Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -765,7 +765,7 @@ public sealed partial class GetPublishedFilesReportRequest : global::Omnius.Core
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest(p_zone);
+            return new global::Omnius.Axus.Remoting.GetPublishedFilesReportParam(p_zone);
         }
     }
 }
@@ -888,15 +888,15 @@ public sealed partial class GetPublishedFilesReportResult : global::Omnius.Core.
         }
     }
 }
-public sealed partial class PublishFileFromStorageRequest : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromStorageRequest>
+public sealed partial class PublishFileFromStorageParam : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromStorageParam>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.PublishFileFromStorageRequest> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromStorageRequest>.Formatter;
-    public static global::Omnius.Axus.Remoting.PublishFileFromStorageRequest Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromStorageRequest>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.PublishFileFromStorageParam> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromStorageParam>.Formatter;
+    public static global::Omnius.Axus.Remoting.PublishFileFromStorageParam Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromStorageParam>.Empty;
 
-    static PublishFileFromStorageRequest()
+    static PublishFileFromStorageParam()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromStorageRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromStorageRequest>.Empty = new global::Omnius.Axus.Remoting.PublishFileFromStorageRequest(global::Omnius.Core.RocketPack.Utf8String.Empty, 0, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromStorageParam>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromStorageParam>.Empty = new global::Omnius.Axus.Remoting.PublishFileFromStorageParam(global::Omnius.Core.RocketPack.Utf8String.Empty, 0, global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
@@ -904,7 +904,7 @@ public sealed partial class PublishFileFromStorageRequest : global::Omnius.Core.
     public static readonly int MaxFilePathLength = 2147483647;
     public static readonly int MaxZoneLength = 2147483647;
 
-    public PublishFileFromStorageRequest(global::Omnius.Core.RocketPack.Utf8String filePath, int maxBlockSize, global::Omnius.Core.RocketPack.Utf8String zone)
+    public PublishFileFromStorageParam(global::Omnius.Core.RocketPack.Utf8String filePath, int maxBlockSize, global::Omnius.Core.RocketPack.Utf8String zone)
     {
         if (filePath is null) throw new global::System.ArgumentNullException("filePath");
         if (filePath.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("filePath");
@@ -929,7 +929,7 @@ public sealed partial class PublishFileFromStorageRequest : global::Omnius.Core.
     public int MaxBlockSize { get; }
     public global::Omnius.Core.RocketPack.Utf8String Zone { get; }
 
-    public static global::Omnius.Axus.Remoting.PublishFileFromStorageRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Remoting.PublishFileFromStorageParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -940,20 +940,20 @@ public sealed partial class PublishFileFromStorageRequest : global::Omnius.Core.
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Remoting.PublishFileFromStorageRequest? left, global::Omnius.Axus.Remoting.PublishFileFromStorageRequest? right)
+    public static bool operator ==(global::Omnius.Axus.Remoting.PublishFileFromStorageParam? left, global::Omnius.Axus.Remoting.PublishFileFromStorageParam? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Remoting.PublishFileFromStorageRequest? left, global::Omnius.Axus.Remoting.PublishFileFromStorageRequest? right)
+    public static bool operator !=(global::Omnius.Axus.Remoting.PublishFileFromStorageParam? left, global::Omnius.Axus.Remoting.PublishFileFromStorageParam? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Remoting.PublishFileFromStorageRequest) return false;
-        return this.Equals((global::Omnius.Axus.Remoting.PublishFileFromStorageRequest)other);
+        if (other is not global::Omnius.Axus.Remoting.PublishFileFromStorageParam) return false;
+        return this.Equals((global::Omnius.Axus.Remoting.PublishFileFromStorageParam)other);
     }
-    public bool Equals(global::Omnius.Axus.Remoting.PublishFileFromStorageRequest? target)
+    public bool Equals(global::Omnius.Axus.Remoting.PublishFileFromStorageParam? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -965,9 +965,9 @@ public sealed partial class PublishFileFromStorageRequest : global::Omnius.Core.
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.PublishFileFromStorageRequest>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.PublishFileFromStorageParam>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.PublishFileFromStorageRequest value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.PublishFileFromStorageParam value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -988,7 +988,7 @@ public sealed partial class PublishFileFromStorageRequest : global::Omnius.Core.
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Remoting.PublishFileFromStorageRequest Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Remoting.PublishFileFromStorageParam Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1020,7 +1020,7 @@ public sealed partial class PublishFileFromStorageRequest : global::Omnius.Core.
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.PublishFileFromStorageRequest(p_filePath, p_maxBlockSize, p_zone);
+            return new global::Omnius.Axus.Remoting.PublishFileFromStorageParam(p_filePath, p_maxBlockSize, p_zone);
         }
     }
 }
@@ -1122,15 +1122,15 @@ public sealed partial class PublishFileFromStorageResult : global::Omnius.Core.R
         }
     }
 }
-public sealed partial class PublishFileFromMemoryRequest : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest>
+public sealed partial class PublishFileFromMemoryParam : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromMemoryParam>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest>.Formatter;
-    public static global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.PublishFileFromMemoryParam> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromMemoryParam>.Formatter;
+    public static global::Omnius.Axus.Remoting.PublishFileFromMemoryParam Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromMemoryParam>.Empty;
 
-    static PublishFileFromMemoryRequest()
+    static PublishFileFromMemoryParam()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest>.Empty = new global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest(global::System.ReadOnlyMemory<byte>.Empty, 0, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromMemoryParam>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromMemoryParam>.Empty = new global::Omnius.Axus.Remoting.PublishFileFromMemoryParam(global::System.ReadOnlyMemory<byte>.Empty, 0, global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
@@ -1138,7 +1138,7 @@ public sealed partial class PublishFileFromMemoryRequest : global::Omnius.Core.R
     public static readonly int MaxMemoryLength = 33554432;
     public static readonly int MaxZoneLength = 2147483647;
 
-    public PublishFileFromMemoryRequest(global::System.ReadOnlyMemory<byte> memory, int maxBlockSize, global::Omnius.Core.RocketPack.Utf8String zone)
+    public PublishFileFromMemoryParam(global::System.ReadOnlyMemory<byte> memory, int maxBlockSize, global::Omnius.Core.RocketPack.Utf8String zone)
     {
         if (memory.Length > 33554432) throw new global::System.ArgumentOutOfRangeException("memory");
         if (zone is null) throw new global::System.ArgumentNullException("zone");
@@ -1162,7 +1162,7 @@ public sealed partial class PublishFileFromMemoryRequest : global::Omnius.Core.R
     public int MaxBlockSize { get; }
     public global::Omnius.Core.RocketPack.Utf8String Zone { get; }
 
-    public static global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Remoting.PublishFileFromMemoryParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -1173,20 +1173,20 @@ public sealed partial class PublishFileFromMemoryRequest : global::Omnius.Core.R
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest? left, global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest? right)
+    public static bool operator ==(global::Omnius.Axus.Remoting.PublishFileFromMemoryParam? left, global::Omnius.Axus.Remoting.PublishFileFromMemoryParam? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest? left, global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest? right)
+    public static bool operator !=(global::Omnius.Axus.Remoting.PublishFileFromMemoryParam? left, global::Omnius.Axus.Remoting.PublishFileFromMemoryParam? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest) return false;
-        return this.Equals((global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest)other);
+        if (other is not global::Omnius.Axus.Remoting.PublishFileFromMemoryParam) return false;
+        return this.Equals((global::Omnius.Axus.Remoting.PublishFileFromMemoryParam)other);
     }
-    public bool Equals(global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest? target)
+    public bool Equals(global::Omnius.Axus.Remoting.PublishFileFromMemoryParam? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -1198,9 +1198,9 @@ public sealed partial class PublishFileFromMemoryRequest : global::Omnius.Core.R
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.PublishFileFromMemoryParam>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.PublishFileFromMemoryParam value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1221,7 +1221,7 @@ public sealed partial class PublishFileFromMemoryRequest : global::Omnius.Core.R
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Remoting.PublishFileFromMemoryParam Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1253,7 +1253,7 @@ public sealed partial class PublishFileFromMemoryRequest : global::Omnius.Core.R
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest(p_memory, p_maxBlockSize, p_zone);
+            return new global::Omnius.Axus.Remoting.PublishFileFromMemoryParam(p_memory, p_maxBlockSize, p_zone);
         }
     }
 }
@@ -1355,15 +1355,15 @@ public sealed partial class PublishFileFromMemoryResult : global::Omnius.Core.Ro
         }
     }
 }
-public sealed partial class UnpublishFileFromStorageRequest : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest>
+public sealed partial class UnpublishFileFromStorageParam : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest>.Formatter;
-    public static global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam>.Formatter;
+    public static global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam>.Empty;
 
-    static UnpublishFileFromStorageRequest()
+    static UnpublishFileFromStorageParam()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest>.Empty = new global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest(global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam>.Empty = new global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam(global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
@@ -1371,7 +1371,7 @@ public sealed partial class UnpublishFileFromStorageRequest : global::Omnius.Cor
     public static readonly int MaxFilePathLength = 2147483647;
     public static readonly int MaxZoneLength = 2147483647;
 
-    public UnpublishFileFromStorageRequest(global::Omnius.Core.RocketPack.Utf8String filePath, global::Omnius.Core.RocketPack.Utf8String zone)
+    public UnpublishFileFromStorageParam(global::Omnius.Core.RocketPack.Utf8String filePath, global::Omnius.Core.RocketPack.Utf8String zone)
     {
         if (filePath is null) throw new global::System.ArgumentNullException("filePath");
         if (filePath.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("filePath");
@@ -1393,7 +1393,7 @@ public sealed partial class UnpublishFileFromStorageRequest : global::Omnius.Cor
     public global::Omnius.Core.RocketPack.Utf8String FilePath { get; }
     public global::Omnius.Core.RocketPack.Utf8String Zone { get; }
 
-    public static global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -1404,20 +1404,20 @@ public sealed partial class UnpublishFileFromStorageRequest : global::Omnius.Cor
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest? left, global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest? right)
+    public static bool operator ==(global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam? left, global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest? left, global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest? right)
+    public static bool operator !=(global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam? left, global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest) return false;
-        return this.Equals((global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest)other);
+        if (other is not global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam) return false;
+        return this.Equals((global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam)other);
     }
-    public bool Equals(global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest? target)
+    public bool Equals(global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -1428,9 +1428,9 @@ public sealed partial class UnpublishFileFromStorageRequest : global::Omnius.Cor
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1446,7 +1446,7 @@ public sealed partial class UnpublishFileFromStorageRequest : global::Omnius.Cor
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1472,26 +1472,26 @@ public sealed partial class UnpublishFileFromStorageRequest : global::Omnius.Cor
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest(p_filePath, p_zone);
+            return new global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam(p_filePath, p_zone);
         }
     }
 }
-public sealed partial class UnpublishFileFromMemoryRequest : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest>
+public sealed partial class UnpublishFileFromMemoryParam : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest>.Formatter;
-    public static global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam>.Formatter;
+    public static global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam>.Empty;
 
-    static UnpublishFileFromMemoryRequest()
+    static UnpublishFileFromMemoryParam()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest>.Empty = new global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest(global::Omnius.Core.Cryptography.OmniHash.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam>.Empty = new global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam(global::Omnius.Core.Cryptography.OmniHash.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxZoneLength = 2147483647;
 
-    public UnpublishFileFromMemoryRequest(global::Omnius.Core.Cryptography.OmniHash rootHash, global::Omnius.Core.RocketPack.Utf8String zone)
+    public UnpublishFileFromMemoryParam(global::Omnius.Core.Cryptography.OmniHash rootHash, global::Omnius.Core.RocketPack.Utf8String zone)
     {
         if (zone is null) throw new global::System.ArgumentNullException("zone");
         if (zone.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("zone");
@@ -1511,7 +1511,7 @@ public sealed partial class UnpublishFileFromMemoryRequest : global::Omnius.Core
     public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
     public global::Omnius.Core.RocketPack.Utf8String Zone { get; }
 
-    public static global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -1522,20 +1522,20 @@ public sealed partial class UnpublishFileFromMemoryRequest : global::Omnius.Core
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest? left, global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest? right)
+    public static bool operator ==(global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam? left, global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest? left, global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest? right)
+    public static bool operator !=(global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam? left, global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest) return false;
-        return this.Equals((global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest)other);
+        if (other is not global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam) return false;
+        return this.Equals((global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam)other);
     }
-    public bool Equals(global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest? target)
+    public bool Equals(global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -1546,9 +1546,9 @@ public sealed partial class UnpublishFileFromMemoryRequest : global::Omnius.Core
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1564,7 +1564,7 @@ public sealed partial class UnpublishFileFromMemoryRequest : global::Omnius.Core
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1590,26 +1590,26 @@ public sealed partial class UnpublishFileFromMemoryRequest : global::Omnius.Core
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest(p_rootHash, p_zone);
+            return new global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam(p_rootHash, p_zone);
         }
     }
 }
-public sealed partial class GetSubscribedFilesReportRequest : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest>
+public sealed partial class GetSubscribedFilesReportParam : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest>.Formatter;
-    public static global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam>.Formatter;
+    public static global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam>.Empty;
 
-    static GetSubscribedFilesReportRequest()
+    static GetSubscribedFilesReportParam()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest>.Empty = new global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest(global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam>.Empty = new global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam(global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxZoneLength = 2147483647;
 
-    public GetSubscribedFilesReportRequest(global::Omnius.Core.RocketPack.Utf8String zone)
+    public GetSubscribedFilesReportParam(global::Omnius.Core.RocketPack.Utf8String zone)
     {
         if (zone is null) throw new global::System.ArgumentNullException("zone");
         if (zone.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("zone");
@@ -1626,7 +1626,7 @@ public sealed partial class GetSubscribedFilesReportRequest : global::Omnius.Cor
 
     public global::Omnius.Core.RocketPack.Utf8String Zone { get; }
 
-    public static global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -1637,20 +1637,20 @@ public sealed partial class GetSubscribedFilesReportRequest : global::Omnius.Cor
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest? left, global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest? right)
+    public static bool operator ==(global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam? left, global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest? left, global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest? right)
+    public static bool operator !=(global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam? left, global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest) return false;
-        return this.Equals((global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest)other);
+        if (other is not global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam) return false;
+        return this.Equals((global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam)other);
     }
-    public bool Equals(global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest? target)
+    public bool Equals(global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -1660,9 +1660,9 @@ public sealed partial class GetSubscribedFilesReportRequest : global::Omnius.Cor
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1673,7 +1673,7 @@ public sealed partial class GetSubscribedFilesReportRequest : global::Omnius.Cor
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1693,7 +1693,7 @@ public sealed partial class GetSubscribedFilesReportRequest : global::Omnius.Cor
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest(p_zone);
+            return new global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam(p_zone);
         }
     }
 }
@@ -1816,22 +1816,22 @@ public sealed partial class GetSubscribedFilesReportResult : global::Omnius.Core
         }
     }
 }
-public sealed partial class SubscribeFileRequest : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeFileRequest>
+public sealed partial class SubscribeFileParam : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeFileParam>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.SubscribeFileRequest> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeFileRequest>.Formatter;
-    public static global::Omnius.Axus.Remoting.SubscribeFileRequest Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeFileRequest>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.SubscribeFileParam> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeFileParam>.Formatter;
+    public static global::Omnius.Axus.Remoting.SubscribeFileParam Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeFileParam>.Empty;
 
-    static SubscribeFileRequest()
+    static SubscribeFileParam()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeFileRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeFileRequest>.Empty = new global::Omnius.Axus.Remoting.SubscribeFileRequest(global::Omnius.Core.Cryptography.OmniHash.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeFileParam>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeFileParam>.Empty = new global::Omnius.Axus.Remoting.SubscribeFileParam(global::Omnius.Core.Cryptography.OmniHash.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxZoneLength = 2147483647;
 
-    public SubscribeFileRequest(global::Omnius.Core.Cryptography.OmniHash rootHash, global::Omnius.Core.RocketPack.Utf8String zone)
+    public SubscribeFileParam(global::Omnius.Core.Cryptography.OmniHash rootHash, global::Omnius.Core.RocketPack.Utf8String zone)
     {
         if (zone is null) throw new global::System.ArgumentNullException("zone");
         if (zone.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("zone");
@@ -1851,7 +1851,7 @@ public sealed partial class SubscribeFileRequest : global::Omnius.Core.RocketPac
     public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
     public global::Omnius.Core.RocketPack.Utf8String Zone { get; }
 
-    public static global::Omnius.Axus.Remoting.SubscribeFileRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Remoting.SubscribeFileParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -1862,20 +1862,20 @@ public sealed partial class SubscribeFileRequest : global::Omnius.Core.RocketPac
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Remoting.SubscribeFileRequest? left, global::Omnius.Axus.Remoting.SubscribeFileRequest? right)
+    public static bool operator ==(global::Omnius.Axus.Remoting.SubscribeFileParam? left, global::Omnius.Axus.Remoting.SubscribeFileParam? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Remoting.SubscribeFileRequest? left, global::Omnius.Axus.Remoting.SubscribeFileRequest? right)
+    public static bool operator !=(global::Omnius.Axus.Remoting.SubscribeFileParam? left, global::Omnius.Axus.Remoting.SubscribeFileParam? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Remoting.SubscribeFileRequest) return false;
-        return this.Equals((global::Omnius.Axus.Remoting.SubscribeFileRequest)other);
+        if (other is not global::Omnius.Axus.Remoting.SubscribeFileParam) return false;
+        return this.Equals((global::Omnius.Axus.Remoting.SubscribeFileParam)other);
     }
-    public bool Equals(global::Omnius.Axus.Remoting.SubscribeFileRequest? target)
+    public bool Equals(global::Omnius.Axus.Remoting.SubscribeFileParam? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -1886,9 +1886,9 @@ public sealed partial class SubscribeFileRequest : global::Omnius.Core.RocketPac
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.SubscribeFileRequest>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.SubscribeFileParam>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.SubscribeFileRequest value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.SubscribeFileParam value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1904,7 +1904,7 @@ public sealed partial class SubscribeFileRequest : global::Omnius.Core.RocketPac
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Remoting.SubscribeFileRequest Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Remoting.SubscribeFileParam Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1930,26 +1930,26 @@ public sealed partial class SubscribeFileRequest : global::Omnius.Core.RocketPac
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.SubscribeFileRequest(p_rootHash, p_zone);
+            return new global::Omnius.Axus.Remoting.SubscribeFileParam(p_rootHash, p_zone);
         }
     }
 }
-public sealed partial class UnsubscribeFileRequest : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeFileRequest>
+public sealed partial class UnsubscribeFileParam : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeFileParam>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.UnsubscribeFileRequest> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeFileRequest>.Formatter;
-    public static global::Omnius.Axus.Remoting.UnsubscribeFileRequest Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeFileRequest>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.UnsubscribeFileParam> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeFileParam>.Formatter;
+    public static global::Omnius.Axus.Remoting.UnsubscribeFileParam Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeFileParam>.Empty;
 
-    static UnsubscribeFileRequest()
+    static UnsubscribeFileParam()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeFileRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeFileRequest>.Empty = new global::Omnius.Axus.Remoting.UnsubscribeFileRequest(global::Omnius.Core.Cryptography.OmniHash.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeFileParam>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeFileParam>.Empty = new global::Omnius.Axus.Remoting.UnsubscribeFileParam(global::Omnius.Core.Cryptography.OmniHash.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxZoneLength = 2147483647;
 
-    public UnsubscribeFileRequest(global::Omnius.Core.Cryptography.OmniHash rootHash, global::Omnius.Core.RocketPack.Utf8String zone)
+    public UnsubscribeFileParam(global::Omnius.Core.Cryptography.OmniHash rootHash, global::Omnius.Core.RocketPack.Utf8String zone)
     {
         if (zone is null) throw new global::System.ArgumentNullException("zone");
         if (zone.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("zone");
@@ -1969,7 +1969,7 @@ public sealed partial class UnsubscribeFileRequest : global::Omnius.Core.RocketP
     public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
     public global::Omnius.Core.RocketPack.Utf8String Zone { get; }
 
-    public static global::Omnius.Axus.Remoting.UnsubscribeFileRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Remoting.UnsubscribeFileParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -1980,20 +1980,20 @@ public sealed partial class UnsubscribeFileRequest : global::Omnius.Core.RocketP
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Remoting.UnsubscribeFileRequest? left, global::Omnius.Axus.Remoting.UnsubscribeFileRequest? right)
+    public static bool operator ==(global::Omnius.Axus.Remoting.UnsubscribeFileParam? left, global::Omnius.Axus.Remoting.UnsubscribeFileParam? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Remoting.UnsubscribeFileRequest? left, global::Omnius.Axus.Remoting.UnsubscribeFileRequest? right)
+    public static bool operator !=(global::Omnius.Axus.Remoting.UnsubscribeFileParam? left, global::Omnius.Axus.Remoting.UnsubscribeFileParam? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Remoting.UnsubscribeFileRequest) return false;
-        return this.Equals((global::Omnius.Axus.Remoting.UnsubscribeFileRequest)other);
+        if (other is not global::Omnius.Axus.Remoting.UnsubscribeFileParam) return false;
+        return this.Equals((global::Omnius.Axus.Remoting.UnsubscribeFileParam)other);
     }
-    public bool Equals(global::Omnius.Axus.Remoting.UnsubscribeFileRequest? target)
+    public bool Equals(global::Omnius.Axus.Remoting.UnsubscribeFileParam? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -2004,9 +2004,9 @@ public sealed partial class UnsubscribeFileRequest : global::Omnius.Core.RocketP
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.UnsubscribeFileRequest>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.UnsubscribeFileParam>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.UnsubscribeFileRequest value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.UnsubscribeFileParam value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -2022,7 +2022,7 @@ public sealed partial class UnsubscribeFileRequest : global::Omnius.Core.RocketP
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Remoting.UnsubscribeFileRequest Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Remoting.UnsubscribeFileParam Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -2048,26 +2048,26 @@ public sealed partial class UnsubscribeFileRequest : global::Omnius.Core.RocketP
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.UnsubscribeFileRequest(p_rootHash, p_zone);
+            return new global::Omnius.Axus.Remoting.UnsubscribeFileParam(p_rootHash, p_zone);
         }
     }
 }
-public sealed partial class TryExportFileToStorageRequest : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportFileToStorageRequest>
+public sealed partial class TryExportFileToStorageParam : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportFileToStorageParam>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.TryExportFileToStorageRequest> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportFileToStorageRequest>.Formatter;
-    public static global::Omnius.Axus.Remoting.TryExportFileToStorageRequest Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportFileToStorageRequest>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.TryExportFileToStorageParam> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportFileToStorageParam>.Formatter;
+    public static global::Omnius.Axus.Remoting.TryExportFileToStorageParam Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportFileToStorageParam>.Empty;
 
-    static TryExportFileToStorageRequest()
+    static TryExportFileToStorageParam()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportFileToStorageRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportFileToStorageRequest>.Empty = new global::Omnius.Axus.Remoting.TryExportFileToStorageRequest(global::Omnius.Core.Cryptography.OmniHash.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportFileToStorageParam>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportFileToStorageParam>.Empty = new global::Omnius.Axus.Remoting.TryExportFileToStorageParam(global::Omnius.Core.Cryptography.OmniHash.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxFilePathLength = 2147483647;
 
-    public TryExportFileToStorageRequest(global::Omnius.Core.Cryptography.OmniHash rootHash, global::Omnius.Core.RocketPack.Utf8String filePath)
+    public TryExportFileToStorageParam(global::Omnius.Core.Cryptography.OmniHash rootHash, global::Omnius.Core.RocketPack.Utf8String filePath)
     {
         if (filePath is null) throw new global::System.ArgumentNullException("filePath");
         if (filePath.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("filePath");
@@ -2087,7 +2087,7 @@ public sealed partial class TryExportFileToStorageRequest : global::Omnius.Core.
     public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
     public global::Omnius.Core.RocketPack.Utf8String FilePath { get; }
 
-    public static global::Omnius.Axus.Remoting.TryExportFileToStorageRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Remoting.TryExportFileToStorageParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -2098,20 +2098,20 @@ public sealed partial class TryExportFileToStorageRequest : global::Omnius.Core.
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Remoting.TryExportFileToStorageRequest? left, global::Omnius.Axus.Remoting.TryExportFileToStorageRequest? right)
+    public static bool operator ==(global::Omnius.Axus.Remoting.TryExportFileToStorageParam? left, global::Omnius.Axus.Remoting.TryExportFileToStorageParam? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Remoting.TryExportFileToStorageRequest? left, global::Omnius.Axus.Remoting.TryExportFileToStorageRequest? right)
+    public static bool operator !=(global::Omnius.Axus.Remoting.TryExportFileToStorageParam? left, global::Omnius.Axus.Remoting.TryExportFileToStorageParam? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Remoting.TryExportFileToStorageRequest) return false;
-        return this.Equals((global::Omnius.Axus.Remoting.TryExportFileToStorageRequest)other);
+        if (other is not global::Omnius.Axus.Remoting.TryExportFileToStorageParam) return false;
+        return this.Equals((global::Omnius.Axus.Remoting.TryExportFileToStorageParam)other);
     }
-    public bool Equals(global::Omnius.Axus.Remoting.TryExportFileToStorageRequest? target)
+    public bool Equals(global::Omnius.Axus.Remoting.TryExportFileToStorageParam? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -2122,9 +2122,9 @@ public sealed partial class TryExportFileToStorageRequest : global::Omnius.Core.
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.TryExportFileToStorageRequest>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.TryExportFileToStorageParam>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.TryExportFileToStorageRequest value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.TryExportFileToStorageParam value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -2140,7 +2140,7 @@ public sealed partial class TryExportFileToStorageRequest : global::Omnius.Core.
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Remoting.TryExportFileToStorageRequest Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Remoting.TryExportFileToStorageParam Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -2166,7 +2166,7 @@ public sealed partial class TryExportFileToStorageRequest : global::Omnius.Core.
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.TryExportFileToStorageRequest(p_rootHash, p_filePath);
+            return new global::Omnius.Axus.Remoting.TryExportFileToStorageParam(p_rootHash, p_filePath);
         }
     }
 }
@@ -2268,20 +2268,20 @@ public sealed partial class TryExportFileToStorageResult : global::Omnius.Core.R
         }
     }
 }
-public sealed partial class TryExportFileToMemoryRequest : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest>
+public sealed partial class TryExportFileToMemoryParam : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportFileToMemoryParam>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest>.Formatter;
-    public static global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.TryExportFileToMemoryParam> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportFileToMemoryParam>.Formatter;
+    public static global::Omnius.Axus.Remoting.TryExportFileToMemoryParam Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportFileToMemoryParam>.Empty;
 
-    static TryExportFileToMemoryRequest()
+    static TryExportFileToMemoryParam()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest>.Empty = new global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest(global::Omnius.Core.Cryptography.OmniHash.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportFileToMemoryParam>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportFileToMemoryParam>.Empty = new global::Omnius.Axus.Remoting.TryExportFileToMemoryParam(global::Omnius.Core.Cryptography.OmniHash.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public TryExportFileToMemoryRequest(global::Omnius.Core.Cryptography.OmniHash rootHash)
+    public TryExportFileToMemoryParam(global::Omnius.Core.Cryptography.OmniHash rootHash)
     {
         this.RootHash = rootHash;
 
@@ -2295,7 +2295,7 @@ public sealed partial class TryExportFileToMemoryRequest : global::Omnius.Core.R
 
     public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
 
-    public static global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Remoting.TryExportFileToMemoryParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -2306,20 +2306,20 @@ public sealed partial class TryExportFileToMemoryRequest : global::Omnius.Core.R
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest? left, global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest? right)
+    public static bool operator ==(global::Omnius.Axus.Remoting.TryExportFileToMemoryParam? left, global::Omnius.Axus.Remoting.TryExportFileToMemoryParam? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest? left, global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest? right)
+    public static bool operator !=(global::Omnius.Axus.Remoting.TryExportFileToMemoryParam? left, global::Omnius.Axus.Remoting.TryExportFileToMemoryParam? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest) return false;
-        return this.Equals((global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest)other);
+        if (other is not global::Omnius.Axus.Remoting.TryExportFileToMemoryParam) return false;
+        return this.Equals((global::Omnius.Axus.Remoting.TryExportFileToMemoryParam)other);
     }
-    public bool Equals(global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest? target)
+    public bool Equals(global::Omnius.Axus.Remoting.TryExportFileToMemoryParam? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -2329,9 +2329,9 @@ public sealed partial class TryExportFileToMemoryRequest : global::Omnius.Core.R
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.TryExportFileToMemoryParam>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.TryExportFileToMemoryParam value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -2342,7 +2342,7 @@ public sealed partial class TryExportFileToMemoryRequest : global::Omnius.Core.R
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Remoting.TryExportFileToMemoryParam Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -2362,7 +2362,7 @@ public sealed partial class TryExportFileToMemoryRequest : global::Omnius.Core.R
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest(p_rootHash);
+            return new global::Omnius.Axus.Remoting.TryExportFileToMemoryParam(p_rootHash);
         }
     }
 }
@@ -2474,22 +2474,22 @@ public sealed partial class TryExportFileToMemoryResult : global::Omnius.Core.Ro
         }
     }
 }
-public sealed partial class GetPublishedShoutsReportRequest : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest>
+public sealed partial class GetPublishedShoutsReportParam : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest>.Formatter;
-    public static global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam>.Formatter;
+    public static global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam>.Empty;
 
-    static GetPublishedShoutsReportRequest()
+    static GetPublishedShoutsReportParam()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest>.Empty = new global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest(global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam>.Empty = new global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam(global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxZoneLength = 2147483647;
 
-    public GetPublishedShoutsReportRequest(global::Omnius.Core.RocketPack.Utf8String zone)
+    public GetPublishedShoutsReportParam(global::Omnius.Core.RocketPack.Utf8String zone)
     {
         if (zone is null) throw new global::System.ArgumentNullException("zone");
         if (zone.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("zone");
@@ -2506,7 +2506,7 @@ public sealed partial class GetPublishedShoutsReportRequest : global::Omnius.Cor
 
     public global::Omnius.Core.RocketPack.Utf8String Zone { get; }
 
-    public static global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -2517,20 +2517,20 @@ public sealed partial class GetPublishedShoutsReportRequest : global::Omnius.Cor
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest? left, global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest? right)
+    public static bool operator ==(global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam? left, global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest? left, global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest? right)
+    public static bool operator !=(global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam? left, global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest) return false;
-        return this.Equals((global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest)other);
+        if (other is not global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam) return false;
+        return this.Equals((global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam)other);
     }
-    public bool Equals(global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest? target)
+    public bool Equals(global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -2540,9 +2540,9 @@ public sealed partial class GetPublishedShoutsReportRequest : global::Omnius.Cor
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -2553,7 +2553,7 @@ public sealed partial class GetPublishedShoutsReportRequest : global::Omnius.Cor
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -2573,7 +2573,7 @@ public sealed partial class GetPublishedShoutsReportRequest : global::Omnius.Cor
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest(p_zone);
+            return new global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam(p_zone);
         }
     }
 }
@@ -2696,22 +2696,22 @@ public sealed partial class GetPublishedShoutsReportResult : global::Omnius.Core
         }
     }
 }
-public sealed partial class PublishShoutRequest : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishShoutRequest>, global::System.IDisposable
+public sealed partial class PublishShoutParam : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishShoutParam>, global::System.IDisposable
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.PublishShoutRequest> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishShoutRequest>.Formatter;
-    public static global::Omnius.Axus.Remoting.PublishShoutRequest Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishShoutRequest>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.PublishShoutParam> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishShoutParam>.Formatter;
+    public static global::Omnius.Axus.Remoting.PublishShoutParam Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishShoutParam>.Empty;
 
-    static PublishShoutRequest()
+    static PublishShoutParam()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishShoutRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishShoutRequest>.Empty = new global::Omnius.Axus.Remoting.PublishShoutRequest(global::Omnius.Axus.Messages.Shout.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishShoutParam>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishShoutParam>.Empty = new global::Omnius.Axus.Remoting.PublishShoutParam(global::Omnius.Axus.Messages.Shout.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxZoneLength = 2147483647;
 
-    public PublishShoutRequest(global::Omnius.Axus.Messages.Shout shout, global::Omnius.Core.RocketPack.Utf8String zone)
+    public PublishShoutParam(global::Omnius.Axus.Messages.Shout shout, global::Omnius.Core.RocketPack.Utf8String zone)
     {
         if (shout is null) throw new global::System.ArgumentNullException("shout");
         if (zone is null) throw new global::System.ArgumentNullException("zone");
@@ -2737,7 +2737,7 @@ public sealed partial class PublishShoutRequest : global::Omnius.Core.RocketPack
     public global::Omnius.Axus.Messages.Shout Shout { get; }
     public global::Omnius.Core.RocketPack.Utf8String Zone { get; }
 
-    public static global::Omnius.Axus.Remoting.PublishShoutRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Remoting.PublishShoutParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -2748,20 +2748,20 @@ public sealed partial class PublishShoutRequest : global::Omnius.Core.RocketPack
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Remoting.PublishShoutRequest? left, global::Omnius.Axus.Remoting.PublishShoutRequest? right)
+    public static bool operator ==(global::Omnius.Axus.Remoting.PublishShoutParam? left, global::Omnius.Axus.Remoting.PublishShoutParam? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Remoting.PublishShoutRequest? left, global::Omnius.Axus.Remoting.PublishShoutRequest? right)
+    public static bool operator !=(global::Omnius.Axus.Remoting.PublishShoutParam? left, global::Omnius.Axus.Remoting.PublishShoutParam? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Remoting.PublishShoutRequest) return false;
-        return this.Equals((global::Omnius.Axus.Remoting.PublishShoutRequest)other);
+        if (other is not global::Omnius.Axus.Remoting.PublishShoutParam) return false;
+        return this.Equals((global::Omnius.Axus.Remoting.PublishShoutParam)other);
     }
-    public bool Equals(global::Omnius.Axus.Remoting.PublishShoutRequest? target)
+    public bool Equals(global::Omnius.Axus.Remoting.PublishShoutParam? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -2772,9 +2772,9 @@ public sealed partial class PublishShoutRequest : global::Omnius.Core.RocketPack
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.PublishShoutRequest>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.PublishShoutParam>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.PublishShoutRequest value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.PublishShoutParam value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -2790,7 +2790,7 @@ public sealed partial class PublishShoutRequest : global::Omnius.Core.RocketPack
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Remoting.PublishShoutRequest Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Remoting.PublishShoutParam Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -2816,19 +2816,19 @@ public sealed partial class PublishShoutRequest : global::Omnius.Core.RocketPack
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.PublishShoutRequest(p_shout, p_zone);
+            return new global::Omnius.Axus.Remoting.PublishShoutParam(p_shout, p_zone);
         }
     }
 }
-public sealed partial class UnpublishShoutRequest : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishShoutRequest>
+public sealed partial class UnpublishShoutParam : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishShoutParam>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.UnpublishShoutRequest> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishShoutRequest>.Formatter;
-    public static global::Omnius.Axus.Remoting.UnpublishShoutRequest Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishShoutRequest>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.UnpublishShoutParam> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishShoutParam>.Formatter;
+    public static global::Omnius.Axus.Remoting.UnpublishShoutParam Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishShoutParam>.Empty;
 
-    static UnpublishShoutRequest()
+    static UnpublishShoutParam()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishShoutRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishShoutRequest>.Empty = new global::Omnius.Axus.Remoting.UnpublishShoutRequest(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishShoutParam>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnpublishShoutParam>.Empty = new global::Omnius.Axus.Remoting.UnpublishShoutParam(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
@@ -2836,7 +2836,7 @@ public sealed partial class UnpublishShoutRequest : global::Omnius.Core.RocketPa
     public static readonly int MaxChannelLength = 2147483647;
     public static readonly int MaxZoneLength = 2147483647;
 
-    public UnpublishShoutRequest(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String channel, global::Omnius.Core.RocketPack.Utf8String zone)
+    public UnpublishShoutParam(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String channel, global::Omnius.Core.RocketPack.Utf8String zone)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
         if (channel is null) throw new global::System.ArgumentNullException("channel");
@@ -2862,7 +2862,7 @@ public sealed partial class UnpublishShoutRequest : global::Omnius.Core.RocketPa
     public global::Omnius.Core.RocketPack.Utf8String Channel { get; }
     public global::Omnius.Core.RocketPack.Utf8String Zone { get; }
 
-    public static global::Omnius.Axus.Remoting.UnpublishShoutRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Remoting.UnpublishShoutParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -2873,20 +2873,20 @@ public sealed partial class UnpublishShoutRequest : global::Omnius.Core.RocketPa
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Remoting.UnpublishShoutRequest? left, global::Omnius.Axus.Remoting.UnpublishShoutRequest? right)
+    public static bool operator ==(global::Omnius.Axus.Remoting.UnpublishShoutParam? left, global::Omnius.Axus.Remoting.UnpublishShoutParam? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Remoting.UnpublishShoutRequest? left, global::Omnius.Axus.Remoting.UnpublishShoutRequest? right)
+    public static bool operator !=(global::Omnius.Axus.Remoting.UnpublishShoutParam? left, global::Omnius.Axus.Remoting.UnpublishShoutParam? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Remoting.UnpublishShoutRequest) return false;
-        return this.Equals((global::Omnius.Axus.Remoting.UnpublishShoutRequest)other);
+        if (other is not global::Omnius.Axus.Remoting.UnpublishShoutParam) return false;
+        return this.Equals((global::Omnius.Axus.Remoting.UnpublishShoutParam)other);
     }
-    public bool Equals(global::Omnius.Axus.Remoting.UnpublishShoutRequest? target)
+    public bool Equals(global::Omnius.Axus.Remoting.UnpublishShoutParam? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -2898,9 +2898,9 @@ public sealed partial class UnpublishShoutRequest : global::Omnius.Core.RocketPa
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.UnpublishShoutRequest>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.UnpublishShoutParam>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.UnpublishShoutRequest value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.UnpublishShoutParam value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -2921,7 +2921,7 @@ public sealed partial class UnpublishShoutRequest : global::Omnius.Core.RocketPa
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Remoting.UnpublishShoutRequest Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Remoting.UnpublishShoutParam Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -2953,26 +2953,26 @@ public sealed partial class UnpublishShoutRequest : global::Omnius.Core.RocketPa
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.UnpublishShoutRequest(p_signature, p_channel, p_zone);
+            return new global::Omnius.Axus.Remoting.UnpublishShoutParam(p_signature, p_channel, p_zone);
         }
     }
 }
-public sealed partial class GetSubscribedShoutsReportRequest : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest>
+public sealed partial class GetSubscribedShoutsReportParam : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest>.Formatter;
-    public static global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam>.Formatter;
+    public static global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam>.Empty;
 
-    static GetSubscribedShoutsReportRequest()
+    static GetSubscribedShoutsReportParam()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest>.Empty = new global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest(global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam>.Empty = new global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam(global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxZoneLength = 2147483647;
 
-    public GetSubscribedShoutsReportRequest(global::Omnius.Core.RocketPack.Utf8String zone)
+    public GetSubscribedShoutsReportParam(global::Omnius.Core.RocketPack.Utf8String zone)
     {
         if (zone is null) throw new global::System.ArgumentNullException("zone");
         if (zone.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("zone");
@@ -2989,7 +2989,7 @@ public sealed partial class GetSubscribedShoutsReportRequest : global::Omnius.Co
 
     public global::Omnius.Core.RocketPack.Utf8String Zone { get; }
 
-    public static global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -3000,20 +3000,20 @@ public sealed partial class GetSubscribedShoutsReportRequest : global::Omnius.Co
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest? left, global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest? right)
+    public static bool operator ==(global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam? left, global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest? left, global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest? right)
+    public static bool operator !=(global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam? left, global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest) return false;
-        return this.Equals((global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest)other);
+        if (other is not global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam) return false;
+        return this.Equals((global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam)other);
     }
-    public bool Equals(global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest? target)
+    public bool Equals(global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -3023,9 +3023,9 @@ public sealed partial class GetSubscribedShoutsReportRequest : global::Omnius.Co
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -3036,7 +3036,7 @@ public sealed partial class GetSubscribedShoutsReportRequest : global::Omnius.Co
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -3056,7 +3056,7 @@ public sealed partial class GetSubscribedShoutsReportRequest : global::Omnius.Co
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest(p_zone);
+            return new global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam(p_zone);
         }
     }
 }
@@ -3179,15 +3179,15 @@ public sealed partial class GetSubscribedShoutsReportResult : global::Omnius.Cor
         }
     }
 }
-public sealed partial class SubscribeShoutRequest : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeShoutRequest>
+public sealed partial class SubscribeShoutParam : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeShoutParam>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.SubscribeShoutRequest> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeShoutRequest>.Formatter;
-    public static global::Omnius.Axus.Remoting.SubscribeShoutRequest Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeShoutRequest>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.SubscribeShoutParam> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeShoutParam>.Formatter;
+    public static global::Omnius.Axus.Remoting.SubscribeShoutParam Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeShoutParam>.Empty;
 
-    static SubscribeShoutRequest()
+    static SubscribeShoutParam()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeShoutRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeShoutRequest>.Empty = new global::Omnius.Axus.Remoting.SubscribeShoutRequest(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeShoutParam>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeShoutParam>.Empty = new global::Omnius.Axus.Remoting.SubscribeShoutParam(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
@@ -3195,7 +3195,7 @@ public sealed partial class SubscribeShoutRequest : global::Omnius.Core.RocketPa
     public static readonly int MaxChannelLength = 2147483647;
     public static readonly int MaxZoneLength = 2147483647;
 
-    public SubscribeShoutRequest(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String channel, global::Omnius.Core.RocketPack.Utf8String zone)
+    public SubscribeShoutParam(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String channel, global::Omnius.Core.RocketPack.Utf8String zone)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
         if (channel is null) throw new global::System.ArgumentNullException("channel");
@@ -3221,7 +3221,7 @@ public sealed partial class SubscribeShoutRequest : global::Omnius.Core.RocketPa
     public global::Omnius.Core.RocketPack.Utf8String Channel { get; }
     public global::Omnius.Core.RocketPack.Utf8String Zone { get; }
 
-    public static global::Omnius.Axus.Remoting.SubscribeShoutRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Remoting.SubscribeShoutParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -3232,20 +3232,20 @@ public sealed partial class SubscribeShoutRequest : global::Omnius.Core.RocketPa
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Remoting.SubscribeShoutRequest? left, global::Omnius.Axus.Remoting.SubscribeShoutRequest? right)
+    public static bool operator ==(global::Omnius.Axus.Remoting.SubscribeShoutParam? left, global::Omnius.Axus.Remoting.SubscribeShoutParam? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Remoting.SubscribeShoutRequest? left, global::Omnius.Axus.Remoting.SubscribeShoutRequest? right)
+    public static bool operator !=(global::Omnius.Axus.Remoting.SubscribeShoutParam? left, global::Omnius.Axus.Remoting.SubscribeShoutParam? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Remoting.SubscribeShoutRequest) return false;
-        return this.Equals((global::Omnius.Axus.Remoting.SubscribeShoutRequest)other);
+        if (other is not global::Omnius.Axus.Remoting.SubscribeShoutParam) return false;
+        return this.Equals((global::Omnius.Axus.Remoting.SubscribeShoutParam)other);
     }
-    public bool Equals(global::Omnius.Axus.Remoting.SubscribeShoutRequest? target)
+    public bool Equals(global::Omnius.Axus.Remoting.SubscribeShoutParam? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -3257,9 +3257,9 @@ public sealed partial class SubscribeShoutRequest : global::Omnius.Core.RocketPa
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.SubscribeShoutRequest>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.SubscribeShoutParam>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.SubscribeShoutRequest value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.SubscribeShoutParam value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -3280,7 +3280,7 @@ public sealed partial class SubscribeShoutRequest : global::Omnius.Core.RocketPa
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Remoting.SubscribeShoutRequest Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Remoting.SubscribeShoutParam Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -3312,19 +3312,19 @@ public sealed partial class SubscribeShoutRequest : global::Omnius.Core.RocketPa
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.SubscribeShoutRequest(p_signature, p_channel, p_zone);
+            return new global::Omnius.Axus.Remoting.SubscribeShoutParam(p_signature, p_channel, p_zone);
         }
     }
 }
-public sealed partial class UnsubscribeShoutRequest : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeShoutRequest>
+public sealed partial class UnsubscribeShoutParam : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeShoutParam>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.UnsubscribeShoutRequest> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeShoutRequest>.Formatter;
-    public static global::Omnius.Axus.Remoting.UnsubscribeShoutRequest Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeShoutRequest>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.UnsubscribeShoutParam> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeShoutParam>.Formatter;
+    public static global::Omnius.Axus.Remoting.UnsubscribeShoutParam Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeShoutParam>.Empty;
 
-    static UnsubscribeShoutRequest()
+    static UnsubscribeShoutParam()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeShoutRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeShoutRequest>.Empty = new global::Omnius.Axus.Remoting.UnsubscribeShoutRequest(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeShoutParam>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.UnsubscribeShoutParam>.Empty = new global::Omnius.Axus.Remoting.UnsubscribeShoutParam(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
@@ -3332,7 +3332,7 @@ public sealed partial class UnsubscribeShoutRequest : global::Omnius.Core.Rocket
     public static readonly int MaxChannelLength = 2147483647;
     public static readonly int MaxZoneLength = 2147483647;
 
-    public UnsubscribeShoutRequest(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String channel, global::Omnius.Core.RocketPack.Utf8String zone)
+    public UnsubscribeShoutParam(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String channel, global::Omnius.Core.RocketPack.Utf8String zone)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
         if (channel is null) throw new global::System.ArgumentNullException("channel");
@@ -3358,7 +3358,7 @@ public sealed partial class UnsubscribeShoutRequest : global::Omnius.Core.Rocket
     public global::Omnius.Core.RocketPack.Utf8String Channel { get; }
     public global::Omnius.Core.RocketPack.Utf8String Zone { get; }
 
-    public static global::Omnius.Axus.Remoting.UnsubscribeShoutRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Remoting.UnsubscribeShoutParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -3369,20 +3369,20 @@ public sealed partial class UnsubscribeShoutRequest : global::Omnius.Core.Rocket
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Remoting.UnsubscribeShoutRequest? left, global::Omnius.Axus.Remoting.UnsubscribeShoutRequest? right)
+    public static bool operator ==(global::Omnius.Axus.Remoting.UnsubscribeShoutParam? left, global::Omnius.Axus.Remoting.UnsubscribeShoutParam? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Remoting.UnsubscribeShoutRequest? left, global::Omnius.Axus.Remoting.UnsubscribeShoutRequest? right)
+    public static bool operator !=(global::Omnius.Axus.Remoting.UnsubscribeShoutParam? left, global::Omnius.Axus.Remoting.UnsubscribeShoutParam? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Remoting.UnsubscribeShoutRequest) return false;
-        return this.Equals((global::Omnius.Axus.Remoting.UnsubscribeShoutRequest)other);
+        if (other is not global::Omnius.Axus.Remoting.UnsubscribeShoutParam) return false;
+        return this.Equals((global::Omnius.Axus.Remoting.UnsubscribeShoutParam)other);
     }
-    public bool Equals(global::Omnius.Axus.Remoting.UnsubscribeShoutRequest? target)
+    public bool Equals(global::Omnius.Axus.Remoting.UnsubscribeShoutParam? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -3394,9 +3394,9 @@ public sealed partial class UnsubscribeShoutRequest : global::Omnius.Core.Rocket
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.UnsubscribeShoutRequest>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.UnsubscribeShoutParam>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.UnsubscribeShoutRequest value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.UnsubscribeShoutParam value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -3417,7 +3417,7 @@ public sealed partial class UnsubscribeShoutRequest : global::Omnius.Core.Rocket
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Remoting.UnsubscribeShoutRequest Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Remoting.UnsubscribeShoutParam Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -3449,26 +3449,26 @@ public sealed partial class UnsubscribeShoutRequest : global::Omnius.Core.Rocket
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.UnsubscribeShoutRequest(p_signature, p_channel, p_zone);
+            return new global::Omnius.Axus.Remoting.UnsubscribeShoutParam(p_signature, p_channel, p_zone);
         }
     }
 }
-public sealed partial class TryExportShoutRequest : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportShoutRequest>
+public sealed partial class TryExportShoutParam : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportShoutParam>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.TryExportShoutRequest> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportShoutRequest>.Formatter;
-    public static global::Omnius.Axus.Remoting.TryExportShoutRequest Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportShoutRequest>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.TryExportShoutParam> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportShoutParam>.Formatter;
+    public static global::Omnius.Axus.Remoting.TryExportShoutParam Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportShoutParam>.Empty;
 
-    static TryExportShoutRequest()
+    static TryExportShoutParam()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportShoutRequest>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportShoutRequest>.Empty = new global::Omnius.Axus.Remoting.TryExportShoutRequest(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.RocketPack.Timestamp64.Zero);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportShoutParam>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.TryExportShoutParam>.Empty = new global::Omnius.Axus.Remoting.TryExportShoutParam(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.RocketPack.Timestamp64.Zero);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxChannelLength = 2147483647;
 
-    public TryExportShoutRequest(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String channel, global::Omnius.Core.RocketPack.Timestamp64 updatedTime)
+    public TryExportShoutParam(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String channel, global::Omnius.Core.RocketPack.Timestamp64 updatedTime)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
         if (channel is null) throw new global::System.ArgumentNullException("channel");
@@ -3491,7 +3491,7 @@ public sealed partial class TryExportShoutRequest : global::Omnius.Core.RocketPa
     public global::Omnius.Core.RocketPack.Utf8String Channel { get; }
     public global::Omnius.Core.RocketPack.Timestamp64 UpdatedTime { get; }
 
-    public static global::Omnius.Axus.Remoting.TryExportShoutRequest Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Remoting.TryExportShoutParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -3502,20 +3502,20 @@ public sealed partial class TryExportShoutRequest : global::Omnius.Core.RocketPa
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Remoting.TryExportShoutRequest? left, global::Omnius.Axus.Remoting.TryExportShoutRequest? right)
+    public static bool operator ==(global::Omnius.Axus.Remoting.TryExportShoutParam? left, global::Omnius.Axus.Remoting.TryExportShoutParam? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Remoting.TryExportShoutRequest? left, global::Omnius.Axus.Remoting.TryExportShoutRequest? right)
+    public static bool operator !=(global::Omnius.Axus.Remoting.TryExportShoutParam? left, global::Omnius.Axus.Remoting.TryExportShoutParam? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Remoting.TryExportShoutRequest) return false;
-        return this.Equals((global::Omnius.Axus.Remoting.TryExportShoutRequest)other);
+        if (other is not global::Omnius.Axus.Remoting.TryExportShoutParam) return false;
+        return this.Equals((global::Omnius.Axus.Remoting.TryExportShoutParam)other);
     }
-    public bool Equals(global::Omnius.Axus.Remoting.TryExportShoutRequest? target)
+    public bool Equals(global::Omnius.Axus.Remoting.TryExportShoutParam? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -3527,9 +3527,9 @@ public sealed partial class TryExportShoutRequest : global::Omnius.Core.RocketPa
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.TryExportShoutRequest>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Remoting.TryExportShoutParam>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.TryExportShoutRequest value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Remoting.TryExportShoutParam value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -3550,7 +3550,7 @@ public sealed partial class TryExportShoutRequest : global::Omnius.Core.RocketPa
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Remoting.TryExportShoutRequest Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Remoting.TryExportShoutParam Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -3582,7 +3582,7 @@ public sealed partial class TryExportShoutRequest : global::Omnius.Core.RocketPa
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.TryExportShoutRequest(p_signature, p_channel, p_updatedTime);
+            return new global::Omnius.Axus.Remoting.TryExportShoutParam(p_signature, p_channel, p_updatedTime);
         }
     }
 }
@@ -4558,28 +4558,28 @@ public sealed partial class TcpAccepterConfig : global::Omnius.Core.RocketPack.I
 public interface IAxusService
 {
     global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetConfigResult> GetConfigAsync(global::System.Threading.CancellationToken cancellationToken = default);
-    global::System.Threading.Tasks.ValueTask SetConfigAsync(global::Omnius.Axus.Remoting.SetConfigRequest param, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.ValueTask SetConfigAsync(global::Omnius.Axus.Remoting.SetConfigParam param, global::System.Threading.CancellationToken cancellationToken = default);
     global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetSessionsReportResult> GetSessionsReportAsync(global::System.Threading.CancellationToken cancellationToken = default);
     global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetMyNodeLocationResult> GetMyNodeLocationAsync(global::System.Threading.CancellationToken cancellationToken = default);
     global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetCloudNodeLocationsResult> GetCloudNodeLocationsAsync(global::System.Threading.CancellationToken cancellationToken = default);
-    global::System.Threading.Tasks.ValueTask AddCloudNodeLocationsAsync(global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest param, global::System.Threading.CancellationToken cancellationToken = default);
-    global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetPublishedFilesReportResult> GetPublishedFilesReportAsync(global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest param, global::System.Threading.CancellationToken cancellationToken = default);
-    global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.PublishFileFromStorageResult> PublishFileFromStorageAsync(global::Omnius.Axus.Remoting.PublishFileFromStorageRequest param, global::System.Threading.CancellationToken cancellationToken = default);
-    global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.PublishFileFromMemoryResult> PublishFileFromMemoryAsync(global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest param, global::System.Threading.CancellationToken cancellationToken = default);
-    global::System.Threading.Tasks.ValueTask UnpublishFileFromStorageAsync(global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest param, global::System.Threading.CancellationToken cancellationToken = default);
-    global::System.Threading.Tasks.ValueTask UnpublishFileFromMemoryAsync(global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest param, global::System.Threading.CancellationToken cancellationToken = default);
-    global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetSubscribedFilesReportResult> GetSubscribedFilesReportAsync(global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest param, global::System.Threading.CancellationToken cancellationToken = default);
-    global::System.Threading.Tasks.ValueTask SubscribeFileAsync(global::Omnius.Axus.Remoting.SubscribeFileRequest param, global::System.Threading.CancellationToken cancellationToken = default);
-    global::System.Threading.Tasks.ValueTask UnsubscribeFileAsync(global::Omnius.Axus.Remoting.UnsubscribeFileRequest param, global::System.Threading.CancellationToken cancellationToken = default);
-    global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.TryExportFileToStorageResult> TryExportFileToStorageAsync(global::Omnius.Axus.Remoting.TryExportFileToStorageRequest param, global::System.Threading.CancellationToken cancellationToken = default);
-    global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.TryExportFileToMemoryResult> TryExportFileToMemoryAsync(global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest param, global::System.Threading.CancellationToken cancellationToken = default);
-    global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetPublishedShoutsReportResult> GetPublishedShoutsReportAsync(global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest param, global::System.Threading.CancellationToken cancellationToken = default);
-    global::System.Threading.Tasks.ValueTask PublishShoutAsync(global::Omnius.Axus.Remoting.PublishShoutRequest param, global::System.Threading.CancellationToken cancellationToken = default);
-    global::System.Threading.Tasks.ValueTask UnpublishShoutAsync(global::Omnius.Axus.Remoting.UnpublishShoutRequest param, global::System.Threading.CancellationToken cancellationToken = default);
-    global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportResult> GetSubscribedShoutsReportAsync(global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest param, global::System.Threading.CancellationToken cancellationToken = default);
-    global::System.Threading.Tasks.ValueTask SubscribeShoutAsync(global::Omnius.Axus.Remoting.SubscribeShoutRequest param, global::System.Threading.CancellationToken cancellationToken = default);
-    global::System.Threading.Tasks.ValueTask UnsubscribeShoutAsync(global::Omnius.Axus.Remoting.UnsubscribeShoutRequest param, global::System.Threading.CancellationToken cancellationToken = default);
-    global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.TryExportShoutResult> TryExportShoutAsync(global::Omnius.Axus.Remoting.TryExportShoutRequest param, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.ValueTask AddCloudNodeLocationsAsync(global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam param, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetPublishedFilesReportResult> GetPublishedFilesReportAsync(global::Omnius.Axus.Remoting.GetPublishedFilesReportParam param, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.PublishFileFromStorageResult> PublishFileFromStorageAsync(global::Omnius.Axus.Remoting.PublishFileFromStorageParam param, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.PublishFileFromMemoryResult> PublishFileFromMemoryAsync(global::Omnius.Axus.Remoting.PublishFileFromMemoryParam param, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.ValueTask UnpublishFileFromStorageAsync(global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam param, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.ValueTask UnpublishFileFromMemoryAsync(global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam param, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetSubscribedFilesReportResult> GetSubscribedFilesReportAsync(global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam param, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.ValueTask SubscribeFileAsync(global::Omnius.Axus.Remoting.SubscribeFileParam param, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.ValueTask UnsubscribeFileAsync(global::Omnius.Axus.Remoting.UnsubscribeFileParam param, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.TryExportFileToStorageResult> TryExportFileToStorageAsync(global::Omnius.Axus.Remoting.TryExportFileToStorageParam param, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.TryExportFileToMemoryResult> TryExportFileToMemoryAsync(global::Omnius.Axus.Remoting.TryExportFileToMemoryParam param, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetPublishedShoutsReportResult> GetPublishedShoutsReportAsync(global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam param, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.ValueTask PublishShoutAsync(global::Omnius.Axus.Remoting.PublishShoutParam param, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.ValueTask UnpublishShoutAsync(global::Omnius.Axus.Remoting.UnpublishShoutParam param, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportResult> GetSubscribedShoutsReportAsync(global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam param, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.ValueTask SubscribeShoutAsync(global::Omnius.Axus.Remoting.SubscribeShoutParam param, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.ValueTask UnsubscribeShoutAsync(global::Omnius.Axus.Remoting.UnsubscribeShoutParam param, global::System.Threading.CancellationToken cancellationToken = default);
+    global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.TryExportShoutResult> TryExportShoutAsync(global::Omnius.Axus.Remoting.TryExportShoutParam param, global::System.Threading.CancellationToken cancellationToken = default);
 }
 public class AxusServiceRemoting
 {
@@ -4598,10 +4598,10 @@ public class AxusServiceRemoting
             await using var caller = await _callerFactory.CreateAsync(1, cancellationToken);
             return await caller.CallFunctionAsync<global::Omnius.Axus.Remoting.GetConfigResult>(cancellationToken);
         }
-        public async global::System.Threading.Tasks.ValueTask SetConfigAsync(global::Omnius.Axus.Remoting.SetConfigRequest param, global::System.Threading.CancellationToken cancellationToken = default)
+        public async global::System.Threading.Tasks.ValueTask SetConfigAsync(global::Omnius.Axus.Remoting.SetConfigParam param, global::System.Threading.CancellationToken cancellationToken = default)
         {
             await using var caller = await _callerFactory.CreateAsync(2, cancellationToken);
-            await caller.CallActionAsync<global::Omnius.Axus.Remoting.SetConfigRequest>(param, cancellationToken);
+            await caller.CallActionAsync<global::Omnius.Axus.Remoting.SetConfigParam>(param, cancellationToken);
         }
         public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetSessionsReportResult> GetSessionsReportAsync(global::System.Threading.CancellationToken cancellationToken = default)
         {
@@ -4618,95 +4618,95 @@ public class AxusServiceRemoting
             await using var caller = await _callerFactory.CreateAsync(5, cancellationToken);
             return await caller.CallFunctionAsync<global::Omnius.Axus.Remoting.GetCloudNodeLocationsResult>(cancellationToken);
         }
-        public async global::System.Threading.Tasks.ValueTask AddCloudNodeLocationsAsync(global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest param, global::System.Threading.CancellationToken cancellationToken = default)
+        public async global::System.Threading.Tasks.ValueTask AddCloudNodeLocationsAsync(global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam param, global::System.Threading.CancellationToken cancellationToken = default)
         {
             await using var caller = await _callerFactory.CreateAsync(6, cancellationToken);
-            await caller.CallActionAsync<global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest>(param, cancellationToken);
+            await caller.CallActionAsync<global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam>(param, cancellationToken);
         }
-        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetPublishedFilesReportResult> GetPublishedFilesReportAsync(global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest param, global::System.Threading.CancellationToken cancellationToken = default)
+        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetPublishedFilesReportResult> GetPublishedFilesReportAsync(global::Omnius.Axus.Remoting.GetPublishedFilesReportParam param, global::System.Threading.CancellationToken cancellationToken = default)
         {
             await using var caller = await _callerFactory.CreateAsync(7, cancellationToken);
-            return await caller.CallFunctionAsync<global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest, global::Omnius.Axus.Remoting.GetPublishedFilesReportResult>(param, cancellationToken);
+            return await caller.CallFunctionAsync<global::Omnius.Axus.Remoting.GetPublishedFilesReportParam, global::Omnius.Axus.Remoting.GetPublishedFilesReportResult>(param, cancellationToken);
         }
-        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.PublishFileFromStorageResult> PublishFileFromStorageAsync(global::Omnius.Axus.Remoting.PublishFileFromStorageRequest param, global::System.Threading.CancellationToken cancellationToken = default)
+        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.PublishFileFromStorageResult> PublishFileFromStorageAsync(global::Omnius.Axus.Remoting.PublishFileFromStorageParam param, global::System.Threading.CancellationToken cancellationToken = default)
         {
             await using var caller = await _callerFactory.CreateAsync(8, cancellationToken);
-            return await caller.CallFunctionAsync<global::Omnius.Axus.Remoting.PublishFileFromStorageRequest, global::Omnius.Axus.Remoting.PublishFileFromStorageResult>(param, cancellationToken);
+            return await caller.CallFunctionAsync<global::Omnius.Axus.Remoting.PublishFileFromStorageParam, global::Omnius.Axus.Remoting.PublishFileFromStorageResult>(param, cancellationToken);
         }
-        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.PublishFileFromMemoryResult> PublishFileFromMemoryAsync(global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest param, global::System.Threading.CancellationToken cancellationToken = default)
+        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.PublishFileFromMemoryResult> PublishFileFromMemoryAsync(global::Omnius.Axus.Remoting.PublishFileFromMemoryParam param, global::System.Threading.CancellationToken cancellationToken = default)
         {
             await using var caller = await _callerFactory.CreateAsync(9, cancellationToken);
-            return await caller.CallFunctionAsync<global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest, global::Omnius.Axus.Remoting.PublishFileFromMemoryResult>(param, cancellationToken);
+            return await caller.CallFunctionAsync<global::Omnius.Axus.Remoting.PublishFileFromMemoryParam, global::Omnius.Axus.Remoting.PublishFileFromMemoryResult>(param, cancellationToken);
         }
-        public async global::System.Threading.Tasks.ValueTask UnpublishFileFromStorageAsync(global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest param, global::System.Threading.CancellationToken cancellationToken = default)
+        public async global::System.Threading.Tasks.ValueTask UnpublishFileFromStorageAsync(global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam param, global::System.Threading.CancellationToken cancellationToken = default)
         {
             await using var caller = await _callerFactory.CreateAsync(10, cancellationToken);
-            await caller.CallActionAsync<global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest>(param, cancellationToken);
+            await caller.CallActionAsync<global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam>(param, cancellationToken);
         }
-        public async global::System.Threading.Tasks.ValueTask UnpublishFileFromMemoryAsync(global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest param, global::System.Threading.CancellationToken cancellationToken = default)
+        public async global::System.Threading.Tasks.ValueTask UnpublishFileFromMemoryAsync(global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam param, global::System.Threading.CancellationToken cancellationToken = default)
         {
             await using var caller = await _callerFactory.CreateAsync(11, cancellationToken);
-            await caller.CallActionAsync<global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest>(param, cancellationToken);
+            await caller.CallActionAsync<global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam>(param, cancellationToken);
         }
-        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetSubscribedFilesReportResult> GetSubscribedFilesReportAsync(global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest param, global::System.Threading.CancellationToken cancellationToken = default)
+        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetSubscribedFilesReportResult> GetSubscribedFilesReportAsync(global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam param, global::System.Threading.CancellationToken cancellationToken = default)
         {
             await using var caller = await _callerFactory.CreateAsync(12, cancellationToken);
-            return await caller.CallFunctionAsync<global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest, global::Omnius.Axus.Remoting.GetSubscribedFilesReportResult>(param, cancellationToken);
+            return await caller.CallFunctionAsync<global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam, global::Omnius.Axus.Remoting.GetSubscribedFilesReportResult>(param, cancellationToken);
         }
-        public async global::System.Threading.Tasks.ValueTask SubscribeFileAsync(global::Omnius.Axus.Remoting.SubscribeFileRequest param, global::System.Threading.CancellationToken cancellationToken = default)
+        public async global::System.Threading.Tasks.ValueTask SubscribeFileAsync(global::Omnius.Axus.Remoting.SubscribeFileParam param, global::System.Threading.CancellationToken cancellationToken = default)
         {
             await using var caller = await _callerFactory.CreateAsync(13, cancellationToken);
-            await caller.CallActionAsync<global::Omnius.Axus.Remoting.SubscribeFileRequest>(param, cancellationToken);
+            await caller.CallActionAsync<global::Omnius.Axus.Remoting.SubscribeFileParam>(param, cancellationToken);
         }
-        public async global::System.Threading.Tasks.ValueTask UnsubscribeFileAsync(global::Omnius.Axus.Remoting.UnsubscribeFileRequest param, global::System.Threading.CancellationToken cancellationToken = default)
+        public async global::System.Threading.Tasks.ValueTask UnsubscribeFileAsync(global::Omnius.Axus.Remoting.UnsubscribeFileParam param, global::System.Threading.CancellationToken cancellationToken = default)
         {
             await using var caller = await _callerFactory.CreateAsync(14, cancellationToken);
-            await caller.CallActionAsync<global::Omnius.Axus.Remoting.UnsubscribeFileRequest>(param, cancellationToken);
+            await caller.CallActionAsync<global::Omnius.Axus.Remoting.UnsubscribeFileParam>(param, cancellationToken);
         }
-        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.TryExportFileToStorageResult> TryExportFileToStorageAsync(global::Omnius.Axus.Remoting.TryExportFileToStorageRequest param, global::System.Threading.CancellationToken cancellationToken = default)
+        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.TryExportFileToStorageResult> TryExportFileToStorageAsync(global::Omnius.Axus.Remoting.TryExportFileToStorageParam param, global::System.Threading.CancellationToken cancellationToken = default)
         {
             await using var caller = await _callerFactory.CreateAsync(15, cancellationToken);
-            return await caller.CallFunctionAsync<global::Omnius.Axus.Remoting.TryExportFileToStorageRequest, global::Omnius.Axus.Remoting.TryExportFileToStorageResult>(param, cancellationToken);
+            return await caller.CallFunctionAsync<global::Omnius.Axus.Remoting.TryExportFileToStorageParam, global::Omnius.Axus.Remoting.TryExportFileToStorageResult>(param, cancellationToken);
         }
-        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.TryExportFileToMemoryResult> TryExportFileToMemoryAsync(global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest param, global::System.Threading.CancellationToken cancellationToken = default)
+        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.TryExportFileToMemoryResult> TryExportFileToMemoryAsync(global::Omnius.Axus.Remoting.TryExportFileToMemoryParam param, global::System.Threading.CancellationToken cancellationToken = default)
         {
             await using var caller = await _callerFactory.CreateAsync(16, cancellationToken);
-            return await caller.CallFunctionAsync<global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest, global::Omnius.Axus.Remoting.TryExportFileToMemoryResult>(param, cancellationToken);
+            return await caller.CallFunctionAsync<global::Omnius.Axus.Remoting.TryExportFileToMemoryParam, global::Omnius.Axus.Remoting.TryExportFileToMemoryResult>(param, cancellationToken);
         }
-        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetPublishedShoutsReportResult> GetPublishedShoutsReportAsync(global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest param, global::System.Threading.CancellationToken cancellationToken = default)
+        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetPublishedShoutsReportResult> GetPublishedShoutsReportAsync(global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam param, global::System.Threading.CancellationToken cancellationToken = default)
         {
             await using var caller = await _callerFactory.CreateAsync(17, cancellationToken);
-            return await caller.CallFunctionAsync<global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest, global::Omnius.Axus.Remoting.GetPublishedShoutsReportResult>(param, cancellationToken);
+            return await caller.CallFunctionAsync<global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam, global::Omnius.Axus.Remoting.GetPublishedShoutsReportResult>(param, cancellationToken);
         }
-        public async global::System.Threading.Tasks.ValueTask PublishShoutAsync(global::Omnius.Axus.Remoting.PublishShoutRequest param, global::System.Threading.CancellationToken cancellationToken = default)
+        public async global::System.Threading.Tasks.ValueTask PublishShoutAsync(global::Omnius.Axus.Remoting.PublishShoutParam param, global::System.Threading.CancellationToken cancellationToken = default)
         {
             await using var caller = await _callerFactory.CreateAsync(18, cancellationToken);
-            await caller.CallActionAsync<global::Omnius.Axus.Remoting.PublishShoutRequest>(param, cancellationToken);
+            await caller.CallActionAsync<global::Omnius.Axus.Remoting.PublishShoutParam>(param, cancellationToken);
         }
-        public async global::System.Threading.Tasks.ValueTask UnpublishShoutAsync(global::Omnius.Axus.Remoting.UnpublishShoutRequest param, global::System.Threading.CancellationToken cancellationToken = default)
+        public async global::System.Threading.Tasks.ValueTask UnpublishShoutAsync(global::Omnius.Axus.Remoting.UnpublishShoutParam param, global::System.Threading.CancellationToken cancellationToken = default)
         {
             await using var caller = await _callerFactory.CreateAsync(19, cancellationToken);
-            await caller.CallActionAsync<global::Omnius.Axus.Remoting.UnpublishShoutRequest>(param, cancellationToken);
+            await caller.CallActionAsync<global::Omnius.Axus.Remoting.UnpublishShoutParam>(param, cancellationToken);
         }
-        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportResult> GetSubscribedShoutsReportAsync(global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest param, global::System.Threading.CancellationToken cancellationToken = default)
+        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportResult> GetSubscribedShoutsReportAsync(global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam param, global::System.Threading.CancellationToken cancellationToken = default)
         {
             await using var caller = await _callerFactory.CreateAsync(20, cancellationToken);
-            return await caller.CallFunctionAsync<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest, global::Omnius.Axus.Remoting.GetSubscribedShoutsReportResult>(param, cancellationToken);
+            return await caller.CallFunctionAsync<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam, global::Omnius.Axus.Remoting.GetSubscribedShoutsReportResult>(param, cancellationToken);
         }
-        public async global::System.Threading.Tasks.ValueTask SubscribeShoutAsync(global::Omnius.Axus.Remoting.SubscribeShoutRequest param, global::System.Threading.CancellationToken cancellationToken = default)
+        public async global::System.Threading.Tasks.ValueTask SubscribeShoutAsync(global::Omnius.Axus.Remoting.SubscribeShoutParam param, global::System.Threading.CancellationToken cancellationToken = default)
         {
             await using var caller = await _callerFactory.CreateAsync(21, cancellationToken);
-            await caller.CallActionAsync<global::Omnius.Axus.Remoting.SubscribeShoutRequest>(param, cancellationToken);
+            await caller.CallActionAsync<global::Omnius.Axus.Remoting.SubscribeShoutParam>(param, cancellationToken);
         }
-        public async global::System.Threading.Tasks.ValueTask UnsubscribeShoutAsync(global::Omnius.Axus.Remoting.UnsubscribeShoutRequest param, global::System.Threading.CancellationToken cancellationToken = default)
+        public async global::System.Threading.Tasks.ValueTask UnsubscribeShoutAsync(global::Omnius.Axus.Remoting.UnsubscribeShoutParam param, global::System.Threading.CancellationToken cancellationToken = default)
         {
             await using var caller = await _callerFactory.CreateAsync(22, cancellationToken);
-            await caller.CallActionAsync<global::Omnius.Axus.Remoting.UnsubscribeShoutRequest>(param, cancellationToken);
+            await caller.CallActionAsync<global::Omnius.Axus.Remoting.UnsubscribeShoutParam>(param, cancellationToken);
         }
-        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.TryExportShoutResult> TryExportShoutAsync(global::Omnius.Axus.Remoting.TryExportShoutRequest param, global::System.Threading.CancellationToken cancellationToken = default)
+        public async global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.TryExportShoutResult> TryExportShoutAsync(global::Omnius.Axus.Remoting.TryExportShoutParam param, global::System.Threading.CancellationToken cancellationToken = default)
         {
             await using var caller = await _callerFactory.CreateAsync(23, cancellationToken);
-            return await caller.CallFunctionAsync<global::Omnius.Axus.Remoting.TryExportShoutRequest, global::Omnius.Axus.Remoting.TryExportShoutResult>(param, cancellationToken);
+            return await caller.CallFunctionAsync<global::Omnius.Axus.Remoting.TryExportShoutParam, global::Omnius.Axus.Remoting.TryExportShoutResult>(param, cancellationToken);
         }
     }
     public class Server<TError>
@@ -4736,7 +4736,7 @@ public class AxusServiceRemoting
                         break;
                     case 2:
                         {
-                            await listener.ListenActionAsync<global::Omnius.Axus.Remoting.SetConfigRequest>(_service.SetConfigAsync, cancellationToken);
+                            await listener.ListenActionAsync<global::Omnius.Axus.Remoting.SetConfigParam>(_service.SetConfigAsync, cancellationToken);
                         }
                         break;
                     case 3:
@@ -4756,92 +4756,92 @@ public class AxusServiceRemoting
                         break;
                     case 6:
                         {
-                            await listener.ListenActionAsync<global::Omnius.Axus.Remoting.AddCloudNodeLocationsRequest>(_service.AddCloudNodeLocationsAsync, cancellationToken);
+                            await listener.ListenActionAsync<global::Omnius.Axus.Remoting.AddCloudNodeLocationsParam>(_service.AddCloudNodeLocationsAsync, cancellationToken);
                         }
                         break;
                     case 7:
                         {
-                            await listener.ListenFunctionAsync<global::Omnius.Axus.Remoting.GetPublishedFilesReportRequest, global::Omnius.Axus.Remoting.GetPublishedFilesReportResult>(_service.GetPublishedFilesReportAsync, cancellationToken);
+                            await listener.ListenFunctionAsync<global::Omnius.Axus.Remoting.GetPublishedFilesReportParam, global::Omnius.Axus.Remoting.GetPublishedFilesReportResult>(_service.GetPublishedFilesReportAsync, cancellationToken);
                         }
                         break;
                     case 8:
                         {
-                            await listener.ListenFunctionAsync<global::Omnius.Axus.Remoting.PublishFileFromStorageRequest, global::Omnius.Axus.Remoting.PublishFileFromStorageResult>(_service.PublishFileFromStorageAsync, cancellationToken);
+                            await listener.ListenFunctionAsync<global::Omnius.Axus.Remoting.PublishFileFromStorageParam, global::Omnius.Axus.Remoting.PublishFileFromStorageResult>(_service.PublishFileFromStorageAsync, cancellationToken);
                         }
                         break;
                     case 9:
                         {
-                            await listener.ListenFunctionAsync<global::Omnius.Axus.Remoting.PublishFileFromMemoryRequest, global::Omnius.Axus.Remoting.PublishFileFromMemoryResult>(_service.PublishFileFromMemoryAsync, cancellationToken);
+                            await listener.ListenFunctionAsync<global::Omnius.Axus.Remoting.PublishFileFromMemoryParam, global::Omnius.Axus.Remoting.PublishFileFromMemoryResult>(_service.PublishFileFromMemoryAsync, cancellationToken);
                         }
                         break;
                     case 10:
                         {
-                            await listener.ListenActionAsync<global::Omnius.Axus.Remoting.UnpublishFileFromStorageRequest>(_service.UnpublishFileFromStorageAsync, cancellationToken);
+                            await listener.ListenActionAsync<global::Omnius.Axus.Remoting.UnpublishFileFromStorageParam>(_service.UnpublishFileFromStorageAsync, cancellationToken);
                         }
                         break;
                     case 11:
                         {
-                            await listener.ListenActionAsync<global::Omnius.Axus.Remoting.UnpublishFileFromMemoryRequest>(_service.UnpublishFileFromMemoryAsync, cancellationToken);
+                            await listener.ListenActionAsync<global::Omnius.Axus.Remoting.UnpublishFileFromMemoryParam>(_service.UnpublishFileFromMemoryAsync, cancellationToken);
                         }
                         break;
                     case 12:
                         {
-                            await listener.ListenFunctionAsync<global::Omnius.Axus.Remoting.GetSubscribedFilesReportRequest, global::Omnius.Axus.Remoting.GetSubscribedFilesReportResult>(_service.GetSubscribedFilesReportAsync, cancellationToken);
+                            await listener.ListenFunctionAsync<global::Omnius.Axus.Remoting.GetSubscribedFilesReportParam, global::Omnius.Axus.Remoting.GetSubscribedFilesReportResult>(_service.GetSubscribedFilesReportAsync, cancellationToken);
                         }
                         break;
                     case 13:
                         {
-                            await listener.ListenActionAsync<global::Omnius.Axus.Remoting.SubscribeFileRequest>(_service.SubscribeFileAsync, cancellationToken);
+                            await listener.ListenActionAsync<global::Omnius.Axus.Remoting.SubscribeFileParam>(_service.SubscribeFileAsync, cancellationToken);
                         }
                         break;
                     case 14:
                         {
-                            await listener.ListenActionAsync<global::Omnius.Axus.Remoting.UnsubscribeFileRequest>(_service.UnsubscribeFileAsync, cancellationToken);
+                            await listener.ListenActionAsync<global::Omnius.Axus.Remoting.UnsubscribeFileParam>(_service.UnsubscribeFileAsync, cancellationToken);
                         }
                         break;
                     case 15:
                         {
-                            await listener.ListenFunctionAsync<global::Omnius.Axus.Remoting.TryExportFileToStorageRequest, global::Omnius.Axus.Remoting.TryExportFileToStorageResult>(_service.TryExportFileToStorageAsync, cancellationToken);
+                            await listener.ListenFunctionAsync<global::Omnius.Axus.Remoting.TryExportFileToStorageParam, global::Omnius.Axus.Remoting.TryExportFileToStorageResult>(_service.TryExportFileToStorageAsync, cancellationToken);
                         }
                         break;
                     case 16:
                         {
-                            await listener.ListenFunctionAsync<global::Omnius.Axus.Remoting.TryExportFileToMemoryRequest, global::Omnius.Axus.Remoting.TryExportFileToMemoryResult>(_service.TryExportFileToMemoryAsync, cancellationToken);
+                            await listener.ListenFunctionAsync<global::Omnius.Axus.Remoting.TryExportFileToMemoryParam, global::Omnius.Axus.Remoting.TryExportFileToMemoryResult>(_service.TryExportFileToMemoryAsync, cancellationToken);
                         }
                         break;
                     case 17:
                         {
-                            await listener.ListenFunctionAsync<global::Omnius.Axus.Remoting.GetPublishedShoutsReportRequest, global::Omnius.Axus.Remoting.GetPublishedShoutsReportResult>(_service.GetPublishedShoutsReportAsync, cancellationToken);
+                            await listener.ListenFunctionAsync<global::Omnius.Axus.Remoting.GetPublishedShoutsReportParam, global::Omnius.Axus.Remoting.GetPublishedShoutsReportResult>(_service.GetPublishedShoutsReportAsync, cancellationToken);
                         }
                         break;
                     case 18:
                         {
-                            await listener.ListenActionAsync<global::Omnius.Axus.Remoting.PublishShoutRequest>(_service.PublishShoutAsync, cancellationToken);
+                            await listener.ListenActionAsync<global::Omnius.Axus.Remoting.PublishShoutParam>(_service.PublishShoutAsync, cancellationToken);
                         }
                         break;
                     case 19:
                         {
-                            await listener.ListenActionAsync<global::Omnius.Axus.Remoting.UnpublishShoutRequest>(_service.UnpublishShoutAsync, cancellationToken);
+                            await listener.ListenActionAsync<global::Omnius.Axus.Remoting.UnpublishShoutParam>(_service.UnpublishShoutAsync, cancellationToken);
                         }
                         break;
                     case 20:
                         {
-                            await listener.ListenFunctionAsync<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportRequest, global::Omnius.Axus.Remoting.GetSubscribedShoutsReportResult>(_service.GetSubscribedShoutsReportAsync, cancellationToken);
+                            await listener.ListenFunctionAsync<global::Omnius.Axus.Remoting.GetSubscribedShoutsReportParam, global::Omnius.Axus.Remoting.GetSubscribedShoutsReportResult>(_service.GetSubscribedShoutsReportAsync, cancellationToken);
                         }
                         break;
                     case 21:
                         {
-                            await listener.ListenActionAsync<global::Omnius.Axus.Remoting.SubscribeShoutRequest>(_service.SubscribeShoutAsync, cancellationToken);
+                            await listener.ListenActionAsync<global::Omnius.Axus.Remoting.SubscribeShoutParam>(_service.SubscribeShoutAsync, cancellationToken);
                         }
                         break;
                     case 22:
                         {
-                            await listener.ListenActionAsync<global::Omnius.Axus.Remoting.UnsubscribeShoutRequest>(_service.UnsubscribeShoutAsync, cancellationToken);
+                            await listener.ListenActionAsync<global::Omnius.Axus.Remoting.UnsubscribeShoutParam>(_service.UnsubscribeShoutAsync, cancellationToken);
                         }
                         break;
                     case 23:
                         {
-                            await listener.ListenFunctionAsync<global::Omnius.Axus.Remoting.TryExportShoutRequest, global::Omnius.Axus.Remoting.TryExportShoutResult>(_service.TryExportShoutAsync, cancellationToken);
+                            await listener.ListenFunctionAsync<global::Omnius.Axus.Remoting.TryExportShoutParam, global::Omnius.Axus.Remoting.TryExportShoutResult>(_service.TryExportShoutAsync, cancellationToken);
                         }
                         break;
                 }

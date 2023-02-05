@@ -6,42 +6,42 @@ namespace "Omnius.Axus.Remoting";
 
 service AxusService {
     GetConfig: () -> (GetConfigResult),
-    SetConfig: (SetConfigRequest) -> (),
+    SetConfig: (SetConfigParam) -> (),
 
     GetSessionsReport: () -> (GetSessionsReportResult),
 
     GetMyNodeLocation: () -> (GetMyNodeLocationResult),
 
     GetCloudNodeLocations: () -> (GetCloudNodeLocationsResult),
-    AddCloudNodeLocations: (AddCloudNodeLocationsRequest) -> (),
+    AddCloudNodeLocations: (AddCloudNodeLocationsParam) -> (),
 
-    GetPublishedFilesReport: (GetPublishedFilesReportRequest) -> (GetPublishedFilesReportResult),
-    PublishFileFromStorage: (PublishFileFromStorageRequest) -> (PublishFileFromStorageResult),
-    PublishFileFromMemory: (PublishFileFromMemoryRequest) -> (PublishFileFromMemoryResult),
-    UnpublishFileFromStorage: (UnpublishFileFromStorageRequest) -> (),
-    UnpublishFileFromMemory: (UnpublishFileFromMemoryRequest) -> (),
+    GetPublishedFilesReport: (GetPublishedFilesReportParam) -> (GetPublishedFilesReportResult),
+    PublishFileFromStorage: (PublishFileFromStorageParam) -> (PublishFileFromStorageResult),
+    PublishFileFromMemory: (PublishFileFromMemoryParam) -> (PublishFileFromMemoryResult),
+    UnpublishFileFromStorage: (UnpublishFileFromStorageParam) -> (),
+    UnpublishFileFromMemory: (UnpublishFileFromMemoryParam) -> (),
 
-    GetSubscribedFilesReport: (GetSubscribedFilesReportRequest) -> (GetSubscribedFilesReportResult),
-    SubscribeFile: (SubscribeFileRequest) -> (),
-    UnsubscribeFile: (UnsubscribeFileRequest) -> (),
-    TryExportFileToStorage: (TryExportFileToStorageRequest) -> (TryExportFileToStorageResult),
-    TryExportFileToMemory: (TryExportFileToMemoryRequest) -> (TryExportFileToMemoryResult),
+    GetSubscribedFilesReport: (GetSubscribedFilesReportParam) -> (GetSubscribedFilesReportResult),
+    SubscribeFile: (SubscribeFileParam) -> (),
+    UnsubscribeFile: (UnsubscribeFileParam) -> (),
+    TryExportFileToStorage: (TryExportFileToStorageParam) -> (TryExportFileToStorageResult),
+    TryExportFileToMemory: (TryExportFileToMemoryParam) -> (TryExportFileToMemoryResult),
 
-    GetPublishedShoutsReport: (GetPublishedShoutsReportRequest) -> (GetPublishedShoutsReportResult),
-    PublishShout: (PublishShoutRequest) -> (),
-    UnpublishShout: (UnpublishShoutRequest) -> (),
+    GetPublishedShoutsReport: (GetPublishedShoutsReportParam) -> (GetPublishedShoutsReportResult),
+    PublishShout: (PublishShoutParam) -> (),
+    UnpublishShout: (UnpublishShoutParam) -> (),
 
-    GetSubscribedShoutsReport: (GetSubscribedShoutsReportRequest) -> (GetSubscribedShoutsReportResult),
-    SubscribeShout: (SubscribeShoutRequest) -> (),
-    UnsubscribeShout: (UnsubscribeShoutRequest) -> (),
-    TryExportShout: (TryExportShoutRequest) -> (TryExportShoutResult),
+    GetSubscribedShoutsReport: (GetSubscribedShoutsReportParam) -> (GetSubscribedShoutsReportResult),
+    SubscribeShout: (SubscribeShoutParam) -> (),
+    UnsubscribeShout: (UnsubscribeShoutParam) -> (),
+    TryExportShout: (TryExportShoutParam) -> (TryExportShoutResult),
 }
 
 message GetConfigResult {
     Config: ServiceConfig,
 }
 
-message SetConfigRequest {
+message SetConfigParam {
     Config: ServiceConfig,
 }
 
@@ -57,11 +57,11 @@ message GetCloudNodeLocationsResult {
     NodeLocations: vector<NodeLocation>(capacity: 8192),
 }
 
-message AddCloudNodeLocationsRequest {
+message AddCloudNodeLocationsParam {
     NodeLocations: vector<NodeLocation>(capacity: 8192),
 }
 
-message GetPublishedFilesReportRequest {
+message GetPublishedFilesReportParam {
     Zone: string,
 }
 
@@ -69,7 +69,7 @@ message GetPublishedFilesReportResult {
     PublishedFiles: vector<PublishedFileReport>,
 }
 
-message PublishFileFromStorageRequest {
+message PublishFileFromStorageParam {
     FilePath: string,
     MaxBlockSize: int32,
     Zone: string,
@@ -78,7 +78,7 @@ message PublishFileFromStorageResult {
     Hash: OmniHash,
 }
 
-message PublishFileFromMemoryRequest {
+message PublishFileFromMemoryParam {
     Memory: bytes(capacity: 32 * 1024 * 1024),
     MaxBlockSize: int32,
     Zone: string,
@@ -87,17 +87,17 @@ message PublishFileFromMemoryResult {
     Hash: OmniHash,
 }
 
-message UnpublishFileFromStorageRequest {
+message UnpublishFileFromStorageParam {
     FilePath: string,
     Zone: string,
 }
 
-message UnpublishFileFromMemoryRequest {
+message UnpublishFileFromMemoryParam {
     RootHash: OmniHash,
     Zone: string,
 }
 
-message GetSubscribedFilesReportRequest {
+message GetSubscribedFilesReportParam {
     Zone: string,
 }
 
@@ -105,17 +105,17 @@ message GetSubscribedFilesReportResult {
     SubscribedFiles: vector<SubscribedFileReport>,
 }
 
-message SubscribeFileRequest {
+message SubscribeFileParam {
     RootHash: OmniHash,
     Zone: string,
 }
 
-message UnsubscribeFileRequest {
+message UnsubscribeFileParam {
     RootHash: OmniHash,
     Zone: string,
 }
 
-message TryExportFileToStorageRequest {
+message TryExportFileToStorageParam {
     RootHash: OmniHash,
     FilePath: string,
 }
@@ -124,7 +124,7 @@ message TryExportFileToStorageResult {
     Success: bool,
 }
 
-message TryExportFileToMemoryRequest {
+message TryExportFileToMemoryParam {
     RootHash: OmniHash,
 }
 
@@ -132,7 +132,7 @@ message TryExportFileToMemoryResult {
     Memory: bytes?(capacity: 32 * 1024 * 1024, recyclable: true),
 }
 
-message GetPublishedShoutsReportRequest {
+message GetPublishedShoutsReportParam {
     Zone: string,
 }
 
@@ -140,18 +140,18 @@ message GetPublishedShoutsReportResult {
     PublishedShouts: vector<PublishedShoutReport>,
 }
 
-message PublishShoutRequest {
+message PublishShoutParam {
     Shout: Shout,
     Zone: string,
 }
 
-message UnpublishShoutRequest {
+message UnpublishShoutParam {
     Signature: OmniSignature,
     Channel: string,
     Zone: string,
 }
 
-message GetSubscribedShoutsReportRequest {
+message GetSubscribedShoutsReportParam {
     Zone: string,
 }
 
@@ -159,19 +159,19 @@ message GetSubscribedShoutsReportResult {
     SubscribedShouts: vector<SubscribedShoutReport>,
 }
 
-message SubscribeShoutRequest {
+message SubscribeShoutParam {
     Signature: OmniSignature,
     Channel: string,
     Zone: string,
 }
 
-message UnsubscribeShoutRequest {
+message UnsubscribeShoutParam {
     Signature: OmniSignature,
     Channel: string,
     Zone: string,
 }
 
-message TryExportShoutRequest {
+message TryExportShoutParam {
     Signature: OmniSignature,
     Channel: string,
     UpdatedTime: timestamp64,

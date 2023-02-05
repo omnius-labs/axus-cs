@@ -903,3 +903,119 @@ public sealed partial class SeedContent : global::Omnius.Core.RocketPack.IRocket
         }
     }
 }
+public sealed partial class CachedSeed : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedSeed>
+{
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Internal.Models.CachedSeed> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedSeed>.Formatter;
+    public static global::Omnius.Axus.Interactors.Internal.Models.CachedSeed Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedSeed>.Empty;
+
+    static CachedSeed()
+    {
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedSeed>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedSeed>.Empty = new global::Omnius.Axus.Interactors.Internal.Models.CachedSeed(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Axus.Interactors.Models.Seed.Empty);
+    }
+
+    private readonly global::System.Lazy<int> ___hashCode;
+
+    public CachedSeed(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Axus.Interactors.Models.Seed value)
+    {
+        if (signature is null) throw new global::System.ArgumentNullException("signature");
+        if (value is null) throw new global::System.ArgumentNullException("value");
+
+        this.Signature = signature;
+        this.Value = value;
+
+        ___hashCode = new global::System.Lazy<int>(() =>
+        {
+            var ___h = new global::System.HashCode();
+            if (signature != default) ___h.Add(signature.GetHashCode());
+            if (value != default) ___h.Add(value.GetHashCode());
+            return ___h.ToHashCode();
+        });
+    }
+
+    public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
+    public global::Omnius.Axus.Interactors.Models.Seed Value { get; }
+
+    public static global::Omnius.Axus.Interactors.Internal.Models.CachedSeed Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
+        return Formatter.Deserialize(ref reader, 0);
+    }
+    public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
+        Formatter.Serialize(ref writer, this, 0);
+    }
+
+    public static bool operator ==(global::Omnius.Axus.Interactors.Internal.Models.CachedSeed? left, global::Omnius.Axus.Interactors.Internal.Models.CachedSeed? right)
+    {
+        return (right is null) ? (left is null) : right.Equals(left);
+    }
+    public static bool operator !=(global::Omnius.Axus.Interactors.Internal.Models.CachedSeed? left, global::Omnius.Axus.Interactors.Internal.Models.CachedSeed? right)
+    {
+        return !(left == right);
+    }
+    public override bool Equals(object? other)
+    {
+        if (other is not global::Omnius.Axus.Interactors.Internal.Models.CachedSeed) return false;
+        return this.Equals((global::Omnius.Axus.Interactors.Internal.Models.CachedSeed)other);
+    }
+    public bool Equals(global::Omnius.Axus.Interactors.Internal.Models.CachedSeed? target)
+    {
+        if (target is null) return false;
+        if (object.ReferenceEquals(this, target)) return true;
+        if (this.Signature != target.Signature) return false;
+        if (this.Value != target.Value) return false;
+
+        return true;
+    }
+    public override int GetHashCode() => ___hashCode.Value;
+
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Internal.Models.CachedSeed>
+    {
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Interactors.Internal.Models.CachedSeed value, scoped in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            if (value.Signature != global::Omnius.Core.Cryptography.OmniSignature.Empty)
+            {
+                w.Write((uint)1);
+                global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
+            }
+            if (value.Value != global::Omnius.Axus.Interactors.Models.Seed.Empty)
+            {
+                w.Write((uint)2);
+                global::Omnius.Axus.Interactors.Models.Seed.Formatter.Serialize(ref w, value.Value, rank + 1);
+            }
+            w.Write((uint)0);
+        }
+        public global::Omnius.Axus.Interactors.Internal.Models.CachedSeed Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            global::Omnius.Core.Cryptography.OmniSignature p_signature = global::Omnius.Core.Cryptography.OmniSignature.Empty;
+            global::Omnius.Axus.Interactors.Models.Seed p_value = global::Omnius.Axus.Interactors.Models.Seed.Empty;
+
+            for (; ; )
+            {
+                uint id = r.GetUInt32();
+                if (id == 0) break;
+                switch (id)
+                {
+                    case 1:
+                        {
+                            p_signature = global::Omnius.Core.Cryptography.OmniSignature.Formatter.Deserialize(ref r, rank + 1);
+                            break;
+                        }
+                    case 2:
+                        {
+                            p_value = global::Omnius.Axus.Interactors.Models.Seed.Formatter.Deserialize(ref r, rank + 1);
+                            break;
+                        }
+                }
+            }
+
+            return new global::Omnius.Axus.Interactors.Internal.Models.CachedSeed(p_signature, p_value);
+        }
+    }
+}
