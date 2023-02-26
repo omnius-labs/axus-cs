@@ -8,10 +8,22 @@ namespace "Omnius.Axus.Interactors.Models";
 
 // Common
 
+message Profile {
+    TrustedSignatures: vector<OmniSignature>(capacity: 1024),
+    BlockedSignatures: vector<OmniSignature>(capacity: 1024),
+}
+
 message Seed {
     RootHash: OmniHash,
     Name: string(capacity: 256),
     Size: uint64,
+    CreatedTime: timestamp64,
+}
+
+message Memo {
+    Comment: string(capacity: 1024),
+    Tag: string(capacity: 256),
+    AnchorHash: OmniHash,
     CreatedTime: timestamp64,
 }
 
@@ -30,23 +42,16 @@ message ProfileDownloaderConfig {
     MaxProfileCount: uint32,
 }
 
-// Bark
+// Memo
 
-message BarkUploaderConfig {
+message MemoUploaderConfig {
     DigitalSignature: OmniDigitalSignature,
-    Messages: vector<BarkMessage>(capacity: 8 * 1024),
+    Memos: vector<Memo>(capacity: 8 * 1024),
 }
 
-message BarkDownloaderConfig {
+message MemoDownloaderConfig {
     Tags: vector<string(capacity: 256)>(capacity: 256),
-    MaxBarkMessageCount: uint32,
-}
-
-message BarkMessage {
-    Tag: string(capacity: 256),
-    CreatedTime: timestamp64,
-    Comment: string(capacity: 1024),
-    AnchorHash: OmniHash,
+    MaxMemoCount: uint32,
 }
 
 // Seed

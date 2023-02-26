@@ -5,16 +5,16 @@ using Omnius.Core.Avalonia;
 namespace Omnius.Axus.Ui.Desktop.Windows.Main;
 
 [Equatable]
-public partial class UploadingFileViewModel : BindableBase, ICollectionViewModel<UploadingFileViewModel, UploadingFileReport>
+public partial class UploadingFileViewModel : BindableBase, ICollectionViewModel<UploadingFileViewModel, FileUploadingReport>
 {
-    private UploadingFileReport? _model;
+    private FileUploadingReport? _model;
 
-    public void Update(UploadingFileReport? model)
+    public void Update(FileUploadingReport? model)
     {
         this.Model = model;
     }
 
-    public UploadingFileReport? Model
+    public FileUploadingReport? Model
     {
         get => _model;
         set
@@ -30,5 +30,5 @@ public partial class UploadingFileViewModel : BindableBase, ICollectionViewModel
 
     public DateTime CreatedTime => this.Model?.CreatedTime ?? DateTime.MinValue;
 
-    public UploadingFileState State => this.Model?.Status.State ?? UploadingFileState.Unknown;
+    public FileUploadingState State => this.Model?.Status.State ?? FileUploadingState.Unknown;
 }

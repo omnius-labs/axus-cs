@@ -23,8 +23,8 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
     private readonly ISessionConnector _sessionConnector;
     private readonly ISessionAccepter _sessionAccepter;
     private readonly INodeFinder _nodeFinder;
-    private readonly IPublishedShoutStorage _publishedShoutStorage;
-    private readonly ISubscribedShoutStorage _subscribedShoutStorage;
+    private readonly IShoutPublisherStorage _publishedShoutStorage;
+    private readonly IShoutSubscriberStorage _subscribedShoutStorage;
     private readonly IBytesPool _bytesPool;
     private readonly ShoutExchangerOptions _options;
 
@@ -54,7 +54,7 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
     private const string Schema = "shout-exchanger-v1";
 
     public static async ValueTask<ShoutExchanger> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
-        IPublishedShoutStorage publishedShoutStorage, ISubscribedShoutStorage subscribedShoutStorage,
+        IShoutPublisherStorage publishedShoutStorage, IShoutSubscriberStorage subscribedShoutStorage,
         IBytesPool bytesPool, ShoutExchangerOptions options, CancellationToken cancellationToken = default)
     {
         var shoutExchanger = new ShoutExchanger(sessionConnector, sessionAccepter, nodeFinder, publishedShoutStorage, subscribedShoutStorage, bytesPool, options);
@@ -63,7 +63,7 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
     }
 
     private ShoutExchanger(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
-        IPublishedShoutStorage publishedShoutStorage, ISubscribedShoutStorage subscribedShoutStorage,
+        IShoutPublisherStorage publishedShoutStorage, IShoutSubscriberStorage subscribedShoutStorage,
         IBytesPool bytesPool, ShoutExchangerOptions options)
     {
         _sessionConnector = sessionConnector;

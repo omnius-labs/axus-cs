@@ -13,8 +13,8 @@ public partial class InteractorProvider : AsyncDisposableBase, IInteractorProvid
 
     private IProfileUploader? _profileUploader;
     private IProfileDownloader? _profileDownloader;
-    private IBarkUploader? _barkUploader;
-    private IBarkDownloader? _barkDownloader;
+    private IMemoUploader? _barkUploader;
+    private IMemoDownloader? _barkDownloader;
     private IFileUploader? _fileUploader;
     private IFileDownloader? _fileDownloader;
 
@@ -44,11 +44,11 @@ public partial class InteractorProvider : AsyncDisposableBase, IInteractorProvid
         var profileDownloaderOptions = new ProfileDownloaderOptions(Path.Combine(_databaseDirectoryPath, "profile_downloader"));
         _profileDownloader = await ProfileDownloader.CreateAsync(_serviceMediator, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, profileDownloaderOptions, cancellationToken);
 
-        var barkUploaderOptions = new BarkUploaderOptions(Path.Combine(_databaseDirectoryPath, "bark_uploader"));
-        _barkUploader = await BarkUploader.CreateAsync(_serviceMediator, SingleValueFileStorage.Factory, _bytesPool, barkUploaderOptions, cancellationToken);
+        var barkUploaderOptions = new MemoUploaderOptions(Path.Combine(_databaseDirectoryPath, "bark_uploader"));
+        _barkUploader = await MemoUploader.CreateAsync(_serviceMediator, SingleValueFileStorage.Factory, _bytesPool, barkUploaderOptions, cancellationToken);
 
-        var barkDownloaderOptions = new BarkDownloaderOptions(Path.Combine(_databaseDirectoryPath, "bark_downloader"));
-        _barkDownloader = await BarkDownloader.CreateAsync(_profileDownloader, _serviceMediator, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, barkDownloaderOptions, cancellationToken);
+        var barkDownloaderOptions = new MemoDownloaderOptions(Path.Combine(_databaseDirectoryPath, "bark_downloader"));
+        _barkDownloader = await MemoDownloader.CreateAsync(_profileDownloader, _serviceMediator, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, barkDownloaderOptions, cancellationToken);
 
         var fileUploaderOptions = new FileUploaderOptions(Path.Combine(_databaseDirectoryPath, "file_uploader"));
         _fileUploader = await FileUploader.CreateAsync(_serviceMediator, SingleValueFileStorage.Factory, _bytesPool, fileUploaderOptions, cancellationToken);
@@ -80,8 +80,8 @@ public partial class InteractorProvider : AsyncDisposableBase, IInteractorProvid
 
     public IProfileUploader GetProfileUploader() => _profileUploader!;
     public IProfileDownloader GetProfileDownloader() => _profileDownloader!;
-    public IBarkUploader GetBarkUploader() => _barkUploader!;
-    public IBarkDownloader GetBarkDownloader() => _barkDownloader!;
+    public IMemoUploader GetMemoUploader() => _barkUploader!;
+    public IMemoDownloader GetMemoDownloader() => _barkDownloader!;
     public ISeedUploader GetSeedUploader() => throw new NotImplementedException();
     public ISeedDownloader GetSeedDownloader() => throw new NotImplementedException();
     public IFileUploader GetFileUploader() => _fileUploader!;

@@ -110,16 +110,16 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
         }
     }
 
-    public async ValueTask<IEnumerable<UploadingFileReport>> GetUploadingFileReportsAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<FileUploadingReport>> GetUploadingFileReportsAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = new List<UploadingFileReport>();
+            var reports = new List<FileUploadingReport>();
 
             foreach (var item in _fileUploaderRepo.FileItems.FindAll())
             {
-                var status = new UploadingFileStatus(item.State);
-                reports.Add(new UploadingFileReport(item.FilePath, item.Seed, item.CreatedTime, status));
+                var status = new FileUploadingStatus(item.State);
+                reports.Add(new FileUploadingReport(item.FilePath, item.Seed, item.CreatedTime, status));
             }
 
             return reports;
@@ -133,12 +133,12 @@ public sealed class FileUploader : AsyncDisposableBase, IFileUploader
             if (_fileUploaderRepo.FileItems.Exists(filePath)) return;
 
             var now = DateTime.UtcNow;
-            var fileItem = new UploadingFileItem
+            var fileItem = new FileUploadingItem
             {
                 FilePath = filePath,
                 Name = name,
                 Length = new FileInfo(filePath).Length,
-                State = UploadingFileState.Waiting,
+                State = FileUploadingState.Waiting,
                 CreatedTime = now,
             };
             _fileUploaderRepo.FileItems.Upsert(fileItem);

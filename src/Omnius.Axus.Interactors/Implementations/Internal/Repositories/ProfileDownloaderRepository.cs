@@ -62,9 +62,9 @@ internal sealed class ProfileDownloaderRepository : DisposableBase
             }
         }
 
-        private ILiteCollection<DownloadingProfileItemEntity> GetCollection()
+        private ILiteCollection<ProfileDownloadingItemEntity> GetCollection()
         {
-            var col = _database.GetCollection<DownloadingProfileItemEntity>(CollectionName);
+            var col = _database.GetCollection<ProfileDownloadingItemEntity>(CollectionName);
             return col;
         }
 
@@ -90,7 +90,7 @@ internal sealed class ProfileDownloaderRepository : DisposableBase
             }
         }
 
-        public IEnumerable<DownloadingProfileItem> FindAll()
+        public IEnumerable<ProfileDownloadingItem> FindAll()
         {
             lock (_lockObject)
             {
@@ -99,7 +99,7 @@ internal sealed class ProfileDownloaderRepository : DisposableBase
             }
         }
 
-        public DownloadingProfileItem? FindOne(OmniSignature signature)
+        public ProfileDownloadingItem? FindOne(OmniSignature signature)
         {
             lock (_lockObject)
             {
@@ -110,11 +110,11 @@ internal sealed class ProfileDownloaderRepository : DisposableBase
             }
         }
 
-        public void Upsert(DownloadingProfileItem item)
+        public void Upsert(ProfileDownloadingItem item)
         {
             lock (_lockObject)
             {
-                var itemEntity = DownloadingProfileItemEntity.Import(item);
+                var itemEntity = ProfileDownloadingItemEntity.Import(item);
 
                 var col = this.GetCollection();
 

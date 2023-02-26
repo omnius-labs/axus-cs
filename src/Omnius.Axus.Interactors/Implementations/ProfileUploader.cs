@@ -105,7 +105,7 @@ public sealed class ProfileUploader : AsyncDisposableBase, IProfileUploader
 
             if (_profileUploaderRepo.ProfileItems.Exists(config.DigitalSignature.GetOmniSignature())) return;
 
-            var newProfileItem = new UploadingProfileItem()
+            var newProfileItem = new ProfileUploadingItem()
             {
                 Signature = config.DigitalSignature.GetOmniSignature(),
             };
@@ -182,7 +182,7 @@ public sealed class ProfileUploader : AsyncDisposableBase, IProfileUploader
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var digitalSignature = config.DigitalSignature;
-            var content = new ProfileContent(config.TrustedSignatures.ToArray(), config.BlockedSignatures.ToArray());
+            var content = new Profile(config.TrustedSignatures.ToArray(), config.BlockedSignatures.ToArray());
 
             using var contentBytes = RocketMessage.ToBytes(content);
             var rootHash = await _serviceMediator.PublishFileFromMemoryAsync(contentBytes.Memory, 8 * 1024 * 1024, Zone, cancellationToken);

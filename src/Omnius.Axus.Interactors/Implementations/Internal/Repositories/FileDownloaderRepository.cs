@@ -62,9 +62,9 @@ internal sealed class FileDownloaderRepository : DisposableBase
             }
         }
 
-        private ILiteCollection<DownloadingFileItemEntity> GetCollection()
+        private ILiteCollection<FileDownloadingItemEntity> GetCollection()
         {
-            var col = _database.GetCollection<DownloadingFileItemEntity>(CollectionName);
+            var col = _database.GetCollection<FileDownloadingItemEntity>(CollectionName);
             return col;
         }
 
@@ -90,7 +90,7 @@ internal sealed class FileDownloaderRepository : DisposableBase
             }
         }
 
-        public IEnumerable<DownloadingFileItem> FindAll()
+        public IEnumerable<FileDownloadingItem> FindAll()
         {
             lock (_lockObject)
             {
@@ -99,7 +99,7 @@ internal sealed class FileDownloaderRepository : DisposableBase
             }
         }
 
-        public DownloadingFileItem? FindOne(Seed seed)
+        public FileDownloadingItem? FindOne(Seed seed)
         {
             lock (_lockObject)
             {
@@ -110,11 +110,11 @@ internal sealed class FileDownloaderRepository : DisposableBase
             }
         }
 
-        public void Upsert(DownloadingFileItem item)
+        public void Upsert(FileDownloadingItem item)
         {
             lock (_lockObject)
             {
-                var itemEntity = DownloadingFileItemEntity.Import(item);
+                var itemEntity = FileDownloadingItemEntity.Import(item);
 
                 var col = this.GetCollection();
 

@@ -18,7 +18,6 @@ mono_crash.*
 .vscode/*
 !.vscode/tasks.json
 !.vscode/launch.json
-!.vscode/settings.json
 
 # Tool Runtime Dir
 /[Tt]ools/

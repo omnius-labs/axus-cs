@@ -3,6 +3,159 @@
 
 namespace Omnius.Axus.Interactors.Models;
 
+public sealed partial class Profile : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.Profile>
+{
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.Profile> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.Profile>.Formatter;
+    public static global::Omnius.Axus.Interactors.Models.Profile Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.Profile>.Empty;
+
+    static Profile()
+    {
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.Profile>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.Profile>.Empty = new global::Omnius.Axus.Interactors.Models.Profile(global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>(), global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>());
+    }
+
+    private readonly global::System.Lazy<int> ___hashCode;
+
+    public static readonly int MaxTrustedSignaturesCount = 1024;
+    public static readonly int MaxBlockedSignaturesCount = 1024;
+
+    public Profile(global::Omnius.Core.Cryptography.OmniSignature[] trustedSignatures, global::Omnius.Core.Cryptography.OmniSignature[] blockedSignatures)
+    {
+        if (trustedSignatures is null) throw new global::System.ArgumentNullException("trustedSignatures");
+        if (trustedSignatures.Length > 1024) throw new global::System.ArgumentOutOfRangeException("trustedSignatures");
+        foreach (var n in trustedSignatures)
+        {
+            if (n is null) throw new global::System.ArgumentNullException("n");
+        }
+        if (blockedSignatures is null) throw new global::System.ArgumentNullException("blockedSignatures");
+        if (blockedSignatures.Length > 1024) throw new global::System.ArgumentOutOfRangeException("blockedSignatures");
+        foreach (var n in blockedSignatures)
+        {
+            if (n is null) throw new global::System.ArgumentNullException("n");
+        }
+
+        this.TrustedSignatures = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Cryptography.OmniSignature>(trustedSignatures);
+        this.BlockedSignatures = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Cryptography.OmniSignature>(blockedSignatures);
+
+        ___hashCode = new global::System.Lazy<int>(() =>
+        {
+            var ___h = new global::System.HashCode();
+            foreach (var n in trustedSignatures)
+            {
+                if (n != default) ___h.Add(n.GetHashCode());
+            }
+            foreach (var n in blockedSignatures)
+            {
+                if (n != default) ___h.Add(n.GetHashCode());
+            }
+            return ___h.ToHashCode();
+        });
+    }
+
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Cryptography.OmniSignature> TrustedSignatures { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Cryptography.OmniSignature> BlockedSignatures { get; }
+
+    public static global::Omnius.Axus.Interactors.Models.Profile Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
+        return Formatter.Deserialize(ref reader, 0);
+    }
+    public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
+        Formatter.Serialize(ref writer, this, 0);
+    }
+
+    public static bool operator ==(global::Omnius.Axus.Interactors.Models.Profile? left, global::Omnius.Axus.Interactors.Models.Profile? right)
+    {
+        return (right is null) ? (left is null) : right.Equals(left);
+    }
+    public static bool operator !=(global::Omnius.Axus.Interactors.Models.Profile? left, global::Omnius.Axus.Interactors.Models.Profile? right)
+    {
+        return !(left == right);
+    }
+    public override bool Equals(object? other)
+    {
+        if (other is not global::Omnius.Axus.Interactors.Models.Profile) return false;
+        return this.Equals((global::Omnius.Axus.Interactors.Models.Profile)other);
+    }
+    public bool Equals(global::Omnius.Axus.Interactors.Models.Profile? target)
+    {
+        if (target is null) return false;
+        if (object.ReferenceEquals(this, target)) return true;
+        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.TrustedSignatures, target.TrustedSignatures)) return false;
+        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.BlockedSignatures, target.BlockedSignatures)) return false;
+
+        return true;
+    }
+    public override int GetHashCode() => ___hashCode.Value;
+
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.Profile>
+    {
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Interactors.Models.Profile value, scoped in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            if (value.TrustedSignatures.Count != 0)
+            {
+                w.Write((uint)1);
+                w.Write((uint)value.TrustedSignatures.Count);
+                foreach (var n in value.TrustedSignatures)
+                {
+                    global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, n, rank + 1);
+                }
+            }
+            if (value.BlockedSignatures.Count != 0)
+            {
+                w.Write((uint)2);
+                w.Write((uint)value.BlockedSignatures.Count);
+                foreach (var n in value.BlockedSignatures)
+                {
+                    global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, n, rank + 1);
+                }
+            }
+            w.Write((uint)0);
+        }
+        public global::Omnius.Axus.Interactors.Models.Profile Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            global::Omnius.Core.Cryptography.OmniSignature[] p_trustedSignatures = global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>();
+            global::Omnius.Core.Cryptography.OmniSignature[] p_blockedSignatures = global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>();
+
+            for (; ; )
+            {
+                uint id = r.GetUInt32();
+                if (id == 0) break;
+                switch (id)
+                {
+                    case 1:
+                        {
+                            var length = r.GetUInt32();
+                            p_trustedSignatures = new global::Omnius.Core.Cryptography.OmniSignature[length];
+                            for (int i = 0; i < p_trustedSignatures.Length; i++)
+                            {
+                                p_trustedSignatures[i] = global::Omnius.Core.Cryptography.OmniSignature.Formatter.Deserialize(ref r, rank + 1);
+                            }
+                            break;
+                        }
+                    case 2:
+                        {
+                            var length = r.GetUInt32();
+                            p_blockedSignatures = new global::Omnius.Core.Cryptography.OmniSignature[length];
+                            for (int i = 0; i < p_blockedSignatures.Length; i++)
+                            {
+                                p_blockedSignatures[i] = global::Omnius.Core.Cryptography.OmniSignature.Formatter.Deserialize(ref r, rank + 1);
+                            }
+                            break;
+                        }
+                }
+            }
+
+            return new global::Omnius.Axus.Interactors.Models.Profile(p_trustedSignatures, p_blockedSignatures);
+        }
+    }
+}
 public sealed partial class Seed : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.Seed>
 {
     public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.Seed> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.Seed>.Formatter;
@@ -147,6 +300,156 @@ public sealed partial class Seed : global::Omnius.Core.RocketPack.IRocketMessage
             }
 
             return new global::Omnius.Axus.Interactors.Models.Seed(p_rootHash, p_name, p_size, p_createdTime);
+        }
+    }
+}
+public sealed partial class Memo : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.Memo>
+{
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.Memo> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.Memo>.Formatter;
+    public static global::Omnius.Axus.Interactors.Models.Memo Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.Memo>.Empty;
+
+    static Memo()
+    {
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.Memo>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.Memo>.Empty = new global::Omnius.Axus.Interactors.Models.Memo(global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.Cryptography.OmniHash.Empty, global::Omnius.Core.RocketPack.Timestamp64.Zero);
+    }
+
+    private readonly global::System.Lazy<int> ___hashCode;
+
+    public static readonly int MaxCommentLength = 1024;
+    public static readonly int MaxTagLength = 256;
+
+    public Memo(global::Omnius.Core.RocketPack.Utf8String comment, global::Omnius.Core.RocketPack.Utf8String tag, global::Omnius.Core.Cryptography.OmniHash anchorHash, global::Omnius.Core.RocketPack.Timestamp64 createdTime)
+    {
+        if (comment is null) throw new global::System.ArgumentNullException("comment");
+        if (comment.Length > 1024) throw new global::System.ArgumentOutOfRangeException("comment");
+        if (tag is null) throw new global::System.ArgumentNullException("tag");
+        if (tag.Length > 256) throw new global::System.ArgumentOutOfRangeException("tag");
+        this.Comment = comment;
+        this.Tag = tag;
+        this.AnchorHash = anchorHash;
+        this.CreatedTime = createdTime;
+
+        ___hashCode = new global::System.Lazy<int>(() =>
+        {
+            var ___h = new global::System.HashCode();
+            if (!comment.IsEmpty) ___h.Add(comment.GetHashCode());
+            if (!tag.IsEmpty) ___h.Add(tag.GetHashCode());
+            if (anchorHash != default) ___h.Add(anchorHash.GetHashCode());
+            if (createdTime != default) ___h.Add(createdTime.GetHashCode());
+            return ___h.ToHashCode();
+        });
+    }
+
+    public global::Omnius.Core.RocketPack.Utf8String Comment { get; }
+    public global::Omnius.Core.RocketPack.Utf8String Tag { get; }
+    public global::Omnius.Core.Cryptography.OmniHash AnchorHash { get; }
+    public global::Omnius.Core.RocketPack.Timestamp64 CreatedTime { get; }
+
+    public static global::Omnius.Axus.Interactors.Models.Memo Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
+        return Formatter.Deserialize(ref reader, 0);
+    }
+    public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
+        Formatter.Serialize(ref writer, this, 0);
+    }
+
+    public static bool operator ==(global::Omnius.Axus.Interactors.Models.Memo? left, global::Omnius.Axus.Interactors.Models.Memo? right)
+    {
+        return (right is null) ? (left is null) : right.Equals(left);
+    }
+    public static bool operator !=(global::Omnius.Axus.Interactors.Models.Memo? left, global::Omnius.Axus.Interactors.Models.Memo? right)
+    {
+        return !(left == right);
+    }
+    public override bool Equals(object? other)
+    {
+        if (other is not global::Omnius.Axus.Interactors.Models.Memo) return false;
+        return this.Equals((global::Omnius.Axus.Interactors.Models.Memo)other);
+    }
+    public bool Equals(global::Omnius.Axus.Interactors.Models.Memo? target)
+    {
+        if (target is null) return false;
+        if (object.ReferenceEquals(this, target)) return true;
+        if (this.Comment != target.Comment) return false;
+        if (this.Tag != target.Tag) return false;
+        if (this.AnchorHash != target.AnchorHash) return false;
+        if (this.CreatedTime != target.CreatedTime) return false;
+
+        return true;
+    }
+    public override int GetHashCode() => ___hashCode.Value;
+
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.Memo>
+    {
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Interactors.Models.Memo value, scoped in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            if (value.Comment != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            {
+                w.Write((uint)1);
+                w.Write(value.Comment);
+            }
+            if (value.Tag != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            {
+                w.Write((uint)2);
+                w.Write(value.Tag);
+            }
+            if (value.AnchorHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
+            {
+                w.Write((uint)3);
+                global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.AnchorHash, rank + 1);
+            }
+            if (value.CreatedTime != global::Omnius.Core.RocketPack.Timestamp64.Zero)
+            {
+                w.Write((uint)4);
+                w.Write(value.CreatedTime);
+            }
+            w.Write((uint)0);
+        }
+        public global::Omnius.Axus.Interactors.Models.Memo Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            global::Omnius.Core.RocketPack.Utf8String p_comment = global::Omnius.Core.RocketPack.Utf8String.Empty;
+            global::Omnius.Core.RocketPack.Utf8String p_tag = global::Omnius.Core.RocketPack.Utf8String.Empty;
+            global::Omnius.Core.Cryptography.OmniHash p_anchorHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
+            global::Omnius.Core.RocketPack.Timestamp64 p_createdTime = global::Omnius.Core.RocketPack.Timestamp64.Zero;
+
+            for (; ; )
+            {
+                uint id = r.GetUInt32();
+                if (id == 0) break;
+                switch (id)
+                {
+                    case 1:
+                        {
+                            p_comment = r.GetString(1024);
+                            break;
+                        }
+                    case 2:
+                        {
+                            p_tag = r.GetString(256);
+                            break;
+                        }
+                    case 3:
+                        {
+                            p_anchorHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
+                            break;
+                        }
+                    case 4:
+                        {
+                            p_createdTime = r.GetTimestamp64();
+                            break;
+                        }
+                }
+            }
+
+            return new global::Omnius.Axus.Interactors.Models.Memo(p_comment, p_tag, p_anchorHash, p_createdTime);
         }
     }
 }
@@ -501,39 +804,39 @@ public sealed partial class ProfileDownloaderConfig : global::Omnius.Core.Rocket
         }
     }
 }
-public sealed partial class BarkUploaderConfig : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.BarkUploaderConfig>
+public sealed partial class MemoUploaderConfig : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.MemoUploaderConfig>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.BarkUploaderConfig> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.BarkUploaderConfig>.Formatter;
-    public static global::Omnius.Axus.Interactors.Models.BarkUploaderConfig Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.BarkUploaderConfig>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.MemoUploaderConfig> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.MemoUploaderConfig>.Formatter;
+    public static global::Omnius.Axus.Interactors.Models.MemoUploaderConfig Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.MemoUploaderConfig>.Empty;
 
-    static BarkUploaderConfig()
+    static MemoUploaderConfig()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.BarkUploaderConfig>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.BarkUploaderConfig>.Empty = new global::Omnius.Axus.Interactors.Models.BarkUploaderConfig(global::Omnius.Core.Cryptography.OmniDigitalSignature.Empty, global::System.Array.Empty<global::Omnius.Axus.Interactors.Models.BarkMessage>());
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.MemoUploaderConfig>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.MemoUploaderConfig>.Empty = new global::Omnius.Axus.Interactors.Models.MemoUploaderConfig(global::Omnius.Core.Cryptography.OmniDigitalSignature.Empty, global::System.Array.Empty<global::Omnius.Axus.Interactors.Models.Memo>());
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public static readonly int MaxMessagesCount = 8192;
+    public static readonly int MaxMemosCount = 8192;
 
-    public BarkUploaderConfig(global::Omnius.Core.Cryptography.OmniDigitalSignature digitalSignature, global::Omnius.Axus.Interactors.Models.BarkMessage[] messages)
+    public MemoUploaderConfig(global::Omnius.Core.Cryptography.OmniDigitalSignature digitalSignature, global::Omnius.Axus.Interactors.Models.Memo[] memos)
     {
         if (digitalSignature is null) throw new global::System.ArgumentNullException("digitalSignature");
-        if (messages is null) throw new global::System.ArgumentNullException("messages");
-        if (messages.Length > 8192) throw new global::System.ArgumentOutOfRangeException("messages");
-        foreach (var n in messages)
+        if (memos is null) throw new global::System.ArgumentNullException("memos");
+        if (memos.Length > 8192) throw new global::System.ArgumentOutOfRangeException("memos");
+        foreach (var n in memos)
         {
             if (n is null) throw new global::System.ArgumentNullException("n");
         }
 
         this.DigitalSignature = digitalSignature;
-        this.Messages = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Interactors.Models.BarkMessage>(messages);
+        this.Memos = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Interactors.Models.Memo>(memos);
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (digitalSignature != default) ___h.Add(digitalSignature.GetHashCode());
-            foreach (var n in messages)
+            foreach (var n in memos)
             {
                 if (n != default) ___h.Add(n.GetHashCode());
             }
@@ -542,9 +845,9 @@ public sealed partial class BarkUploaderConfig : global::Omnius.Core.RocketPack.
     }
 
     public global::Omnius.Core.Cryptography.OmniDigitalSignature DigitalSignature { get; }
-    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Interactors.Models.BarkMessage> Messages { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Interactors.Models.Memo> Memos { get; }
 
-    public static global::Omnius.Axus.Interactors.Models.BarkUploaderConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Interactors.Models.MemoUploaderConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -555,33 +858,33 @@ public sealed partial class BarkUploaderConfig : global::Omnius.Core.RocketPack.
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Interactors.Models.BarkUploaderConfig? left, global::Omnius.Axus.Interactors.Models.BarkUploaderConfig? right)
+    public static bool operator ==(global::Omnius.Axus.Interactors.Models.MemoUploaderConfig? left, global::Omnius.Axus.Interactors.Models.MemoUploaderConfig? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Interactors.Models.BarkUploaderConfig? left, global::Omnius.Axus.Interactors.Models.BarkUploaderConfig? right)
+    public static bool operator !=(global::Omnius.Axus.Interactors.Models.MemoUploaderConfig? left, global::Omnius.Axus.Interactors.Models.MemoUploaderConfig? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Interactors.Models.BarkUploaderConfig) return false;
-        return this.Equals((global::Omnius.Axus.Interactors.Models.BarkUploaderConfig)other);
+        if (other is not global::Omnius.Axus.Interactors.Models.MemoUploaderConfig) return false;
+        return this.Equals((global::Omnius.Axus.Interactors.Models.MemoUploaderConfig)other);
     }
-    public bool Equals(global::Omnius.Axus.Interactors.Models.BarkUploaderConfig? target)
+    public bool Equals(global::Omnius.Axus.Interactors.Models.MemoUploaderConfig? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
         if (this.DigitalSignature != target.DigitalSignature) return false;
-        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Messages, target.Messages)) return false;
+        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Memos, target.Memos)) return false;
 
         return true;
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.BarkUploaderConfig>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.MemoUploaderConfig>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Interactors.Models.BarkUploaderConfig value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Interactors.Models.MemoUploaderConfig value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -590,23 +893,23 @@ public sealed partial class BarkUploaderConfig : global::Omnius.Core.RocketPack.
                 w.Write((uint)1);
                 global::Omnius.Core.Cryptography.OmniDigitalSignature.Formatter.Serialize(ref w, value.DigitalSignature, rank + 1);
             }
-            if (value.Messages.Count != 0)
+            if (value.Memos.Count != 0)
             {
                 w.Write((uint)2);
-                w.Write((uint)value.Messages.Count);
-                foreach (var n in value.Messages)
+                w.Write((uint)value.Memos.Count);
+                foreach (var n in value.Memos)
                 {
-                    global::Omnius.Axus.Interactors.Models.BarkMessage.Formatter.Serialize(ref w, n, rank + 1);
+                    global::Omnius.Axus.Interactors.Models.Memo.Formatter.Serialize(ref w, n, rank + 1);
                 }
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Interactors.Models.BarkUploaderConfig Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Interactors.Models.MemoUploaderConfig Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Core.Cryptography.OmniDigitalSignature p_digitalSignature = global::Omnius.Core.Cryptography.OmniDigitalSignature.Empty;
-            global::Omnius.Axus.Interactors.Models.BarkMessage[] p_messages = global::System.Array.Empty<global::Omnius.Axus.Interactors.Models.BarkMessage>();
+            global::Omnius.Axus.Interactors.Models.Memo[] p_memos = global::System.Array.Empty<global::Omnius.Axus.Interactors.Models.Memo>();
 
             for (; ; )
             {
@@ -622,36 +925,36 @@ public sealed partial class BarkUploaderConfig : global::Omnius.Core.RocketPack.
                     case 2:
                         {
                             var length = r.GetUInt32();
-                            p_messages = new global::Omnius.Axus.Interactors.Models.BarkMessage[length];
-                            for (int i = 0; i < p_messages.Length; i++)
+                            p_memos = new global::Omnius.Axus.Interactors.Models.Memo[length];
+                            for (int i = 0; i < p_memos.Length; i++)
                             {
-                                p_messages[i] = global::Omnius.Axus.Interactors.Models.BarkMessage.Formatter.Deserialize(ref r, rank + 1);
+                                p_memos[i] = global::Omnius.Axus.Interactors.Models.Memo.Formatter.Deserialize(ref r, rank + 1);
                             }
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axus.Interactors.Models.BarkUploaderConfig(p_digitalSignature, p_messages);
+            return new global::Omnius.Axus.Interactors.Models.MemoUploaderConfig(p_digitalSignature, p_memos);
         }
     }
 }
-public sealed partial class BarkDownloaderConfig : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.BarkDownloaderConfig>
+public sealed partial class MemoDownloaderConfig : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.MemoDownloaderConfig>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.BarkDownloaderConfig> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.BarkDownloaderConfig>.Formatter;
-    public static global::Omnius.Axus.Interactors.Models.BarkDownloaderConfig Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.BarkDownloaderConfig>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.MemoDownloaderConfig> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.MemoDownloaderConfig>.Formatter;
+    public static global::Omnius.Axus.Interactors.Models.MemoDownloaderConfig Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.MemoDownloaderConfig>.Empty;
 
-    static BarkDownloaderConfig()
+    static MemoDownloaderConfig()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.BarkDownloaderConfig>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.BarkDownloaderConfig>.Empty = new global::Omnius.Axus.Interactors.Models.BarkDownloaderConfig(global::System.Array.Empty<global::Omnius.Core.RocketPack.Utf8String>(), 0);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.MemoDownloaderConfig>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.MemoDownloaderConfig>.Empty = new global::Omnius.Axus.Interactors.Models.MemoDownloaderConfig(global::System.Array.Empty<global::Omnius.Core.RocketPack.Utf8String>(), 0);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxTagsCount = 256;
 
-    public BarkDownloaderConfig(global::Omnius.Core.RocketPack.Utf8String[] tags, uint maxBarkMessageCount)
+    public MemoDownloaderConfig(global::Omnius.Core.RocketPack.Utf8String[] tags, uint maxMemoCount)
     {
         if (tags is null) throw new global::System.ArgumentNullException("tags");
         if (tags.Length > 256) throw new global::System.ArgumentOutOfRangeException("tags");
@@ -661,7 +964,7 @@ public sealed partial class BarkDownloaderConfig : global::Omnius.Core.RocketPac
             if (n.Length > 256) throw new global::System.ArgumentOutOfRangeException("n");
         }
         this.Tags = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.RocketPack.Utf8String>(tags);
-        this.MaxBarkMessageCount = maxBarkMessageCount;
+        this.MaxMemoCount = maxMemoCount;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
@@ -670,15 +973,15 @@ public sealed partial class BarkDownloaderConfig : global::Omnius.Core.RocketPac
             {
                 if (!n.IsEmpty) ___h.Add(n.GetHashCode());
             }
-            if (maxBarkMessageCount != default) ___h.Add(maxBarkMessageCount.GetHashCode());
+            if (maxMemoCount != default) ___h.Add(maxMemoCount.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.RocketPack.Utf8String> Tags { get; }
-    public uint MaxBarkMessageCount { get; }
+    public uint MaxMemoCount { get; }
 
-    public static global::Omnius.Axus.Interactors.Models.BarkDownloaderConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Interactors.Models.MemoDownloaderConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -689,33 +992,33 @@ public sealed partial class BarkDownloaderConfig : global::Omnius.Core.RocketPac
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Interactors.Models.BarkDownloaderConfig? left, global::Omnius.Axus.Interactors.Models.BarkDownloaderConfig? right)
+    public static bool operator ==(global::Omnius.Axus.Interactors.Models.MemoDownloaderConfig? left, global::Omnius.Axus.Interactors.Models.MemoDownloaderConfig? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Interactors.Models.BarkDownloaderConfig? left, global::Omnius.Axus.Interactors.Models.BarkDownloaderConfig? right)
+    public static bool operator !=(global::Omnius.Axus.Interactors.Models.MemoDownloaderConfig? left, global::Omnius.Axus.Interactors.Models.MemoDownloaderConfig? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Interactors.Models.BarkDownloaderConfig) return false;
-        return this.Equals((global::Omnius.Axus.Interactors.Models.BarkDownloaderConfig)other);
+        if (other is not global::Omnius.Axus.Interactors.Models.MemoDownloaderConfig) return false;
+        return this.Equals((global::Omnius.Axus.Interactors.Models.MemoDownloaderConfig)other);
     }
-    public bool Equals(global::Omnius.Axus.Interactors.Models.BarkDownloaderConfig? target)
+    public bool Equals(global::Omnius.Axus.Interactors.Models.MemoDownloaderConfig? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
         if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Tags, target.Tags)) return false;
-        if (this.MaxBarkMessageCount != target.MaxBarkMessageCount) return false;
+        if (this.MaxMemoCount != target.MaxMemoCount) return false;
 
         return true;
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.BarkDownloaderConfig>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.MemoDownloaderConfig>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Interactors.Models.BarkDownloaderConfig value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Interactors.Models.MemoDownloaderConfig value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -728,19 +1031,19 @@ public sealed partial class BarkDownloaderConfig : global::Omnius.Core.RocketPac
                     w.Write(n);
                 }
             }
-            if (value.MaxBarkMessageCount != 0)
+            if (value.MaxMemoCount != 0)
             {
                 w.Write((uint)2);
-                w.Write(value.MaxBarkMessageCount);
+                w.Write(value.MaxMemoCount);
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Interactors.Models.BarkDownloaderConfig Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Interactors.Models.MemoDownloaderConfig Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Core.RocketPack.Utf8String[] p_tags = global::System.Array.Empty<global::Omnius.Core.RocketPack.Utf8String>();
-            uint p_maxBarkMessageCount = 0;
+            uint p_maxMemoCount = 0;
 
             for (; ; )
             {
@@ -760,163 +1063,13 @@ public sealed partial class BarkDownloaderConfig : global::Omnius.Core.RocketPac
                         }
                     case 2:
                         {
-                            p_maxBarkMessageCount = r.GetUInt32();
+                            p_maxMemoCount = r.GetUInt32();
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axus.Interactors.Models.BarkDownloaderConfig(p_tags, p_maxBarkMessageCount);
-        }
-    }
-}
-public sealed partial class BarkMessage : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.BarkMessage>
-{
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.BarkMessage> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.BarkMessage>.Formatter;
-    public static global::Omnius.Axus.Interactors.Models.BarkMessage Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.BarkMessage>.Empty;
-
-    static BarkMessage()
-    {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.BarkMessage>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.BarkMessage>.Empty = new global::Omnius.Axus.Interactors.Models.BarkMessage(global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.RocketPack.Timestamp64.Zero, global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.Cryptography.OmniHash.Empty);
-    }
-
-    private readonly global::System.Lazy<int> ___hashCode;
-
-    public static readonly int MaxTagLength = 256;
-    public static readonly int MaxCommentLength = 1024;
-
-    public BarkMessage(global::Omnius.Core.RocketPack.Utf8String tag, global::Omnius.Core.RocketPack.Timestamp64 createdTime, global::Omnius.Core.RocketPack.Utf8String comment, global::Omnius.Core.Cryptography.OmniHash anchorHash)
-    {
-        if (tag is null) throw new global::System.ArgumentNullException("tag");
-        if (tag.Length > 256) throw new global::System.ArgumentOutOfRangeException("tag");
-        if (comment is null) throw new global::System.ArgumentNullException("comment");
-        if (comment.Length > 1024) throw new global::System.ArgumentOutOfRangeException("comment");
-        this.Tag = tag;
-        this.CreatedTime = createdTime;
-        this.Comment = comment;
-        this.AnchorHash = anchorHash;
-
-        ___hashCode = new global::System.Lazy<int>(() =>
-        {
-            var ___h = new global::System.HashCode();
-            if (!tag.IsEmpty) ___h.Add(tag.GetHashCode());
-            if (createdTime != default) ___h.Add(createdTime.GetHashCode());
-            if (!comment.IsEmpty) ___h.Add(comment.GetHashCode());
-            if (anchorHash != default) ___h.Add(anchorHash.GetHashCode());
-            return ___h.ToHashCode();
-        });
-    }
-
-    public global::Omnius.Core.RocketPack.Utf8String Tag { get; }
-    public global::Omnius.Core.RocketPack.Timestamp64 CreatedTime { get; }
-    public global::Omnius.Core.RocketPack.Utf8String Comment { get; }
-    public global::Omnius.Core.Cryptography.OmniHash AnchorHash { get; }
-
-    public static global::Omnius.Axus.Interactors.Models.BarkMessage Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
-    {
-        var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
-        return Formatter.Deserialize(ref reader, 0);
-    }
-    public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
-    {
-        var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
-        Formatter.Serialize(ref writer, this, 0);
-    }
-
-    public static bool operator ==(global::Omnius.Axus.Interactors.Models.BarkMessage? left, global::Omnius.Axus.Interactors.Models.BarkMessage? right)
-    {
-        return (right is null) ? (left is null) : right.Equals(left);
-    }
-    public static bool operator !=(global::Omnius.Axus.Interactors.Models.BarkMessage? left, global::Omnius.Axus.Interactors.Models.BarkMessage? right)
-    {
-        return !(left == right);
-    }
-    public override bool Equals(object? other)
-    {
-        if (other is not global::Omnius.Axus.Interactors.Models.BarkMessage) return false;
-        return this.Equals((global::Omnius.Axus.Interactors.Models.BarkMessage)other);
-    }
-    public bool Equals(global::Omnius.Axus.Interactors.Models.BarkMessage? target)
-    {
-        if (target is null) return false;
-        if (object.ReferenceEquals(this, target)) return true;
-        if (this.Tag != target.Tag) return false;
-        if (this.CreatedTime != target.CreatedTime) return false;
-        if (this.Comment != target.Comment) return false;
-        if (this.AnchorHash != target.AnchorHash) return false;
-
-        return true;
-    }
-    public override int GetHashCode() => ___hashCode.Value;
-
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.BarkMessage>
-    {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Interactors.Models.BarkMessage value, scoped in int rank)
-        {
-            if (rank > 256) throw new global::System.FormatException();
-
-            if (value.Tag != global::Omnius.Core.RocketPack.Utf8String.Empty)
-            {
-                w.Write((uint)1);
-                w.Write(value.Tag);
-            }
-            if (value.CreatedTime != global::Omnius.Core.RocketPack.Timestamp64.Zero)
-            {
-                w.Write((uint)2);
-                w.Write(value.CreatedTime);
-            }
-            if (value.Comment != global::Omnius.Core.RocketPack.Utf8String.Empty)
-            {
-                w.Write((uint)3);
-                w.Write(value.Comment);
-            }
-            if (value.AnchorHash != global::Omnius.Core.Cryptography.OmniHash.Empty)
-            {
-                w.Write((uint)4);
-                global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.AnchorHash, rank + 1);
-            }
-            w.Write((uint)0);
-        }
-        public global::Omnius.Axus.Interactors.Models.BarkMessage Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
-        {
-            if (rank > 256) throw new global::System.FormatException();
-
-            global::Omnius.Core.RocketPack.Utf8String p_tag = global::Omnius.Core.RocketPack.Utf8String.Empty;
-            global::Omnius.Core.RocketPack.Timestamp64 p_createdTime = global::Omnius.Core.RocketPack.Timestamp64.Zero;
-            global::Omnius.Core.RocketPack.Utf8String p_comment = global::Omnius.Core.RocketPack.Utf8String.Empty;
-            global::Omnius.Core.Cryptography.OmniHash p_anchorHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
-
-            for (; ; )
-            {
-                uint id = r.GetUInt32();
-                if (id == 0) break;
-                switch (id)
-                {
-                    case 1:
-                        {
-                            p_tag = r.GetString(256);
-                            break;
-                        }
-                    case 2:
-                        {
-                            p_createdTime = r.GetTimestamp64();
-                            break;
-                        }
-                    case 3:
-                        {
-                            p_comment = r.GetString(1024);
-                            break;
-                        }
-                    case 4:
-                        {
-                            p_anchorHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
-                            break;
-                        }
-                }
-            }
-
-            return new global::Omnius.Axus.Interactors.Models.BarkMessage(p_tag, p_createdTime, p_comment, p_anchorHash);
+            return new global::Omnius.Axus.Interactors.Models.MemoDownloaderConfig(p_tags, p_maxMemoCount);
         }
     }
 }

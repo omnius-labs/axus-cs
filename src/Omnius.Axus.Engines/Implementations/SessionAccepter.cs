@@ -14,7 +14,7 @@ namespace Omnius.Axus.Engines;
 public sealed partial class SessionAccepter : AsyncDisposableBase, ISessionAccepter
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
-    private readonly ImmutableArray<IConnectionAccepter> _connectionAccepters;
+    private readonly ImmutableArray<IConnectionAcceptor> _connectionAccepters;
     private readonly IBytesPool _bytesPool;
     private readonly SessionAccepterOptions _options;
 
@@ -26,13 +26,13 @@ public sealed partial class SessionAccepter : AsyncDisposableBase, ISessionAccep
 
     private const int MaxReceiveByteCount = 1024 * 1024 * 256;
 
-    public static async ValueTask<SessionAccepter> CreateAsync(IEnumerable<IConnectionAccepter> connectionAccepters, IBytesPool bytesPool, SessionAccepterOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<SessionAccepter> CreateAsync(IEnumerable<IConnectionAcceptor> connectionAccepters, IBytesPool bytesPool, SessionAccepterOptions options, CancellationToken cancellationToken = default)
     {
         var sessionAccepter = new SessionAccepter(connectionAccepters, bytesPool, options);
         return sessionAccepter;
     }
 
-    private SessionAccepter(IEnumerable<IConnectionAccepter> connectionAccepters, IBytesPool bytesPool, SessionAccepterOptions options)
+    private SessionAccepter(IEnumerable<IConnectionAcceptor> connectionAccepters, IBytesPool bytesPool, SessionAccepterOptions options)
     {
         _connectionAccepters = connectionAccepters.ToImmutableArray();
         _bytesPool = bytesPool;

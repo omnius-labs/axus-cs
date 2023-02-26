@@ -24,8 +24,8 @@ public class AxusServiceTest
             var listenAddress2 = OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 30002);
             await using var service2 = await this.GenServiceAsync(Path.Combine(tempDir, "service/2"), listenAddress2);
 
-            await service1.AddCloudNodeLocationsAsync(new AddCloudNodeLocationsRequest(new[] { new NodeLocation(new[] { listenAddress2 }) }));
-            await service2.AddCloudNodeLocationsAsync(new AddCloudNodeLocationsRequest(new[] { new NodeLocation(new[] { listenAddress1 }) }));
+            await service1.AddCloudNodeLocationsAsync(new AddCloudNodeLocationsParam(new[] { new NodeLocation(new[] { listenAddress2 }) }));
+            await service2.AddCloudNodeLocationsAsync(new AddCloudNodeLocationsParam(new[] { new NodeLocation(new[] { listenAddress1 }) }));
 
             var sw = Stopwatch.StartNew();
 
@@ -50,7 +50,7 @@ public class AxusServiceTest
     {
         var config = GenServiceConfig(listenAddress);
         var service = await AxusService.CreateAsync(databaseDirectoryPath);
-        await service.SetConfigAsync(new SetConfigRequest(config));
+        await service.SetConfigAsync(new SetConfigParam(config));
         return service;
     }
 

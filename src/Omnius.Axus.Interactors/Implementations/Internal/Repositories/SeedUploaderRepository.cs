@@ -62,9 +62,9 @@ internal sealed class SeedUploaderRepository : DisposableBase
             }
         }
 
-        private ILiteCollection<UploadingSeedItemEntity> GetCollection()
+        private ILiteCollection<SeedUploadingItemEntity> GetCollection()
         {
-            var col = _database.GetCollection<UploadingSeedItemEntity>(CollectionName);
+            var col = _database.GetCollection<SeedUploadingItemEntity>(CollectionName);
             return col;
         }
 
@@ -99,7 +99,7 @@ internal sealed class SeedUploaderRepository : DisposableBase
             }
         }
 
-        public IEnumerable<UploadingSeedItem> FindAll()
+        public IEnumerable<CaskUploadingItem> FindAll()
         {
             lock (_lockObject)
             {
@@ -108,7 +108,7 @@ internal sealed class SeedUploaderRepository : DisposableBase
             }
         }
 
-        public UploadingSeedItem? FindOne(OmniSignature signature)
+        public CaskUploadingItem? FindOne(OmniSignature signature)
         {
             lock (_lockObject)
             {
@@ -119,11 +119,11 @@ internal sealed class SeedUploaderRepository : DisposableBase
             }
         }
 
-        public void Upsert(UploadingSeedItem item)
+        public void Upsert(CaskUploadingItem item)
         {
             lock (_lockObject)
             {
-                var itemEntity = UploadingSeedItemEntity.Import(item);
+                var itemEntity = SeedUploadingItemEntity.Import(item);
 
                 var col = this.GetCollection();
 

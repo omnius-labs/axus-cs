@@ -60,9 +60,9 @@ internal sealed class FileUploaderRepository : DisposableBase
             }
         }
 
-        private ILiteCollection<UploadingFileItemEntity> GetCollection()
+        private ILiteCollection<FileUploadingItemEntity> GetCollection()
         {
-            var col = _database.GetCollection<UploadingFileItemEntity>(CollectionName);
+            var col = _database.GetCollection<FileUploadingItemEntity>(CollectionName);
             return col;
         }
 
@@ -75,7 +75,7 @@ internal sealed class FileUploaderRepository : DisposableBase
             }
         }
 
-        public IEnumerable<UploadingFileItem> FindAll()
+        public IEnumerable<FileUploadingItem> FindAll()
         {
             lock (_lockObject)
             {
@@ -84,7 +84,7 @@ internal sealed class FileUploaderRepository : DisposableBase
             }
         }
 
-        public UploadingFileItem? FindOne(string filePath)
+        public FileUploadingItem? FindOne(string filePath)
         {
             lock (_lockObject)
             {
@@ -93,11 +93,11 @@ internal sealed class FileUploaderRepository : DisposableBase
             }
         }
 
-        public void Upsert(UploadingFileItem item)
+        public void Upsert(FileUploadingItem item)
         {
             lock (_lockObject)
             {
-                var itemEntity = UploadingFileItemEntity.Import(item);
+                var itemEntity = FileUploadingItemEntity.Import(item);
 
                 var col = this.GetCollection();
 

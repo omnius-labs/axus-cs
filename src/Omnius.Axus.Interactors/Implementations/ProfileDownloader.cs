@@ -20,7 +20,7 @@ public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileDow
 
     private readonly ProfileDownloaderRepository _profileDownloaderRepo;
     private readonly ISingleValueStorage _configStorage;
-    private readonly CachedProfileContentRepository _cachedProfileContentRepo;
+    private readonly CachedProfileRepository _cachedProfileRepo;
 
     private Task _watchLoopTask = null!;
 
@@ -46,13 +46,13 @@ public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileDow
 
         _profileDownloaderRepo = new ProfileDownloaderRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
         _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
-        _cachedProfileContentRepo = new CachedProfileContentRepository(Path.Combine(_options.ConfigDirectoryPath, "cached_profile_contents"), keyValueStorageFactory, bytesPool);
+        _cachedProfileRepo = new CachedProfileRepository(Path.Combine(_options.ConfigDirectoryPath, "cached_profile_contents"), keyValueStorageFactory, bytesPool);
     }
 
     internal async ValueTask InitAsync(CancellationToken cancellationToken = default)
     {
         await _profileDownloaderRepo.MigrateAsync(cancellationToken);
-        await _cachedProfileContentRepo.MigrateAsync(cancellationToken);
+        await _cachedProfileRepo.MigrateAsync(cancellationToken);
 
         _watchLoopTask = this.WatchLoopAsync(_cancellationTokenSource.Token);
     }
@@ -65,7 +65,7 @@ public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileDow
 
         _profileDownloaderRepo.Dispose();
         _configStorage.Dispose();
-        _cachedProfileContentRepo.Dispose();
+        _cachedProfileRepo.Dispose();
     }
 
     private async Task WatchLoopAsync(CancellationToken cancellationToken = default)
@@ -80,8 +80,8 @@ public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileDow
 
                 var config = await this.GetConfigAsync(cancellationToken);
 
-                var signatures = await this.UpdateCachedProfileContentsAsync(config.TrustedSignatures, config.BlockedSignatures, (int)config.SearchDepth, (int)config.MaxProfileCount, cancellationToken);
-                await _cachedProfileContentRepo.ShrinkAsync(signatures);
+                var signatures = await this.UpdateCachedProfilesAsync(config.TrustedSignatures, config.BlockedSignatures, (int)config.SearchDepth, (int)config.MaxProfileCount, cancellationToken);
+                await _cachedProfileRepo.ShrinkAsync(signatures);
 
                 await this.SyncProfileDownloaderRepo(signatures, cancellationToken);
                 await this.SyncSubscribedShouts(cancellationToken);
@@ -98,7 +98,7 @@ public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileDow
         }
     }
 
-    private async ValueTask<ImmutableHashSet<OmniSignature>> UpdateCachedProfileContentsAsync(IEnumerable<OmniSignature> rootSignatures, IEnumerable<OmniSignature> ignoreSignatures, int depth, int maxCount, CancellationToken cancellationToken = default)
+    private async ValueTask<ImmutableHashSet<OmniSignature>> UpdateCachedProfilesAsync(IEnumerable<OmniSignature> rootSignatures, IEnumerable<OmniSignature> ignoreSignatures, int depth, int maxCount, CancellationToken cancellationToken = default)
     {
         if (maxCount == 0) return ImmutableHashSet<OmniSignature>.Empty;
 
@@ -136,20 +136,20 @@ public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileDow
         return results.ToImmutableHashSet();
     }
 
-    private async IAsyncEnumerable<CachedProfileContent> InternalFindProfilesAsync(IEnumerable<OmniSignature> signatures, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    private async IAsyncEnumerable<CachedProfile> InternalFindProfilesAsync(IEnumerable<OmniSignature> signatures, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         foreach (var signature in signatures)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var cachedContent = await _cachedProfileContentRepo.TryReadAsync(signature, cancellationToken);
+            var cachedContent = await _cachedProfileRepo.TryReadAsync(signature, cancellationToken);
             var cachedContentUpdatedTime = cachedContent?.ShoutUpdatedTime.ToDateTime() ?? DateTime.MinValue;
 
             var downloadedContent = await this.TryInternalExportAsync(signature, cachedContentUpdatedTime, cancellationToken);
 
             if (downloadedContent is not null)
             {
-                await _cachedProfileContentRepo.UpsertAsync(downloadedContent, cancellationToken);
+                await _cachedProfileRepo.UpsertAsync(downloadedContent, cancellationToken);
                 yield return downloadedContent;
             }
             else if (cachedContent is not null)
@@ -159,7 +159,7 @@ public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileDow
         }
     }
 
-    private async ValueTask<CachedProfileContent?> TryInternalExportAsync(OmniSignature signature, DateTime cachedContentUpdatedTime, CancellationToken cancellationToken = default)
+    private async ValueTask<CachedProfile?> TryInternalExportAsync(OmniSignature signature, DateTime cachedContentUpdatedTime, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -171,9 +171,9 @@ public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileDow
             using var contentBytes = await _serviceMediator.TryExportFileToMemoryAsync(shoutItem.RootHash, cancellationToken);
             if (contentBytes is null) return null;
 
-            var content = RocketMessage.FromBytes<ProfileContent>(contentBytes.Memory);
+            var content = RocketMessage.FromBytes<Profile>(contentBytes.Memory);
 
-            return new CachedProfileContent(signature, Timestamp64.FromDateTime(shoutItem.ShoutUpdatedTime), content);
+            return new CachedProfile(signature, Timestamp64.FromDateTime(shoutItem.ShoutUpdatedTime), content);
         }
     }
 
@@ -191,7 +191,7 @@ public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileDow
             {
                 if (_profileDownloaderRepo.ProfileItems.Exists(signature)) continue;
 
-                var newProfileItem = new DownloadingProfileItem()
+                var newProfileItem = new ProfileDownloadingItem()
                 {
                     Signature = signature,
                     ShoutUpdatedTime = DateTime.MinValue,
@@ -265,7 +265,7 @@ public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileDow
         {
             var results = new List<OmniSignature>();
 
-            await foreach (var signature in _cachedProfileContentRepo.GetSignaturesAsync(cancellationToken))
+            await foreach (var signature in _cachedProfileRepo.GetSignaturesAsync(cancellationToken))
             {
                 results.Add(signature);
             }
@@ -278,10 +278,10 @@ public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileDow
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var cachedProfile = await _cachedProfileContentRepo.TryReadAsync(signature, cancellationToken);
+            var cachedProfile = await _cachedProfileRepo.TryReadAsync(signature, cancellationToken);
             if (cachedProfile is null) return null;
 
-            var message = new ProfileReport(cachedProfile.Signature, cachedProfile.ShoutUpdatedTime.ToDateTime(), cachedProfile.Value.TrustedSignatures, cachedProfile.Value.BlockedSignatures);
+            var message = new ProfileReport(cachedProfile.Signature, cachedProfile.ShoutUpdatedTime.ToDateTime(), cachedProfile.Value);
             return message;
         }
     }

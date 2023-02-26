@@ -22,7 +22,7 @@ public class UploadViewModel : AsyncDisposableBase
     private readonly IDialogService _dialogService;
     private readonly IClipboardService _clipboardService;
 
-    private readonly CollectionViewUpdater<UploadingFileViewModel, UploadingFileReport> _uploadingFilesUpdater;
+    private readonly CollectionViewUpdater<UploadingFileViewModel, FileUploadingReport> _uploadingFilesUpdater;
     private readonly ObservableCollection<UploadingFileViewModel> _selectedFiles = new();
 
     private readonly CompositeDisposable _disposable = new();
@@ -35,7 +35,7 @@ public class UploadViewModel : AsyncDisposableBase
         _dialogService = dialogService;
         _clipboardService = clipboardService;
 
-        _uploadingFilesUpdater = new CollectionViewUpdater<UploadingFileViewModel, UploadingFileReport>(_applicationDispatcher, this.GetUploadingFileReports, TimeSpan.FromSeconds(3), UploadingFileReportEqualityComparer.Default);
+        _uploadingFilesUpdater = new CollectionViewUpdater<UploadingFileViewModel, FileUploadingReport>(_applicationDispatcher, this.GetUploadingFileReports, TimeSpan.FromSeconds(3), UploadingFileReportEqualityComparer.Default);
 
         this.AddCommand = new ReactiveCommand().AddTo(_disposable);
         this.AddCommand.Subscribe(() => this.Register()).AddTo(_disposable);
@@ -53,23 +53,23 @@ public class UploadViewModel : AsyncDisposableBase
         await _uploadingFilesUpdater.DisposeAsync();
     }
 
-    private async ValueTask<IEnumerable<UploadingFileReport>> GetUploadingFileReports(CancellationToken cancellationToken)
+    private async ValueTask<IEnumerable<FileUploadingReport>> GetUploadingFileReports(CancellationToken cancellationToken)
     {
         var fileUploader = _interactorProvider.GetFileUploader();
 
         return await fileUploader.GetUploadingFileReportsAsync(cancellationToken);
     }
 
-    private class UploadingFileReportEqualityComparer : IEqualityComparer<UploadingFileReport>
+    private class UploadingFileReportEqualityComparer : IEqualityComparer<FileUploadingReport>
     {
         public static UploadingFileReportEqualityComparer Default { get; } = new();
 
-        public bool Equals(UploadingFileReport? x, UploadingFileReport? y)
+        public bool Equals(FileUploadingReport? x, FileUploadingReport? y)
         {
             return (x?.FilePath == y?.FilePath);
         }
 
-        public int GetHashCode([DisallowNull] UploadingFileReport obj)
+        public int GetHashCode([DisallowNull] FileUploadingReport obj)
         {
             return obj?.FilePath?.GetHashCode() ?? 0;
         }

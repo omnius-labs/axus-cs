@@ -1,20 +1,17 @@
-using System.Collections.Immutable;
 using Omnius.Core.Cryptography;
 
 namespace Omnius.Axus.Interactors.Models;
 
 public record ProfileReport
 {
-    public ProfileReport(OmniSignature signature, DateTime createdTime, IEnumerable<OmniSignature> trustedSignatures, IEnumerable<OmniSignature> blockedSignatures)
+    public ProfileReport(OmniSignature signature, DateTime createdTime, Profile profile)
     {
         this.Signature = signature;
         this.CreatedTime = createdTime;
-        this.TrustedSignatures = trustedSignatures.ToImmutableList();
-        this.BlockedSignatures = blockedSignatures.ToImmutableList();
+        this.Profile = profile;
     }
 
     public OmniSignature Signature { get; }
     public DateTime CreatedTime { get; }
-    public IReadOnlyList<OmniSignature> TrustedSignatures { get; }
-    public IReadOnlyList<OmniSignature> BlockedSignatures { get; }
+    public Profile Profile { get; }
 }

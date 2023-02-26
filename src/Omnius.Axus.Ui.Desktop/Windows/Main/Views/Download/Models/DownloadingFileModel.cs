@@ -5,16 +5,16 @@ using Omnius.Core.Avalonia;
 namespace Omnius.Axus.Ui.Desktop.Windows.Main;
 
 [Equatable]
-public partial class DownloadingFileViewModel : BindableBase, ICollectionViewModel<DownloadingFileViewModel, DownloadingFileReport>
+public partial class DownloadingFileViewModel : BindableBase, ICollectionViewModel<DownloadingFileViewModel, FileDownloadingReport>
 {
-    private DownloadingFileReport? _model;
+    private FileDownloadingReport? _model;
 
-    public void Update(DownloadingFileReport? model)
+    public void Update(FileDownloadingReport? model)
     {
         this.Model = model;
     }
 
-    public DownloadingFileReport? Model
+    public FileDownloadingReport? Model
     {
         get => _model;
         set
@@ -28,7 +28,7 @@ public partial class DownloadingFileViewModel : BindableBase, ICollectionViewMod
 
     public DateTime CreatedTime => this.Model?.CreatedTime ?? DateTime.MinValue;
 
-    public DownloadingFileState State => this.Model?.Status.State ?? DownloadingFileState.Unknown;
+    public FileDownloadingState State => this.Model?.Status.State ?? FileDownloadingState.Unknown;
 
     public double Depth => this.Model?.Status?.CurrentDepth ?? -1;
 

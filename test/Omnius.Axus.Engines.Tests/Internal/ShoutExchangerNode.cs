@@ -19,12 +19,12 @@ internal class ShoutExchangerNode : AsyncDisposableBase
     private readonly string _tempDirectoryPath;
 
     private ImmutableList<IConnectionConnector> _connectionConnectors = ImmutableList<IConnectionConnector>.Empty;
-    private ImmutableList<IConnectionAccepter> _connectionAcceptors = ImmutableList<IConnectionAccepter>.Empty;
+    private ImmutableList<IConnectionAcceptor> _connectionAcceptors = ImmutableList<IConnectionAcceptor>.Empty;
     private ISessionConnector _sessionConnector = null!;
     private ISessionAccepter _sessionAccepter = null!;
     private INodeFinder _nodeFinder = null!;
-    private IPublishedShoutStorage _publishedShoutStorage = null!;
-    private ISubscribedShoutStorage _subscribedShoutStorage = null!;
+    private IShoutPublisherStorage _publishedShoutStorage = null!;
+    private IShoutSubscriberStorage _subscribedShoutStorage = null!;
     private IShoutExchanger _shoutExchanger = null!;
 
     private AsyncLock _asyncLock = new();
@@ -65,7 +65,7 @@ internal class ShoutExchangerNode : AsyncDisposableBase
         var connectionConnectors = ImmutableList.CreateBuilder<IConnectionConnector>();
 
         {
-            var tcpConnectionConnectorOptions = new TcpConnectionConnectorOptions
+            var tcpConnectionConnectorOptions = new ConnectionTcpConnectorOptions
             {
                 Proxy = new TcpProxyOptions
                 {
@@ -73,7 +73,7 @@ internal class ShoutExchangerNode : AsyncDisposableBase
                     Address = OmniAddress.Empty,
                 }
             };
-            var tcpConnectionConnector = await TcpConnectionConnector.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, Socks5ProxyClient.Factory, HttpProxyClient.Factory, bytesPool, tcpConnectionConnectorOptions, cancellationToken);
+            var tcpConnectionConnector = await ConnectionTcpConnector.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, Socks5ProxyClient.Factory, HttpProxyClient.Factory, bytesPool, tcpConnectionConnectorOptions, cancellationToken);
             connectionConnectors.Add(tcpConnectionConnector);
         }
 
@@ -85,15 +85,15 @@ internal class ShoutExchangerNode : AsyncDisposableBase
         };
         _sessionConnector = await SessionConnector.CreateAsync(_connectionConnectors, bytesPool, sessionConnectorOptions, cancellationToken);
 
-        var connectionAcceptors = ImmutableList.CreateBuilder<IConnectionAccepter>();
+        var connectionAcceptors = ImmutableList.CreateBuilder<IConnectionAcceptor>();
 
         {
-            var tcpConnectionAccepterOption = new TcpConnectionAccepterOptions
+            var tcpConnectionAccepterOption = new ConnectionTcpAccepterOptions
             {
                 UseUpnp = false,
                 ListenAddress = _listenAddress
             };
-            var tcpConnectionAccepter = await TcpConnectionAccepter.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, UpnpClient.Factory, bytesPool, tcpConnectionAccepterOption, cancellationToken);
+            var tcpConnectionAccepter = await ConnectionTcpAccepter.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, UpnpClient.Factory, bytesPool, tcpConnectionAccepterOption, cancellationToken);
             connectionAcceptors.Add(tcpConnectionAccepter);
         }
 
@@ -112,17 +112,17 @@ internal class ShoutExchangerNode : AsyncDisposableBase
         };
         _nodeFinder = await NodeFinder.CreateAsync(_sessionConnector, _sessionAccepter, nodeLocationsFetcher, bytesPool, nodeFinderOptions, cancellationToken);
 
-        var publishedShoutStorageOptions = new PublishedShoutStorageOptions
+        var publishedShoutStorageOptions = new ShoutPublisherStorageOptions
         {
             ConfigDirectoryPath = Path.Combine(_databaseDirectoryPath, "published_shout_storage")
         };
-        _publishedShoutStorage = await PublishedShoutStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, publishedShoutStorageOptions, cancellationToken);
+        _publishedShoutStorage = await ShoutPublisherStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, publishedShoutStorageOptions, cancellationToken);
 
-        var subscribedShoutStorageOptions = new SubscribedShoutStorageOptions
+        var subscribedShoutStorageOptions = new ShoutSubscriberStorageOptions
         {
             ConfigDirectoryPath = Path.Combine(_databaseDirectoryPath, "subscribed_shout_storage")
         };
-        _subscribedShoutStorage = await SubscribedShoutStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, subscribedShoutStorageOptions, cancellationToken);
+        _subscribedShoutStorage = await ShoutSubscriberStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, subscribedShoutStorageOptions, cancellationToken);
 
         var shoutExchangerOptions = new ShoutExchangerOptions
         {
@@ -190,7 +190,7 @@ internal class ShoutExchangerNode : AsyncDisposableBase
 
     public INodeFinder GetNodeFinder() => _nodeFinder;
 
-    public IPublishedShoutStorage GetPublishedShoutStorage() => _publishedShoutStorage;
+    public IShoutPublisherStorage GetPublishedShoutStorage() => _publishedShoutStorage;
 
-    public ISubscribedShoutStorage GetSubscribedShoutStorage() => _subscribedShoutStorage;
+    public IShoutSubscriberStorage GetSubscribedShoutStorage() => _subscribedShoutStorage;
 }

@@ -22,7 +22,7 @@ public class DownloadViewModel : AsyncDisposableBase
     private readonly IDialogService _dialogService;
     private readonly IClipboardService _clipboardService;
 
-    private readonly CollectionViewUpdater<DownloadingFileViewModel, DownloadingFileReport> _downloadingFilesUpdater;
+    private readonly CollectionViewUpdater<DownloadingFileViewModel, FileDownloadingReport> _downloadingFilesUpdater;
 
     private readonly CompositeDisposable _disposable = new();
 
@@ -34,7 +34,7 @@ public class DownloadViewModel : AsyncDisposableBase
         _dialogService = dialogService;
         _clipboardService = clipboardService;
 
-        _downloadingFilesUpdater = new CollectionViewUpdater<DownloadingFileViewModel, DownloadingFileReport>(_applicationDispatcher, this.GetDownloadingFileReports, TimeSpan.FromSeconds(3), DownloadingFileReportEqualityComparer.Default);
+        _downloadingFilesUpdater = new CollectionViewUpdater<DownloadingFileViewModel, FileDownloadingReport>(_applicationDispatcher, this.GetDownloadingFileReports, TimeSpan.FromSeconds(3), DownloadingFileReportEqualityComparer.Default);
 
         this.AddCommand = new ReactiveCommand().AddTo(_disposable);
         this.AddCommand.Subscribe(() => this.Register()).AddTo(_disposable);
@@ -54,23 +54,23 @@ public class DownloadViewModel : AsyncDisposableBase
 
     public DownloadViewStatus Status => _uiState.DownloadView ??= new DownloadViewStatus();
 
-    private async ValueTask<IEnumerable<DownloadingFileReport>> GetDownloadingFileReports(CancellationToken cancellationToken)
+    private async ValueTask<IEnumerable<FileDownloadingReport>> GetDownloadingFileReports(CancellationToken cancellationToken)
     {
         var fileDownloader = _interactorProvider.GetFileDownloader();
 
         return await fileDownloader.GetDownloadingFileReportsAsync(cancellationToken);
     }
 
-    private class DownloadingFileReportEqualityComparer : IEqualityComparer<DownloadingFileReport>
+    private class DownloadingFileReportEqualityComparer : IEqualityComparer<FileDownloadingReport>
     {
         public static DownloadingFileReportEqualityComparer Default { get; } = new();
 
-        public bool Equals(DownloadingFileReport? x, DownloadingFileReport? y)
+        public bool Equals(FileDownloadingReport? x, FileDownloadingReport? y)
         {
             return (x?.Seed == y?.Seed);
         }
 
-        public int GetHashCode([DisallowNull] DownloadingFileReport obj)
+        public int GetHashCode([DisallowNull] FileDownloadingReport obj)
         {
             return obj?.Seed?.GetHashCode() ?? 0;
         }

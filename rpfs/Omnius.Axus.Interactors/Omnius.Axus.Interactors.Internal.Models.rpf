@@ -9,43 +9,38 @@ namespace "Omnius.Axus.Interactors.Internal.Models";
 
 // Profile
 
-message CachedProfileContent {
+message CachedProfile {
     Signature: OmniSignature,
     ShoutUpdatedTime: timestamp64,
-    Value: ProfileContent,
+    Value: Profile,
 }
 
-message ProfileContent {
-    TrustedSignatures: vector<OmniSignature>(capacity: 1024),
-    BlockedSignatures: vector<OmniSignature>(capacity: 1024),
-}
+// Note
 
-// Bark
-
-message CachedBarkContent {
+message CachedNoteContent {
     Signature: OmniSignature,
     ShoutUpdatedTime: timestamp64,
-    Value: BarkContent,
+    Value: NoteContent,
 }
 
-message BarkContent {
-    Messages: vector<BarkMessage>(capacity: 8 * 1024),
+message NoteContent {
+    Memos: vector<Memo>(capacity: 8 * 1024),
 }
 
-message CachedBarkMessage {
+message CachedMemo {
     Signature: OmniSignature,
-    Value: BarkMessage,
+    Value: Memo,
 }
 
-// Seed
+// Cask
 
-message CachedSeedContent {
+message CachedCaskContent {
     Signature: OmniSignature,
     ShoutUpdatedTime: timestamp64,
-    Value: SeedContent,
+    Value: CaskContent,
 }
 
-message SeedContent {
+message CaskContent {
     Seeds: vector<Seed>(capacity: 1024 * 32),
 }
 

@@ -22,8 +22,8 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
     private readonly ISessionConnector _sessionConnector;
     private readonly ISessionAccepter _sessionAccepter;
     private readonly INodeFinder _nodeFinder;
-    private readonly IPublishedFileStorage _publishedFileStorage;
-    private readonly ISubscribedFileStorage _subscribedFileStorage;
+    private readonly IFilePublisherStorage _publishedFileStorage;
+    private readonly IFileSubscriberStorage _subscribedFileStorage;
     private readonly IBytesPool _bytesPool;
     private readonly FileExchangerOptions _options;
 
@@ -56,7 +56,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
     private const string Schema = "file-exchanger-v1";
 
     public static async ValueTask<FileExchanger> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
-        IPublishedFileStorage publishedFileStorage, ISubscribedFileStorage subscribedFileStorage,
+        IFilePublisherStorage publishedFileStorage, IFileSubscriberStorage subscribedFileStorage,
         IBytesPool bytesPool, FileExchangerOptions options, CancellationToken cancellationToken = default)
     {
         var fileExchanger = new FileExchanger(sessionConnector, sessionAccepter, nodeFinder, publishedFileStorage, subscribedFileStorage, bytesPool, options);
@@ -65,7 +65,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
     }
 
     private FileExchanger(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
-        IPublishedFileStorage publishedFileStorage, ISubscribedFileStorage subscribedFileStorage,
+        IFilePublisherStorage publishedFileStorage, IFileSubscriberStorage subscribedFileStorage,
         IBytesPool bytesPool, FileExchangerOptions options)
     {
         _sessionConnector = sessionConnector;

@@ -107,7 +107,7 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
 
             if (_seedUploaderRepo.Items.Exists(config.DigitalSignature.GetOmniSignature())) return;
 
-            var newItem = new UploadingSeedItem()
+            var newItem = new CaskUploadingItem()
             {
                 Signature = config.DigitalSignature.GetOmniSignature(),
             };
@@ -187,7 +187,7 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
             var seeds = reports.Select(n => n.Seed).WhereNotNull().ToArray();
 
             var digitalSignature = config.DigitalSignature;
-            var content = new SeedContent(seeds);
+            var content = new CaskContent(seeds);
 
             using var contentBytes = RocketMessage.ToBytes(content);
             var rootHash = await _serviceMediator.PublishFileFromMemoryAsync(contentBytes.Memory, 8 * 1024 * 1024, Zone, cancellationToken);

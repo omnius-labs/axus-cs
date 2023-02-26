@@ -19,12 +19,12 @@ internal class FileExchangerNode : AsyncDisposableBase
     private readonly string _tempDirectoryPath;
 
     private ImmutableList<IConnectionConnector> _connectionConnectors = ImmutableList<IConnectionConnector>.Empty;
-    private ImmutableList<IConnectionAccepter> _connectionAcceptors = ImmutableList<IConnectionAccepter>.Empty;
+    private ImmutableList<IConnectionAcceptor> _connectionAcceptors = ImmutableList<IConnectionAcceptor>.Empty;
     private ISessionConnector _sessionConnector = null!;
     private ISessionAccepter _sessionAccepter = null!;
     private INodeFinder _nodeFinder = null!;
-    private IPublishedFileStorage _publishedFileStorage = null!;
-    private ISubscribedFileStorage _subscribedFileStorage = null!;
+    private IFilePublisherStorage _publishedFileStorage = null!;
+    private IFileSubscriberStorage _subscribedFileStorage = null!;
     private IFileExchanger _fileExchanger = null!;
 
     private AsyncLock _asyncLock = new();
@@ -65,7 +65,7 @@ internal class FileExchangerNode : AsyncDisposableBase
         var connectionConnectors = ImmutableList.CreateBuilder<IConnectionConnector>();
 
         {
-            var tcpConnectionConnectorOptions = new TcpConnectionConnectorOptions
+            var tcpConnectionConnectorOptions = new ConnectionTcpConnectorOptions
             {
                 Proxy = new TcpProxyOptions
                 {
@@ -73,7 +73,7 @@ internal class FileExchangerNode : AsyncDisposableBase
                     Address = OmniAddress.Empty,
                 }
             };
-            var tcpConnectionConnector = await TcpConnectionConnector.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, Socks5ProxyClient.Factory, HttpProxyClient.Factory, bytesPool, tcpConnectionConnectorOptions, cancellationToken);
+            var tcpConnectionConnector = await ConnectionTcpConnector.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, Socks5ProxyClient.Factory, HttpProxyClient.Factory, bytesPool, tcpConnectionConnectorOptions, cancellationToken);
             connectionConnectors.Add(tcpConnectionConnector);
         }
 
@@ -85,15 +85,15 @@ internal class FileExchangerNode : AsyncDisposableBase
         };
         _sessionConnector = await SessionConnector.CreateAsync(_connectionConnectors, bytesPool, sessionConnectorOptions, cancellationToken);
 
-        var connectionAcceptors = ImmutableList.CreateBuilder<IConnectionAccepter>();
+        var connectionAcceptors = ImmutableList.CreateBuilder<IConnectionAcceptor>();
 
         {
-            var tcpConnectionAccepterOption = new TcpConnectionAccepterOptions
+            var tcpConnectionAccepterOption = new ConnectionTcpAccepterOptions
             {
                 UseUpnp = false,
                 ListenAddress = _listenAddress
             };
-            var tcpConnectionAccepter = await TcpConnectionAccepter.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, UpnpClient.Factory, bytesPool, tcpConnectionAccepterOption, cancellationToken);
+            var tcpConnectionAccepter = await ConnectionTcpAccepter.CreateAsync(senderBandwidthLimiter, receiverBandwidthLimiter, UpnpClient.Factory, bytesPool, tcpConnectionAccepterOption, cancellationToken);
             connectionAcceptors.Add(tcpConnectionAccepter);
         }
 
@@ -112,17 +112,17 @@ internal class FileExchangerNode : AsyncDisposableBase
         };
         _nodeFinder = await NodeFinder.CreateAsync(_sessionConnector, _sessionAccepter, nodeLocationsFetcher, bytesPool, nodeFinderOptions, cancellationToken);
 
-        var publishedFileStorageOptions = new PublishedFileStorageOptions
+        var publishedFileStorageOptions = new FilePublisherStorageOptions
         {
             ConfigDirectoryPath = Path.Combine(_databaseDirectoryPath, "published_file_storage")
         };
-        _publishedFileStorage = await PublishedFileStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, publishedFileStorageOptions, cancellationToken);
+        _publishedFileStorage = await FilePublisherStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, publishedFileStorageOptions, cancellationToken);
 
-        var subscribedFileStorageOptions = new SubscribedFileStorageOptions
+        var subscribedFileStorageOptions = new FileSubscriberStorageOptions
         {
             ConfigDirectoryPath = Path.Combine(_databaseDirectoryPath, "subscribed_file_storage")
         };
-        _subscribedFileStorage = await SubscribedFileStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, subscribedFileStorageOptions, cancellationToken);
+        _subscribedFileStorage = await FileSubscriberStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, subscribedFileStorageOptions, cancellationToken);
 
         var fileExchangerOptions = new FileExchangerOptions
         {
@@ -188,6 +188,6 @@ internal class FileExchangerNode : AsyncDisposableBase
 
     public OmniAddress ListenAddress => _listenAddress;
     public INodeFinder GetNodeFinder() => _nodeFinder;
-    public IPublishedFileStorage GetPublishedFileStorage() => _publishedFileStorage;
-    public ISubscribedFileStorage GetSubscribedFileStorage() => _subscribedFileStorage;
+    public IFilePublisherStorage GetPublishedFileStorage() => _publishedFileStorage;
+    public IFileSubscriberStorage GetSubscribedFileStorage() => _subscribedFileStorage;
 }

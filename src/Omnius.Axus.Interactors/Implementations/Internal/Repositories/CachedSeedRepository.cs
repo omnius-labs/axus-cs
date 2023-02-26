@@ -61,7 +61,7 @@ CREATE INDEX IF NOT EXISTS index_created_time_for_messages ON messages (created_
         return connection;
     }
 
-    public void UpsertBulk(CachedSeedContent content)
+    public void UpsertBulk(CachedCaskContent content)
     {
         lock (_lockObject)
         {
@@ -88,25 +88,27 @@ DELETE FROM seeds WHERE signature = '{signature}';
 
             using var bytesPipe = new BytesPipe(_bytesPool);
 
-            foreach (var m in content.ToMessages())
+            foreach (var s in content.ToSeeds())
             {
-                var self_hash = m.SelfHash.ToString(ConvertStringType.Base16);
-                var signature = m.Signature.ToString();
-                var tag = m.Value.Tag.ToString();
-                var created_time = m.Value.CreatedTime.Seconds;
+                var self_hash = s.SelfHash.ToString(ConvertStringType.Base16);
+                var signature = s.Signature.ToString();
+                var name = s.Value.Name;
+                var size = s.Value.Size;
+                var created_time = s.Value.CreatedTime.Seconds;
 
-                m.Export(bytesPipe.Writer, _bytesPool);
+                s.Export(bytesPipe.Writer, _bytesPool);
                 var value = _base16.Value.BytesToString(bytesPipe.Reader.GetSequence());
                 bytesPipe.Reset();
 
                 using var command = new SQLiteCommand(connection);
                 command.CommandText =
 $@"
-INSERT OR IGNORE INTO messages (self_hash, signature, tag, created_time, value)
+INSERT OR IGNORE INTO messages (self_hash, signature, name, size, created_time, value)
 VALUES (
     '{self_hash}',
     '{signature}',
-    '{tag}',
+    '{name}',
+    {size},
     {created_time},
     x'{value}'
 );
@@ -150,7 +152,7 @@ VALUES (
             var compiler = new SqliteCompiler();
             using var db = new QueryFactory(connection, compiler);
 
-            var rows = db.Query("messages")
+            var rows = db.Query("seeds")
                 .Select("value")
                 .Where("tag", tag)
                 .OrderByDesc("created_time")
@@ -186,34 +188,6 @@ VALUES (
             if (value is null) return null;
 
             return CachedSeed.Import(new ReadOnlySequence<byte>(value), _bytesPool);
-        }
-    }
-
-    public void Shrink(IEnumerable<OmniSignature> excludedSignatures)
-    {
-        lock (_lockObject)
-        {
-            using var connection = this.GetConnection();
-            var compiler = new SqliteCompiler();
-            using var db = new QueryFactory(connection, compiler);
-
-            using var transaction = connection.BeginTransaction();
-
-            var rows = db.Query("cached_bark_messages")
-                .Select("signature")
-                .Get();
-
-            var allSignatureSet = rows.Select(n => n.signature).OfType<string>().Select(n => OmniSignature.Parse(n)).ToHashSet();
-            allSignatureSet.ExceptWith(excludedSignatures);
-
-            foreach (var signatures in allSignatureSet.Chunk(200))
-            {
-                db.Query("cached_bark_messages")
-                    .WhereIn("signature", signatures.Select(n => n.ToString()))
-                    .Delete();
-            }
-
-            transaction.Commit();
         }
     }
 }

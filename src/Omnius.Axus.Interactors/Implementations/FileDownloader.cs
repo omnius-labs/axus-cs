@@ -118,7 +118,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
 
             foreach (var fileItem in _fileDownloaderRepo.FileItems.FindAll())
             {
-                if (fileItem.State == DownloadingFileState.Completed) continue;
+                if (fileItem.State == FileDownloadingState.Completed) continue;
 
                 if (!reportMap.TryGetValue(fileItem.Seed.RootHash, out var report)) continue;
                 if (report.Status.State != SubscribedFileState.Downloaded) continue;
@@ -131,7 +131,7 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
                     var newFileItem = fileItem with
                     {
                         FilePath = filePath,
-                        State = DownloadingFileState.Completed,
+                        State = FileDownloadingState.Completed,
                     };
                     _fileDownloaderRepo.FileItems.Upsert(newFileItem);
                 }
@@ -139,11 +139,11 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
         }
     }
 
-    public async ValueTask<IEnumerable<DownloadingFileReport>> GetDownloadingFileReportsAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<FileDownloadingReport>> GetDownloadingFileReportsAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var results = new List<DownloadingFileReport>();
+            var results = new List<FileDownloadingReport>();
 
             var reports = await _service.GetSubscribedFileReportsAsync(Zone, cancellationToken);
             var reportMap = reports.ToDictionary(n => n.RootHash);
@@ -152,9 +152,9 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
             {
                 if (!reportMap.TryGetValue(item.Seed.RootHash, out var report)) continue;
 
-                var status = new DownloadingFileStatus(report.Status.CurrentDepth, report.Status.DownloadedBlockCount,
+                var status = new FileDownloadingStatus(report.Status.CurrentDepth, report.Status.DownloadedBlockCount,
                     report.Status.TotalBlockCount, item.State);
-                results.Add(new DownloadingFileReport(item.Seed, item.FilePath, item.CreatedTime, status));
+                results.Add(new FileDownloadingReport(item.Seed, item.FilePath, item.CreatedTime, status));
             }
 
             return results;
@@ -168,10 +168,10 @@ public sealed class FileDownloader : AsyncDisposableBase, IFileDownloader
             if (_fileDownloaderRepo.FileItems.Exists(seed)) return;
 
             var now = DateTime.UtcNow;
-            var fileItem = new DownloadingFileItem()
+            var fileItem = new FileDownloadingItem()
             {
                 Seed = seed,
-                State = DownloadingFileState.Downloading,
+                State = FileDownloadingState.Downloading,
                 CreatedTime = now,
             };
             _fileDownloaderRepo.FileItems.Upsert(fileItem);
