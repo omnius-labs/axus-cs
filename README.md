@@ -1,4 +1,4 @@
-# Axus - Peer-to-peer data sharing platform
+# Axus - Omnius Exchange Service
 
 [![Test](https://github.com/omnius-labs/axus/actions/workflows/test.yml/badge.svg)](https://github.com/omnius-labs/axus/actions/workflows/test.yml)
 [![Gitter](https://badges.gitter.im/omnius-labs.svg)](https://gitter.im/omnius-labs/community)
