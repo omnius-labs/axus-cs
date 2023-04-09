@@ -8,11 +8,11 @@ using Omnius.Core.Helpers;
 
 namespace Omnius.Axus.Interactors.Internal.Repositories;
 
-internal sealed class CaskDownloaderRepository : DisposableBase
+internal sealed class SeedBoxDownloaderRepository : DisposableBase
 {
     private readonly LiteDatabase _database;
 
-    public CaskDownloaderRepository(string dirPath)
+    public SeedBoxDownloaderRepository(string dirPath)
     {
         DirectoryHelper.CreateDirectory(dirPath);
 
@@ -62,9 +62,9 @@ internal sealed class CaskDownloaderRepository : DisposableBase
             }
         }
 
-        private ILiteCollection<CaskDownloadingItemEntity> GetCollection()
+        private ILiteCollection<SeedBoxDownloadingItemEntity> GetCollection()
         {
-            var col = _database.GetCollection<CaskDownloadingItemEntity>(CollectionName);
+            var col = _database.GetCollection<SeedBoxDownloadingItemEntity>(CollectionName);
             return col;
         }
 
@@ -90,7 +90,7 @@ internal sealed class CaskDownloaderRepository : DisposableBase
             }
         }
 
-        public IEnumerable<CaskDownloadingItem> FindAll()
+        public IEnumerable<SeedBoxDownloadingItem> FindAll()
         {
             lock (_lockObject)
             {
@@ -99,7 +99,7 @@ internal sealed class CaskDownloaderRepository : DisposableBase
             }
         }
 
-        public CaskDownloadingItem? FindOne(OmniSignature signature)
+        public SeedBoxDownloadingItem? FindOne(OmniSignature signature)
         {
             lock (_lockObject)
             {
@@ -110,11 +110,11 @@ internal sealed class CaskDownloaderRepository : DisposableBase
             }
         }
 
-        public void Upsert(CaskDownloadingItem item)
+        public void Upsert(SeedBoxDownloadingItem item)
         {
             lock (_lockObject)
             {
-                var itemEntity = CaskDownloadingItemEntity.Import(item);
+                var itemEntity = SeedBoxDownloadingItemEntity.Import(item);
 
                 var col = this.GetCollection();
 

@@ -4,8 +4,8 @@ public interface IInteractorProvider : IAsyncDisposable
 {
     IProfileUploader GetProfileUploader();
     IProfileDownloader GetProfileDownloader();
-    IMemoUploader GetMemoUploader();
-    IMemoDownloader GetMemoDownloader();
+    INoteUploader GetMemoUploader();
+    INoteDownloader GetMemoDownloader();
     ISeedUploader GetSeedUploader();
     ISeedDownloader GetSeedDownloader();
     IFileUploader GetFileUploader();

@@ -61,7 +61,7 @@ CREATE INDEX IF NOT EXISTS index_created_time_for_messages ON messages (created_
         return connection;
     }
 
-    public void UpsertBulk(CachedCaskContent content)
+    public void UpsertBulk(CachedSeedBox content)
     {
         lock (_lockObject)
         {

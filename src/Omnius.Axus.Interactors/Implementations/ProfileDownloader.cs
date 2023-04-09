@@ -28,7 +28,7 @@ public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileDow
 
     private readonly AsyncLock _asyncLock = new();
 
-    private const string Channel = "profile/v1";
+    private const string Channel = "profile-v1";
     private const string Zone = "profile-downloader-v1";
 
     public static async ValueTask<ProfileDownloader> CreateAsync(IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ProfileDownloaderOptions options, CancellationToken cancellationToken = default)
@@ -84,6 +84,7 @@ public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileDow
                 await _cachedProfileRepo.ShrinkAsync(signatures);
 
                 await this.SyncProfileDownloaderRepo(signatures, cancellationToken);
+
                 await this.SyncSubscribedShouts(cancellationToken);
                 await this.SyncSubscribedFiles(cancellationToken);
             }

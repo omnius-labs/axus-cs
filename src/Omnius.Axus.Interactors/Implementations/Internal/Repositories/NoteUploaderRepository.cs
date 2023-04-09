@@ -8,11 +8,11 @@ using Omnius.Core.Helpers;
 
 namespace Omnius.Axus.Interactors.Internal.Repositories;
 
-internal sealed class NoteUploaderRepository : DisposableBase
+internal sealed class NoteBoxUploaderRepository : DisposableBase
 {
     private readonly LiteDatabase _database;
 
-    public NoteUploaderRepository(string dirPath)
+    public NoteBoxUploaderRepository(string dirPath)
     {
         DirectoryHelper.CreateDirectory(dirPath);
 
@@ -62,9 +62,9 @@ internal sealed class NoteUploaderRepository : DisposableBase
             }
         }
 
-        private ILiteCollection<NoteUploadingItemEntity> GetCollection()
+        private ILiteCollection<NoteBoxUploadingItemEntity> GetCollection()
         {
-            var col = _database.GetCollection<NoteUploadingItemEntity>(CollectionName);
+            var col = _database.GetCollection<NoteBoxUploadingItemEntity>(CollectionName);
             return col;
         }
 
@@ -99,7 +99,7 @@ internal sealed class NoteUploaderRepository : DisposableBase
             }
         }
 
-        public IEnumerable<NoteUploadingItem> FindAll()
+        public IEnumerable<NoteBoxUploadingItem> FindAll()
         {
             lock (_lockObject)
             {
@@ -108,7 +108,7 @@ internal sealed class NoteUploaderRepository : DisposableBase
             }
         }
 
-        public NoteUploadingItem? FindOne(OmniSignature signature)
+        public NoteBoxUploadingItem? FindOne(OmniSignature signature)
         {
             lock (_lockObject)
             {
@@ -119,11 +119,11 @@ internal sealed class NoteUploaderRepository : DisposableBase
             }
         }
 
-        public void Upsert(NoteUploadingItem item)
+        public void Upsert(NoteBoxUploadingItem item)
         {
             lock (_lockObject)
             {
-                var itemEntity = NoteUploadingItemEntity.Import(item);
+                var itemEntity = NoteBoxUploadingItemEntity.Import(item);
 
                 var col = this.GetCollection();
 

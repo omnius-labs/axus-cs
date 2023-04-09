@@ -20,8 +20,8 @@ message Seed {
     CreatedTime: timestamp64,
 }
 
-message Memo {
-    Comment: string(capacity: 1024),
+message Note {
+    Value: string(capacity: 1024),
     Tag: string(capacity: 256),
     AnchorHash: OmniHash,
     CreatedTime: timestamp64,
@@ -42,11 +42,11 @@ message ProfileDownloaderConfig {
     MaxProfileCount: uint32,
 }
 
-// Memo
+// Note
 
 message MemoUploaderConfig {
     DigitalSignature: OmniDigitalSignature,
-    Memos: vector<Memo>(capacity: 8 * 1024),
+    Notes: vector<Note>(capacity: 8 * 1024),
 }
 
 message MemoDownloaderConfig {

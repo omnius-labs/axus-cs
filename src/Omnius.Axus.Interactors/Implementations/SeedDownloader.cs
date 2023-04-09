@@ -9,16 +9,16 @@ using Omnius.Core.Storages;
 
 namespace Omnius.Axus.Interactors;
 
-public sealed partial class MemoDownloader : AsyncDisposableBase, INoteDownloader
+public sealed partial class SeedDownloader : AsyncDisposableBase, ISeedDownloader
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
     private readonly IProfileDownloader _profileDownloader;
     private readonly IAxusServiceMediator _serviceMediator;
     private readonly IBytesPool _bytesPool;
-    private readonly MemoDownloaderOptions _options;
+    private readonly SeedDownloaderOptions _options;
 
-    private readonly NoteBoxDownloaderRepository _memoDownloaderRepo;
+    private readonly SeedBoxDownloaderRepository _seedBoxDownloaderRepo;
     private readonly CachedMemoRepository _cachedMemoRepo;
     private readonly ISingleValueStorage _configStorage;
 
@@ -45,14 +45,14 @@ public sealed partial class MemoDownloader : AsyncDisposableBase, INoteDownloade
         _bytesPool = bytesPool;
         _options = options;
 
-        _memoDownloaderRepo = new NoteBoxDownloaderRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
+        _seedBoxDownloaderRepo = new NoteBoxDownloaderRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
         _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
         _cachedMemoRepo = new CachedMemoRepository(Path.Combine(_options.ConfigDirectoryPath, "cached_memos"), _bytesPool);
     }
 
     internal async ValueTask InitAsync(CancellationToken cancellationToken = default)
     {
-        await _memoDownloaderRepo.MigrateAsync(cancellationToken);
+        await _seedBoxDownloaderRepo.MigrateAsync(cancellationToken);
 
         _watchLoopTask = this.WatchLoopAsync(_cancellationTokenSource.Token);
     }
@@ -63,7 +63,7 @@ public sealed partial class MemoDownloader : AsyncDisposableBase, INoteDownloade
         await _watchLoopTask;
         _cancellationTokenSource.Dispose();
 
-        _memoDownloaderRepo.Dispose();
+        _seedBoxDownloaderRepo.Dispose();
         _configStorage.Dispose();
     }
 
@@ -117,22 +117,22 @@ public sealed partial class MemoDownloader : AsyncDisposableBase, INoteDownloade
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            foreach (var profileItem in _memoDownloaderRepo.BarkItems.FindAll())
+            foreach (var profileItem in _seedBoxDownloaderRepo.BarkItems.FindAll())
             {
                 if (targetSignatures.Contains(profileItem.Signature)) continue;
-                _memoDownloaderRepo.BarkItems.Delete(profileItem.Signature);
+                _seedBoxDownloaderRepo.BarkItems.Delete(profileItem.Signature);
             }
 
             foreach (var signature in targetSignatures)
             {
-                if (_memoDownloaderRepo.BarkItems.Exists(signature)) continue;
+                if (_seedBoxDownloaderRepo.BarkItems.Exists(signature)) continue;
 
                 var newBarkItem = new NoteBoxDownloadingItem()
                 {
                     Signature = signature,
                     ShoutUpdatedTime = DateTime.MinValue,
                 };
-                _memoDownloaderRepo.BarkItems.Upsert(newBarkItem);
+                _seedBoxDownloaderRepo.BarkItems.Upsert(newBarkItem);
             }
         }
     }
@@ -146,17 +146,17 @@ public sealed partial class MemoDownloader : AsyncDisposableBase, INoteDownloade
 
             foreach (var signature in signatures)
             {
-                if (_memoDownloaderRepo.BarkItems.Exists(signature)) continue;
+                if (_seedBoxDownloaderRepo.BarkItems.Exists(signature)) continue;
                 await _serviceMediator.UnsubscribeShoutAsync(signature, Channel, Zone, cancellationToken);
             }
 
-            foreach (var memoItem in _memoDownloaderRepo.BarkItems.FindAll())
+            foreach (var memoItem in _seedBoxDownloaderRepo.BarkItems.FindAll())
             {
                 if (signatures.Contains(memoItem.Signature)) continue;
                 await _serviceMediator.SubscribeShoutAsync(memoItem.Signature, Channel, Zone, cancellationToken);
             }
 
-            foreach (var memoItem in _memoDownloaderRepo.BarkItems.FindAll())
+            foreach (var memoItem in _seedBoxDownloaderRepo.BarkItems.FindAll())
             {
                 using var shout = await _serviceMediator.TryExportShoutAsync(memoItem.Signature, Channel, memoItem.ShoutUpdatedTime, cancellationToken);
                 if (shout is null) continue;
@@ -168,7 +168,7 @@ public sealed partial class MemoDownloader : AsyncDisposableBase, INoteDownloade
                     RootHash = rootHash,
                     ShoutUpdatedTime = shout.UpdatedTime.ToDateTime(),
                 };
-                _memoDownloaderRepo.BarkItems.Upsert(newBarkItem);
+                _seedBoxDownloaderRepo.BarkItems.Upsert(newBarkItem);
             }
         }
     }
@@ -182,11 +182,11 @@ public sealed partial class MemoDownloader : AsyncDisposableBase, INoteDownloade
 
             foreach (var rootHash in rootHashes)
             {
-                if (_memoDownloaderRepo.BarkItems.Exists(rootHash)) continue;
+                if (_seedBoxDownloaderRepo.BarkItems.Exists(rootHash)) continue;
                 await _serviceMediator.UnpublishFileFromMemoryAsync(rootHash, Zone, cancellationToken);
             }
 
-            foreach (var rootHash in _memoDownloaderRepo.BarkItems.FindAll().Select(n => n.RootHash))
+            foreach (var rootHash in _seedBoxDownloaderRepo.BarkItems.FindAll().Select(n => n.RootHash))
             {
                 if (rootHash == OmniHash.Empty) continue;
                 if (rootHashes.Contains(rootHash)) continue;
@@ -217,7 +217,7 @@ public sealed partial class MemoDownloader : AsyncDisposableBase, INoteDownloade
         {
             await Task.Delay(0, cancellationToken).ConfigureAwait(false);
 
-            var memoItem = _memoDownloaderRepo.BarkItems.FindOne(signature);
+            var memoItem = _seedBoxDownloaderRepo.BarkItems.FindOne(signature);
             if (memoItem is null || memoItem.RootHash == OmniHash.Empty || memoItem.ShoutUpdatedTime <= cachedContentShoutUpdatedTime) return null;
 
             using var contentBytes = await _serviceMediator.TryExportFileToMemoryAsync(memoItem.RootHash, cancellationToken);
@@ -275,4 +275,8 @@ public sealed partial class MemoDownloader : AsyncDisposableBase, INoteDownloade
             await _configStorage.TrySetValueAsync(config, cancellationToken);
         }
     }
+
+    public ValueTask<FindSeedsResult> FindSeedsAsync(FindSeedsCondition condition, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+    ValueTask<SeedDownloaderConfig> ISeedDownloader.GetConfigAsync(CancellationToken cancellationToken) => throw new NotImplementedException();
+    public ValueTask SetConfigAsync(SeedDownloaderConfig config, CancellationToken cancellationToken = default) => throw new NotImplementedException();
 }

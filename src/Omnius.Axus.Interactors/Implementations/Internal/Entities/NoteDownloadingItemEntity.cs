@@ -3,15 +3,15 @@ using Omnius.Core.Cryptography;
 
 namespace Omnius.Axus.Interactors.Internal.Entities;
 
-internal record NoteDownloadingItemEntity
+internal record NoteBoxDownloadingItemEntity
 {
     public OmniSignatureEntity? Signature { get; set; }
     public OmniHashEntity? RootHash { get; set; }
     public DateTime ShoutUpdatedTime { get; set; }
 
-    public static NoteDownloadingItemEntity Import(NoteDownloadingItem item)
+    public static NoteBoxDownloadingItemEntity Import(NoteBoxDownloadingItem item)
     {
-        return new NoteDownloadingItemEntity()
+        return new NoteBoxDownloadingItemEntity()
         {
             Signature = OmniSignatureEntity.Import(item.Signature),
             RootHash = OmniHashEntity.Import(item.RootHash),
@@ -19,9 +19,9 @@ internal record NoteDownloadingItemEntity
         };
     }
 
-    public NoteDownloadingItem Export()
+    public NoteBoxDownloadingItem Export()
     {
-        return new NoteDownloadingItem()
+        return new NoteBoxDownloadingItem()
         {
             Signature = this.Signature?.Export() ?? OmniSignature.Empty,
             RootHash = this.RootHash?.Export() ?? OmniHash.Empty,

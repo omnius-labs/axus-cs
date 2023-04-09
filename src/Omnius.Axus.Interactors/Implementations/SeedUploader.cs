@@ -27,7 +27,7 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
 
     private readonly AsyncLock _asyncLock = new();
 
-    private const string Channel = "seed/v1";
+    private const string Channel = "seed-v1";
     private const string Zone = "seed-uploader-v1";
 
     public static async ValueTask<SeedUploader> CreateAsync(IFileUploader fileUploader, IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, SeedUploaderOptions options, CancellationToken cancellationToken = default)
@@ -76,6 +76,7 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
                 var config = await this.GetConfigAsync(cancellationToken);
 
                 await this.SyncSeedUploaderRepo(config, cancellationToken);
+
                 await this.ShrinkPublishedShouts(cancellationToken);
                 await this.ShrinkPublishedFiles(cancellationToken);
 
@@ -107,7 +108,7 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
 
             if (_seedUploaderRepo.Items.Exists(config.DigitalSignature.GetOmniSignature())) return;
 
-            var newItem = new CaskUploadingItem()
+            var newItem = new SeedBoxUploadingItem()
             {
                 Signature = config.DigitalSignature.GetOmniSignature(),
             };
@@ -187,7 +188,7 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
             var seeds = reports.Select(n => n.Seed).WhereNotNull().ToArray();
 
             var digitalSignature = config.DigitalSignature;
-            var content = new CaskContent(seeds);
+            var content = new SeedBox(seeds);
 
             using var contentBytes = RocketMessage.ToBytes(content);
             var rootHash = await _serviceMediator.PublishFileFromMemoryAsync(contentBytes.Memory, 8 * 1024 * 1024, Zone, cancellationToken);

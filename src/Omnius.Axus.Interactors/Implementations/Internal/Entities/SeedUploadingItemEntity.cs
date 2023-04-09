@@ -8,7 +8,7 @@ internal record SeedUploadingItemEntity
     public OmniSignatureEntity? Signature { get; set; }
     public OmniHashEntity? RootHash { get; set; }
 
-    public static SeedUploadingItemEntity Import(CaskUploadingItem item)
+    public static SeedUploadingItemEntity Import(SeedBoxUploadingItem item)
     {
         return new SeedUploadingItemEntity()
         {
@@ -17,9 +17,9 @@ internal record SeedUploadingItemEntity
         };
     }
 
-    public CaskUploadingItem Export()
+    public SeedBoxUploadingItem Export()
     {
-        return new CaskUploadingItem
+        return new SeedBoxUploadingItem
         {
             Signature = this.Signature?.Export() ?? OmniSignature.Empty,
             RootHash = this.RootHash?.Export() ?? OmniHash.Empty,

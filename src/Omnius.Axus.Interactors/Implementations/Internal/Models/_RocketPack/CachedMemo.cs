@@ -31,9 +31,9 @@ public partial class CachedMemo
         }
     }
 
-    public MemoReport ToReport()
+    public NoteReport ToReport()
     {
-        var result = new MemoReport(this.Signature, this.SelfHash, this.Value);
+        var result = new NoteReport(this.Signature, this.SelfHash, this.Value);
         return result;
     }
 }

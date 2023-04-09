@@ -134,20 +134,20 @@ public sealed partial class CachedProfile : global::Omnius.Core.RocketPack.IRock
         }
     }
 }
-public sealed partial class CachedNoteContent : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedNoteContent>
+public sealed partial class CachedNoteBox : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Internal.Models.CachedNoteContent> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedNoteContent>.Formatter;
-    public static global::Omnius.Axus.Interactors.Internal.Models.CachedNoteContent Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedNoteContent>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox>.Formatter;
+    public static global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox>.Empty;
 
-    static CachedNoteContent()
+    static CachedNoteBox()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedNoteContent>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedNoteContent>.Empty = new global::Omnius.Axus.Interactors.Internal.Models.CachedNoteContent(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Timestamp64.Zero, global::Omnius.Axus.Interactors.Internal.Models.NoteContent.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox>.Empty = new global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Timestamp64.Zero, global::Omnius.Axus.Interactors.Internal.Models.NoteBox.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public CachedNoteContent(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Timestamp64 shoutUpdatedTime, global::Omnius.Axus.Interactors.Internal.Models.NoteContent value)
+    public CachedNoteBox(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Timestamp64 shoutUpdatedTime, global::Omnius.Axus.Interactors.Internal.Models.NoteBox value)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
         if (value is null) throw new global::System.ArgumentNullException("value");
@@ -168,9 +168,9 @@ public sealed partial class CachedNoteContent : global::Omnius.Core.RocketPack.I
 
     public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
     public global::Omnius.Core.RocketPack.Timestamp64 ShoutUpdatedTime { get; }
-    public global::Omnius.Axus.Interactors.Internal.Models.NoteContent Value { get; }
+    public global::Omnius.Axus.Interactors.Internal.Models.NoteBox Value { get; }
 
-    public static global::Omnius.Axus.Interactors.Internal.Models.CachedNoteContent Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -181,20 +181,20 @@ public sealed partial class CachedNoteContent : global::Omnius.Core.RocketPack.I
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Interactors.Internal.Models.CachedNoteContent? left, global::Omnius.Axus.Interactors.Internal.Models.CachedNoteContent? right)
+    public static bool operator ==(global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox? left, global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Interactors.Internal.Models.CachedNoteContent? left, global::Omnius.Axus.Interactors.Internal.Models.CachedNoteContent? right)
+    public static bool operator !=(global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox? left, global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Interactors.Internal.Models.CachedNoteContent) return false;
-        return this.Equals((global::Omnius.Axus.Interactors.Internal.Models.CachedNoteContent)other);
+        if (other is not global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox) return false;
+        return this.Equals((global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox)other);
     }
-    public bool Equals(global::Omnius.Axus.Interactors.Internal.Models.CachedNoteContent? target)
+    public bool Equals(global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -206,9 +206,9 @@ public sealed partial class CachedNoteContent : global::Omnius.Core.RocketPack.I
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Internal.Models.CachedNoteContent>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Interactors.Internal.Models.CachedNoteContent value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -222,20 +222,20 @@ public sealed partial class CachedNoteContent : global::Omnius.Core.RocketPack.I
                 w.Write((uint)2);
                 w.Write(value.ShoutUpdatedTime);
             }
-            if (value.Value != global::Omnius.Axus.Interactors.Internal.Models.NoteContent.Empty)
+            if (value.Value != global::Omnius.Axus.Interactors.Internal.Models.NoteBox.Empty)
             {
                 w.Write((uint)3);
-                global::Omnius.Axus.Interactors.Internal.Models.NoteContent.Formatter.Serialize(ref w, value.Value, rank + 1);
+                global::Omnius.Axus.Interactors.Internal.Models.NoteBox.Formatter.Serialize(ref w, value.Value, rank + 1);
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Interactors.Internal.Models.CachedNoteContent Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Core.Cryptography.OmniSignature p_signature = global::Omnius.Core.Cryptography.OmniSignature.Empty;
             global::Omnius.Core.RocketPack.Timestamp64 p_shoutUpdatedTime = global::Omnius.Core.RocketPack.Timestamp64.Zero;
-            global::Omnius.Axus.Interactors.Internal.Models.NoteContent p_value = global::Omnius.Axus.Interactors.Internal.Models.NoteContent.Empty;
+            global::Omnius.Axus.Interactors.Internal.Models.NoteBox p_value = global::Omnius.Axus.Interactors.Internal.Models.NoteBox.Empty;
 
             for (; ; )
             {
@@ -255,46 +255,46 @@ public sealed partial class CachedNoteContent : global::Omnius.Core.RocketPack.I
                         }
                     case 3:
                         {
-                            p_value = global::Omnius.Axus.Interactors.Internal.Models.NoteContent.Formatter.Deserialize(ref r, rank + 1);
+                            p_value = global::Omnius.Axus.Interactors.Internal.Models.NoteBox.Formatter.Deserialize(ref r, rank + 1);
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axus.Interactors.Internal.Models.CachedNoteContent(p_signature, p_shoutUpdatedTime, p_value);
+            return new global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox(p_signature, p_shoutUpdatedTime, p_value);
         }
     }
 }
-public sealed partial class NoteContent : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.NoteContent>
+public sealed partial class NoteBox : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.NoteBox>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Internal.Models.NoteContent> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.NoteContent>.Formatter;
-    public static global::Omnius.Axus.Interactors.Internal.Models.NoteContent Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.NoteContent>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Internal.Models.NoteBox> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.NoteBox>.Formatter;
+    public static global::Omnius.Axus.Interactors.Internal.Models.NoteBox Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.NoteBox>.Empty;
 
-    static NoteContent()
+    static NoteBox()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.NoteContent>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.NoteContent>.Empty = new global::Omnius.Axus.Interactors.Internal.Models.NoteContent(global::System.Array.Empty<global::Omnius.Axus.Interactors.Models.Memo>());
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.NoteBox>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.NoteBox>.Empty = new global::Omnius.Axus.Interactors.Internal.Models.NoteBox(global::System.Array.Empty<global::Omnius.Axus.Interactors.Models.Note>());
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public static readonly int MaxMemosCount = 8192;
+    public static readonly int MaxNotesCount = 8192;
 
-    public NoteContent(global::Omnius.Axus.Interactors.Models.Memo[] memos)
+    public NoteBox(global::Omnius.Axus.Interactors.Models.Note[] notes)
     {
-        if (memos is null) throw new global::System.ArgumentNullException("memos");
-        if (memos.Length > 8192) throw new global::System.ArgumentOutOfRangeException("memos");
-        foreach (var n in memos)
+        if (notes is null) throw new global::System.ArgumentNullException("notes");
+        if (notes.Length > 8192) throw new global::System.ArgumentOutOfRangeException("notes");
+        foreach (var n in notes)
         {
             if (n is null) throw new global::System.ArgumentNullException("n");
         }
 
-        this.Memos = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Interactors.Models.Memo>(memos);
+        this.Notes = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Interactors.Models.Note>(notes);
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
-            foreach (var n in memos)
+            foreach (var n in notes)
             {
                 if (n != default) ___h.Add(n.GetHashCode());
             }
@@ -302,9 +302,9 @@ public sealed partial class NoteContent : global::Omnius.Core.RocketPack.IRocket
         });
     }
 
-    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Interactors.Models.Memo> Memos { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Interactors.Models.Note> Notes { get; }
 
-    public static global::Omnius.Axus.Interactors.Internal.Models.NoteContent Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Interactors.Internal.Models.NoteBox Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -315,51 +315,51 @@ public sealed partial class NoteContent : global::Omnius.Core.RocketPack.IRocket
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Interactors.Internal.Models.NoteContent? left, global::Omnius.Axus.Interactors.Internal.Models.NoteContent? right)
+    public static bool operator ==(global::Omnius.Axus.Interactors.Internal.Models.NoteBox? left, global::Omnius.Axus.Interactors.Internal.Models.NoteBox? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Interactors.Internal.Models.NoteContent? left, global::Omnius.Axus.Interactors.Internal.Models.NoteContent? right)
+    public static bool operator !=(global::Omnius.Axus.Interactors.Internal.Models.NoteBox? left, global::Omnius.Axus.Interactors.Internal.Models.NoteBox? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Interactors.Internal.Models.NoteContent) return false;
-        return this.Equals((global::Omnius.Axus.Interactors.Internal.Models.NoteContent)other);
+        if (other is not global::Omnius.Axus.Interactors.Internal.Models.NoteBox) return false;
+        return this.Equals((global::Omnius.Axus.Interactors.Internal.Models.NoteBox)other);
     }
-    public bool Equals(global::Omnius.Axus.Interactors.Internal.Models.NoteContent? target)
+    public bool Equals(global::Omnius.Axus.Interactors.Internal.Models.NoteBox? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
-        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Memos, target.Memos)) return false;
+        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Notes, target.Notes)) return false;
 
         return true;
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Internal.Models.NoteContent>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Internal.Models.NoteBox>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Interactors.Internal.Models.NoteContent value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Interactors.Internal.Models.NoteBox value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            if (value.Memos.Count != 0)
+            if (value.Notes.Count != 0)
             {
                 w.Write((uint)1);
-                w.Write((uint)value.Memos.Count);
-                foreach (var n in value.Memos)
+                w.Write((uint)value.Notes.Count);
+                foreach (var n in value.Notes)
                 {
-                    global::Omnius.Axus.Interactors.Models.Memo.Formatter.Serialize(ref w, n, rank + 1);
+                    global::Omnius.Axus.Interactors.Models.Note.Formatter.Serialize(ref w, n, rank + 1);
                 }
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Interactors.Internal.Models.NoteContent Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Interactors.Internal.Models.NoteBox Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            global::Omnius.Axus.Interactors.Models.Memo[] p_memos = global::System.Array.Empty<global::Omnius.Axus.Interactors.Models.Memo>();
+            global::Omnius.Axus.Interactors.Models.Note[] p_notes = global::System.Array.Empty<global::Omnius.Axus.Interactors.Models.Note>();
 
             for (; ; )
             {
@@ -370,17 +370,17 @@ public sealed partial class NoteContent : global::Omnius.Core.RocketPack.IRocket
                     case 1:
                         {
                             var length = r.GetUInt32();
-                            p_memos = new global::Omnius.Axus.Interactors.Models.Memo[length];
-                            for (int i = 0; i < p_memos.Length; i++)
+                            p_notes = new global::Omnius.Axus.Interactors.Models.Note[length];
+                            for (int i = 0; i < p_notes.Length; i++)
                             {
-                                p_memos[i] = global::Omnius.Axus.Interactors.Models.Memo.Formatter.Deserialize(ref r, rank + 1);
+                                p_notes[i] = global::Omnius.Axus.Interactors.Models.Note.Formatter.Deserialize(ref r, rank + 1);
                             }
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axus.Interactors.Internal.Models.NoteContent(p_memos);
+            return new global::Omnius.Axus.Interactors.Internal.Models.NoteBox(p_notes);
         }
     }
 }
@@ -392,12 +392,12 @@ public sealed partial class CachedMemo : global::Omnius.Core.RocketPack.IRocketM
     static CachedMemo()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedMemo>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedMemo>.Empty = new global::Omnius.Axus.Interactors.Internal.Models.CachedMemo(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Axus.Interactors.Models.Memo.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedMemo>.Empty = new global::Omnius.Axus.Interactors.Internal.Models.CachedMemo(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Axus.Interactors.Models.Note.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public CachedMemo(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Axus.Interactors.Models.Memo value)
+    public CachedMemo(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Axus.Interactors.Models.Note value)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
         if (value is null) throw new global::System.ArgumentNullException("value");
@@ -415,7 +415,7 @@ public sealed partial class CachedMemo : global::Omnius.Core.RocketPack.IRocketM
     }
 
     public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
-    public global::Omnius.Axus.Interactors.Models.Memo Value { get; }
+    public global::Omnius.Axus.Interactors.Models.Note Value { get; }
 
     public static global::Omnius.Axus.Interactors.Internal.Models.CachedMemo Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -463,10 +463,10 @@ public sealed partial class CachedMemo : global::Omnius.Core.RocketPack.IRocketM
                 w.Write((uint)1);
                 global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
             }
-            if (value.Value != global::Omnius.Axus.Interactors.Models.Memo.Empty)
+            if (value.Value != global::Omnius.Axus.Interactors.Models.Note.Empty)
             {
                 w.Write((uint)2);
-                global::Omnius.Axus.Interactors.Models.Memo.Formatter.Serialize(ref w, value.Value, rank + 1);
+                global::Omnius.Axus.Interactors.Models.Note.Formatter.Serialize(ref w, value.Value, rank + 1);
             }
             w.Write((uint)0);
         }
@@ -475,7 +475,7 @@ public sealed partial class CachedMemo : global::Omnius.Core.RocketPack.IRocketM
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Core.Cryptography.OmniSignature p_signature = global::Omnius.Core.Cryptography.OmniSignature.Empty;
-            global::Omnius.Axus.Interactors.Models.Memo p_value = global::Omnius.Axus.Interactors.Models.Memo.Empty;
+            global::Omnius.Axus.Interactors.Models.Note p_value = global::Omnius.Axus.Interactors.Models.Note.Empty;
 
             for (; ; )
             {
@@ -490,7 +490,7 @@ public sealed partial class CachedMemo : global::Omnius.Core.RocketPack.IRocketM
                         }
                     case 2:
                         {
-                            p_value = global::Omnius.Axus.Interactors.Models.Memo.Formatter.Deserialize(ref r, rank + 1);
+                            p_value = global::Omnius.Axus.Interactors.Models.Note.Formatter.Deserialize(ref r, rank + 1);
                             break;
                         }
                 }
@@ -500,20 +500,20 @@ public sealed partial class CachedMemo : global::Omnius.Core.RocketPack.IRocketM
         }
     }
 }
-public sealed partial class CachedCaskContent : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedCaskContent>
+public sealed partial class CachedSeedBox : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Internal.Models.CachedCaskContent> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedCaskContent>.Formatter;
-    public static global::Omnius.Axus.Interactors.Internal.Models.CachedCaskContent Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedCaskContent>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox>.Formatter;
+    public static global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox>.Empty;
 
-    static CachedCaskContent()
+    static CachedSeedBox()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedCaskContent>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedCaskContent>.Empty = new global::Omnius.Axus.Interactors.Internal.Models.CachedCaskContent(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Timestamp64.Zero, global::Omnius.Axus.Interactors.Internal.Models.CaskContent.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox>.Empty = new global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Timestamp64.Zero, global::Omnius.Axus.Interactors.Internal.Models.SeedBox.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public CachedCaskContent(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Timestamp64 shoutUpdatedTime, global::Omnius.Axus.Interactors.Internal.Models.CaskContent value)
+    public CachedSeedBox(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Timestamp64 shoutUpdatedTime, global::Omnius.Axus.Interactors.Internal.Models.SeedBox value)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
         if (value is null) throw new global::System.ArgumentNullException("value");
@@ -534,9 +534,9 @@ public sealed partial class CachedCaskContent : global::Omnius.Core.RocketPack.I
 
     public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
     public global::Omnius.Core.RocketPack.Timestamp64 ShoutUpdatedTime { get; }
-    public global::Omnius.Axus.Interactors.Internal.Models.CaskContent Value { get; }
+    public global::Omnius.Axus.Interactors.Internal.Models.SeedBox Value { get; }
 
-    public static global::Omnius.Axus.Interactors.Internal.Models.CachedCaskContent Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -547,20 +547,20 @@ public sealed partial class CachedCaskContent : global::Omnius.Core.RocketPack.I
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Interactors.Internal.Models.CachedCaskContent? left, global::Omnius.Axus.Interactors.Internal.Models.CachedCaskContent? right)
+    public static bool operator ==(global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox? left, global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Interactors.Internal.Models.CachedCaskContent? left, global::Omnius.Axus.Interactors.Internal.Models.CachedCaskContent? right)
+    public static bool operator !=(global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox? left, global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Interactors.Internal.Models.CachedCaskContent) return false;
-        return this.Equals((global::Omnius.Axus.Interactors.Internal.Models.CachedCaskContent)other);
+        if (other is not global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox) return false;
+        return this.Equals((global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox)other);
     }
-    public bool Equals(global::Omnius.Axus.Interactors.Internal.Models.CachedCaskContent? target)
+    public bool Equals(global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -572,9 +572,9 @@ public sealed partial class CachedCaskContent : global::Omnius.Core.RocketPack.I
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Internal.Models.CachedCaskContent>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Interactors.Internal.Models.CachedCaskContent value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -588,20 +588,20 @@ public sealed partial class CachedCaskContent : global::Omnius.Core.RocketPack.I
                 w.Write((uint)2);
                 w.Write(value.ShoutUpdatedTime);
             }
-            if (value.Value != global::Omnius.Axus.Interactors.Internal.Models.CaskContent.Empty)
+            if (value.Value != global::Omnius.Axus.Interactors.Internal.Models.SeedBox.Empty)
             {
                 w.Write((uint)3);
-                global::Omnius.Axus.Interactors.Internal.Models.CaskContent.Formatter.Serialize(ref w, value.Value, rank + 1);
+                global::Omnius.Axus.Interactors.Internal.Models.SeedBox.Formatter.Serialize(ref w, value.Value, rank + 1);
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Interactors.Internal.Models.CachedCaskContent Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Core.Cryptography.OmniSignature p_signature = global::Omnius.Core.Cryptography.OmniSignature.Empty;
             global::Omnius.Core.RocketPack.Timestamp64 p_shoutUpdatedTime = global::Omnius.Core.RocketPack.Timestamp64.Zero;
-            global::Omnius.Axus.Interactors.Internal.Models.CaskContent p_value = global::Omnius.Axus.Interactors.Internal.Models.CaskContent.Empty;
+            global::Omnius.Axus.Interactors.Internal.Models.SeedBox p_value = global::Omnius.Axus.Interactors.Internal.Models.SeedBox.Empty;
 
             for (; ; )
             {
@@ -621,32 +621,32 @@ public sealed partial class CachedCaskContent : global::Omnius.Core.RocketPack.I
                         }
                     case 3:
                         {
-                            p_value = global::Omnius.Axus.Interactors.Internal.Models.CaskContent.Formatter.Deserialize(ref r, rank + 1);
+                            p_value = global::Omnius.Axus.Interactors.Internal.Models.SeedBox.Formatter.Deserialize(ref r, rank + 1);
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axus.Interactors.Internal.Models.CachedCaskContent(p_signature, p_shoutUpdatedTime, p_value);
+            return new global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox(p_signature, p_shoutUpdatedTime, p_value);
         }
     }
 }
-public sealed partial class CaskContent : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CaskContent>
+public sealed partial class SeedBox : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.SeedBox>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Internal.Models.CaskContent> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CaskContent>.Formatter;
-    public static global::Omnius.Axus.Interactors.Internal.Models.CaskContent Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CaskContent>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Internal.Models.SeedBox> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.SeedBox>.Formatter;
+    public static global::Omnius.Axus.Interactors.Internal.Models.SeedBox Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.SeedBox>.Empty;
 
-    static CaskContent()
+    static SeedBox()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CaskContent>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CaskContent>.Empty = new global::Omnius.Axus.Interactors.Internal.Models.CaskContent(global::System.Array.Empty<global::Omnius.Axus.Interactors.Models.Seed>());
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.SeedBox>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.SeedBox>.Empty = new global::Omnius.Axus.Interactors.Internal.Models.SeedBox(global::System.Array.Empty<global::Omnius.Axus.Interactors.Models.Seed>());
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxSeedsCount = 32768;
 
-    public CaskContent(global::Omnius.Axus.Interactors.Models.Seed[] seeds)
+    public SeedBox(global::Omnius.Axus.Interactors.Models.Seed[] seeds)
     {
         if (seeds is null) throw new global::System.ArgumentNullException("seeds");
         if (seeds.Length > 32768) throw new global::System.ArgumentOutOfRangeException("seeds");
@@ -670,7 +670,7 @@ public sealed partial class CaskContent : global::Omnius.Core.RocketPack.IRocket
 
     public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Interactors.Models.Seed> Seeds { get; }
 
-    public static global::Omnius.Axus.Interactors.Internal.Models.CaskContent Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Interactors.Internal.Models.SeedBox Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -681,20 +681,20 @@ public sealed partial class CaskContent : global::Omnius.Core.RocketPack.IRocket
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Interactors.Internal.Models.CaskContent? left, global::Omnius.Axus.Interactors.Internal.Models.CaskContent? right)
+    public static bool operator ==(global::Omnius.Axus.Interactors.Internal.Models.SeedBox? left, global::Omnius.Axus.Interactors.Internal.Models.SeedBox? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Interactors.Internal.Models.CaskContent? left, global::Omnius.Axus.Interactors.Internal.Models.CaskContent? right)
+    public static bool operator !=(global::Omnius.Axus.Interactors.Internal.Models.SeedBox? left, global::Omnius.Axus.Interactors.Internal.Models.SeedBox? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Interactors.Internal.Models.CaskContent) return false;
-        return this.Equals((global::Omnius.Axus.Interactors.Internal.Models.CaskContent)other);
+        if (other is not global::Omnius.Axus.Interactors.Internal.Models.SeedBox) return false;
+        return this.Equals((global::Omnius.Axus.Interactors.Internal.Models.SeedBox)other);
     }
-    public bool Equals(global::Omnius.Axus.Interactors.Internal.Models.CaskContent? target)
+    public bool Equals(global::Omnius.Axus.Interactors.Internal.Models.SeedBox? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -704,9 +704,9 @@ public sealed partial class CaskContent : global::Omnius.Core.RocketPack.IRocket
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Internal.Models.CaskContent>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Internal.Models.SeedBox>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Interactors.Internal.Models.CaskContent value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Interactors.Internal.Models.SeedBox value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -721,7 +721,7 @@ public sealed partial class CaskContent : global::Omnius.Core.RocketPack.IRocket
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Interactors.Internal.Models.CaskContent Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Interactors.Internal.Models.SeedBox Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -746,7 +746,7 @@ public sealed partial class CaskContent : global::Omnius.Core.RocketPack.IRocket
                 }
             }
 
-            return new global::Omnius.Axus.Interactors.Internal.Models.CaskContent(p_seeds);
+            return new global::Omnius.Axus.Interactors.Internal.Models.SeedBox(p_seeds);
         }
     }
 }

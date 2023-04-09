@@ -1,6 +1,6 @@
 namespace Omnius.Axus.Interactors.Internal.Models;
 
-public partial class CachedCaskContent
+public partial class CachedSeedBox
 {
     public IEnumerable<CachedSeed> ToSeeds()
     {

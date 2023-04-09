@@ -13,8 +13,8 @@ public partial class InteractorProvider : AsyncDisposableBase, IInteractorProvid
 
     private IProfileUploader? _profileUploader;
     private IProfileDownloader? _profileDownloader;
-    private IMemoUploader? _barkUploader;
-    private IMemoDownloader? _barkDownloader;
+    private INoteUploader? _barkUploader;
+    private INoteDownloader? _barkDownloader;
     private IFileUploader? _fileUploader;
     private IFileDownloader? _fileDownloader;
 
@@ -80,8 +80,8 @@ public partial class InteractorProvider : AsyncDisposableBase, IInteractorProvid
 
     public IProfileUploader GetProfileUploader() => _profileUploader!;
     public IProfileDownloader GetProfileDownloader() => _profileDownloader!;
-    public IMemoUploader GetMemoUploader() => _barkUploader!;
-    public IMemoDownloader GetMemoDownloader() => _barkDownloader!;
+    public INoteUploader GetMemoUploader() => _barkUploader!;
+    public INoteDownloader GetMemoDownloader() => _barkDownloader!;
     public ISeedUploader GetSeedUploader() => throw new NotImplementedException();
     public ISeedDownloader GetSeedDownloader() => throw new NotImplementedException();
     public IFileUploader GetFileUploader() => _fileUploader!;

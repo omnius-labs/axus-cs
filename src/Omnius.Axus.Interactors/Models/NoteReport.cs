@@ -2,16 +2,16 @@ using Omnius.Core.Cryptography;
 
 namespace Omnius.Axus.Interactors.Models;
 
-public record MemoReport
+public record NoteReport
 {
-    public MemoReport(OmniSignature signature, OmniHash selfHash, Memo memo)
+    public NoteReport(OmniSignature signature, OmniHash selfHash, Note note)
     {
         this.Signature = signature;
         this.SelfHash = selfHash;
-        this.Memo = memo;
+        this.Note = note;
     }
 
     public OmniSignature Signature { get; }
     public OmniHash SelfHash { get; }
-    public Memo Memo { get; }
+    public Note Note { get; }
 }

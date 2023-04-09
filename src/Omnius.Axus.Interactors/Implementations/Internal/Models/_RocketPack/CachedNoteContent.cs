@@ -1,14 +1,14 @@
 namespace Omnius.Axus.Interactors.Internal.Models;
 
-public partial class CachedNoteContent
+public partial class CachedNoteBox
 {
     public IEnumerable<CachedMemo> ToMemos()
     {
         var results = new List<CachedMemo>();
 
-        foreach (var memo in this.Value.Memos)
+        foreach (var note in this.Value.Notes)
         {
-            var result = new CachedMemo(this.Signature, memo);
+            var result = new CachedMemo(this.Signature, note);
             results.Add(result);
         }
 

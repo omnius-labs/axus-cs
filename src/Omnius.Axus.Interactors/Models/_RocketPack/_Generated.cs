@@ -303,29 +303,29 @@ public sealed partial class Seed : global::Omnius.Core.RocketPack.IRocketMessage
         }
     }
 }
-public sealed partial class Memo : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.Memo>
+public sealed partial class Note : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.Note>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.Memo> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.Memo>.Formatter;
-    public static global::Omnius.Axus.Interactors.Models.Memo Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.Memo>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.Note> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.Note>.Formatter;
+    public static global::Omnius.Axus.Interactors.Models.Note Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.Note>.Empty;
 
-    static Memo()
+    static Note()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.Memo>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.Memo>.Empty = new global::Omnius.Axus.Interactors.Models.Memo(global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.Cryptography.OmniHash.Empty, global::Omnius.Core.RocketPack.Timestamp64.Zero);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.Note>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.Note>.Empty = new global::Omnius.Axus.Interactors.Models.Note(global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.Cryptography.OmniHash.Empty, global::Omnius.Core.RocketPack.Timestamp64.Zero);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public static readonly int MaxCommentLength = 1024;
+    public static readonly int MaxValueLength = 1024;
     public static readonly int MaxTagLength = 256;
 
-    public Memo(global::Omnius.Core.RocketPack.Utf8String comment, global::Omnius.Core.RocketPack.Utf8String tag, global::Omnius.Core.Cryptography.OmniHash anchorHash, global::Omnius.Core.RocketPack.Timestamp64 createdTime)
+    public Note(global::Omnius.Core.RocketPack.Utf8String value, global::Omnius.Core.RocketPack.Utf8String tag, global::Omnius.Core.Cryptography.OmniHash anchorHash, global::Omnius.Core.RocketPack.Timestamp64 createdTime)
     {
-        if (comment is null) throw new global::System.ArgumentNullException("comment");
-        if (comment.Length > 1024) throw new global::System.ArgumentOutOfRangeException("comment");
+        if (value is null) throw new global::System.ArgumentNullException("value");
+        if (value.Length > 1024) throw new global::System.ArgumentOutOfRangeException("value");
         if (tag is null) throw new global::System.ArgumentNullException("tag");
         if (tag.Length > 256) throw new global::System.ArgumentOutOfRangeException("tag");
-        this.Comment = comment;
+        this.Value = value;
         this.Tag = tag;
         this.AnchorHash = anchorHash;
         this.CreatedTime = createdTime;
@@ -333,7 +333,7 @@ public sealed partial class Memo : global::Omnius.Core.RocketPack.IRocketMessage
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
-            if (!comment.IsEmpty) ___h.Add(comment.GetHashCode());
+            if (!value.IsEmpty) ___h.Add(value.GetHashCode());
             if (!tag.IsEmpty) ___h.Add(tag.GetHashCode());
             if (anchorHash != default) ___h.Add(anchorHash.GetHashCode());
             if (createdTime != default) ___h.Add(createdTime.GetHashCode());
@@ -341,12 +341,12 @@ public sealed partial class Memo : global::Omnius.Core.RocketPack.IRocketMessage
         });
     }
 
-    public global::Omnius.Core.RocketPack.Utf8String Comment { get; }
+    public global::Omnius.Core.RocketPack.Utf8String Value { get; }
     public global::Omnius.Core.RocketPack.Utf8String Tag { get; }
     public global::Omnius.Core.Cryptography.OmniHash AnchorHash { get; }
     public global::Omnius.Core.RocketPack.Timestamp64 CreatedTime { get; }
 
-    public static global::Omnius.Axus.Interactors.Models.Memo Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Interactors.Models.Note Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -357,24 +357,24 @@ public sealed partial class Memo : global::Omnius.Core.RocketPack.IRocketMessage
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Interactors.Models.Memo? left, global::Omnius.Axus.Interactors.Models.Memo? right)
+    public static bool operator ==(global::Omnius.Axus.Interactors.Models.Note? left, global::Omnius.Axus.Interactors.Models.Note? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Interactors.Models.Memo? left, global::Omnius.Axus.Interactors.Models.Memo? right)
+    public static bool operator !=(global::Omnius.Axus.Interactors.Models.Note? left, global::Omnius.Axus.Interactors.Models.Note? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Interactors.Models.Memo) return false;
-        return this.Equals((global::Omnius.Axus.Interactors.Models.Memo)other);
+        if (other is not global::Omnius.Axus.Interactors.Models.Note) return false;
+        return this.Equals((global::Omnius.Axus.Interactors.Models.Note)other);
     }
-    public bool Equals(global::Omnius.Axus.Interactors.Models.Memo? target)
+    public bool Equals(global::Omnius.Axus.Interactors.Models.Note? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
-        if (this.Comment != target.Comment) return false;
+        if (this.Value != target.Value) return false;
         if (this.Tag != target.Tag) return false;
         if (this.AnchorHash != target.AnchorHash) return false;
         if (this.CreatedTime != target.CreatedTime) return false;
@@ -383,16 +383,16 @@ public sealed partial class Memo : global::Omnius.Core.RocketPack.IRocketMessage
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.Memo>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Models.Note>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Interactors.Models.Memo value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Interactors.Models.Note value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            if (value.Comment != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            if (value.Value != global::Omnius.Core.RocketPack.Utf8String.Empty)
             {
                 w.Write((uint)1);
-                w.Write(value.Comment);
+                w.Write(value.Value);
             }
             if (value.Tag != global::Omnius.Core.RocketPack.Utf8String.Empty)
             {
@@ -411,11 +411,11 @@ public sealed partial class Memo : global::Omnius.Core.RocketPack.IRocketMessage
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Interactors.Models.Memo Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Interactors.Models.Note Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            global::Omnius.Core.RocketPack.Utf8String p_comment = global::Omnius.Core.RocketPack.Utf8String.Empty;
+            global::Omnius.Core.RocketPack.Utf8String p_value = global::Omnius.Core.RocketPack.Utf8String.Empty;
             global::Omnius.Core.RocketPack.Utf8String p_tag = global::Omnius.Core.RocketPack.Utf8String.Empty;
             global::Omnius.Core.Cryptography.OmniHash p_anchorHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
             global::Omnius.Core.RocketPack.Timestamp64 p_createdTime = global::Omnius.Core.RocketPack.Timestamp64.Zero;
@@ -428,7 +428,7 @@ public sealed partial class Memo : global::Omnius.Core.RocketPack.IRocketMessage
                 {
                     case 1:
                         {
-                            p_comment = r.GetString(1024);
+                            p_value = r.GetString(1024);
                             break;
                         }
                     case 2:
@@ -449,7 +449,7 @@ public sealed partial class Memo : global::Omnius.Core.RocketPack.IRocketMessage
                 }
             }
 
-            return new global::Omnius.Axus.Interactors.Models.Memo(p_comment, p_tag, p_anchorHash, p_createdTime);
+            return new global::Omnius.Axus.Interactors.Models.Note(p_value, p_tag, p_anchorHash, p_createdTime);
         }
     }
 }
@@ -812,31 +812,31 @@ public sealed partial class MemoUploaderConfig : global::Omnius.Core.RocketPack.
     static MemoUploaderConfig()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.MemoUploaderConfig>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.MemoUploaderConfig>.Empty = new global::Omnius.Axus.Interactors.Models.MemoUploaderConfig(global::Omnius.Core.Cryptography.OmniDigitalSignature.Empty, global::System.Array.Empty<global::Omnius.Axus.Interactors.Models.Memo>());
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Models.MemoUploaderConfig>.Empty = new global::Omnius.Axus.Interactors.Models.MemoUploaderConfig(global::Omnius.Core.Cryptography.OmniDigitalSignature.Empty, global::System.Array.Empty<global::Omnius.Axus.Interactors.Models.Note>());
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public static readonly int MaxMemosCount = 8192;
+    public static readonly int MaxNotesCount = 8192;
 
-    public MemoUploaderConfig(global::Omnius.Core.Cryptography.OmniDigitalSignature digitalSignature, global::Omnius.Axus.Interactors.Models.Memo[] memos)
+    public MemoUploaderConfig(global::Omnius.Core.Cryptography.OmniDigitalSignature digitalSignature, global::Omnius.Axus.Interactors.Models.Note[] notes)
     {
         if (digitalSignature is null) throw new global::System.ArgumentNullException("digitalSignature");
-        if (memos is null) throw new global::System.ArgumentNullException("memos");
-        if (memos.Length > 8192) throw new global::System.ArgumentOutOfRangeException("memos");
-        foreach (var n in memos)
+        if (notes is null) throw new global::System.ArgumentNullException("notes");
+        if (notes.Length > 8192) throw new global::System.ArgumentOutOfRangeException("notes");
+        foreach (var n in notes)
         {
             if (n is null) throw new global::System.ArgumentNullException("n");
         }
 
         this.DigitalSignature = digitalSignature;
-        this.Memos = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Interactors.Models.Memo>(memos);
+        this.Notes = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Interactors.Models.Note>(notes);
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (digitalSignature != default) ___h.Add(digitalSignature.GetHashCode());
-            foreach (var n in memos)
+            foreach (var n in notes)
             {
                 if (n != default) ___h.Add(n.GetHashCode());
             }
@@ -845,7 +845,7 @@ public sealed partial class MemoUploaderConfig : global::Omnius.Core.RocketPack.
     }
 
     public global::Omnius.Core.Cryptography.OmniDigitalSignature DigitalSignature { get; }
-    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Interactors.Models.Memo> Memos { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Interactors.Models.Note> Notes { get; }
 
     public static global::Omnius.Axus.Interactors.Models.MemoUploaderConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -876,7 +876,7 @@ public sealed partial class MemoUploaderConfig : global::Omnius.Core.RocketPack.
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
         if (this.DigitalSignature != target.DigitalSignature) return false;
-        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Memos, target.Memos)) return false;
+        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Notes, target.Notes)) return false;
 
         return true;
     }
@@ -893,13 +893,13 @@ public sealed partial class MemoUploaderConfig : global::Omnius.Core.RocketPack.
                 w.Write((uint)1);
                 global::Omnius.Core.Cryptography.OmniDigitalSignature.Formatter.Serialize(ref w, value.DigitalSignature, rank + 1);
             }
-            if (value.Memos.Count != 0)
+            if (value.Notes.Count != 0)
             {
                 w.Write((uint)2);
-                w.Write((uint)value.Memos.Count);
-                foreach (var n in value.Memos)
+                w.Write((uint)value.Notes.Count);
+                foreach (var n in value.Notes)
                 {
-                    global::Omnius.Axus.Interactors.Models.Memo.Formatter.Serialize(ref w, n, rank + 1);
+                    global::Omnius.Axus.Interactors.Models.Note.Formatter.Serialize(ref w, n, rank + 1);
                 }
             }
             w.Write((uint)0);
@@ -909,7 +909,7 @@ public sealed partial class MemoUploaderConfig : global::Omnius.Core.RocketPack.
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Core.Cryptography.OmniDigitalSignature p_digitalSignature = global::Omnius.Core.Cryptography.OmniDigitalSignature.Empty;
-            global::Omnius.Axus.Interactors.Models.Memo[] p_memos = global::System.Array.Empty<global::Omnius.Axus.Interactors.Models.Memo>();
+            global::Omnius.Axus.Interactors.Models.Note[] p_notes = global::System.Array.Empty<global::Omnius.Axus.Interactors.Models.Note>();
 
             for (; ; )
             {
@@ -925,17 +925,17 @@ public sealed partial class MemoUploaderConfig : global::Omnius.Core.RocketPack.
                     case 2:
                         {
                             var length = r.GetUInt32();
-                            p_memos = new global::Omnius.Axus.Interactors.Models.Memo[length];
-                            for (int i = 0; i < p_memos.Length; i++)
+                            p_notes = new global::Omnius.Axus.Interactors.Models.Note[length];
+                            for (int i = 0; i < p_notes.Length; i++)
                             {
-                                p_memos[i] = global::Omnius.Axus.Interactors.Models.Memo.Formatter.Deserialize(ref r, rank + 1);
+                                p_notes[i] = global::Omnius.Axus.Interactors.Models.Note.Formatter.Deserialize(ref r, rank + 1);
                             }
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axus.Interactors.Models.MemoUploaderConfig(p_digitalSignature, p_memos);
+            return new global::Omnius.Axus.Interactors.Models.MemoUploaderConfig(p_digitalSignature, p_notes);
         }
     }
 }

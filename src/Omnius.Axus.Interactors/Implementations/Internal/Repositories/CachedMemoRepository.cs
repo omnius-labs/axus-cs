@@ -38,16 +38,16 @@ CREATE TABLE IF NOT EXISTS contents (
     signature TEXT NOT NULL PRIMARY KEY,
     shout_updated_time INTEGER NOT NULL
 );
-CREATE TABLE IF NOT EXISTS memos (
+CREATE TABLE IF NOT EXISTS notes (
     self_hash TEXT NOT NULL PRIMARY KEY,
     signature TEXT NOT NULL,
     tag TEXT NOT NULL,
     created_time INTEGER NOT NULL,
     value BLOB NOT NULL
 );
-CREATE INDEX IF NOT EXISTS index_signature_for_memos ON memos (signature);
-CREATE INDEX IF NOT EXISTS index_tag_for_memos ON memos (tag, created_time DESC);
-CREATE INDEX IF NOT EXISTS index_created_time_for_memos ON memos (created_time);
+CREATE INDEX IF NOT EXISTS index_signature_for_memos ON notes (signature);
+CREATE INDEX IF NOT EXISTS index_tag_for_memos ON notes (tag, created_time DESC);
+CREATE INDEX IF NOT EXISTS index_created_time_for_memos ON notes (created_time);
 ";
         command.ExecuteNonQuery();
     }
@@ -60,7 +60,7 @@ CREATE INDEX IF NOT EXISTS index_created_time_for_memos ON memos (created_time);
         return connection;
     }
 
-    public void UpsertBulk(CachedNoteContent content)
+    public void UpsertBulk(CachedNoteBox content)
     {
         lock (_lockObject)
         {
@@ -80,7 +80,7 @@ VALUES (
     '{signature}',
     '{shout_updated_time}'
 );
-DELETE FROM memos WHERE signature = '{signature}';
+DELETE FROM notes WHERE signature = '{signature}';
 ";
                 command.ExecuteNonQuery();
             }
@@ -101,7 +101,7 @@ DELETE FROM memos WHERE signature = '{signature}';
                 using var command = new SQLiteCommand(connection);
                 command.CommandText =
 $@"
-INSERT OR IGNORE INTO memos (self_hash, signature, tag, created_time, value)
+INSERT OR IGNORE INTO notes (self_hash, signature, tag, created_time, value)
 VALUES (
     '{self_hash}',
     '{signature}',

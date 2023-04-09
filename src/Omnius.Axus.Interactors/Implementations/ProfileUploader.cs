@@ -26,7 +26,7 @@ public sealed class ProfileUploader : AsyncDisposableBase, IProfileUploader
 
     private readonly AsyncLock _asyncLock = new();
 
-    private const string Channel = "profile/v1";
+    private const string Channel = "profile-v1";
     private const string Zone = "profile-uploader-v1";
 
     public static async ValueTask<ProfileUploader> CreateAsync(IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, ProfileUploaderOptions options, CancellationToken cancellationToken = default)
@@ -74,6 +74,7 @@ public sealed class ProfileUploader : AsyncDisposableBase, IProfileUploader
                 var config = await this.GetConfigAsync(cancellationToken);
 
                 await this.SyncProfileUploaderRepo(config, cancellationToken);
+
                 await this.ShrinkPublishedShouts(cancellationToken);
                 await this.ShrinkPublishedFiles(cancellationToken);
 

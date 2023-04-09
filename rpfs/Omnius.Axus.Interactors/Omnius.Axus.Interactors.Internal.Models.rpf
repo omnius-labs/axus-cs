@@ -15,32 +15,32 @@ message CachedProfile {
     Value: Profile,
 }
 
-// Note
+// NoteBox
 
-message CachedNoteContent {
+message CachedNoteBox {
     Signature: OmniSignature,
     ShoutUpdatedTime: timestamp64,
-    Value: NoteContent,
+    Value: NoteBox,
 }
 
-message NoteContent {
-    Memos: vector<Memo>(capacity: 8 * 1024),
+message NoteBox {
+    Notes: vector<Note>(capacity: 8 * 1024),
 }
 
 message CachedMemo {
     Signature: OmniSignature,
-    Value: Memo,
+    Value: Note,
 }
 
-// Cask
+// SeedBox
 
-message CachedCaskContent {
+message CachedSeedBox {
     Signature: OmniSignature,
     ShoutUpdatedTime: timestamp64,
-    Value: CaskContent,
+    Value: SeedBox,
 }
 
-message CaskContent {
+message SeedBox {
     Seeds: vector<Seed>(capacity: 1024 * 32),
 }
 

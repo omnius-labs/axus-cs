@@ -9,7 +9,7 @@ using Omnius.Core.Storages;
 
 namespace Omnius.Axus.Interactors;
 
-public sealed class MemoUploader : AsyncDisposableBase, IMemoUploader
+public sealed class MemoUploader : AsyncDisposableBase, INoteUploader
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -17,7 +17,7 @@ public sealed class MemoUploader : AsyncDisposableBase, IMemoUploader
     private readonly IBytesPool _bytesPool;
     private readonly MemoUploaderOptions _options;
 
-    private readonly NoteUploaderRepository _barkUploaderRepo;
+    private readonly NoteBoxUploaderRepository _memoUploaderRepo;
     private readonly ISingleValueStorage _configStorage;
 
     private Task _watchLoopTask = null!;
@@ -26,14 +26,14 @@ public sealed class MemoUploader : AsyncDisposableBase, IMemoUploader
 
     private readonly AsyncLock _asyncLock = new();
 
-    private const string Channel = "bark/v1";
-    private const string Zone = "bark-uploader-v1";
+    private const string Channel = "note-v1";
+    private const string Zone = "note-uploader-v1";
 
     public static async ValueTask<MemoUploader> CreateAsync(IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, MemoUploaderOptions options, CancellationToken cancellationToken = default)
     {
-        var barkUploader = new MemoUploader(serviceMediator, singleValueStorageFactory, bytesPool, options);
-        await barkUploader.InitAsync(cancellationToken);
-        return barkUploader;
+        var memoUploader = new MemoUploader(serviceMediator, singleValueStorageFactory, bytesPool, options);
+        await memoUploader.InitAsync(cancellationToken);
+        return memoUploader;
     }
 
     private MemoUploader(IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, MemoUploaderOptions options)
@@ -42,7 +42,7 @@ public sealed class MemoUploader : AsyncDisposableBase, IMemoUploader
         _bytesPool = bytesPool;
         _options = options;
 
-        _barkUploaderRepo = new NoteUploaderRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
+        _memoUploaderRepo = new NoteBoxUploaderRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
         _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
     }
 
@@ -57,7 +57,7 @@ public sealed class MemoUploader : AsyncDisposableBase, IMemoUploader
         await _watchLoopTask;
         _cancellationTokenSource.Dispose();
 
-        _barkUploaderRepo.Dispose();
+        _memoUploaderRepo.Dispose();
         _configStorage.Dispose();
     }
 
@@ -74,6 +74,7 @@ public sealed class MemoUploader : AsyncDisposableBase, IMemoUploader
                 var config = await this.GetConfigAsync(cancellationToken);
 
                 await this.SyncMemoUploaderRepo(config, cancellationToken);
+
                 await this.ShrinkPublishedShouts(cancellationToken);
                 await this.ShrinkPublishedFiles(cancellationToken);
 
@@ -97,19 +98,19 @@ public sealed class MemoUploader : AsyncDisposableBase, IMemoUploader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            foreach (var profileItem in _barkUploaderRepo.BarkItems.FindAll())
+            foreach (var profileItem in _memoUploaderRepo.BarkItems.FindAll())
             {
                 if (profileItem.Signature == config.DigitalSignature.GetOmniSignature()) continue;
-                _barkUploaderRepo.BarkItems.Delete(profileItem.Signature);
+                _memoUploaderRepo.BarkItems.Delete(profileItem.Signature);
             }
 
-            if (_barkUploaderRepo.BarkItems.Exists(config.DigitalSignature.GetOmniSignature())) return;
+            if (_memoUploaderRepo.BarkItems.Exists(config.DigitalSignature.GetOmniSignature())) return;
 
-            var newBarkItem = new NoteUploadingItem()
+            var newBarkItem = new NoteBoxUploadingItem()
             {
                 Signature = config.DigitalSignature.GetOmniSignature(),
             };
-            _barkUploaderRepo.BarkItems.Upsert(newBarkItem);
+            _memoUploaderRepo.BarkItems.Upsert(newBarkItem);
         }
     }
 
@@ -122,7 +123,7 @@ public sealed class MemoUploader : AsyncDisposableBase, IMemoUploader
 
             foreach (var signature in signatures)
             {
-                if (_barkUploaderRepo.BarkItems.Exists(signature)) continue;
+                if (_memoUploaderRepo.BarkItems.Exists(signature)) continue;
                 await _serviceMediator.UnsubscribeShoutAsync(signature, Channel, Zone, cancellationToken);
             }
         }
@@ -137,7 +138,7 @@ public sealed class MemoUploader : AsyncDisposableBase, IMemoUploader
 
             foreach (var rootHash in rootHashes)
             {
-                if (_barkUploaderRepo.BarkItems.Exists(rootHash)) continue;
+                if (_memoUploaderRepo.BarkItems.Exists(rootHash)) continue;
                 await _serviceMediator.UnpublishFileFromMemoryAsync(rootHash, Zone, cancellationToken);
             }
         }
@@ -150,7 +151,7 @@ public sealed class MemoUploader : AsyncDisposableBase, IMemoUploader
             var reports = await _serviceMediator.GetPublishedShoutReportsAsync(Zone, cancellationToken);
             var signatures = reports.Select(n => n.Signature).ToHashSet();
 
-            foreach (var profileItem in _barkUploaderRepo.BarkItems.FindAll())
+            foreach (var profileItem in _memoUploaderRepo.BarkItems.FindAll())
             {
                 if (signatures.Contains(profileItem.Signature)) continue;
                 return false;
@@ -167,7 +168,7 @@ public sealed class MemoUploader : AsyncDisposableBase, IMemoUploader
             var reports = await _serviceMediator.GetPublishedFileReportsAsync(Zone, cancellationToken);
             var rootHashes = reports.Select(n => n.RootHash).WhereNotNull().ToHashSet();
 
-            foreach (var profileItem in _barkUploaderRepo.BarkItems.FindAll())
+            foreach (var profileItem in _memoUploaderRepo.BarkItems.FindAll())
             {
                 if (rootHashes.Contains(profileItem.RootHash)) continue;
                 return false;
@@ -182,7 +183,7 @@ public sealed class MemoUploader : AsyncDisposableBase, IMemoUploader
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var digitalSignature = config.DigitalSignature;
-            var content = new NoteContent(config.Memos.ToArray());
+            var content = new NoteBox(config.Notes.ToArray());
 
             using var contentBytes = RocketMessage.ToBytes(content);
             var rootHash = await _serviceMediator.PublishFileFromMemoryAsync(contentBytes.Memory, 8 * 1024 * 1024, Zone, cancellationToken);
@@ -203,7 +204,7 @@ public sealed class MemoUploader : AsyncDisposableBase, IMemoUploader
             {
                 config = new MemoUploaderConfig(
                     digitalSignature: OmniDigitalSignature.Create("Anonymous", OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256),
-                    memos: Array.Empty<Memo>()
+                    notes: Array.Empty<Note>()
                 );
 
                 await _configStorage.TrySetValueAsync(config, cancellationToken);
@@ -218,7 +219,7 @@ public sealed class MemoUploader : AsyncDisposableBase, IMemoUploader
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             await _configStorage.TrySetValueAsync(config, cancellationToken);
-            _barkUploaderRepo.BarkItems.DeleteAll();
+            _memoUploaderRepo.BarkItems.DeleteAll();
         }
     }
 }

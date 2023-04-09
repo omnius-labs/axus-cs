@@ -99,7 +99,7 @@ internal sealed class SeedUploaderRepository : DisposableBase
             }
         }
 
-        public IEnumerable<CaskUploadingItem> FindAll()
+        public IEnumerable<SeedBoxUploadingItem> FindAll()
         {
             lock (_lockObject)
             {
@@ -108,7 +108,7 @@ internal sealed class SeedUploaderRepository : DisposableBase
             }
         }
 
-        public CaskUploadingItem? FindOne(OmniSignature signature)
+        public SeedBoxUploadingItem? FindOne(OmniSignature signature)
         {
             lock (_lockObject)
             {
@@ -119,7 +119,7 @@ internal sealed class SeedUploaderRepository : DisposableBase
             }
         }
 
-        public void Upsert(CaskUploadingItem item)
+        public void Upsert(SeedBoxUploadingItem item)
         {
             lock (_lockObject)
             {
