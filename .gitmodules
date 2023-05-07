@@ -1,4 +1,3 @@
-[submodule "refs/core"]
-	path = refs/core
-	url = https://github.com/omnius-labs/core.git
-	branch = main
+[submodule "refs/core-cs"]
+	path = refs/core-cs
+	url = git@github.com:omnius-labs/core-cs.git

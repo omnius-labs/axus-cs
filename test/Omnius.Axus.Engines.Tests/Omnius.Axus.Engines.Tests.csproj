@@ -5,18 +5,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Collections\Omnius.Core.Collections.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Cryptography\Omnius.Core.Cryptography.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Net.Connections\Omnius.Core.Net.Connections.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Net.I2p\Omnius.Core.Net.I2p.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Net.Proxies\Omnius.Core.Net.Proxies.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Net.Upnp\Omnius.Core.Net.Upnp.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Net\Omnius.Core.Net.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.RocketPack.Remoting\Omnius.Core.RocketPack.Remoting.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.RocketPack\Omnius.Core.RocketPack.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Storages\Omnius.Core.Storages.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.UnitTestToolkit\Omnius.Core.UnitTestToolkit.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core\Omnius.Core.csproj" />
+    <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.Collections\Omnius.Core.Collections.csproj" />
+    <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.Cryptography\Omnius.Core.Cryptography.csproj" />
+    <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.Net.Connections\Omnius.Core.Net.Connections.csproj" />
+    <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.Net.I2p\Omnius.Core.Net.I2p.csproj" />
+    <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.Net.Proxies\Omnius.Core.Net.Proxies.csproj" />
+    <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.Net.Upnp\Omnius.Core.Net.Upnp.csproj" />
+    <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.Net\Omnius.Core.Net.csproj" />
+    <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.RocketPack.Remoting\Omnius.Core.RocketPack.Remoting.csproj" />
+    <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.RocketPack\Omnius.Core.RocketPack.csproj" />
+    <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.Storages\Omnius.Core.Storages.csproj" />
+    <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.UnitTestToolkit\Omnius.Core.UnitTestToolkit.csproj" />
+    <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core\Omnius.Core.csproj" />
     <ProjectReference Include="..\..\src\Omnius.Axus.Engines\Omnius.Axus.Engines.csproj" />
     <ProjectReference Include="..\..\src\Omnius.Axus.Messages\Omnius.Axus.Messages.csproj" />
     <ProjectReference Include="..\..\src\Omnius.Axus.Utils\Omnius.Axus.Utils.csproj" />

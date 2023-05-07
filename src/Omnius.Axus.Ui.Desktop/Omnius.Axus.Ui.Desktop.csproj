@@ -40,10 +40,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Net.Connections\Omnius.Core.Net.Connections.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Avalonia\Omnius.Core.Avalonia.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core.Utils\Omnius.Core.Utils.csproj" />
-    <ProjectReference Include="..\..\refs\core\src\Omnius.Core\Omnius.Core.csproj" />
+    <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.Net.Connections\Omnius.Core.Net.Connections.csproj" />
+    <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.Avalonia\Omnius.Core.Avalonia.csproj" />
+    <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.Utils\Omnius.Core.Utils.csproj" />
+    <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core\Omnius.Core.csproj" />
     <ProjectReference Include="..\Omnius.Axus.Messages\Omnius.Axus.Messages.csproj" />
     <ProjectReference Include="..\Omnius.Axus.Remoting\Omnius.Axus.Remoting.csproj" />
     <ProjectReference Include="..\Omnius.Axus.Interactors\Omnius.Axus.Interactors.csproj" />
