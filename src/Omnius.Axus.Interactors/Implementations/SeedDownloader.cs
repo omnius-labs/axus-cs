@@ -44,15 +44,12 @@ public sealed partial class SeedDownloader : AsyncDisposableBase, ISeedDownloade
         _bytesPool = bytesPool;
         _options = options;
 
-        _seedBoxDownloaderRepo = new NoteBoxDownloaderRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
         _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
-        _cachedSeedBoxRepo = new CachedMemoRepository(Path.Combine(_options.ConfigDirectoryPath, "cached_memos"), _bytesPool);
+        _cachedSeedBoxRepo = new CachedSeedBoxRepository(Path.Combine(_options.ConfigDirectoryPath, "cached_seed_boxes"), _bytesPool);
     }
 
     internal async ValueTask InitAsync(CancellationToken cancellationToken = default)
     {
-        await _seedBoxDownloaderRepo.MigrateAsync(cancellationToken);
-
         _watchLoopTask = this.WatchLoopAsync(_cancellationTokenSource.Token);
     }
 
@@ -62,7 +59,6 @@ public sealed partial class SeedDownloader : AsyncDisposableBase, ISeedDownloade
         await _watchLoopTask;
         _cancellationTokenSource.Dispose();
 
-        _seedBoxDownloaderRepo.Dispose();
         _configStorage.Dispose();
     }
 
@@ -74,24 +70,9 @@ public sealed partial class SeedDownloader : AsyncDisposableBase, ISeedDownloade
 
             for (; ; )
             {
-                await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken).ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken).ConfigureAwait(false);
 
-                // 1. 不要なSubscribedShoutsを削除
-                // 2. 不要なSubscribedFilesを削除
-                // 3. 不要なCachedSeedBoxを削除
-                // 4. 新しいSubscribedShoutsを追加
-                // 5. 新しいSubscribedFilesを追加
-                // 6. 新しいCachedSeedBoxを追加
-
-                var signatures = await this.GetSignaturesAsync(cancellationToken);
-
-                await this.SyncMemoDownloaderRepo(signatures, cancellationToken);
-
-                await this.SyncSubscribedShouts(cancellationToken);
-                await this.SyncSubscribedFiles(cancellationToken);
-
-                await this.UpdateCachedMemosAsync(signatures, cancellationToken);
-                _cachedSeedBoxRepo.Shrink(signatures);
+                await this.SyncAsync(cancellationToken);
             }
         }
         catch (OperationCanceledException e)
@@ -102,6 +83,18 @@ public sealed partial class SeedDownloader : AsyncDisposableBase, ISeedDownloade
         {
             _logger.Error(e, "Unexpected Exception");
         }
+    }
+
+    private async Task SyncAsync(CancellationToken cancellationToken)
+    {
+        // 1. 不要なSubscribedShoutsを削除
+        // 2. 不要なSubscribedFilesを削除
+        // 3. 不要なCachedSeedBoxを削除
+        // 4. 新しいSubscribedShoutsを追加
+        // 5. 新しいSubscribedFilesを追加
+        // 6. 新しいCachedSeedBoxを追加
+
+        var targetSignatures = await this.GetSignaturesAsync(cancellationToken);
     }
 
     private async ValueTask<ImmutableHashSet<OmniSignature>> GetSignaturesAsync(CancellationToken cancellationToken = default)
