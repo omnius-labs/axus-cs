@@ -62,7 +62,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
 
             foreach (var item in _publisherRepo.FileItems.FindAll())
             {
-                fileReports.Add(new PublishedFileReport(item.FilePath, item.RootHash));
+                fileReports.Add(new PublishedFileReport(item.FilePath, item.RootHash, item.Properties.ToArray()));
             }
 
             return fileReports.ToArray();
@@ -126,7 +126,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
         }
     }
 
-    public async ValueTask<OmniHash> PublishFileAsync(string filePath, int maxBlockSize, string zone, CancellationToken cancellationToken = default)
+    public async ValueTask<OmniHash> PublishFileAsync(string filePath, int maxBlockSize, IEnumerable<AttachedProperty> properties, string zone, CancellationToken cancellationToken = default)
     {
         using (await _publishAsyncLock.LockAsync(cancellationToken))
         {
@@ -134,10 +134,10 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
 
             if (fileItem is not null)
             {
-                if (fileItem.Authors.Contains(zone)) return fileItem.RootHash;
+                if (fileItem.Zones.Contains(zone)) return fileItem.RootHash;
 
-                var authors = fileItem.Authors.Append(zone).ToArray();
-                fileItem = fileItem with { Authors = authors };
+                var zones = fileItem.Zones.Append(zone).ToArray();
+                fileItem = fileItem with { Zones = zones };
                 _publisherRepo.FileItems.Upsert(fileItem);
 
                 return fileItem.RootHash;
@@ -171,7 +171,8 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
             {
                 RootHash = rootHash,
                 FilePath = filePath,
-                Authors = new[] { zone },
+                Properties = properties.ToArray(),
+                Zones = new[] { zone },
                 MaxBlockSize = maxBlockSize,
             };
 
@@ -190,7 +191,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
         }
     }
 
-    public async ValueTask<OmniHash> PublishFileAsync(ReadOnlySequence<byte> sequence, int maxBlockSize, string zone, CancellationToken cancellationToken = default)
+    public async ValueTask<OmniHash> PublishFileAsync(ReadOnlySequence<byte> sequence, int maxBlockSize, IEnumerable<AttachedProperty> properties, string zone, CancellationToken cancellationToken = default)
     {
         using (await _publishAsyncLock.LockAsync(cancellationToken))
         {
@@ -225,10 +226,10 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
                 var targetBlockHashes = allInternalBlockItems.Select(n => n.BlockHash).ToArray();
                 await this.DeleteBlocksAsync(tempPrefix, targetBlockHashes, cancellationToken);
 
-                if (fileItem.Authors.Contains(zone)) return rootHash;
+                if (fileItem.Zones.Contains(zone)) return rootHash;
 
-                var authors = fileItem.Authors.Append(zone).ToArray();
-                fileItem = fileItem with { Authors = authors };
+                var zones = fileItem.Zones.Append(zone).ToArray();
+                fileItem = fileItem with { Zones = zones };
                 _publisherRepo.FileItems.Upsert(fileItem);
 
                 return rootHash;
@@ -238,7 +239,8 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
             {
                 RootHash = rootHash,
                 FilePath = null,
-                Authors = new[] { zone },
+                Properties = properties.ToArray(),
+                Zones = new[] { zone },
                 MaxBlockSize = maxBlockSize,
             };
 
@@ -372,12 +374,12 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
         {
             var fileItem = _publisherRepo.FileItems.FindOne(rootHash);
             if (fileItem is null) return;
-            if (!fileItem.Authors.Contains(zone)) return;
+            if (!fileItem.Zones.Contains(zone)) return;
 
-            if (fileItem.Authors.Count > 1)
+            if (fileItem.Zones.Count > 1)
             {
-                var authors = fileItem.Authors.Where(n => n != zone).ToArray();
-                var newFileItem = fileItem with { Authors = authors };
+                var zones = fileItem.Zones.Where(n => n != zone).ToArray();
+                var newFileItem = fileItem with { Zones = zones };
                 _publisherRepo.FileItems.Upsert(newFileItem);
 
                 return;

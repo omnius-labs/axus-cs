@@ -12,7 +12,7 @@ using SqlKata.Execution;
 
 namespace Omnius.Axus.Interactors.Internal.Repositories;
 
-internal sealed class CachedSeedRepository
+internal sealed class CachedSeedBoxRepository
 {
     private readonly string _databasePath;
     private readonly IBytesPool _bytesPool;
@@ -21,7 +21,7 @@ internal sealed class CachedSeedRepository
 
     private readonly object _lockObject = new();
 
-    public CachedSeedRepository(string dirPath, IBytesPool bytesPool)
+    public CachedSeedBoxRepository(string dirPath, IBytesPool bytesPool)
     {
         DirectoryHelper.CreateDirectory(dirPath);
         _databasePath = Path.Combine(dirPath, "sqlite.db");

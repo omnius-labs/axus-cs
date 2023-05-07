@@ -60,7 +60,7 @@ public sealed partial class ShoutPublisherStorage : AsyncDisposableBase, IShoutP
 
             foreach (var item in _publisherRepo.ShoutItems.Find(zone))
             {
-                shoutReports.Add(new PublishedShoutReport(item.Signature, item.Channel));
+                shoutReports.Add(new PublishedShoutReport(item.Signature, item.Properties.ToArray(), item.Channel));
             }
 
             return shoutReports.ToArray();
@@ -94,7 +94,7 @@ public sealed partial class ShoutPublisherStorage : AsyncDisposableBase, IShoutP
         }
     }
 
-    public async ValueTask PublishShoutAsync(Shout shout, string zone, CancellationToken cancellationToken = default)
+    public async ValueTask PublishShoutAsync(Shout shout, IEnumerable<AttachedProperty> properties, string zone, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -107,9 +107,10 @@ public sealed partial class ShoutPublisherStorage : AsyncDisposableBase, IShoutP
             var newShoutItem = new ShoutPublishedItem()
             {
                 Signature = signature,
+                Properties = properties.ToArray(),
                 Channel = shout.Channel,
                 ShoutUpdatedTime = shout.UpdatedTime.ToDateTime(),
-                Authors = new[] { zone }
+                Zones = new[] { zone }
             };
             _publisherRepo.ShoutItems.Upsert(newShoutItem);
 

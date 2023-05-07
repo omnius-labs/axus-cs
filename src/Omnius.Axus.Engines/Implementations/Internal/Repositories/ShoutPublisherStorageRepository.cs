@@ -92,7 +92,7 @@ internal sealed partial class ShoutPublisherStorageRepository : DisposableBase
             lock (_lockObject)
             {
                 var col = this.GetCollection();
-                return col.Find(n => n.Authors!.Contains(zone)).Select(n => n.Export());
+                return col.Find(n => n.Zones!.Contains(zone)).Select(n => n.Export());
             }
         }
 

@@ -72,6 +72,7 @@ message GetPublishedFilesReportResult {
 message PublishFileFromStorageParam {
     FilePath: string,
     MaxBlockSize: int32,
+    Properties: vector<AttachedProperty>(capacity: 256),
     Zone: string,
 }
 message PublishFileFromStorageResult {
@@ -81,6 +82,7 @@ message PublishFileFromStorageResult {
 message PublishFileFromMemoryParam {
     Memory: bytes(capacity: 32 * 1024 * 1024),
     MaxBlockSize: int32,
+    Properties: vector<AttachedProperty>(capacity: 256),
     Zone: string,
 }
 message PublishFileFromMemoryResult {
@@ -107,6 +109,7 @@ message GetSubscribedFilesReportResult {
 
 message SubscribeFileParam {
     RootHash: OmniHash,
+    Properties: vector<AttachedProperty>(capacity: 256),
     Zone: string,
 }
 
@@ -142,6 +145,7 @@ message GetPublishedShoutsReportResult {
 
 message PublishShoutParam {
     Shout: Shout,
+    Properties: vector<AttachedProperty>(capacity: 256),
     Zone: string,
 }
 
@@ -162,6 +166,7 @@ message GetSubscribedShoutsReportResult {
 message SubscribeShoutParam {
     Signature: OmniSignature,
     Channel: string,
+    Properties: vector<AttachedProperty>(capacity: 256),
     Zone: string,
 }
 

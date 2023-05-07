@@ -1,5 +1,5 @@
+using System.Buffers;
 using Omnius.Axus.Interactors.Internal.Models;
-using Omnius.Axus.Interactors.Internal.Repositories;
 using Omnius.Axus.Interactors.Models;
 using Omnius.Axus.Messages;
 using Omnius.Core;
@@ -18,8 +18,8 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
     private readonly IBytesPool _bytesPool;
     private readonly SeedUploaderOptions _options;
 
-    private readonly SeedUploaderRepository _seedUploaderRepo;
     private readonly ISingleValueStorage _configStorage;
+    private SeedUploaderConfig? _config;
 
     private Task _watchLoopTask = null!;
 
@@ -27,8 +27,8 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
 
     private readonly AsyncLock _asyncLock = new();
 
-    private const string Channel = "seed-v1";
-    private const string Zone = "seed-uploader-v1";
+    private const string Channel = "seed-box-v1";
+    private const string Zone = "seed-box-uploader-v1";
 
     public static async ValueTask<SeedUploader> CreateAsync(IFileUploader fileUploader, IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, SeedUploaderOptions options, CancellationToken cancellationToken = default)
     {
@@ -44,7 +44,6 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
         _bytesPool = bytesPool;
         _options = options;
 
-        _seedUploaderRepo = new SeedUploaderRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
         _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
     }
 
@@ -59,7 +58,6 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
         await _watchLoopTask;
         _cancellationTokenSource.Dispose();
 
-        _seedUploaderRepo.Dispose();
         _configStorage.Dispose();
     }
 
@@ -73,17 +71,7 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
             {
                 await Task.Delay(TimeSpan.FromMinutes(3), cancellationToken).ConfigureAwait(false);
 
-                var config = await this.GetConfigAsync(cancellationToken);
-
-                await this.SyncSeedUploaderRepo(config, cancellationToken);
-
-                await this.ShrinkPublishedShouts(cancellationToken);
-                await this.ShrinkPublishedFiles(cancellationToken);
-
-                if (!await this.ExistsPublishedShouts(cancellationToken) || !await this.ExistsPublishedFiles(cancellationToken))
-                {
-                    await this.PublishContent(config, cancellationToken);
-                }
+                await this.SyncAsync(cancellationToken);
             }
         }
         catch (OperationCanceledException e)
@@ -96,106 +84,96 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
         }
     }
 
-    private async ValueTask SyncSeedUploaderRepo(SeedUploaderConfig config, CancellationToken cancellationToken = default)
+    private async Task SyncAsync(CancellationToken cancellationToken)
     {
-        using (await _asyncLock.LockAsync(cancellationToken))
+        // 1. 不要なPublishedShoutsを削除
+        // 2. 不要なPublishedFilesを削除
+        // 3. 未Publishの場合はSeedBoxをPublish
+
+        bool exists = true;
+        exists &= await this.TrySyncPublishedShoutsAsync(cancellationToken);
+        exists &= await this.TrySyncPublishedFilesAsync(cancellationToken);
+
+        if (!exists)
         {
-            foreach (var item in _seedUploaderRepo.Items.FindAll())
-            {
-                if (item.Signature == config.DigitalSignature.GetOmniSignature()) continue;
-                _seedUploaderRepo.Items.Delete(item.Signature);
-            }
-
-            if (_seedUploaderRepo.Items.Exists(config.DigitalSignature.GetOmniSignature())) return;
-
-            var newItem = new SeedBoxUploadingItem()
-            {
-                Signature = config.DigitalSignature.GetOmniSignature(),
-            };
-            _seedUploaderRepo.Items.Upsert(newItem);
+            await this.PublishSeedBoxAsync(cancellationToken);
         }
     }
 
-    private async ValueTask ShrinkPublishedShouts(CancellationToken cancellationToken = default)
+    private async ValueTask<bool> TrySyncPublishedShoutsAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
+            bool exists = false;
+
+            var config = await this.GetConfigAsync(cancellationToken);
             var reports = await _serviceMediator.GetPublishedShoutReportsAsync(Zone, cancellationToken);
-            var signatures = reports.Select(n => n.Signature).ToHashSet();
 
-            foreach (var signature in signatures)
+            foreach (var report in reports)
             {
-                if (_seedUploaderRepo.Items.Exists(signature)) continue;
-                await _serviceMediator.UnsubscribeShoutAsync(signature, Channel, Zone, cancellationToken);
+                if (report.Signature == config.DigitalSignature.GetOmniSignature())
+                {
+                    exists = true;
+                    continue;
+                }
+
+                await _serviceMediator.UnsubscribeShoutAsync(report.Signature, Channel, Zone, cancellationToken);
             }
+
+            return exists;
         }
     }
 
-    private async ValueTask ShrinkPublishedFiles(CancellationToken cancellationToken = default)
+    private async ValueTask<bool> TrySyncPublishedFilesAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
+            bool exists = false;
+
+            var config = await this.GetConfigAsync(cancellationToken);
             var reports = await _serviceMediator.GetPublishedFileReportsAsync(Zone, cancellationToken);
-            var rootHashes = reports.Select(n => n.RootHash).WhereNotNull().ToHashSet();
 
-            foreach (var rootHash in rootHashes)
+            foreach (var report in reports)
             {
-                if (_seedUploaderRepo.Items.Exists(rootHash)) continue;
-                await _serviceMediator.UnpublishFileFromMemoryAsync(rootHash, Zone, cancellationToken);
+                if (report.RootHash is null) continue;
+
+                if (!report.Properties.TryGetValue("Signature", out var signatureBytes)) continue;
+                var signature = RocketMessage.FromBytes<OmniSignature>(signatureBytes);
+
+                if (signature == config.DigitalSignature.GetOmniSignature())
+                {
+                    exists = true;
+                    continue;
+                }
+
+                await _serviceMediator.UnpublishFileFromMemoryAsync(report.RootHash.Value, Zone, cancellationToken);
             }
+
+            return exists;
         }
     }
 
-    private async ValueTask<bool> ExistsPublishedShouts(CancellationToken cancellationToken = default)
+    private async ValueTask PublishSeedBoxAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetPublishedShoutReportsAsync(Zone, cancellationToken);
-            var signatures = reports.Select(n => n.Signature).ToHashSet();
+            var config = await this.GetConfigAsync(cancellationToken);
+            var digitalSignature = config.DigitalSignature;
 
-            foreach (var item in _seedUploaderRepo.Items.FindAll())
-            {
-                if (signatures.Contains(item.Signature)) continue;
-                return false;
-            }
-
-            return true;
-        }
-    }
-
-    private async ValueTask<bool> ExistsPublishedFiles(CancellationToken cancellationToken = default)
-    {
-        using (await _asyncLock.LockAsync(cancellationToken))
-        {
-            var reports = await _serviceMediator.GetPublishedFileReportsAsync(Zone, cancellationToken);
-            var rootHashes = reports.Select(n => n.RootHash).WhereNotNull().ToHashSet();
-
-            foreach (var item in _seedUploaderRepo.Items.FindAll())
-            {
-                if (rootHashes.Contains(item.RootHash)) continue;
-                return false;
-            }
-
-            return true;
-        }
-    }
-
-    private async ValueTask PublishContent(SeedUploaderConfig config, CancellationToken cancellationToken = default)
-    {
-        using (await _asyncLock.LockAsync(cancellationToken))
-        {
             var reports = await _fileUploader.GetUploadingFileReportsAsync(cancellationToken);
             var seeds = reports.Select(n => n.Seed).WhereNotNull().ToArray();
 
-            var digitalSignature = config.DigitalSignature;
             var content = new SeedBox(seeds);
-
             using var contentBytes = RocketMessage.ToBytes(content);
-            var rootHash = await _serviceMediator.PublishFileFromMemoryAsync(contentBytes.Memory, 8 * 1024 * 1024, Zone, cancellationToken);
+
+            using var signatureBytes = RocketMessage.ToBytes(digitalSignature.GetOmniSignature());
+            var property = new AttachedProperty("Signature", signatureBytes.Memory);
+
+            var rootHash = await _serviceMediator.PublishFileFromMemoryAsync(contentBytes.Memory, 8 * 1024 * 1024, new[] { property }, Zone, cancellationToken);
 
             var now = DateTime.UtcNow;
             using var shout = Shout.Create(Channel, Timestamp64.FromDateTime(now), RocketMessage.ToBytes(rootHash), digitalSignature);
-            await _serviceMediator.PublishShoutAsync(shout, Zone, cancellationToken);
+            await _serviceMediator.PublishShoutAsync(shout, Enumerable.Empty<AttachedProperty>(), Zone, cancellationToken);
         }
     }
 
@@ -203,18 +181,20 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var config = await _configStorage.TryGetValueAsync<SeedUploaderConfig>(cancellationToken);
+            if (_config is not null) return _config;
 
-            if (config is null)
+            _config = await _configStorage.TryGetValueAsync<SeedUploaderConfig>(cancellationToken);
+
+            if (_config is null)
             {
-                config = new SeedUploaderConfig(
+                _config = new SeedUploaderConfig(
                     digitalSignature: OmniDigitalSignature.Create("Anonymous", OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256)
                 );
 
-                await _configStorage.TrySetValueAsync(config, cancellationToken);
+                await _configStorage.TrySetValueAsync(_config, cancellationToken);
             }
 
-            return config;
+            return _config;
         }
     }
 
@@ -223,7 +203,7 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             await _configStorage.TrySetValueAsync(config, cancellationToken);
-            _seedUploaderRepo.Items.DeleteAll();
+            _config = config;
         }
     }
 }

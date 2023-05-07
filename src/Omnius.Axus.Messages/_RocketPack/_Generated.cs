@@ -291,6 +291,126 @@ public sealed partial class Shout : global::Omnius.Core.RocketPack.IRocketMessag
         }
     }
 }
+public sealed partial class AttachedProperty : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.AttachedProperty>
+{
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Messages.AttachedProperty> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.AttachedProperty>.Formatter;
+    public static global::Omnius.Axus.Messages.AttachedProperty Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.AttachedProperty>.Empty;
+
+    static AttachedProperty()
+    {
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.AttachedProperty>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.AttachedProperty>.Empty = new global::Omnius.Axus.Messages.AttachedProperty(global::Omnius.Core.RocketPack.Utf8String.Empty, global::System.ReadOnlyMemory<byte>.Empty);
+    }
+
+    private readonly global::System.Lazy<int> ___hashCode;
+
+    public static readonly int MaxNameLength = 256;
+    public static readonly int MaxValueLength = 32768;
+
+    public AttachedProperty(global::Omnius.Core.RocketPack.Utf8String name, global::System.ReadOnlyMemory<byte> value)
+    {
+        if (name is null) throw new global::System.ArgumentNullException("name");
+        if (name.Length > 256) throw new global::System.ArgumentOutOfRangeException("name");
+        if (value.Length > 32768) throw new global::System.ArgumentOutOfRangeException("value");
+
+        this.Name = name;
+        this.Value = value;
+
+        ___hashCode = new global::System.Lazy<int>(() =>
+        {
+            var ___h = new global::System.HashCode();
+            if (!name.IsEmpty) ___h.Add(name.GetHashCode());
+            if (!value.IsEmpty) ___h.Add(global::Omnius.Core.Helpers.ObjectHelper.GetHashCode(value.Span));
+            return ___h.ToHashCode();
+        });
+    }
+
+    public global::Omnius.Core.RocketPack.Utf8String Name { get; }
+    public global::System.ReadOnlyMemory<byte> Value { get; }
+
+    public static global::Omnius.Axus.Messages.AttachedProperty Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
+        return Formatter.Deserialize(ref reader, 0);
+    }
+    public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
+        Formatter.Serialize(ref writer, this, 0);
+    }
+
+    public static bool operator ==(global::Omnius.Axus.Messages.AttachedProperty? left, global::Omnius.Axus.Messages.AttachedProperty? right)
+    {
+        return (right is null) ? (left is null) : right.Equals(left);
+    }
+    public static bool operator !=(global::Omnius.Axus.Messages.AttachedProperty? left, global::Omnius.Axus.Messages.AttachedProperty? right)
+    {
+        return !(left == right);
+    }
+    public override bool Equals(object? other)
+    {
+        if (other is not global::Omnius.Axus.Messages.AttachedProperty) return false;
+        return this.Equals((global::Omnius.Axus.Messages.AttachedProperty)other);
+    }
+    public bool Equals(global::Omnius.Axus.Messages.AttachedProperty? target)
+    {
+        if (target is null) return false;
+        if (object.ReferenceEquals(this, target)) return true;
+        if (this.Name != target.Name) return false;
+        if (!global::Omnius.Core.BytesOperations.Equals(this.Value.Span, target.Value.Span)) return false;
+
+        return true;
+    }
+    public override int GetHashCode() => ___hashCode.Value;
+
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Messages.AttachedProperty>
+    {
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Messages.AttachedProperty value, scoped in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            if (value.Name != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            {
+                w.Write((uint)1);
+                w.Write(value.Name);
+            }
+            if (!value.Value.IsEmpty)
+            {
+                w.Write((uint)2);
+                w.Write(value.Value.Span);
+            }
+            w.Write((uint)0);
+        }
+        public global::Omnius.Axus.Messages.AttachedProperty Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            global::Omnius.Core.RocketPack.Utf8String p_name = global::Omnius.Core.RocketPack.Utf8String.Empty;
+            global::System.ReadOnlyMemory<byte> p_value = global::System.ReadOnlyMemory<byte>.Empty;
+
+            for (; ; )
+            {
+                uint id = r.GetUInt32();
+                if (id == 0) break;
+                switch (id)
+                {
+                    case 1:
+                        {
+                            p_name = r.GetString(256);
+                            break;
+                        }
+                    case 2:
+                        {
+                            p_value = r.GetMemory(32768);
+                            break;
+                        }
+                }
+            }
+
+            return new global::Omnius.Axus.Messages.AttachedProperty(p_name, p_value);
+        }
+    }
+}
 public sealed partial class ConsistencyReport : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.ConsistencyReport>
 {
     public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Messages.ConsistencyReport> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.ConsistencyReport>.Formatter;
@@ -561,30 +681,44 @@ public sealed partial class PublishedFileReport : global::Omnius.Core.RocketPack
     static PublishedFileReport()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.PublishedFileReport>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.PublishedFileReport>.Empty = new global::Omnius.Axus.Messages.PublishedFileReport(null, null);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.PublishedFileReport>.Empty = new global::Omnius.Axus.Messages.PublishedFileReport(null, null, global::System.Array.Empty<global::Omnius.Axus.Messages.AttachedProperty>());
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxFilePathLength = 2147483647;
+    public static readonly int MaxPropertiesCount = 256;
 
-    public PublishedFileReport(global::Omnius.Core.RocketPack.Utf8String? filePath, global::Omnius.Core.Cryptography.OmniHash? rootHash)
+    public PublishedFileReport(global::Omnius.Core.RocketPack.Utf8String? filePath, global::Omnius.Core.Cryptography.OmniHash? rootHash, global::Omnius.Axus.Messages.AttachedProperty[] properties)
     {
         if (filePath is not null && filePath.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("filePath");
+        if (properties is null) throw new global::System.ArgumentNullException("properties");
+        if (properties.Length > 256) throw new global::System.ArgumentOutOfRangeException("properties");
+        foreach (var n in properties)
+        {
+            if (n is null) throw new global::System.ArgumentNullException("n");
+        }
+
         this.FilePath = filePath;
         this.RootHash = rootHash;
+        this.Properties = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.AttachedProperty>(properties);
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (filePath is not null && !filePath.IsEmpty) ___h.Add(filePath.GetHashCode());
             if (rootHash is not null) ___h.Add(rootHash.Value.GetHashCode());
+            foreach (var n in properties)
+            {
+                if (n != default) ___h.Add(n.GetHashCode());
+            }
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Core.RocketPack.Utf8String? FilePath { get; }
     public global::Omnius.Core.Cryptography.OmniHash? RootHash { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.AttachedProperty> Properties { get; }
 
     public static global::Omnius.Axus.Messages.PublishedFileReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -617,6 +751,7 @@ public sealed partial class PublishedFileReport : global::Omnius.Core.RocketPack
         if (this.FilePath != target.FilePath) return false;
         if ((this.RootHash is null) != (target.RootHash is null)) return false;
         if ((this.RootHash is not null) && (target.RootHash is not null) && this.RootHash != target.RootHash) return false;
+        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Properties, target.Properties)) return false;
 
         return true;
     }
@@ -638,6 +773,15 @@ public sealed partial class PublishedFileReport : global::Omnius.Core.RocketPack
                 w.Write((uint)2);
                 global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.RootHash.Value, rank + 1);
             }
+            if (value.Properties.Count != 0)
+            {
+                w.Write((uint)3);
+                w.Write((uint)value.Properties.Count);
+                foreach (var n in value.Properties)
+                {
+                    global::Omnius.Axus.Messages.AttachedProperty.Formatter.Serialize(ref w, n, rank + 1);
+                }
+            }
             w.Write((uint)0);
         }
         public global::Omnius.Axus.Messages.PublishedFileReport Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
@@ -646,6 +790,7 @@ public sealed partial class PublishedFileReport : global::Omnius.Core.RocketPack
 
             global::Omnius.Core.RocketPack.Utf8String? p_filePath = null;
             global::Omnius.Core.Cryptography.OmniHash? p_rootHash = null;
+            global::Omnius.Axus.Messages.AttachedProperty[] p_properties = global::System.Array.Empty<global::Omnius.Axus.Messages.AttachedProperty>();
 
             for (; ; )
             {
@@ -663,10 +808,20 @@ public sealed partial class PublishedFileReport : global::Omnius.Core.RocketPack
                             p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Formatter.Deserialize(ref r, rank + 1);
                             break;
                         }
+                    case 3:
+                        {
+                            var length = r.GetUInt32();
+                            p_properties = new global::Omnius.Axus.Messages.AttachedProperty[length];
+                            for (int i = 0; i < p_properties.Length; i++)
+                            {
+                                p_properties[i] = global::Omnius.Axus.Messages.AttachedProperty.Formatter.Deserialize(ref r, rank + 1);
+                            }
+                            break;
+                        }
                 }
             }
 
-            return new global::Omnius.Axus.Messages.PublishedFileReport(p_filePath, p_rootHash);
+            return new global::Omnius.Axus.Messages.PublishedFileReport(p_filePath, p_rootHash, p_properties);
         }
     }
 }
@@ -678,29 +833,43 @@ public sealed partial class SubscribedFileReport : global::Omnius.Core.RocketPac
     static SubscribedFileReport()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.SubscribedFileReport>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.SubscribedFileReport>.Empty = new global::Omnius.Axus.Messages.SubscribedFileReport(global::Omnius.Core.Cryptography.OmniHash.Empty, global::Omnius.Axus.Messages.SubscribedFileStatus.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.SubscribedFileReport>.Empty = new global::Omnius.Axus.Messages.SubscribedFileReport(global::Omnius.Core.Cryptography.OmniHash.Empty, global::Omnius.Axus.Messages.SubscribedFileStatus.Empty, global::System.Array.Empty<global::Omnius.Axus.Messages.AttachedProperty>());
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public SubscribedFileReport(global::Omnius.Core.Cryptography.OmniHash rootHash, global::Omnius.Axus.Messages.SubscribedFileStatus status)
+    public static readonly int MaxPropertiesCount = 256;
+
+    public SubscribedFileReport(global::Omnius.Core.Cryptography.OmniHash rootHash, global::Omnius.Axus.Messages.SubscribedFileStatus status, global::Omnius.Axus.Messages.AttachedProperty[] properties)
     {
         if (status is null) throw new global::System.ArgumentNullException("status");
+        if (properties is null) throw new global::System.ArgumentNullException("properties");
+        if (properties.Length > 256) throw new global::System.ArgumentOutOfRangeException("properties");
+        foreach (var n in properties)
+        {
+            if (n is null) throw new global::System.ArgumentNullException("n");
+        }
 
         this.RootHash = rootHash;
         this.Status = status;
+        this.Properties = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.AttachedProperty>(properties);
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (rootHash != default) ___h.Add(rootHash.GetHashCode());
             if (status != default) ___h.Add(status.GetHashCode());
+            foreach (var n in properties)
+            {
+                if (n != default) ___h.Add(n.GetHashCode());
+            }
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
     public global::Omnius.Axus.Messages.SubscribedFileStatus Status { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.AttachedProperty> Properties { get; }
 
     public static global::Omnius.Axus.Messages.SubscribedFileReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -732,6 +901,7 @@ public sealed partial class SubscribedFileReport : global::Omnius.Core.RocketPac
         if (object.ReferenceEquals(this, target)) return true;
         if (this.RootHash != target.RootHash) return false;
         if (this.Status != target.Status) return false;
+        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Properties, target.Properties)) return false;
 
         return true;
     }
@@ -753,6 +923,15 @@ public sealed partial class SubscribedFileReport : global::Omnius.Core.RocketPac
                 w.Write((uint)2);
                 global::Omnius.Axus.Messages.SubscribedFileStatus.Formatter.Serialize(ref w, value.Status, rank + 1);
             }
+            if (value.Properties.Count != 0)
+            {
+                w.Write((uint)3);
+                w.Write((uint)value.Properties.Count);
+                foreach (var n in value.Properties)
+                {
+                    global::Omnius.Axus.Messages.AttachedProperty.Formatter.Serialize(ref w, n, rank + 1);
+                }
+            }
             w.Write((uint)0);
         }
         public global::Omnius.Axus.Messages.SubscribedFileReport Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
@@ -761,6 +940,7 @@ public sealed partial class SubscribedFileReport : global::Omnius.Core.RocketPac
 
             global::Omnius.Core.Cryptography.OmniHash p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
             global::Omnius.Axus.Messages.SubscribedFileStatus p_status = global::Omnius.Axus.Messages.SubscribedFileStatus.Empty;
+            global::Omnius.Axus.Messages.AttachedProperty[] p_properties = global::System.Array.Empty<global::Omnius.Axus.Messages.AttachedProperty>();
 
             for (; ; )
             {
@@ -778,10 +958,20 @@ public sealed partial class SubscribedFileReport : global::Omnius.Core.RocketPac
                             p_status = global::Omnius.Axus.Messages.SubscribedFileStatus.Formatter.Deserialize(ref r, rank + 1);
                             break;
                         }
+                    case 3:
+                        {
+                            var length = r.GetUInt32();
+                            p_properties = new global::Omnius.Axus.Messages.AttachedProperty[length];
+                            for (int i = 0; i < p_properties.Length; i++)
+                            {
+                                p_properties[i] = global::Omnius.Axus.Messages.AttachedProperty.Formatter.Deserialize(ref r, rank + 1);
+                            }
+                            break;
+                        }
                 }
             }
 
-            return new global::Omnius.Axus.Messages.SubscribedFileReport(p_rootHash, p_status);
+            return new global::Omnius.Axus.Messages.SubscribedFileReport(p_rootHash, p_status, p_properties);
         }
     }
 }
@@ -936,32 +1126,45 @@ public sealed partial class PublishedShoutReport : global::Omnius.Core.RocketPac
     static PublishedShoutReport()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.PublishedShoutReport>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.PublishedShoutReport>.Empty = new global::Omnius.Axus.Messages.PublishedShoutReport(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.PublishedShoutReport>.Empty = new global::Omnius.Axus.Messages.PublishedShoutReport(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::System.Array.Empty<global::Omnius.Axus.Messages.AttachedProperty>(), global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
+    public static readonly int MaxPropertiesCount = 256;
     public static readonly int MaxChannelLength = 2147483647;
 
-    public PublishedShoutReport(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String channel)
+    public PublishedShoutReport(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Axus.Messages.AttachedProperty[] properties, global::Omnius.Core.RocketPack.Utf8String channel)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
+        if (properties is null) throw new global::System.ArgumentNullException("properties");
+        if (properties.Length > 256) throw new global::System.ArgumentOutOfRangeException("properties");
+        foreach (var n in properties)
+        {
+            if (n is null) throw new global::System.ArgumentNullException("n");
+        }
         if (channel is null) throw new global::System.ArgumentNullException("channel");
         if (channel.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("channel");
 
         this.Signature = signature;
+        this.Properties = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.AttachedProperty>(properties);
         this.Channel = channel;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (signature != default) ___h.Add(signature.GetHashCode());
+            foreach (var n in properties)
+            {
+                if (n != default) ___h.Add(n.GetHashCode());
+            }
             if (!channel.IsEmpty) ___h.Add(channel.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.AttachedProperty> Properties { get; }
     public global::Omnius.Core.RocketPack.Utf8String Channel { get; }
 
     public static global::Omnius.Axus.Messages.PublishedShoutReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -993,6 +1196,7 @@ public sealed partial class PublishedShoutReport : global::Omnius.Core.RocketPac
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
         if (this.Signature != target.Signature) return false;
+        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Properties, target.Properties)) return false;
         if (this.Channel != target.Channel) return false;
 
         return true;
@@ -1010,9 +1214,18 @@ public sealed partial class PublishedShoutReport : global::Omnius.Core.RocketPac
                 w.Write((uint)1);
                 global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
             }
-            if (value.Channel != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            if (value.Properties.Count != 0)
             {
                 w.Write((uint)2);
+                w.Write((uint)value.Properties.Count);
+                foreach (var n in value.Properties)
+                {
+                    global::Omnius.Axus.Messages.AttachedProperty.Formatter.Serialize(ref w, n, rank + 1);
+                }
+            }
+            if (value.Channel != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            {
+                w.Write((uint)3);
                 w.Write(value.Channel);
             }
             w.Write((uint)0);
@@ -1022,6 +1235,7 @@ public sealed partial class PublishedShoutReport : global::Omnius.Core.RocketPac
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Core.Cryptography.OmniSignature p_signature = global::Omnius.Core.Cryptography.OmniSignature.Empty;
+            global::Omnius.Axus.Messages.AttachedProperty[] p_properties = global::System.Array.Empty<global::Omnius.Axus.Messages.AttachedProperty>();
             global::Omnius.Core.RocketPack.Utf8String p_channel = global::Omnius.Core.RocketPack.Utf8String.Empty;
 
             for (; ; )
@@ -1037,13 +1251,23 @@ public sealed partial class PublishedShoutReport : global::Omnius.Core.RocketPac
                         }
                     case 2:
                         {
+                            var length = r.GetUInt32();
+                            p_properties = new global::Omnius.Axus.Messages.AttachedProperty[length];
+                            for (int i = 0; i < p_properties.Length; i++)
+                            {
+                                p_properties[i] = global::Omnius.Axus.Messages.AttachedProperty.Formatter.Deserialize(ref r, rank + 1);
+                            }
+                            break;
+                        }
+                    case 3:
+                        {
                             p_channel = r.GetString(2147483647);
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axus.Messages.PublishedShoutReport(p_signature, p_channel);
+            return new global::Omnius.Axus.Messages.PublishedShoutReport(p_signature, p_properties, p_channel);
         }
     }
 }
@@ -1055,32 +1279,45 @@ public sealed partial class SubscribedShoutReport : global::Omnius.Core.RocketPa
     static SubscribedShoutReport()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.SubscribedShoutReport>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.SubscribedShoutReport>.Empty = new global::Omnius.Axus.Messages.SubscribedShoutReport(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.SubscribedShoutReport>.Empty = new global::Omnius.Axus.Messages.SubscribedShoutReport(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::System.Array.Empty<global::Omnius.Axus.Messages.AttachedProperty>(), global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
+    public static readonly int MaxPropertiesCount = 256;
     public static readonly int MaxChannelLength = 2147483647;
 
-    public SubscribedShoutReport(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String channel)
+    public SubscribedShoutReport(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Axus.Messages.AttachedProperty[] properties, global::Omnius.Core.RocketPack.Utf8String channel)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
+        if (properties is null) throw new global::System.ArgumentNullException("properties");
+        if (properties.Length > 256) throw new global::System.ArgumentOutOfRangeException("properties");
+        foreach (var n in properties)
+        {
+            if (n is null) throw new global::System.ArgumentNullException("n");
+        }
         if (channel is null) throw new global::System.ArgumentNullException("channel");
         if (channel.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("channel");
 
         this.Signature = signature;
+        this.Properties = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.AttachedProperty>(properties);
         this.Channel = channel;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (signature != default) ___h.Add(signature.GetHashCode());
+            foreach (var n in properties)
+            {
+                if (n != default) ___h.Add(n.GetHashCode());
+            }
             if (!channel.IsEmpty) ___h.Add(channel.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.AttachedProperty> Properties { get; }
     public global::Omnius.Core.RocketPack.Utf8String Channel { get; }
 
     public static global::Omnius.Axus.Messages.SubscribedShoutReport Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -1112,6 +1349,7 @@ public sealed partial class SubscribedShoutReport : global::Omnius.Core.RocketPa
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
         if (this.Signature != target.Signature) return false;
+        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Properties, target.Properties)) return false;
         if (this.Channel != target.Channel) return false;
 
         return true;
@@ -1129,9 +1367,18 @@ public sealed partial class SubscribedShoutReport : global::Omnius.Core.RocketPa
                 w.Write((uint)1);
                 global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
             }
-            if (value.Channel != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            if (value.Properties.Count != 0)
             {
                 w.Write((uint)2);
+                w.Write((uint)value.Properties.Count);
+                foreach (var n in value.Properties)
+                {
+                    global::Omnius.Axus.Messages.AttachedProperty.Formatter.Serialize(ref w, n, rank + 1);
+                }
+            }
+            if (value.Channel != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            {
+                w.Write((uint)3);
                 w.Write(value.Channel);
             }
             w.Write((uint)0);
@@ -1141,6 +1388,7 @@ public sealed partial class SubscribedShoutReport : global::Omnius.Core.RocketPa
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Core.Cryptography.OmniSignature p_signature = global::Omnius.Core.Cryptography.OmniSignature.Empty;
+            global::Omnius.Axus.Messages.AttachedProperty[] p_properties = global::System.Array.Empty<global::Omnius.Axus.Messages.AttachedProperty>();
             global::Omnius.Core.RocketPack.Utf8String p_channel = global::Omnius.Core.RocketPack.Utf8String.Empty;
 
             for (; ; )
@@ -1156,13 +1404,23 @@ public sealed partial class SubscribedShoutReport : global::Omnius.Core.RocketPa
                         }
                     case 2:
                         {
+                            var length = r.GetUInt32();
+                            p_properties = new global::Omnius.Axus.Messages.AttachedProperty[length];
+                            for (int i = 0; i < p_properties.Length; i++)
+                            {
+                                p_properties[i] = global::Omnius.Axus.Messages.AttachedProperty.Formatter.Deserialize(ref r, rank + 1);
+                            }
+                            break;
+                        }
+                    case 3:
+                        {
                             p_channel = r.GetString(2147483647);
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axus.Messages.SubscribedShoutReport(p_signature, p_channel);
+            return new global::Omnius.Axus.Messages.SubscribedShoutReport(p_signature, p_properties, p_channel);
         }
     }
 }

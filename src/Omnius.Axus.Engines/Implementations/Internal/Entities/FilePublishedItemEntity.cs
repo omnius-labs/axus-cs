@@ -1,4 +1,5 @@
 using Omnius.Axus.Engines.Internal.Models;
+using Omnius.Axus.Messages;
 using Omnius.Core.Cryptography;
 
 namespace Omnius.Axus.Engines.Internal.Entities;
@@ -8,7 +9,8 @@ internal record FilePublishedItemEntity
     public OmniHashEntity? RootHash { get; set; }
     public string? FilePath { get; set; }
     public int MaxBlockSize { get; set; }
-    public IReadOnlyList<string>? Authors { get; set; }
+    public IReadOnlyList<string>? Zones { get; set; }
+    public IReadOnlyList<AttachedProperty>? Properties { get; init; }
 
     public static FilePublishedItemEntity Import(FilePublishedItem item)
     {
@@ -17,7 +19,8 @@ internal record FilePublishedItemEntity
             RootHash = OmniHashEntity.Import(item.RootHash),
             FilePath = item.FilePath,
             MaxBlockSize = item.MaxBlockSize,
-            Authors = item.Authors,
+            Zones = item.Zones,
+            Properties = item.Properties,
         };
     }
 
@@ -28,7 +31,8 @@ internal record FilePublishedItemEntity
             RootHash = this.RootHash?.Export() ?? OmniHash.Empty,
             FilePath = this.FilePath,
             MaxBlockSize = this.MaxBlockSize,
-            Authors = this.Authors ?? Array.Empty<string>(),
+            Zones = this.Zones ?? Array.Empty<string>(),
+            Properties = this.Properties ?? Array.Empty<AttachedProperty>(),
         };
     }
 }

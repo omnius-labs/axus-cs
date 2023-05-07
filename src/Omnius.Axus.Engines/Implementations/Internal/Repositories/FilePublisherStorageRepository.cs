@@ -106,7 +106,7 @@ internal sealed class FilePublisherStorageRepository : DisposableBase
             lock (_lockObject)
             {
                 var col = this.GetCollection();
-                return col.Find(n => n.Authors!.Contains(zone)).Select(n => n.Export()).ToArray();
+                return col.Find(n => n.Zones!.Contains(zone)).Select(n => n.Export()).ToArray();
             }
         }
 

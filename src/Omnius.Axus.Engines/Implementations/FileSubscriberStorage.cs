@@ -170,10 +170,10 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
         {
             var results = new List<SubscribedFileReport>();
 
-            foreach (var fileItem in _subscriberRepo.FileItems.Find(zone))
+            foreach (var item in _subscriberRepo.FileItems.Find(zone))
             {
-                var status = new SubscribedFileStatus(fileItem.Status.CurrentDepth, (uint)fileItem.Status.DownloadedBlockCount, (uint)fileItem.Status.TotalBlockCount, fileItem.Status.State);
-                var report = new SubscribedFileReport(fileItem.RootHash, status);
+                var status = new SubscribedFileStatus(item.Status.CurrentDepth, (uint)item.Status.DownloadedBlockCount, (uint)item.Status.TotalBlockCount, item.Status.State);
+                var report = new SubscribedFileReport(item.RootHash, status, item.Properties.ToArray());
                 results.Add(report);
             }
 
@@ -233,7 +233,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
         }
     }
 
-    public async ValueTask SubscribeFileAsync(OmniHash rootHash, string zone, CancellationToken cancellationToken = default)
+    public async ValueTask SubscribeFileAsync(OmniHash rootHash, IEnumerable<AttachedProperty> properties, string zone, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -241,10 +241,10 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
 
             if (fileItem is not null)
             {
-                if (fileItem.Authors.Contains(zone)) return;
+                if (fileItem.Zones.Contains(zone)) return;
 
-                var authors = fileItem.Authors.Append(zone).ToArray();
-                fileItem = fileItem with { Authors = authors };
+                var zones = fileItem.Zones.Append(zone).ToArray();
+                fileItem = fileItem with { Zones = zones };
                 _subscriberRepo.FileItems.Upsert(fileItem);
 
                 return;
@@ -253,7 +253,8 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
             var newFileItem = new FileSubscribedItem()
             {
                 RootHash = rootHash,
-                Authors = new[] { zone },
+                Properties = properties.ToArray(),
+                Zones = new[] { zone },
                 Status = new FileSubscribedItemStatus()
                 {
                     CurrentDepth = -1,
@@ -282,12 +283,12 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
         {
             var fileItem = _subscriberRepo.FileItems.FindOne(rootHash);
             if (fileItem is null) return;
-            if (!fileItem.Authors.Contains(zone)) return;
+            if (!fileItem.Zones.Contains(zone)) return;
 
-            if (fileItem.Authors.Count > 1)
+            if (fileItem.Zones.Count > 1)
             {
-                var authors = fileItem.Authors.Where(n => n != zone).ToArray();
-                var newFileItem = fileItem with { Authors = authors };
+                var zones = fileItem.Zones.Where(n => n != zone).ToArray();
+                var newFileItem = fileItem with { Zones = zones };
                 _subscriberRepo.FileItems.Upsert(newFileItem);
 
                 return;
@@ -398,4 +399,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
     {
         return StringConverter.ToString(rootHash) + "/" + StringConverter.ToString(blockHash);
     }
+
+    public ValueTask SubscribeFileAsync(OmniHash rootHash, string zone, IEnumerable<AttachedProperty> properties, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+    public ValueTask UnsubscribeFileAsync(OmniHash rootHash, string zone, IEnumerable<AttachedProperty> properties, CancellationToken cancellationToken = default) => throw new NotImplementedException();
 }

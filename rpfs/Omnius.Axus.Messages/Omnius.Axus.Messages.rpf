@@ -18,6 +18,13 @@ message Shout {
     Certificate: OmniCertificate?,
 }
 
+message AttachedProperty {
+    Name: string(capacity: 256),
+    Value: bytes(capacity: 32 * 1024),
+}
+
+// Report
+
 message ConsistencyReport {
     BadBlockCount: uint32,
     CheckedBlockCount: uint32,
@@ -36,16 +43,16 @@ enum SessionHandshakeType : uint8 {
     Accepted = 2,
 }
 
-// Report
-
 message PublishedFileReport {
     FilePath: string?,
     RootHash: OmniHash?,
+    Properties: vector<AttachedProperty>(capacity: 256),
 }
 
 message SubscribedFileReport {
     RootHash: OmniHash,
     Status: SubscribedFileStatus,
+    Properties: vector<AttachedProperty>(capacity: 256),
 }
 
 message SubscribedFileStatus {
@@ -64,10 +71,12 @@ enum SubscribedFileState : uint8 {
 
 message PublishedShoutReport {
     Signature: OmniSignature,
+    Properties: vector<AttachedProperty>(capacity: 256),
     Channel: string,
 }
 
 message SubscribedShoutReport {
     Signature: OmniSignature,
+    Properties: vector<AttachedProperty>(capacity: 256),
     Channel: string,
 }

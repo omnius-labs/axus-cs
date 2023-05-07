@@ -896,23 +896,31 @@ public sealed partial class PublishFileFromStorageParam : global::Omnius.Core.Ro
     static PublishFileFromStorageParam()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromStorageParam>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromStorageParam>.Empty = new global::Omnius.Axus.Remoting.PublishFileFromStorageParam(global::Omnius.Core.RocketPack.Utf8String.Empty, 0, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromStorageParam>.Empty = new global::Omnius.Axus.Remoting.PublishFileFromStorageParam(global::Omnius.Core.RocketPack.Utf8String.Empty, 0, global::System.Array.Empty<global::Omnius.Axus.Messages.AttachedProperty>(), global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxFilePathLength = 2147483647;
+    public static readonly int MaxPropertiesCount = 256;
     public static readonly int MaxZoneLength = 2147483647;
 
-    public PublishFileFromStorageParam(global::Omnius.Core.RocketPack.Utf8String filePath, int maxBlockSize, global::Omnius.Core.RocketPack.Utf8String zone)
+    public PublishFileFromStorageParam(global::Omnius.Core.RocketPack.Utf8String filePath, int maxBlockSize, global::Omnius.Axus.Messages.AttachedProperty[] properties, global::Omnius.Core.RocketPack.Utf8String zone)
     {
         if (filePath is null) throw new global::System.ArgumentNullException("filePath");
         if (filePath.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("filePath");
+        if (properties is null) throw new global::System.ArgumentNullException("properties");
+        if (properties.Length > 256) throw new global::System.ArgumentOutOfRangeException("properties");
+        foreach (var n in properties)
+        {
+            if (n is null) throw new global::System.ArgumentNullException("n");
+        }
         if (zone is null) throw new global::System.ArgumentNullException("zone");
         if (zone.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("zone");
 
         this.FilePath = filePath;
         this.MaxBlockSize = maxBlockSize;
+        this.Properties = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.AttachedProperty>(properties);
         this.Zone = zone;
 
         ___hashCode = new global::System.Lazy<int>(() =>
@@ -920,6 +928,10 @@ public sealed partial class PublishFileFromStorageParam : global::Omnius.Core.Ro
             var ___h = new global::System.HashCode();
             if (!filePath.IsEmpty) ___h.Add(filePath.GetHashCode());
             if (maxBlockSize != default) ___h.Add(maxBlockSize.GetHashCode());
+            foreach (var n in properties)
+            {
+                if (n != default) ___h.Add(n.GetHashCode());
+            }
             if (!zone.IsEmpty) ___h.Add(zone.GetHashCode());
             return ___h.ToHashCode();
         });
@@ -927,6 +939,7 @@ public sealed partial class PublishFileFromStorageParam : global::Omnius.Core.Ro
 
     public global::Omnius.Core.RocketPack.Utf8String FilePath { get; }
     public int MaxBlockSize { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.AttachedProperty> Properties { get; }
     public global::Omnius.Core.RocketPack.Utf8String Zone { get; }
 
     public static global::Omnius.Axus.Remoting.PublishFileFromStorageParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -959,6 +972,7 @@ public sealed partial class PublishFileFromStorageParam : global::Omnius.Core.Ro
         if (object.ReferenceEquals(this, target)) return true;
         if (this.FilePath != target.FilePath) return false;
         if (this.MaxBlockSize != target.MaxBlockSize) return false;
+        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Properties, target.Properties)) return false;
         if (this.Zone != target.Zone) return false;
 
         return true;
@@ -981,9 +995,18 @@ public sealed partial class PublishFileFromStorageParam : global::Omnius.Core.Ro
                 w.Write((uint)2);
                 w.Write(value.MaxBlockSize);
             }
-            if (value.Zone != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            if (value.Properties.Count != 0)
             {
                 w.Write((uint)3);
+                w.Write((uint)value.Properties.Count);
+                foreach (var n in value.Properties)
+                {
+                    global::Omnius.Axus.Messages.AttachedProperty.Formatter.Serialize(ref w, n, rank + 1);
+                }
+            }
+            if (value.Zone != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            {
+                w.Write((uint)4);
                 w.Write(value.Zone);
             }
             w.Write((uint)0);
@@ -994,6 +1017,7 @@ public sealed partial class PublishFileFromStorageParam : global::Omnius.Core.Ro
 
             global::Omnius.Core.RocketPack.Utf8String p_filePath = global::Omnius.Core.RocketPack.Utf8String.Empty;
             int p_maxBlockSize = 0;
+            global::Omnius.Axus.Messages.AttachedProperty[] p_properties = global::System.Array.Empty<global::Omnius.Axus.Messages.AttachedProperty>();
             global::Omnius.Core.RocketPack.Utf8String p_zone = global::Omnius.Core.RocketPack.Utf8String.Empty;
 
             for (; ; )
@@ -1014,13 +1038,23 @@ public sealed partial class PublishFileFromStorageParam : global::Omnius.Core.Ro
                         }
                     case 3:
                         {
+                            var length = r.GetUInt32();
+                            p_properties = new global::Omnius.Axus.Messages.AttachedProperty[length];
+                            for (int i = 0; i < p_properties.Length; i++)
+                            {
+                                p_properties[i] = global::Omnius.Axus.Messages.AttachedProperty.Formatter.Deserialize(ref r, rank + 1);
+                            }
+                            break;
+                        }
+                    case 4:
+                        {
                             p_zone = r.GetString(2147483647);
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.PublishFileFromStorageParam(p_filePath, p_maxBlockSize, p_zone);
+            return new global::Omnius.Axus.Remoting.PublishFileFromStorageParam(p_filePath, p_maxBlockSize, p_properties, p_zone);
         }
     }
 }
@@ -1130,22 +1164,30 @@ public sealed partial class PublishFileFromMemoryParam : global::Omnius.Core.Roc
     static PublishFileFromMemoryParam()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromMemoryParam>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromMemoryParam>.Empty = new global::Omnius.Axus.Remoting.PublishFileFromMemoryParam(global::System.ReadOnlyMemory<byte>.Empty, 0, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishFileFromMemoryParam>.Empty = new global::Omnius.Axus.Remoting.PublishFileFromMemoryParam(global::System.ReadOnlyMemory<byte>.Empty, 0, global::System.Array.Empty<global::Omnius.Axus.Messages.AttachedProperty>(), global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxMemoryLength = 33554432;
+    public static readonly int MaxPropertiesCount = 256;
     public static readonly int MaxZoneLength = 2147483647;
 
-    public PublishFileFromMemoryParam(global::System.ReadOnlyMemory<byte> memory, int maxBlockSize, global::Omnius.Core.RocketPack.Utf8String zone)
+    public PublishFileFromMemoryParam(global::System.ReadOnlyMemory<byte> memory, int maxBlockSize, global::Omnius.Axus.Messages.AttachedProperty[] properties, global::Omnius.Core.RocketPack.Utf8String zone)
     {
         if (memory.Length > 33554432) throw new global::System.ArgumentOutOfRangeException("memory");
+        if (properties is null) throw new global::System.ArgumentNullException("properties");
+        if (properties.Length > 256) throw new global::System.ArgumentOutOfRangeException("properties");
+        foreach (var n in properties)
+        {
+            if (n is null) throw new global::System.ArgumentNullException("n");
+        }
         if (zone is null) throw new global::System.ArgumentNullException("zone");
         if (zone.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("zone");
 
         this.Memory = memory;
         this.MaxBlockSize = maxBlockSize;
+        this.Properties = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.AttachedProperty>(properties);
         this.Zone = zone;
 
         ___hashCode = new global::System.Lazy<int>(() =>
@@ -1153,6 +1195,10 @@ public sealed partial class PublishFileFromMemoryParam : global::Omnius.Core.Roc
             var ___h = new global::System.HashCode();
             if (!memory.IsEmpty) ___h.Add(global::Omnius.Core.Helpers.ObjectHelper.GetHashCode(memory.Span));
             if (maxBlockSize != default) ___h.Add(maxBlockSize.GetHashCode());
+            foreach (var n in properties)
+            {
+                if (n != default) ___h.Add(n.GetHashCode());
+            }
             if (!zone.IsEmpty) ___h.Add(zone.GetHashCode());
             return ___h.ToHashCode();
         });
@@ -1160,6 +1206,7 @@ public sealed partial class PublishFileFromMemoryParam : global::Omnius.Core.Roc
 
     public global::System.ReadOnlyMemory<byte> Memory { get; }
     public int MaxBlockSize { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.AttachedProperty> Properties { get; }
     public global::Omnius.Core.RocketPack.Utf8String Zone { get; }
 
     public static global::Omnius.Axus.Remoting.PublishFileFromMemoryParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -1192,6 +1239,7 @@ public sealed partial class PublishFileFromMemoryParam : global::Omnius.Core.Roc
         if (object.ReferenceEquals(this, target)) return true;
         if (!global::Omnius.Core.BytesOperations.Equals(this.Memory.Span, target.Memory.Span)) return false;
         if (this.MaxBlockSize != target.MaxBlockSize) return false;
+        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Properties, target.Properties)) return false;
         if (this.Zone != target.Zone) return false;
 
         return true;
@@ -1214,9 +1262,18 @@ public sealed partial class PublishFileFromMemoryParam : global::Omnius.Core.Roc
                 w.Write((uint)2);
                 w.Write(value.MaxBlockSize);
             }
-            if (value.Zone != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            if (value.Properties.Count != 0)
             {
                 w.Write((uint)3);
+                w.Write((uint)value.Properties.Count);
+                foreach (var n in value.Properties)
+                {
+                    global::Omnius.Axus.Messages.AttachedProperty.Formatter.Serialize(ref w, n, rank + 1);
+                }
+            }
+            if (value.Zone != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            {
+                w.Write((uint)4);
                 w.Write(value.Zone);
             }
             w.Write((uint)0);
@@ -1227,6 +1284,7 @@ public sealed partial class PublishFileFromMemoryParam : global::Omnius.Core.Roc
 
             global::System.ReadOnlyMemory<byte> p_memory = global::System.ReadOnlyMemory<byte>.Empty;
             int p_maxBlockSize = 0;
+            global::Omnius.Axus.Messages.AttachedProperty[] p_properties = global::System.Array.Empty<global::Omnius.Axus.Messages.AttachedProperty>();
             global::Omnius.Core.RocketPack.Utf8String p_zone = global::Omnius.Core.RocketPack.Utf8String.Empty;
 
             for (; ; )
@@ -1247,13 +1305,23 @@ public sealed partial class PublishFileFromMemoryParam : global::Omnius.Core.Roc
                         }
                     case 3:
                         {
+                            var length = r.GetUInt32();
+                            p_properties = new global::Omnius.Axus.Messages.AttachedProperty[length];
+                            for (int i = 0; i < p_properties.Length; i++)
+                            {
+                                p_properties[i] = global::Omnius.Axus.Messages.AttachedProperty.Formatter.Deserialize(ref r, rank + 1);
+                            }
+                            break;
+                        }
+                    case 4:
+                        {
                             p_zone = r.GetString(2147483647);
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.PublishFileFromMemoryParam(p_memory, p_maxBlockSize, p_zone);
+            return new global::Omnius.Axus.Remoting.PublishFileFromMemoryParam(p_memory, p_maxBlockSize, p_properties, p_zone);
         }
     }
 }
@@ -1824,31 +1892,44 @@ public sealed partial class SubscribeFileParam : global::Omnius.Core.RocketPack.
     static SubscribeFileParam()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeFileParam>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeFileParam>.Empty = new global::Omnius.Axus.Remoting.SubscribeFileParam(global::Omnius.Core.Cryptography.OmniHash.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeFileParam>.Empty = new global::Omnius.Axus.Remoting.SubscribeFileParam(global::Omnius.Core.Cryptography.OmniHash.Empty, global::System.Array.Empty<global::Omnius.Axus.Messages.AttachedProperty>(), global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
+    public static readonly int MaxPropertiesCount = 256;
     public static readonly int MaxZoneLength = 2147483647;
 
-    public SubscribeFileParam(global::Omnius.Core.Cryptography.OmniHash rootHash, global::Omnius.Core.RocketPack.Utf8String zone)
+    public SubscribeFileParam(global::Omnius.Core.Cryptography.OmniHash rootHash, global::Omnius.Axus.Messages.AttachedProperty[] properties, global::Omnius.Core.RocketPack.Utf8String zone)
     {
+        if (properties is null) throw new global::System.ArgumentNullException("properties");
+        if (properties.Length > 256) throw new global::System.ArgumentOutOfRangeException("properties");
+        foreach (var n in properties)
+        {
+            if (n is null) throw new global::System.ArgumentNullException("n");
+        }
         if (zone is null) throw new global::System.ArgumentNullException("zone");
         if (zone.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("zone");
 
         this.RootHash = rootHash;
+        this.Properties = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.AttachedProperty>(properties);
         this.Zone = zone;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (rootHash != default) ___h.Add(rootHash.GetHashCode());
+            foreach (var n in properties)
+            {
+                if (n != default) ___h.Add(n.GetHashCode());
+            }
             if (!zone.IsEmpty) ___h.Add(zone.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.AttachedProperty> Properties { get; }
     public global::Omnius.Core.RocketPack.Utf8String Zone { get; }
 
     public static global::Omnius.Axus.Remoting.SubscribeFileParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -1880,6 +1961,7 @@ public sealed partial class SubscribeFileParam : global::Omnius.Core.RocketPack.
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
         if (this.RootHash != target.RootHash) return false;
+        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Properties, target.Properties)) return false;
         if (this.Zone != target.Zone) return false;
 
         return true;
@@ -1897,9 +1979,18 @@ public sealed partial class SubscribeFileParam : global::Omnius.Core.RocketPack.
                 w.Write((uint)1);
                 global::Omnius.Core.Cryptography.OmniHash.Formatter.Serialize(ref w, value.RootHash, rank + 1);
             }
-            if (value.Zone != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            if (value.Properties.Count != 0)
             {
                 w.Write((uint)2);
+                w.Write((uint)value.Properties.Count);
+                foreach (var n in value.Properties)
+                {
+                    global::Omnius.Axus.Messages.AttachedProperty.Formatter.Serialize(ref w, n, rank + 1);
+                }
+            }
+            if (value.Zone != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            {
+                w.Write((uint)3);
                 w.Write(value.Zone);
             }
             w.Write((uint)0);
@@ -1909,6 +2000,7 @@ public sealed partial class SubscribeFileParam : global::Omnius.Core.RocketPack.
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Core.Cryptography.OmniHash p_rootHash = global::Omnius.Core.Cryptography.OmniHash.Empty;
+            global::Omnius.Axus.Messages.AttachedProperty[] p_properties = global::System.Array.Empty<global::Omnius.Axus.Messages.AttachedProperty>();
             global::Omnius.Core.RocketPack.Utf8String p_zone = global::Omnius.Core.RocketPack.Utf8String.Empty;
 
             for (; ; )
@@ -1924,13 +2016,23 @@ public sealed partial class SubscribeFileParam : global::Omnius.Core.RocketPack.
                         }
                     case 2:
                         {
+                            var length = r.GetUInt32();
+                            p_properties = new global::Omnius.Axus.Messages.AttachedProperty[length];
+                            for (int i = 0; i < p_properties.Length; i++)
+                            {
+                                p_properties[i] = global::Omnius.Axus.Messages.AttachedProperty.Formatter.Deserialize(ref r, rank + 1);
+                            }
+                            break;
+                        }
+                    case 3:
+                        {
                             p_zone = r.GetString(2147483647);
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.SubscribeFileParam(p_rootHash, p_zone);
+            return new global::Omnius.Axus.Remoting.SubscribeFileParam(p_rootHash, p_properties, p_zone);
         }
     }
 }
@@ -2704,26 +2806,38 @@ public sealed partial class PublishShoutParam : global::Omnius.Core.RocketPack.I
     static PublishShoutParam()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishShoutParam>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishShoutParam>.Empty = new global::Omnius.Axus.Remoting.PublishShoutParam(global::Omnius.Axus.Messages.Shout.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.PublishShoutParam>.Empty = new global::Omnius.Axus.Remoting.PublishShoutParam(global::Omnius.Axus.Messages.Shout.Empty, global::System.Array.Empty<global::Omnius.Axus.Messages.AttachedProperty>(), global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
+    public static readonly int MaxPropertiesCount = 256;
     public static readonly int MaxZoneLength = 2147483647;
 
-    public PublishShoutParam(global::Omnius.Axus.Messages.Shout shout, global::Omnius.Core.RocketPack.Utf8String zone)
+    public PublishShoutParam(global::Omnius.Axus.Messages.Shout shout, global::Omnius.Axus.Messages.AttachedProperty[] properties, global::Omnius.Core.RocketPack.Utf8String zone)
     {
         if (shout is null) throw new global::System.ArgumentNullException("shout");
+        if (properties is null) throw new global::System.ArgumentNullException("properties");
+        if (properties.Length > 256) throw new global::System.ArgumentOutOfRangeException("properties");
+        foreach (var n in properties)
+        {
+            if (n is null) throw new global::System.ArgumentNullException("n");
+        }
         if (zone is null) throw new global::System.ArgumentNullException("zone");
         if (zone.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("zone");
 
         this.Shout = shout;
+        this.Properties = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.AttachedProperty>(properties);
         this.Zone = zone;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (shout != default) ___h.Add(shout.GetHashCode());
+            foreach (var n in properties)
+            {
+                if (n != default) ___h.Add(n.GetHashCode());
+            }
             if (!zone.IsEmpty) ___h.Add(zone.GetHashCode());
             return ___h.ToHashCode();
         });
@@ -2735,6 +2849,7 @@ public sealed partial class PublishShoutParam : global::Omnius.Core.RocketPack.I
     }
 
     public global::Omnius.Axus.Messages.Shout Shout { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.AttachedProperty> Properties { get; }
     public global::Omnius.Core.RocketPack.Utf8String Zone { get; }
 
     public static global::Omnius.Axus.Remoting.PublishShoutParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -2766,6 +2881,7 @@ public sealed partial class PublishShoutParam : global::Omnius.Core.RocketPack.I
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
         if (this.Shout != target.Shout) return false;
+        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Properties, target.Properties)) return false;
         if (this.Zone != target.Zone) return false;
 
         return true;
@@ -2783,9 +2899,18 @@ public sealed partial class PublishShoutParam : global::Omnius.Core.RocketPack.I
                 w.Write((uint)1);
                 global::Omnius.Axus.Messages.Shout.Formatter.Serialize(ref w, value.Shout, rank + 1);
             }
-            if (value.Zone != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            if (value.Properties.Count != 0)
             {
                 w.Write((uint)2);
+                w.Write((uint)value.Properties.Count);
+                foreach (var n in value.Properties)
+                {
+                    global::Omnius.Axus.Messages.AttachedProperty.Formatter.Serialize(ref w, n, rank + 1);
+                }
+            }
+            if (value.Zone != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            {
+                w.Write((uint)3);
                 w.Write(value.Zone);
             }
             w.Write((uint)0);
@@ -2795,6 +2920,7 @@ public sealed partial class PublishShoutParam : global::Omnius.Core.RocketPack.I
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Axus.Messages.Shout p_shout = global::Omnius.Axus.Messages.Shout.Empty;
+            global::Omnius.Axus.Messages.AttachedProperty[] p_properties = global::System.Array.Empty<global::Omnius.Axus.Messages.AttachedProperty>();
             global::Omnius.Core.RocketPack.Utf8String p_zone = global::Omnius.Core.RocketPack.Utf8String.Empty;
 
             for (; ; )
@@ -2810,13 +2936,23 @@ public sealed partial class PublishShoutParam : global::Omnius.Core.RocketPack.I
                         }
                     case 2:
                         {
+                            var length = r.GetUInt32();
+                            p_properties = new global::Omnius.Axus.Messages.AttachedProperty[length];
+                            for (int i = 0; i < p_properties.Length; i++)
+                            {
+                                p_properties[i] = global::Omnius.Axus.Messages.AttachedProperty.Formatter.Deserialize(ref r, rank + 1);
+                            }
+                            break;
+                        }
+                    case 3:
+                        {
                             p_zone = r.GetString(2147483647);
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.PublishShoutParam(p_shout, p_zone);
+            return new global::Omnius.Axus.Remoting.PublishShoutParam(p_shout, p_properties, p_zone);
         }
     }
 }
@@ -3187,24 +3323,32 @@ public sealed partial class SubscribeShoutParam : global::Omnius.Core.RocketPack
     static SubscribeShoutParam()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeShoutParam>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeShoutParam>.Empty = new global::Omnius.Axus.Remoting.SubscribeShoutParam(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Remoting.SubscribeShoutParam>.Empty = new global::Omnius.Axus.Remoting.SubscribeShoutParam(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Core.RocketPack.Utf8String.Empty, global::System.Array.Empty<global::Omnius.Axus.Messages.AttachedProperty>(), global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxChannelLength = 2147483647;
+    public static readonly int MaxPropertiesCount = 256;
     public static readonly int MaxZoneLength = 2147483647;
 
-    public SubscribeShoutParam(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String channel, global::Omnius.Core.RocketPack.Utf8String zone)
+    public SubscribeShoutParam(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String channel, global::Omnius.Axus.Messages.AttachedProperty[] properties, global::Omnius.Core.RocketPack.Utf8String zone)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
         if (channel is null) throw new global::System.ArgumentNullException("channel");
         if (channel.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("channel");
+        if (properties is null) throw new global::System.ArgumentNullException("properties");
+        if (properties.Length > 256) throw new global::System.ArgumentOutOfRangeException("properties");
+        foreach (var n in properties)
+        {
+            if (n is null) throw new global::System.ArgumentNullException("n");
+        }
         if (zone is null) throw new global::System.ArgumentNullException("zone");
         if (zone.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("zone");
 
         this.Signature = signature;
         this.Channel = channel;
+        this.Properties = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.AttachedProperty>(properties);
         this.Zone = zone;
 
         ___hashCode = new global::System.Lazy<int>(() =>
@@ -3212,6 +3356,10 @@ public sealed partial class SubscribeShoutParam : global::Omnius.Core.RocketPack
             var ___h = new global::System.HashCode();
             if (signature != default) ___h.Add(signature.GetHashCode());
             if (!channel.IsEmpty) ___h.Add(channel.GetHashCode());
+            foreach (var n in properties)
+            {
+                if (n != default) ___h.Add(n.GetHashCode());
+            }
             if (!zone.IsEmpty) ___h.Add(zone.GetHashCode());
             return ___h.ToHashCode();
         });
@@ -3219,6 +3367,7 @@ public sealed partial class SubscribeShoutParam : global::Omnius.Core.RocketPack
 
     public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
     public global::Omnius.Core.RocketPack.Utf8String Channel { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.AttachedProperty> Properties { get; }
     public global::Omnius.Core.RocketPack.Utf8String Zone { get; }
 
     public static global::Omnius.Axus.Remoting.SubscribeShoutParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -3251,6 +3400,7 @@ public sealed partial class SubscribeShoutParam : global::Omnius.Core.RocketPack
         if (object.ReferenceEquals(this, target)) return true;
         if (this.Signature != target.Signature) return false;
         if (this.Channel != target.Channel) return false;
+        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Properties, target.Properties)) return false;
         if (this.Zone != target.Zone) return false;
 
         return true;
@@ -3273,9 +3423,18 @@ public sealed partial class SubscribeShoutParam : global::Omnius.Core.RocketPack
                 w.Write((uint)2);
                 w.Write(value.Channel);
             }
-            if (value.Zone != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            if (value.Properties.Count != 0)
             {
                 w.Write((uint)3);
+                w.Write((uint)value.Properties.Count);
+                foreach (var n in value.Properties)
+                {
+                    global::Omnius.Axus.Messages.AttachedProperty.Formatter.Serialize(ref w, n, rank + 1);
+                }
+            }
+            if (value.Zone != global::Omnius.Core.RocketPack.Utf8String.Empty)
+            {
+                w.Write((uint)4);
                 w.Write(value.Zone);
             }
             w.Write((uint)0);
@@ -3286,6 +3445,7 @@ public sealed partial class SubscribeShoutParam : global::Omnius.Core.RocketPack
 
             global::Omnius.Core.Cryptography.OmniSignature p_signature = global::Omnius.Core.Cryptography.OmniSignature.Empty;
             global::Omnius.Core.RocketPack.Utf8String p_channel = global::Omnius.Core.RocketPack.Utf8String.Empty;
+            global::Omnius.Axus.Messages.AttachedProperty[] p_properties = global::System.Array.Empty<global::Omnius.Axus.Messages.AttachedProperty>();
             global::Omnius.Core.RocketPack.Utf8String p_zone = global::Omnius.Core.RocketPack.Utf8String.Empty;
 
             for (; ; )
@@ -3306,13 +3466,23 @@ public sealed partial class SubscribeShoutParam : global::Omnius.Core.RocketPack
                         }
                     case 3:
                         {
+                            var length = r.GetUInt32();
+                            p_properties = new global::Omnius.Axus.Messages.AttachedProperty[length];
+                            for (int i = 0; i < p_properties.Length; i++)
+                            {
+                                p_properties[i] = global::Omnius.Axus.Messages.AttachedProperty.Formatter.Deserialize(ref r, rank + 1);
+                            }
+                            break;
+                        }
+                    case 4:
+                        {
                             p_zone = r.GetString(2147483647);
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.SubscribeShoutParam(p_signature, p_channel, p_zone);
+            return new global::Omnius.Axus.Remoting.SubscribeShoutParam(p_signature, p_channel, p_properties, p_zone);
         }
     }
 }

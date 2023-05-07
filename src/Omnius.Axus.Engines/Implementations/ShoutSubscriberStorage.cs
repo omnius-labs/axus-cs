@@ -60,7 +60,7 @@ public sealed partial class ShoutSubscriberStorage : AsyncDisposableBase, IShout
 
             foreach (var item in _subscriberRepo.ShoutItems.Find(zone))
             {
-                shoutReports.Add(new SubscribedShoutReport(item.Signature, item.Channel));
+                shoutReports.Add(new SubscribedShoutReport(item.Signature, item.Properties.ToArray(), item.Channel));
             }
 
             return shoutReports.ToArray();
@@ -94,7 +94,7 @@ public sealed partial class ShoutSubscriberStorage : AsyncDisposableBase, IShout
         }
     }
 
-    public async ValueTask SubscribeShoutAsync(OmniSignature signature, string channel, string zone, CancellationToken cancellationToken = default)
+    public async ValueTask SubscribeShoutAsync(OmniSignature signature, IEnumerable<AttachedProperty> properties, string channel, string zone, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -102,10 +102,10 @@ public sealed partial class ShoutSubscriberStorage : AsyncDisposableBase, IShout
 
             if (shoutItem is not null)
             {
-                if (shoutItem.Authors.Contains(zone)) return;
+                if (shoutItem.Zones.Contains(zone)) return;
 
-                var authors = shoutItem.Authors.Append(zone).ToArray();
-                shoutItem = shoutItem with { Authors = authors };
+                var zones = shoutItem.Zones.Append(zone).ToArray();
+                shoutItem = shoutItem with { Zones = zones };
                 _subscriberRepo.ShoutItems.Upsert(shoutItem);
 
                 return;
@@ -114,9 +114,10 @@ public sealed partial class ShoutSubscriberStorage : AsyncDisposableBase, IShout
             var newShoutItem = new ShoutSubscribedItem()
             {
                 Signature = signature,
+                Properties = properties.ToArray(),
                 Channel = channel,
                 ShoutUpdatedTime = DateTime.MinValue,
-                Authors = new[] { zone }
+                Zones = new[] { zone }
             };
             _subscriberRepo.ShoutItems.Upsert(newShoutItem);
         }
@@ -128,12 +129,12 @@ public sealed partial class ShoutSubscriberStorage : AsyncDisposableBase, IShout
         {
             var shoutItem = _subscriberRepo.ShoutItems.FindOne(signature, channel);
             if (shoutItem is null) return;
-            if (!shoutItem.Authors.Contains(zone)) return;
+            if (!shoutItem.Zones.Contains(zone)) return;
 
-            if (shoutItem.Authors.Count > 1)
+            if (shoutItem.Zones.Count > 1)
             {
-                var authors = shoutItem.Authors.Where(n => n != zone).ToArray();
-                var newShoutItem = shoutItem with { Authors = authors };
+                var zones = shoutItem.Zones.Where(n => n != zone).ToArray();
+                var newShoutItem = shoutItem with { Zones = zones };
                 _subscriberRepo.ShoutItems.Upsert(newShoutItem);
 
                 return;

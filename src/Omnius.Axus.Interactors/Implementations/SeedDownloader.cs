@@ -18,8 +18,7 @@ public sealed partial class SeedDownloader : AsyncDisposableBase, ISeedDownloade
     private readonly IBytesPool _bytesPool;
     private readonly SeedDownloaderOptions _options;
 
-    private readonly SeedBoxDownloaderRepository _seedBoxDownloaderRepo;
-    private readonly CachedMemoRepository _cachedMemoRepo;
+    private readonly CachedSeedBoxRepository _cachedSeedBoxRepo;
     private readonly ISingleValueStorage _configStorage;
 
     private Task _watchLoopTask = null!;
@@ -28,17 +27,17 @@ public sealed partial class SeedDownloader : AsyncDisposableBase, ISeedDownloade
 
     private readonly AsyncLock _asyncLock = new();
 
-    private const string Channel = "note-v1";
-    private const string Zone = "note-downloader-v1";
+    private const string Channel = "seed-box-v1";
+    private const string Zone = "seed-box-downloader-v1";
 
-    public static async ValueTask<MemoDownloader> CreateAsync(IProfileDownloader profileDownloader, IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, MemoDownloaderOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<SeedDownloader> CreateAsync(IProfileDownloader profileDownloader, IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, SeedDownloaderOptions options, CancellationToken cancellationToken = default)
     {
-        var memoDownloader = new MemoDownloader(profileDownloader, serviceMediator, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
-        await memoDownloader.InitAsync(cancellationToken);
-        return memoDownloader;
+        var seedDownloader = new SeedDownloader(profileDownloader, serviceMediator, singleValueStorageFactory, keyValueStorageFactory, bytesPool, options);
+        await seedDownloader.InitAsync(cancellationToken);
+        return seedDownloader;
     }
 
-    private MemoDownloader(IProfileDownloader profileDownloader, IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, MemoDownloaderOptions options)
+    private SeedDownloader(IProfileDownloader profileDownloader, IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, SeedDownloaderOptions options)
     {
         _profileDownloader = profileDownloader;
         _serviceMediator = serviceMediator;
@@ -47,7 +46,7 @@ public sealed partial class SeedDownloader : AsyncDisposableBase, ISeedDownloade
 
         _seedBoxDownloaderRepo = new NoteBoxDownloaderRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
         _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
-        _cachedMemoRepo = new CachedMemoRepository(Path.Combine(_options.ConfigDirectoryPath, "cached_memos"), _bytesPool);
+        _cachedSeedBoxRepo = new CachedMemoRepository(Path.Combine(_options.ConfigDirectoryPath, "cached_memos"), _bytesPool);
     }
 
     internal async ValueTask InitAsync(CancellationToken cancellationToken = default)
@@ -77,6 +76,13 @@ public sealed partial class SeedDownloader : AsyncDisposableBase, ISeedDownloade
             {
                 await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken).ConfigureAwait(false);
 
+                // 1. 不要なSubscribedShoutsを削除
+                // 2. 不要なSubscribedFilesを削除
+                // 3. 不要なCachedSeedBoxを削除
+                // 4. 新しいSubscribedShoutsを追加
+                // 5. 新しいSubscribedFilesを追加
+                // 6. 新しいCachedSeedBoxを追加
+
                 var signatures = await this.GetSignaturesAsync(cancellationToken);
 
                 await this.SyncMemoDownloaderRepo(signatures, cancellationToken);
@@ -85,7 +91,7 @@ public sealed partial class SeedDownloader : AsyncDisposableBase, ISeedDownloade
                 await this.SyncSubscribedFiles(cancellationToken);
 
                 await this.UpdateCachedMemosAsync(signatures, cancellationToken);
-                _cachedMemoRepo.Shrink(signatures);
+                _cachedSeedBoxRepo.Shrink(signatures);
             }
         }
         catch (OperationCanceledException e)
@@ -201,12 +207,12 @@ public sealed partial class SeedDownloader : AsyncDisposableBase, ISeedDownloade
         {
             foreach (var signature in targetSignatures)
             {
-                var cachedContentShoutUpdatedTime = _cachedMemoRepo.FetchShoutUpdatedTime(signature);
+                var cachedContentShoutUpdatedTime = _cachedSeedBoxRepo.FetchShoutUpdatedTime(signature);
 
                 var cachedContent = await this.TryInternalExportAsync(signature, cachedContentShoutUpdatedTime, cancellationToken);
                 if (cachedContent is null) continue;
 
-                _cachedMemoRepo.UpsertBulk(cachedContent);
+                _cachedSeedBoxRepo.UpsertBulk(cachedContent);
             }
         }
     }
@@ -234,7 +240,7 @@ public sealed partial class SeedDownloader : AsyncDisposableBase, ISeedDownloade
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var results = _cachedMemoRepo.FetchMemoByTag(tag);
+            var results = _cachedSeedBoxRepo.FetchMemoByTag(tag);
             return results.Select(n => n.ToReport());
         }
     }
@@ -243,7 +249,7 @@ public sealed partial class SeedDownloader : AsyncDisposableBase, ISeedDownloade
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var result = _cachedMemoRepo.FetchMemoBySelfHash(selfHash);
+            var result = _cachedSeedBoxRepo.FetchMemoBySelfHash(selfHash);
             return result?.ToReport();
         }
     }
