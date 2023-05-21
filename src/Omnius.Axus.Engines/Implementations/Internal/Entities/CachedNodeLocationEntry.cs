@@ -15,7 +15,7 @@ internal record CachedNodeLocationEntity
         {
             Value = NodeLocationEntity.Import(item.Value),
             LastConnectedTime = item.LastConnectedTime,
-            UpdatedTime = item.UpdatedTime,
+            UpdatedTime = item.CreatedTime,
         };
     }
 
@@ -25,7 +25,7 @@ internal record CachedNodeLocationEntity
         {
             Value = this.Value?.Export() ?? NodeLocation.Empty,
             LastConnectedTime = this.LastConnectedTime,
-            UpdatedTime = this.UpdatedTime,
+            CreatedTime = this.UpdatedTime,
         };
     }
 }

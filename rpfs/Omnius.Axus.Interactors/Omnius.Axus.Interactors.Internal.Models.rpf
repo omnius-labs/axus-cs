@@ -11,7 +11,7 @@ namespace "Omnius.Axus.Interactors.Internal.Models";
 
 message CachedProfile {
     Signature: OmniSignature,
-    ShoutUpdatedTime: timestamp64,
+    CreatedTime: timestamp64,
     Value: Profile,
 }
 
@@ -19,7 +19,7 @@ message CachedProfile {
 
 message CachedNoteBox {
     Signature: OmniSignature,
-    ShoutUpdatedTime: timestamp64,
+    CreatedTime: timestamp64,
     Value: NoteBox,
 }
 
@@ -27,7 +27,7 @@ message NoteBox {
     Notes: vector<Note>(capacity: 8 * 1024),
 }
 
-message CachedMemo {
+message CachedNote {
     Signature: OmniSignature,
     Value: Note,
 }
@@ -36,7 +36,7 @@ message CachedMemo {
 
 message CachedSeedBox {
     Signature: OmniSignature,
-    ShoutUpdatedTime: timestamp64,
+    CreatedTime: timestamp64,
     Value: SeedBox,
 }
 

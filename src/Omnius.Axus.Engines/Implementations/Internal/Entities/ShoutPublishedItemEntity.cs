@@ -7,20 +7,20 @@ namespace Omnius.Axus.Engines.Internal.Entities;
 internal record ShoutPublishedItemEntity
 {
     public OmniSignatureEntity? Signature { get; set; }
+    public DateTime CreatedTime { get; set; }
+    public IReadOnlyList<AttachedProperty>? Properties { get; init; }
     public string? Channel { get; set; }
     public IReadOnlyList<string>? Zones { get; set; }
-    public DateTime ShoutUpdatedTime { get; set; }
-    public IReadOnlyList<AttachedProperty>? Properties { get; init; }
 
     public static ShoutPublishedItemEntity Import(ShoutPublishedItem item)
     {
         return new ShoutPublishedItemEntity()
         {
             Signature = OmniSignatureEntity.Import(item.Signature),
+            CreatedTime = item.CreatedTime,
+            Properties = item.Properties,
             Channel = item.Channel,
             Zones = item.Zones,
-            ShoutUpdatedTime = item.ShoutUpdatedTime,
-            Properties = item.Properties,
         };
     }
 
@@ -29,10 +29,10 @@ internal record ShoutPublishedItemEntity
         return new ShoutPublishedItem()
         {
             Signature = this.Signature?.Export() ?? OmniSignature.Empty,
+            CreatedTime = this.CreatedTime,
+            Properties = this.Properties ?? Array.Empty<AttachedProperty>(),
             Channel = this.Channel ?? string.Empty,
             Zones = this.Zones ?? Array.Empty<string>(),
-            ShoutUpdatedTime = this.ShoutUpdatedTime,
-            Properties = this.Properties ?? Array.Empty<AttachedProperty>(),
         };
     }
 }

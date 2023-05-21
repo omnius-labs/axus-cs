@@ -49,7 +49,7 @@ public class ShoutExchangerTest
         var publishedShout2 = await publishedShoutStorage.TryReadShoutAsync(digitalSignature.GetOmniSignature(), "test_channel", DateTime.MinValue);
         publishedShout2.Should().Be(publishedShout);
 
-        var publishedShout2UpdatedTime = await publishedShoutStorage.ReadShoutUpdatedTimeAsync(digitalSignature.GetOmniSignature(), "test_channel");
+        var publishedShout2UpdatedTime = await publishedShoutStorage.ReadShoutCreatedTimeAsync(digitalSignature.GetOmniSignature(), "test_channel");
         var truncateTimeSpan = TimeSpan.FromTicks(TimeSpan.TicksPerSecond);
         publishedShout2UpdatedTime.Truncate(truncateTimeSpan).Should().Be(publishedShout.UpdatedTime.ToDateTime().Truncate(truncateTimeSpan));
 
@@ -61,7 +61,7 @@ public class ShoutExchangerTest
         {
             await Task.Delay(TimeSpan.FromSeconds(1));
 
-            var updatedTime = await subscribedShoutStorage.ReadShoutUpdatedTimeAsync(digitalSignature.GetOmniSignature(), "test_channel");
+            var updatedTime = await subscribedShoutStorage.ReadShoutCreatedTimeAsync(digitalSignature.GetOmniSignature(), "test_channel");
             if (updatedTime == publishedShout2UpdatedTime) break;
 
             if (sw.Elapsed > timeout) throw new TimeoutException();

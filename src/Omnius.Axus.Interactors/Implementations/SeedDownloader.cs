@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using Omnius.Axus.Interactors.Internal.Models;
 using Omnius.Axus.Interactors.Internal.Repositories;
 using Omnius.Axus.Interactors.Models;
+using Omnius.Axus.Messages;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.RocketPack;
@@ -20,6 +21,7 @@ public sealed partial class SeedDownloader : AsyncDisposableBase, ISeedDownloade
 
     private readonly CachedSeedBoxRepository _cachedSeedBoxRepo;
     private readonly ISingleValueStorage _configStorage;
+    private SeedDownloaderConfig? _config;
 
     private Task _watchLoopTask = null!;
 
@@ -27,8 +29,10 @@ public sealed partial class SeedDownloader : AsyncDisposableBase, ISeedDownloade
 
     private readonly AsyncLock _asyncLock = new();
 
-    private const string Channel = "seed-box-v1";
-    private const string Zone = "seed-box-downloader-v1";
+    private const string PROPERTIES_SHOUT = "Shout";
+
+    private const string Channel = "seed-v1";
+    private const string Zone = "seed-downloader-v1";
 
     public static async ValueTask<SeedDownloader> CreateAsync(IProfileDownloader profileDownloader, IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, SeedDownloaderOptions options, CancellationToken cancellationToken = default)
     {
@@ -44,12 +48,14 @@ public sealed partial class SeedDownloader : AsyncDisposableBase, ISeedDownloade
         _bytesPool = bytesPool;
         _options = options;
 
-        _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
         _cachedSeedBoxRepo = new CachedSeedBoxRepository(Path.Combine(_options.ConfigDirectoryPath, "cached_seed_boxes"), _bytesPool);
+        _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
     }
 
     internal async ValueTask InitAsync(CancellationToken cancellationToken = default)
     {
+        await _cachedSeedBoxRepo.MigrateAsync(cancellationToken);
+
         _watchLoopTask = this.WatchLoopAsync(_cancellationTokenSource.Token);
     }
 
@@ -85,16 +91,24 @@ public sealed partial class SeedDownloader : AsyncDisposableBase, ISeedDownloade
         }
     }
 
-    private async Task SyncAsync(CancellationToken cancellationToken)
+    private async ValueTask SyncAsync(CancellationToken cancellationToken = default)
     {
-        // 1. 不要なSubscribedShoutsを削除
-        // 2. 不要なSubscribedFilesを削除
+        // 1. 不要なSubscribedShoutを削除
+        // 2. 不要なSubscribedFileを削除
         // 3. 不要なCachedSeedBoxを削除
-        // 4. 新しいSubscribedShoutsを追加
-        // 5. 新しいSubscribedFilesを追加
+        // 4. 新しいSubscribedShoutを追加
+        // 5. 新しいSubscribedFileを追加
         // 6. 新しいCachedSeedBoxを追加
 
         var targetSignatures = await this.GetSignaturesAsync(cancellationToken);
+
+        var subscribedShoutKeys = await this.TryRemoveUnusedSubscribedShoutsAsync(targetSignatures, cancellationToken);
+        var subscribedFileKeys = await this.TryRemoveUnusedSubscribedFilesAsync(subscribedShoutKeys, cancellationToken);
+        var cachedSeedBoxKeys = await this.TryRemoveUnusedCachedSeedBoxesAsync(subscribedFileKeys, cancellationToken);
+
+        await this.TryAddSubscribedShoutsAsync(targetSignatures, subscribedShoutKeys, cancellationToken);
+        await this.TryAddSubscribedFilesAsync(subscribedShoutKeys, subscribedFileKeys, cancellationToken);
+        await this.TryAddCachedSeedBoxesAsync(subscribedFileKeys, cachedSeedBoxKeys, cancellationToken);
     }
 
     private async ValueTask<ImmutableHashSet<OmniSignature>> GetSignaturesAsync(CancellationToken cancellationToken = default)
@@ -112,170 +126,159 @@ public sealed partial class SeedDownloader : AsyncDisposableBase, ISeedDownloade
         }
     }
 
-    private async ValueTask SyncMemoDownloaderRepo(ImmutableHashSet<OmniSignature> targetSignatures, CancellationToken cancellationToken = default)
+    private async ValueTask<ImmutableDictionary<OmniSignature, Timestamp64>> TryRemoveUnusedSubscribedShoutsAsync(ImmutableHashSet<OmniSignature> targetSignatures, CancellationToken cancellationToken = default)
+    {
+        var builder = ImmutableDictionary.CreateBuilder<OmniSignature, Timestamp64>();
+
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
+            var reports = await _serviceMediator.GetSubscribedShoutReportsAsync(Zone, cancellationToken);
+
+            foreach (var report in reports)
+            {
+                if (targetSignatures.Contains(report.Signature))
+                {
+                    builder.Add(report.Signature, report.CreatedTime);
+                    continue;
+                }
+
+                await _serviceMediator.UnsubscribeShoutAsync(report.Signature, Channel, Zone, cancellationToken);
+            }
+        }
+
+        return builder.ToImmutable();
+    }
+
+    private async ValueTask<ImmutableDictionary<OmniSignature, (Timestamp64, OmniHash)>> TryRemoveUnusedSubscribedFilesAsync(ImmutableDictionary<OmniSignature, Timestamp64> subscribedShoutKeys, CancellationToken cancellationToken = default)
+    {
+        var builder = ImmutableDictionary.CreateBuilder<OmniSignature, (Timestamp64, OmniHash)>();
+
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
+            var reports = await _serviceMediator.GetSubscribedFileReportsAsync(Zone, cancellationToken);
+
+            foreach (var report in reports)
+            {
+                if (report.Properties.TryGetValue<Shout>(PROPERTIES_SHOUT, out var shout)
+                    && shout.Certificate is not null)
+                {
+                    if (subscribedShoutKeys.TryGetValue(shout.Certificate.GetOmniSignature(), out var targetCreatedTime)
+                        && targetCreatedTime == shout.CreatedTime)
+                    {
+                        builder.Add(shout.Certificate.GetOmniSignature(), (shout.CreatedTime, report.RootHash));
+                        continue;
+                    }
+                }
+
+                await _serviceMediator.UnsubscribeFileAsync(report.RootHash, Zone, cancellationToken);
+            }
+        }
+
+        return builder.ToImmutable();
+    }
+
+    private async ValueTask<ImmutableDictionary<OmniSignature, Timestamp64>> TryRemoveUnusedCachedSeedBoxesAsync(ImmutableDictionary<OmniSignature, (Timestamp64, OmniHash)> subscribedFileKeys, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            foreach (var profileItem in _seedBoxDownloaderRepo.BarkItems.FindAll())
+            var signatures = subscribedFileKeys.Select(n => n.Key).ToList();
+            await _cachedSeedBoxRepo.ShrinkAsync(signatures, cancellationToken);
+
+            var cachedBoxSeedKeys = await _cachedSeedBoxRepo.GetKeysAsync(cancellationToken);
+
+            var builder = ImmutableDictionary.CreateBuilder<OmniSignature, Timestamp64>();
+            foreach (var (signature, createdTime) in cachedBoxSeedKeys)
             {
-                if (targetSignatures.Contains(profileItem.Signature)) continue;
-                _seedBoxDownloaderRepo.BarkItems.Delete(profileItem.Signature);
+                builder.Add(signature, createdTime);
             }
 
+            return builder.ToImmutable();
+        }
+    }
+
+    private async ValueTask TryAddSubscribedShoutsAsync(ImmutableHashSet<OmniSignature> targetSignatures, ImmutableDictionary<OmniSignature, Timestamp64> subscribedShoutKeys, CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
             foreach (var signature in targetSignatures)
             {
-                if (_seedBoxDownloaderRepo.BarkItems.Exists(signature)) continue;
+                if (subscribedShoutKeys.Contains(signature)) continue;
 
-                var newBarkItem = new NoteBoxDownloadingItem()
-                {
-                    Signature = signature,
-                    ShoutUpdatedTime = DateTime.MinValue,
-                };
-                _seedBoxDownloaderRepo.BarkItems.Upsert(newBarkItem);
+                await _serviceMediator.SubscribeShoutAsync(signature, Channel, Enumerable.Empty<AttachedProperty>(), Zone, cancellationToken);
             }
         }
     }
 
-    private async ValueTask SyncSubscribedShouts(CancellationToken cancellationToken = default)
+    private async ValueTask TryAddSubscribedFilesAsync(ImmutableDictionary<OmniSignature, Timestamp64> subscribedShoutKeys, ImmutableDictionary<OmniSignature, (Timestamp64, OmniHash)> subscribedFileKeys, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetSubscribedShoutReportsAsync(Zone, cancellationToken);
-            var signatures = reports.Select(n => n.Signature).ToHashSet();
-
-            foreach (var signature in signatures)
+            foreach (var (signature, createdTime) in subscribedShoutKeys)
             {
-                if (_seedBoxDownloaderRepo.BarkItems.Exists(signature)) continue;
-                await _serviceMediator.UnsubscribeShoutAsync(signature, Channel, Zone, cancellationToken);
-            }
+                if (subscribedFileKeys.ContainsKey(signature)) continue;
 
-            foreach (var memoItem in _seedBoxDownloaderRepo.BarkItems.FindAll())
-            {
-                if (signatures.Contains(memoItem.Signature)) continue;
-                await _serviceMediator.SubscribeShoutAsync(memoItem.Signature, Channel, Zone, cancellationToken);
-            }
-
-            foreach (var memoItem in _seedBoxDownloaderRepo.BarkItems.FindAll())
-            {
-                using var shout = await _serviceMediator.TryExportShoutAsync(memoItem.Signature, Channel, memoItem.ShoutUpdatedTime, cancellationToken);
+                using var shout = await _serviceMediator.TryExportShoutAsync(signature, Channel, createdTime, cancellationToken);
                 if (shout is null) continue;
 
                 var rootHash = RocketMessage.FromBytes<OmniHash>(shout.Value.Memory);
 
-                var newBarkItem = memoItem with
-                {
-                    RootHash = rootHash,
-                    ShoutUpdatedTime = shout.UpdatedTime.ToDateTime(),
-                };
-                _seedBoxDownloaderRepo.BarkItems.Upsert(newBarkItem);
+                using var shoutBytes = RocketMessage.ToBytes(shout);
+                var property = new AttachedProperty(PROPERTIES_SHOUT, shoutBytes.Memory);
+
+                await _serviceMediator.SubscribeFileAsync(rootHash, new[] { property }, Zone, cancellationToken);
             }
         }
     }
 
-    private async ValueTask SyncSubscribedFiles(CancellationToken cancellationToken = default)
+    private async ValueTask TryAddCachedSeedBoxesAsync(ImmutableDictionary<OmniSignature, (Timestamp64, OmniHash)> subscribedFileKeys, ImmutableDictionary<OmniSignature, Timestamp64> cachedSeedBoxKeys, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetSubscribedFileReportsAsync(Zone, cancellationToken);
-            var rootHashes = reports.Select(n => n.RootHash).ToHashSet();
-
-            foreach (var rootHash in rootHashes)
+            foreach (var (signature, (createdTime, rootHash)) in subscribedFileKeys)
             {
-                if (_seedBoxDownloaderRepo.BarkItems.Exists(rootHash)) continue;
-                await _serviceMediator.UnpublishFileFromMemoryAsync(rootHash, Zone, cancellationToken);
-            }
+                if (cachedSeedBoxKeys.TryGetValue(signature, out var cachedCreatedTime)
+                    && createdTime <= cachedCreatedTime) continue;
 
-            foreach (var rootHash in _seedBoxDownloaderRepo.BarkItems.FindAll().Select(n => n.RootHash))
-            {
-                if (rootHash == OmniHash.Empty) continue;
-                if (rootHashes.Contains(rootHash)) continue;
-                await _serviceMediator.SubscribeFileAsync(rootHash, Zone, cancellationToken);
+                using var seedBoxBytes = await _serviceMediator.TryExportFileToMemoryAsync(rootHash, cancellationToken);
+                if (seedBoxBytes is null) continue;
+
+                var seedBox = RocketMessage.FromBytes<SeedBox>(seedBoxBytes.Memory);
+                var cachedSeedBox = new CachedSeedBox(signature, createdTime, seedBox);
+                await _cachedSeedBoxRepo.UpsertAsync(cachedSeedBox, cancellationToken);
             }
         }
     }
 
-    private async ValueTask UpdateCachedMemosAsync(ImmutableHashSet<OmniSignature> targetSignatures, CancellationToken cancellationToken = default)
+
+    public async ValueTask<SeedDownloaderConfig> GetConfigAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            foreach (var signature in targetSignatures)
+            if (_config is not null) return _config;
+
+            _config = await _configStorage.TryGetValueAsync<SeedDownloaderConfig>(cancellationToken);
+
+            if (_config is null)
             {
-                var cachedContentShoutUpdatedTime = _cachedSeedBoxRepo.FetchShoutUpdatedTime(signature);
-
-                var cachedContent = await this.TryInternalExportAsync(signature, cachedContentShoutUpdatedTime, cancellationToken);
-                if (cachedContent is null) continue;
-
-                _cachedSeedBoxRepo.UpsertBulk(cachedContent);
-            }
-        }
-    }
-
-    private async ValueTask<CachedNoteBox?> TryInternalExportAsync(OmniSignature signature, DateTime cachedContentShoutUpdatedTime, CancellationToken cancellationToken = default)
-    {
-        using (await _asyncLock.LockAsync(cancellationToken))
-        {
-            await Task.Delay(0, cancellationToken).ConfigureAwait(false);
-
-            var memoItem = _seedBoxDownloaderRepo.BarkItems.FindOne(signature);
-            if (memoItem is null || memoItem.RootHash == OmniHash.Empty || memoItem.ShoutUpdatedTime <= cachedContentShoutUpdatedTime) return null;
-
-            using var contentBytes = await _serviceMediator.TryExportFileToMemoryAsync(memoItem.RootHash, cancellationToken);
-            if (contentBytes is null) return null;
-
-            var content = RocketMessage.FromBytes<NoteBox>(contentBytes.Memory);
-
-            var cachedContent = new CachedNoteBox(signature, Timestamp64.FromDateTime(memoItem.ShoutUpdatedTime), content);
-            return cachedContent;
-        }
-    }
-
-    public async ValueTask<IEnumerable<NoteReport>> FindMessagesByTagAsync(string tag, CancellationToken cancellationToken = default)
-    {
-        using (await _asyncLock.LockAsync(cancellationToken))
-        {
-            var results = _cachedSeedBoxRepo.FetchMemoByTag(tag);
-            return results.Select(n => n.ToReport());
-        }
-    }
-
-    public async ValueTask<NoteReport?> FindMessageBySelfHashAsync(OmniHash selfHash, CancellationToken cancellationToken = default)
-    {
-        using (await _asyncLock.LockAsync(cancellationToken))
-        {
-            var result = _cachedSeedBoxRepo.FetchMemoBySelfHash(selfHash);
-            return result?.ToReport();
-        }
-    }
-
-    public async ValueTask<MemoDownloaderConfig> GetConfigAsync(CancellationToken cancellationToken = default)
-    {
-        using (await _asyncLock.LockAsync(cancellationToken))
-        {
-            var config = await _configStorage.TryGetValueAsync<MemoDownloaderConfig>(cancellationToken);
-
-            if (config is null)
-            {
-                config = new MemoDownloaderConfig(
-                    tags: Array.Empty<Utf8String>(),
-                    maxMemoCount: 10000
+                _config = new SeedDownloaderConfig(
+                    maxSeedBoxCount: 10000
                 );
 
-                await _configStorage.TrySetValueAsync(config, cancellationToken);
+                await _configStorage.TrySetValueAsync(_config, cancellationToken);
             }
 
-            return config;
+            return _config;
         }
     }
 
-    public async ValueTask SetConfigAsync(MemoDownloaderConfig config, CancellationToken cancellationToken = default)
+    public async ValueTask SetConfigAsync(SeedDownloaderConfig config, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             await _configStorage.TrySetValueAsync(config, cancellationToken);
+            _config = config;
         }
     }
 
     public ValueTask<FindSeedsResult> FindSeedsAsync(FindSeedsCondition condition, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    ValueTask<SeedDownloaderConfig> ISeedDownloader.GetConfigAsync(CancellationToken cancellationToken) => throw new NotImplementedException();
-    public ValueTask SetConfigAsync(SeedDownloaderConfig config, CancellationToken cancellationToken = default) => throw new NotImplementedException();
 }

@@ -45,10 +45,10 @@ public partial class InteractorProvider : AsyncDisposableBase, IInteractorProvid
         _profileDownloader = await ProfileDownloader.CreateAsync(_serviceMediator, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, profileDownloaderOptions, cancellationToken);
 
         var barkUploaderOptions = new MemoUploaderOptions(Path.Combine(_databaseDirectoryPath, "bark_uploader"));
-        _barkUploader = await MemoUploader.CreateAsync(_serviceMediator, SingleValueFileStorage.Factory, _bytesPool, barkUploaderOptions, cancellationToken);
+        _barkUploader = await NoteUploader.CreateAsync(_serviceMediator, SingleValueFileStorage.Factory, _bytesPool, barkUploaderOptions, cancellationToken);
 
-        var barkDownloaderOptions = new MemoDownloaderOptions(Path.Combine(_databaseDirectoryPath, "bark_downloader"));
-        _barkDownloader = await MemoDownloader.CreateAsync(_profileDownloader, _serviceMediator, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, barkDownloaderOptions, cancellationToken);
+        var barkDownloaderOptions = new NoteDownloaderOptions(Path.Combine(_databaseDirectoryPath, "bark_downloader"));
+        _barkDownloader = await NoteDownloader.CreateAsync(_profileDownloader, _serviceMediator, SingleValueFileStorage.Factory, KeyValueLiteDatabaseStorage.Factory, _bytesPool, barkDownloaderOptions, cancellationToken);
 
         var fileUploaderOptions = new FileUploaderOptions(Path.Combine(_databaseDirectoryPath, "file_uploader"));
         _fileUploader = await FileUploader.CreateAsync(_serviceMediator, SingleValueFileStorage.Factory, _bytesPool, fileUploaderOptions, cancellationToken);

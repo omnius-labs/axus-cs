@@ -2,6 +2,7 @@ using System.Buffers;
 using Omnius.Axus.Messages;
 using Omnius.Axus.Remoting;
 using Omnius.Core.Cryptography;
+using Omnius.Core.RocketPack;
 
 namespace Omnius.Axus.Interactors;
 
@@ -24,7 +25,7 @@ public interface IAxusServiceMediator
     ValueTask SubscribeShoutAsync(OmniSignature signature, string channel, IEnumerable<AttachedProperty> properties, string zone, CancellationToken cancellationToken = default);
     ValueTask<IMemoryOwner<byte>?> TryExportFileToMemoryAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
     ValueTask<bool> TryExportFileToStorageAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default);
-    ValueTask<Shout?> TryExportShoutAsync(OmniSignature signature, string channel, DateTime updatedTime, CancellationToken cancellationToken = default);
+    ValueTask<Shout?> TryExportShoutAsync(OmniSignature signature, string channel, Timestamp64 createdTime, CancellationToken cancellationToken = default);
     ValueTask UnpublishFileFromMemoryAsync(OmniHash rootHash, string zone, CancellationToken cancellationToken = default);
     ValueTask UnpublishFileFromStorageAsync(string filePath, string zone, CancellationToken cancellationToken = default);
     ValueTask UnpublishShoutAsync(OmniSignature signature, string channel, string zone, CancellationToken cancellationToken = default);

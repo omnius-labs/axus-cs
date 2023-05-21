@@ -6,9 +6,9 @@ namespace Omnius.Axus.Engines.Internal.Models;
 internal record FileSubscribedItem
 {
     public required OmniHash RootHash { get; init; }
-    public required IReadOnlyList<string> Zones { get; init; }
     public required FileSubscribedItemStatus Status { get; init; }
     public required IReadOnlyList<AttachedProperty> Properties { get; init; }
+    public required IReadOnlyList<string> Zones { get; init; }
 }
 
 internal record FileSubscribedItemStatus

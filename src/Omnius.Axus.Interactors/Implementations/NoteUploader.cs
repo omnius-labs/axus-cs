@@ -1,4 +1,3 @@
-using System.Buffers;
 using Omnius.Axus.Interactors.Internal.Models;
 using Omnius.Axus.Interactors.Models;
 using Omnius.Axus.Messages;
@@ -9,17 +8,16 @@ using Omnius.Core.Storages;
 
 namespace Omnius.Axus.Interactors;
 
-public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
+public sealed class NoteUploader : AsyncDisposableBase, INoteUploader
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
-    private readonly IFileUploader _fileUploader;
     private readonly IAxusServiceMediator _serviceMediator;
     private readonly IBytesPool _bytesPool;
-    private readonly SeedUploaderOptions _options;
+    private readonly NoteUploaderOptions _options;
 
     private readonly ISingleValueStorage _configStorage;
-    private SeedUploaderConfig? _config;
+    private NoteUploaderConfig? _config;
 
     private Task _watchLoopTask = null!;
 
@@ -29,19 +27,18 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
 
     private const string PROPERTIES_SIGNATURE = "Signature";
 
-    private const string Channel = "seed-v1";
-    private const string Zone = "seed-uploader-v1";
+    private const string Channel = "note-v1";
+    private const string Zone = "note-uploader-v1";
 
-    public static async ValueTask<SeedUploader> CreateAsync(IFileUploader fileUploader, IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, SeedUploaderOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<NoteUploader> CreateAsync(IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, NoteUploaderOptions options, CancellationToken cancellationToken = default)
     {
-        var seedUploader = new SeedUploader(fileUploader, serviceMediator, singleValueStorageFactory, bytesPool, options);
-        await seedUploader.InitAsync(cancellationToken);
-        return seedUploader;
+        var noteUploader = new NoteUploader(serviceMediator, singleValueStorageFactory, bytesPool, options);
+        await noteUploader.InitAsync(cancellationToken);
+        return noteUploader;
     }
 
-    private SeedUploader(IFileUploader fileUploader, IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, SeedUploaderOptions options)
+    private NoteUploader(IAxusServiceMediator serviceMediator, ISingleValueStorageFactory singleValueStorageFactory, IBytesPool bytesPool, NoteUploaderOptions options)
     {
-        _fileUploader = fileUploader;
         _serviceMediator = serviceMediator;
         _bytesPool = bytesPool;
         _options = options;
@@ -90,15 +87,13 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
     {
         // 1. 不要なPublishedShoutを削除
         // 2. 不要なPublishedFileを削除
-        // 3. 未Publishの場合はSeedBoxをPublish
+        // 3. 未Publishの場合はNoteBoxをPublish
 
         bool exists = true;
-        exists &= await this.TryRemoveUnusedPublishedShoutsAsync(cancellationToken);
-        exists &= await this.TryRemoveUnusedPublishedFilesAsync(cancellationToken);
 
         if (!exists)
         {
-            await this.PublishSeedBoxAsync(cancellationToken);
+
         }
     }
 
@@ -153,24 +148,20 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
         }
     }
 
-    private async ValueTask PublishSeedBoxAsync(CancellationToken cancellationToken = default)
+    private async ValueTask PublishNoteBoxAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var config = await this.GetConfigAsync(cancellationToken);
             var digitalSignature = config.DigitalSignature;
 
-            // アップロード済みファイルが対象
-            var reports = await _fileUploader.GetUploadingFileReportsAsync(cancellationToken);
-            var seeds = reports.Select(n => n.Seed).WhereNotNull().ToArray();
-
-            var seedBox = new SeedBox(seeds);
-            using var seedBoxBytes = RocketMessage.ToBytes(seedBox);
+            var noteBox = new NoteBox(config.Notes.ToArray());
+            using var noteBoxBytes = RocketMessage.ToBytes(noteBox);
 
             using var signatureBytes = RocketMessage.ToBytes(digitalSignature.GetOmniSignature());
             var property = new AttachedProperty(PROPERTIES_SIGNATURE, signatureBytes.Memory);
 
-            var rootHash = await _serviceMediator.PublishFileFromMemoryAsync(seedBoxBytes.Memory, 8 * 1024 * 1024, new[] { property }, Zone, cancellationToken);
+            var rootHash = await _serviceMediator.PublishFileFromMemoryAsync(noteBoxBytes.Memory, 8 * 1024 * 1024, new[] { property }, Zone, cancellationToken);
 
             var now = DateTime.UtcNow;
             using var shout = Shout.Create(Channel, Timestamp64.FromDateTime(now), RocketMessage.ToBytes(rootHash), digitalSignature);
@@ -178,18 +169,19 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
         }
     }
 
-    public async ValueTask<SeedUploaderConfig> GetConfigAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<NoteUploaderConfig> GetConfigAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             if (_config is not null) return _config;
 
-            _config = await _configStorage.TryGetValueAsync<SeedUploaderConfig>(cancellationToken);
+            _config = await _configStorage.TryGetValueAsync<NoteUploaderConfig>(cancellationToken);
 
             if (_config is null)
             {
-                _config = new SeedUploaderConfig(
-                    digitalSignature: OmniDigitalSignature.Create("Anonymous", OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256)
+                _config = new NoteUploaderConfig(
+                    digitalSignature: OmniDigitalSignature.Create("Anonymous", OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256),
+                    notes: Array.Empty<Note>()
                 );
 
                 await _configStorage.TrySetValueAsync(_config, cancellationToken);
@@ -199,7 +191,7 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
         }
     }
 
-    public async ValueTask SetConfigAsync(SeedUploaderConfig config, CancellationToken cancellationToken = default)
+    public async ValueTask SetConfigAsync(NoteUploaderConfig config, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {

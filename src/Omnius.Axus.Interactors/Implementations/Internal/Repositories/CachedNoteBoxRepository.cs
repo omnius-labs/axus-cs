@@ -12,16 +12,16 @@ using SqlKata.Execution;
 
 namespace Omnius.Axus.Interactors.Internal.Repositories;
 
-internal sealed class CachedMemoRepository
+internal sealed class CachedNoteBoxRepository
 {
     private readonly string _databasePath;
     private readonly IBytesPool _bytesPool;
 
     private static readonly Lazy<Base16> _base16 = new Lazy<Base16>(() => new Base16(ConvertStringCase.Lower));
 
-    private readonly object _lockObject = new();
+    private readonly AsyncLock _asyncLock = new();
 
-    public CachedMemoRepository(string dirPath, IBytesPool bytesPool)
+    public CachedNoteBoxRepository(string dirPath, IBytesPool bytesPool)
     {
         DirectoryHelper.CreateDirectory(dirPath);
         _databasePath = Path.Combine(dirPath, "sqlite.db");
@@ -30,13 +30,15 @@ internal sealed class CachedMemoRepository
 
     public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
     {
-        using var connection = this.GetConnection();
-        using var command = new SQLiteCommand(connection);
-        command.CommandText =
+        await Task.Delay(1, cancellationToken).ConfigureAwait(false);
+
+        using var connection = await this.GetConnectionAsync(cancellationToken);
+
+        var query =
 @"
-CREATE TABLE IF NOT EXISTS contents (
+CREATE TABLE IF NOT EXISTS boxes (
     signature TEXT NOT NULL PRIMARY KEY,
-    shout_updated_time INTEGER NOT NULL
+    created_time INTEGER NOT NULL
 );
 CREATE TABLE IF NOT EXISTS notes (
     self_hash TEXT NOT NULL PRIMARY KEY,
@@ -45,23 +47,48 @@ CREATE TABLE IF NOT EXISTS notes (
     created_time INTEGER NOT NULL,
     value BLOB NOT NULL
 );
-CREATE INDEX IF NOT EXISTS index_signature_for_memos ON notes (signature);
-CREATE INDEX IF NOT EXISTS index_tag_for_memos ON notes (tag, created_time DESC);
-CREATE INDEX IF NOT EXISTS index_created_time_for_memos ON notes (created_time);
+CREATE INDEX IF NOT EXISTS index_signature_and_created_time_for_boxes ON boxes (signature, created_time);
+CREATE INDEX IF NOT EXISTS index_signature_for_notes ON notes (signature);
+CREATE INDEX IF NOT EXISTS index_tag_for_notes ON notes (tag, created_time DESC);
+CREATE INDEX IF NOT EXISTS index_created_time_for_notes ON notes (created_time);
 ";
-        command.ExecuteNonQuery();
+        await connection.ExecuteNonQueryAsync(query, cancellationToken);
     }
 
-    private SQLiteConnection GetConnection()
+    private async ValueTask<SQLiteConnection> GetConnectionAsync(CancellationToken cancellationToken = default)
     {
         var sqlConnectionStringBuilder = new SQLiteConnectionStringBuilder { DataSource = _databasePath };
         var connection = new SQLiteConnection(sqlConnectionStringBuilder.ToString());
-        connection.Open();
+        await connection.OpenAsync(cancellationToken);
         return connection;
     }
 
-    public void UpsertBulk(CachedNoteBox content)
+    public async ValueTask UpsertAsync(CachedNoteBox box, CancellationToken cancellationToken = default)
     {
+        await Task.Delay(1, cancellationToken).ConfigureAwait(false);
+
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
+            using var connection = await this.GetConnectionAsync(cancellationToken);
+            using var transaction = connection.BeginTransaction();
+
+            {
+                var query =
+$@"
+DELETE FROM boxes WHERE signature = @Signature;
+INSERT INTO boxes (signature, created_time)
+    VALUES (@Signature, @CreatedTime);
+DELETE FROM notes WHERE signature = @Signature;
+";
+                var parameters = new (string, object)[] {
+                    ("@Signature", box.Signature.ToString()),
+                    ("@CreatedTime", box.CreatedTime.Seconds)
+                };
+
+                await transaction.ExecuteNonQueryAsync(query, parameters, cancellationToken);
+            }
+        }
+
         lock (_lockObject)
         {
             using var connection = this.GetConnection();

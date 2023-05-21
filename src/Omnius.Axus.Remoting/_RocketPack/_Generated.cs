@@ -3638,28 +3638,28 @@ public sealed partial class TryExportShoutParam : global::Omnius.Core.RocketPack
 
     public static readonly int MaxChannelLength = 2147483647;
 
-    public TryExportShoutParam(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String channel, global::Omnius.Core.RocketPack.Timestamp64 updatedTime)
+    public TryExportShoutParam(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Utf8String channel, global::Omnius.Core.RocketPack.Timestamp64 createdTime)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
         if (channel is null) throw new global::System.ArgumentNullException("channel");
         if (channel.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("channel");
         this.Signature = signature;
         this.Channel = channel;
-        this.UpdatedTime = updatedTime;
+        this.CreatedTime = createdTime;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (signature != default) ___h.Add(signature.GetHashCode());
             if (!channel.IsEmpty) ___h.Add(channel.GetHashCode());
-            if (updatedTime != default) ___h.Add(updatedTime.GetHashCode());
+            if (createdTime != default) ___h.Add(createdTime.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
     public global::Omnius.Core.RocketPack.Utf8String Channel { get; }
-    public global::Omnius.Core.RocketPack.Timestamp64 UpdatedTime { get; }
+    public global::Omnius.Core.RocketPack.Timestamp64 CreatedTime { get; }
 
     public static global::Omnius.Axus.Remoting.TryExportShoutParam Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -3691,7 +3691,7 @@ public sealed partial class TryExportShoutParam : global::Omnius.Core.RocketPack
         if (object.ReferenceEquals(this, target)) return true;
         if (this.Signature != target.Signature) return false;
         if (this.Channel != target.Channel) return false;
-        if (this.UpdatedTime != target.UpdatedTime) return false;
+        if (this.CreatedTime != target.CreatedTime) return false;
 
         return true;
     }
@@ -3713,10 +3713,10 @@ public sealed partial class TryExportShoutParam : global::Omnius.Core.RocketPack
                 w.Write((uint)2);
                 w.Write(value.Channel);
             }
-            if (value.UpdatedTime != global::Omnius.Core.RocketPack.Timestamp64.Zero)
+            if (value.CreatedTime != global::Omnius.Core.RocketPack.Timestamp64.Zero)
             {
                 w.Write((uint)3);
-                w.Write(value.UpdatedTime);
+                w.Write(value.CreatedTime);
             }
             w.Write((uint)0);
         }
@@ -3726,7 +3726,7 @@ public sealed partial class TryExportShoutParam : global::Omnius.Core.RocketPack
 
             global::Omnius.Core.Cryptography.OmniSignature p_signature = global::Omnius.Core.Cryptography.OmniSignature.Empty;
             global::Omnius.Core.RocketPack.Utf8String p_channel = global::Omnius.Core.RocketPack.Utf8String.Empty;
-            global::Omnius.Core.RocketPack.Timestamp64 p_updatedTime = global::Omnius.Core.RocketPack.Timestamp64.Zero;
+            global::Omnius.Core.RocketPack.Timestamp64 p_createdTime = global::Omnius.Core.RocketPack.Timestamp64.Zero;
 
             for (; ; )
             {
@@ -3746,13 +3746,13 @@ public sealed partial class TryExportShoutParam : global::Omnius.Core.RocketPack
                         }
                     case 3:
                         {
-                            p_updatedTime = r.GetTimestamp64();
+                            p_createdTime = r.GetTimestamp64();
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axus.Remoting.TryExportShoutParam(p_signature, p_channel, p_updatedTime);
+            return new global::Omnius.Axus.Remoting.TryExportShoutParam(p_signature, p_channel, p_createdTime);
         }
     }
 }

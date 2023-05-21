@@ -6,6 +6,7 @@ using Omnius.Axus.Messages;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Pipelines;
+using Omnius.Core.RocketPack;
 using Omnius.Core.Storages;
 
 namespace Omnius.Axus.Engines;
@@ -60,7 +61,7 @@ public sealed partial class ShoutSubscriberStorage : AsyncDisposableBase, IShout
 
             foreach (var item in _subscriberRepo.ShoutItems.Find(zone))
             {
-                shoutReports.Add(new SubscribedShoutReport(item.Signature, item.Properties.ToArray(), item.Channel));
+                shoutReports.Add(new SubscribedShoutReport(item.Signature, item.Channel, Timestamp64.FromDateTime(item.CreatedTime), item.Properties.ToArray()));
             }
 
             return shoutReports.ToArray();
@@ -116,7 +117,7 @@ public sealed partial class ShoutSubscriberStorage : AsyncDisposableBase, IShout
                 Signature = signature,
                 Properties = properties.ToArray(),
                 Channel = channel,
-                ShoutUpdatedTime = DateTime.MinValue,
+                CreatedTime = DateTime.MinValue,
                 Zones = new[] { zone }
             };
             _subscriberRepo.ShoutItems.Upsert(newShoutItem);
@@ -147,14 +148,14 @@ public sealed partial class ShoutSubscriberStorage : AsyncDisposableBase, IShout
         }
     }
 
-    public async ValueTask<DateTime> ReadShoutUpdatedTimeAsync(OmniSignature signature, string channel, CancellationToken cancellationToken = default)
+    public async ValueTask<DateTime> ReadShoutCreatedTimeAsync(OmniSignature signature, string channel, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var shoutItem = _subscriberRepo.ShoutItems.FindOne(signature, channel);
             if (shoutItem is null) return DateTime.MinValue;
 
-            return shoutItem.ShoutUpdatedTime;
+            return shoutItem.CreatedTime;
         }
     }
 
@@ -163,7 +164,7 @@ public sealed partial class ShoutSubscriberStorage : AsyncDisposableBase, IShout
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var shoutItem = _subscriberRepo.ShoutItems.FindOne(signature, channel);
-            if (shoutItem is null || shoutItem.ShoutUpdatedTime <= updatedTime) return null;
+            if (shoutItem is null || shoutItem.CreatedTime <= updatedTime) return null;
 
             var blockName = GenKey(signature, channel);
             using var memoryOwner = await _blockStorage.TryReadAsync(blockName, cancellationToken);
@@ -184,9 +185,9 @@ public sealed partial class ShoutSubscriberStorage : AsyncDisposableBase, IShout
             if (signature == null) return;
 
             var shoutItem = _subscriberRepo.ShoutItems.FindOne(signature, shout.Channel);
-            if (shoutItem is null || shoutItem.ShoutUpdatedTime >= shout.UpdatedTime.ToDateTime()) return;
+            if (shoutItem is null || shoutItem.CreatedTime >= shout.CreatedTime.ToDateTime()) return;
 
-            var newShoutItem = shoutItem with { ShoutUpdatedTime = shout.UpdatedTime.ToDateTime() };
+            var newShoutItem = shoutItem with { CreatedTime = shout.CreatedTime.ToDateTime() };
             _subscriberRepo.ShoutItems.Upsert(newShoutItem);
 
             using var bytesPipe = new BytesPipe(_bytesPool);

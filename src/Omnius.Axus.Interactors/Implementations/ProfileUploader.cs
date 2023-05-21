@@ -1,5 +1,3 @@
-using Omnius.Axus.Interactors.Internal.Models;
-using Omnius.Axus.Interactors.Internal.Repositories;
 using Omnius.Axus.Interactors.Models;
 using Omnius.Axus.Messages;
 using Omnius.Core;
@@ -17,14 +15,16 @@ public sealed class ProfileUploader : AsyncDisposableBase, IProfileUploader
     private readonly IBytesPool _bytesPool;
     private readonly ProfileUploaderOptions _options;
 
-    private readonly ProfileUploaderRepository _profileUploaderRepo;
     private readonly ISingleValueStorage _configStorage;
+    private ProfileUploaderConfig? _config;
 
     private Task _watchLoopTask = null!;
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     private readonly AsyncLock _asyncLock = new();
+
+    private const string PROPERTIES_SIGNATURE = "Signature";
 
     private const string Channel = "profile-v1";
     private const string Zone = "profile-uploader-v1";
@@ -42,7 +42,6 @@ public sealed class ProfileUploader : AsyncDisposableBase, IProfileUploader
         _bytesPool = bytesPool;
         _options = options;
 
-        _profileUploaderRepo = new ProfileUploaderRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
         _configStorage = singleValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "config"), _bytesPool);
     }
 
@@ -57,7 +56,6 @@ public sealed class ProfileUploader : AsyncDisposableBase, IProfileUploader
         await _watchLoopTask;
         _cancellationTokenSource.Dispose();
 
-        _profileUploaderRepo.Dispose();
         _configStorage.Dispose();
     }
 
@@ -71,17 +69,7 @@ public sealed class ProfileUploader : AsyncDisposableBase, IProfileUploader
             {
                 await Task.Delay(TimeSpan.FromMinutes(3), cancellationToken).ConfigureAwait(false);
 
-                var config = await this.GetConfigAsync(cancellationToken);
-
-                await this.SyncProfileUploaderRepo(config, cancellationToken);
-
-                await this.ShrinkPublishedShouts(cancellationToken);
-                await this.ShrinkPublishedFiles(cancellationToken);
-
-                if (!await this.ExistsPublishedShouts(cancellationToken) || !await this.ExistsPublishedFiles(cancellationToken))
-                {
-                    await this.PublishProfileContent(config, cancellationToken);
-                }
+                await this.SyncAsync(cancellationToken);
             }
         }
         catch (OperationCanceledException e)
@@ -94,103 +82,91 @@ public sealed class ProfileUploader : AsyncDisposableBase, IProfileUploader
         }
     }
 
-    private async ValueTask SyncProfileUploaderRepo(ProfileUploaderConfig config, CancellationToken cancellationToken = default)
+    private async ValueTask SyncAsync(CancellationToken cancellationToken)
     {
-        using (await _asyncLock.LockAsync(cancellationToken))
+        // 1. 不要なPublishedShoutを削除
+        // 2. 不要なPublishedFileを削除
+        // 3. 未Publishの場合はProfileをPublish
+
+        bool exists = true;
+        exists &= await this.TryRemoveUnusedPublishedShoutsAsync(cancellationToken);
+        exists &= await this.TryRemoveUnusedPublishedFilesAsync(cancellationToken);
+
+        if (!exists)
         {
-            foreach (var profileItem in _profileUploaderRepo.ProfileItems.FindAll())
-            {
-                if (profileItem.Signature == config.DigitalSignature.GetOmniSignature()) continue;
-                _profileUploaderRepo.ProfileItems.Delete(profileItem.Signature);
-            }
-
-            if (_profileUploaderRepo.ProfileItems.Exists(config.DigitalSignature.GetOmniSignature())) return;
-
-            var newProfileItem = new ProfileUploadingItem()
-            {
-                Signature = config.DigitalSignature.GetOmniSignature(),
-            };
-            _profileUploaderRepo.ProfileItems.Upsert(newProfileItem);
+            await this.PublishProfileAsync(cancellationToken);
         }
     }
 
-    private async ValueTask ShrinkPublishedShouts(CancellationToken cancellationToken = default)
+    private async ValueTask<bool> TryRemoveUnusedPublishedShoutsAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
+            bool exists = false;
+
+            var config = await this.GetConfigAsync(cancellationToken);
             var reports = await _serviceMediator.GetPublishedShoutReportsAsync(Zone, cancellationToken);
-            var signatures = reports.Select(n => n.Signature).ToHashSet();
 
-            foreach (var signature in signatures)
+            foreach (var report in reports)
             {
-                if (_profileUploaderRepo.ProfileItems.Exists(signature)) continue;
-                await _serviceMediator.UnsubscribeShoutAsync(signature, Channel, Zone, cancellationToken);
+                if (report.Signature == config.DigitalSignature.GetOmniSignature())
+                {
+                    exists = true;
+                    continue;
+                }
+
+                await _serviceMediator.UnsubscribeShoutAsync(report.Signature, Channel, Zone, cancellationToken);
             }
+
+            return exists;
         }
     }
 
-    private async ValueTask ShrinkPublishedFiles(CancellationToken cancellationToken = default)
+    private async ValueTask<bool> TryRemoveUnusedPublishedFilesAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
+            bool exists = false;
+
+            var config = await this.GetConfigAsync(cancellationToken);
             var reports = await _serviceMediator.GetPublishedFileReportsAsync(Zone, cancellationToken);
-            var rootHashes = reports.Select(n => n.RootHash).WhereNotNull().ToHashSet();
 
-            foreach (var rootHash in rootHashes)
+            foreach (var report in reports)
             {
-                if (_profileUploaderRepo.ProfileItems.Exists(rootHash)) continue;
-                await _serviceMediator.UnpublishFileFromMemoryAsync(rootHash, Zone, cancellationToken);
+                if (report.RootHash is null) continue;
+                if (!report.Properties.TryGetValue<OmniSignature>(PROPERTIES_SIGNATURE, out var signature)) continue;
+
+                if (signature == config.DigitalSignature.GetOmniSignature())
+                {
+                    exists = true;
+                    continue;
+                }
+
+                await _serviceMediator.UnpublishFileFromMemoryAsync(report.RootHash.Value, Zone, cancellationToken);
             }
+
+            return exists;
         }
     }
 
-    private async ValueTask<bool> ExistsPublishedShouts(CancellationToken cancellationToken = default)
+    private async ValueTask PublishProfileAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var reports = await _serviceMediator.GetPublishedShoutReportsAsync(Zone, cancellationToken);
-            var signatures = reports.Select(n => n.Signature).ToHashSet();
-
-            foreach (var profileItem in _profileUploaderRepo.ProfileItems.FindAll())
-            {
-                if (signatures.Contains(profileItem.Signature)) continue;
-                return false;
-            }
-
-            return true;
-        }
-    }
-
-    private async ValueTask<bool> ExistsPublishedFiles(CancellationToken cancellationToken = default)
-    {
-        using (await _asyncLock.LockAsync(cancellationToken))
-        {
-            var reports = await _serviceMediator.GetPublishedFileReportsAsync(Zone, cancellationToken);
-            var rootHashes = reports.Select(n => n.RootHash).WhereNotNull().ToHashSet();
-
-            foreach (var profileItem in _profileUploaderRepo.ProfileItems.FindAll())
-            {
-                if (rootHashes.Contains(profileItem.RootHash)) continue;
-                return false;
-            }
-
-            return true;
-        }
-    }
-
-    private async ValueTask PublishProfileContent(ProfileUploaderConfig config, CancellationToken cancellationToken = default)
-    {
-        using (await _asyncLock.LockAsync(cancellationToken))
-        {
+            var config = await this.GetConfigAsync(cancellationToken);
             var digitalSignature = config.DigitalSignature;
-            var content = new Profile(config.TrustedSignatures.ToArray(), config.BlockedSignatures.ToArray());
 
-            using var contentBytes = RocketMessage.ToBytes(content);
-            var rootHash = await _serviceMediator.PublishFileFromMemoryAsync(contentBytes.Memory, 8 * 1024 * 1024, Zone, cancellationToken);
+            var profile = new Profile(config.TrustedSignatures.ToArray(), config.BlockedSignatures.ToArray());
+            using var profileBytes = RocketMessage.ToBytes(profile);
+
+            using var signatureBytes = RocketMessage.ToBytes(digitalSignature.GetOmniSignature());
+            var property = new AttachedProperty(PROPERTIES_SIGNATURE, signatureBytes.Memory);
+
+            var rootHash = await _serviceMediator.PublishFileFromMemoryAsync(profileBytes.Memory, 8 * 1024 * 1024, new[] { property }, Zone, cancellationToken);
 
             var now = DateTime.UtcNow;
             using var shout = Shout.Create(Channel, Timestamp64.FromDateTime(now), RocketMessage.ToBytes(rootHash), digitalSignature);
-            await _serviceMediator.PublishShoutAsync(shout, Zone, cancellationToken);
+            await _serviceMediator.PublishShoutAsync(shout, Enumerable.Empty<AttachedProperty>(), Zone, cancellationToken);
         }
     }
 
@@ -198,20 +174,22 @@ public sealed class ProfileUploader : AsyncDisposableBase, IProfileUploader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var config = await _configStorage.TryGetValueAsync<ProfileUploaderConfig>(cancellationToken);
+            if (_config is not null) return _config;
 
-            if (config is null)
+            _config = await _configStorage.TryGetValueAsync<ProfileUploaderConfig>(cancellationToken);
+
+            if (_config is null)
             {
-                config = new ProfileUploaderConfig(
+                _config = new ProfileUploaderConfig(
                     digitalSignature: OmniDigitalSignature.Create("Anonymous", OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256),
                     trustedSignatures: Array.Empty<OmniSignature>(),
                     blockedSignatures: Array.Empty<OmniSignature>()
                 );
 
-                await _configStorage.TrySetValueAsync(config, cancellationToken);
+                await _configStorage.TrySetValueAsync(_config, cancellationToken);
             }
 
-            return config;
+            return _config;
         }
     }
 
@@ -220,7 +198,7 @@ public sealed class ProfileUploader : AsyncDisposableBase, IProfileUploader
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             await _configStorage.TrySetValueAsync(config, cancellationToken);
-            _profileUploaderRepo.ProfileItems.DeleteAll();
+            _config = config;
         }
     }
 }

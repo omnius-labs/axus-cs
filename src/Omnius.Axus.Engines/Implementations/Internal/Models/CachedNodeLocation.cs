@@ -6,5 +6,5 @@ internal record CachedNodeLocation
 {
     public required NodeLocation Value { get; init; }
     public required DateTime LastConnectedTime { get; init; }
-    public required DateTime UpdatedTime { get; init; }
+    public required DateTime CreatedTime { get; init; }
 }

@@ -2,7 +2,7 @@ namespace Omnius.Axus.Interactors.Internal.Models;
 
 public partial class CachedSeedBox
 {
-    public IEnumerable<CachedSeed> ToSeeds()
+    public IEnumerable<CachedSeed> ToCachedSeeds()
     {
         var results = new List<CachedSeed>();
 

@@ -16,27 +16,27 @@ public sealed partial class CachedProfile : global::Omnius.Core.RocketPack.IRock
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public CachedProfile(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Timestamp64 shoutUpdatedTime, global::Omnius.Axus.Interactors.Models.Profile value)
+    public CachedProfile(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Timestamp64 createdTime, global::Omnius.Axus.Interactors.Models.Profile value)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
         if (value is null) throw new global::System.ArgumentNullException("value");
 
         this.Signature = signature;
-        this.ShoutUpdatedTime = shoutUpdatedTime;
+        this.CreatedTime = createdTime;
         this.Value = value;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (signature != default) ___h.Add(signature.GetHashCode());
-            if (shoutUpdatedTime != default) ___h.Add(shoutUpdatedTime.GetHashCode());
+            if (createdTime != default) ___h.Add(createdTime.GetHashCode());
             if (value != default) ___h.Add(value.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
-    public global::Omnius.Core.RocketPack.Timestamp64 ShoutUpdatedTime { get; }
+    public global::Omnius.Core.RocketPack.Timestamp64 CreatedTime { get; }
     public global::Omnius.Axus.Interactors.Models.Profile Value { get; }
 
     public static global::Omnius.Axus.Interactors.Internal.Models.CachedProfile Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -68,7 +68,7 @@ public sealed partial class CachedProfile : global::Omnius.Core.RocketPack.IRock
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
         if (this.Signature != target.Signature) return false;
-        if (this.ShoutUpdatedTime != target.ShoutUpdatedTime) return false;
+        if (this.CreatedTime != target.CreatedTime) return false;
         if (this.Value != target.Value) return false;
 
         return true;
@@ -86,10 +86,10 @@ public sealed partial class CachedProfile : global::Omnius.Core.RocketPack.IRock
                 w.Write((uint)1);
                 global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
             }
-            if (value.ShoutUpdatedTime != global::Omnius.Core.RocketPack.Timestamp64.Zero)
+            if (value.CreatedTime != global::Omnius.Core.RocketPack.Timestamp64.Zero)
             {
                 w.Write((uint)2);
-                w.Write(value.ShoutUpdatedTime);
+                w.Write(value.CreatedTime);
             }
             if (value.Value != global::Omnius.Axus.Interactors.Models.Profile.Empty)
             {
@@ -103,7 +103,7 @@ public sealed partial class CachedProfile : global::Omnius.Core.RocketPack.IRock
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Core.Cryptography.OmniSignature p_signature = global::Omnius.Core.Cryptography.OmniSignature.Empty;
-            global::Omnius.Core.RocketPack.Timestamp64 p_shoutUpdatedTime = global::Omnius.Core.RocketPack.Timestamp64.Zero;
+            global::Omnius.Core.RocketPack.Timestamp64 p_createdTime = global::Omnius.Core.RocketPack.Timestamp64.Zero;
             global::Omnius.Axus.Interactors.Models.Profile p_value = global::Omnius.Axus.Interactors.Models.Profile.Empty;
 
             for (; ; )
@@ -119,7 +119,7 @@ public sealed partial class CachedProfile : global::Omnius.Core.RocketPack.IRock
                         }
                     case 2:
                         {
-                            p_shoutUpdatedTime = r.GetTimestamp64();
+                            p_createdTime = r.GetTimestamp64();
                             break;
                         }
                     case 3:
@@ -130,7 +130,7 @@ public sealed partial class CachedProfile : global::Omnius.Core.RocketPack.IRock
                 }
             }
 
-            return new global::Omnius.Axus.Interactors.Internal.Models.CachedProfile(p_signature, p_shoutUpdatedTime, p_value);
+            return new global::Omnius.Axus.Interactors.Internal.Models.CachedProfile(p_signature, p_createdTime, p_value);
         }
     }
 }
@@ -147,27 +147,27 @@ public sealed partial class CachedNoteBox : global::Omnius.Core.RocketPack.IRock
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public CachedNoteBox(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Timestamp64 shoutUpdatedTime, global::Omnius.Axus.Interactors.Internal.Models.NoteBox value)
+    public CachedNoteBox(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Timestamp64 createdTime, global::Omnius.Axus.Interactors.Internal.Models.NoteBox value)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
         if (value is null) throw new global::System.ArgumentNullException("value");
 
         this.Signature = signature;
-        this.ShoutUpdatedTime = shoutUpdatedTime;
+        this.CreatedTime = createdTime;
         this.Value = value;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (signature != default) ___h.Add(signature.GetHashCode());
-            if (shoutUpdatedTime != default) ___h.Add(shoutUpdatedTime.GetHashCode());
+            if (createdTime != default) ___h.Add(createdTime.GetHashCode());
             if (value != default) ___h.Add(value.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
-    public global::Omnius.Core.RocketPack.Timestamp64 ShoutUpdatedTime { get; }
+    public global::Omnius.Core.RocketPack.Timestamp64 CreatedTime { get; }
     public global::Omnius.Axus.Interactors.Internal.Models.NoteBox Value { get; }
 
     public static global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -199,7 +199,7 @@ public sealed partial class CachedNoteBox : global::Omnius.Core.RocketPack.IRock
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
         if (this.Signature != target.Signature) return false;
-        if (this.ShoutUpdatedTime != target.ShoutUpdatedTime) return false;
+        if (this.CreatedTime != target.CreatedTime) return false;
         if (this.Value != target.Value) return false;
 
         return true;
@@ -217,10 +217,10 @@ public sealed partial class CachedNoteBox : global::Omnius.Core.RocketPack.IRock
                 w.Write((uint)1);
                 global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
             }
-            if (value.ShoutUpdatedTime != global::Omnius.Core.RocketPack.Timestamp64.Zero)
+            if (value.CreatedTime != global::Omnius.Core.RocketPack.Timestamp64.Zero)
             {
                 w.Write((uint)2);
-                w.Write(value.ShoutUpdatedTime);
+                w.Write(value.CreatedTime);
             }
             if (value.Value != global::Omnius.Axus.Interactors.Internal.Models.NoteBox.Empty)
             {
@@ -234,7 +234,7 @@ public sealed partial class CachedNoteBox : global::Omnius.Core.RocketPack.IRock
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Core.Cryptography.OmniSignature p_signature = global::Omnius.Core.Cryptography.OmniSignature.Empty;
-            global::Omnius.Core.RocketPack.Timestamp64 p_shoutUpdatedTime = global::Omnius.Core.RocketPack.Timestamp64.Zero;
+            global::Omnius.Core.RocketPack.Timestamp64 p_createdTime = global::Omnius.Core.RocketPack.Timestamp64.Zero;
             global::Omnius.Axus.Interactors.Internal.Models.NoteBox p_value = global::Omnius.Axus.Interactors.Internal.Models.NoteBox.Empty;
 
             for (; ; )
@@ -250,7 +250,7 @@ public sealed partial class CachedNoteBox : global::Omnius.Core.RocketPack.IRock
                         }
                     case 2:
                         {
-                            p_shoutUpdatedTime = r.GetTimestamp64();
+                            p_createdTime = r.GetTimestamp64();
                             break;
                         }
                     case 3:
@@ -261,7 +261,7 @@ public sealed partial class CachedNoteBox : global::Omnius.Core.RocketPack.IRock
                 }
             }
 
-            return new global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox(p_signature, p_shoutUpdatedTime, p_value);
+            return new global::Omnius.Axus.Interactors.Internal.Models.CachedNoteBox(p_signature, p_createdTime, p_value);
         }
     }
 }
@@ -384,20 +384,20 @@ public sealed partial class NoteBox : global::Omnius.Core.RocketPack.IRocketMess
         }
     }
 }
-public sealed partial class CachedMemo : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedMemo>
+public sealed partial class CachedNote : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedNote>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Internal.Models.CachedMemo> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedMemo>.Formatter;
-    public static global::Omnius.Axus.Interactors.Internal.Models.CachedMemo Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedMemo>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Internal.Models.CachedNote> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedNote>.Formatter;
+    public static global::Omnius.Axus.Interactors.Internal.Models.CachedNote Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedNote>.Empty;
 
-    static CachedMemo()
+    static CachedNote()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedMemo>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedMemo>.Empty = new global::Omnius.Axus.Interactors.Internal.Models.CachedMemo(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Axus.Interactors.Models.Note.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedNote>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Interactors.Internal.Models.CachedNote>.Empty = new global::Omnius.Axus.Interactors.Internal.Models.CachedNote(global::Omnius.Core.Cryptography.OmniSignature.Empty, global::Omnius.Axus.Interactors.Models.Note.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public CachedMemo(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Axus.Interactors.Models.Note value)
+    public CachedNote(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Axus.Interactors.Models.Note value)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
         if (value is null) throw new global::System.ArgumentNullException("value");
@@ -417,7 +417,7 @@ public sealed partial class CachedMemo : global::Omnius.Core.RocketPack.IRocketM
     public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
     public global::Omnius.Axus.Interactors.Models.Note Value { get; }
 
-    public static global::Omnius.Axus.Interactors.Internal.Models.CachedMemo Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Interactors.Internal.Models.CachedNote Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -428,20 +428,20 @@ public sealed partial class CachedMemo : global::Omnius.Core.RocketPack.IRocketM
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Interactors.Internal.Models.CachedMemo? left, global::Omnius.Axus.Interactors.Internal.Models.CachedMemo? right)
+    public static bool operator ==(global::Omnius.Axus.Interactors.Internal.Models.CachedNote? left, global::Omnius.Axus.Interactors.Internal.Models.CachedNote? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Interactors.Internal.Models.CachedMemo? left, global::Omnius.Axus.Interactors.Internal.Models.CachedMemo? right)
+    public static bool operator !=(global::Omnius.Axus.Interactors.Internal.Models.CachedNote? left, global::Omnius.Axus.Interactors.Internal.Models.CachedNote? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Interactors.Internal.Models.CachedMemo) return false;
-        return this.Equals((global::Omnius.Axus.Interactors.Internal.Models.CachedMemo)other);
+        if (other is not global::Omnius.Axus.Interactors.Internal.Models.CachedNote) return false;
+        return this.Equals((global::Omnius.Axus.Interactors.Internal.Models.CachedNote)other);
     }
-    public bool Equals(global::Omnius.Axus.Interactors.Internal.Models.CachedMemo? target)
+    public bool Equals(global::Omnius.Axus.Interactors.Internal.Models.CachedNote? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -452,9 +452,9 @@ public sealed partial class CachedMemo : global::Omnius.Core.RocketPack.IRocketM
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Internal.Models.CachedMemo>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Interactors.Internal.Models.CachedNote>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Interactors.Internal.Models.CachedMemo value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Interactors.Internal.Models.CachedNote value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -470,7 +470,7 @@ public sealed partial class CachedMemo : global::Omnius.Core.RocketPack.IRocketM
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Interactors.Internal.Models.CachedMemo Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Interactors.Internal.Models.CachedNote Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -496,7 +496,7 @@ public sealed partial class CachedMemo : global::Omnius.Core.RocketPack.IRocketM
                 }
             }
 
-            return new global::Omnius.Axus.Interactors.Internal.Models.CachedMemo(p_signature, p_value);
+            return new global::Omnius.Axus.Interactors.Internal.Models.CachedNote(p_signature, p_value);
         }
     }
 }
@@ -513,27 +513,27 @@ public sealed partial class CachedSeedBox : global::Omnius.Core.RocketPack.IRock
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public CachedSeedBox(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Timestamp64 shoutUpdatedTime, global::Omnius.Axus.Interactors.Internal.Models.SeedBox value)
+    public CachedSeedBox(global::Omnius.Core.Cryptography.OmniSignature signature, global::Omnius.Core.RocketPack.Timestamp64 createdTime, global::Omnius.Axus.Interactors.Internal.Models.SeedBox value)
     {
         if (signature is null) throw new global::System.ArgumentNullException("signature");
         if (value is null) throw new global::System.ArgumentNullException("value");
 
         this.Signature = signature;
-        this.ShoutUpdatedTime = shoutUpdatedTime;
+        this.CreatedTime = createdTime;
         this.Value = value;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (signature != default) ___h.Add(signature.GetHashCode());
-            if (shoutUpdatedTime != default) ___h.Add(shoutUpdatedTime.GetHashCode());
+            if (createdTime != default) ___h.Add(createdTime.GetHashCode());
             if (value != default) ___h.Add(value.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Core.Cryptography.OmniSignature Signature { get; }
-    public global::Omnius.Core.RocketPack.Timestamp64 ShoutUpdatedTime { get; }
+    public global::Omnius.Core.RocketPack.Timestamp64 CreatedTime { get; }
     public global::Omnius.Axus.Interactors.Internal.Models.SeedBox Value { get; }
 
     public static global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
@@ -565,7 +565,7 @@ public sealed partial class CachedSeedBox : global::Omnius.Core.RocketPack.IRock
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
         if (this.Signature != target.Signature) return false;
-        if (this.ShoutUpdatedTime != target.ShoutUpdatedTime) return false;
+        if (this.CreatedTime != target.CreatedTime) return false;
         if (this.Value != target.Value) return false;
 
         return true;
@@ -583,10 +583,10 @@ public sealed partial class CachedSeedBox : global::Omnius.Core.RocketPack.IRock
                 w.Write((uint)1);
                 global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, value.Signature, rank + 1);
             }
-            if (value.ShoutUpdatedTime != global::Omnius.Core.RocketPack.Timestamp64.Zero)
+            if (value.CreatedTime != global::Omnius.Core.RocketPack.Timestamp64.Zero)
             {
                 w.Write((uint)2);
-                w.Write(value.ShoutUpdatedTime);
+                w.Write(value.CreatedTime);
             }
             if (value.Value != global::Omnius.Axus.Interactors.Internal.Models.SeedBox.Empty)
             {
@@ -600,7 +600,7 @@ public sealed partial class CachedSeedBox : global::Omnius.Core.RocketPack.IRock
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Core.Cryptography.OmniSignature p_signature = global::Omnius.Core.Cryptography.OmniSignature.Empty;
-            global::Omnius.Core.RocketPack.Timestamp64 p_shoutUpdatedTime = global::Omnius.Core.RocketPack.Timestamp64.Zero;
+            global::Omnius.Core.RocketPack.Timestamp64 p_createdTime = global::Omnius.Core.RocketPack.Timestamp64.Zero;
             global::Omnius.Axus.Interactors.Internal.Models.SeedBox p_value = global::Omnius.Axus.Interactors.Internal.Models.SeedBox.Empty;
 
             for (; ; )
@@ -616,7 +616,7 @@ public sealed partial class CachedSeedBox : global::Omnius.Core.RocketPack.IRock
                         }
                     case 2:
                         {
-                            p_shoutUpdatedTime = r.GetTimestamp64();
+                            p_createdTime = r.GetTimestamp64();
                             break;
                         }
                     case 3:
@@ -627,7 +627,7 @@ public sealed partial class CachedSeedBox : global::Omnius.Core.RocketPack.IRock
                 }
             }
 
-            return new global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox(p_signature, p_shoutUpdatedTime, p_value);
+            return new global::Omnius.Axus.Interactors.Internal.Models.CachedSeedBox(p_signature, p_createdTime, p_value);
         }
     }
 }

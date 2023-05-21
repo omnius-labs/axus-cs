@@ -1,10 +1,9 @@
-using System.Buffers;
+using System.Data;
 using System.Data.SQLite;
 using Omnius.Axus.Interactors.Internal.Models;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Helpers;
-using Omnius.Core.Pipelines;
 using Omnius.Core.RocketPack;
 using Omnius.Core.Serialization;
 using SqlKata.Compilers;
@@ -19,7 +18,7 @@ internal sealed class CachedSeedBoxRepository
 
     private static readonly Lazy<Base16> _base16 = new Lazy<Base16>(() => new Base16(ConvertStringCase.Lower));
 
-    private readonly object _lockObject = new();
+    private readonly AsyncLock _asyncLock = new();
 
     public CachedSeedBoxRepository(string dirPath, IBytesPool bytesPool)
     {
@@ -30,13 +29,15 @@ internal sealed class CachedSeedBoxRepository
 
     public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
     {
-        using var connection = this.GetConnection();
-        using var command = new SQLiteCommand(connection);
-        command.CommandText =
+        await Task.Delay(1, cancellationToken).ConfigureAwait(false);
+
+        using var connection = await this.GetConnectionAsync(cancellationToken);
+
+        var query =
 @"
-CREATE TABLE IF NOT EXISTS contents (
+CREATE TABLE IF NOT EXISTS boxes (
     signature TEXT NOT NULL PRIMARY KEY,
-    shout_updated_time INTEGER NOT NULL
+    created_time INTEGER NOT NULL
 );
 CREATE TABLE IF NOT EXISTS seeds (
     self_hash TEXT NOT NULL PRIMARY KEY,
@@ -46,148 +47,137 @@ CREATE TABLE IF NOT EXISTS seeds (
     created_time INTEGER NOT NULL,
     value BLOB NOT NULL
 );
+CREATE INDEX IF NOT EXISTS index_signature_and_created_time_for_boxes ON boxes (signature, created_time);
 CREATE INDEX IF NOT EXISTS index_signature_for_seeds ON seeds (signature);
 CREATE INDEX IF NOT EXISTS index_size_for_seeds ON seeds (size);
-CREATE INDEX IF NOT EXISTS index_created_time_for_messages ON messages (created_time);
 ";
-        command.ExecuteNonQuery();
+        await connection.ExecuteNonQueryAsync(query, cancellationToken);
     }
 
-    private SQLiteConnection GetConnection()
+    private async ValueTask<SQLiteConnection> GetConnectionAsync(CancellationToken cancellationToken = default)
     {
         var sqlConnectionStringBuilder = new SQLiteConnectionStringBuilder { DataSource = _databasePath };
         var connection = new SQLiteConnection(sqlConnectionStringBuilder.ToString());
-        connection.Open();
+        await connection.OpenAsync(cancellationToken);
         return connection;
     }
 
-    public void UpsertBulk(CachedSeedBox content)
+    public async ValueTask UpsertAsync(CachedSeedBox box, CancellationToken cancellationToken = default)
     {
-        lock (_lockObject)
+        await Task.Delay(1, cancellationToken).ConfigureAwait(false);
+
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
-            using var connection = this.GetConnection();
+            using var connection = await this.GetConnectionAsync(cancellationToken);
             using var transaction = connection.BeginTransaction();
 
             {
-                var signature = content.Signature.ToString();
-                var shout_updated_time = content.ShoutUpdatedTime.Seconds;
-
-                using var command = new SQLiteCommand(connection);
-                command.CommandText =
+                var query =
 $@"
-DELETE FROM contents WHERE signature = '{signature}';
-INSERT INTO contents (signature, shout_updated_time)
-VALUES (
-    '{signature}',
-    '{shout_updated_time}'
-);
-DELETE FROM seeds WHERE signature = '{signature}';
+DELETE FROM boxes WHERE signature = @Signature;
+INSERT INTO boxes (signature, created_time)
+    VALUES (@Signature, @CreatedTime);
+DELETE FROM seeds WHERE signature = @Signature;
 ";
-                command.ExecuteNonQuery();
+                var parameters = new (string, object)[] {
+                    ("@Signature", box.Signature.ToString()),
+                    ("@CreatedTime", box.CreatedTime.Seconds)
+                };
+
+                await transaction.ExecuteNonQueryAsync(query, parameters, cancellationToken);
             }
 
-            using var bytesPipe = new BytesPipe(_bytesPool);
-
-            foreach (var s in content.ToSeeds())
+            foreach (var s in box.ToCachedSeeds())
             {
-                var self_hash = s.SelfHash.ToString(ConvertStringType.Base16);
-                var signature = s.Signature.ToString();
-                var name = s.Value.Name;
-                var size = s.Value.Size;
-                var created_time = s.Value.CreatedTime.Seconds;
-
-                s.Export(bytesPipe.Writer, _bytesPool);
-                var value = _base16.Value.BytesToString(bytesPipe.Reader.GetSequence());
-                bytesPipe.Reset();
-
-                using var command = new SQLiteCommand(connection);
-                command.CommandText =
+                var query =
 $@"
-INSERT OR IGNORE INTO messages (self_hash, signature, name, size, created_time, value)
-VALUES (
-    '{self_hash}',
-    '{signature}',
-    '{name}',
-    {size},
-    {created_time},
-    x'{value}'
-);
+INSERT OR IGNORE INTO seeds (self_hash, signature, name, size, created_time, value)
+    VALUES (@SelfHash, @Signature, @Name, @Size, @CreatedTime, @Value);
 ";
-                command.ExecuteNonQuery();
+                using var value = RocketMessage.ToBytes(s.Value);
+                var parameters = new (string, object)[] {
+                    ("@SelfHash", s.SelfHash.ToString(ConvertStringType.Base16)),
+                    ("@Signature", s.Signature.ToString()),
+                    ("@Name", s.Value.Name),
+                    ("@Size", s.Value.Size),
+                    ("@CreatedTime", s.Value.CreatedTime.Seconds),
+                    ("@Value", value),
+                };
+
+                await transaction.ExecuteNonQueryAsync(query, parameters, cancellationToken);
             }
 
-            transaction.Commit();
+            await transaction.CommitAsync(cancellationToken);
         }
     }
 
-    public DateTime FetchShoutUpdatedTime(OmniSignature signature)
+    public async ValueTask<IEnumerable<(OmniSignature Signature, Timestamp64 CreatedTime)>> GetKeysAsync(CancellationToken cancellationToken = default)
     {
-        lock (_lockObject)
+        await Task.Delay(1, cancellationToken).ConfigureAwait(false);
+
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
-            using var connection = this.GetConnection();
+            using var connection = await this.GetConnectionAsync(cancellationToken);
             var compiler = new SqliteCompiler();
             using var db = new QueryFactory(connection, compiler);
 
-            var rows = db.Query("contents")
-                .Select("shout_updated_time")
-                .Where("signature", signature.ToString())
-                .Get();
+            var rows = await db.Query("profiles")
+                .Select("signature", "created_time")
+                .GetAsync();
 
-            if (rows.Count() == 0) return DateTime.MinValue;
-
-            var shoutUpdatedTime = rows
-                .Select(n => n.shout_updated_time)
-                .OfType<long>()
-                .Select(n => new Timestamp64(n).ToDateTime())
-                .Single();
-            return shoutUpdatedTime;
-        }
-    }
-
-    public IEnumerable<CachedSeed> FetchMessageByTag(string tag)
-    {
-        lock (_lockObject)
-        {
-            using var connection = this.GetConnection();
-            var compiler = new SqliteCompiler();
-            using var db = new QueryFactory(connection, compiler);
-
-            var rows = db.Query("seeds")
-                .Select("value")
-                .Where("tag", tag)
-                .OrderByDesc("created_time")
-                .Get();
-
-            var results = new List<CachedSeed>();
-
-            foreach (var value in rows.Select(n => n.value).OfType<byte[]>())
-            {
-                var result = CachedSeed.Import(new ReadOnlySequence<byte>(value), _bytesPool);
-                results.Add(result);
-            }
+            var results = rows
+                .Select(n => (n.signature, n.created_time))
+                .OfType<(string, long)>()
+                .Select(n => (OmniSignature.Parse(n.Item1), new Timestamp64(n.Item2)));
 
             return results;
         }
     }
 
-    public CachedSeed? FetchMessageBySelfHash(OmniHash selfHash)
+    // TODO: FindSeedsの実装が必要
+
+    public async ValueTask ShrinkAsync(IEnumerable<OmniSignature> signatures, CancellationToken cancellationToken = default)
     {
-        lock (_lockObject)
+        await Task.Delay(1, cancellationToken).ConfigureAwait(false);
+
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
-            using var connection = this.GetConnection();
-            var compiler = new SqliteCompiler();
-            using var db = new QueryFactory(connection, compiler);
+            using var connection = await this.GetConnectionAsync(cancellationToken);
+            using var transaction = connection.BeginTransaction();
 
-            var rows = db.Query("messages")
-                .Select("value")
-                .Where("self_hash", selfHash.ToString())
-                .Limit(1)
-                .Get();
+            {
+                var query =
+@"
+CREATE TEMP TABLE tmp (
+    signature TEXT NOT NULL PRIMARY KEY
+);
+";
+                await transaction.ExecuteNonQueryAsync(query, cancellationToken);
+            }
 
-            var value = rows.Select(n => n.value).OfType<byte[]>().FirstOrDefault();
-            if (value is null) return null;
+            {
+                var compiler = new SqliteCompiler();
+                using var db = new QueryFactory(connection, compiler);
 
-            return CachedSeed.Import(new ReadOnlySequence<byte>(value), _bytesPool);
+                foreach (var chunkedSignatures in signatures.Chunk(500))
+                {
+                    var columns = new[] { "signature" };
+                    var valuesCollection = chunkedSignatures.Select(signature => new object[] { signature.ToString() });
+                    await db.Query("tmp")
+                        .InsertAsync(columns, valuesCollection, transaction, null, cancellationToken);
+                }
+            }
+
+            {
+                var query =
+@"
+DELETE FROM boxes
+    WHERE (signature) NOT IN (SELECT (signature) FROM tmp);
+";
+                await transaction.ExecuteNonQueryAsync(query, cancellationToken);
+            }
+
+            await transaction.CommitAsync(cancellationToken);
         }
     }
 }

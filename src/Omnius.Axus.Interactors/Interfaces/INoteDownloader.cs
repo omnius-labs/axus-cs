@@ -7,6 +7,6 @@ public interface INoteDownloader : IAsyncDisposable
 {
     ValueTask<IEnumerable<NoteReport>> FindMessagesByTagAsync(string tag, CancellationToken cancellationToken = default);
     ValueTask<NoteReport?> FindMessageBySelfHashAsync(OmniHash selfHash, CancellationToken cancellationToken = default);
-    ValueTask<MemoDownloaderConfig> GetConfigAsync(CancellationToken cancellationToken = default);
-    ValueTask SetConfigAsync(MemoDownloaderConfig config, CancellationToken cancellationToken = default);
+    ValueTask<NoteDownloaderConfig> GetConfigAsync(CancellationToken cancellationToken = default);
+    ValueTask SetConfigAsync(NoteDownloaderConfig config, CancellationToken cancellationToken = default);
 }

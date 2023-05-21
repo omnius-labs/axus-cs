@@ -8,8 +8,9 @@
     <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.Net\Omnius.Core.Net.csproj" />
     <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.RocketPack.Remoting\Omnius.Core.RocketPack.Remoting.csproj" />
     <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.RocketPack\Omnius.Core.RocketPack.csproj" />
-    <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.Storages\Omnius.Core.Storages.csproj" />
     <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.Serialization\Omnius.Core.Serialization.csproj" />
+    <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.Sql\Omnius.Core.Sql.csproj" />
+    <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.Storages\Omnius.Core.Storages.csproj" />
     <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core\Omnius.Core.csproj" />
     <ProjectReference Include="..\Omnius.Axus.Messages\Omnius.Axus.Messages.csproj" />
     <ProjectReference Include="..\Omnius.Axus.Remoting\Omnius.Axus.Remoting.csproj" />

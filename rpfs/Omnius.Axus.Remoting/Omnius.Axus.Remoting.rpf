@@ -179,7 +179,7 @@ message UnsubscribeShoutParam {
 message TryExportShoutParam {
     Signature: OmniSignature,
     Channel: string,
-    UpdatedTime: timestamp64,
+    CreatedTime: timestamp64,
 }
 
 message TryExportShoutResult {

@@ -49,8 +49,6 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
     private readonly CompositeDisposable _disposables = new();
 
-    private readonly object _lockObject = new();
-
     private const string Schema = "shout-exchanger-v1";
 
     public static async ValueTask<ShoutExchanger> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
@@ -246,7 +244,7 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
             if (version == ShoutExchangerVersion.Version1)
             {
-                var shoutUpdatedTime = await this.ReadShoutUpdatedTimeAsync(signature, channel, cancellationToken);
+                var shoutUpdatedTime = await this.ReadShoutCreatedTimeAsync(signature, channel, cancellationToken);
 
                 var requestMessage = new ShoutExchangerFetchRequestMessage(signature, channel, Timestamp64.FromDateTime(shoutUpdatedTime.ToUniversalTime()));
                 var resultMessage = await session.Connection.SendAndReceiveAsync<ShoutExchangerFetchRequestMessage, ShoutExchangerFetchResultMessage>(requestMessage, cancellationToken);
@@ -324,18 +322,18 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
                 _logger.Debug($"Receive ShoutFetchRequest: (Signature: {requestMessage.Signature.ToString()})");
 
-                var shoutUpdatedTime = await this.ReadShoutUpdatedTimeAsync(requestMessage.Signature, requestMessage.Channel, cancellationToken);
+                var shoutCreatedTime = await this.ReadShoutCreatedTimeAsync(requestMessage.Signature, requestMessage.Channel, cancellationToken);
 
-                if (requestMessage.ShoutUpdatedTime.ToDateTime() == shoutUpdatedTime)
+                if (requestMessage.CreatedTime.ToDateTime() == shoutCreatedTime)
                 {
                     using var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.Same, null);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
 
                     _logger.Debug($"Send ShoutFetchResult: (Type: Same, Signature: {requestMessage.Signature.ToString()})");
                 }
-                else if (requestMessage.ShoutUpdatedTime.ToDateTime() < shoutUpdatedTime)
+                else if (requestMessage.CreatedTime.ToDateTime() < shoutCreatedTime)
                 {
-                    using var shout = await this.TryReadShoutAsync(requestMessage.Signature, requestMessage.Channel, requestMessage.ShoutUpdatedTime.ToDateTime(), cancellationToken);
+                    using var shout = await this.TryReadShoutAsync(requestMessage.Signature, requestMessage.Channel, requestMessage.CreatedTime.ToDateTime(), cancellationToken);
                     using var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.Found, shout);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
 
@@ -394,12 +392,12 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
         return version ?? ShoutExchangerVersion.Unknown;
     }
 
-    private async ValueTask<DateTime> ReadShoutUpdatedTimeAsync(OmniSignature signature, string channel, CancellationToken cancellationToken)
+    private async ValueTask<DateTime> ReadShoutCreatedTimeAsync(OmniSignature signature, string channel, CancellationToken cancellationToken)
     {
-        var wantShoutUpdatedTime = await _subscribedShoutStorage.ReadShoutUpdatedTimeAsync(signature, channel, cancellationToken);
-        var pushShoutUpdatedTime = await _publishedShoutStorage.ReadShoutUpdatedTimeAsync(signature, channel, cancellationToken);
+        var wantShoutCreatedTime = await _subscribedShoutStorage.ReadShoutCreatedTimeAsync(signature, channel, cancellationToken);
+        var pushShoutCreatedTime = await _publishedShoutStorage.ReadShoutCreatedTimeAsync(signature, channel, cancellationToken);
 
-        return wantShoutUpdatedTime > pushShoutUpdatedTime ? wantShoutUpdatedTime : pushShoutUpdatedTime;
+        return wantShoutCreatedTime > pushShoutCreatedTime ? wantShoutCreatedTime : pushShoutCreatedTime;
     }
 
     public async ValueTask<Shout?> TryReadShoutAsync(OmniSignature signature, string channel, DateTime updatedTime, CancellationToken cancellationToken)

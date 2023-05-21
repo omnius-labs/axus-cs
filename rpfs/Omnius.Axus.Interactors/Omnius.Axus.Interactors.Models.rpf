@@ -38,20 +38,18 @@ message ProfileUploaderConfig {
 message ProfileDownloaderConfig {
     TrustedSignatures: vector<OmniSignature>(capacity: 1024),
     BlockedSignatures: vector<OmniSignature>(capacity: 1024),
-    SearchDepth: uint32,
-    MaxProfileCount: uint32,
 }
 
 // Note
 
-message MemoUploaderConfig {
+message NoteUploaderConfig {
     DigitalSignature: OmniDigitalSignature,
     Notes: vector<Note>(capacity: 8 * 1024),
 }
 
-message MemoDownloaderConfig {
+message NoteDownloaderConfig {
     Tags: vector<string(capacity: 256)>(capacity: 256),
-    MaxMemoCount: uint32,
+    MaxNoteCount: uint32,
 }
 
 // Seed
@@ -61,7 +59,7 @@ message SeedUploaderConfig {
 }
 
 message SeedDownloaderConfig {
-    MaxSeedCount: uint32,
+    MaxSeedBoxCount: uint32,
 }
 
 // File

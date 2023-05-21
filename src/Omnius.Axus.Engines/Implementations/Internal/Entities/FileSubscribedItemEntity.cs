@@ -7,18 +7,18 @@ namespace Omnius.Axus.Engines.Internal.Entities;
 internal record FileSubscribedItemEntity
 {
     public OmniHashEntity? RootHash { get; set; }
-    public IReadOnlyList<string>? Zones { get; set; }
     public SubscribedFileItemStatusEntity? Status { get; init; }
     public IReadOnlyList<AttachedProperty>? Properties { get; init; }
+    public IReadOnlyList<string>? Zones { get; set; }
 
     public static FileSubscribedItemEntity Import(FileSubscribedItem item)
     {
         return new FileSubscribedItemEntity()
         {
             RootHash = OmniHashEntity.Import(item.RootHash),
-            Zones = item.Zones,
             Status = SubscribedFileItemStatusEntity.Import(item.Status),
             Properties = item.Properties,
+            Zones = item.Zones,
         };
     }
 
@@ -27,7 +27,6 @@ internal record FileSubscribedItemEntity
         return new FileSubscribedItem()
         {
             RootHash = this.RootHash?.Export() ?? OmniHash.Empty,
-            Zones = this.Zones ?? Array.Empty<string>(),
             Status = this.Status?.Export() ?? new FileSubscribedItemStatus
             {
                 CurrentDepth = 0,
@@ -36,6 +35,7 @@ internal record FileSubscribedItemEntity
                 State = SubscribedFileState.Unknown
             },
             Properties = this.Properties ?? Array.Empty<AttachedProperty>(),
+            Zones = this.Zones ?? Array.Empty<string>(),
         };
     }
 }

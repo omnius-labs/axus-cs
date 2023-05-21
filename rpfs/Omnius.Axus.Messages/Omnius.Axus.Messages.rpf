@@ -13,7 +13,7 @@ message NodeLocation {
 
 message Shout {
     Channel: string(capacity: 256),
-    UpdatedTime: timestamp64,
+    CreatedTime: timestamp64,
     Value: bytes(capacity: 32 * 1024 * 1024, recyclable: true),
     Certificate: OmniCertificate?,
 }
@@ -71,12 +71,14 @@ enum SubscribedFileState : uint8 {
 
 message PublishedShoutReport {
     Signature: OmniSignature,
-    Properties: vector<AttachedProperty>(capacity: 256),
     Channel: string,
+    CreatedTime: timestamp64,
+    Properties: vector<AttachedProperty>(capacity: 256),
 }
 
 message SubscribedShoutReport {
     Signature: OmniSignature,
-    Properties: vector<AttachedProperty>(capacity: 256),
     Channel: string,
+    CreatedTime: timestamp64,
+    Properties: vector<AttachedProperty>(capacity: 256),
 }

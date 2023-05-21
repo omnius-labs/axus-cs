@@ -9,8 +9,8 @@ internal record FilePublishedItemEntity
     public OmniHashEntity? RootHash { get; set; }
     public string? FilePath { get; set; }
     public int MaxBlockSize { get; set; }
-    public IReadOnlyList<string>? Zones { get; set; }
     public IReadOnlyList<AttachedProperty>? Properties { get; init; }
+    public IReadOnlyList<string>? Zones { get; set; }
 
     public static FilePublishedItemEntity Import(FilePublishedItem item)
     {
@@ -19,8 +19,8 @@ internal record FilePublishedItemEntity
             RootHash = OmniHashEntity.Import(item.RootHash),
             FilePath = item.FilePath,
             MaxBlockSize = item.MaxBlockSize,
-            Zones = item.Zones,
             Properties = item.Properties,
+            Zones = item.Zones,
         };
     }
 
@@ -31,8 +31,8 @@ internal record FilePublishedItemEntity
             RootHash = this.RootHash?.Export() ?? OmniHash.Empty,
             FilePath = this.FilePath,
             MaxBlockSize = this.MaxBlockSize,
-            Zones = this.Zones ?? Array.Empty<string>(),
             Properties = this.Properties ?? Array.Empty<AttachedProperty>(),
+            Zones = this.Zones ?? Array.Empty<string>(),
         };
     }
 }

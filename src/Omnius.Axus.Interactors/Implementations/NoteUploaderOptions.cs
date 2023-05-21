@@ -1,8 +1,8 @@
 namespace Omnius.Axus.Interactors;
 
-public record MemoDownloaderOptions
+public record NoteUploaderOptions
 {
-    public MemoDownloaderOptions(string configDirectoryPath)
+    public NoteUploaderOptions(string configDirectoryPath)
     {
         this.ConfigDirectoryPath = configDirectoryPath;
     }

@@ -155,9 +155,9 @@ public sealed class AxusServiceMediator : IAxusServiceMediator
         await _axusService.UnsubscribeShoutAsync(input, cancellationToken);
     }
 
-    public async ValueTask<Shout?> TryExportShoutAsync(OmniSignature signature, string channel, DateTime updatedTime, CancellationToken cancellationToken = default)
+    public async ValueTask<Shout?> TryExportShoutAsync(OmniSignature signature, string channel, Timestamp64 createdTime, CancellationToken cancellationToken = default)
     {
-        var input = new TryExportShoutParam(signature, channel, Timestamp64.FromDateTime(updatedTime));
+        var input = new TryExportShoutParam(signature, channel, createdTime);
         var output = await _axusService.TryExportShoutAsync(input, cancellationToken);
         return output.Shout;
     }

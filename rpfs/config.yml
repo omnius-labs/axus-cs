@@ -1,5 +1,5 @@
 - Includes:
-    - ./refs/core/rpfs/**/*.rpf
+    - ./refs/core-cs/rpfs/**/*.rpf
     - ./rpfs/**/*.rpf
   CompileTargets:
     - Input: ./rpfs/Omnius.Axus.Messages/Omnius.Axus.Messages.rpf
