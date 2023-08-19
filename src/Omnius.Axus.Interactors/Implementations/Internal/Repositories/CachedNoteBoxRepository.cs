@@ -28,14 +28,24 @@ internal sealed class CachedNoteBoxRepository
         _bytesPool = bytesPool;
     }
 
+    private async ValueTask<SQLiteConnection> GetConnectionAsync(CancellationToken cancellationToken = default)
+    {
+        var sqlConnectionStringBuilder = new SQLiteConnectionStringBuilder { DataSource = _databasePath };
+        var connection = new SQLiteConnection(sqlConnectionStringBuilder.ToString());
+        await connection.OpenAsync(cancellationToken);
+        return connection;
+    }
+
     public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
     {
         await Task.Delay(1, cancellationToken).ConfigureAwait(false);
 
-        using var connection = await this.GetConnectionAsync(cancellationToken);
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
+            using var connection = await this.GetConnectionAsync(cancellationToken);
 
-        var query =
-@"
+            var query =
+    @"
 CREATE TABLE IF NOT EXISTS boxes (
     signature TEXT NOT NULL PRIMARY KEY,
     created_time INTEGER NOT NULL
@@ -52,15 +62,8 @@ CREATE INDEX IF NOT EXISTS index_signature_for_notes ON notes (signature);
 CREATE INDEX IF NOT EXISTS index_tag_for_notes ON notes (tag, created_time DESC);
 CREATE INDEX IF NOT EXISTS index_created_time_for_notes ON notes (created_time);
 ";
-        await connection.ExecuteNonQueryAsync(query, cancellationToken);
-    }
-
-    private async ValueTask<SQLiteConnection> GetConnectionAsync(CancellationToken cancellationToken = default)
-    {
-        var sqlConnectionStringBuilder = new SQLiteConnectionStringBuilder { DataSource = _databasePath };
-        var connection = new SQLiteConnection(sqlConnectionStringBuilder.ToString());
-        await connection.OpenAsync(cancellationToken);
-        return connection;
+            await connection.ExecuteNonQueryAsync(query, cancellationToken);
+        }
     }
 
     public async ValueTask UpsertAsync(CachedNoteBox box, CancellationToken cancellationToken = default)

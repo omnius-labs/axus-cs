@@ -21,7 +21,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
     private readonly FileSubscriberStorageOptions _options;
 
     private readonly FileSubscriberStorageRepository _subscriberRepo;
-    private readonly IKeyValueStorage<string> _blockStorage;
+    private readonly IKeyValueStorage _blockStorage;
 
     private Task _computeLoopTask = null!;
 
@@ -43,7 +43,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
         _options = options;
 
         _subscriberRepo = new FileSubscriberStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
-        _blockStorage = _keyValueStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
+        _blockStorage = _keyValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
     }
 
     private async ValueTask InitAsync(CancellationToken cancellationToken = default)
@@ -61,7 +61,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
         _cancellationTokenSource.Dispose();
 
         _subscriberRepo.Dispose();
-        _blockStorage.Dispose();
+        await _blockStorage.DisposeAsync();
     }
 
     private async Task ComputeLoopAsync(CancellationToken cancellationToken)
@@ -164,7 +164,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
         return MerkleTreeSection.Import(bytesPipe.Reader.GetSequence(), _bytesPool);
     }
 
-    public async ValueTask<IEnumerable<SubscribedFileReport>> GetSubscribedFileReportsAsync(string zone, CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<SubscribedFileReport>> GetSubscribedFileReportsAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -233,7 +233,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
         }
     }
 
-    public async ValueTask SubscribeFileAsync(OmniHash rootHash, IEnumerable<AttachedProperty> properties, string zone, CancellationToken cancellationToken = default)
+    public async ValueTask SubscribeFileAsync(OmniHash rootHash, IEnumerable<AttachedProperty> properties, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -277,7 +277,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
         }
     }
 
-    public async ValueTask UnsubscribeFileAsync(OmniHash rootHash, string zone, CancellationToken cancellationToken = default)
+    public async ValueTask UnsubscribeFileAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -399,7 +399,4 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
     {
         return StringConverter.ToString(rootHash) + "/" + StringConverter.ToString(blockHash);
     }
-
-    public ValueTask SubscribeFileAsync(OmniHash rootHash, string zone, IEnumerable<AttachedProperty> properties, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    public ValueTask UnsubscribeFileAsync(OmniHash rootHash, string zone, IEnumerable<AttachedProperty> properties, CancellationToken cancellationToken = default) => throw new NotImplementedException();
 }

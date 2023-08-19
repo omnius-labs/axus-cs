@@ -20,7 +20,7 @@ public sealed partial class ShoutPublisherStorage : AsyncDisposableBase, IShoutP
     private readonly ShoutPublisherStorageOptions _options;
 
     private readonly ShoutPublisherStorageRepository _publisherRepo;
-    private readonly IKeyValueStorage<string> _blockStorage;
+    private readonly IKeyValueStorage _blockStorage;
 
     private readonly AsyncLock _asyncLock = new();
 
@@ -38,7 +38,7 @@ public sealed partial class ShoutPublisherStorage : AsyncDisposableBase, IShoutP
         _options = options;
 
         _publisherRepo = new ShoutPublisherStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
-        _blockStorage = _keyValueStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
+        _blockStorage = _keyValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
     }
 
     private async ValueTask InitAsync(CancellationToken cancellationToken = default)
@@ -50,7 +50,7 @@ public sealed partial class ShoutPublisherStorage : AsyncDisposableBase, IShoutP
     protected override async ValueTask OnDisposeAsync()
     {
         _publisherRepo.Dispose();
-        _blockStorage.Dispose();
+        await _blockStorage.DisposeAsync();
     }
 
     public async ValueTask<IEnumerable<PublishedShoutReport>> GetPublishedShoutReportsAsync(string zone, CancellationToken cancellationToken = default)

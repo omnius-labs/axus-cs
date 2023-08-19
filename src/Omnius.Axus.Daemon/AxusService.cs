@@ -184,13 +184,13 @@ public class AxusService : AsyncDisposableBase, IAxusService
         {
             ConfigDirectoryPath = Path.Combine(_databaseDirectoryPath, "file_publisher_storage")
         };
-        _filePublisherStorage = await FilePublisherStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, filePublisherStorageOptions, cancellationToken);
+        _filePublisherStorage = await FilePublisherStorage.CreateAsync(KeyValueFileStorage.Factory, bytesPool, filePublisherStorageOptions, cancellationToken);
 
         var fileSubscriberStorageOptions = new FileSubscriberStorageOptions
         {
             ConfigDirectoryPath = Path.Combine(_databaseDirectoryPath, "file_subscriber_storage")
         };
-        _fileSubscriberStorage = await FileSubscriberStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, fileSubscriberStorageOptions, cancellationToken);
+        _fileSubscriberStorage = await FileSubscriberStorage.CreateAsync(KeyValueFileStorage.Factory, bytesPool, fileSubscriberStorageOptions, cancellationToken);
 
         var fileExchangerOptions = new FileExchangerOptions
         {
@@ -202,13 +202,13 @@ public class AxusService : AsyncDisposableBase, IAxusService
         {
             ConfigDirectoryPath = Path.Combine(_databaseDirectoryPath, "shout_publisher_storage")
         };
-        _shoutPublisherStorage = await ShoutPublisherStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, shoutPublisherStorageOptions, cancellationToken);
+        _shoutPublisherStorage = await ShoutPublisherStorage.CreateAsync(KeyValueFileStorage.Factory, bytesPool, shoutPublisherStorageOptions, cancellationToken);
 
         var shoutSubscriberStorageOptions = new ShoutSubscriberStorageOptions
         {
             ConfigDirectoryPath = Path.Combine(_databaseDirectoryPath, "shout_subscriber_storage")
         };
-        _shoutSubscriberStorage = await ShoutSubscriberStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, shoutSubscriberStorageOptions, cancellationToken);
+        _shoutSubscriberStorage = await ShoutSubscriberStorage.CreateAsync(KeyValueFileStorage.Factory, bytesPool, shoutSubscriberStorageOptions, cancellationToken);
 
         var shoutExchangerOptions = new ShoutExchangerOptions
         {
@@ -503,7 +503,7 @@ public class AxusService : AsyncDisposableBase, IAxusService
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var shout = await _shoutSubscriberStorage.TryReadShoutAsync(param.Signature, param.Channel, param.UpdatedTime.ToDateTime(), cancellationToken);
+            var shout = await _shoutSubscriberStorage.TryReadShoutAsync(param.Signature, param.Channel, param.CreatedTime.ToDateTime(), cancellationToken);
             return new TryExportShoutResult(shout);
         }
     }

@@ -20,6 +20,10 @@ message MerkleTreeSection {
     Hashes: vector<OmniHash>(capacity: 1024 * 1024 * 1024),
 }
 
+message AttachedProperties {
+    Values: vector<AttachedProperty>(capacity: 256),
+}
+
 // SessionManager
 
 message SessionManagerHelloMessage {

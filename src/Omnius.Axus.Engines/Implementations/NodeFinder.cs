@@ -159,7 +159,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
     {
         lock (_lockObject)
         {
-            _cachedNodeLocationRepo.InsertBulk(nodeLocations, DateTime.UtcNow);
+            _cachedNodeLocationRepo.InsertBulkAsync(nodeLocations, DateTime.UtcNow);
         }
     }
 
@@ -596,7 +596,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         var nodeLocations = await _nodeLocationsFetcher.FetchAsync(cancellationToken);
         if (nodeLocations is null) return;
 
-        _cachedNodeLocationRepo.InsertBulk(nodeLocations, DateTime.UtcNow);
+        _cachedNodeLocationRepo.InsertBulkAsync(nodeLocations, DateTime.UtcNow);
     }
 
     private async ValueTask RemoveDeadSessionsAsync(CancellationToken cancellationToken = default)

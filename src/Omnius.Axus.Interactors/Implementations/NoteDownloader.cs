@@ -65,7 +65,7 @@ public sealed partial class NoteDownloader : AsyncDisposableBase, INoteDownloade
         await _watchLoopTask;
         _cancellationTokenSource.Dispose();
 
-        _configStorage.Dispose();
+        await _configStorage.DisposeAsync();
     }
 
     private async Task WatchLoopAsync(CancellationToken cancellationToken = default)

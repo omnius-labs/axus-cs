@@ -16,8 +16,6 @@ internal sealed class CachedSeedBoxRepository
     private readonly string _databasePath;
     private readonly IBytesPool _bytesPool;
 
-    private static readonly Lazy<Base16> _base16 = new Lazy<Base16>(() => new Base16(ConvertStringCase.Lower));
-
     private readonly AsyncLock _asyncLock = new();
 
     public CachedSeedBoxRepository(string dirPath, IBytesPool bytesPool)
@@ -27,14 +25,26 @@ internal sealed class CachedSeedBoxRepository
         _bytesPool = bytesPool;
     }
 
+    private async ValueTask<SQLiteConnection> GetConnectionAsync(CancellationToken cancellationToken = default)
+    {
+        var sqlConnectionStringBuilder = new SQLiteConnectionStringBuilder
+        {
+            DataSource = _databasePath,
+            ForeignKeys = true,
+        };
+        var connection = new SQLiteConnection(sqlConnectionStringBuilder.ToString());
+        await connection.OpenAsync(cancellationToken);
+        return connection;
+    }
+
     public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
     {
-        await Task.Delay(1, cancellationToken).ConfigureAwait(false);
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
+            using var connection = await this.GetConnectionAsync(cancellationToken);
 
-        using var connection = await this.GetConnectionAsync(cancellationToken);
-
-        var query =
-@"
+            var query =
+    @"
 CREATE TABLE IF NOT EXISTS boxes (
     signature TEXT NOT NULL PRIMARY KEY,
     created_time INTEGER NOT NULL
@@ -51,21 +61,12 @@ CREATE INDEX IF NOT EXISTS index_signature_and_created_time_for_boxes ON boxes (
 CREATE INDEX IF NOT EXISTS index_signature_for_seeds ON seeds (signature);
 CREATE INDEX IF NOT EXISTS index_size_for_seeds ON seeds (size);
 ";
-        await connection.ExecuteNonQueryAsync(query, cancellationToken);
-    }
-
-    private async ValueTask<SQLiteConnection> GetConnectionAsync(CancellationToken cancellationToken = default)
-    {
-        var sqlConnectionStringBuilder = new SQLiteConnectionStringBuilder { DataSource = _databasePath };
-        var connection = new SQLiteConnection(sqlConnectionStringBuilder.ToString());
-        await connection.OpenAsync(cancellationToken);
-        return connection;
+            await connection.ExecuteNonQueryAsync(query, cancellationToken);
+        }
     }
 
     public async ValueTask UpsertAsync(CachedSeedBox box, CancellationToken cancellationToken = default)
     {
-        await Task.Delay(1, cancellationToken).ConfigureAwait(false);
-
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             using var connection = await this.GetConnectionAsync(cancellationToken);
@@ -94,14 +95,14 @@ $@"
 INSERT OR IGNORE INTO seeds (self_hash, signature, name, size, created_time, value)
     VALUES (@SelfHash, @Signature, @Name, @Size, @CreatedTime, @Value);
 ";
-                using var value = RocketMessage.ToBytes(s.Value);
+                using var valueBytes = RocketMessage.ToBytes(s.Value);
                 var parameters = new (string, object)[] {
                     ("@SelfHash", s.SelfHash.ToString(ConvertStringType.Base16)),
                     ("@Signature", s.Signature.ToString()),
                     ("@Name", s.Value.Name),
                     ("@Size", s.Value.Size),
                     ("@CreatedTime", s.Value.CreatedTime.Seconds),
-                    ("@Value", value),
+                    ("@Value", valueBytes),
                 };
 
                 await transaction.ExecuteNonQueryAsync(query, parameters, cancellationToken);
@@ -113,8 +114,6 @@ INSERT OR IGNORE INTO seeds (self_hash, signature, name, size, created_time, val
 
     public async ValueTask<IEnumerable<(OmniSignature Signature, Timestamp64 CreatedTime)>> GetKeysAsync(CancellationToken cancellationToken = default)
     {
-        await Task.Delay(1, cancellationToken).ConfigureAwait(false);
-
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             using var connection = await this.GetConnectionAsync(cancellationToken);
@@ -136,10 +135,8 @@ INSERT OR IGNORE INTO seeds (self_hash, signature, name, size, created_time, val
 
     // TODO: FindSeedsの実装が必要
 
-    public async ValueTask ShrinkAsync(IEnumerable<OmniSignature> signatures, CancellationToken cancellationToken = default)
+    public async ValueTask ShrinkAsync(IEnumerable<OmniSignature> excludedSignatures, CancellationToken cancellationToken = default)
     {
-        await Task.Delay(1, cancellationToken).ConfigureAwait(false);
-
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             using var connection = await this.GetConnectionAsync(cancellationToken);
@@ -148,7 +145,7 @@ INSERT OR IGNORE INTO seeds (self_hash, signature, name, size, created_time, val
             {
                 var query =
 @"
-CREATE TEMP TABLE tmp (
+CREATE TEMP TABLE excluded_signatures (
     signature TEXT NOT NULL PRIMARY KEY
 );
 ";
@@ -159,12 +156,12 @@ CREATE TEMP TABLE tmp (
                 var compiler = new SqliteCompiler();
                 using var db = new QueryFactory(connection, compiler);
 
-                foreach (var chunkedSignatures in signatures.Chunk(500))
+                foreach (var chunkedSignatures in excludedSignatures.Chunk(500))
                 {
                     var columns = new[] { "signature" };
-                    var valuesCollection = chunkedSignatures.Select(signature => new object[] { signature.ToString() });
-                    await db.Query("tmp")
-                        .InsertAsync(columns, valuesCollection, transaction, null, cancellationToken);
+                    var values = chunkedSignatures.Select(signature => new object[] { signature.ToString() });
+                    await db.Query("excluded_signatures")
+                        .InsertAsync(columns, values, transaction, null, cancellationToken);
                 }
             }
 
@@ -172,7 +169,7 @@ CREATE TEMP TABLE tmp (
                 var query =
 @"
 DELETE FROM boxes
-    WHERE (signature) NOT IN (SELECT (signature) FROM tmp);
+    WHERE (signature) NOT IN (SELECT (signature) FROM excluded_signatures);
 ";
                 await transaction.ExecuteNonQueryAsync(query, cancellationToken);
             }
