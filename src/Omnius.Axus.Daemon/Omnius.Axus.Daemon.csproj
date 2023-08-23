@@ -25,7 +25,6 @@
     <ProjectReference Include="..\Omnius.Axus.Remoting\Omnius.Axus.Remoting.csproj" />
     <ProjectReference Include="..\Omnius.Axus.Messages\Omnius.Axus.Messages.csproj" />
     <ProjectReference Include="..\Omnius.Axus.Engines\Omnius.Axus.Engines.csproj" />
-    <ProjectReference Include="..\Omnius.Axus.Utils\Omnius.Axus.Utils.csproj" />
   </ItemGroup>
 
   <ItemGroup>
