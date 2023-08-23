@@ -1154,6 +1154,7 @@
           "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )",
           "Omnius.Core.RocketPack.Remoting": "[0.0.1-alpha.1, )",
           "Omnius.Core.Serialization": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Sql": "[0.0.1-alpha.1, )",
           "Omnius.Core.Storages": "[0.0.1-alpha.1, )",
           "SqlKata": "[2.3.7, )",
           "SqlKata.Execution": "[2.3.7, )",
@@ -1327,6 +1328,13 @@
           "Omnius.Core": "[0.0.1-alpha.1, )",
           "Omnius.Core.Pipelines": "[0.0.1-alpha.1, )",
           "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )"
+        }
+      },
+      "omnius.core.sql": {
+        "type": "Project",
+        "dependencies": {
+          "NLog": "[4.7.15, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )"
         }
       },
       "omnius.core.storages": {

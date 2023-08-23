@@ -79,8 +79,8 @@
       },
       "DiffPlex": {
         "type": "Transitive",
-        "resolved": "1.7.0",
-        "contentHash": "2Mna9MSihC3tujLJ34+FqhFdsS6xlaMzPd8ywuTz3Qq/Z7vWRKAe18H2R5v69TMbmGyzn3FuIngnhyuNkrfUzQ=="
+        "resolved": "1.7.1",
+        "contentHash": "a0fSO2p8ykrcfzgG0sjpZAMZPthXXz4l6UIVuM9uyIYIh5yga4sq3aydSGt6n+MkdSBKvMurjjaKnxIqZtfG1g=="
       },
       "LiteDB": {
         "type": "Transitive",
@@ -1417,7 +1417,7 @@
       "omnius.core.unittesttoolkit": {
         "type": "Project",
         "dependencies": {
-          "DiffPlex": "[1.7.0, )",
+          "DiffPlex": "[1.7.1, )",
           "NLog": "[4.7.15, )",
           "System.Text.Json": "[7.0.1, )"
         }

@@ -614,6 +614,13 @@
           "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )"
         }
       },
+      "omnius.core.sql": {
+        "type": "Project",
+        "dependencies": {
+          "NLog": "[4.7.15, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )"
+        }
+      },
       "omnius.core.storages": {
         "type": "Project",
         "dependencies": {

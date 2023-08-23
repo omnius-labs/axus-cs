@@ -102,8 +102,8 @@
       },
       "DiffPlex": {
         "type": "Transitive",
-        "resolved": "1.7.0",
-        "contentHash": "2Mna9MSihC3tujLJ34+FqhFdsS6xlaMzPd8ywuTz3Qq/Z7vWRKAe18H2R5v69TMbmGyzn3FuIngnhyuNkrfUzQ=="
+        "resolved": "1.7.1",
+        "contentHash": "a0fSO2p8ykrcfzgG0sjpZAMZPthXXz4l6UIVuM9uyIYIh5yga4sq3aydSGt6n+MkdSBKvMurjjaKnxIqZtfG1g=="
       },
       "GitInfo": {
         "type": "Transitive",
@@ -1414,6 +1414,7 @@
           "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )",
           "Omnius.Core.RocketPack.Remoting": "[0.0.1-alpha.1, )",
           "Omnius.Core.Serialization": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Sql": "[0.0.1-alpha.1, )",
           "Omnius.Core.Storages": "[0.0.1-alpha.1, )",
           "SqlKata": "[2.3.7, )",
           "SqlKata.Execution": "[2.3.7, )",
@@ -1580,6 +1581,13 @@
           "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )"
         }
       },
+      "omnius.core.sql": {
+        "type": "Project",
+        "dependencies": {
+          "NLog": "[4.7.15, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )"
+        }
+      },
       "omnius.core.storages": {
         "type": "Project",
         "dependencies": {
@@ -1611,7 +1619,7 @@
       "omnius.core.unittesttoolkit": {
         "type": "Project",
         "dependencies": {
-          "DiffPlex": "[1.7.0, )",
+          "DiffPlex": "[1.7.1, )",
           "NLog": "[4.7.15, )",
           "System.Text.Json": "[7.0.1, )"
         }

@@ -1,10 +1,11 @@
-name: Test
+name: Test Slim
 
 on:
   push:
     branches:
-      - "main"
-      - "release/*"
+      - "**"
+      - "!main"
+      - "!release/*"
     paths:
       - "**"
       - "!/docs/**"
@@ -14,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  StableTest: true
+  StableTest: false
   ContinuousIntegrationBuild: true
 
 jobs:
