@@ -20,14 +20,14 @@ internal sealed class FilePublisherStorageRepository : AsyncDisposableBase
 
     public FilePublisherStorageRepository(string dirPath, IBytesPool bytesPool)
     {
-        _ = DirectoryHelper.CreateDirectory(dirPath);
+        DirectoryHelper.CreateDirectory(dirPath);
 
         _connectionBuilder = new SQLiteConnectionBuilder(Path.Combine(dirPath, "sqlite.db"));
         _bytesPool = bytesPool;
 
-        this.FileItemRepo = new FilePublishedItemRepository(_connectionBuilder, _bytesPool);
-        this.BlockInternalItemRepo = new BlockPublishedInternalItemRepository(_connectionBuilder, _bytesPool);
-        this.BlockExternalItemRepo = new BlockPublishedExternalItemRepository(_connectionBuilder, _bytesPool);
+        this.FileItems = new FilePublishedItemRepository(_connectionBuilder, _bytesPool);
+        this.BlockInternalItems = new BlockPublishedInternalItemRepository(_connectionBuilder, _bytesPool);
+        this.BlockExternalItems = new BlockPublishedExternalItemRepository(_connectionBuilder, _bytesPool);
     }
 
     protected override async ValueTask OnDisposeAsync()
@@ -36,14 +36,14 @@ internal sealed class FilePublisherStorageRepository : AsyncDisposableBase
 
     public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
     {
-        await this.FileItemRepo.MigrateAsync(cancellationToken);
-        await this.BlockInternalItemRepo.MigrateAsync(cancellationToken);
-        await this.BlockExternalItemRepo.MigrateAsync(cancellationToken);
+        await this.FileItems.MigrateAsync(cancellationToken);
+        await this.BlockInternalItems.MigrateAsync(cancellationToken);
+        await this.BlockExternalItems.MigrateAsync(cancellationToken);
     }
 
-    public FilePublishedItemRepository FileItemRepo { get; }
-    public BlockPublishedInternalItemRepository BlockInternalItemRepo { get; }
-    public BlockPublishedExternalItemRepository BlockExternalItemRepo { get; }
+    public FilePublishedItemRepository FileItems { get; }
+    public BlockPublishedInternalItemRepository BlockInternalItems { get; }
+    public BlockPublishedExternalItemRepository BlockExternalItems { get; }
 
     public sealed class FilePublishedItemRepository
     {
@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS file_items (
 CREATE UNIQUE INDEX IF NOT EXISTS file_items_root_hash_index ON file_items(root_hash) WHERE file_path IS NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS file_items_file_path_index ON file_items(file_path) WHERE file_path IS NOT NULL;
 ";
-                _ = await connection.ExecuteNonQueryAsync(query, cancellationToken);
+                await connection.ExecuteNonQueryAsync(query, cancellationToken);
             }
         }
 
@@ -141,10 +141,7 @@ SELECT COUNT(1)
                         .Offset(offset)
                         .Limit(limit)
                         .GetAsync(cancellationToken: cancellationToken);
-                    if (!rows.Any())
-                    {
-                        yield break;
-                    }
+                    if (!rows.Any()) yield break;
 
                     foreach (var row in rows)
                     {
@@ -178,10 +175,7 @@ SELECT COUNT(1)
                     .Where("file_path", "=", filePath)
                     .Limit(1)
                     .GetAsync(cancellationToken: cancellationToken);
-                if (!rows.Any())
-                {
-                    return null;
-                }
+                if (!rows.Any()) return null;
 
                 var row = rows.First();
 
@@ -210,10 +204,7 @@ SELECT COUNT(1)
                     .Where("root_hash", "=", rootHash.ToString(ConvertStringType.Base64))
                     .Limit(1)
                     .GetAsync(cancellationToken: cancellationToken);
-                if (!rows.Any())
-                {
-                    return null;
-                }
+                if (!rows.Any()) return null;
 
                 var row = rows.First();
 
@@ -248,10 +239,7 @@ SELECT COUNT(1)
                         .Offset(offset)
                         .Limit(limit)
                         .GetAsync(cancellationToken: cancellationToken);
-                    if (!rows.Any())
-                    {
-                        yield break;
-                    }
+                    if (!rows.Any()) yield break;
 
                     foreach (var row in rows)
                     {
@@ -290,14 +278,120 @@ SELECT COUNT(1)
             _bytesPool = bytesPool;
         }
 
-        public sealed class BlockPublishedExternalItemRepository(SQLiteConnectionBuilder connectionBuilder, IBytesPool bytesPool)
+        internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
         {
-            private readonly SQLiteConnectionBuilder _connectionBuilder = connectionBuilder;
-            private readonly IBytesPool _bytesPool = bytesPool;
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+            }
+        }
 
-            private readonly AsyncLock _asyncLock = new();
+        private ILiteCollection<BlockPublishedInternalItemEntity> GetCollection()
+        {
+            var col = _database.GetCollection<BlockPublishedInternalItemEntity>(CollectionName);
+            return col;
+        }
 
-            internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
+        public bool Exists(OmniHash rootHash, OmniHash blockHash)
+        {
+            lock (_lockObject)
+            {
+                var rootHashEntity = OmniHashEntity.Import(rootHash);
+                var blockHashEntity = OmniHashEntity.Import(blockHash);
+
+                var col = this.GetCollection();
+                return col.Exists(n => n.BlockHash == blockHashEntity && n.RootHash == rootHashEntity);
+            }
+        }
+
+        public IEnumerable<BlockPublishedInternalItem> FindAll()
+        {
+            lock (_lockObject)
+            {
+                var col = this.GetCollection();
+                return col.FindAll().Select(n => n.Export()).ToArray();
+            }
+        }
+
+        public IEnumerable<BlockPublishedInternalItem> Find(OmniHash rootHash)
+        {
+            lock (_lockObject)
+            {
+                var rootHashEntity = OmniHashEntity.Import(rootHash);
+
+                var col = this.GetCollection();
+                return col.Find(n => n.RootHash == rootHashEntity).Select(n => n.Export()).ToArray();
+            }
+        }
+
+        public IEnumerable<BlockPublishedInternalItem> Find(OmniHash rootHash, OmniHash blockHash)
+        {
+            lock (_lockObject)
+            {
+                var rootHashEntity = OmniHashEntity.Import(rootHash);
+                var blockHashEntity = OmniHashEntity.Import(blockHash);
+
+                var col = this.GetCollection();
+                return col.Find(n => n.BlockHash == blockHashEntity && n.RootHash == rootHashEntity).Select(n => n.Export()).ToArray();
+            }
+        }
+
+        public void Upsert(BlockPublishedInternalItem item)
+        {
+            this.UpsertBulk(new[] { item });
+        }
+
+        public void UpsertBulk(IEnumerable<BlockPublishedInternalItem> items)
+        {
+            lock (_lockObject)
+            {
+                var col = this.GetCollection();
+
+                _database.BeginTrans();
+
+                foreach (var item in items)
+                {
+                    var itemEntity = BlockPublishedInternalItemEntity.Import(item);
+
+                    col.DeleteMany(n =>
+                        n.BlockHash == itemEntity.BlockHash
+                        && n.RootHash == itemEntity.RootHash
+                        && n.Depth == itemEntity.Depth
+                        && n.Order == itemEntity.Order);
+                    col.Insert(itemEntity);
+                }
+
+                _database.Commit();
+            }
+        }
+
+        public void Delete(OmniHash rootHash)
+        {
+            lock (_lockObject)
+            {
+                var rootHashEntity = OmniHashEntity.Import(rootHash);
+
+                var col = this.GetCollection();
+                col.DeleteMany(n => n.RootHash == rootHashEntity);
+            }
+        }
+    }
+
+    public sealed class BlockPublishedExternalItemRepository
+    {
+        private readonly SQLiteConnectionBuilder _connectionBuilder;
+        private readonly IBytesPool _bytesPool;
+
+        private readonly AsyncLock _asyncLock = new();
+
+        public BlockPublishedExternalItemRepository(SQLiteConnectionBuilder connectionBuilder, IBytesPool bytesPool)
+        {
+            _connectionBuilder = connectionBuilder;
+            _bytesPool = bytesPool;
+        }
+
+        internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
+        {
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
                 using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
 
@@ -315,39 +409,40 @@ CREATE TABLE IF NOT EXISTS file_items (
 CREATE UNIQUE INDEX IF NOT EXISTS file_items_root_hash_index ON file_items(root_hash) WHERE file_path IS NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS file_items_file_path_index ON file_items(file_path) WHERE file_path IS NOT NULL;
 ";
-                _ = await connection.ExecuteNonQueryAsync(query, cancellationToken);
-            }
-
-            public ValueTask<bool> ExistsAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
-            {
-            }
-
-            public async IAsyncEnumerable<BlockPublishedExternalItem> GetItemsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
-            {
-            }
-
-            public async IAsyncEnumerable<BlockPublishedExternalItem> GetItemsAsync(OmniHash rootHash, [EnumeratorCancellation] CancellationToken cancellationToken = default)
-            {
-            }
-
-            public async IAsyncEnumerable<BlockPublishedExternalItem> GetItemsAsync(OmniHash rootHash, OmniHash blockHash, [EnumeratorCancellation] CancellationToken cancellationToken = default)
-            {
-            }
-
-            public async ValueTask<BlockPublishedExternalItem> GetItemAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
-            {
-            }
-
-            public async ValueTask UpsertAsync(BlockPublishedExternalItem item, CancellationToken cancellationToken = default)
-            {
-            }
-
-            public async ValueTask UpsertBulkAsync(IEnumerable<BlockPublishedExternalItem> items, CancellationToken cancellationToken = default)
-            {
-            }
-
-            public async ValueTask DeleteAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
-            {
+                await connection.ExecuteNonQueryAsync(query, cancellationToken);
             }
         }
+
+        public ValueTask<bool> ExistsAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
+        {
+        }
+
+        public async IAsyncEnumerable<BlockPublishedExternalItem> GetItemsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+        }
+
+        public async IAsyncEnumerable<BlockPublishedExternalItem> GetItemsAsync(OmniHash rootHash, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+        }
+
+        public async IAsyncEnumerable<BlockPublishedExternalItem> GetItemsAsync(OmniHash rootHash, OmniHash blockHash, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+        }
+
+        public async ValueTask<BlockPublishedExternalItem> GetItemAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
+        {
+        }
+
+        public async ValueTask UpsertAsync(BlockPublishedExternalItem item, CancellationToken cancellationToken = default)
+        {
+        }
+
+        public async ValueTask UpsertBulkAsync(IEnumerable<BlockPublishedExternalItem> items, CancellationToken cancellationToken = default)
+        {
+        }
+
+        public async ValueTask DeleteAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+        {
+        }
     }
+}

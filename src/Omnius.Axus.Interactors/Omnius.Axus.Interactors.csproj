@@ -14,7 +14,6 @@
     <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core\Omnius.Core.csproj" />
     <ProjectReference Include="..\Omnius.Axus.Messages\Omnius.Axus.Messages.csproj" />
     <ProjectReference Include="..\Omnius.Axus.Remoting\Omnius.Axus.Remoting.csproj" />
-    <ProjectReference Include="..\Omnius.Axus.Utils\Omnius.Axus.Utils.csproj" />
   </ItemGroup>
 
   <ItemGroup>
