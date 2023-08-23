@@ -56,7 +56,7 @@ public sealed class ProfileUploader : AsyncDisposableBase, IProfileUploader
         await _watchLoopTask;
         _cancellationTokenSource.Dispose();
 
-        _configStorage.Dispose();
+        await _configStorage.DisposeAsync();
     }
 
     private async Task WatchLoopAsync(CancellationToken cancellationToken = default)
@@ -186,7 +186,7 @@ public sealed class ProfileUploader : AsyncDisposableBase, IProfileUploader
                     blockedSignatures: Array.Empty<OmniSignature>()
                 );
 
-                await _configStorage.TrySetValueAsync(_config, cancellationToken);
+                await _configStorage.SetValueAsync(_config, cancellationToken);
             }
 
             return _config;
@@ -197,7 +197,7 @@ public sealed class ProfileUploader : AsyncDisposableBase, IProfileUploader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await _configStorage.TrySetValueAsync(config, cancellationToken);
+            await _configStorage.SetValueAsync(config, cancellationToken);
             _config = config;
         }
     }

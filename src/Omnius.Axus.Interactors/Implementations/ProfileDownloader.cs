@@ -64,7 +64,7 @@ public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileDow
         await _watchLoopTask;
         _cancellationTokenSource.Dispose();
 
-        _configStorage.Dispose();
+        await _configStorage.DisposeAsync();
     }
 
     private async Task WatchLoopAsync(CancellationToken cancellationToken = default)
@@ -313,7 +313,7 @@ public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileDow
                     blockedSignatures: Array.Empty<OmniSignature>()
                 );
 
-                await _configStorage.TrySetValueAsync(_config, cancellationToken);
+                await _configStorage.SetValueAsync(_config, cancellationToken);
             }
 
             return _config;
@@ -324,11 +324,11 @@ public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileDow
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await _configStorage.TrySetValueAsync(config, cancellationToken);
+            await _configStorage.SetValueAsync(config, cancellationToken);
             _config = config;
         }
     }
 
-    public ValueTask<IEnumerable<OmniSignature>> GetSignaturesAsync(CancellationToken cancellationToken) => throw new NotImplementedException();
+    public ValueTask<IEnumerable<OmniSignature>> GetSignaturesAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
     public ValueTask<ProfileReport?> FindProfileBySignatureAsync(OmniSignature signature, CancellationToken cancellationToken = default) => throw new NotImplementedException();
 }

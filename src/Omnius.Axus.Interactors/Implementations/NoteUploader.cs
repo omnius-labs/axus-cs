@@ -57,7 +57,7 @@ public sealed class NoteUploader : AsyncDisposableBase, INoteUploader
         await _watchLoopTask;
         _cancellationTokenSource.Dispose();
 
-        _configStorage.Dispose();
+        await _configStorage.DisposeAsync();
     }
 
     private async Task WatchLoopAsync(CancellationToken cancellationToken = default)
@@ -184,7 +184,7 @@ public sealed class NoteUploader : AsyncDisposableBase, INoteUploader
                     notes: Array.Empty<Note>()
                 );
 
-                await _configStorage.TrySetValueAsync(_config, cancellationToken);
+                await _configStorage.SetValueAsync(_config, cancellationToken);
             }
 
             return _config;
@@ -195,7 +195,7 @@ public sealed class NoteUploader : AsyncDisposableBase, INoteUploader
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            await _configStorage.TrySetValueAsync(config, cancellationToken);
+            await _configStorage.SetValueAsync(config, cancellationToken);
             _config = config;
         }
     }

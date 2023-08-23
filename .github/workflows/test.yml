@@ -20,9 +20,12 @@ env:
 jobs:
   linux:
     runs-on: ubuntu-latest
+      ContinuousIntegrationBuild: true
     steps:
       - name: Checkout branch
         uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
       - name: Install dependencies (lib)
         run: sudo apt-get install libsnappy-dev
       - name: Setup dotnet

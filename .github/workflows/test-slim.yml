@@ -24,6 +24,8 @@ jobs:
     steps:
       - name: Checkout branch
         uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
       - name: Install dependencies (lib)
         run: sudo apt-get install libsnappy-dev
       - name: Setup dotnet
@@ -37,12 +39,14 @@ jobs:
       - name: format check
         run: dotnet format --verify-no-changes
       - name: Test
-        run: dotnet test --no-restore
+        run: dotnet test --filter "FullyQualifiedName~Omnius.Axus"
   windows:
     runs-on: windows-latest
     steps:
       - name: Checkout branch
         uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
         with:
@@ -50,4 +54,4 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: Test
-        run: dotnet test --no-restore
+        run: dotnet test --filter "FullyQualifiedName~Omnius.Axus"

@@ -1,146 +1,231 @@
-using LiteDB;
-using Omnius.Axus.Engines.Internal.Entities;
+using System.Buffers;
+using System.Runtime.CompilerServices;
+using System.Text;
+using Omnius.Axus.Engines.Internal.Models;
 using Omnius.Axus.Messages;
-using Omnius.Axus.Utils;
 using Omnius.Core;
+using Omnius.Core.Cryptography;
 using Omnius.Core.Helpers;
+using Omnius.Core.RocketPack;
+using Omnius.Core.Sql;
+using SqlKata.Compilers;
+using SqlKata.Execution;
 
 namespace Omnius.Axus.Engines.Internal.Repositories;
 
-internal sealed class CachedNodeLocationRepository : DisposableBase
+internal sealed class CachedNodeLocationRepository : AsyncDisposableBase
 {
-    private readonly LiteDatabase _database;
+    private readonly SQLiteConnectionBuilder _connectionBuilder;
+    private readonly IBytesPool _bytesPool;
 
-    private readonly object _lockObject = new();
+    private readonly AsyncLock _asyncLock = new();
 
-    private const string CollectionName = "cached_node_locations";
-
-    public CachedNodeLocationRepository(string dirPath)
+    public CachedNodeLocationRepository(string dirPath, IBytesPool bytesPool)
     {
         DirectoryHelper.CreateDirectory(dirPath);
 
-        _database = new LiteDatabase(Path.Combine(dirPath, "lite.db"));
-        _database.UtcDate = true;
+        _connectionBuilder = new SQLiteConnectionBuilder(Path.Combine(dirPath, "sqlite.db"));
+        _bytesPool = bytesPool;
     }
 
-    protected override void OnDispose(bool disposing)
+    protected override async ValueTask OnDisposeAsync()
     {
-        _database.Dispose();
     }
 
-    internal async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
+    public async ValueTask MigrateAsync(CancellationToken cancellationToken = default)
     {
-        lock (_lockObject)
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
-            if (_database.GetDocumentVersion(CollectionName) <= 0)
-            {
-                var col = this.GetCollection();
-                col.EnsureIndex(x => x.Value, true);
-            }
+            using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
 
-            _database.SetDocumentVersion(CollectionName, 1);
+            var query =
+@"
+CREATE TABLE IF NOT EXISTS node_locations (
+    hash TEXT NOT NULL PRIMARY KEY,
+    value BLOB NOT NULL,
+    created_time INTEGER NOT NULL,
+    updated_time INTEGER NOT NULL
+);
+";
+            await connection.ExecuteNonQueryAsync(query, cancellationToken);
         }
     }
 
-    private ILiteCollection<CachedNodeLocationEntity> GetCollection()
+    public async IAsyncEnumerable<CachedNodeLocation> GetNodeLocationsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var col = _database.GetCollection<CachedNodeLocationEntity>(CollectionName);
-        return col;
-    }
-
-    public IEnumerable<NodeLocation> FindAll()
-    {
-        lock (_lockObject)
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var col = this.GetCollection();
-            return col.FindAll().Select(n => n.Value!.Export()).ToArray();
-        }
-    }
+            using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+            var compiler = new SqliteCompiler();
+            using var db = new QueryFactory(connection, compiler);
 
-    public void Insert(NodeLocation nodeLocation, DateTime updatedTime)
-    {
-        this.InsertBulk(new[] { nodeLocation }, updatedTime);
-    }
+            const int ChunkSize = 5000;
+            int offset = 0;
+            int limit = ChunkSize;
 
-    public void InsertBulk(IEnumerable<NodeLocation> nodeLocations, DateTime updatedTime)
-    {
-        lock (_lockObject)
-        {
-            var col = this.GetCollection();
-
-            _database.BeginTrans();
-
-            foreach (var value in nodeLocations)
+            for (; ; )
             {
-                var itemEntity = new CachedNodeLocationEntity()
+                var rows = await db.Query("node_locations")
+                    .Select("value", "created_time", "updated_time")
+                    .Offset(offset)
+                    .Limit(limit)
+                    .GetAsync(cancellationToken: cancellationToken);
+                if (!rows.Any()) yield break;
+
+                foreach (var row in rows)
                 {
-                    Value = NodeLocationEntity.Import(value),
-                    LastConnectedTime = DateTime.MinValue,
-                    UpdatedTime = updatedTime,
-                };
+                    var nodeLocation = NodeLocation.Import(new ReadOnlySequence<byte>(row.value), _bytesPool);
+                    yield return new CachedNodeLocation
+                    {
+                        Value = nodeLocation,
+                        CreatedTime = Timestamp64.FromSeconds(row.created_time).ToDateTime(),
+                        UpdatedTime = Timestamp64.FromSeconds(row.updated_time).ToDateTime()
+                    };
+                }
 
-                if (col.Exists(n => n.Value == itemEntity.Value)) continue;
-
-                col.Insert(itemEntity);
+                offset = limit;
+                limit += ChunkSize;
             }
-
-            _database.Commit();
         }
     }
 
-    public void Upsert(NodeLocation nodeLocation, DateTime updatedTime, DateTime lastConnectedTime)
+    public async ValueTask InsertAsync(NodeLocation nodeLocation, CancellationToken cancellationToken = default)
     {
-        this.UpsertBulk(new[] { nodeLocation }, updatedTime, lastConnectedTime);
+        await this.InsertBulkAsync(new[] { nodeLocation });
     }
 
-    public void UpsertBulk(IEnumerable<NodeLocation> nodeLocations, DateTime updatedTime, DateTime lastConnectedTime)
+    public async ValueTask InsertBulkAsync(IEnumerable<NodeLocation> nodeLocations, CancellationToken cancellationToken = default)
     {
-        lock (_lockObject)
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var col = this.GetCollection();
+            using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+            using var transaction = connection.BeginTransaction();
 
-            _database.BeginTrans();
+            var now = Timestamp64.FromDateTime(DateTime.UtcNow).Seconds;
 
-            foreach (var value in nodeLocations)
+            foreach (var chunk in nodeLocations.Chunk(500))
             {
-                var itemEntity = new CachedNodeLocationEntity()
+                var queryBuilder = new StringBuilder();
+                queryBuilder.AppendLine("INSERT OR IGNORE INTO node_locations (hash, value, created_time, updated_time) VALUES");
+                var parameters = new List<(string, object)>();
+                parameters.Add(($"@created_time", now));
+                parameters.Add(($"@updated_time", now));
+
+                foreach (var (_, current, next, index) in chunk.WithContext())
                 {
-                    Value = NodeLocationEntity.Import(value),
-                    LastConnectedTime = lastConnectedTime,
-                    UpdatedTime = updatedTime,
-                };
+                    queryBuilder.AppendLine($"(@hash_{index}, @value_{index}, @created_time, @updated_time)");
+                    if (next is not null) queryBuilder.AppendLine(",");
 
-                col.DeleteMany(n => n.Value == itemEntity.Value);
-                col.Insert(itemEntity);
+                    using var valueBytes = RocketMessage.ToBytes(current);
+                    var hash = OmniHash.Create(OmniHashAlgorithmType.Sha2_256, valueBytes.Memory.Span);
+
+                    parameters.Add(($"@hash_{index}", hash.ToString()));
+                    parameters.Add(($"@value_{index}", valueBytes));
+                }
+
+                await transaction.ExecuteNonQueryAsync(queryBuilder.ToString(), parameters, cancellationToken);
             }
 
-            _database.Commit();
+            await transaction.CommitAsync(cancellationToken);
         }
     }
 
-    public void Shrink(int capacity)
+    public async ValueTask UpsertAsync(NodeLocation nodeLocation, CancellationToken cancellationToken = default)
     {
-        lock (_lockObject)
+        await this.UpsertBulkAsync(new[] { nodeLocation });
+    }
+
+    public async ValueTask UpsertBulkAsync(IEnumerable<NodeLocation> nodeLocations, CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var col = this.GetCollection();
+            using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+            using var transaction = connection.BeginTransaction();
 
-            _database.BeginTrans();
+            var now = Timestamp64.FromDateTime(DateTime.UtcNow).Seconds;
 
-            foreach (var extra in col.FindAll().OrderBy(n => n.UpdatedTime).OrderByDescending(n => n.LastConnectedTime).Skip(capacity).ToArray())
+            foreach (var chunk in nodeLocations.Chunk(500))
             {
-                col.DeleteMany(n => n.Value == extra.Value);
+                var queryBuilder = new StringBuilder();
+                queryBuilder.AppendLine("INSERT INTO node_locations (hash, value, created_time, updated_time) VALUES");
+                var parameters = new List<(string, object)>();
+                parameters.Add(($"@created_time", now));
+                parameters.Add(($"@updated_time", now));
+
+                foreach (var (_, current, next, index) in chunk.WithContext())
+                {
+                    queryBuilder.AppendLine($"(@hash_{index}, @value_{index}, @created_time, @updated_time)");
+                    if (next is not null) queryBuilder.AppendLine(",");
+
+                    using var valueBytes = RocketMessage.ToBytes(current);
+                    var hash = OmniHash.Create(OmniHashAlgorithmType.Sha2_256, valueBytes.Memory.Span);
+
+                    parameters.Add(($"@hash_{index}", hash.ToString()));
+                    parameters.Add(($"@value_{index}", valueBytes));
+                }
+
+                queryBuilder.AppendLine("ON CONFLICT(hash) DO UPDATE SET updated_time = @updated_time");
+
+                await transaction.ExecuteNonQueryAsync(queryBuilder.ToString(), parameters, cancellationToken);
             }
 
-            _database.Commit();
+            await transaction.CommitAsync(cancellationToken);
         }
     }
 
-    public int Count()
+    public async ValueTask ShrinkAsync(int capacity, CancellationToken cancellationToken = default)
     {
-        lock (_lockObject)
+        await Task.Delay(1, cancellationToken).ConfigureAwait(false);
+
+        using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var col = this.GetCollection();
-            return col.Count();
+            using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+            using var transaction = connection.BeginTransaction();
+
+            {
+                var query =
+@"
+CREATE TEMP TABLE tmp (
+    hash TEXT NOT NULL PRIMARY KEY
+);
+";
+                await transaction.ExecuteNonQueryAsync(query, cancellationToken);
+            }
+
+            {
+                var query =
+@$"
+INSERT INTO tmp (hash)
+    SELECT hash
+        FROM node_locations
+        ORDER BY updated_time DESC
+        LIMIT {capacity}
+";
+                await transaction.ExecuteNonQueryAsync(query, cancellationToken);
+            }
+
+            {
+                var query =
+@"
+DELETE FROM node_locations
+    WHERE (hash) NOT IN (SELECT (hash) FROM tmp);
+";
+                await transaction.ExecuteNonQueryAsync(query, cancellationToken);
+            }
+
+            await transaction.CommitAsync(cancellationToken);
+        }
+    }
+
+    public async ValueTask<long> CountAsync(CancellationToken cancellationToken = default)
+    {
+        using (await _asyncLock.LockAsync(cancellationToken))
+        {
+            using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+
+            var query = "SELECT COUNT(1) FROM node_locations";
+            var res = await connection.ExecuteScalarAsync(query, cancellationToken);
+            return (long)res!;
         }
     }
 }

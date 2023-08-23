@@ -1,7 +1,7 @@
 using System.Buffers;
+using Omnius.Axus.Engines.Implementations.Internal.Repositories;
 using Omnius.Axus.Engines.Internal;
 using Omnius.Axus.Engines.Internal.Models;
-using Omnius.Axus.Engines.Internal.Repositories;
 using Omnius.Axus.Messages;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
@@ -16,30 +16,35 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
     private readonly IKeyValueStorageFactory _keyValueStorageFactory;
+    private readonly ISystemClock _systemClock;
+    private readonly IRandomStringProvider _randomStringProvider;
     private readonly IBytesPool _bytesPool;
     private readonly FilePublisherStorageOptions _options;
 
     private readonly FilePublisherStorageRepository _publisherRepo;
-    private readonly IKeyValueStorage<string> _blockStorage;
+    private readonly IKeyValueStorage _blockStorage;
 
     private readonly AsyncLock _asyncLock = new();
     private readonly AsyncLock _publishAsyncLock = new();
 
-    public static async ValueTask<FilePublisherStorage> CreateAsync(IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, FilePublisherStorageOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<FilePublisherStorage> CreateAsync(IKeyValueStorageFactory keyValueStorageFactory, ISystemClock systemClock, IRandomStringProvider randomStringProvider,
+        IBytesPool bytesPool, FilePublisherStorageOptions options, CancellationToken cancellationToken = default)
     {
-        var publishedFileStorage = new FilePublisherStorage(keyValueStorageFactory, bytesPool, options);
+        var publishedFileStorage = new FilePublisherStorage(keyValueStorageFactory, systemClock, randomStringProvider, bytesPool, options);
         await publishedFileStorage.InitAsync(cancellationToken);
         return publishedFileStorage;
     }
 
-    private FilePublisherStorage(IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, FilePublisherStorageOptions options)
+    private FilePublisherStorage(IKeyValueStorageFactory keyValueStorageFactory, ISystemClock systemClock, IRandomStringProvider randomStringProvider, IBytesPool bytesPool, FilePublisherStorageOptions options)
     {
         _keyValueStorageFactory = keyValueStorageFactory;
+        _systemClock = systemClock;
+        _randomStringProvider = randomStringProvider;
         _bytesPool = bytesPool;
         _options = options;
 
-        _publisherRepo = new FilePublisherStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
-        _blockStorage = _keyValueStorageFactory.Create<string>(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
+        _publisherRepo = new FilePublisherStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "status"), _bytesPool);
+        _blockStorage = _keyValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
     }
 
     private async ValueTask InitAsync(CancellationToken cancellationToken = default)
@@ -50,8 +55,8 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
 
     protected override async ValueTask OnDisposeAsync()
     {
-        _publisherRepo.Dispose();
-        _blockStorage.Dispose();
+        await _publisherRepo.DisposeAsync();
+        await _blockStorage.DisposeAsync();
     }
 
     public async ValueTask<IEnumerable<PublishedFileReport>> GetPublishedFileReportsAsync(CancellationToken cancellationToken = default)
@@ -60,7 +65,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
         {
             var fileReports = new List<PublishedFileReport>();
 
-            foreach (var item in _publisherRepo.FileItems.FindAll())
+            await foreach (var item in _publisherRepo.FileItemRepo.GetItemsAsync(cancellationToken))
             {
                 fileReports.Add(new PublishedFileReport(item.FilePath, item.RootHash, item.Properties.ToArray()));
             }
@@ -72,6 +77,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
     // TODO 実装する
     public async ValueTask CheckConsistencyAsync(Action<ConsistencyReport> callback, CancellationToken cancellationToken = default)
     {
+        // 一時的なブロックが残留する可能性があるので、消す必要がある
     }
 
     public async ValueTask<IEnumerable<OmniHash>> GetPushRootHashesAsync(CancellationToken cancellationToken = default)
@@ -80,9 +86,9 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
         {
             var results = new List<OmniHash>();
 
-            foreach (var item in _publisherRepo.FileItems.FindAll())
+            await foreach (var rootHash in _publisherRepo.FileItemRepo.GetRootHashesAsync(cancellationToken))
             {
-                results.Add(item.RootHash);
+                results.Add(rootHash);
             }
 
             return results;
@@ -95,12 +101,12 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
         {
             var results = new List<OmniHash>();
 
-            foreach (var blockItem in _publisherRepo.BlockInternalItems.Find(rootHash))
+            await foreach (var blockItem in _publisherRepo.BlockInternalItemRepo.GetItemsAsync(rootHash))
             {
                 results.Add(blockItem.BlockHash);
             }
 
-            foreach (var blockItem in _publisherRepo.BlockExternalItems.Find(rootHash))
+            await foreach (var blockItem in _publisherRepo.BlockExternalItemRepo.GetItemsAsync(rootHash))
             {
                 results.Add(blockItem.BlockHash);
             }
@@ -113,7 +119,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            return _publisherRepo.FileItems.Exists(rootHash);
+            return await _publisherRepo.FileItemRepo.ExistsAsync(rootHash, cancellationToken);
         }
     }
 
@@ -121,29 +127,20 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            return _publisherRepo.BlockInternalItems.Exists(rootHash, blockHash)
-                || _publisherRepo.BlockExternalItems.Exists(rootHash, blockHash);
+            return await _publisherRepo.BlockInternalItemRepo.ExistsAsync(rootHash, blockHash)
+                || await _publisherRepo.BlockExternalItemRepo.ExistsAsync(rootHash, blockHash);
         }
     }
 
-    public async ValueTask<OmniHash> PublishFileAsync(string filePath, int maxBlockSize, IEnumerable<AttachedProperty> properties, string zone, CancellationToken cancellationToken = default)
+    public async ValueTask<OmniHash> PublishFileAsync(string filePath, int maxBlockSize, IEnumerable<AttachedProperty> properties, CancellationToken cancellationToken = default)
     {
         using (await _publishAsyncLock.LockAsync(cancellationToken))
         {
-            var fileItem = _publisherRepo.FileItems.FindOne(filePath);
+            var fileItem = await _publisherRepo.FileItemRepo.GetItemAsync(filePath, cancellationToken);
+            if (fileItem is not null) return fileItem.RootHash;
 
-            if (fileItem is not null)
-            {
-                if (fileItem.Zones.Contains(zone)) return fileItem.RootHash;
-
-                var zones = fileItem.Zones.Append(zone).ToArray();
-                fileItem = fileItem with { Zones = zones };
-                _publisherRepo.FileItems.Upsert(fileItem);
-
-                return fileItem.RootHash;
-            }
-
-            var tempPrefix = "_temp_" + Guid.NewGuid().ToString("N");
+            var now = _systemClock.GetUtcNow();
+            string tempSpaceId = this.GenSpaceId(now);
 
             var externalBlockItems = await this.ImportFromFileAsync(filePath, maxBlockSize, cancellationToken);
             var currentBlockHashes = externalBlockItems.Select(n => n.BlockHash).ToArray();
@@ -156,7 +153,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
                 var merkleTreeSection = new MerkleTreeSection(depth, currentBlockHashes);
                 merkleTreeSection.Export(bytesPool.Writer, _bytesPool);
 
-                var localBlockItems = await this.ImportFromMemoryAsync(tempPrefix, bytesPool.Reader.GetSequence(), maxBlockSize, depth, cancellationToken);
+                var localBlockItems = await this.ImportFromMemoryAsync(tempSpaceId, bytesPool.Reader.GetSequence(), maxBlockSize, depth, cancellationToken);
                 allInternalBlockItems.AddRange(localBlockItems);
                 currentBlockHashes = localBlockItems.Select(n => n.BlockHash).ToArray();
 
@@ -172,34 +169,35 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
                 RootHash = rootHash,
                 FilePath = filePath,
                 Properties = properties.ToArray(),
-                Zones = new[] { zone },
                 MaxBlockSize = maxBlockSize,
+                CreatedTime = now,
+                UpdatedTime = now,
             };
 
             using (await _asyncLock.LockAsync(cancellationToken))
             {
-                var newPrefix = StringConverter.ToString(rootHash);
                 var targetBlockHashes = allInternalBlockItems.Select(n => n.BlockHash).ToArray();
-                await this.RenameBlocksAsync(tempPrefix, newPrefix, targetBlockHashes, cancellationToken);
+                await this.RenameBlocksAsync(tempSpaceId, rootHash, targetBlockHashes, cancellationToken);
 
-                _publisherRepo.FileItems.Upsert(newFileItem);
-                _publisherRepo.BlockInternalItems.UpsertBulk(allInternalBlockItems);
-                _publisherRepo.BlockExternalItems.UpsertBulk(externalBlockItems);
+                await _publisherRepo.FileItemRepo.UpsertAsync(newFileItem, cancellationToken);
+                await _publisherRepo.BlockInternalItemRepo.UpsertBulkAsync(allInternalBlockItems, cancellationToken);
+                await _publisherRepo.BlockExternalItemRepo.UpsertBulkAsync(externalBlockItems, cancellationToken);
             }
 
             return rootHash;
         }
     }
 
-    public async ValueTask<OmniHash> PublishFileAsync(ReadOnlySequence<byte> sequence, int maxBlockSize, IEnumerable<AttachedProperty> properties, string zone, CancellationToken cancellationToken = default)
+    public async ValueTask<OmniHash> PublishFileAsync(ReadOnlySequence<byte> sequence, int maxBlockSize, IEnumerable<AttachedProperty> properties, CancellationToken cancellationToken = default)
     {
         using (await _publishAsyncLock.LockAsync(cancellationToken))
         {
-            var tempPrefix = "_temp_" + Guid.NewGuid().ToString("N");
+            var now = _systemClock.GetUtcNow();
+            var tempSpaceId = this.GenSpaceId(now);
 
             var allInternalBlockItems = new List<BlockPublishedInternalItem>();
 
-            var internalBlockItems = await this.ImportFromMemoryAsync(tempPrefix, sequence, maxBlockSize, 0, cancellationToken);
+            var internalBlockItems = await this.ImportFromMemoryAsync(tempSpaceId, sequence, maxBlockSize, 0, cancellationToken);
             allInternalBlockItems.AddRange(internalBlockItems);
             var currentBlockHashes = internalBlockItems.Select(n => n.BlockHash).ToArray();
 
@@ -209,7 +207,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
                 var merkleTreeSection = new MerkleTreeSection(depth, currentBlockHashes);
                 merkleTreeSection.Export(bytesPool.Writer, _bytesPool);
 
-                internalBlockItems = await this.ImportFromMemoryAsync(tempPrefix, bytesPool.Reader.GetSequence(), maxBlockSize, depth, cancellationToken);
+                internalBlockItems = await this.ImportFromMemoryAsync(tempSpaceId, bytesPool.Reader.GetSequence(), maxBlockSize, depth, cancellationToken);
                 allInternalBlockItems.AddRange(internalBlockItems);
                 currentBlockHashes = internalBlockItems.Select(n => n.BlockHash).ToArray();
 
@@ -219,18 +217,12 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
             var rootHash = currentBlockHashes.Single();
             allInternalBlockItems = allInternalBlockItems.Select(n => n with { RootHash = rootHash }).ToList();
 
-            var fileItem = _publisherRepo.FileItems.FindOne(rootHash);
+            var fileItem = await _publisherRepo.FileItemRepo.GetItemAsync(rootHash, cancellationToken);
 
             if (fileItem is not null)
             {
                 var targetBlockHashes = allInternalBlockItems.Select(n => n.BlockHash).ToArray();
-                await this.DeleteBlocksAsync(tempPrefix, targetBlockHashes, cancellationToken);
-
-                if (fileItem.Zones.Contains(zone)) return rootHash;
-
-                var zones = fileItem.Zones.Append(zone).ToArray();
-                fileItem = fileItem with { Zones = zones };
-                _publisherRepo.FileItems.Upsert(fileItem);
+                await this.DeleteBlocksAsync(tempSpaceId, targetBlockHashes, cancellationToken);
 
                 return rootHash;
             }
@@ -240,44 +232,49 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
                 RootHash = rootHash,
                 FilePath = null,
                 Properties = properties.ToArray(),
-                Zones = new[] { zone },
                 MaxBlockSize = maxBlockSize,
+                CreatedTime = now,
+                UpdatedTime = now,
             };
 
             using (await _asyncLock.LockAsync(cancellationToken))
             {
-                var newPrefix = StringConverter.ToString(rootHash);
                 var targetBlockHashes = allInternalBlockItems.Select(n => n.BlockHash).ToArray();
-                await this.RenameBlocksAsync(tempPrefix, newPrefix, targetBlockHashes, cancellationToken);
+                await this.RenameBlocksAsync(tempSpaceId, rootHash, targetBlockHashes, cancellationToken);
 
-                _publisherRepo.FileItems.Upsert(newFileItem);
-                _publisherRepo.BlockInternalItems.UpsertBulk(allInternalBlockItems);
+                await _publisherRepo.FileItemRepo.UpsertAsync(newFileItem, cancellationToken);
+                await _publisherRepo.BlockInternalItemRepo.UpsertBulkAsync(allInternalBlockItems, cancellationToken);
             }
 
             return rootHash;
         }
     }
 
+    private string GenSpaceId(DateTime now)
+    {
+        return string.Format("{}_{}", now.ToString("yyyy-MM-dd'T'HH:mm:ss"), _randomStringProvider.Gen());
+    }
+
     private async ValueTask DeleteBlocksAsync(string prefix, IEnumerable<OmniHash> blockHashes, CancellationToken cancellationToken = default)
     {
         foreach (var blockHash in blockHashes.ToHashSet())
         {
-            var key = GenKey(prefix, blockHash);
+            var key = GenTempKey(prefix, blockHash);
             await _blockStorage.TryDeleteAsync(key, cancellationToken);
         }
     }
 
-    private async ValueTask RenameBlocksAsync(string oldPrefix, string newPrefix, IEnumerable<OmniHash> blockHashes, CancellationToken cancellationToken = default)
+    private async ValueTask RenameBlocksAsync(string spaceId, OmniHash rootHash, IEnumerable<OmniHash> blockHashes, CancellationToken cancellationToken = default)
     {
         foreach (var blockHash in blockHashes.ToHashSet())
         {
-            var oldKey = GenKey(oldPrefix, blockHash);
-            var newKey = GenKey(newPrefix, blockHash);
+            var oldKey = GenTempKey(spaceId, blockHash);
+            var newKey = GenFixedKey(rootHash, blockHash);
             await _blockStorage.TryChangeKeyAsync(oldKey, newKey, cancellationToken);
         }
     }
 
-    private async ValueTask<IEnumerable<BlockPublishedInternalItem>> ImportFromMemoryAsync(string prefix, ReadOnlySequence<byte> sequence, int maxBlockSize, int depth, CancellationToken cancellationToken = default)
+    private async ValueTask<IEnumerable<BlockPublishedInternalItem>> ImportFromMemoryAsync(string spaceId, ReadOnlySequence<byte> sequence, int maxBlockSize, int depth, CancellationToken cancellationToken = default)
     {
         var blockItems = new List<BlockPublishedInternalItem>();
 
@@ -303,7 +300,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
             };
             blockItems.Add(blockItem);
 
-            await this.WriteBlockAsync(prefix, blockHash, memory);
+            await this.WriteBlockAsync(spaceId, blockHash, memory);
 
             sequence = sequence.Slice(blockSize);
         }
@@ -351,50 +348,40 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
         return blockItems;
     }
 
-    private async ValueTask WriteBlockAsync(string prefix, OmniHash blockHash, ReadOnlyMemory<byte> memory)
+    private async ValueTask WriteBlockAsync(string spaceId, OmniHash blockHash, ReadOnlyMemory<byte> memory)
     {
-        var key = GenKey(prefix, blockHash);
+        var key = GenTempKey(spaceId, blockHash);
         await _blockStorage.WriteAsync(key, memory);
     }
 
-    public async ValueTask UnpublishFileAsync(string filePath, string zone, CancellationToken cancellationToken = default)
+    public async ValueTask UnpublishFileAsync(string filePath, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var fileItem = _publisherRepo.FileItems.FindOne(filePath);
+            var fileItem = await _publisherRepo.FileItemRepo.GetItemAsync(filePath, cancellationToken);
             if (fileItem is null) return;
 
-            await this.UnpublishFileAsync(fileItem.RootHash, zone, cancellationToken);
+            await this.UnpublishFileAsync(fileItem.RootHash, cancellationToken);
         }
     }
 
-    public async ValueTask UnpublishFileAsync(OmniHash rootHash, string zone, CancellationToken cancellationToken = default)
+    public async ValueTask UnpublishFileAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var fileItem = _publisherRepo.FileItems.FindOne(rootHash);
+            var fileItem = await _publisherRepo.FileItemRepo.GetItemAsync(rootHash, cancellationToken);
             if (fileItem is null) return;
-            if (!fileItem.Zones.Contains(zone)) return;
 
-            if (fileItem.Zones.Count > 1)
+            await _publisherRepo.FileItemRepo.DeleteAsync(rootHash, cancellationToken);
+
+            await foreach (var blockItem in _publisherRepo.BlockInternalItemRepo.GetItemsAsync(rootHash, cancellationToken))
             {
-                var zones = fileItem.Zones.Where(n => n != zone).ToArray();
-                var newFileItem = fileItem with { Zones = zones };
-                _publisherRepo.FileItems.Upsert(newFileItem);
-
-                return;
-            }
-
-            _publisherRepo.FileItems.Delete(rootHash);
-
-            foreach (var blockItem in _publisherRepo.BlockInternalItems.Find(rootHash))
-            {
-                var key = GenKey(rootHash, blockItem.BlockHash);
+                var key = GenFixedKey(rootHash, blockItem.BlockHash);
                 await _blockStorage.TryDeleteAsync(key, cancellationToken);
             }
 
-            _publisherRepo.BlockInternalItems.Delete(rootHash);
-            _publisherRepo.BlockExternalItems.Delete(rootHash);
+            await _publisherRepo.BlockInternalItemRepo.DeleteAsync(rootHash, cancellationToken);
+            await _publisherRepo.BlockExternalItemRepo.DeleteAsync(rootHash, cancellationToken);
         }
     }
 
@@ -402,11 +389,11 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var key = GenKey(rootHash, blockHash);
+            var key = GenFixedKey(rootHash, blockHash);
             var result = await _blockStorage.TryReadAsync(key, cancellationToken);
             if (result is not null) return result;
 
-            var blockItem = _publisherRepo.BlockExternalItems.Find(rootHash, blockHash).FirstOrDefault();
+            var blockItem = await _publisherRepo.BlockExternalItemRepo.GetItemAsync(rootHash, blockHash);
             if (blockItem is null) return null;
 
             result = await this.TryReadBlockFromFileAsync(blockItem.FilePath, blockItem.Offset, blockItem.Count, blockHash, cancellationToken);
@@ -438,15 +425,13 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
         return memoryOwner;
     }
 
-    private static string GenKey(string prefix, OmniHash blockHash)
+    private static string GenTempKey(string spaceId, OmniHash blockHash)
     {
-        return prefix + "/" + StringConverter.ToString(blockHash);
+        return string.Format("tmp/{}/{}", spaceId, StringConverter.ToString(blockHash));
     }
 
-    private static string GenKey(OmniHash rootHash, OmniHash blockHash)
+    private static string GenFixedKey(OmniHash rootHash, OmniHash blockHash)
     {
-        return StringConverter.ToString(rootHash) + "/" + StringConverter.ToString(blockHash);
+        return string.Format("fix/{}/{}", StringConverter.ToString(rootHash), StringConverter.ToString(blockHash));
     }
-
-    public ValueTask<IEnumerable<PublishedFileReport>> GetPublishedFileReportsAsync(string zone, CancellationToken cancellationToken = default) => throw new NotImplementedException();
 }
