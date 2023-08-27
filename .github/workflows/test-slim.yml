@@ -1,4 +1,4 @@
-name: Test Slim
+name: test-slim
 
 on:
   push:
