@@ -156,15 +156,15 @@ public sealed class NoteUploader : AsyncDisposableBase, INoteUploader
             var digitalSignature = config.DigitalSignature;
 
             var noteBox = new NoteBox(config.Notes.ToArray());
-            using var noteBoxBytes = RocketMessage.ToBytes(noteBox);
+            using var noteBoxBytes = RocketMessageConverter.ToBytes(noteBox);
 
-            using var signatureBytes = RocketMessage.ToBytes(digitalSignature.GetOmniSignature());
+            using var signatureBytes = RocketMessageConverter.ToBytes(digitalSignature.GetOmniSignature());
             var property = new AttachedProperty(PROPERTIES_SIGNATURE, signatureBytes.Memory);
 
             var rootHash = await _serviceMediator.PublishFileFromMemoryAsync(noteBoxBytes.Memory, 8 * 1024 * 1024, new[] { property }, Zone, cancellationToken);
 
             var now = DateTime.UtcNow;
-            using var shout = Shout.Create(Channel, Timestamp64.FromDateTime(now), RocketMessage.ToBytes(rootHash), digitalSignature);
+            using var shout = Shout.Create(Channel, Timestamp64.FromDateTime(now), RocketMessageConverter.ToBytes(rootHash), digitalSignature);
             await _serviceMediator.PublishShoutAsync(shout, Enumerable.Empty<AttachedProperty>(), Zone, cancellationToken);
         }
     }

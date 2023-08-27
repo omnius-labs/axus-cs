@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS node_locations (
             {
                 var queryBuilder = new StringBuilder();
                 queryBuilder.AppendLine("INSERT OR IGNORE INTO node_locations (hash, value, created_time, updated_time) VALUES");
-                var parameters = new List<(string, object)>();
+                var parameters = new List<(string, object?)>();
                 parameters.Add(($"@created_time", now));
                 parameters.Add(($"@updated_time", now));
 
@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS node_locations (
                     queryBuilder.AppendLine($"(@hash_{index}, @value_{index}, @created_time, @updated_time)");
                     if (next is not null) queryBuilder.AppendLine(",");
 
-                    using var valueBytes = RocketMessage.ToBytes(current);
+                    using var valueBytes = RocketMessageConverter.ToBytes(current);
                     var hash = OmniHash.Create(OmniHashAlgorithmType.Sha2_256, valueBytes.Memory.Span);
 
                     parameters.Add(($"@hash_{index}", hash.ToString()));
@@ -148,7 +148,7 @@ CREATE TABLE IF NOT EXISTS node_locations (
             {
                 var queryBuilder = new StringBuilder();
                 queryBuilder.AppendLine("INSERT INTO node_locations (hash, value, created_time, updated_time) VALUES");
-                var parameters = new List<(string, object)>();
+                var parameters = new List<(string, object?)>();
                 parameters.Add(($"@created_time", now));
                 parameters.Add(($"@updated_time", now));
 
@@ -157,7 +157,7 @@ CREATE TABLE IF NOT EXISTS node_locations (
                     queryBuilder.AppendLine($"(@hash_{index}, @value_{index}, @created_time, @updated_time)");
                     if (next is not null) queryBuilder.AppendLine(",");
 
-                    using var valueBytes = RocketMessage.ToBytes(current);
+                    using var valueBytes = RocketMessageConverter.ToBytes(current);
                     var hash = OmniHash.Create(OmniHashAlgorithmType.Sha2_256, valueBytes.Memory.Span);
 
                     parameters.Add(($"@hash_{index}", hash.ToString()));

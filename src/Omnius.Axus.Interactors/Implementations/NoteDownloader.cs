@@ -229,7 +229,7 @@ public sealed partial class NoteDownloader : AsyncDisposableBase, INoteDownloade
                 using var shout = await _serviceMediator.TryExportShoutAsync(memoItem.Signature, Channel, memoItem.ShoutUpdatedTime, cancellationToken);
                 if (shout is null) continue;
 
-                var rootHash = RocketMessage.FromBytes<OmniHash>(shout.Value.Memory);
+                var rootHash = RocketMessageConverter.FromBytes<OmniHash>(shout.Value.Memory);
 
                 var newBarkItem = memoItem with
                 {
@@ -291,7 +291,7 @@ public sealed partial class NoteDownloader : AsyncDisposableBase, INoteDownloade
             using var contentBytes = await _serviceMediator.TryExportFileToMemoryAsync(memoItem.RootHash, cancellationToken);
             if (contentBytes is null) return null;
 
-            var content = RocketMessage.FromBytes<NoteBox>(contentBytes.Memory);
+            var content = RocketMessageConverter.FromBytes<NoteBox>(contentBytes.Memory);
 
             var cachedContent = new CachedNoteBox(signature, Timestamp64.FromDateTime(memoItem.ShoutUpdatedTime), content);
             return cachedContent;

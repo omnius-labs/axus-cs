@@ -269,9 +269,9 @@ public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileDow
                 using var shout = await _serviceMediator.TryExportShoutAsync(signature, Channel, createdTime, cancellationToken);
                 if (shout is null) continue;
 
-                var rootHash = RocketMessage.FromBytes<OmniHash>(shout.Value.Memory);
+                var rootHash = RocketMessageConverter.FromBytes<OmniHash>(shout.Value.Memory);
 
-                using var shoutBytes = RocketMessage.ToBytes(shout);
+                using var shoutBytes = RocketMessageConverter.ToBytes(shout);
                 var property = new AttachedProperty(PROPERTIES_SHOUT, shoutBytes.Memory);
 
                 await _serviceMediator.SubscribeFileAsync(rootHash, new[] { property }, Zone, cancellationToken);
@@ -291,7 +291,7 @@ public sealed partial class ProfileDownloader : AsyncDisposableBase, IProfileDow
                 using var profileBytes = await _serviceMediator.TryExportFileToMemoryAsync(rootHash, cancellationToken);
                 if (profileBytes is null) continue;
 
-                var profile = RocketMessage.FromBytes<Profile>(profileBytes.Memory);
+                var profile = RocketMessageConverter.FromBytes<Profile>(profileBytes.Memory);
                 var cachedProfile = new CachedProfile(signature, createdTime, profile);
                 await _cachedProfileRepo.UpsertAsync(cachedProfile, cancellationToken);
             }

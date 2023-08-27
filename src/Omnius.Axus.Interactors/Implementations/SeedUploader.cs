@@ -165,15 +165,15 @@ public sealed class SeedUploader : AsyncDisposableBase, ISeedUploader
             var seeds = reports.Select(n => n.Seed).WhereNotNull().ToArray();
 
             var seedBox = new SeedBox(seeds);
-            using var seedBoxBytes = RocketMessage.ToBytes(seedBox);
+            using var seedBoxBytes = RocketMessageConverter.ToBytes(seedBox);
 
-            using var signatureBytes = RocketMessage.ToBytes(digitalSignature.GetOmniSignature());
+            using var signatureBytes = RocketMessageConverter.ToBytes(digitalSignature.GetOmniSignature());
             var property = new AttachedProperty(PROPERTIES_SIGNATURE, signatureBytes.Memory);
 
             var rootHash = await _serviceMediator.PublishFileFromMemoryAsync(seedBoxBytes.Memory, 8 * 1024 * 1024, new[] { property }, Zone, cancellationToken);
 
             var now = DateTime.UtcNow;
-            using var shout = Shout.Create(Channel, Timestamp64.FromDateTime(now), RocketMessage.ToBytes(rootHash), digitalSignature);
+            using var shout = Shout.Create(Channel, Timestamp64.FromDateTime(now), RocketMessageConverter.ToBytes(rootHash), digitalSignature);
             await _serviceMediator.PublishShoutAsync(shout, Enumerable.Empty<AttachedProperty>(), Zone, cancellationToken);
         }
     }

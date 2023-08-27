@@ -95,7 +95,7 @@ $@"
 INSERT OR IGNORE INTO seeds (self_hash, signature, name, size, created_time, value)
     VALUES (@SelfHash, @Signature, @Name, @Size, @CreatedTime, @Value);
 ";
-                using var valueBytes = RocketMessage.ToBytes(s.Value);
+                using var valueBytes = RocketMessageConverter.ToBytes(s.Value);
                 var parameters = new (string, object)[] {
                     ("@SelfHash", s.SelfHash.ToString(ConvertStringType.Base16)),
                     ("@Signature", s.Signature.ToString()),

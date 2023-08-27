@@ -157,15 +157,15 @@ public sealed class ProfileUploader : AsyncDisposableBase, IProfileUploader
             var digitalSignature = config.DigitalSignature;
 
             var profile = new Profile(config.TrustedSignatures.ToArray(), config.BlockedSignatures.ToArray());
-            using var profileBytes = RocketMessage.ToBytes(profile);
+            using var profileBytes = RocketMessageConverter.ToBytes(profile);
 
-            using var signatureBytes = RocketMessage.ToBytes(digitalSignature.GetOmniSignature());
+            using var signatureBytes = RocketMessageConverter.ToBytes(digitalSignature.GetOmniSignature());
             var property = new AttachedProperty(PROPERTIES_SIGNATURE, signatureBytes.Memory);
 
             var rootHash = await _serviceMediator.PublishFileFromMemoryAsync(profileBytes.Memory, 8 * 1024 * 1024, new[] { property }, Zone, cancellationToken);
 
             var now = DateTime.UtcNow;
-            using var shout = Shout.Create(Channel, Timestamp64.FromDateTime(now), RocketMessage.ToBytes(rootHash), digitalSignature);
+            using var shout = Shout.Create(Channel, Timestamp64.FromDateTime(now), RocketMessageConverter.ToBytes(rootHash), digitalSignature);
             await _serviceMediator.PublishShoutAsync(shout, Enumerable.Empty<AttachedProperty>(), Zone, cancellationToken);
         }
     }

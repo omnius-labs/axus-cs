@@ -68,7 +68,7 @@ DELETE FROM profiles WHERE signature = @Signature;
 INSERT INTO profiles (signature, created_time, value)
     VALUES(@Signature, @Created_time, @Value);
 ";
-                using var value = RocketMessage.ToBytes(profile.Value);
+                using var value = RocketMessageConverter.ToBytes(profile.Value);
                 var parameters = new (string, object)[] {
                     ("@Signature", profile.Signature.ToString()),
                     ("@CreatedTime", profile.CreatedTime.Seconds),
@@ -119,7 +119,7 @@ INSERT INTO profiles (signature, created_time, value)
                 .Select("signature")
                 .FirstAsync();
 
-            var result = new CachedProfile(OmniSignature.Parse(row.signature), new Timestamp64(row.created_time), RocketMessage.FromBytes(row.value));
+            var result = new CachedProfile(OmniSignature.Parse(row.signature), new Timestamp64(row.created_time), RocketMessageConverter.FromBytes(row.value));
             return result;
         }
     }

@@ -220,9 +220,9 @@ public sealed partial class SeedDownloader : AsyncDisposableBase, ISeedDownloade
                 using var shout = await _serviceMediator.TryExportShoutAsync(signature, Channel, createdTime, cancellationToken);
                 if (shout is null) continue;
 
-                var rootHash = RocketMessage.FromBytes<OmniHash>(shout.Value.Memory);
+                var rootHash = RocketMessageConverter.FromBytes<OmniHash>(shout.Value.Memory);
 
-                using var shoutBytes = RocketMessage.ToBytes(shout);
+                using var shoutBytes = RocketMessageConverter.ToBytes(shout);
                 var property = new AttachedProperty(PROPERTIES_SHOUT, shoutBytes.Memory);
 
                 await _serviceMediator.SubscribeFileAsync(rootHash, new[] { property }, Zone, cancellationToken);
@@ -242,7 +242,7 @@ public sealed partial class SeedDownloader : AsyncDisposableBase, ISeedDownloade
                 using var seedBoxBytes = await _serviceMediator.TryExportFileToMemoryAsync(rootHash, cancellationToken);
                 if (seedBoxBytes is null) continue;
 
-                var seedBox = RocketMessage.FromBytes<SeedBox>(seedBoxBytes.Memory);
+                var seedBox = RocketMessageConverter.FromBytes<SeedBox>(seedBoxBytes.Memory);
                 var cachedSeedBox = new CachedSeedBox(signature, createdTime, seedBox);
                 await _cachedSeedBoxRepo.UpsertAsync(cachedSeedBox, cancellationToken);
             }

@@ -2,6 +2,7 @@ using System.Buffers;
 using System.Runtime.CompilerServices;
 using Omnius.Axus.Engines.Internal;
 using Omnius.Axus.Engines.Internal.Models;
+using Omnius.Axus.Messages;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Helpers;
@@ -65,18 +66,18 @@ internal sealed class FilePublisherStorageRepository : AsyncDisposableBase
                 using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
 
                 var query =
-    @"
-CREATE TABLE IF NOT EXISTS file_items (
+@"
+CREATE TABLE IF NOT EXISTS files (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    root_hash TEXT NOT NULL,
     file_path TEXT,
+    root_hash TEXT NOT NULL,
     max_block_size INTEGER NOT NULL,
     properties BLOB NOT NULL,
     created_time INTEGER NOT NULL,
     updated_time INTEGER NOT NULL
 );
-CREATE UNIQUE INDEX IF NOT EXISTS file_items_root_hash_index ON file_items(root_hash) WHERE file_path IS NULL;
-CREATE UNIQUE INDEX IF NOT EXISTS file_items_file_path_index ON file_items(file_path) WHERE file_path IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS files_file_path_index ON files(file_path) WHERE file_path IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS files_root_hash_index ON files(root_hash) WHERE file_path IS NULL;
 ";
                 await connection.ExecuteNonQueryAsync(query, cancellationToken);
             }
@@ -91,13 +92,14 @@ CREATE UNIQUE INDEX IF NOT EXISTS file_items_file_path_index ON file_items(file_
                 var query =
 $@"
 SELECT COUNT(1)
-    FROM file_items
-    WHERE root_hash = '{SqliteQueryHelper.EscapeText(rootHash.ToString())}'
-    LIMIT 1
-;
+    FROM files
+    WHERE root_hash = @root_hash
+    LIMIT 1;
 ";
+                var parameters = new List<(string, object?)>();
+                parameters.Add(($"@root_hash", rootHash.ToString(ConvertStringType.Base64)));
 
-                var result = await connection.ExecuteScalarAsync(query, cancellationToken);
+                var result = await connection.ExecuteScalarAsync(query, parameters, cancellationToken);
                 return (long)result! == 1;
             }
         }
@@ -111,13 +113,14 @@ SELECT COUNT(1)
                 var query =
 $@"
 SELECT COUNT(1)
-    FROM file_items
-    WHERE file_path = '{SqliteQueryHelper.EscapeText(filePath)}'
-    LIMIT 1
-;
+    FROM files
+    WHERE file_path = @file_path
+    LIMIT 1;
 ";
+                var parameters = new List<(string, object?)>();
+                parameters.Add(($"@file_path", filePath));
 
-                var result = await connection.ExecuteScalarAsync(query, cancellationToken);
+                var result = await connection.ExecuteScalarAsync(query, parameters, cancellationToken);
                 return (long)result! == 1;
             }
         }
@@ -136,7 +139,7 @@ SELECT COUNT(1)
 
                 for (; ; )
                 {
-                    var rows = await db.Query("file_items")
+                    var rows = await db.Query("files")
                         .Select("root_hash", "file_path", "max_block_size", "properties", "created_time", "updated_time")
                         .Offset(offset)
                         .Limit(limit)
@@ -150,7 +153,7 @@ SELECT COUNT(1)
                             RootHash = OmniHash.Parse(row.root_hash),
                             FilePath = row.file_path,
                             MaxBlockSize = row.max_block_size,
-                            Properties = AttachedProperties.Import(new ReadOnlySequence<byte>(row.Properties), _bytesPool).Values,
+                            Properties = RocketMessageConverter.FromBytes<RocketArray<AttachedProperty>>((byte[])row.properties).Values,
                             CreatedTime = Timestamp64.FromSeconds(row.created_time).ToDateTime(),
                             UpdatedTime = Timestamp64.FromSeconds(row.updated_time).ToDateTime(),
                         };
@@ -170,7 +173,7 @@ SELECT COUNT(1)
                 var compiler = new SqliteCompiler();
                 using var db = new QueryFactory(connection, compiler);
 
-                var rows = await db.Query("file_items")
+                var rows = await db.Query("files")
                     .Select("root_hash", "file_path", "max_block_size", "properties", "created_time", "updated_time")
                     .Where("file_path", "=", filePath)
                     .Limit(1)
@@ -184,7 +187,7 @@ SELECT COUNT(1)
                     RootHash = OmniHash.Parse(row.root_hash),
                     FilePath = row.file_path,
                     MaxBlockSize = row.max_block_size,
-                    Properties = AttachedProperties.Import(new ReadOnlySequence<byte>(row.Properties), _bytesPool).Values,
+                    Properties = RocketMessageConverter.FromBytes<RocketArray<AttachedProperty>>((byte[])row.properties).Values,
                     CreatedTime = Timestamp64.FromSeconds(row.created_time).ToDateTime(),
                     UpdatedTime = Timestamp64.FromSeconds(row.updated_time).ToDateTime(),
                 };
@@ -199,7 +202,7 @@ SELECT COUNT(1)
                 var compiler = new SqliteCompiler();
                 using var db = new QueryFactory(connection, compiler);
 
-                var rows = await db.Query("file_items")
+                var rows = await db.Query("files")
                     .Select("root_hash", "file_path", "max_block_size", "properties", "created_time", "updated_time")
                     .Where("root_hash", "=", rootHash.ToString(ConvertStringType.Base64))
                     .Limit(1)
@@ -213,7 +216,7 @@ SELECT COUNT(1)
                     RootHash = OmniHash.Parse(row.root_hash),
                     FilePath = row.file_path,
                     MaxBlockSize = row.max_block_size,
-                    Properties = AttachedProperties.Import(new ReadOnlySequence<byte>(row.Properties), _bytesPool).Values,
+                    Properties = RocketMessageConverter.FromBytes<RocketArray<AttachedProperty>>((byte[])row.properties).Values,
                     CreatedTime = Timestamp64.FromSeconds(row.created_time).ToDateTime(),
                     UpdatedTime = Timestamp64.FromSeconds(row.updated_time).ToDateTime(),
                 };
@@ -234,7 +237,7 @@ SELECT COUNT(1)
 
                 for (; ; )
                 {
-                    var rows = await db.Query("file_items")
+                    var rows = await db.Query("files")
                         .Select("root_hash")
                         .Offset(offset)
                         .Limit(limit)
@@ -254,14 +257,65 @@ SELECT COUNT(1)
 
         public async ValueTask UpsertAsync(FilePublishedItem item, CancellationToken cancellationToken = default)
         {
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+                using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+
+                var query =
+$@"
+INSERT INTO notes (file_path, root_hash, max_block_size, properties, created_time, updated_time)
+    VALUES (@file_path, @root_hash, @max_block_size, @properties, @created_time, @updated_time)
+ON CONFLICT(@file_path, @root_hash)
+    DO UPDATE SET file_path = @file_path, root_hash = @root_hash, max_block_size = @max_block_size, properties = @properties, created_time = @created_time, updated_time = @updated_time;
+";
+                var parameters = new List<(string, object?)>();
+                parameters.Add(($"@file_path", item.FilePath));
+                parameters.Add(($"@root_hash", item.RootHash.ToString(ConvertStringType.Base16Lower)));
+                parameters.Add(($"@max_block_size", item.MaxBlockSize));
+                parameters.Add(($"@properties", RocketMessageConverter.ToBytes(new RocketArray<AttachedProperty>(item.Properties.ToArray()))));
+                parameters.Add(($"@created_time", item.FilePath));
+                parameters.Add(($"@updated_time", item.UpdatedTime));
+
+                var result = await connection.ExecuteNonQueryAsync(query, parameters, cancellationToken);
+            }
         }
 
         public async ValueTask DeleteAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+                using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+
+                var query =
+$@"
+DELETE
+    FROM files
+    WHERE root_hash = @root_hash;
+";
+                var parameters = new List<(string, object?)>();
+                parameters.Add(($"@root_hash", rootHash.ToString(ConvertStringType.Base64)));
+
+                var result = await connection.ExecuteNonQueryAsync(query, parameters, cancellationToken);
+            }
         }
 
         public async ValueTask DeleteAsync(string filePath, CancellationToken cancellationToken = default)
         {
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+                using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+
+                var query =
+$@"
+DELETE
+    FROM files
+    WHERE file_path = @file_path;
+";
+                var parameters = new List<(string, object?)>();
+                parameters.Add(($"@file_path", filePath));
+
+                var result = await connection.ExecuteNonQueryAsync(query, parameters, cancellationToken);
+            }
         }
     }
 
@@ -282,97 +336,65 @@ SELECT COUNT(1)
         {
             using (await _asyncLock.LockAsync(cancellationToken))
             {
+                using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+
+                var query =
+@"
+CREATE TABLE IF NOT EXISTS internal_blocks (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    root_hash TEXT NOT NULL,
+    block_hash TEXT NOT NULL,
+    depth INTEGER NOT NULL,
+    order INTEGER NOT NULL,
+    created_time INTEGER NOT NULL,
+    updated_time INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS internal_blocks_root_hash_block_hash_index ON internal_blocks(root_hash, block_hash);
+";
+                await connection.ExecuteNonQueryAsync(query, cancellationToken);
             }
         }
 
-        private ILiteCollection<BlockPublishedInternalItemEntity> GetCollection()
+        public async ValueTask<bool> ExistsAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
         {
-            var col = _database.GetCollection<BlockPublishedInternalItemEntity>(CollectionName);
-            return col;
-        }
-
-        public bool Exists(OmniHash rootHash, OmniHash blockHash)
-        {
-            lock (_lockObject)
+            using (await _asyncLock.LockAsync(cancellationToken))
             {
-                var rootHashEntity = OmniHashEntity.Import(rootHash);
-                var blockHashEntity = OmniHashEntity.Import(blockHash);
+                using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
 
-                var col = this.GetCollection();
-                return col.Exists(n => n.BlockHash == blockHashEntity && n.RootHash == rootHashEntity);
+                var query =
+$@"
+SELECT COUNT(1)
+    FROM internal_blocks
+    WHERE root_hash = @root_hash AND block_hash = @block_hash
+    LIMIT 1;
+";
+                var parameters = new List<(string, object?)>();
+                parameters.Add(($"@root_hash", rootHash.ToString(ConvertStringType.Base64)));
+                parameters.Add(($"@block_hash", blockHash.ToString(ConvertStringType.Base64)));
+
+                var result = await connection.ExecuteScalarAsync(query, parameters, cancellationToken);
+                return (long)result! == 1;
             }
         }
 
-        public IEnumerable<BlockPublishedInternalItem> FindAll()
+        public async IAsyncEnumerable<BlockPublishedInternalItem> GetItemsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            lock (_lockObject)
-            {
-                var col = this.GetCollection();
-                return col.FindAll().Select(n => n.Export()).ToArray();
-            }
         }
 
-        public IEnumerable<BlockPublishedInternalItem> Find(OmniHash rootHash)
+        public IAsyncEnumerable<BlockPublishedInternalItem> GetItemsAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
-            lock (_lockObject)
-            {
-                var rootHashEntity = OmniHashEntity.Import(rootHash);
-
-                var col = this.GetCollection();
-                return col.Find(n => n.RootHash == rootHashEntity).Select(n => n.Export()).ToArray();
-            }
         }
 
-        public IEnumerable<BlockPublishedInternalItem> Find(OmniHash rootHash, OmniHash blockHash)
+        public ValueTask<BlockPublishedInternalItem> GetItemAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
         {
-            lock (_lockObject)
-            {
-                var rootHashEntity = OmniHashEntity.Import(rootHash);
-                var blockHashEntity = OmniHashEntity.Import(blockHash);
-
-                var col = this.GetCollection();
-                return col.Find(n => n.BlockHash == blockHashEntity && n.RootHash == rootHashEntity).Select(n => n.Export()).ToArray();
-            }
         }
 
-        public void Upsert(BlockPublishedInternalItem item)
+        public ValueTask UpsertBulkAsync(IEnumerable<BlockPublishedInternalItem> items, CancellationToken cancellationToken = default)
         {
-            this.UpsertBulk(new[] { item });
         }
 
-        public void UpsertBulk(IEnumerable<BlockPublishedInternalItem> items)
+        public ValueTask DeleteAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
-            lock (_lockObject)
-            {
-                var col = this.GetCollection();
-
-                _database.BeginTrans();
-
-                foreach (var item in items)
-                {
-                    var itemEntity = BlockPublishedInternalItemEntity.Import(item);
-
-                    col.DeleteMany(n =>
-                        n.BlockHash == itemEntity.BlockHash
-                        && n.RootHash == itemEntity.RootHash
-                        && n.Depth == itemEntity.Depth
-                        && n.Order == itemEntity.Order);
-                    col.Insert(itemEntity);
-                }
-
-                _database.Commit();
-            }
-        }
-
-        public void Delete(OmniHash rootHash)
-        {
-            lock (_lockObject)
-            {
-                var rootHashEntity = OmniHashEntity.Import(rootHash);
-
-                var col = this.GetCollection();
-                col.DeleteMany(n => n.RootHash == rootHashEntity);
-            }
         }
     }
 
@@ -396,18 +418,20 @@ SELECT COUNT(1)
                 using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
 
                 var query =
-    @"
-CREATE TABLE IF NOT EXISTS file_items (
+@"
+CREATE TABLE IF NOT EXISTS external_blocks (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    file_path TEXT NOT NULL,
     root_hash TEXT NOT NULL,
-    file_path TEXT,
-    max_block_size INTEGER NOT NULL,
-    properties BLOB NOT NULL,
+    block_hash TEXT NOT NULL,
+    depth INTEGER NOT NULL,
+    order INTEGER NOT NULL,
+    count INTEGER NOT NULL,
     created_time INTEGER NOT NULL,
     updated_time INTEGER NOT NULL
 );
-CREATE UNIQUE INDEX IF NOT EXISTS file_items_root_hash_index ON file_items(root_hash) WHERE file_path IS NULL;
-CREATE UNIQUE INDEX IF NOT EXISTS file_items_file_path_index ON file_items(file_path) WHERE file_path IS NOT NULL;
+CREATE INDEX IF NOT EXISTS external_blocks_root_hash_block_hash_index ON external_blocks(root_hash, block_hash);
+CREATE INDEX IF NOT EXISTS external_blocks_file_path_root_hash_block_hash_index ON external_blocks(file_path, root_hash, block_hash);
 ";
                 await connection.ExecuteNonQueryAsync(query, cancellationToken);
             }
@@ -425,15 +449,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS file_items_file_path_index ON file_items(file_
         {
         }
 
-        public async IAsyncEnumerable<BlockPublishedExternalItem> GetItemsAsync(OmniHash rootHash, OmniHash blockHash, [EnumeratorCancellation] CancellationToken cancellationToken = default)
-        {
-        }
-
         public async ValueTask<BlockPublishedExternalItem> GetItemAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
-        {
-        }
-
-        public async ValueTask UpsertAsync(BlockPublishedExternalItem item, CancellationToken cancellationToken = default)
         {
         }
 

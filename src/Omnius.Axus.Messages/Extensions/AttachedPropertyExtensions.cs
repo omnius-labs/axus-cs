@@ -27,7 +27,7 @@ public static class AttachedPropertyExtensions
         {
             if (p.Name == name)
             {
-                value = RocketMessage.FromBytes<T>(p.Value);
+                value = RocketMessageConverter.FromBytes<T>(p.Value);
                 return true;
             }
         }

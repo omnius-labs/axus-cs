@@ -7,6 +7,7 @@ using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Cryptography.Functions;
 using Omnius.Core.Pipelines;
+using Omnius.Core.Serialization;
 using Omnius.Core.Storages;
 
 namespace Omnius.Axus.Engines;
@@ -26,6 +27,8 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
 
     private readonly AsyncLock _asyncLock = new();
     private readonly AsyncLock _publishAsyncLock = new();
+
+    private static Base16 _base16 = new Base16(Base16Case.Lower);
 
     public static async ValueTask<FilePublisherStorage> CreateAsync(IKeyValueStorageFactory keyValueStorageFactory, ISystemClock systemClock, IRandomBytesProvider randomStringProvider,
         IBytesPool bytesPool, FilePublisherStorageOptions options, CancellationToken cancellationToken = default)
@@ -252,7 +255,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
 
     private string GenSpaceId(DateTime now)
     {
-        return string.Format("{}_{}", now.ToString("yyyy-MM-dd'T'HH:mm:ss"), _randomStringProvider.Gen());
+        return string.Format("{}_{}", now.ToString("yyyy-MM-dd'T'HH:mm:ss"), _base16.BytesToString(new ReadOnlySequence<byte>(_randomStringProvider.GetBytes(32))));
     }
 
     private async ValueTask DeleteBlocksAsync(string prefix, IEnumerable<OmniHash> blockHashes, CancellationToken cancellationToken = default)
