@@ -343,7 +343,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
                 BlockHash = blockHash,
                 Order = order++,
                 Offset = stream.Position - blockSize,
-                Count = blockSize,
+                Length = blockSize,
             };
             blockItems.Add(blockItem);
         }
@@ -399,7 +399,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
             var blockItem = await _publisherRepo.BlockExternalItems.GetItemAsync(rootHash, blockHash);
             if (blockItem is null) return null;
 
-            result = await this.TryReadBlockFromFileAsync(blockItem.FilePath, blockItem.Offset, blockItem.Count, blockHash, cancellationToken);
+            result = await this.TryReadBlockFromFileAsync(blockItem.FilePath, blockItem.Offset, blockItem.Length, blockHash, cancellationToken);
             return result;
         }
     }

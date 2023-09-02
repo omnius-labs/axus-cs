@@ -21,7 +21,7 @@ internal record BlockPublishedExternalItemEntity
             BlockHash = OmniHashEntity.Import(item.BlockHash),
             Order = item.Order,
             Offset = item.Offset,
-            Count = item.Count,
+            Count = item.Length,
         };
     }
 
@@ -34,7 +34,7 @@ internal record BlockPublishedExternalItemEntity
             BlockHash = this.BlockHash?.Export() ?? OmniHash.Empty,
             Order = this.Order,
             Offset = this.Offset,
-            Count = this.Count,
+            Length = this.Count,
         };
     }
 }

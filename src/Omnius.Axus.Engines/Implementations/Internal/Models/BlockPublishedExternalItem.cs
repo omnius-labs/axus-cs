@@ -9,5 +9,5 @@ internal record BlockPublishedExternalItem
     public required OmniHash BlockHash { get; init; }
     public required int Order { get; init; }
     public required long Offset { get; init; }
-    public required int Count { get; init; }
+    public required int Length { get; init; }
 }
