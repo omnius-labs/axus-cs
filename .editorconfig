@@ -204,3 +204,7 @@ end_of_line = lf
 # Makefile
 [Makefile]
 indent_style = tab
+
+# Rocket Pack Format files
+[*.rpf]
+end_of_line = lf
