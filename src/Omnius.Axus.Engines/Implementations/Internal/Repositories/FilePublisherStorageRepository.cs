@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Runtime.CompilerServices;
+using System.Text;
 using Omnius.Axus.Engines.Internal;
 using Omnius.Axus.Engines.Internal.Models;
 using Omnius.Axus.Messages;
@@ -76,8 +77,9 @@ CREATE TABLE IF NOT EXISTS files (
     created_time INTEGER NOT NULL,
     updated_time INTEGER NOT NULL
 );
-CREATE UNIQUE INDEX IF NOT EXISTS files_file_path_index ON files(file_path) WHERE file_path IS NOT NULL;
-CREATE UNIQUE INDEX IF NOT EXISTS files_root_hash_index ON files(root_hash) WHERE file_path IS NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS files_file_path_unique_index ON files(file_path) WHERE file_path IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS files_root_hash_unique_index ON files(root_hash) WHERE file_path IS NULL;
+CREATE INDEX IF NOT EXISTS files_root_hash_index ON files(root_hash);
 ";
                 await connection.ExecuteNonQueryAsync(query, cancellationToken);
             }
@@ -96,8 +98,10 @@ SELECT COUNT(1)
     WHERE root_hash = @root_hash
     LIMIT 1;
 ";
-                var parameters = new List<(string, object?)>();
-                parameters.Add(($"@root_hash", rootHash.ToString(ConvertStringType.Base64)));
+                var parameters = new (string, object?)[]
+                {
+                    ("@root_hash", rootHash.ToString(ConvertStringType.Base64))
+                };
 
                 var result = await connection.ExecuteScalarAsync(query, parameters, cancellationToken);
                 return (long)result! == 1;
@@ -117,8 +121,10 @@ SELECT COUNT(1)
     WHERE file_path = @file_path
     LIMIT 1;
 ";
-                var parameters = new List<(string, object?)>();
-                parameters.Add(($"@file_path", filePath));
+                var parameters = new (string, object?)[]
+                {
+                    ("@file_path", filePath)
+                };
 
                 var result = await connection.ExecuteScalarAsync(query, parameters, cancellationToken);
                 return (long)result! == 1;
@@ -263,18 +269,20 @@ SELECT COUNT(1)
 
                 var query =
 $@"
-INSERT INTO notes (file_path, root_hash, max_block_size, properties, created_time, updated_time)
+INSERT INTO files (file_path, root_hash, max_block_size, properties, created_time, updated_time)
     VALUES (@file_path, @root_hash, @max_block_size, @properties, @created_time, @updated_time)
-ON CONFLICT(@file_path, @root_hash)
+ON CONFLICT (@root_hash, @file_path)
     DO UPDATE SET file_path = @file_path, root_hash = @root_hash, max_block_size = @max_block_size, properties = @properties, created_time = @created_time, updated_time = @updated_time;
 ";
-                var parameters = new List<(string, object?)>();
-                parameters.Add(($"@file_path", item.FilePath));
-                parameters.Add(($"@root_hash", item.RootHash.ToString(ConvertStringType.Base16Lower)));
-                parameters.Add(($"@max_block_size", item.MaxBlockSize));
-                parameters.Add(($"@properties", RocketMessageConverter.ToBytes(new RocketArray<AttachedProperty>(item.Properties.ToArray()))));
-                parameters.Add(($"@created_time", item.FilePath));
-                parameters.Add(($"@updated_time", item.UpdatedTime));
+                var parameters = new (string, object?)[]
+                {
+                    ("@file_path", item.FilePath),
+                    ("@root_hash", item.RootHash.ToString(ConvertStringType.Base16Lower)),
+                    ("@max_block_size", item.MaxBlockSize),
+                    ("@properties", RocketMessageConverter.ToBytes(new RocketArray<AttachedProperty>(item.Properties.ToArray()))),
+                    ("@created_time", item.FilePath),
+                    ("@updated_time", item.UpdatedTime)
+                };
 
                 var result = await connection.ExecuteNonQueryAsync(query, parameters, cancellationToken);
             }
@@ -292,8 +300,10 @@ DELETE
     FROM files
     WHERE root_hash = @root_hash;
 ";
-                var parameters = new List<(string, object?)>();
-                parameters.Add(($"@root_hash", rootHash.ToString(ConvertStringType.Base64)));
+                var parameters = new (string, object?)[]
+                {
+                    ($"@root_hash", rootHash.ToString(ConvertStringType.Base64)),
+                };
 
                 var result = await connection.ExecuteNonQueryAsync(query, parameters, cancellationToken);
             }
@@ -311,8 +321,10 @@ DELETE
     FROM files
     WHERE file_path = @file_path;
 ";
-                var parameters = new List<(string, object?)>();
-                parameters.Add(($"@file_path", filePath));
+                var parameters = new (string, object?)[]
+                {
+                    ($"@file_path", filePath),
+                };
 
                 var result = await connection.ExecuteNonQueryAsync(query, parameters, cancellationToken);
             }
@@ -346,10 +358,9 @@ CREATE TABLE IF NOT EXISTS internal_blocks (
     block_hash TEXT NOT NULL,
     depth INTEGER NOT NULL,
     order INTEGER NOT NULL,
-    created_time INTEGER NOT NULL,
-    updated_time INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS internal_blocks_root_hash_block_hash_index ON internal_blocks(root_hash, block_hash);
+CREATE UNIQUE INDEX IF NOT EXISTS internal_blocks_root_hash_block_hash_depth_order_unique_index ON internal_blocks(root_hash, block_hash, depth, order);
 ";
                 await connection.ExecuteNonQueryAsync(query, cancellationToken);
             }
@@ -368,9 +379,11 @@ SELECT COUNT(1)
     WHERE root_hash = @root_hash AND block_hash = @block_hash
     LIMIT 1;
 ";
-                var parameters = new List<(string, object?)>();
-                parameters.Add(($"@root_hash", rootHash.ToString(ConvertStringType.Base64)));
-                parameters.Add(($"@block_hash", blockHash.ToString(ConvertStringType.Base64)));
+                var parameters = new (string, object?)[]
+                {
+                    ($"@root_hash", rootHash.ToString(ConvertStringType.Base64)),
+                    ($"@block_hash", blockHash.ToString(ConvertStringType.Base64)),
+                };
 
                 var result = await connection.ExecuteScalarAsync(query, parameters, cancellationToken);
                 return (long)result! == 1;
@@ -379,21 +392,149 @@ SELECT COUNT(1)
 
         public async IAsyncEnumerable<BlockPublishedInternalItem> GetItemsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+                using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+                var compiler = new SqliteCompiler();
+                using var db = new QueryFactory(connection, compiler);
+
+                const int ChunkSize = 5000;
+                int offset = 0;
+                int limit = ChunkSize;
+
+                for (; ; )
+                {
+                    var rows = await db.Query("internal_blocks")
+                        .Select("root_hash", "block_hash", "depth", "order")
+                        .Offset(offset)
+                        .Limit(limit)
+                        .GetAsync(cancellationToken: cancellationToken);
+                    if (!rows.Any()) yield break;
+
+                    foreach (var row in rows)
+                    {
+                        yield return new BlockPublishedInternalItem
+                        {
+                            RootHash = OmniHash.Parse(row.root_hash),
+                            BlockHash = OmniHash.Parse(row.block_hash),
+                            Depth = row.depth,
+                            Order = row.order,
+                        };
+                    }
+
+                    offset = limit;
+                    limit += ChunkSize;
+                }
+            }
         }
 
-        public IAsyncEnumerable<BlockPublishedInternalItem> GetItemsAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<BlockPublishedInternalItem> GetItemsAsync(OmniHash rootHash, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+                using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+                var compiler = new SqliteCompiler();
+                using var db = new QueryFactory(connection, compiler);
+
+                const int ChunkSize = 5000;
+                int offset = 0;
+                int limit = ChunkSize;
+
+                for (; ; )
+                {
+                    var rows = await db.Query("internal_blocks")
+                        .Select("root_hash", "block_hash", "depth", "order")
+                        .Where("root_hash", "=", rootHash.ToString(ConvertStringType.Base64))
+                        .Offset(offset)
+                        .Limit(limit)
+                        .GetAsync(cancellationToken: cancellationToken);
+                    if (!rows.Any()) yield break;
+
+                    foreach (var row in rows)
+                    {
+                        yield return new BlockPublishedInternalItem
+                        {
+                            RootHash = OmniHash.Parse(row.root_hash),
+                            BlockHash = OmniHash.Parse(row.block_hash),
+                            Depth = row.depth,
+                            Order = row.order,
+                        };
+                    }
+
+                    offset = limit;
+                    limit += ChunkSize;
+                }
+            }
         }
 
-        public ValueTask<BlockPublishedInternalItem> GetItemAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
+        public async ValueTask<BlockPublishedInternalItem?> GetItemAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
         {
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+                using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+                var compiler = new SqliteCompiler();
+                using var db = new QueryFactory(connection, compiler);
+
+                var rows = await db.Query("internal_blocks")
+                    .Select("root_hash", "block_hash", "depth", "order")
+                    .Where("root_hash", "=", rootHash.ToString(ConvertStringType.Base64))
+                    .Where("block_hash", "=", blockHash.ToString(ConvertStringType.Base64))
+                    .Limit(1)
+                    .GetAsync(cancellationToken: cancellationToken);
+                if (!rows.Any()) return null;
+
+                var row = rows.First();
+
+                return new BlockPublishedInternalItem
+                {
+                    RootHash = OmniHash.Parse(row.root_hash),
+                    BlockHash = OmniHash.Parse(row.block_hash),
+                    Depth = row.depth,
+                    Order = row.order,
+                };
+            }
         }
 
-        public ValueTask UpsertBulkAsync(IEnumerable<BlockPublishedInternalItem> items, CancellationToken cancellationToken = default)
+        public async ValueTask UpsertBulkAsync(IEnumerable<BlockPublishedInternalItem> items, CancellationToken cancellationToken = default)
         {
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+                using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+                using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+
+                foreach (var chunkedItems in items.Chunk(500))
+                {
+                    var queries = new StringBuilder();
+                    var parameters = new List<(string, object?)>();
+
+                    foreach (var (i, item) in chunkedItems.Select((n, i) => (i, n)))
+                    {
+                        var q =
+$@"
+INSERT INTO internal_blocks (root_hash, block_hash, depth, order)
+    VALUES (@root_hash_{i}, @block_hash_{i}, @depth_{i}, @order_{i})
+ON CONFLICT (@root_hash_{i}, @block_hash_{i}, @depth_{i}, @order_{i}) DO NOTHING;
+";
+                        queries.Append(q);
+
+                        var ps = new (string, object?)[]
+                        {
+                            ($"@root_hash_{i}", item.RootHash),
+                            ($"@block_hash_{i}", item.BlockHash),
+                            ($"@depth_{i}", item.Depth),
+                            ($"@order_{i}", item.Order),
+                        };
+                        parameters.AddRange(ps);
+                    }
+
+                    await transaction.ExecuteNonQueryAsync(queries, parameters, cancellationToken);
+                }
+
+                await transaction.CommitAsync(cancellationToken);
+            }
         }
 
-        public ValueTask DeleteAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
+        public async ValueTask DeleteAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
         }
     }
@@ -437,7 +578,7 @@ CREATE INDEX IF NOT EXISTS external_blocks_file_path_root_hash_block_hash_index 
             }
         }
 
-        public ValueTask<bool> ExistsAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
+        public async ValueTask<bool> ExistsAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
         {
         }
 
