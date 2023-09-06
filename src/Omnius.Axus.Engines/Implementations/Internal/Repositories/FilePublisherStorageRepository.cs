@@ -357,7 +357,7 @@ CREATE TABLE IF NOT EXISTS internal_blocks (
     root_hash TEXT NOT NULL,
     block_hash TEXT NOT NULL,
     depth INTEGER NOT NULL,
-    order INTEGER NOT NULL,
+    order INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS internal_blocks_root_hash_block_hash_index ON internal_blocks(root_hash, block_hash);
 CREATE UNIQUE INDEX IF NOT EXISTS internal_blocks_root_hash_block_hash_depth_order_unique_index ON internal_blocks(root_hash, block_hash, depth, order);
@@ -519,15 +519,15 @@ ON CONFLICT (@root_hash_{i}, @block_hash_{i}, @depth_{i}, @order_{i}) DO NOTHING
 
                         var ps = new (string, object?)[]
                         {
-                            ($"@root_hash_{i}", item.RootHash),
-                            ($"@block_hash_{i}", item.BlockHash),
+                            ($"@root_hash_{i}", item.RootHash.ToString(ConvertStringType.Base64)),
+                            ($"@block_hash_{i}", item.BlockHash.ToString(ConvertStringType.Base64)),
                             ($"@depth_{i}", item.Depth),
                             ($"@order_{i}", item.Order),
                         };
                         parameters.AddRange(ps);
                     }
 
-                    await transaction.ExecuteNonQueryAsync(queries, parameters, cancellationToken);
+                    await transaction.ExecuteNonQueryAsync(queries.ToString(), parameters, cancellationToken);
                 }
 
                 await transaction.CommitAsync(cancellationToken);
@@ -536,6 +536,23 @@ ON CONFLICT (@root_hash_{i}, @block_hash_{i}, @depth_{i}, @order_{i}) DO NOTHING
 
         public async ValueTask DeleteAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+                using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+
+                var query =
+$@"
+DELETE
+    FROM internal_blocks
+    WHERE root_hash = @root_hash;
+";
+                var parameters = new (string, object?)[]
+                {
+                    ($"@root_hash", rootHash.ToString(ConvertStringType.Base64)),
+                };
+
+                var result = await connection.ExecuteNonQueryAsync(query, parameters, cancellationToken);
+            }
         }
     }
 
@@ -565,14 +582,12 @@ CREATE TABLE IF NOT EXISTS external_blocks (
     file_path TEXT NOT NULL,
     root_hash TEXT NOT NULL,
     block_hash TEXT NOT NULL,
-    depth INTEGER NOT NULL,
     order INTEGER NOT NULL,
-    count INTEGER NOT NULL,
-    created_time INTEGER NOT NULL,
-    updated_time INTEGER NOT NULL
+    offset INTEGER NOT NULL,
+    length INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS external_blocks_root_hash_block_hash_index ON external_blocks(root_hash, block_hash);
-CREATE INDEX IF NOT EXISTS external_blocks_file_path_root_hash_block_hash_index ON external_blocks(file_path, root_hash, block_hash);
+CREATE UNIQUE INDEX IF NOT EXISTS external_blocks_file_path_root_hash_block_hash_order_offset_length_unique_index ON external_blocks(file_path, root_hash, block_hash, order, offset, length);
 ";
                 await connection.ExecuteNonQueryAsync(query, cancellationToken);
             }
@@ -580,26 +595,199 @@ CREATE INDEX IF NOT EXISTS external_blocks_file_path_root_hash_block_hash_index 
 
         public async ValueTask<bool> ExistsAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
         {
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+                using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+
+                var query =
+$@"
+SELECT COUNT(1)
+    FROM external_blocks
+    WHERE root_hash = @root_hash AND block_hash = @block_hash
+    LIMIT 1;
+";
+                var parameters = new (string, object?)[]
+                {
+                    ($"@root_hash", rootHash.ToString(ConvertStringType.Base64)),
+                    ($"@block_hash", blockHash.ToString(ConvertStringType.Base64)),
+                };
+
+                var result = await connection.ExecuteScalarAsync(query, parameters, cancellationToken);
+                return (long)result! == 1;
+            }
         }
 
         public async IAsyncEnumerable<BlockPublishedExternalItem> GetItemsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+                using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+                var compiler = new SqliteCompiler();
+                using var db = new QueryFactory(connection, compiler);
+
+                const int ChunkSize = 5000;
+                int offset = 0;
+                int limit = ChunkSize;
+
+                for (; ; )
+                {
+                    var rows = await db.Query("external_blocks")
+                        .Select("file_path", "root_hash", "block_hash", "order", "offset", "length")
+                        .Offset(offset)
+                        .Limit(limit)
+                        .GetAsync(cancellationToken: cancellationToken);
+                    if (!rows.Any()) yield break;
+
+                    foreach (var row in rows)
+                    {
+                        yield return new BlockPublishedExternalItem
+                        {
+                            FilePath = row.file_path,
+                            RootHash = OmniHash.Parse(row.root_hash),
+                            BlockHash = OmniHash.Parse(row.block_hash),
+                            Order = row.order,
+                            Offset = row.offset,
+                            Length = row.length,
+                        };
+                    }
+
+                    offset = limit;
+                    limit += ChunkSize;
+                }
+            }
         }
 
         public async IAsyncEnumerable<BlockPublishedExternalItem> GetItemsAsync(OmniHash rootHash, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+                using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+                var compiler = new SqliteCompiler();
+                using var db = new QueryFactory(connection, compiler);
+
+                const int ChunkSize = 5000;
+                int offset = 0;
+                int limit = ChunkSize;
+
+                for (; ; )
+                {
+                    var rows = await db.Query("external_blocks")
+                        .Select("file_path", "root_hash", "block_hash", "order", "offset", "length")
+                        .Where("root_hash", "=", rootHash.ToString(ConvertStringType.Base64))
+                        .Offset(offset)
+                        .Limit(limit)
+                        .GetAsync(cancellationToken: cancellationToken);
+                    if (!rows.Any()) yield break;
+
+                    foreach (var row in rows)
+                    {
+                        yield return new BlockPublishedExternalItem
+                        {
+                            FilePath = row.file_path,
+                            RootHash = OmniHash.Parse(row.root_hash),
+                            BlockHash = OmniHash.Parse(row.block_hash),
+                            Order = row.order,
+                            Offset = row.offset,
+                            Length = row.length,
+                        };
+                    }
+
+                    offset = limit;
+                    limit += ChunkSize;
+                }
+            }
         }
 
-        public async ValueTask<BlockPublishedExternalItem> GetItemAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
+        public async ValueTask<BlockPublishedExternalItem?> GetItemAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
         {
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+                using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+                var compiler = new SqliteCompiler();
+                using var db = new QueryFactory(connection, compiler);
+
+                var rows = await db.Query("external_blocks")
+                    .Select("file_path", "root_hash", "block_hash", "order", "offset", "length")
+                    .Where("root_hash", "=", rootHash.ToString(ConvertStringType.Base64))
+                    .Where("block_hash", "=", blockHash.ToString(ConvertStringType.Base64))
+                    .Limit(1)
+                    .GetAsync(cancellationToken: cancellationToken);
+                if (!rows.Any()) return null;
+
+                var row = rows.First();
+
+                return new BlockPublishedExternalItem
+                {
+                    FilePath = row.file_path,
+                    RootHash = OmniHash.Parse(row.root_hash),
+                    BlockHash = OmniHash.Parse(row.block_hash),
+                    Order = row.order,
+                    Offset = row.offset,
+                    Length = row.length,
+                };
+            }
         }
 
         public async ValueTask UpsertBulkAsync(IEnumerable<BlockPublishedExternalItem> items, CancellationToken cancellationToken = default)
         {
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+                using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+                using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+
+                foreach (var chunkedItems in items.Chunk(500))
+                {
+                    var queries = new StringBuilder();
+                    var parameters = new List<(string, object?)>();
+
+                    foreach (var (i, item) in chunkedItems.Select((n, i) => (i, n)))
+                    {
+                        var q =
+$@"
+INSERT INTO external_blocks (file_path, root_hash, block_hash, order, offset, length)
+    VALUES (@file_path_{i}, @root_hash_{i}, @block_hash_{i}, @order_{i}, @offset_{i}, @length_{i})
+ON CONFLICT (@file_path_{i}, @root_hash_{i}, @block_hash_{i}, @order_{i}, @offset_{i}, @length_{i}) DO NOTHING;
+";
+                        queries.Append(q);
+
+                        var ps = new (string, object?)[]
+                        {
+                            ($"@file_path_{i}", item.FilePath),
+                            ($"@root_hash_{i}", item.RootHash.ToString(ConvertStringType.Base64)),
+                            ($"@block_hash_{i}", item.BlockHash.ToString(ConvertStringType.Base64)),
+                            ($"@order_{i}", item.Order),
+                            ($"@offset_{i}", item.Offset),
+                            ($"@length_{i}", item.Length),
+                        };
+                        parameters.AddRange(ps);
+                    }
+
+                    await transaction.ExecuteNonQueryAsync(queries.ToString(), parameters, cancellationToken);
+                }
+
+                await transaction.CommitAsync(cancellationToken);
+            }
         }
 
         public async ValueTask DeleteAsync(OmniHash rootHash, CancellationToken cancellationToken = default)
         {
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+                using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+
+                var query =
+$@"
+DELETE
+    FROM external_blocks
+    WHERE root_hash = @root_hash;
+";
+                var parameters = new (string, object?)[]
+                {
+                    ($"@root_hash", rootHash.ToString(ConvertStringType.Base64)),
+                };
+
+                var result = await connection.ExecuteNonQueryAsync(query, parameters, cancellationToken);
+            }
         }
     }
 }
