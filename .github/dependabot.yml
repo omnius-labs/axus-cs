@@ -1,9 +1,22 @@
 version: 2
 updates:
+  - package-ecosystem: nuget
+    directory: "/"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependabot"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
       interval: "daily"
     labels:
-      - "dependencies"
-      - "automerge"
+      - "dependabot"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
