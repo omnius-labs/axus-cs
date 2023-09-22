@@ -217,7 +217,7 @@ DELETE FROM node_locations
         }
     }
 
-    public async ValueTask<long> CountAsync(CancellationToken cancellationToken = default)
+    public async ValueTask<long> GetCountAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {

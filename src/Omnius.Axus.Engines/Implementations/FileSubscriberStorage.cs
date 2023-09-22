@@ -33,8 +33,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     public static async ValueTask<FileSubscriberStorage> CreateAsync(IKeyValueStorageFactory keyValueStorageFactory,
-        ISystemClock systemClock, IRandomBytesProvider randomBytesProvider, IBytesPool bytesPool,
-        FileSubscriberStorageOptions options, CancellationToken cancellationToken = default)
+        ISystemClock systemClock, IRandomBytesProvider randomBytesProvider, IBytesPool bytesPool, FileSubscriberStorageOptions options, CancellationToken cancellationToken = default)
     {
         var subscribedFileStorage = new FileSubscriberStorage(keyValueStorageFactory, systemClock, randomBytesProvider, bytesPool, options);
         await subscribedFileStorage.InitAsync(cancellationToken);
@@ -42,8 +41,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
     }
 
     private FileSubscriberStorage(IKeyValueStorageFactory keyValueStorageFactory,
-        ISystemClock systemClock, IRandomBytesProvider randomBytesProvider, IBytesPool bytesPool,
-        FileSubscriberStorageOptions options)
+        ISystemClock systemClock, IRandomBytesProvider randomBytesProvider, IBytesPool bytesPool, FileSubscriberStorageOptions options)
     {
         _keyValueStorageFactory = keyValueStorageFactory;
         _systemClock = systemClock;

@@ -24,6 +24,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
     private readonly ISessionConnector _sessionConnector;
     private readonly ISessionAccepter _sessionAccepter;
     private readonly INodeLocationsFetcher _nodeLocationsFetcher;
+    private readonly ISystemClock _systemClock;
     private readonly IBytesPool _bytesPool;
     private readonly NodeFinderOptions _options;
 
@@ -59,29 +60,30 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
     private const string Schema = "node-finder-v1";
 
     public static async ValueTask<NodeFinder> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeLocationsFetcher nodeLocationsFetcher,
-        IBytesPool bytesPool, NodeFinderOptions options, CancellationToken cancellationToken = default)
+        ISystemClock systemClock, IBytesPool bytesPool, NodeFinderOptions options, CancellationToken cancellationToken = default)
     {
-        var nodeFinder = new NodeFinder(sessionConnector, sessionAccepter, nodeLocationsFetcher, bytesPool, options);
+        var nodeFinder = new NodeFinder(sessionConnector, sessionAccepter, nodeLocationsFetcher, systemClock, bytesPool, options);
         await nodeFinder.InitAsync(cancellationToken);
         return nodeFinder;
     }
 
     private NodeFinder(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeLocationsFetcher nodeLocationsFetcher,
-        IBytesPool bytesPool, NodeFinderOptions options)
+        ISystemClock systemClock, IBytesPool bytesPool, NodeFinderOptions options)
     {
         _sessionConnector = sessionConnector;
         _sessionAccepter = sessionAccepter;
         _nodeLocationsFetcher = nodeLocationsFetcher;
+        _systemClock = systemClock;
         _bytesPool = bytesPool;
         _options = options;
         _myId = GenId();
 
-        _cachedNodeLocationRepo = new CachedNodeLocationRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
+        _cachedNodeLocationRepo = new CachedNodeLocationRepository(Path.Combine(_options.ConfigDirectoryPath, "status"), _bytesPool);
 
-        _connectedAddressSet = new VolatileHashSet<OmniAddress>(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(10), _batchActionDispatcher);
+        _connectedAddressSet = new VolatileHashSet<OmniAddress>(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(10), _systemClock, _batchActionDispatcher);
 
-        _receivedPushContentLocationMap = new VolatileListDictionary<ContentKey, NodeLocation>(TimeSpan.FromMinutes(30), TimeSpan.FromSeconds(30), _batchActionDispatcher);
-        _receivedGiveContentLocationMap = new VolatileListDictionary<ContentKey, NodeLocation>(TimeSpan.FromMinutes(30), TimeSpan.FromSeconds(30), _batchActionDispatcher);
+        _receivedPushContentLocationMap = new VolatileListDictionary<ContentKey, NodeLocation>(TimeSpan.FromMinutes(30), TimeSpan.FromSeconds(30), _systemClock, _batchActionDispatcher);
+        _receivedGiveContentLocationMap = new VolatileListDictionary<ContentKey, NodeLocation>(TimeSpan.FromMinutes(30), TimeSpan.FromSeconds(30), _systemClock, _batchActionDispatcher);
     }
 
     private async ValueTask InitAsync(CancellationToken cancellationToken = default)
@@ -120,7 +122,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         _receivedPushContentLocationMap.Dispose();
         _receivedGiveContentLocationMap.Dispose();
 
-        _cachedNodeLocationRepo.Dispose();
+        await _cachedNodeLocationRepo.DisposeAsync();
     }
 
     public IFuncListener<IEnumerable<ContentKey>> OnGetPushContentKeys => _getPushContentKeysFuncPipe.Listener;
@@ -149,18 +151,13 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
     public async ValueTask<IEnumerable<NodeLocation>> GetCloudNodeLocationsAsync(CancellationToken cancellationToken = default)
     {
-        lock (_lockObject)
-        {
-            return _cachedNodeLocationRepo.FindAll();
-        }
+        var cachedNodeLocations = await _cachedNodeLocationRepo.GetNodeLocationsAsync().ToArrayAsync(cancellationToken);
+        return cachedNodeLocations.Select(n => n.Value).Randomize().ToArray();
     }
 
     public async ValueTask AddCloudNodeLocationsAsync(IEnumerable<NodeLocation> nodeLocations, CancellationToken cancellationToken = default)
     {
-        lock (_lockObject)
-        {
-            _cachedNodeLocationRepo.InsertBulkAsync(nodeLocations, DateTime.UtcNow);
-        }
+        await _cachedNodeLocationRepo.InsertBulkAsync(nodeLocations, cancellationToken);
     }
 
     public async ValueTask<NodeLocation[]> FindNodeLocationsAsync(ContentKey ContentKey, CancellationToken cancellationToken = default)
@@ -178,14 +175,6 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         }
 
         return result.ToArray();
-    }
-
-    private void RefreshCloudNodeLocation(NodeLocation nodeLocation)
-    {
-        lock (_lockObject)
-        {
-            _cachedNodeLocationRepo.Upsert(nodeLocation, DateTime.UtcNow, DateTime.UtcNow);
-        }
     }
 
     private async Task ConnectLoopAsync(CancellationToken cancellationToken)
@@ -220,9 +209,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
     private async ValueTask<IEnumerable<NodeLocation>> FindNodeLocationsForConnecting(CancellationToken cancellationToken = default)
     {
-        var nodeLocations = _cachedNodeLocationRepo.FindAll().ToList();
-        _random.Shuffle(nodeLocations);
-
+        var nodeLocations = await this.GetCloudNodeLocationsAsync(cancellationToken);
         var ignoredAddressSet = await this.GetIgnoredAddressSet(cancellationToken);
 
         return nodeLocations
@@ -257,7 +244,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
                 var success = await this.TryAddSessionAsync(session, cancellationToken);
                 if (success)
                 {
-                    this.RefreshCloudNodeLocation(nodeLocation);
+                    await _cachedNodeLocationRepo.UpsertAsync(nodeLocation, cancellationToken);
                     return true;
                 }
 
@@ -557,6 +544,8 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
         try
         {
+            await this.FetchNodeLocationIfInitialStartupAsync(cancellationToken);
+
             for (; ; )
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -565,7 +554,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
                 if (shrinkNodeLocationsStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromMinutes(1)))
                 {
-                    _cachedNodeLocationRepo.Shrink(MaxNodeLocationCount);
+                    await _cachedNodeLocationRepo.ShrinkAsync(MaxNodeLocationCount);
                 }
 
                 if (removeDeadSessionsStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromMinutes(1)))
@@ -591,12 +580,12 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
     private async ValueTask FetchNodeLocationIfInitialStartupAsync(CancellationToken cancellationToken = default)
     {
-        if (_cachedNodeLocationRepo.Count() > 0) return;
+        if (await _cachedNodeLocationRepo.GetCountAsync(cancellationToken) > 0) return;
 
         var nodeLocations = await _nodeLocationsFetcher.FetchAsync(cancellationToken);
         if (nodeLocations is null) return;
 
-        _cachedNodeLocationRepo.InsertBulkAsync(nodeLocations, DateTime.UtcNow);
+        await _cachedNodeLocationRepo.InsertBulkAsync(nodeLocations, cancellationToken);
     }
 
     private async ValueTask RemoveDeadSessionsAsync(CancellationToken cancellationToken = default)

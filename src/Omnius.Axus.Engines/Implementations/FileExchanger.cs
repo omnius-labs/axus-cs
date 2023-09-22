@@ -58,8 +58,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
     public static async ValueTask<FileExchanger> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
         IFilePublisherStorage publishedFileStorage, IFileSubscriberStorage subscribedFileStorage,
-        ISystemClock systemClock, IBytesPool bytesPool,
-        FileExchangerOptions options, CancellationToken cancellationToken = default)
+        ISystemClock systemClock, IBytesPool bytesPool, FileExchangerOptions options, CancellationToken cancellationToken = default)
     {
         var fileExchanger = new FileExchanger(sessionConnector, sessionAccepter, nodeFinder, publishedFileStorage, subscribedFileStorage, systemClock, bytesPool, options);
         await fileExchanger.InitAsync(cancellationToken);
@@ -68,8 +67,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
     private FileExchanger(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
         IFilePublisherStorage publishedFileStorage, IFileSubscriberStorage subscribedFileStorage,
-        ISystemClock systemClock, IBytesPool bytesPool,
-        FileExchangerOptions options)
+        ISystemClock systemClock, IBytesPool bytesPool, FileExchangerOptions options)
     {
         _sessionConnector = sessionConnector;
         _sessionAccepter = sessionAccepter;

@@ -31,15 +31,15 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
     private static Base16 _base16 = new Base16(Base16Case.Lower);
 
     public static async ValueTask<FilePublisherStorage> CreateAsync(IKeyValueStorageFactory keyValueStorageFactory,
-        ISystemClock systemClock, IRandomBytesProvider randomBytesProvider, IBytesPool bytesPool,
-        FilePublisherStorageOptions options, CancellationToken cancellationToken = default)
+        ISystemClock systemClock, IRandomBytesProvider randomBytesProvider, IBytesPool bytesPool, FilePublisherStorageOptions options, CancellationToken cancellationToken = default)
     {
         var publishedFileStorage = new FilePublisherStorage(keyValueStorageFactory, systemClock, randomBytesProvider, bytesPool, options);
         await publishedFileStorage.InitAsync(cancellationToken);
         return publishedFileStorage;
     }
 
-    private FilePublisherStorage(IKeyValueStorageFactory keyValueStorageFactory, ISystemClock systemClock, IRandomBytesProvider randomBytesProvider, IBytesPool bytesPool, FilePublisherStorageOptions options)
+    private FilePublisherStorage(IKeyValueStorageFactory keyValueStorageFactory,
+        ISystemClock systemClock, IRandomBytesProvider randomBytesProvider, IBytesPool bytesPool, FilePublisherStorageOptions options)
     {
         _keyValueStorageFactory = keyValueStorageFactory;
         _systemClock = systemClock;
