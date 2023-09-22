@@ -37,6 +37,15 @@
           "Stub.System.Data.SQLite.Core.NetStandard": "[1.0.116]"
         }
       },
+      "System.Linq.Async": {
+        "type": "Direct",
+        "requested": "[6.0.1, )",
+        "resolved": "6.0.1",
+        "contentHash": "0YhHcaroWpQ9UCot3Pizah7ryAzQhNvobLMSxeDIGmnXfkQn8u5owvpOH0K6EVB+z9L7u6Cc4W17Br/+jyttEQ==",
+        "dependencies": {
+          "Microsoft.Bcl.AsyncInterfaces": "6.0.0"
+        }
+      },
       "Dapper": {
         "type": "Transitive",
         "resolved": "1.50.5",
@@ -51,6 +60,11 @@
         "type": "Transitive",
         "resolved": "2.8.26",
         "contentHash": "OiKusGL20vby4uDEswj2IgkdchC1yQ6rwbIkZDVBPIR6al2b7n3pC91elBul9q33KaBgRKhbZH3+2Ur4fnWx2A=="
+      },
+      "Microsoft.Bcl.AsyncInterfaces": {
+        "type": "Transitive",
+        "resolved": "6.0.0",
+        "contentHash": "UcSjPsst+DfAdJGVDsu346FX0ci0ah+lw3WRtn18NUwEqRt70HaOQ7lI72vy3+1LxtqI3T5GWwV39rQSrCzAeg=="
       },
       "Microsoft.CSharp": {
         "type": "Transitive",
@@ -514,12 +528,6 @@
           "Omnius.Core.Utils": "[0.0.1-alpha.1, )"
         }
       },
-      "omnius.axus.utils": {
-        "type": "Project",
-        "dependencies": {
-          "NLog": "[4.7.15, )"
-        }
-      },
       "omnius.core": {
         "type": "Project",
         "dependencies": {
@@ -620,6 +628,7 @@
         "dependencies": {
           "NLog": "[4.7.15, )",
           "Omnius.Core": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Collections": "[0.0.1-alpha.1, )",
           "Omnius.Core.Pipelines": "[0.0.1-alpha.1, )"
         }
       },

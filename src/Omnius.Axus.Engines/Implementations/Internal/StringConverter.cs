@@ -13,7 +13,7 @@ internal static class StringConverter
 
     public static string ToString(OmniHash hash)
     {
-        return hash.ToString(ConvertStringType.Base16);
+        return hash.ToString(ConvertStringType.Base16Lower);
     }
 
     public static string ToString(OmniSignature signature, string channel)
@@ -24,6 +24,6 @@ internal static class StringConverter
         _encoding.Value.GetBytes(channel, bytesPipe.Writer);
 
         var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(bytesPipe.Reader.GetSequence()));
-        return hash.ToString(ConvertStringType.Base16);
+        return hash.ToString(ConvertStringType.Base16Lower);
     }
 }

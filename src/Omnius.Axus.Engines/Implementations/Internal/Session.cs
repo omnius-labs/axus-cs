@@ -23,12 +23,8 @@ internal class Session : AsyncDisposableBase, ISession
     }
 
     public IConnection Connection { get; }
-
     public OmniAddress Address { get; }
-
     public SessionHandshakeType HandshakeType { get; }
-
     public OmniSignature Signature { get; }
-
     public string Scheme { get; }
 }

@@ -271,8 +271,13 @@ SELECT COUNT(1)
 $@"
 INSERT INTO files (file_path, root_hash, max_block_size, properties, created_time, updated_time)
     VALUES (@file_path, @root_hash, @max_block_size, @properties, @created_time, @updated_time)
-ON CONFLICT (@root_hash, @file_path)
-    DO UPDATE SET file_path = @file_path, root_hash = @root_hash, max_block_size = @max_block_size, properties = @properties, created_time = @created_time, updated_time = @updated_time;
+    ON CONFLICT (@root_hash, @file_path) DO UPDATE SET
+        file_path = @file_path,
+        root_hash = @root_hash,
+        max_block_size = @max_block_size,
+        properties = @properties,
+        created_time = @created_time,
+        updated_time = @updated_time;
 ";
                 var parameters = new (string, object?)[]
                 {
@@ -280,7 +285,7 @@ ON CONFLICT (@root_hash, @file_path)
                     ("@root_hash", item.RootHash.ToString(ConvertStringType.Base16Lower)),
                     ("@max_block_size", item.MaxBlockSize),
                     ("@properties", RocketMessageConverter.ToBytes(new RocketArray<AttachedProperty>(item.Properties.ToArray()))),
-                    ("@created_time", item.FilePath),
+                    ("@created_time", item.CreatedTime),
                     ("@updated_time", item.UpdatedTime)
                 };
 
@@ -513,7 +518,7 @@ SELECT COUNT(1)
 $@"
 INSERT INTO internal_blocks (root_hash, block_hash, depth, order)
     VALUES (@root_hash_{i}, @block_hash_{i}, @depth_{i}, @order_{i})
-ON CONFLICT (@root_hash_{i}, @block_hash_{i}, @depth_{i}, @order_{i}) DO NOTHING;
+    ON CONFLICT (@root_hash_{i}, @block_hash_{i}, @depth_{i}, @order_{i}) DO NOTHING;
 ";
                         queries.Append(q);
 

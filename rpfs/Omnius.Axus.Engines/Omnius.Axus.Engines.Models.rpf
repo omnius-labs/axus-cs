@@ -8,7 +8,7 @@ namespace "Omnius.Axus.Engines.Models";
 
 // Common
 
-message ContentClue {
+message ContentKey {
     Scheme: string(capacity: 256),
     RootHash: OmniHash,
 }

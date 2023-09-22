@@ -63,13 +63,13 @@ message NodeFinderProfileMessage {
 
 message NodeFinderDataMessage {
     PushCloudNodeLocations: vector<NodeLocation>(capacity: 256),
-    WantContentClues: vector<ContentClue>(capacity: 256),
+    WantContentKeys: vector<ContentKey>(capacity: 256),
     GiveContentLocations: vector<ContentLocation>(capacity: 256),
     PushContentLocations: vector<ContentLocation>(capacity: 256),
 }
 
 message ContentLocation {
-    ContentClue: ContentClue,
+    ContentKey: ContentKey,
     NodeLocations: vector<NodeLocation>(capacity: 8192),
 }
 

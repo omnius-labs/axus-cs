@@ -286,6 +286,7 @@
         "dependencies": {
           "NLog": "[4.7.15, )",
           "Omnius.Core": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Collections": "[0.0.1-alpha.1, )",
           "Omnius.Core.Pipelines": "[0.0.1-alpha.1, )"
         }
       },

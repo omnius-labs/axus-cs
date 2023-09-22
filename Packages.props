@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <PackageReference Update="System.Linq.Async" Version="6.0.1" />
     <PackageReference Update="Avalonia.AvaloniaEdit" Version="0.10.12.2 " />
     <PackageReference Update="Avalonia.Controls.DataGrid" Version="0.10.18" />
     <PackageReference Update="Avalonia.Desktop" Version="0.10.18" />

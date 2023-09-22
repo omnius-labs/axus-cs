@@ -18,14 +18,14 @@ public sealed partial class NodeFinder
             this.NodeLocation = nodeLocation;
             this.LastReceivedTime = DateTime.UtcNow;
 
-            this.ReceivedWantContentClues = new VolatileHashSet<ContentClue>(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), batchActionDispatcher);
+            this.ReceivedWantContentKeys = new VolatileHashSet<ContentKey>(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), batchActionDispatcher);
         }
 
         protected override async ValueTask OnDisposeAsync()
         {
             await this.Session.DisposeAsync();
 
-            this.ReceivedWantContentClues.Dispose();
+            this.ReceivedWantContentKeys.Dispose();
         }
 
         public ISession Session { get; }
@@ -38,6 +38,6 @@ public sealed partial class NodeFinder
 
         public NodeFinderDataMessage? SendingDataMessage { get; set; } = null;
 
-        public VolatileHashSet<ContentClue> ReceivedWantContentClues { get; }
+        public VolatileHashSet<ContentKey> ReceivedWantContentKeys { get; }
     }
 }

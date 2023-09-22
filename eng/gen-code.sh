@@ -1,4 +1,4 @@
-#!/usr/env bash
+#!/bin/bash
 set -euo pipefail
 
 DOTNET_CLI_TELEMETRY_OPTOUT=1

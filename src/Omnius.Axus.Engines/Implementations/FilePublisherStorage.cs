@@ -18,7 +18,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
 
     private readonly IKeyValueStorageFactory _keyValueStorageFactory;
     private readonly ISystemClock _systemClock;
-    private readonly IRandomBytesProvider _randomStringProvider;
+    private readonly IRandomBytesProvider _randomBytesProvider;
     private readonly IBytesPool _bytesPool;
     private readonly FilePublisherStorageOptions _options;
 
@@ -30,19 +30,20 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
 
     private static Base16 _base16 = new Base16(Base16Case.Lower);
 
-    public static async ValueTask<FilePublisherStorage> CreateAsync(IKeyValueStorageFactory keyValueStorageFactory, ISystemClock systemClock, IRandomBytesProvider randomStringProvider,
-        IBytesPool bytesPool, FilePublisherStorageOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<FilePublisherStorage> CreateAsync(IKeyValueStorageFactory keyValueStorageFactory,
+        ISystemClock systemClock, IRandomBytesProvider randomBytesProvider, IBytesPool bytesPool,
+        FilePublisherStorageOptions options, CancellationToken cancellationToken = default)
     {
-        var publishedFileStorage = new FilePublisherStorage(keyValueStorageFactory, systemClock, randomStringProvider, bytesPool, options);
+        var publishedFileStorage = new FilePublisherStorage(keyValueStorageFactory, systemClock, randomBytesProvider, bytesPool, options);
         await publishedFileStorage.InitAsync(cancellationToken);
         return publishedFileStorage;
     }
 
-    private FilePublisherStorage(IKeyValueStorageFactory keyValueStorageFactory, ISystemClock systemClock, IRandomBytesProvider randomStringProvider, IBytesPool bytesPool, FilePublisherStorageOptions options)
+    private FilePublisherStorage(IKeyValueStorageFactory keyValueStorageFactory, ISystemClock systemClock, IRandomBytesProvider randomBytesProvider, IBytesPool bytesPool, FilePublisherStorageOptions options)
     {
         _keyValueStorageFactory = keyValueStorageFactory;
         _systemClock = systemClock;
-        _randomStringProvider = randomStringProvider;
+        _randomBytesProvider = randomBytesProvider;
         _bytesPool = bytesPool;
         _options = options;
 
@@ -139,10 +140,16 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
     {
         using (await _publishAsyncLock.LockAsync(cancellationToken))
         {
-            var fileItem = await _publisherRepo.FileItems.GetItemAsync(filePath, cancellationToken);
-            if (fileItem is not null) return fileItem.RootHash;
-
             var now = _systemClock.GetUtcNow();
+
+            var fileItem = await _publisherRepo.FileItems.GetItemAsync(filePath, cancellationToken);
+            if (fileItem is not null)
+            {
+                fileItem = fileItem with { Properties = properties.ToArray(), UpdatedTime = now };
+                await _publisherRepo.FileItems.UpsertAsync(fileItem, cancellationToken);
+                return fileItem.RootHash;
+            }
+
             string tempSpaceId = this.GenSpaceId(now);
 
             var externalBlockItems = await this.ImportFromFileAsync(filePath, maxBlockSize, cancellationToken);
@@ -224,6 +231,9 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
 
             if (fileItem is not null)
             {
+                fileItem = fileItem with { Properties = properties.ToArray(), UpdatedTime = now };
+                await _publisherRepo.FileItems.UpsertAsync(fileItem, cancellationToken);
+
                 var targetBlockHashes = allInternalBlockItems.Select(n => n.BlockHash).ToArray();
                 await this.DeleteBlocksAsync(tempSpaceId, targetBlockHashes, cancellationToken);
 
@@ -255,7 +265,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
 
     private string GenSpaceId(DateTime now)
     {
-        return string.Format("{}_{}", now.ToString("yyyy-MM-dd'T'HH:mm:ss"), _base16.BytesToString(new ReadOnlySequence<byte>(_randomStringProvider.GetBytes(32))));
+        return string.Format("{}_{}", now.ToString("yyyy-MM-dd'T'HH:mm:ss"), _base16.BytesToString(new ReadOnlySequence<byte>(_randomBytesProvider.GetBytes(32))));
     }
 
     private async ValueTask DeleteBlocksAsync(string prefix, IEnumerable<OmniHash> blockHashes, CancellationToken cancellationToken = default)

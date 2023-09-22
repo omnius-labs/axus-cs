@@ -10,7 +10,7 @@ public sealed partial class FileExchanger
 {
     private sealed class SessionStatus : AsyncDisposableBase
     {
-        public SessionStatus(ISession session, ExchangeType exchangeType, OmniHash rootHash, IBatchActionDispatcher batchActionDispatcher)
+        public SessionStatus(ISession session, ExchangeType exchangeType, OmniHash rootHash, ISystemClock systemClock, IBatchActionDispatcher batchActionDispatcher)
         {
             this.Session = session;
             this.ExchangeType = exchangeType;
@@ -18,8 +18,8 @@ public sealed partial class FileExchanger
             this.BatchActionDispatcher = batchActionDispatcher;
             this.LastReceivedTime = DateTime.UtcNow;
 
-            this.SentBlockHashes = new(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), batchActionDispatcher);
-            this.ReceivedWantBlockHashes = new(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), batchActionDispatcher);
+            this.SentBlockHashes = new VolatileHashSet<OmniHash>(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), systemClock, batchActionDispatcher);
+            this.ReceivedWantBlockHashes = new VolatileHashSet<OmniHash>(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), systemClock, batchActionDispatcher);
         }
 
         protected override async ValueTask OnDisposeAsync()

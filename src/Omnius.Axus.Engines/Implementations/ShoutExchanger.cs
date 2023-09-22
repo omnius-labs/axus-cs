@@ -25,6 +25,7 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
     private readonly INodeFinder _nodeFinder;
     private readonly IShoutPublisherStorage _publishedShoutStorage;
     private readonly IShoutSubscriberStorage _subscribedShoutStorage;
+    private readonly ISystemClock _systemClock;
     private readonly IBytesPool _bytesPool;
     private readonly ShoutExchangerOptions _options;
 
@@ -34,14 +35,14 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
     private ImmutableHashSet<SessionStatus> _sessionStatusSet = ImmutableHashSet<SessionStatus>.Empty;
 
-    private ImmutableHashSet<ContentClue> _pushContentClues = ImmutableHashSet<ContentClue>.Empty;
-    private ImmutableHashSet<ContentClue> _wantContentClues = ImmutableHashSet<ContentClue>.Empty;
+    private ImmutableHashSet<ContentKey> _pushContentKeys = ImmutableHashSet<ContentKey>.Empty;
+    private ImmutableHashSet<ContentKey> _wantContentKeys = ImmutableHashSet<ContentKey>.Empty;
 
     private Task? _connectLoopTask;
     private Task? _acceptLoopTask;
     private Task? _computeLoopTask;
-    private readonly IDisposable _getPushContentCluesListenerRegister;
-    private readonly IDisposable _getWantContentCluesListenerRegister;
+    private readonly IDisposable _getPushContentKeysListenerRegister;
+    private readonly IDisposable _getWantContentKeysListenerRegister;
 
     private readonly Random _random = new();
 
@@ -53,29 +54,32 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
     public static async ValueTask<ShoutExchanger> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
         IShoutPublisherStorage publishedShoutStorage, IShoutSubscriberStorage subscribedShoutStorage,
-        IBytesPool bytesPool, ShoutExchangerOptions options, CancellationToken cancellationToken = default)
+        ISystemClock systemClock, IBytesPool bytesPool,
+        ShoutExchangerOptions options, CancellationToken cancellationToken = default)
     {
-        var shoutExchanger = new ShoutExchanger(sessionConnector, sessionAccepter, nodeFinder, publishedShoutStorage, subscribedShoutStorage, bytesPool, options);
+        var shoutExchanger = new ShoutExchanger(sessionConnector, sessionAccepter, nodeFinder, publishedShoutStorage, subscribedShoutStorage, systemClock, bytesPool, options);
         await shoutExchanger.InitAsync(cancellationToken);
         return shoutExchanger;
     }
 
     private ShoutExchanger(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
         IShoutPublisherStorage publishedShoutStorage, IShoutSubscriberStorage subscribedShoutStorage,
-        IBytesPool bytesPool, ShoutExchangerOptions options)
+        ISystemClock systemClock, IBytesPool bytesPool,
+        ShoutExchangerOptions options)
     {
         _sessionConnector = sessionConnector;
         _sessionAccepter = sessionAccepter;
         _nodeFinder = nodeFinder;
         _publishedShoutStorage = publishedShoutStorage;
         _subscribedShoutStorage = subscribedShoutStorage;
+        _systemClock = systemClock;
         _bytesPool = bytesPool;
         _options = options;
 
-        _connectedAddressSet = new VolatileHashSet<OmniAddress>(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), _batchActionDispatcher);
+        _connectedAddressSet = new VolatileHashSet<OmniAddress>(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), systemClock, _batchActionDispatcher);
 
-        _getPushContentCluesListenerRegister = _nodeFinder.OnGetPushContentClues.Listen(() => _pushContentClues);
-        _getWantContentCluesListenerRegister = _nodeFinder.OnGetWantContentClues.Listen(() => _wantContentClues);
+        _getPushContentKeysListenerRegister = _nodeFinder.OnGetPushContentKeys.Listen(() => _pushContentKeys);
+        _getWantContentKeysListenerRegister = _nodeFinder.OnGetWantContentKeys.Listen(() => _wantContentKeys);
     }
 
     private async ValueTask InitAsync(CancellationToken cancellationToken = default)
@@ -100,8 +104,8 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
         _connectedAddressSet.Dispose();
 
-        _getPushContentCluesListenerRegister.Dispose();
-        _getWantContentCluesListenerRegister.Dispose();
+        _getPushContentKeysListenerRegister.Dispose();
+        _getWantContentKeysListenerRegister.Dispose();
     }
 
     public async ValueTask<IEnumerable<SessionReport>> GetSessionReportsAsync(CancellationToken cancellationToken = default)
@@ -154,9 +158,9 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
     private async ValueTask<IEnumerable<NodeLocation>> FindNodeLocationsForConnecting(OmniSignature signature, string channel, CancellationToken cancellationToken)
     {
-        var contentClue = ContentClueConverter.ToContentClue(Schema, signature, channel);
+        var ContentKey = ContentKeyConverter.ToContentKey(Schema, signature, channel);
 
-        var nodeLocations = await _nodeFinder.FindNodeLocationsAsync(contentClue, cancellationToken);
+        var nodeLocations = await _nodeFinder.FindNodeLocationsAsync(ContentKey, cancellationToken);
         _random.Shuffle(nodeLocations);
 
         var ignoredAddressSet = await this.GetIgnoredAddressSet(cancellationToken);
@@ -411,7 +415,7 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
 
     private async Task ComputeLoopAsync(CancellationToken cancellationToken)
     {
-        var computeContentCluesStopwatch = new Stopwatch();
+        var computeContentKeysStopwatch = new Stopwatch();
 
         try
         {
@@ -419,10 +423,10 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
             {
                 await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken).ConfigureAwait(false);
 
-                if (computeContentCluesStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromSeconds(30)))
+                if (computeContentKeysStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromSeconds(30)))
                 {
-                    await this.UpdatePushContentCluesAsync(cancellationToken);
-                    await this.UpdateWantContentCluesAsync(cancellationToken);
+                    await this.UpdatePushContentKeysAsync(cancellationToken);
+                    await this.UpdateWantContentKeysAsync(cancellationToken);
                 }
             }
         }
@@ -436,29 +440,29 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
         }
     }
 
-    private async ValueTask UpdatePushContentCluesAsync(CancellationToken cancellationToken = default)
+    private async ValueTask UpdatePushContentKeysAsync(CancellationToken cancellationToken = default)
     {
-        var builder = ImmutableHashSet.CreateBuilder<ContentClue>();
+        var builder = ImmutableHashSet.CreateBuilder<ContentKey>();
 
         foreach (var (signature, channel) in await _publishedShoutStorage.GetKeysAsync(cancellationToken))
         {
-            var contentClue = ContentClueConverter.ToContentClue(Schema, signature, channel);
-            builder.Add(contentClue);
+            var ContentKey = ContentKeyConverter.ToContentKey(Schema, signature, channel);
+            builder.Add(ContentKey);
         }
 
-        _pushContentClues = builder.ToImmutable();
+        _pushContentKeys = builder.ToImmutable();
     }
 
-    private async ValueTask UpdateWantContentCluesAsync(CancellationToken cancellationToken = default)
+    private async ValueTask UpdateWantContentKeysAsync(CancellationToken cancellationToken = default)
     {
-        var builder = ImmutableHashSet.CreateBuilder<ContentClue>();
+        var builder = ImmutableHashSet.CreateBuilder<ContentKey>();
 
         foreach (var (signature, channel) in await _subscribedShoutStorage.GetKeysAsync(cancellationToken))
         {
-            var contentClue = ContentClueConverter.ToContentClue(Schema, signature, channel);
-            builder.Add(contentClue);
+            var ContentKey = ContentKeyConverter.ToContentKey(Schema, signature, channel);
+            builder.Add(ContentKey);
         }
 
-        _wantContentClues = builder.ToImmutable();
+        _wantContentKeys = builder.ToImmutable();
     }
 }

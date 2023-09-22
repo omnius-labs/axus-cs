@@ -31,16 +31,16 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
     private readonly CachedNodeLocationRepository _cachedNodeLocationRepo;
 
-    private readonly FuncPipe<IEnumerable<ContentClue>> _getPushContentCluesFuncPipe = new();
-    private readonly FuncPipe<IEnumerable<ContentClue>> _getWantContentCluesFuncPipe = new();
+    private readonly FuncPipe<IEnumerable<ContentKey>> _getPushContentKeysFuncPipe = new();
+    private readonly FuncPipe<IEnumerable<ContentKey>> _getWantContentKeysFuncPipe = new();
 
     private readonly byte[] _myId;
 
     private readonly VolatileHashSet<OmniAddress> _connectedAddressSet;
     private ImmutableHashSet<SessionStatus> _sessionStatusSet = ImmutableHashSet<SessionStatus>.Empty;
 
-    private readonly VolatileListDictionary<ContentClue, NodeLocation> _receivedPushContentLocationMap;
-    private readonly VolatileListDictionary<ContentClue, NodeLocation> _receivedGiveContentLocationMap;
+    private readonly VolatileListDictionary<ContentKey, NodeLocation> _receivedPushContentLocationMap;
+    private readonly VolatileListDictionary<ContentKey, NodeLocation> _receivedGiveContentLocationMap;
 
     private Task? _connectLoopTask;
     private Task? _acceptLoopTask;
@@ -80,8 +80,8 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
         _connectedAddressSet = new VolatileHashSet<OmniAddress>(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(10), _batchActionDispatcher);
 
-        _receivedPushContentLocationMap = new VolatileListDictionary<ContentClue, NodeLocation>(TimeSpan.FromMinutes(30), TimeSpan.FromSeconds(30), _batchActionDispatcher);
-        _receivedGiveContentLocationMap = new VolatileListDictionary<ContentClue, NodeLocation>(TimeSpan.FromMinutes(30), TimeSpan.FromSeconds(30), _batchActionDispatcher);
+        _receivedPushContentLocationMap = new VolatileListDictionary<ContentKey, NodeLocation>(TimeSpan.FromMinutes(30), TimeSpan.FromSeconds(30), _batchActionDispatcher);
+        _receivedGiveContentLocationMap = new VolatileListDictionary<ContentKey, NodeLocation>(TimeSpan.FromMinutes(30), TimeSpan.FromSeconds(30), _batchActionDispatcher);
     }
 
     private async ValueTask InitAsync(CancellationToken cancellationToken = default)
@@ -123,8 +123,8 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         _cachedNodeLocationRepo.Dispose();
     }
 
-    public IFuncListener<IEnumerable<ContentClue>> OnGetPushContentClues => _getPushContentCluesFuncPipe.Listener;
-    public IFuncListener<IEnumerable<ContentClue>> OnGetWantContentClues => _getWantContentCluesFuncPipe.Listener;
+    public IFuncListener<IEnumerable<ContentKey>> OnGetPushContentKeys => _getPushContentKeysFuncPipe.Listener;
+    public IFuncListener<IEnumerable<ContentKey>> OnGetWantContentKeys => _getWantContentKeysFuncPipe.Listener;
 
     public async ValueTask<IEnumerable<SessionReport>> GetSessionReportsAsync(CancellationToken cancellationToken = default)
     {
@@ -163,16 +163,16 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         }
     }
 
-    public async ValueTask<NodeLocation[]> FindNodeLocationsAsync(ContentClue contentClue, CancellationToken cancellationToken = default)
+    public async ValueTask<NodeLocation[]> FindNodeLocationsAsync(ContentKey ContentKey, CancellationToken cancellationToken = default)
     {
         var result = new HashSet<NodeLocation>();
 
-        if (_receivedPushContentLocationMap.TryGetValue(contentClue, out var nodeLocations1))
+        if (_receivedPushContentLocationMap.TryGetValue(ContentKey, out var nodeLocations1))
         {
             result.UnionWith(nodeLocations1);
         }
 
-        if (_receivedGiveContentLocationMap.TryGetValue(contentClue, out var nodeLocations2))
+        if (_receivedGiveContentLocationMap.TryGetValue(ContentKey, out var nodeLocations2))
         {
             result.UnionWith(nodeLocations2);
         }
@@ -420,9 +420,9 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
                             _logger.Debug($"Send PushCloudNodeLocations: (Address: {sessionStatus.Session.Address}, Count: {dataMessage.PushCloudNodeLocations.Count})");
                         }
 
-                        if (dataMessage.WantContentClues.Count > 0)
+                        if (dataMessage.WantContentKeys.Count > 0)
                         {
-                            _logger.Debug($"Send WantContentClues: (Address: {sessionStatus.Session.Address}, Count: {dataMessage.WantContentClues.Count})");
+                            _logger.Debug($"Send WantContentKeys: (Address: {sessionStatus.Session.Address}, Count: {dataMessage.WantContentKeys.Count})");
                         }
 
                         if (dataMessage.PushContentLocations.Count > 0)
@@ -492,17 +492,17 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
                             _logger.Debug($"Receive PushCloudNodeLocations: (Address: {sessionStatus.Session.Address}, Count: {dataMessage.PushCloudNodeLocations.Count})");
                         }
 
-                        if (dataMessage.WantContentClues.Count > 0)
+                        if (dataMessage.WantContentKeys.Count > 0)
                         {
-                            sessionStatus.ReceivedWantContentClues.UnionWith(dataMessage.WantContentClues);
-                            _logger.Debug($"Receive WantContentClues: (Address: {sessionStatus.Session.Address}, Count: {dataMessage.WantContentClues.Count})");
+                            sessionStatus.ReceivedWantContentKeys.UnionWith(dataMessage.WantContentKeys);
+                            _logger.Debug($"Receive WantContentKeys: (Address: {sessionStatus.Session.Address}, Count: {dataMessage.WantContentKeys.Count})");
                         }
 
                         if (dataMessage.PushContentLocations.Count > 0)
                         {
                             foreach (var contentLocation in dataMessage.PushContentLocations)
                             {
-                                _receivedPushContentLocationMap.AddRange(contentLocation.ContentClue, contentLocation.NodeLocations);
+                                _receivedPushContentLocationMap.AddRange(contentLocation.ContentKey, contentLocation.NodeLocations);
                             }
 
                             _logger.Debug($"Receive PushContentLocations: (Address: {sessionStatus.Session.Address}, Count: {dataMessage.PushContentLocations.Count})");
@@ -512,7 +512,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
                         {
                             foreach (var contentLocation in dataMessage.GiveContentLocations)
                             {
-                                _receivedGiveContentLocationMap.AddRange(contentLocation.ContentClue, contentLocation.NodeLocations);
+                                _receivedGiveContentLocationMap.AddRange(contentLocation.ContentKey, contentLocation.NodeLocations);
                             }
 
                             _logger.Debug($"Receive GiveContentLocations: (Address: {sessionStatus.Session.Address}, Count: {dataMessage.GiveContentLocations.Count})");
@@ -627,16 +627,16 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         var nodeElements = new List<KademliaElement<NodeElement>>();
 
         // コンテンツのロケーション情報
-        var contentLocationMap = new Dictionary<ContentClue, HashSet<NodeLocation>>();
+        var contentLocationMap = new Dictionary<ContentKey, HashSet<NodeLocation>>();
 
         // 送信するノードロケーション
         var sendingPushNodeLocations = new List<NodeLocation>();
 
         // 送信するコンテンツのロケーション情報
-        var sendingPushContentLocationMap = new Dictionary<ContentClue, HashSet<NodeLocation>>();
+        var sendingPushContentLocationMap = new Dictionary<ContentKey, HashSet<NodeLocation>>();
 
         // 送信するコンテンツのロケーションリクエスト情報
-        var sendingWantContentClueSet = new HashSet<ContentClue>();
+        var sendingWantContentKeySet = new HashSet<ContentKey>();
 
         // ノード情報を追加
         foreach (var connectionStatus in _sessionStatusSet)
@@ -650,32 +650,32 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         // 接続中のノードのノードロケーションを追加
         sendingPushNodeLocations.AddRange(nodeElements.Select(n => n.Value.SessionStatus.NodeLocation).Where(n => n.Addresses.Count > 0));
 
-        foreach (var contentClue in _getPushContentCluesFuncPipe.Caller.Call().Flatten())
+        foreach (var ContentKey in _getPushContentKeysFuncPipe.Caller.Call().Flatten())
         {
-            contentLocationMap.GetOrAdd(contentClue, (_) => new HashSet<NodeLocation>())
+            contentLocationMap.GetOrAdd(ContentKey, (_) => new HashSet<NodeLocation>())
                 .Add(myNodeLocation);
 
-            sendingPushContentLocationMap.GetOrAdd(contentClue, (_) => new HashSet<NodeLocation>())
+            sendingPushContentLocationMap.GetOrAdd(ContentKey, (_) => new HashSet<NodeLocation>())
                 .Add(myNodeLocation);
         }
 
-        foreach (var contentClue in _getWantContentCluesFuncPipe.Caller.Call().Flatten())
+        foreach (var ContentKey in _getWantContentKeysFuncPipe.Caller.Call().Flatten())
         {
-            contentLocationMap.GetOrAdd(contentClue, (_) => new HashSet<NodeLocation>())
+            contentLocationMap.GetOrAdd(ContentKey, (_) => new HashSet<NodeLocation>())
                 .Add(myNodeLocation);
 
-            sendingPushContentLocationMap.GetOrAdd(contentClue, (_) => new HashSet<NodeLocation>())
+            sendingPushContentLocationMap.GetOrAdd(ContentKey, (_) => new HashSet<NodeLocation>())
                 .Add(myNodeLocation);
 
-            sendingWantContentClueSet.Add(contentClue);
+            sendingWantContentKeySet.Add(ContentKey);
         }
 
-        foreach (var (contentClue, nodeLocations) in _receivedPushContentLocationMap)
+        foreach (var (ContentKey, nodeLocations) in _receivedPushContentLocationMap)
         {
-            contentLocationMap.GetOrAdd(contentClue, (_) => new HashSet<NodeLocation>())
+            contentLocationMap.GetOrAdd(ContentKey, (_) => new HashSet<NodeLocation>())
                 .UnionWith(nodeLocations);
 
-            sendingPushContentLocationMap.GetOrAdd(contentClue, (_) => new HashSet<NodeLocation>())
+            sendingPushContentLocationMap.GetOrAdd(ContentKey, (_) => new HashSet<NodeLocation>())
                 .UnionWith(nodeLocations);
         }
 
@@ -687,9 +687,9 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
         foreach (var nodeElement in nodeElements)
         {
-            foreach (var tag in nodeElement.Value.SessionStatus.ReceivedWantContentClues)
+            foreach (var tag in nodeElement.Value.SessionStatus.ReceivedWantContentKeys)
             {
-                sendingWantContentClueSet.Add(tag);
+                sendingWantContentKeySet.Add(tag);
             }
         }
 
@@ -700,31 +700,31 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
         }
 
         // Compute SendingPushContentLocations
-        foreach (var (contentClue, nodeLocations) in sendingPushContentLocationMap)
+        foreach (var (ContentKey, nodeLocations) in sendingPushContentLocationMap)
         {
-            foreach (var element in Kademlia.Search(_myId.AsSpan(), contentClue.RootHash.Value.Span, nodeElements, 1))
+            foreach (var element in Kademlia.Search(_myId.AsSpan(), ContentKey.RootHash.Value.Span, nodeElements, 1))
             {
-                element.Value.SendingPushContentLocations[contentClue] = nodeLocations.ToList();
+                element.Value.SendingPushContentLocations[ContentKey] = nodeLocations.ToList();
             }
         }
 
-        // Compute SendingWantContentClues
-        foreach (var contentClue in sendingWantContentClueSet)
+        // Compute SendingWantContentKeys
+        foreach (var ContentKey in sendingWantContentKeySet)
         {
-            foreach (var element in Kademlia.Search(_myId.AsSpan(), contentClue.RootHash.Value.Span, nodeElements, 1))
+            foreach (var element in Kademlia.Search(_myId.AsSpan(), ContentKey.RootHash.Value.Span, nodeElements, 1))
             {
-                element.Value.SendingWantContentClues.Add(contentClue);
+                element.Value.SendingWantContentKeys.Add(ContentKey);
             }
         }
 
         // Compute SendingGiveContentLocations
         foreach (var nodeElement in nodeElements)
         {
-            foreach (var contentClue in nodeElement.Value.SessionStatus.ReceivedWantContentClues)
+            foreach (var ContentKey in nodeElement.Value.SessionStatus.ReceivedWantContentKeys)
             {
-                if (!contentLocationMap.TryGetValue(contentClue, out var nodeLocations)) continue;
+                if (!contentLocationMap.TryGetValue(ContentKey, out var nodeLocations)) continue;
 
-                nodeElement.Value.SendingGiveContentLocations[contentClue] = nodeLocations.Randomize().ToList();
+                nodeElement.Value.SendingGiveContentLocations[ContentKey] = nodeLocations.Randomize().ToList();
             }
         }
 
@@ -733,7 +733,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
             element.Value.SessionStatus.SendingDataMessage =
                 new NodeFinderDataMessage(
                     element.Value.SendingPushCloudNodeLocations.Randomize().Take(NodeFinderDataMessage.MaxPushCloudNodeLocationsCount).ToArray(),
-                    element.Value.SendingWantContentClues.Randomize().Take(NodeFinderDataMessage.MaxWantContentCluesCount).ToArray(),
+                    element.Value.SendingWantContentKeys.Randomize().Take(NodeFinderDataMessage.MaxWantContentKeysCount).ToArray(),
                     element.Value.SendingPushContentLocations.Randomize().Select(n => new ContentLocation(n.Key, n.Value.Randomize().Take(ContentLocation.MaxNodeLocationsCount).ToArray())).Take(NodeFinderDataMessage.MaxPushContentLocationsCount).ToArray(),
                     element.Value.SendingGiveContentLocations.Randomize().Select(n => new ContentLocation(n.Key, n.Value.Randomize().Take(ContentLocation.MaxNodeLocationsCount).ToArray())).Take(NodeFinderDataMessage.MaxGiveContentLocationsCount).ToArray());
         }
@@ -750,10 +750,10 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
 
         public List<NodeLocation> SendingPushCloudNodeLocations { get; } = new List<NodeLocation>();
 
-        public List<ContentClue> SendingWantContentClues { get; } = new List<ContentClue>();
+        public List<ContentKey> SendingWantContentKeys { get; } = new List<ContentKey>();
 
-        public Dictionary<ContentClue, List<NodeLocation>> SendingPushContentLocations { get; } = new Dictionary<ContentClue, List<NodeLocation>>();
+        public Dictionary<ContentKey, List<NodeLocation>> SendingPushContentLocations { get; } = new Dictionary<ContentKey, List<NodeLocation>>();
 
-        public Dictionary<ContentClue, List<NodeLocation>> SendingGiveContentLocations { get; } = new Dictionary<ContentClue, List<NodeLocation>>();
+        public Dictionary<ContentKey, List<NodeLocation>> SendingGiveContentLocations { get; } = new Dictionary<ContentKey, List<NodeLocation>>();
     }
 }

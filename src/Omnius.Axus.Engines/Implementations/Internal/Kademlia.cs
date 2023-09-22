@@ -11,7 +11,6 @@ internal readonly struct KademliaElement<T>
     }
 
     public ReadOnlyMemory<byte> Id { get; }
-
     public T Value { get; }
 }
 

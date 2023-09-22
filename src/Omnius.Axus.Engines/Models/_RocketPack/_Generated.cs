@@ -3,22 +3,22 @@
 
 namespace Omnius.Axus.Engines.Models;
 
-public sealed partial class ContentClue : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Engines.Models.ContentClue>
+public sealed partial class ContentKey : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Engines.Models.ContentKey>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Engines.Models.ContentClue> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Engines.Models.ContentClue>.Formatter;
-    public static global::Omnius.Axus.Engines.Models.ContentClue Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Engines.Models.ContentClue>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Engines.Models.ContentKey> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Engines.Models.ContentKey>.Formatter;
+    public static global::Omnius.Axus.Engines.Models.ContentKey Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Engines.Models.ContentKey>.Empty;
 
-    static ContentClue()
+    static ContentKey()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Engines.Models.ContentClue>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Engines.Models.ContentClue>.Empty = new global::Omnius.Axus.Engines.Models.ContentClue(global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.Cryptography.OmniHash.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Engines.Models.ContentKey>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Engines.Models.ContentKey>.Empty = new global::Omnius.Axus.Engines.Models.ContentKey(global::Omnius.Core.RocketPack.Utf8String.Empty, global::Omnius.Core.Cryptography.OmniHash.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxSchemeLength = 256;
 
-    public ContentClue(global::Omnius.Core.RocketPack.Utf8String scheme, global::Omnius.Core.Cryptography.OmniHash rootHash)
+    public ContentKey(global::Omnius.Core.RocketPack.Utf8String scheme, global::Omnius.Core.Cryptography.OmniHash rootHash)
     {
         if (scheme is null) throw new global::System.ArgumentNullException("scheme");
         if (scheme.Length > 256) throw new global::System.ArgumentOutOfRangeException("scheme");
@@ -37,7 +37,7 @@ public sealed partial class ContentClue : global::Omnius.Core.RocketPack.IRocket
     public global::Omnius.Core.RocketPack.Utf8String Scheme { get; }
     public global::Omnius.Core.Cryptography.OmniHash RootHash { get; }
 
-    public static global::Omnius.Axus.Engines.Models.ContentClue Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Engines.Models.ContentKey Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -48,20 +48,20 @@ public sealed partial class ContentClue : global::Omnius.Core.RocketPack.IRocket
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Engines.Models.ContentClue? left, global::Omnius.Axus.Engines.Models.ContentClue? right)
+    public static bool operator ==(global::Omnius.Axus.Engines.Models.ContentKey? left, global::Omnius.Axus.Engines.Models.ContentKey? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Engines.Models.ContentClue? left, global::Omnius.Axus.Engines.Models.ContentClue? right)
+    public static bool operator !=(global::Omnius.Axus.Engines.Models.ContentKey? left, global::Omnius.Axus.Engines.Models.ContentKey? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Engines.Models.ContentClue) return false;
-        return this.Equals((global::Omnius.Axus.Engines.Models.ContentClue)other);
+        if (other is not global::Omnius.Axus.Engines.Models.ContentKey) return false;
+        return this.Equals((global::Omnius.Axus.Engines.Models.ContentKey)other);
     }
-    public bool Equals(global::Omnius.Axus.Engines.Models.ContentClue? target)
+    public bool Equals(global::Omnius.Axus.Engines.Models.ContentKey? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -72,9 +72,9 @@ public sealed partial class ContentClue : global::Omnius.Core.RocketPack.IRocket
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Engines.Models.ContentClue>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Engines.Models.ContentKey>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Engines.Models.ContentClue value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Engines.Models.ContentKey value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -90,7 +90,7 @@ public sealed partial class ContentClue : global::Omnius.Core.RocketPack.IRocket
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Engines.Models.ContentClue Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Engines.Models.ContentKey Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -116,7 +116,7 @@ public sealed partial class ContentClue : global::Omnius.Core.RocketPack.IRocket
                 }
             }
 
-            return new global::Omnius.Axus.Engines.Models.ContentClue(p_scheme, p_rootHash);
+            return new global::Omnius.Axus.Engines.Models.ContentKey(p_scheme, p_rootHash);
         }
     }
 }

@@ -24,6 +24,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
     private readonly INodeFinder _nodeFinder;
     private readonly IFilePublisherStorage _publishedFileStorage;
     private readonly IFileSubscriberStorage _subscribedFileStorage;
+    private readonly ISystemClock _systemClock;
     private readonly IBytesPool _bytesPool;
     private readonly FileExchangerOptions _options;
 
@@ -33,8 +34,8 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
     private ImmutableHashSet<SessionStatus> _sessionStatusSet = ImmutableHashSet<SessionStatus>.Empty;
 
-    private ImmutableHashSet<ContentClue> _pushContentClues = ImmutableHashSet<ContentClue>.Empty;
-    private ImmutableHashSet<ContentClue> _wantContentClues = ImmutableHashSet<ContentClue>.Empty;
+    private ImmutableHashSet<ContentKey> _pushContentKeys = ImmutableHashSet<ContentKey>.Empty;
+    private ImmutableHashSet<ContentKey> _wantContentKeys = ImmutableHashSet<ContentKey>.Empty;
 
     private Task? _publishConnectLoopTask;
     private Task? _subscribeConnectLoopTask;
@@ -42,8 +43,8 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
     private Task? _sendLoopTask;
     private Task? _receiveLoopTask;
     private Task? _computeLoopTask;
-    private readonly IDisposable _getPushContentCluesListenerRegister;
-    private readonly IDisposable _getWantContentCluesListenerRegister;
+    private readonly IDisposable _getPushContentKeysListenerRegister;
+    private readonly IDisposable _getWantContentKeysListenerRegister;
 
     private readonly Random _random = new();
 
@@ -57,29 +58,32 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
     public static async ValueTask<FileExchanger> CreateAsync(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
         IFilePublisherStorage publishedFileStorage, IFileSubscriberStorage subscribedFileStorage,
-        IBytesPool bytesPool, FileExchangerOptions options, CancellationToken cancellationToken = default)
+        ISystemClock systemClock, IBytesPool bytesPool,
+        FileExchangerOptions options, CancellationToken cancellationToken = default)
     {
-        var fileExchanger = new FileExchanger(sessionConnector, sessionAccepter, nodeFinder, publishedFileStorage, subscribedFileStorage, bytesPool, options);
+        var fileExchanger = new FileExchanger(sessionConnector, sessionAccepter, nodeFinder, publishedFileStorage, subscribedFileStorage, systemClock, bytesPool, options);
         await fileExchanger.InitAsync(cancellationToken);
         return fileExchanger;
     }
 
     private FileExchanger(ISessionConnector sessionConnector, ISessionAccepter sessionAccepter, INodeFinder nodeFinder,
         IFilePublisherStorage publishedFileStorage, IFileSubscriberStorage subscribedFileStorage,
-        IBytesPool bytesPool, FileExchangerOptions options)
+        ISystemClock systemClock, IBytesPool bytesPool,
+        FileExchangerOptions options)
     {
         _sessionConnector = sessionConnector;
         _sessionAccepter = sessionAccepter;
         _nodeFinder = nodeFinder;
         _publishedFileStorage = publishedFileStorage;
         _subscribedFileStorage = subscribedFileStorage;
+        _systemClock = systemClock;
         _bytesPool = bytesPool;
         _options = options;
 
-        _connectedAddressSet = new VolatileHashSet<OmniAddress>(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), _batchActionDispatcher);
+        _connectedAddressSet = new VolatileHashSet<OmniAddress>(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), _systemClock, _batchActionDispatcher);
 
-        _getPushContentCluesListenerRegister = _nodeFinder.OnGetPushContentClues.Listen(() => _pushContentClues);
-        _getWantContentCluesListenerRegister = _nodeFinder.OnGetWantContentClues.Listen(() => _wantContentClues);
+        _getPushContentKeysListenerRegister = _nodeFinder.OnGetPushContentKeys.Listen(() => _pushContentKeys);
+        _getWantContentKeysListenerRegister = _nodeFinder.OnGetWantContentKeys.Listen(() => _wantContentKeys);
     }
 
     private async ValueTask InitAsync(CancellationToken cancellationToken = default)
@@ -107,8 +111,8 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
         _connectedAddressSet.Dispose();
 
-        _getPushContentCluesListenerRegister.Dispose();
-        _getWantContentCluesListenerRegister.Dispose();
+        _getPushContentKeysListenerRegister.Dispose();
+        _getWantContentKeysListenerRegister.Dispose();
     }
 
     public async ValueTask<IEnumerable<SessionReport>> GetSessionReportsAsync(CancellationToken cancellationToken = default)
@@ -203,9 +207,9 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
     private async ValueTask<IEnumerable<NodeLocation>> FindNodeLocationsForConnecting(OmniHash rootHash, CancellationToken cancellationToken)
     {
-        var contentClue = ContentClueConverter.ToContentClue(Schema, rootHash);
+        var ContentKey = ContentKeyConverter.ToContentKey(Schema, rootHash);
 
-        var nodeLocations = await _nodeFinder.FindNodeLocationsAsync(contentClue, cancellationToken);
+        var nodeLocations = await _nodeFinder.FindNodeLocationsAsync(ContentKey, cancellationToken);
         _random.Shuffle(nodeLocations);
 
         var ignoredAddressSet = await this.GetIgnoredAddressSet(cancellationToken);
@@ -355,7 +359,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
                     _logger.Debug($"AcceptedSession Succeeded (Published): (Address: {session.Address})");
 
-                    var sessionStatus = new SessionStatus(session, ExchangeType.Published, requestMessage.RootHash, _batchActionDispatcher);
+                    var sessionStatus = new SessionStatus(session, ExchangeType.Published, requestMessage.RootHash, _systemClock, _batchActionDispatcher);
                     return this.InternalTryAddSession(session, ExchangeType.Published, requestMessage.RootHash);
                 }
                 else if (await _subscribedFileStorage.ContainsWantContentAsync(requestMessage.RootHash, cancellationToken))
@@ -418,7 +422,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                 return false;
             }
 
-            _sessionStatusSet = _sessionStatusSet.Add(new SessionStatus(session, exchangeType, rootHash, _batchActionDispatcher));
+            _sessionStatusSet = _sessionStatusSet.Add(new SessionStatus(session, exchangeType, rootHash, _systemClock, _batchActionDispatcher));
 
             return true;
         }
@@ -568,7 +572,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
     private async Task ComputeLoopAsync(CancellationToken cancellationToken)
     {
         var trimSessionsStopwatch = new Stopwatch();
-        var computeContentCluesStopwatch = new Stopwatch();
+        var computeContentKeysStopwatch = new Stopwatch();
         var computeSendingDataStopwatch = new Stopwatch();
 
         try
@@ -585,10 +589,10 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                     await this.TrimUnnecessarySessionsAsync(cancellationToken);
                 }
 
-                if (computeContentCluesStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromSeconds(30)))
+                if (computeContentKeysStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromSeconds(30)))
                 {
-                    await this.ComputePushContentCluesAsync(cancellationToken);
-                    await this.ComputeWantContentCluesAsync(cancellationToken);
+                    await this.ComputePushContentKeysAsync(cancellationToken);
+                    await this.ComputeWantContentKeysAsync(cancellationToken);
                 }
 
                 if (computeSendingDataStopwatch.TryRestartIfElapsedOrStopped(TimeSpan.FromSeconds(10)))
@@ -642,30 +646,30 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
         await sessionStatus.DisposeAsync();
     }
 
-    private async ValueTask ComputePushContentCluesAsync(CancellationToken cancellationToken = default)
+    private async ValueTask ComputePushContentKeysAsync(CancellationToken cancellationToken = default)
     {
-        var builder = ImmutableHashSet.CreateBuilder<ContentClue>();
+        var builder = ImmutableHashSet.CreateBuilder<ContentKey>();
 
         foreach (var rootHash in await _publishedFileStorage.GetPushRootHashesAsync(cancellationToken))
         {
-            var contentClue = ContentClueConverter.ToContentClue(Schema, rootHash);
-            builder.Add(contentClue);
+            var ContentKey = ContentKeyConverter.ToContentKey(Schema, rootHash);
+            builder.Add(ContentKey);
         }
 
-        _pushContentClues = builder.ToImmutable();
+        _pushContentKeys = builder.ToImmutable();
     }
 
-    private async ValueTask ComputeWantContentCluesAsync(CancellationToken cancellationToken = default)
+    private async ValueTask ComputeWantContentKeysAsync(CancellationToken cancellationToken = default)
     {
-        var builder = ImmutableHashSet.CreateBuilder<ContentClue>();
+        var builder = ImmutableHashSet.CreateBuilder<ContentKey>();
 
         foreach (var rootHash in await _subscribedFileStorage.GetWantRootHashesAsync(cancellationToken))
         {
-            var contentClue = ContentClueConverter.ToContentClue(Schema, rootHash);
-            builder.Add(contentClue);
+            var ContentKey = ContentKeyConverter.ToContentKey(Schema, rootHash);
+            builder.Add(ContentKey);
         }
 
-        _wantContentClues = builder.ToImmutable();
+        _wantContentKeys = builder.ToImmutable();
     }
 
     private async ValueTask ComputeSendingDataMessage(CancellationToken cancellationToken = default)
