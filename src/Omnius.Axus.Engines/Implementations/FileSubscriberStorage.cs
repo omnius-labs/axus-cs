@@ -297,14 +297,14 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
 
             await _subscriberRepo.FileItems.DeleteAsync(rootHash, cancellationToken);
 
-            foreach (var blockItem in _subscriberRepo.BlockItems.Find(rootHash))
+            await foreach (var blockItem in _subscriberRepo.BlockItems.GetItemsAsync(rootHash, cancellationToken))
             {
                 if (!blockItem.IsDownloaded) continue;
                 var key = GenKey(rootHash, blockItem.BlockHash);
                 await _blockStorage.TryDeleteAsync(key, cancellationToken);
             }
 
-            _subscriberRepo.BlockItems.Delete(rootHash);
+            await _subscriberRepo.BlockItems.DeleteAsync(rootHash, cancellationToken);
         }
     }
 
@@ -326,10 +326,10 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var fileItem = _subscriberRepo.FileItems.FindOne(rootHash);
+            var fileItem = await _subscriberRepo.FileItems.GetItemAsync(rootHash, cancellationToken);
             if (fileItem is null || fileItem.Status.State != SubscribedFileState.Downloaded) return false;
 
-            var blockHashes = _subscriberRepo.BlockItems.FindBlockHashesAsync(rootHash, 0);
+            var blockHashes = await _subscriberRepo.BlockItems.FindBlockHashesAsync(rootHash, 0).ToListAsync(cancellationToken);
             if (blockHashes is null) return false;
 
             foreach (var blockHash in blockHashes)
@@ -373,14 +373,14 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var blockItems = _subscriberRepo.BlockItems.Find(rootHash, blockHash);
+            var blockItems = await _subscriberRepo.BlockItems.GetItemsAsync(rootHash, blockHash, cancellationToken).ToListAsync(cancellationToken);
             if (blockItems.Count() == 0) return;
 
             var key = GenKey(rootHash, blockHash);
             await _blockStorage.WriteAsync(key, memory, cancellationToken);
 
             var newBlockItems = blockItems.Select(n => n with { IsDownloaded = true }).ToArray();
-            _subscriberRepo.BlockItems.UpsertBulk(newBlockItems);
+            await _subscriberRepo.BlockItems.UpsertBulkAsync(newBlockItems, cancellationToken);
 
             var fileItem = _subscriberRepo.FileItems.FindOne(rootHash);
             if (fileItem is null) return;

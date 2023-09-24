@@ -379,6 +379,47 @@ SELECT COUNT(1)
             }
         }
 
+        public async IAsyncEnumerable<BlockSubscribedItem> GetItemsAsync(OmniHash rootHash, OmniHash blockHash, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+                using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+                var compiler = new SqliteCompiler();
+                using var db = new QueryFactory(connection, compiler);
+
+                const int ChunkSize = 5000;
+                int offset = 0;
+                int limit = ChunkSize;
+
+                for (; ; )
+                {
+                    var rows = await db.Query("blocks")
+                        .Select("root_hash", "block_hash", "depth", "order", "is_downloaded")
+                        .Where("root_hash", "=", rootHash.ToString(ConvertStringType.Base64))
+                        .Where("block_hash", "=", blockHash.ToString(ConvertStringType.Base64))
+                        .Offset(offset)
+                        .Limit(limit)
+                        .GetAsync(cancellationToken: cancellationToken);
+                    if (!rows.Any()) yield break;
+
+                    foreach (var row in rows)
+                    {
+                        yield return new BlockSubscribedItem
+                        {
+                            RootHash = OmniHash.Parse(row.root_hash),
+                            BlockHash = OmniHash.Parse(row.block_hash),
+                            Depth = row.depth,
+                            Order = row.order,
+                            IsDownloaded = row.is_downloaded == 1,
+                        };
+                    }
+
+                    offset = limit;
+                    limit += ChunkSize;
+                }
+            }
+        }
+
         public async ValueTask<BlockSubscribedItem?> GetItemAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync(cancellationToken))

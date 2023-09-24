@@ -249,7 +249,6 @@ public sealed partial class SeedDownloader : AsyncDisposableBase, ISeedDownloade
         }
     }
 
-
     public async ValueTask<SeedDownloaderConfig> GetConfigAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
