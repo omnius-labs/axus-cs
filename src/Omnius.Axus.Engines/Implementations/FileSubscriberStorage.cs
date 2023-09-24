@@ -382,7 +382,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
             var newBlockItems = blockItems.Select(n => n with { IsDownloaded = true }).ToArray();
             await _subscriberRepo.BlockItems.UpsertBulkAsync(newBlockItems, cancellationToken);
 
-            var fileItem = _subscriberRepo.FileItems.FindOne(rootHash);
+            var fileItem = await _subscriberRepo.FileItems.GetItemAsync(rootHash, cancellationToken);
             if (fileItem is null) return;
 
             var newFileItem = fileItem with
@@ -392,7 +392,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
                     DownloadedBlockCount = fileItem.Status.DownloadedBlockCount + 1
                 }
             };
-            _subscriberRepo.FileItems.Upsert(newFileItem);
+            await _subscriberRepo.FileItems.UpsertAsync(newFileItem, cancellationToken);
         }
     }
 
