@@ -24,20 +24,22 @@ public sealed partial class ShoutSubscriberStorage : AsyncDisposableBase, IShout
 
     private readonly AsyncLock _asyncLock = new();
 
-    public static async ValueTask<ShoutSubscriberStorage> CreateAsync(IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ShoutSubscriberStorageOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<ShoutSubscriberStorage> CreateAsync(IKeyValueStorageFactory keyValueStorageFactory,
+        IBytesPool bytesPool, ShoutSubscriberStorageOptions options, CancellationToken cancellationToken = default)
     {
         var subscribedShoutStorage = new ShoutSubscriberStorage(keyValueStorageFactory, bytesPool, options);
         await subscribedShoutStorage.InitAsync(cancellationToken);
         return subscribedShoutStorage;
     }
 
-    private ShoutSubscriberStorage(IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ShoutSubscriberStorageOptions options)
+    private ShoutSubscriberStorage(IKeyValueStorageFactory keyValueStorageFactory,
+        IBytesPool bytesPool, ShoutSubscriberStorageOptions options)
     {
         _keyValueStorageFactory = keyValueStorageFactory;
         _bytesPool = bytesPool;
         _options = options;
 
-        _subscriberRepo = new ShoutSubscriberStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
+        _subscriberRepo = new ShoutSubscriberStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "status"), _bytesPool);
         _blockStorage = _keyValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
     }
 
@@ -49,17 +51,17 @@ public sealed partial class ShoutSubscriberStorage : AsyncDisposableBase, IShout
 
     protected override async ValueTask OnDisposeAsync()
     {
-        _subscriberRepo.Dispose();
+        await _subscriberRepo.DisposeAsync();
         await _blockStorage.DisposeAsync();
     }
 
-    public async ValueTask<IEnumerable<SubscribedShoutReport>> GetSubscribedShoutReportsAsync(string zone, CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<SubscribedShoutReport>> GetSubscribedShoutReportsAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var shoutReports = new List<SubscribedShoutReport>();
 
-            foreach (var item in _subscriberRepo.ShoutItems.Find(zone))
+            await foreach (var item in _subscriberRepo.ShoutItems.GetItemsAsync(cancellationToken))
             {
                 shoutReports.Add(new SubscribedShoutReport(item.Signature, item.Channel, Timestamp64.FromDateTime(item.CreatedTime), item.Properties.ToArray()));
             }
@@ -78,7 +80,7 @@ public sealed partial class ShoutSubscriberStorage : AsyncDisposableBase, IShout
         {
             var results = new List<(OmniSignature, string)>();
 
-            foreach (var item in _subscriberRepo.ShoutItems.FindAll())
+            foreach (var item in _subscriberRepo.ShoutItems.GetItemsAsync())
             {
                 results.Add((item.Signature, item.Channel));
             }
@@ -95,7 +97,7 @@ public sealed partial class ShoutSubscriberStorage : AsyncDisposableBase, IShout
         }
     }
 
-    public async ValueTask SubscribeShoutAsync(OmniSignature signature, IEnumerable<AttachedProperty> properties, string channel, string zone, CancellationToken cancellationToken = default)
+    public async ValueTask SubscribeShoutAsync(OmniSignature signature, IEnumerable<AttachedProperty> properties, string channel, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -124,7 +126,7 @@ public sealed partial class ShoutSubscriberStorage : AsyncDisposableBase, IShout
         }
     }
 
-    public async ValueTask UnsubscribeShoutAsync(OmniSignature signature, string channel, string zone, CancellationToken cancellationToken = default)
+    public async ValueTask UnsubscribeShoutAsync(OmniSignature signature, string channel, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
