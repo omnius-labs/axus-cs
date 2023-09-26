@@ -7,6 +7,7 @@ using Omnius.Axus.Messages;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Pipelines;
+using Omnius.Core.Serialization;
 using Omnius.Core.Storages;
 
 namespace Omnius.Axus.Engines;
@@ -396,6 +397,6 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
 
     private static string GenKey(OmniHash rootHash, OmniHash blockHash)
     {
-        return StringConverter.ToString(rootHash) + "/" + StringConverter.ToString(blockHash);
+        return rootHash.ToString(ConvertStringType.Base16Lower) + "/" + blockHash.ToString(ConvertStringType.Base16Lower);
     }
 }

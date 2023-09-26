@@ -440,11 +440,11 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
 
     private static string GenTempKey(string spaceId, OmniHash blockHash)
     {
-        return string.Format("tmp/{}/{}", spaceId, StringConverter.ToString(blockHash));
+        return string.Format("tmp/{}/{}", spaceId, blockHash.ToString(ConvertStringType.Base16Lower));
     }
 
     private static string GenFixedKey(OmniHash rootHash, OmniHash blockHash)
     {
-        return string.Format("fix/{}/{}", StringConverter.ToString(rootHash), StringConverter.ToString(blockHash));
+        return string.Format("fix/{}/{}", rootHash.ToString(ConvertStringType.Base16Lower), blockHash.ToString(ConvertStringType.Base16Lower));
     }
 }

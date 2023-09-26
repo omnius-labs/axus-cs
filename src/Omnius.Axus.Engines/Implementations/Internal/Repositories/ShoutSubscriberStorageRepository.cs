@@ -125,7 +125,7 @@ SELECT COUNT(1)
                             Signature = OmniSignature.Parse(row.signature),
                             Channel = row.channel,
                             Properties = RocketMessageConverter.FromBytes<RocketArray<AttachedProperty>>((byte[])row.properties).Values,
-                            CreatedTime = Timestamp64.FromSeconds(row.created_time).ToDateTime(),
+                            ShoutCreatedTime = Timestamp64.FromSeconds(row.created_time).ToDateTime(),
                             UpdatedTime = Timestamp64.FromSeconds(row.updated_time).ToDateTime(),
                         };
                     }
@@ -159,7 +159,7 @@ SELECT COUNT(1)
                     Signature = OmniSignature.Parse(row.signature),
                     Channel = row.channel,
                     Properties = RocketMessageConverter.FromBytes<RocketArray<AttachedProperty>>((byte[])row.properties).Values,
-                    CreatedTime = Timestamp64.FromSeconds(row.created_time).ToDateTime(),
+                    ShoutCreatedTime = Timestamp64.FromSeconds(row.created_time).ToDateTime(),
                     UpdatedTime = Timestamp64.FromSeconds(row.updated_time).ToDateTime(),
                 };
             }
@@ -185,7 +185,7 @@ INSERT INTO items (signature, channel, properties, created_time, updated_time)
                     ("@signature", item.Signature.ToString()),
                     ("@channel", item.Channel),
                     ("@properties", RocketMessageConverter.ToBytes(new RocketArray<AttachedProperty>(item.Properties.ToArray()))),
-                    ("@created_time", item.CreatedTime),
+                    ("@created_time", item.ShoutCreatedTime),
                     ("@updated_time", item.UpdatedTime)
                 };
 
