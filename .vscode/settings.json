@@ -6,7 +6,8 @@
         "Kademlia",
         "merkle",
         "Omni",
-        "Omnius"
+        "Omnius",
+        "Xunit"
     ],
     "dotnet.defaultSolution": "axus.sln"
 }

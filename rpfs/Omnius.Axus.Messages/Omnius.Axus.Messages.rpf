@@ -19,8 +19,7 @@ message Shout {
 }
 
 message AttachedProperty {
-    Name: string(capacity: 256),
-    Value: bytes(capacity: 32 * 1024),
+    Value: string(capacity: 8192),
 }
 
 // Report
@@ -46,13 +45,13 @@ enum SessionHandshakeType : uint8 {
 message PublishedFileReport {
     FilePath: string?,
     RootHash: OmniHash?,
-    Properties: vector<AttachedProperty>(capacity: 256),
+    Property: AttachedProperty?,
 }
 
 message SubscribedFileReport {
     RootHash: OmniHash,
     Status: SubscribedFileStatus,
-    Properties: vector<AttachedProperty>(capacity: 256),
+    Property: AttachedProperty?,
 }
 
 message SubscribedFileStatus {
@@ -65,20 +64,21 @@ message SubscribedFileStatus {
 enum SubscribedFileState : uint8 {
     Unknown = 0,
     Downloading = 1,
-    Downloaded = 2,
-    Failed = 3,
+    Decoding = 2,
+    Completed = 3,
+    Failed = 4,
 }
 
 message PublishedShoutReport {
     Signature: OmniSignature,
     Channel: string,
     CreatedTime: timestamp64,
-    Properties: vector<AttachedProperty>(capacity: 256),
+    Property: AttachedProperty?,
 }
 
 message SubscribedShoutReport {
     Signature: OmniSignature,
     Channel: string,
     CreatedTime: timestamp64,
-    Properties: vector<AttachedProperty>(capacity: 256),
+    Property: AttachedProperty?,
 }

@@ -62,12 +62,12 @@ CREATE TABLE IF NOT EXISTS items (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     signature TEXT NOT NULL,
     channel TEXT NOT NULL,
-    properties BLOB NOT NULL,
+    property TEXT,
+    shout_created_time INTEGER NOT NULL,
     created_time INTEGER NOT NULL,
-    updated_time INTEGER NOT NULL
+    updated_time INTEGER NOT NULL,
+    UNIQUE (signature, channel)
 );
-CREATE UNIQUE INDEX IF NOT EXISTS files_root_hash_unique_index ON files(root_hash);
-CREATE INDEX IF NOT EXISTS files_root_hash_index ON files(root_hash);
 ";
                 await connection.ExecuteNonQueryAsync(query, cancellationToken);
             }
@@ -112,7 +112,7 @@ SELECT COUNT(1)
                 for (; ; )
                 {
                     var rows = await db.Query("items")
-                        .Select("signature", "channel", "properties", "created_time", "updated_time")
+                        .Select("signature", "channel", "property", "shout_created_time", "created_time", "updated_time")
                         .Offset(offset)
                         .Limit(limit)
                         .GetAsync(cancellationToken: cancellationToken);
@@ -122,11 +122,12 @@ SELECT COUNT(1)
                     {
                         yield return new ShoutSubscribedItem
                         {
-                            Signature = OmniSignature.Parse(row.signature),
-                            Channel = row.channel,
-                            Properties = RocketMessageConverter.FromBytes<RocketArray<AttachedProperty>>((byte[])row.properties).Values,
-                            ShoutCreatedTime = Timestamp64.FromSeconds(row.created_time).ToDateTime(),
-                            UpdatedTime = Timestamp64.FromSeconds(row.updated_time).ToDateTime(),
+                            Signature = OmniSignature.Parse((string)row.signature),
+                            Channel = (string)row.channel,
+                            Property = row.property is null ? null : AttachedProperty.Create((string)row.property),
+                            ShoutCreatedTime = Timestamp64.FromSeconds((long)row.shout_created_time).ToDateTime(),
+                            CreatedTime = Timestamp64.FromSeconds((long)row.created_time).ToDateTime(),
+                            UpdatedTime = Timestamp64.FromSeconds((long)row.updated_time).ToDateTime(),
                         };
                     }
 
@@ -144,8 +145,8 @@ SELECT COUNT(1)
                 var compiler = new SqliteCompiler();
                 using var db = new QueryFactory(connection, compiler);
 
-                var rows = await db.Query("files")
-                    .Select("signature", "channel", "properties", "created_time", "updated_time")
+                var rows = await db.Query("items")
+                    .Select("signature", "channel", "property", "shout_created_time", "created_time", "updated_time")
                     .Where("signature", signature.ToString())
                     .Where("channel", channel)
                     .Limit(1)
@@ -156,11 +157,12 @@ SELECT COUNT(1)
 
                 return new ShoutSubscribedItem
                 {
-                    Signature = OmniSignature.Parse(row.signature),
-                    Channel = row.channel,
-                    Properties = RocketMessageConverter.FromBytes<RocketArray<AttachedProperty>>((byte[])row.properties).Values,
-                    ShoutCreatedTime = Timestamp64.FromSeconds(row.created_time).ToDateTime(),
-                    UpdatedTime = Timestamp64.FromSeconds(row.updated_time).ToDateTime(),
+                    Signature = OmniSignature.Parse((string)row.signature),
+                    Channel = (string)row.channel,
+                    Property = row.property is null ? null : AttachedProperty.Create((string)row.property),
+                    ShoutCreatedTime = Timestamp64.FromSeconds((long)row.shout_created_time).ToDateTime(),
+                    CreatedTime = Timestamp64.FromSeconds((long)row.created_time).ToDateTime(),
+                    UpdatedTime = Timestamp64.FromSeconds((long)row.updated_time).ToDateTime(),
                 };
             }
         }
@@ -173,10 +175,11 @@ SELECT COUNT(1)
 
                 var query =
 $@"
-INSERT INTO items (signature, channel, properties, created_time, updated_time)
-    VALUES (@signature, @channel, @properties, @created_time, @updated_time)
+INSERT INTO items (signature, channel, property, shout_created_time, created_time, updated_time)
+    VALUES (@signature, @channel, @property, @shout_created_time, @created_time, @updated_time)
     ON CONFLICT(signature, channel) DO UPDATE SET
-        properties = @properties,
+        property = @property,
+        shout_created_time = @shout_created_time,
         created_time = @created_time,
         updated_time = @updated_time;
 ";
@@ -184,9 +187,10 @@ INSERT INTO items (signature, channel, properties, created_time, updated_time)
                 {
                     ("@signature", item.Signature.ToString()),
                     ("@channel", item.Channel),
-                    ("@properties", RocketMessageConverter.ToBytes(new RocketArray<AttachedProperty>(item.Properties.ToArray()))),
-                    ("@created_time", item.ShoutCreatedTime),
-                    ("@updated_time", item.UpdatedTime)
+                    ("@property", item.Property?.Value),
+                    ("@shout_created_time", Timestamp64.FromDateTime(item.ShoutCreatedTime).Seconds),
+                    ("@created_time", Timestamp64.FromDateTime(item.CreatedTime).Seconds),
+                    ("@updated_time", Timestamp64.FromDateTime(item.UpdatedTime).Seconds)
                 };
 
                 var result = await connection.ExecuteNonQueryAsync(query, parameters, cancellationToken);

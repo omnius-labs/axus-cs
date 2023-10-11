@@ -23,7 +23,7 @@ public class AxusUriConverter
         using var outBytesPipe = new BytesPipe(bytesPool);
         if (!OmniMessageConverter.TryWrite(inBytesPipe.Reader.GetSequence(), outBytesPipe.Writer)) throw new Exception();
 
-        return AddSchemaAndPath(path, version, OmniBase.Encode(outBytesPipe.Reader.GetSequence(), ConvertStringType.Base58Btc)!);
+        return AddSchemaAndPath(path, version, OmniBase.Encode(outBytesPipe.Reader.GetSequence(), ConvertBaseType.Base58Btc)!);
     }
 
     public bool TryDecode<T>(string path, int version, string text, [NotNullWhen(true)] out T? message)

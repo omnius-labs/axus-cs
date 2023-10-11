@@ -97,11 +97,8 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
 
     private async ValueTask UpdateAsync(CancellationToken cancellationToken = default)
     {
-        await foreach (var fileItem in _subscriberRepo.FileItems.GetItemsAsync(cancellationToken))
+        foreach (var fileItem in await _subscriberRepo.FileItems.GetItemsAsync(SubscribedFileState.Decoding, cancellationToken).ToListAsync())
         {
-            if (fileItem.Status.State != SubscribedFileState.Downloading) continue;
-            if (fileItem.Status.DownloadedBlockCount < fileItem.Status.TotalBlockCount) continue;
-
             var now = _systemClock.GetUtcNow();
 
             // 最後のMerkleTreeSectionまで展開済みの場合
@@ -111,7 +108,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
                 {
                     Status = fileItem.Status with
                     {
-                        State = SubscribedFileState.Downloaded
+                        State = SubscribedFileState.Completed
                     },
                     UpdatedTime = now,
                 };
@@ -120,7 +117,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
             // 最後のMerkleTreeSectionまで未展開の場合
             else
             {
-                var blockHashes = await _subscriberRepo.BlockItems.FindBlockHashesAsync(fileItem.RootHash, fileItem.Status.CurrentDepth, cancellationToken).ToListAsync();
+                var blockHashes = await _subscriberRepo.BlockItems.GetBlockHashesAsync(fileItem.RootHash, fileItem.Status.CurrentDepth, cancellationToken).ToListAsync();
                 if (blockHashes is null) continue;
 
                 var nextMerkleTreeSection = await this.DecodeMerkleTreeSectionAsync(fileItem.RootHash, blockHashes, cancellationToken);
@@ -138,13 +135,13 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
                     UpdatedTime = now,
                 };
                 var newBlockItems = nextMerkleTreeSection.Hashes
-                    .Select((blockHash, order) =>
+                    .Select((blockHash, index) =>
                         new BlockSubscribedItem
                         {
                             RootHash = fileItem.RootHash,
                             BlockHash = blockHash,
                             Depth = nextMerkleTreeSection.Depth,
-                            Order = order,
+                            Index = index,
                             IsDownloaded = false,
                         })
                     .ToArray();
@@ -183,7 +180,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
             await foreach (var item in _subscriberRepo.FileItems.GetItemsAsync(cancellationToken))
             {
                 var status = new SubscribedFileStatus(item.Status.CurrentDepth, (uint)item.Status.DownloadedBlockCount, (uint)item.Status.TotalBlockCount, item.Status.State);
-                var report = new SubscribedFileReport(item.RootHash, status, item.Properties.ToArray());
+                var report = new SubscribedFileReport(item.RootHash, status, item.Property);
                 results.Add(report);
             }
 
@@ -200,14 +197,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var results = new List<OmniHash>();
-
-            await foreach (var fileItem in _subscriberRepo.FileItems.GetItemsAsync(cancellationToken))
-            {
-                results.Add(fileItem.RootHash);
-            }
-
-            return results;
+            return await _subscriberRepo.FileItems.GetRootHashesAsync(cancellationToken).ToListAsync();
         }
     }
 
@@ -215,15 +205,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var results = new List<OmniHash>();
-
-            await foreach (var blockItem in _subscriberRepo.BlockItems.GetItemsAsync(rootHash, cancellationToken))
-            {
-                if (blockItem.IsDownloaded) continue;
-                results.Add(blockItem.BlockHash);
-            }
-
-            return results;
+            return await _subscriberRepo.BlockItems.GetBlockHashesAsync(rootHash, false, cancellationToken).ToListAsync();
         }
     }
 
@@ -243,7 +225,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
         }
     }
 
-    public async ValueTask SubscribeFileAsync(OmniHash rootHash, IEnumerable<AttachedProperty> properties, CancellationToken cancellationToken = default)
+    public async ValueTask SubscribeFileAsync(OmniHash rootHash, AttachedProperty? property, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -252,7 +234,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
             var fileItem = await _subscriberRepo.FileItems.GetItemAsync(rootHash, cancellationToken);
             if (fileItem is not null)
             {
-                fileItem = fileItem with { Properties = properties.ToArray(), UpdatedTime = now };
+                fileItem = fileItem with { Property = property, UpdatedTime = now };
                 await _subscriberRepo.FileItems.UpsertAsync(fileItem, cancellationToken);
                 return;
             }
@@ -260,7 +242,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
             var newFileItem = new FileSubscribedItem()
             {
                 RootHash = rootHash,
-                Properties = properties.ToArray(),
+                Property = property,
                 Status = new FileSubscribedItemStatus()
                 {
                     CurrentDepth = -1,
@@ -276,7 +258,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
                 RootHash = rootHash,
                 BlockHash = rootHash,
                 Depth = -1,
-                Order = 0,
+                Index = 0,
                 IsDownloaded = false,
             };
 
@@ -296,10 +278,9 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
 
             await _subscriberRepo.FileItems.DeleteAsync(rootHash, cancellationToken);
 
-            await foreach (var blockItem in _subscriberRepo.BlockItems.GetItemsAsync(rootHash, cancellationToken))
+            await foreach (var blockHash in _subscriberRepo.BlockItems.GetBlockHashesAsync(rootHash, true, cancellationToken))
             {
-                if (!blockItem.IsDownloaded) continue;
-                var key = GenKey(rootHash, blockItem.BlockHash);
+                var key = GenKey(rootHash, blockHash);
                 await _blockStorage.TryDeleteAsync(key, cancellationToken);
             }
 
@@ -326,9 +307,9 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var fileItem = await _subscriberRepo.FileItems.GetItemAsync(rootHash, cancellationToken);
-            if (fileItem is null || fileItem.Status.State != SubscribedFileState.Downloaded) return false;
+            if (fileItem is null || fileItem.Status.State != SubscribedFileState.Completed) return false;
 
-            var blockHashes = await _subscriberRepo.BlockItems.FindBlockHashesAsync(rootHash, 0).ToListAsync(cancellationToken);
+            var blockHashes = await _subscriberRepo.BlockItems.GetBlockHashesAsync(rootHash, 0).ToListAsync(cancellationToken);
             if (blockHashes is null) return false;
 
             foreach (var blockHash in blockHashes)
@@ -388,7 +369,8 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
             {
                 Status = fileItem.Status with
                 {
-                    DownloadedBlockCount = fileItem.Status.DownloadedBlockCount + 1
+                    DownloadedBlockCount = fileItem.Status.DownloadedBlockCount + 1,
+                    State = (fileItem.Status.TotalBlockCount == fileItem.Status.DownloadedBlockCount + 1) ? SubscribedFileState.Decoding : SubscribedFileState.Downloading,
                 }
             };
             await _subscriberRepo.FileItems.UpsertAsync(newFileItem, cancellationToken);
@@ -397,6 +379,6 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase, IFileSu
 
     private static string GenKey(OmniHash rootHash, OmniHash blockHash)
     {
-        return rootHash.ToString(ConvertStringType.Base16Lower) + "/" + blockHash.ToString(ConvertStringType.Base16Lower);
+        return rootHash.ToString(ConvertBaseType.Base16Lower) + "/" + blockHash.ToString(ConvertBaseType.Base16Lower);
     }
 }

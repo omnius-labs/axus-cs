@@ -71,7 +71,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
 
             await foreach (var item in _publisherRepo.FileItems.GetItemsAsync(cancellationToken))
             {
-                fileReports.Add(new PublishedFileReport(item.FilePath, item.RootHash, item.Properties.ToArray()));
+                fileReports.Add(new PublishedFileReport(item.FilePath, item.RootHash, item.Property));
             }
 
             return fileReports.ToArray();
@@ -105,15 +105,8 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
         {
             var results = new List<OmniHash>();
 
-            await foreach (var blockItem in _publisherRepo.BlockInternalItems.GetItemsAsync(rootHash))
-            {
-                results.Add(blockItem.BlockHash);
-            }
-
-            await foreach (var blockItem in _publisherRepo.BlockExternalItems.GetItemsAsync(rootHash))
-            {
-                results.Add(blockItem.BlockHash);
-            }
+            results.AddRange(await _publisherRepo.BlockInternalItems.GetBlockHashesAsync(rootHash).ToListAsync());
+            results.AddRange(await _publisherRepo.BlockExternalItems.GetBlockHashesAsync(rootHash).ToListAsync());
 
             return results;
         }
@@ -136,7 +129,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
         }
     }
 
-    public async ValueTask<OmniHash> PublishFileAsync(string filePath, int maxBlockSize, IEnumerable<AttachedProperty> properties, CancellationToken cancellationToken = default)
+    public async ValueTask<OmniHash> PublishFileAsync(string filePath, int maxBlockSize, AttachedProperty? property, CancellationToken cancellationToken = default)
     {
         using (await _publishAsyncLock.LockAsync(cancellationToken))
         {
@@ -145,7 +138,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
             var fileItem = await _publisherRepo.FileItems.GetItemAsync(filePath, cancellationToken);
             if (fileItem is not null)
             {
-                fileItem = fileItem with { Properties = properties.ToArray(), UpdatedTime = now };
+                fileItem = fileItem with { Property = property, UpdatedTime = now };
                 await _publisherRepo.FileItems.UpsertAsync(fileItem, cancellationToken);
                 return fileItem.RootHash;
             }
@@ -178,7 +171,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
             {
                 RootHash = rootHash,
                 FilePath = filePath,
-                Properties = properties.ToArray(),
+                Property = property,
                 MaxBlockSize = maxBlockSize,
                 CreatedTime = now,
                 UpdatedTime = now,
@@ -198,7 +191,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
         }
     }
 
-    public async ValueTask<OmniHash> PublishFileAsync(ReadOnlySequence<byte> sequence, int maxBlockSize, IEnumerable<AttachedProperty> properties, CancellationToken cancellationToken = default)
+    public async ValueTask<OmniHash> PublishFileAsync(ReadOnlySequence<byte> sequence, int maxBlockSize, AttachedProperty? property, CancellationToken cancellationToken = default)
     {
         using (await _publishAsyncLock.LockAsync(cancellationToken))
         {
@@ -231,7 +224,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
 
             if (fileItem is not null)
             {
-                fileItem = fileItem with { Properties = properties.ToArray(), UpdatedTime = now };
+                fileItem = fileItem with { Property = property, UpdatedTime = now };
                 await _publisherRepo.FileItems.UpsertAsync(fileItem, cancellationToken);
 
                 var targetBlockHashes = allInternalBlockItems.Select(n => n.BlockHash).ToArray();
@@ -244,7 +237,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
             {
                 RootHash = rootHash,
                 FilePath = null,
-                Properties = properties.ToArray(),
+                Property = property,
                 MaxBlockSize = maxBlockSize,
                 CreatedTime = now,
                 UpdatedTime = now,
@@ -265,7 +258,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
 
     private string GenSpaceId(DateTime now)
     {
-        return string.Format("{}_{}", now.ToString("yyyy-MM-dd'T'HH:mm:ss"), _base16.BytesToString(new ReadOnlySequence<byte>(_randomBytesProvider.GetBytes(32))));
+        return string.Format("{0}_{1}", now.ToString("yyyy-MM-dd_HH-mm-ss"), _base16.BytesToString(new ReadOnlySequence<byte>(_randomBytesProvider.GetBytes(32))));
     }
 
     private async ValueTask DeleteBlocksAsync(string prefix, IEnumerable<OmniHash> blockHashes, CancellationToken cancellationToken = default)
@@ -287,12 +280,12 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
         }
     }
 
-    private async ValueTask<IEnumerable<BlockPublishedInternalItem>> ImportFromMemoryAsync(string spaceId, ReadOnlySequence<byte> sequence, int maxBlockSize, int depth, CancellationToken cancellationToken = default)
+    private async ValueTask<IEnumerable<BlockPublishedInternalItem>> ImportFromMemoryAsync(string prefix, ReadOnlySequence<byte> sequence, int maxBlockSize, int depth, CancellationToken cancellationToken = default)
     {
         var blockItems = new List<BlockPublishedInternalItem>();
 
         using var memoryOwner = _bytesPool.Memory.Rent(maxBlockSize).Shrink(maxBlockSize);
-        int order = 0;
+        int index = 0;
 
         while (sequence.Length > 0)
         {
@@ -309,11 +302,11 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
                 RootHash = OmniHash.Empty,
                 BlockHash = blockHash,
                 Depth = depth,
-                Order = order++,
+                Index = index++,
             };
             blockItems.Add(blockItem);
 
-            await this.WriteBlockAsync(spaceId, blockHash, memory);
+            await this.WriteBlockAsync(prefix, blockHash, memory);
 
             sequence = sequence.Slice(blockSize);
         }
@@ -328,7 +321,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
         var blockItems = new List<BlockPublishedExternalItem>();
 
         using var memoryOwner = _bytesPool.Memory.Rent(maxBlockSize).Shrink(maxBlockSize);
-        int order = 0;
+        int index = 0;
 
         while (stream.Position < stream.Length)
         {
@@ -351,7 +344,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
                 FilePath = filePath,
                 RootHash = OmniHash.Empty,
                 BlockHash = blockHash,
-                Order = order++,
+                Index = index++,
                 Offset = stream.Position - blockSize,
                 Length = blockSize,
             };
@@ -361,9 +354,9 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
         return blockItems;
     }
 
-    private async ValueTask WriteBlockAsync(string spaceId, OmniHash blockHash, ReadOnlyMemory<byte> memory)
+    private async ValueTask WriteBlockAsync(string prefix, OmniHash blockHash, ReadOnlyMemory<byte> memory)
     {
-        var key = GenTempKey(spaceId, blockHash);
+        var key = GenTempKey(prefix, blockHash);
         await _blockStorage.WriteAsync(key, memory);
     }
 
@@ -440,11 +433,11 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase, IFilePub
 
     private static string GenTempKey(string spaceId, OmniHash blockHash)
     {
-        return string.Format("tmp/{}/{}", spaceId, blockHash.ToString(ConvertStringType.Base16Lower));
+        return string.Format("tmp/{0}/{1}", spaceId, blockHash.ToString(ConvertBaseType.Base16Lower));
     }
 
     private static string GenFixedKey(OmniHash rootHash, OmniHash blockHash)
     {
-        return string.Format("fix/{}/{}", rootHash.ToString(ConvertStringType.Base16Lower), blockHash.ToString(ConvertStringType.Base16Lower));
+        return string.Format("fix/{0}/{1}", rootHash.ToString(ConvertBaseType.Base16Lower), blockHash.ToString(ConvertBaseType.Base16Lower));
     }
 }

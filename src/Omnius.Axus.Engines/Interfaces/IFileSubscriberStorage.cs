@@ -12,7 +12,7 @@ public interface IFileSubscriberStorage : IWritableFileStorage, IAsyncDisposable
     ValueTask<IEnumerable<OmniHash>> GetWantBlockHashesAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
     ValueTask<bool> ContainsWantContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
     ValueTask<bool> ContainsWantBlockAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default);
-    ValueTask SubscribeFileAsync(OmniHash rootHash, IEnumerable<AttachedProperty> properties, CancellationToken cancellationToken = default);
+    ValueTask SubscribeFileAsync(OmniHash rootHash, AttachedProperty? property, CancellationToken cancellationToken = default);
     ValueTask UnsubscribeFileAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
     ValueTask<bool> TryExportFileAsync(OmniHash rootHash, string filePath, CancellationToken cancellationToken = default);
     ValueTask<bool> TryExportFileAsync(OmniHash rootHash, IBufferWriter<byte> bufferWriter, CancellationToken cancellationToken = default);

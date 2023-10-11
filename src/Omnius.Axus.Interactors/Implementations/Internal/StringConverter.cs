@@ -13,6 +13,6 @@ internal static class StringConverter
         using var bytesPipe = new BytesPipe(BytesPool.Shared);
         signature.Export(bytesPipe.Writer, BytesPool.Shared);
         var hash = new OmniHash(OmniHashAlgorithmType.Sha2_256, Sha2_256.ComputeHash(bytesPipe.Reader.GetSequence()));
-        return hash.ToString(ConvertStringType.Base16);
+        return hash.ToString(ConvertBaseType.Base16);
     }
 }

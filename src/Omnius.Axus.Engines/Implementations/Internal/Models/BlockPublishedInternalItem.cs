@@ -7,5 +7,5 @@ internal record BlockPublishedInternalItem
     public required OmniHash RootHash { get; init; }
     public required OmniHash BlockHash { get; init; }
     public required int Depth { get; init; }
-    public required int Order { get; init; }
+    public required int Index { get; init; }
 }

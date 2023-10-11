@@ -74,12 +74,12 @@ CREATE TABLE IF NOT EXISTS node_locations (
 
                 foreach (var row in rows)
                 {
-                    var nodeLocation = NodeLocation.Import(new ReadOnlySequence<byte>(row.value), _bytesPool);
+                    var nodeLocation = RocketMessageConverter.FromBytes<NodeLocation>(row.value);
                     yield return new CachedNodeLocation
                     {
                         Value = nodeLocation,
-                        CreatedTime = Timestamp64.FromSeconds(row.created_time).ToDateTime(),
-                        UpdatedTime = Timestamp64.FromSeconds(row.updated_time).ToDateTime()
+                        CreatedTime = Timestamp64.FromSeconds((long)row.created_time).ToDateTime(),
+                        UpdatedTime = Timestamp64.FromSeconds((long)row.updated_time).ToDateTime()
                     };
                 }
 
@@ -120,7 +120,7 @@ CREATE TABLE IF NOT EXISTS node_locations (
                     var hash = OmniHash.Create(OmniHashAlgorithmType.Sha2_256, valueBytes.Memory.Span);
 
                     parameters.Add(($"@hash_{index}", hash.ToString()));
-                    parameters.Add(($"@value_{index}", valueBytes));
+                    parameters.Add(($"@value_{index}", valueBytes.Memory.ToArray()));
                 }
 
                 await transaction.ExecuteNonQueryAsync(queryBuilder.ToString(), parameters, cancellationToken);
@@ -161,7 +161,7 @@ CREATE TABLE IF NOT EXISTS node_locations (
                     var hash = OmniHash.Create(OmniHashAlgorithmType.Sha2_256, valueBytes.Memory.Span);
 
                     parameters.Add(($"@hash_{index}", hash.ToString()));
-                    parameters.Add(($"@value_{index}", valueBytes));
+                    parameters.Add(($"@value_{index}", valueBytes.Memory.ToArray()));
                 }
 
                 queryBuilder.AppendLine("ON CONFLICT(hash) DO UPDATE SET updated_time = @updated_time");

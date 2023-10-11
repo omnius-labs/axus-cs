@@ -65,7 +65,7 @@ public sealed partial class ShoutSubscriberStorage : AsyncDisposableBase, IShout
 
             await foreach (var item in _subscriberRepo.ShoutItems.GetItemsAsync(cancellationToken))
             {
-                shoutReports.Add(new SubscribedShoutReport(item.Signature, item.Channel, Timestamp64.FromDateTime(item.ShoutCreatedTime), item.Properties.ToArray()));
+                shoutReports.Add(new SubscribedShoutReport(item.Signature, item.Channel, Timestamp64.FromDateTime(item.ShoutCreatedTime), item.Property));
             }
 
             return shoutReports.ToArray();
@@ -99,7 +99,7 @@ public sealed partial class ShoutSubscriberStorage : AsyncDisposableBase, IShout
         }
     }
 
-    public async ValueTask SubscribeShoutAsync(OmniSignature signature, IEnumerable<AttachedProperty> properties, string channel, CancellationToken cancellationToken = default)
+    public async ValueTask SubscribeShoutAsync(OmniSignature signature, AttachedProperty? property, string channel, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
@@ -111,9 +111,9 @@ public sealed partial class ShoutSubscriberStorage : AsyncDisposableBase, IShout
             var newShoutItem = new ShoutSubscribedItem()
             {
                 Signature = signature,
-                Properties = properties.ToArray(),
+                Property = property,
                 Channel = channel,
-                ShoutCreatedTime = DateTime.MinValue,
+                ShoutCreatedTime = DateTime.MinValue.ToUniversalTime(),
                 CreatedTime = now,
                 UpdatedTime = now,
             };
@@ -140,18 +140,18 @@ public sealed partial class ShoutSubscriberStorage : AsyncDisposableBase, IShout
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var shoutItem = await _subscriberRepo.ShoutItems.GetItemAsync(signature, channel, cancellationToken);
-            if (shoutItem is null) return DateTime.MinValue;
+            if (shoutItem is null) return DateTime.MinValue.ToUniversalTime();
 
-            return shoutItem.CreatedTime;
+            return shoutItem.ShoutCreatedTime;
         }
     }
 
-    public async ValueTask<Shout?> TryReadShoutAsync(OmniSignature signature, string channel, DateTime updatedTime, CancellationToken cancellationToken = default)
+    public async ValueTask<Shout?> TryReadShoutAsync(OmniSignature signature, string channel, DateTime createdTime, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var shoutItem = await _subscriberRepo.ShoutItems.GetItemAsync(signature, channel, cancellationToken);
-            if (shoutItem is null || shoutItem.CreatedTime <= updatedTime) return null;
+            if (shoutItem is null || shoutItem.ShoutCreatedTime <= createdTime) return null;
 
             var blockName = GenKey(signature, channel);
             using var memoryOwner = await _blockStorage.TryReadAsync(blockName, cancellationToken);
@@ -172,9 +172,9 @@ public sealed partial class ShoutSubscriberStorage : AsyncDisposableBase, IShout
             if (signature == null) return;
 
             var shoutItem = await _subscriberRepo.ShoutItems.GetItemAsync(signature, shout.Channel, cancellationToken);
-            if (shoutItem is null || shoutItem.CreatedTime >= shout.CreatedTime.ToDateTime()) return;
+            if (shoutItem is null || shoutItem.ShoutCreatedTime >= shout.CreatedTime.ToDateTime()) return;
 
-            var newShoutItem = shoutItem with { CreatedTime = shout.CreatedTime.ToDateTime() };
+            var newShoutItem = shoutItem with { ShoutCreatedTime = shout.CreatedTime.ToDateTime() };
             await _subscriberRepo.ShoutItems.UpsertAsync(newShoutItem, cancellationToken);
 
             using var bytesPipe = new BytesPipe(_bytesPool);

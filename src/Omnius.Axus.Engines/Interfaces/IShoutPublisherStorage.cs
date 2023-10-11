@@ -7,6 +7,6 @@ namespace Omnius.Axus.Engines;
 public interface IShoutPublisherStorage : IReadOnlyShoutStorage, IAsyncDisposable
 {
     ValueTask<IEnumerable<PublishedShoutReport>> GetPublishedShoutReportsAsync(CancellationToken cancellationToken = default);
-    ValueTask PublishShoutAsync(Shout shout, IEnumerable<AttachedProperty> properties, CancellationToken cancellationToken = default);
+    ValueTask PublishShoutAsync(Shout shout, AttachedProperty? property, CancellationToken cancellationToken = default);
     ValueTask UnpublishShoutAsync(OmniSignature signature, string channel, CancellationToken cancellationToken = default);
 }

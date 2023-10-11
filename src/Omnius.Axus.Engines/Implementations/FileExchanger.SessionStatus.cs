@@ -18,6 +18,7 @@ public sealed partial class FileExchanger
             this.BatchActionDispatcher = batchActionDispatcher;
             this.LastReceivedTime = DateTime.UtcNow;
 
+            this.SentWantBlockHashes = new VolatileHashSet<OmniHash>(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), systemClock, batchActionDispatcher);
             this.SentBlockHashes = new VolatileHashSet<OmniHash>(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), systemClock, batchActionDispatcher);
             this.ReceivedWantBlockHashes = new VolatileHashSet<OmniHash>(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), systemClock, batchActionDispatcher);
         }
@@ -38,6 +39,7 @@ public sealed partial class FileExchanger
 
         public FileExchangerDataMessage? SendingDataMessage { get; set; }
 
+        public VolatileHashSet<OmniHash> SentWantBlockHashes { get; }
         public VolatileHashSet<OmniHash> SentBlockHashes { get; }
 
         public VolatileHashSet<OmniHash> ReceivedWantBlockHashes { get; }

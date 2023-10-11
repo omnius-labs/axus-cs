@@ -379,7 +379,7 @@ public sealed partial class NodeFinder : AsyncDisposableBase, INodeFinder
                 return false;
             }
 
-            _sessionStatusSet = _sessionStatusSet.Add(new SessionStatus(session, id, location, _batchActionDispatcher));
+            _sessionStatusSet = _sessionStatusSet.Add(new SessionStatus(session, id, location, _systemClock, _batchActionDispatcher));
 
             return true;
         }

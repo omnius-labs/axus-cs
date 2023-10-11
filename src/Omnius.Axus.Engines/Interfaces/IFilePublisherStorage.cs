@@ -12,8 +12,8 @@ public interface IFilePublisherStorage : IReadOnlyFileStorage, IAsyncDisposable
     ValueTask<IEnumerable<OmniHash>> GetPushBlockHashesAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
     ValueTask<bool> ContainsPushContentAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
     ValueTask<bool> ContainsPushBlockAsync(OmniHash rootHash, OmniHash blockHash, CancellationToken cancellationToken = default);
-    ValueTask<OmniHash> PublishFileAsync(string filePath, int maxBlockSize, IEnumerable<AttachedProperty> properties, CancellationToken cancellationToken = default);
-    ValueTask<OmniHash> PublishFileAsync(ReadOnlySequence<byte> sequence, int maxBlockSize, IEnumerable<AttachedProperty> properties, CancellationToken cancellationToken = default);
+    ValueTask<OmniHash> PublishFileAsync(string filePath, int maxBlockSize, AttachedProperty? property, CancellationToken cancellationToken = default);
+    ValueTask<OmniHash> PublishFileAsync(ReadOnlySequence<byte> sequence, int maxBlockSize, AttachedProperty? property, CancellationToken cancellationToken = default);
     ValueTask UnpublishFileAsync(string filePath, CancellationToken cancellationToken = default);
     ValueTask UnpublishFileAsync(OmniHash rootHash, CancellationToken cancellationToken = default);
 }

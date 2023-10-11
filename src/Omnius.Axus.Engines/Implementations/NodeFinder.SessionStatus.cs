@@ -11,14 +11,14 @@ public sealed partial class NodeFinder
 {
     private sealed class SessionStatus : AsyncDisposableBase
     {
-        public SessionStatus(ISession session, ReadOnlyMemory<byte> id, NodeLocation nodeLocation, IBatchActionDispatcher batchActionDispatcher)
+        public SessionStatus(ISession session, ReadOnlyMemory<byte> id, NodeLocation nodeLocation, ISystemClock systemClock, IBatchActionDispatcher batchActionDispatcher)
         {
             this.Session = session;
             this.Id = id;
             this.NodeLocation = nodeLocation;
             this.LastReceivedTime = DateTime.UtcNow;
 
-            this.ReceivedWantContentKeys = new VolatileHashSet<ContentKey>(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), batchActionDispatcher);
+            this.ReceivedWantContentKeys = new VolatileHashSet<ContentKey>(TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(30), systemClock, batchActionDispatcher);
         }
 
         protected override async ValueTask OnDisposeAsync()

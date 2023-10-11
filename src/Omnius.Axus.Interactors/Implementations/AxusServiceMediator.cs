@@ -58,14 +58,14 @@ public sealed class AxusServiceMediator : IAxusServiceMediator
         return output.PublishedFiles;
     }
 
-    public async ValueTask<OmniHash> PublishFileFromStorageAsync(string filePath, int maxBlockSize, IEnumerable<AttachedProperty> properties, string zone, CancellationToken cancellationToken = default)
+    public async ValueTask<OmniHash> PublishFileFromStorageAsync(string filePath, int maxBlockSize, AttachedProperty? property, string zone, CancellationToken cancellationToken = default)
     {
         var input = new PublishFileFromStorageParam(filePath, maxBlockSize, properties.ToArray(), zone);
         var output = await _axusService.PublishFileFromStorageAsync(input, cancellationToken);
         return output.Hash;
     }
 
-    public async ValueTask<OmniHash> PublishFileFromMemoryAsync(ReadOnlyMemory<byte> memory, int maxBlockSize, IEnumerable<AttachedProperty> properties, string zone, CancellationToken cancellationToken = default)
+    public async ValueTask<OmniHash> PublishFileFromMemoryAsync(ReadOnlyMemory<byte> memory, int maxBlockSize, AttachedProperty? property, string zone, CancellationToken cancellationToken = default)
     {
         var input = new PublishFileFromMemoryParam(memory, maxBlockSize, properties.ToArray(), zone);
         var output = await _axusService.PublishFileFromMemoryAsync(input, cancellationToken);
@@ -91,7 +91,7 @@ public sealed class AxusServiceMediator : IAxusServiceMediator
         return output.SubscribedFiles;
     }
 
-    public async ValueTask SubscribeFileAsync(OmniHash rootHash, IEnumerable<AttachedProperty> properties, string zone, CancellationToken cancellationToken = default)
+    public async ValueTask SubscribeFileAsync(OmniHash rootHash, AttachedProperty? property, string zone, CancellationToken cancellationToken = default)
     {
         var input = new SubscribeFileParam(rootHash, properties.ToArray(), zone);
         await _axusService.SubscribeFileAsync(input, cancellationToken);
@@ -124,7 +124,7 @@ public sealed class AxusServiceMediator : IAxusServiceMediator
         return output.PublishedShouts;
     }
 
-    public async ValueTask PublishShoutAsync(Shout shout, IEnumerable<AttachedProperty> properties, string zone, CancellationToken cancellationToken = default)
+    public async ValueTask PublishShoutAsync(Shout shout, AttachedProperty? property, string zone, CancellationToken cancellationToken = default)
     {
         var input = new PublishShoutParam(shout, properties.ToArray(), zone);
         await _axusService.PublishShoutAsync(input, cancellationToken);
@@ -143,7 +143,7 @@ public sealed class AxusServiceMediator : IAxusServiceMediator
         return output.SubscribedShouts;
     }
 
-    public async ValueTask SubscribeShoutAsync(OmniSignature signature, string channel, IEnumerable<AttachedProperty> properties, string zone, CancellationToken cancellationToken = default)
+    public async ValueTask SubscribeShoutAsync(OmniSignature signature, string channel, AttachedProperty? property, string zone, CancellationToken cancellationToken = default)
     {
         var input = new SubscribeShoutParam(signature, channel, properties.ToArray(), zone);
         await _axusService.SubscribeShoutAsync(input, cancellationToken);

@@ -1087,9 +1087,9 @@ internal sealed partial class ContentLocation : global::Omnius.Core.RocketPack.I
 
     public static readonly int MaxNodeLocationsCount = 8192;
 
-    public ContentLocation(global::Omnius.Axus.Engines.Models.ContentKey ContentKey, global::Omnius.Axus.Messages.NodeLocation[] nodeLocations)
+    public ContentLocation(global::Omnius.Axus.Engines.Models.ContentKey contentKey, global::Omnius.Axus.Messages.NodeLocation[] nodeLocations)
     {
-        if (ContentKey is null) throw new global::System.ArgumentNullException("ContentKey");
+        if (contentKey is null) throw new global::System.ArgumentNullException("contentKey");
         if (nodeLocations is null) throw new global::System.ArgumentNullException("nodeLocations");
         if (nodeLocations.Length > 8192) throw new global::System.ArgumentOutOfRangeException("nodeLocations");
         foreach (var n in nodeLocations)
@@ -1097,13 +1097,13 @@ internal sealed partial class ContentLocation : global::Omnius.Core.RocketPack.I
             if (n is null) throw new global::System.ArgumentNullException("n");
         }
 
-        this.ContentKey = ContentKey;
+        this.ContentKey = contentKey;
         this.NodeLocations = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Axus.Messages.NodeLocation>(nodeLocations);
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
-            if (ContentKey != default) ___h.Add(ContentKey.GetHashCode());
+            if (contentKey != default) ___h.Add(contentKey.GetHashCode());
             foreach (var n in nodeLocations)
             {
                 if (n != default) ___h.Add(n.GetHashCode());
@@ -1176,7 +1176,7 @@ internal sealed partial class ContentLocation : global::Omnius.Core.RocketPack.I
         {
             if (rank > 256) throw new global::System.FormatException();
 
-            global::Omnius.Axus.Engines.Models.ContentKey p_ContentKey = global::Omnius.Axus.Engines.Models.ContentKey.Empty;
+            global::Omnius.Axus.Engines.Models.ContentKey p_contentKey = global::Omnius.Axus.Engines.Models.ContentKey.Empty;
             global::Omnius.Axus.Messages.NodeLocation[] p_nodeLocations = global::System.Array.Empty<global::Omnius.Axus.Messages.NodeLocation>();
 
             for (; ; )
@@ -1187,7 +1187,7 @@ internal sealed partial class ContentLocation : global::Omnius.Core.RocketPack.I
                 {
                     case 1:
                         {
-                            p_ContentKey = global::Omnius.Axus.Engines.Models.ContentKey.Formatter.Deserialize(ref r, rank + 1);
+                            p_contentKey = global::Omnius.Axus.Engines.Models.ContentKey.Formatter.Deserialize(ref r, rank + 1);
                             break;
                         }
                     case 2:
@@ -1203,7 +1203,7 @@ internal sealed partial class ContentLocation : global::Omnius.Core.RocketPack.I
                 }
             }
 
-            return new global::Omnius.Axus.Engines.Internal.Models.ContentLocation(p_ContentKey, p_nodeLocations);
+            return new global::Omnius.Axus.Engines.Internal.Models.ContentLocation(p_contentKey, p_nodeLocations);
         }
     }
 }

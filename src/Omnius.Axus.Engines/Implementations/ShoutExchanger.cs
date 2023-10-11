@@ -253,42 +253,42 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
                 var requestMessage = new ShoutExchangerFetchRequestMessage(signature, channel, Timestamp64.FromDateTime(shoutUpdatedTime.ToUniversalTime()));
                 var resultMessage = await session.Connection.SendAndReceiveAsync<ShoutExchangerFetchRequestMessage, ShoutExchangerFetchResultMessage>(requestMessage, cancellationToken);
 
-                _logger.Debug($"Send ShoutFetchRequest: (Signature: {requestMessage.Signature.ToString()})");
+                _logger.Debug($"Send ShoutFetchRequest: (Signature: {requestMessage.Signature})");
 
                 if (resultMessage.Type == ShoutExchangerFetchResultType.Found && resultMessage.Shout is not null)
                 {
-                    _logger.Debug($"Receive ShoutFetchResult: (Type: Found, Signature: {requestMessage.Signature.ToString()})");
+                    _logger.Debug($"Receive ShoutFetchResult: (Type: Found, Signature: {requestMessage.Signature})");
 
                     await _subscribedShoutStorage.WriteShoutAsync(resultMessage.Shout, cancellationToken);
                 }
                 else if (resultMessage.Type == ShoutExchangerFetchResultType.NotFound)
                 {
-                    _logger.Debug($"Receive ShoutFetchResult: (Type: NotFound, Signature: {requestMessage.Signature.ToString()})");
+                    _logger.Debug($"Receive ShoutFetchResult: (Type: NotFound, Signature: {requestMessage.Signature})");
 
-                    var shout = await this.TryReadShoutAsync(signature, channel, DateTime.MinValue, cancellationToken);
+                    var shout = await this.TryReadShoutAsync(signature, channel, DateTime.MinValue.ToUniversalTime(), cancellationToken);
 
                     if (shout is not null)
                     {
                         var postMessage = new ShoutExchangerPostMessage(ShoutExchangerPostType.Found, null);
                         await session.Connection.Sender.SendAsync(postMessage, cancellationToken);
 
-                        _logger.Debug($"Send ShoutPost: (Type: Found, Signature: {requestMessage.Signature.ToString()})");
+                        _logger.Debug($"Send ShoutPost: (Type: Found, Signature: {requestMessage.Signature})");
                     }
                     else
                     {
                         var postMessage = new ShoutExchangerPostMessage(ShoutExchangerPostType.NotFound, null);
                         await session.Connection.Sender.SendAsync(postMessage, cancellationToken);
 
-                        _logger.Debug($"Send ShoutPost: (Type: NotFound, Signature: {requestMessage.Signature.ToString()})");
+                        _logger.Debug($"Send ShoutPost: (Type: NotFound, Signature: {requestMessage.Signature})");
                     }
                 }
                 else if (resultMessage.Type == ShoutExchangerFetchResultType.Rejected)
                 {
-                    _logger.Debug($"Receive ShoutFetchResult: (Type: Rejected, Signature: {requestMessage.Signature.ToString()})");
+                    _logger.Debug($"Receive ShoutFetchResult: (Type: Rejected, Signature: {requestMessage.Signature})");
                 }
                 else if (resultMessage.Type == ShoutExchangerFetchResultType.Same)
                 {
-                    _logger.Debug($"Receive ShoutFetchResult: (Type: Same, Signature: {requestMessage.Signature.ToString()})");
+                    _logger.Debug($"Receive ShoutFetchResult: (Type: Same, Signature: {requestMessage.Signature})");
                 }
 
                 return true;
@@ -324,7 +324,7 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
             {
                 var requestMessage = await session.Connection.Receiver.ReceiveAsync<ShoutExchangerFetchRequestMessage>(cancellationToken);
 
-                _logger.Debug($"Receive ShoutFetchRequest: (Signature: {requestMessage.Signature.ToString()})");
+                _logger.Debug($"Receive ShoutFetchRequest: (Signature: {requestMessage.Signature})");
 
                 var shoutCreatedTime = await this.ReadShoutCreatedTimeAsync(requestMessage.Signature, requestMessage.Channel, cancellationToken);
 
@@ -333,7 +333,7 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
                     using var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.Same, null);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
 
-                    _logger.Debug($"Send ShoutFetchResult: (Type: Same, Signature: {requestMessage.Signature.ToString()})");
+                    _logger.Debug($"Send ShoutFetchResult: (Type: Same, Signature: {requestMessage.Signature})");
                 }
                 else if (requestMessage.CreatedTime.ToDateTime() < shoutCreatedTime)
                 {
@@ -341,26 +341,26 @@ public sealed partial class ShoutExchanger : AsyncDisposableBase, IShoutExchange
                     using var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.Found, shout);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
 
-                    _logger.Debug($"Send ShoutFetchResult: (Type: Found, Signature: {requestMessage.Signature.ToString()})");
+                    _logger.Debug($"Send ShoutFetchResult: (Type: Found, Signature: {requestMessage.Signature})");
                 }
                 else
                 {
                     using var resultMessage = new ShoutExchangerFetchResultMessage(ShoutExchangerFetchResultType.NotFound, null);
                     await session.Connection.Sender.SendAsync(resultMessage, cancellationToken);
 
-                    _logger.Debug($"Send ShoutFetchResult: (Type: NotFound, Signature: {requestMessage.Signature.ToString()})");
+                    _logger.Debug($"Send ShoutFetchResult: (Type: NotFound, Signature: {requestMessage.Signature})");
 
                     using var postMessage = await session.Connection.Receiver.ReceiveAsync<ShoutExchangerPostMessage>(cancellationToken);
 
                     if (postMessage.Type == ShoutExchangerPostType.Found && postMessage.Shout is not null)
                     {
-                        _logger.Debug($"Send ShoutPost: (Type: Found, Signature: {requestMessage.Signature.ToString()})");
+                        _logger.Debug($"Send ShoutPost: (Type: Found, Signature: {requestMessage.Signature})");
 
                         await _subscribedShoutStorage.WriteShoutAsync(postMessage.Shout, cancellationToken);
                     }
                     else if (postMessage.Type == ShoutExchangerPostType.NotFound)
                     {
-                        _logger.Debug($"Send ShoutPost: (Type: NotFound, Signature: {requestMessage.Signature.ToString()})");
+                        _logger.Debug($"Send ShoutPost: (Type: NotFound, Signature: {requestMessage.Signature})");
                     }
                 }
 

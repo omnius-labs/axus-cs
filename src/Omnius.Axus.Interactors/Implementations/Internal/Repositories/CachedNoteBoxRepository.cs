@@ -119,7 +119,7 @@ DELETE FROM notes WHERE signature = '{signature}';
 
             foreach (var c in content.ToMemos())
             {
-                var self_hash = c.SelfHash.ToString(ConvertStringType.Base16);
+                var self_hash = c.SelfHash.ToString(ConvertBaseType.Base16);
                 var signature = c.Signature.ToString();
                 var tag = c.Value.Tag.ToString();
                 var created_time = c.Value.CreatedTime.Seconds;
@@ -160,7 +160,7 @@ VALUES (
                 .Where("signature", signature.ToString())
                 .Get();
 
-            if (rows.Count() == 0) return DateTime.MinValue;
+            if (rows.Count() == 0) return DateTime.MinValue.ToUniversalTime();
 
             var shoutUpdatedTime = rows
                 .Select(n => n.shout_updated_time)

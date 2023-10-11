@@ -26,7 +26,7 @@ public partial class DownloadingFileViewModel : BindableBase, ICollectionViewMod
 
     public string Name => this.Model?.Seed.Name ?? "";
 
-    public DateTime CreatedTime => this.Model?.CreatedTime ?? DateTime.MinValue;
+    public DateTime CreatedTime => this.Model?.CreatedTime ?? DateTime.MinValue.ToUniversalTime();
 
     public FileDownloadingState State => this.Model?.Status.State ?? FileDownloadingState.Unknown;
 

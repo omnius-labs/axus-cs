@@ -14,7 +14,7 @@ namespace Omnius.Axus.Engines.Internal;
 internal class FileExchangerNode : AsyncDisposableBase
 {
     private OmniAddress _listenAddress;
-    private readonly IDisposable _workingDirectoryDeleter;
+    private readonly IDisposable _workingDirectoryRemover;
     private readonly string _databaseDirectoryPath;
     private readonly string _tempDirectoryPath;
 
@@ -39,7 +39,7 @@ internal class FileExchangerNode : AsyncDisposableBase
     public FileExchangerNode(OmniAddress listenAddress)
     {
         _listenAddress = listenAddress;
-        _workingDirectoryDeleter = FixtureFactory.GenTempDirectory(out var workingDirectoryPath);
+        _workingDirectoryRemover = FixtureFactory.GenTempDirectory(out var workingDirectoryPath);
         _databaseDirectoryPath = Path.Combine(workingDirectoryPath, "db");
         _tempDirectoryPath = Path.Combine(workingDirectoryPath, "temp");
 
@@ -52,6 +52,8 @@ internal class FileExchangerNode : AsyncDisposableBase
         var digitalSignature = OmniDigitalSignature.Create(Guid.NewGuid().ToString("N"), OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256);
 
         var bytesPool = BytesPool.Shared;
+        var systemClock = SystemClock.Shared;
+        var randomBytesProvider = RandomBytesProvider.Shared;
 
         var senderBandwidthLimiter = new BandwidthLimiter(int.MaxValue);
         var receiverBandwidthLimiter = new BandwidthLimiter(int.MaxValue);
@@ -110,25 +112,25 @@ internal class FileExchangerNode : AsyncDisposableBase
             ConfigDirectoryPath = Path.Combine(_databaseDirectoryPath, "node_finder"),
             MaxSessionCount = 128
         };
-        _nodeFinder = await NodeFinder.CreateAsync(_sessionConnector, _sessionAccepter, nodeLocationsFetcher, bytesPool, nodeFinderOptions, cancellationToken);
+        _nodeFinder = await NodeFinder.CreateAsync(_sessionConnector, _sessionAccepter, nodeLocationsFetcher, systemClock, bytesPool, nodeFinderOptions, cancellationToken);
 
         var publishedFileStorageOptions = new FilePublisherStorageOptions
         {
             ConfigDirectoryPath = Path.Combine(_databaseDirectoryPath, "published_file_storage")
         };
-        _publishedFileStorage = await FilePublisherStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, publishedFileStorageOptions, cancellationToken);
+        _publishedFileStorage = await FilePublisherStorage.CreateAsync(KeyValueFileStorage.Factory, systemClock, randomBytesProvider, bytesPool, publishedFileStorageOptions, cancellationToken);
 
         var subscribedFileStorageOptions = new FileSubscriberStorageOptions
         {
             ConfigDirectoryPath = Path.Combine(_databaseDirectoryPath, "subscribed_file_storage")
         };
-        _subscribedFileStorage = await FileSubscriberStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, subscribedFileStorageOptions, cancellationToken);
+        _subscribedFileStorage = await FileSubscriberStorage.CreateAsync(KeyValueFileStorage.Factory, systemClock, randomBytesProvider, bytesPool, subscribedFileStorageOptions, cancellationToken);
 
         var fileExchangerOptions = new FileExchangerOptions
         {
             MaxSessionCount = 128
         };
-        _fileExchanger = await FileExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedFileStorage, _subscribedFileStorage, bytesPool, fileExchangerOptions, cancellationToken);
+        _fileExchanger = await FileExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedFileStorage, _subscribedFileStorage, systemClock, bytesPool, fileExchangerOptions, cancellationToken);
     }
 
     protected override async ValueTask OnDisposeAsync()
@@ -183,7 +185,7 @@ internal class FileExchangerNode : AsyncDisposableBase
 
         _connectionAcceptors = _connectionAcceptors.Clear();
 
-        _workingDirectoryDeleter.Dispose();
+        _workingDirectoryRemover.Dispose();
     }
 
     public OmniAddress ListenAddress => _listenAddress;

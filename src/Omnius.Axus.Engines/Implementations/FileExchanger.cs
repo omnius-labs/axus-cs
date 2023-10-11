@@ -458,7 +458,11 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
                             block.Value.Dispose();
                         }
 
+                        sessionStatus.ReceivedWantBlockHashes.ExceptWith(dataMessage.GiveBlocks.Select(n => n.Hash));
+
+                        sessionStatus.SentWantBlockHashes.UnionWith(dataMessage.WantBlockHashes);
                         sessionStatus.SentBlockHashes.UnionWith(dataMessage.GiveBlocks.Select(n => n.Hash));
+
                         sessionStatus.SendingDataMessage = null;
                     }
                     catch (ObjectDisposedException)
@@ -626,11 +630,11 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
     {
         foreach (var sessionStatus in _sessionStatusSet)
         {
-            bool necessary = false;
-            necessary |= await _publishedFileStorage.ContainsPushContentAsync(sessionStatus.RootHash, cancellationToken);
-            necessary |= await _subscribedFileStorage.ContainsWantContentAsync(sessionStatus.RootHash, cancellationToken);
+            bool exists = false;
+            exists |= await _publishedFileStorage.ContainsPushContentAsync(sessionStatus.RootHash, cancellationToken);
+            exists |= await _subscribedFileStorage.ContainsWantContentAsync(sessionStatus.RootHash, cancellationToken);
 
-            if (necessary) continue;
+            if (exists) continue;
 
             _logger.Debug($"[{nameof(FileExchanger)}] Trim unnecessary session ({sessionStatus.Session.Address})");
 
@@ -650,8 +654,8 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
         foreach (var rootHash in await _publishedFileStorage.GetPushRootHashesAsync(cancellationToken))
         {
-            var ContentKey = ContentKeyConverter.ToContentKey(Schema, rootHash);
-            builder.Add(ContentKey);
+            var contentKey = ContentKeyConverter.ToContentKey(Schema, rootHash);
+            builder.Add(contentKey);
         }
 
         _pushContentKeys = builder.ToImmutable();
@@ -663,8 +667,8 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
 
         foreach (var rootHash in await _subscribedFileStorage.GetWantRootHashesAsync(cancellationToken))
         {
-            var ContentKey = ContentKeyConverter.ToContentKey(Schema, rootHash);
-            builder.Add(ContentKey);
+            var contentKey = ContentKeyConverter.ToContentKey(Schema, rootHash);
+            builder.Add(contentKey);
         }
 
         _wantContentKeys = builder.ToImmutable();
@@ -676,29 +680,27 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
         {
             if (sessionStatus.SendingDataMessage is not null) continue;
 
-            var wantBlockHashes = await this.ComputeWantBlockHashes(sessionStatus, cancellationToken);
-            var giveBlocks = await this.ComputeGiveBlocks(sessionStatus, cancellationToken);
+            var wantBlockHashes = await this.ComputeSendingWantBlockHashes(sessionStatus, cancellationToken);
+            var giveBlocks = await this.ComputeSendingGiveBlocks(sessionStatus, cancellationToken);
 
             sessionStatus.SendingDataMessage = new FileExchangerDataMessage(wantBlockHashes, giveBlocks.ToArray());
         }
     }
 
-    private async ValueTask<OmniHash[]> ComputeWantBlockHashes(SessionStatus sessionStatus, CancellationToken cancellationToken)
+    private async ValueTask<OmniHash[]> ComputeSendingWantBlockHashes(SessionStatus sessionStatus, CancellationToken cancellationToken)
     {
-        var wantBlockHashes = await _subscribedFileStorage.GetWantBlockHashesAsync(sessionStatus.RootHash, cancellationToken);
+        var wantBlockHashes = new HashSet<OmniHash>(await _subscribedFileStorage.GetWantBlockHashesAsync(sessionStatus.RootHash, cancellationToken));
+        wantBlockHashes.ExceptWith(sessionStatus.SentWantBlockHashes);
 
         var results = wantBlockHashes.Randomize().Take(FileExchangerDataMessage.MaxWantBlockHashesCount).ToArray();
         return results;
     }
 
-    private async ValueTask<Block[]> ComputeGiveBlocks(SessionStatus sessionStatus, CancellationToken cancellationToken)
+    private async ValueTask<Block[]> ComputeSendingGiveBlocks(SessionStatus sessionStatus, CancellationToken cancellationToken)
     {
         var results = new List<Block>();
 
-        var receivedWantBlockHashSet = sessionStatus.ReceivedWantBlockHashes;
-        receivedWantBlockHashSet.ExceptWith(sessionStatus.SentBlockHashes);
-
-        foreach (var blockHash in receivedWantBlockHashSet)
+        foreach (var blockHash in sessionStatus.ReceivedWantBlockHashes)
         {
             IMemoryOwner<byte>? value = null;
 
@@ -721,7 +723,7 @@ public sealed partial class FileExchanger : AsyncDisposableBase, IFileExchanger
             }
         }
 
-        receivedWantBlockHashSet.ExceptWith(results.Select(n => n.Hash));
+        sessionStatus.ReceivedWantBlockHashes.ExceptWith(results.Select(n => n.Hash));
 
         return results.ToArray();
     }

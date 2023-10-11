@@ -20,6 +20,8 @@ internal sealed class FilePublisherStorageRepository : AsyncDisposableBase
     private readonly SQLiteConnectionBuilder _connectionBuilder;
     private readonly IBytesPool _bytesPool;
 
+    private const ConvertBaseType _convertBaseType = ConvertBaseType.Base64;
+
     public FilePublisherStorageRepository(string dirPath, IBytesPool bytesPool)
     {
         DirectoryHelper.CreateDirectory(dirPath);
@@ -73,13 +75,11 @@ CREATE TABLE IF NOT EXISTS files (
     file_path TEXT,
     root_hash TEXT NOT NULL,
     max_block_size INTEGER NOT NULL,
-    properties BLOB NOT NULL,
+    property TEXT,
     created_time INTEGER NOT NULL,
-    updated_time INTEGER NOT NULL
+    updated_time INTEGER NOT NULL,
+    UNIQUE (root_hash, file_path)
 );
-CREATE UNIQUE INDEX IF NOT EXISTS files_file_path_unique_index ON files(file_path) WHERE file_path IS NOT NULL;
-CREATE UNIQUE INDEX IF NOT EXISTS files_root_hash_unique_index ON files(root_hash) WHERE file_path IS NULL;
-CREATE INDEX IF NOT EXISTS files_root_hash_index ON files(root_hash);
 ";
                 await connection.ExecuteNonQueryAsync(query, cancellationToken);
             }
@@ -100,7 +100,7 @@ SELECT COUNT(1)
 ";
                 var parameters = new (string, object?)[]
                 {
-                    ("@root_hash", rootHash.ToString(ConvertStringType.Base64))
+                    ("@root_hash", rootHash.ToString(_convertBaseType))
                 };
 
                 var result = await connection.ExecuteScalarAsync(query, parameters, cancellationToken);
@@ -146,7 +146,7 @@ SELECT COUNT(1)
                 for (; ; )
                 {
                     var rows = await db.Query("files")
-                        .Select("root_hash", "file_path", "max_block_size", "properties", "created_time", "updated_time")
+                        .Select("root_hash", "file_path", "max_block_size", "property", "created_time", "updated_time")
                         .Offset(offset)
                         .Limit(limit)
                         .GetAsync(cancellationToken: cancellationToken);
@@ -156,12 +156,12 @@ SELECT COUNT(1)
                     {
                         yield return new FilePublishedItem
                         {
-                            RootHash = OmniHash.Parse(row.root_hash),
-                            FilePath = row.file_path,
-                            MaxBlockSize = row.max_block_size,
-                            Properties = RocketMessageConverter.FromBytes<RocketArray<AttachedProperty>>((byte[])row.properties).Values,
-                            CreatedTime = Timestamp64.FromSeconds(row.created_time).ToDateTime(),
-                            UpdatedTime = Timestamp64.FromSeconds(row.updated_time).ToDateTime(),
+                            RootHash = OmniHash.Parse((string)row.root_hash),
+                            FilePath = (string)row.file_path,
+                            MaxBlockSize = (int)row.max_block_size,
+                            Property = row.property is null ? null : AttachedProperty.Create((string)row.property),
+                            CreatedTime = Timestamp64.FromSeconds((long)row.created_time).ToDateTime(),
+                            UpdatedTime = Timestamp64.FromSeconds((long)row.updated_time).ToDateTime(),
                         };
                     }
 
@@ -180,7 +180,7 @@ SELECT COUNT(1)
                 using var db = new QueryFactory(connection, compiler);
 
                 var rows = await db.Query("files")
-                    .Select("root_hash", "file_path", "max_block_size", "properties", "created_time", "updated_time")
+                    .Select("root_hash", "file_path", "max_block_size", "property", "created_time", "updated_time")
                     .Where("file_path", "=", filePath)
                     .Limit(1)
                     .GetAsync(cancellationToken: cancellationToken);
@@ -190,12 +190,12 @@ SELECT COUNT(1)
 
                 return new FilePublishedItem
                 {
-                    RootHash = OmniHash.Parse(row.root_hash),
-                    FilePath = row.file_path,
-                    MaxBlockSize = row.max_block_size,
-                    Properties = RocketMessageConverter.FromBytes<RocketArray<AttachedProperty>>((byte[])row.properties).Values,
-                    CreatedTime = Timestamp64.FromSeconds(row.created_time).ToDateTime(),
-                    UpdatedTime = Timestamp64.FromSeconds(row.updated_time).ToDateTime(),
+                    RootHash = OmniHash.Parse((string)row.root_hash),
+                    FilePath = (string)row.file_path,
+                    MaxBlockSize = (int)row.max_block_size,
+                    Property = row.property is null ? null : AttachedProperty.Create((string)row.property),
+                    CreatedTime = Timestamp64.FromSeconds((long)row.created_time).ToDateTime(),
+                    UpdatedTime = Timestamp64.FromSeconds((long)row.updated_time).ToDateTime(),
                 };
             }
         }
@@ -209,8 +209,8 @@ SELECT COUNT(1)
                 using var db = new QueryFactory(connection, compiler);
 
                 var rows = await db.Query("files")
-                    .Select("root_hash", "file_path", "max_block_size", "properties", "created_time", "updated_time")
-                    .Where("root_hash", "=", rootHash.ToString(ConvertStringType.Base64))
+                    .Select("root_hash", "file_path", "max_block_size", "property", "created_time", "updated_time")
+                    .Where("root_hash", "=", rootHash.ToString(_convertBaseType))
                     .Limit(1)
                     .GetAsync(cancellationToken: cancellationToken);
                 if (!rows.Any()) return null;
@@ -219,12 +219,12 @@ SELECT COUNT(1)
 
                 return new FilePublishedItem
                 {
-                    RootHash = OmniHash.Parse(row.root_hash),
-                    FilePath = row.file_path,
-                    MaxBlockSize = row.max_block_size,
-                    Properties = RocketMessageConverter.FromBytes<RocketArray<AttachedProperty>>((byte[])row.properties).Values,
-                    CreatedTime = Timestamp64.FromSeconds(row.created_time).ToDateTime(),
-                    UpdatedTime = Timestamp64.FromSeconds(row.updated_time).ToDateTime(),
+                    RootHash = OmniHash.Parse((string)row.root_hash),
+                    FilePath = (string)row.file_path,
+                    MaxBlockSize = (int)row.max_block_size,
+                    Property = row.property is null ? null : AttachedProperty.Create((string)row.property),
+                    CreatedTime = Timestamp64.FromSeconds((long)row.created_time).ToDateTime(),
+                    UpdatedTime = Timestamp64.FromSeconds((long)row.updated_time).ToDateTime(),
                 };
             }
         }
@@ -252,7 +252,7 @@ SELECT COUNT(1)
 
                     foreach (var row in rows)
                     {
-                        yield return OmniHash.Parse(row.root_hash);
+                        yield return OmniHash.Parse((string)row.root_hash);
                     }
 
                     offset = limit;
@@ -269,24 +269,25 @@ SELECT COUNT(1)
 
                 var query =
 $@"
-INSERT INTO files (file_path, root_hash, max_block_size, properties, created_time, updated_time)
-    VALUES (@file_path, @root_hash, @max_block_size, @properties, @created_time, @updated_time)
-    ON CONFLICT (@root_hash, @file_path) DO UPDATE SET
+INSERT INTO files (file_path, root_hash, max_block_size, property, created_time, updated_time)
+    VALUES (@file_path, @root_hash, @max_block_size, @property, @created_time, @updated_time)
+    ON CONFLICT (root_hash, file_path) DO UPDATE SET
         file_path = @file_path,
         root_hash = @root_hash,
         max_block_size = @max_block_size,
-        properties = @properties,
+        property = @property,
         created_time = @created_time,
-        updated_time = @updated_time;
+        updated_time = @updated_time
+    WHERE file_path is not NULL;
 ";
                 var parameters = new (string, object?)[]
                 {
                     ("@file_path", item.FilePath),
-                    ("@root_hash", item.RootHash.ToString(ConvertStringType.Base16Lower)),
+                    ("@root_hash", item.RootHash.ToString(_convertBaseType)),
                     ("@max_block_size", item.MaxBlockSize),
-                    ("@properties", RocketMessageConverter.ToBytes(new RocketArray<AttachedProperty>(item.Properties.ToArray()))),
-                    ("@created_time", item.CreatedTime),
-                    ("@updated_time", item.UpdatedTime)
+                    ("@property", item.Property?.Value),
+                    ("@created_time", Timestamp64.FromDateTime(item.CreatedTime).Seconds),
+                    ("@updated_time", Timestamp64.FromDateTime(item.UpdatedTime).Seconds)
                 };
 
                 var result = await connection.ExecuteNonQueryAsync(query, parameters, cancellationToken);
@@ -307,7 +308,7 @@ DELETE
 ";
                 var parameters = new (string, object?)[]
                 {
-                    ($"@root_hash", rootHash.ToString(ConvertStringType.Base64)),
+                    ($"@root_hash", rootHash.ToString(_convertBaseType)),
                 };
 
                 var result = await connection.ExecuteNonQueryAsync(query, parameters, cancellationToken);
@@ -362,10 +363,10 @@ CREATE TABLE IF NOT EXISTS internal_blocks (
     root_hash TEXT NOT NULL,
     block_hash TEXT NOT NULL,
     depth INTEGER NOT NULL,
-    order INTEGER NOT NULL
+    `index` INTEGER NOT NULL,
+    UNIQUE(root_hash, block_hash, depth, `index`)
 );
-CREATE INDEX IF NOT EXISTS internal_blocks_root_hash_block_hash_index ON internal_blocks(root_hash, block_hash);
-CREATE UNIQUE INDEX IF NOT EXISTS internal_blocks_root_hash_block_hash_depth_order_unique_index ON internal_blocks(root_hash, block_hash, depth, order);
+CREATE INDEX IF NOT EXISTS index_root_hash_depth_index_for_internal_blocks ON internal_blocks (root_hash, depth ASC, `index` ASC);
 ";
                 await connection.ExecuteNonQueryAsync(query, cancellationToken);
             }
@@ -386,8 +387,8 @@ SELECT COUNT(1)
 ";
                 var parameters = new (string, object?)[]
                 {
-                    ($"@root_hash", rootHash.ToString(ConvertStringType.Base64)),
-                    ($"@block_hash", blockHash.ToString(ConvertStringType.Base64)),
+                    ($"@root_hash", rootHash.ToString(_convertBaseType)),
+                    ($"@block_hash", blockHash.ToString(_convertBaseType)),
                 };
 
                 var result = await connection.ExecuteScalarAsync(query, parameters, cancellationToken);
@@ -410,7 +411,7 @@ SELECT COUNT(1)
                 for (; ; )
                 {
                     var rows = await db.Query("internal_blocks")
-                        .Select("root_hash", "block_hash", "depth", "order")
+                        .Select("root_hash", "block_hash", "depth", "index")
                         .Offset(offset)
                         .Limit(limit)
                         .GetAsync(cancellationToken: cancellationToken);
@@ -420,10 +421,10 @@ SELECT COUNT(1)
                     {
                         yield return new BlockPublishedInternalItem
                         {
-                            RootHash = OmniHash.Parse(row.root_hash),
-                            BlockHash = OmniHash.Parse(row.block_hash),
-                            Depth = row.depth,
-                            Order = row.order,
+                            RootHash = OmniHash.Parse((string)row.root_hash),
+                            BlockHash = OmniHash.Parse((string)row.block_hash),
+                            Depth = (int)row.depth,
+                            Index = (int)row.index,
                         };
                     }
 
@@ -448,8 +449,9 @@ SELECT COUNT(1)
                 for (; ; )
                 {
                     var rows = await db.Query("internal_blocks")
-                        .Select("root_hash", "block_hash", "depth", "order")
-                        .Where("root_hash", "=", rootHash.ToString(ConvertStringType.Base64))
+                        .Select("root_hash", "block_hash", "depth", "index")
+                        .Where("root_hash", "=", rootHash.ToString(_convertBaseType))
+                        .OrderBy("depth", "index")
                         .Offset(offset)
                         .Limit(limit)
                         .GetAsync(cancellationToken: cancellationToken);
@@ -459,10 +461,10 @@ SELECT COUNT(1)
                     {
                         yield return new BlockPublishedInternalItem
                         {
-                            RootHash = OmniHash.Parse(row.root_hash),
-                            BlockHash = OmniHash.Parse(row.block_hash),
-                            Depth = row.depth,
-                            Order = row.order,
+                            RootHash = OmniHash.Parse((string)row.root_hash),
+                            BlockHash = OmniHash.Parse((string)row.block_hash),
+                            Depth = (int)row.depth,
+                            Index = (int)row.index,
                         };
                     }
 
@@ -481,9 +483,9 @@ SELECT COUNT(1)
                 using var db = new QueryFactory(connection, compiler);
 
                 var rows = await db.Query("internal_blocks")
-                    .Select("root_hash", "block_hash", "depth", "order")
-                    .Where("root_hash", "=", rootHash.ToString(ConvertStringType.Base64))
-                    .Where("block_hash", "=", blockHash.ToString(ConvertStringType.Base64))
+                    .Select("root_hash", "block_hash", "depth", "index")
+                    .Where("root_hash", "=", rootHash.ToString(_convertBaseType))
+                    .Where("block_hash", "=", blockHash.ToString(_convertBaseType))
                     .Limit(1)
                     .GetAsync(cancellationToken: cancellationToken);
                 if (!rows.Any()) return null;
@@ -492,11 +494,45 @@ SELECT COUNT(1)
 
                 return new BlockPublishedInternalItem
                 {
-                    RootHash = OmniHash.Parse(row.root_hash),
-                    BlockHash = OmniHash.Parse(row.block_hash),
-                    Depth = row.depth,
-                    Order = row.order,
+                    RootHash = OmniHash.Parse((string)row.root_hash),
+                    BlockHash = OmniHash.Parse((string)row.block_hash),
+                    Depth = (int)row.depth,
+                    Index = (int)row.index,
                 };
+            }
+        }
+
+        public async IAsyncEnumerable<OmniHash> GetBlockHashesAsync(OmniHash rootHash, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+                using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+                var compiler = new SqliteCompiler();
+                using var db = new QueryFactory(connection, compiler);
+
+                const int ChunkSize = 5000;
+                int offset = 0;
+                int limit = ChunkSize;
+
+                for (; ; )
+                {
+                    var rows = await db.Query("internal_blocks")
+                        .Select("block_hash")
+                        .Where("root_hash", "=", rootHash.ToString(_convertBaseType))
+                        .OrderBy("depth", "index")
+                        .Offset(offset)
+                        .Limit(limit)
+                        .GetAsync(cancellationToken: cancellationToken);
+                    if (!rows.Any()) yield break;
+
+                    foreach (var row in rows)
+                    {
+                        yield return OmniHash.Parse((string)row.block_hash);
+                    }
+
+                    offset = limit;
+                    limit += ChunkSize;
+                }
             }
         }
 
@@ -516,18 +552,18 @@ SELECT COUNT(1)
                     {
                         var q =
 $@"
-INSERT INTO internal_blocks (root_hash, block_hash, depth, order)
-    VALUES (@root_hash_{i}, @block_hash_{i}, @depth_{i}, @order_{i})
-    ON CONFLICT (@root_hash_{i}, @block_hash_{i}, @depth_{i}, @order_{i}) DO NOTHING;
+INSERT INTO internal_blocks (root_hash, block_hash, depth, `index`)
+    VALUES (@root_hash_{i}, @block_hash_{i}, @depth_{i}, @index_{i})
+    ON CONFLICT (root_hash, block_hash, depth, `index`) DO NOTHING;
 ";
                         queries.Append(q);
 
                         var ps = new (string, object?)[]
                         {
-                            ($"@root_hash_{i}", item.RootHash.ToString(ConvertStringType.Base64)),
-                            ($"@block_hash_{i}", item.BlockHash.ToString(ConvertStringType.Base64)),
+                            ($"@root_hash_{i}", item.RootHash.ToString(_convertBaseType)),
+                            ($"@block_hash_{i}", item.BlockHash.ToString(_convertBaseType)),
                             ($"@depth_{i}", item.Depth),
-                            ($"@order_{i}", item.Order),
+                            ($"@index_{i}", item.Index),
                         };
                         parameters.AddRange(ps);
                     }
@@ -553,7 +589,7 @@ DELETE
 ";
                 var parameters = new (string, object?)[]
                 {
-                    ($"@root_hash", rootHash.ToString(ConvertStringType.Base64)),
+                    ($"@root_hash", rootHash.ToString(_convertBaseType)),
                 };
 
                 var result = await connection.ExecuteNonQueryAsync(query, parameters, cancellationToken);
@@ -587,12 +623,12 @@ CREATE TABLE IF NOT EXISTS external_blocks (
     file_path TEXT NOT NULL,
     root_hash TEXT NOT NULL,
     block_hash TEXT NOT NULL,
-    order INTEGER NOT NULL,
+    `index` INTEGER NOT NULL,
     offset INTEGER NOT NULL,
-    length INTEGER NOT NULL
+    length INTEGER NOT NULL,
+    UNIQUE (root_hash, block_hash, file_path, `index`, offset, length)
 );
-CREATE INDEX IF NOT EXISTS external_blocks_root_hash_block_hash_index ON external_blocks(root_hash, block_hash);
-CREATE UNIQUE INDEX IF NOT EXISTS external_blocks_file_path_root_hash_block_hash_order_offset_length_unique_index ON external_blocks(file_path, root_hash, block_hash, order, offset, length);
+CREATE INDEX IF NOT EXISTS index_root_hash_depth_index_for_blocks ON external_blocks (root_hash, `index` ASC);
 ";
                 await connection.ExecuteNonQueryAsync(query, cancellationToken);
             }
@@ -613,8 +649,8 @@ SELECT COUNT(1)
 ";
                 var parameters = new (string, object?)[]
                 {
-                    ($"@root_hash", rootHash.ToString(ConvertStringType.Base64)),
-                    ($"@block_hash", blockHash.ToString(ConvertStringType.Base64)),
+                    ($"@root_hash", rootHash.ToString(_convertBaseType)),
+                    ($"@block_hash", blockHash.ToString(_convertBaseType)),
                 };
 
                 var result = await connection.ExecuteScalarAsync(query, parameters, cancellationToken);
@@ -637,7 +673,7 @@ SELECT COUNT(1)
                 for (; ; )
                 {
                     var rows = await db.Query("external_blocks")
-                        .Select("file_path", "root_hash", "block_hash", "order", "offset", "length")
+                        .Select("file_path", "root_hash", "block_hash", "index", "offset", "length")
                         .Offset(offset)
                         .Limit(limit)
                         .GetAsync(cancellationToken: cancellationToken);
@@ -647,12 +683,12 @@ SELECT COUNT(1)
                     {
                         yield return new BlockPublishedExternalItem
                         {
-                            FilePath = row.file_path,
-                            RootHash = OmniHash.Parse(row.root_hash),
-                            BlockHash = OmniHash.Parse(row.block_hash),
-                            Order = row.order,
-                            Offset = row.offset,
-                            Length = row.length,
+                            FilePath = (string)row.file_path,
+                            RootHash = OmniHash.Parse((string)row.root_hash),
+                            BlockHash = OmniHash.Parse((string)row.block_hash),
+                            Index = (int)row.index,
+                            Offset = (long)row.offset,
+                            Length = (int)row.length,
                         };
                     }
 
@@ -677,8 +713,9 @@ SELECT COUNT(1)
                 for (; ; )
                 {
                     var rows = await db.Query("external_blocks")
-                        .Select("file_path", "root_hash", "block_hash", "order", "offset", "length")
-                        .Where("root_hash", "=", rootHash.ToString(ConvertStringType.Base64))
+                        .Select("file_path", "root_hash", "block_hash", "index", "offset", "length")
+                        .Where("root_hash", "=", rootHash.ToString(_convertBaseType))
+                        .OrderBy("index")
                         .Offset(offset)
                         .Limit(limit)
                         .GetAsync(cancellationToken: cancellationToken);
@@ -688,12 +725,12 @@ SELECT COUNT(1)
                     {
                         yield return new BlockPublishedExternalItem
                         {
-                            FilePath = row.file_path,
-                            RootHash = OmniHash.Parse(row.root_hash),
-                            BlockHash = OmniHash.Parse(row.block_hash),
-                            Order = row.order,
-                            Offset = row.offset,
-                            Length = row.length,
+                            FilePath = (string)row.file_path,
+                            RootHash = OmniHash.Parse((string)row.root_hash),
+                            BlockHash = OmniHash.Parse((string)row.block_hash),
+                            Index = (int)row.index,
+                            Offset = (long)row.offset,
+                            Length = (int)row.length,
                         };
                     }
 
@@ -712,9 +749,9 @@ SELECT COUNT(1)
                 using var db = new QueryFactory(connection, compiler);
 
                 var rows = await db.Query("external_blocks")
-                    .Select("file_path", "root_hash", "block_hash", "order", "offset", "length")
-                    .Where("root_hash", "=", rootHash.ToString(ConvertStringType.Base64))
-                    .Where("block_hash", "=", blockHash.ToString(ConvertStringType.Base64))
+                    .Select("file_path", "root_hash", "block_hash", "index", "offset", "length")
+                    .Where("root_hash", "=", rootHash.ToString(_convertBaseType))
+                    .Where("block_hash", "=", blockHash.ToString(_convertBaseType))
                     .Limit(1)
                     .GetAsync(cancellationToken: cancellationToken);
                 if (!rows.Any()) return null;
@@ -723,13 +760,47 @@ SELECT COUNT(1)
 
                 return new BlockPublishedExternalItem
                 {
-                    FilePath = row.file_path,
-                    RootHash = OmniHash.Parse(row.root_hash),
-                    BlockHash = OmniHash.Parse(row.block_hash),
-                    Order = row.order,
-                    Offset = row.offset,
-                    Length = row.length,
+                    FilePath = (string)row.file_path,
+                    RootHash = OmniHash.Parse((string)row.root_hash),
+                    BlockHash = OmniHash.Parse((string)row.block_hash),
+                    Index = (int)row.index,
+                    Offset = (long)row.offset,
+                    Length = (int)row.length,
                 };
+            }
+        }
+
+        public async IAsyncEnumerable<OmniHash> GetBlockHashesAsync(OmniHash rootHash, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            using (await _asyncLock.LockAsync(cancellationToken))
+            {
+                using var connection = await _connectionBuilder.CreateAsync(cancellationToken);
+                var compiler = new SqliteCompiler();
+                using var db = new QueryFactory(connection, compiler);
+
+                const int ChunkSize = 5000;
+                int offset = 0;
+                int limit = ChunkSize;
+
+                for (; ; )
+                {
+                    var rows = await db.Query("external_blocks")
+                        .Select("block_hash")
+                        .Where("root_hash", "=", rootHash.ToString(_convertBaseType))
+                        .OrderBy("depth", "index")
+                        .Offset(offset)
+                        .Limit(limit)
+                        .GetAsync(cancellationToken: cancellationToken);
+                    if (!rows.Any()) yield break;
+
+                    foreach (var row in rows)
+                    {
+                        yield return OmniHash.Parse((string)row.block_hash);
+                    }
+
+                    offset = limit;
+                    limit += ChunkSize;
+                }
             }
         }
 
@@ -749,18 +820,18 @@ SELECT COUNT(1)
                     {
                         var q =
 $@"
-INSERT INTO external_blocks (file_path, root_hash, block_hash, order, offset, length)
-    VALUES (@file_path_{i}, @root_hash_{i}, @block_hash_{i}, @order_{i}, @offset_{i}, @length_{i})
-ON CONFLICT (@file_path_{i}, @root_hash_{i}, @block_hash_{i}, @order_{i}, @offset_{i}, @length_{i}) DO NOTHING;
+INSERT INTO external_blocks (file_path, root_hash, block_hash, `index`, offset, length)
+    VALUES (@file_path_{i}, @root_hash_{i}, @block_hash_{i}, @index_{i}, @offset_{i}, @length_{i})
+    ON CONFLICT (file_path, root_hash, block_hash, `index`, offset, length) DO NOTHING;
 ";
                         queries.Append(q);
 
                         var ps = new (string, object?)[]
                         {
                             ($"@file_path_{i}", item.FilePath),
-                            ($"@root_hash_{i}", item.RootHash.ToString(ConvertStringType.Base64)),
-                            ($"@block_hash_{i}", item.BlockHash.ToString(ConvertStringType.Base64)),
-                            ($"@order_{i}", item.Order),
+                            ($"@root_hash_{i}", item.RootHash.ToString(_convertBaseType)),
+                            ($"@block_hash_{i}", item.BlockHash.ToString(_convertBaseType)),
+                            ($"@index_{i}", item.Index),
                             ($"@offset_{i}", item.Offset),
                             ($"@length_{i}", item.Length),
                         };
@@ -788,7 +859,7 @@ DELETE
 ";
                 var parameters = new (string, object?)[]
                 {
-                    ($"@root_hash", rootHash.ToString(ConvertStringType.Base64)),
+                    ($"@root_hash", rootHash.ToString(_convertBaseType)),
                 };
 
                 var result = await connection.ExecuteNonQueryAsync(query, parameters, cancellationToken);

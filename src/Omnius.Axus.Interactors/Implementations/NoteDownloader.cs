@@ -198,7 +198,7 @@ public sealed partial class NoteDownloader : AsyncDisposableBase, INoteDownloade
                 var newBarkItem = new NoteBoxDownloadingItem()
                 {
                     Signature = signature,
-                    ShoutUpdatedTime = DateTime.MinValue,
+                    ShoutUpdatedTime = DateTime.MinValue.ToUniversalTime(),
                 };
                 _memoDownloaderRepo.BarkItems.Upsert(newBarkItem);
             }

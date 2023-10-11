@@ -37,13 +37,13 @@ public class FileExchangerTest
         var publishedFileStorage = fileExchanger1.GetPublishedFileStorage();
         var subscribedFileStorage = fileExchanger2.GetSubscribedFileStorage();
 
-        using var publishDirectoryDeleter = FixtureFactory.GenTempDirectory(out var publishDirectoryPath);
+        using var publishDirectoryRemover = FixtureFactory.GenTempDirectory(out var publishDirectoryPath);
         var publishedFilePath = FixtureFactory.GenRandomFile(publishDirectoryPath, fileSize);
 
-        var rootHash = await publishedFileStorage.PublishFileAsync(publishedFilePath, 1024 * 1024, "test");
-        await subscribedFileStorage.SubscribeFileAsync(rootHash, "test");
+        var rootHash = await publishedFileStorage.PublishFileAsync(publishedFilePath, 1024 * 1024, null);
+        await subscribedFileStorage.SubscribeFileAsync(rootHash, null);
 
-        using var subscriberDirectoryDeleter = FixtureFactory.GenTempDirectory(out var subscriberDirectoryPath);
+        using var subscriberDirectoryRemover = FixtureFactory.GenTempDirectory(out var subscriberDirectoryPath);
         var subscribedFilePath = Path.Combine(subscriberDirectoryPath, "subscribed_test_file");
 
         var sw = Stopwatch.StartNew();

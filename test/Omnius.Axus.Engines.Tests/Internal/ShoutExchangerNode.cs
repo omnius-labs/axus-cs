@@ -14,7 +14,7 @@ namespace Omnius.Axus.Engines.Internal;
 internal class ShoutExchangerNode : AsyncDisposableBase
 {
     private OmniAddress _listenAddress;
-    private readonly IDisposable _workingDirectoryDeleter;
+    private readonly IDisposable _workingDirectoryRemover;
     private readonly string _databaseDirectoryPath;
     private readonly string _tempDirectoryPath;
 
@@ -39,7 +39,7 @@ internal class ShoutExchangerNode : AsyncDisposableBase
     public ShoutExchangerNode(OmniAddress listenAddress)
     {
         _listenAddress = listenAddress;
-        _workingDirectoryDeleter = FixtureFactory.GenTempDirectory(out var workingDirectoryPath);
+        _workingDirectoryRemover = FixtureFactory.GenTempDirectory(out var workingDirectoryPath);
         _databaseDirectoryPath = Path.Combine(workingDirectoryPath, "db");
         _tempDirectoryPath = Path.Combine(workingDirectoryPath, "temp");
 
@@ -52,6 +52,8 @@ internal class ShoutExchangerNode : AsyncDisposableBase
         var digitalSignature = OmniDigitalSignature.Create(Guid.NewGuid().ToString("N"), OmniDigitalSignatureAlgorithmType.EcDsa_P521_Sha2_256);
 
         var bytesPool = BytesPool.Shared;
+        var systemClock = SystemClock.Shared;
+        var randomBytesProvider = RandomBytesProvider.Shared;
 
         var senderBandwidthLimiter = new BandwidthLimiter(int.MaxValue);
         var receiverBandwidthLimiter = new BandwidthLimiter(int.MaxValue);
@@ -110,25 +112,25 @@ internal class ShoutExchangerNode : AsyncDisposableBase
             ConfigDirectoryPath = Path.Combine(_databaseDirectoryPath, "node_finder"),
             MaxSessionCount = 128
         };
-        _nodeFinder = await NodeFinder.CreateAsync(_sessionConnector, _sessionAccepter, nodeLocationsFetcher, bytesPool, nodeFinderOptions, cancellationToken);
+        _nodeFinder = await NodeFinder.CreateAsync(_sessionConnector, _sessionAccepter, nodeLocationsFetcher, systemClock, bytesPool, nodeFinderOptions, cancellationToken);
 
         var publishedShoutStorageOptions = new ShoutPublisherStorageOptions
         {
             ConfigDirectoryPath = Path.Combine(_databaseDirectoryPath, "published_shout_storage")
         };
-        _publishedShoutStorage = await ShoutPublisherStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, publishedShoutStorageOptions, cancellationToken);
+        _publishedShoutStorage = await ShoutPublisherStorage.CreateAsync(KeyValueRocksDbStorage.Factory, systemClock, bytesPool, publishedShoutStorageOptions, cancellationToken);
 
         var subscribedShoutStorageOptions = new ShoutSubscriberStorageOptions
         {
             ConfigDirectoryPath = Path.Combine(_databaseDirectoryPath, "subscribed_shout_storage")
         };
-        _subscribedShoutStorage = await ShoutSubscriberStorage.CreateAsync(KeyValueLiteDatabaseStorage.Factory, bytesPool, subscribedShoutStorageOptions, cancellationToken);
+        _subscribedShoutStorage = await ShoutSubscriberStorage.CreateAsync(KeyValueRocksDbStorage.Factory, systemClock, bytesPool, subscribedShoutStorageOptions, cancellationToken);
 
         var shoutExchangerOptions = new ShoutExchangerOptions
         {
             MaxSessionCount = 128
         };
-        _shoutExchanger = await ShoutExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedShoutStorage, _subscribedShoutStorage, bytesPool, shoutExchangerOptions, cancellationToken);
+        _shoutExchanger = await ShoutExchanger.CreateAsync(_sessionConnector, _sessionAccepter, _nodeFinder, _publishedShoutStorage, _subscribedShoutStorage, systemClock, bytesPool, shoutExchangerOptions, cancellationToken);
     }
 
     protected override async ValueTask OnDisposeAsync()
@@ -183,14 +185,11 @@ internal class ShoutExchangerNode : AsyncDisposableBase
 
         _connectionAcceptors = _connectionAcceptors.Clear();
 
-        _workingDirectoryDeleter.Dispose();
+        _workingDirectoryRemover.Dispose();
     }
 
     public OmniAddress ListenAddress => _listenAddress;
-
     public INodeFinder GetNodeFinder() => _nodeFinder;
-
     public IShoutPublisherStorage GetPublishedShoutStorage() => _publishedShoutStorage;
-
     public IShoutSubscriberStorage GetSubscribedShoutStorage() => _subscribedShoutStorage;
 }

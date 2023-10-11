@@ -1,5 +1,4 @@
 using System.Buffers;
-using Omnius.Axus.Engines.Internal;
 using Omnius.Axus.Engines.Internal.Models;
 using Omnius.Axus.Engines.Internal.Repositories;
 using Omnius.Axus.Messages;
@@ -16,6 +15,7 @@ public sealed partial class ShoutPublisherStorage : AsyncDisposableBase, IShoutP
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
     private readonly IKeyValueStorageFactory _keyValueStorageFactory;
+    private readonly ISystemClock _systemClock;
     private readonly IBytesPool _bytesPool;
     private readonly ShoutPublisherStorageOptions _options;
 
@@ -24,20 +24,23 @@ public sealed partial class ShoutPublisherStorage : AsyncDisposableBase, IShoutP
 
     private readonly AsyncLock _asyncLock = new();
 
-    public static async ValueTask<ShoutPublisherStorage> CreateAsync(IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ShoutPublisherStorageOptions options, CancellationToken cancellationToken = default)
+    public static async ValueTask<ShoutPublisherStorage> CreateAsync(IKeyValueStorageFactory keyValueStorageFactory,
+        ISystemClock systemClock, IBytesPool bytesPool, ShoutPublisherStorageOptions options, CancellationToken cancellationToken = default)
     {
-        var publishedShoutStorage = new ShoutPublisherStorage(keyValueStorageFactory, bytesPool, options);
+        var publishedShoutStorage = new ShoutPublisherStorage(keyValueStorageFactory, systemClock, bytesPool, options);
         await publishedShoutStorage.InitAsync(cancellationToken);
         return publishedShoutStorage;
     }
 
-    private ShoutPublisherStorage(IKeyValueStorageFactory keyValueStorageFactory, IBytesPool bytesPool, ShoutPublisherStorageOptions options)
+    private ShoutPublisherStorage(IKeyValueStorageFactory keyValueStorageFactory,
+        ISystemClock systemClock, IBytesPool bytesPool, ShoutPublisherStorageOptions options)
     {
         _keyValueStorageFactory = keyValueStorageFactory;
+        _systemClock = systemClock;
         _bytesPool = bytesPool;
         _options = options;
 
-        _publisherRepo = new ShoutPublisherStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "status"));
+        _publisherRepo = new ShoutPublisherStorageRepository(Path.Combine(_options.ConfigDirectoryPath, "status"), _bytesPool);
         _blockStorage = _keyValueStorageFactory.Create(Path.Combine(_options.ConfigDirectoryPath, "blocks"), _bytesPool);
     }
 
@@ -49,19 +52,19 @@ public sealed partial class ShoutPublisherStorage : AsyncDisposableBase, IShoutP
 
     protected override async ValueTask OnDisposeAsync()
     {
-        _publisherRepo.Dispose();
+        await _publisherRepo.DisposeAsync();
         await _blockStorage.DisposeAsync();
     }
 
-    public async ValueTask<IEnumerable<PublishedShoutReport>> GetPublishedShoutReportsAsync(string zone, CancellationToken cancellationToken = default)
+    public async ValueTask<IEnumerable<PublishedShoutReport>> GetPublishedShoutReportsAsync(CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var shoutReports = new List<PublishedShoutReport>();
 
-            foreach (var item in _publisherRepo.ShoutItems.Find(zone))
+            await foreach (var item in _publisherRepo.ShoutItems.GetItemsAsync(cancellationToken))
             {
-                shoutReports.Add(new PublishedShoutReport(item.Signature, item.Channel, Timestamp64.FromDateTime(item.CreatedTime), item.Properties.ToArray()));
+                shoutReports.Add(new PublishedShoutReport(item.Signature, item.Channel, Timestamp64.FromDateTime(item.ShoutCreatedTime), item.Property));
             }
 
             return shoutReports.ToArray();
@@ -78,7 +81,7 @@ public sealed partial class ShoutPublisherStorage : AsyncDisposableBase, IShoutP
         {
             var results = new List<(OmniSignature, string)>();
 
-            foreach (var status in _publisherRepo.ShoutItems.FindAll())
+            await foreach (var status in _publisherRepo.ShoutItems.GetItemsAsync(cancellationToken))
             {
                 results.Add((status.Signature, status.Channel));
             }
@@ -91,16 +94,18 @@ public sealed partial class ShoutPublisherStorage : AsyncDisposableBase, IShoutP
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            return _publisherRepo.ShoutItems.Exists(signature, channel);
+            return await _publisherRepo.ShoutItems.ExistsAsync(signature, channel, cancellationToken);
         }
     }
 
-    public async ValueTask PublishShoutAsync(Shout shout, IEnumerable<AttachedProperty> properties, string zone, CancellationToken cancellationToken = default)
+    public async ValueTask PublishShoutAsync(Shout shout, AttachedProperty? property, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
             var signature = shout.Certificate?.GetOmniSignature();
             if (signature is null) throw new ArgumentNullException(nameof(shout.Certificate));
+
+            var now = _systemClock.GetUtcNow();
 
             using var bytesPipe = new BytesPipe(_bytesPool);
             shout.Export(bytesPipe.Writer, _bytesPool);
@@ -108,23 +113,24 @@ public sealed partial class ShoutPublisherStorage : AsyncDisposableBase, IShoutP
             var newShoutItem = new ShoutPublishedItem()
             {
                 Signature = signature,
-                Properties = properties.ToArray(),
+                Property = property,
                 Channel = shout.Channel,
-                CreatedTime = shout.CreatedTime.ToDateTime(),
-                Zones = new[] { zone }
+                ShoutCreatedTime = shout.CreatedTime.ToDateTime(),
+                CreatedTime = now,
+                UpdatedTime = now,
             };
-            _publisherRepo.ShoutItems.Upsert(newShoutItem);
+            await _publisherRepo.ShoutItems.UpsertAsync(newShoutItem, cancellationToken);
 
             var key = GenKey(signature, shout.Channel);
             await _blockStorage.WriteAsync(key, bytesPipe.Reader.GetSequence(), cancellationToken);
         }
     }
 
-    public async ValueTask UnpublishShoutAsync(OmniSignature signature, string channel, string zone, CancellationToken cancellationToken = default)
+    public async ValueTask UnpublishShoutAsync(OmniSignature signature, string channel, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            _publisherRepo.ShoutItems.Delete(signature, channel);
+            await _publisherRepo.ShoutItems.DeleteAsync(signature, channel, cancellationToken);
 
             var key = GenKey(signature, channel);
             await _blockStorage.TryDeleteAsync(key, cancellationToken);
@@ -135,19 +141,19 @@ public sealed partial class ShoutPublisherStorage : AsyncDisposableBase, IShoutP
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var shoutItem = _publisherRepo.ShoutItems.FindOne(signature, channel);
-            if (shoutItem is null) return DateTime.MinValue;
+            var shoutItem = await _publisherRepo.ShoutItems.GetItemAsync(signature, channel, cancellationToken);
+            if (shoutItem is null) return DateTime.MinValue.ToUniversalTime();
 
-            return shoutItem.CreatedTime;
+            return shoutItem.ShoutCreatedTime;
         }
     }
 
-    public async ValueTask<Shout?> TryReadShoutAsync(OmniSignature signature, string channel, DateTime updatedTime, CancellationToken cancellationToken = default)
+    public async ValueTask<Shout?> TryReadShoutAsync(OmniSignature signature, string channel, DateTime createdTime, CancellationToken cancellationToken = default)
     {
         using (await _asyncLock.LockAsync(cancellationToken))
         {
-            var shoutItem = _publisherRepo.ShoutItems.FindOne(signature, channel);
-            if (shoutItem is null || shoutItem.CreatedTime <= updatedTime) return null;
+            var shoutItem = await _publisherRepo.ShoutItems.GetItemAsync(signature, channel, cancellationToken);
+            if (shoutItem is null || shoutItem.ShoutCreatedTime <= createdTime) return null;
 
             var key = GenKey(signature, channel);
             using var memoryOwner = await _blockStorage.TryReadAsync(key, cancellationToken);
@@ -160,6 +166,6 @@ public sealed partial class ShoutPublisherStorage : AsyncDisposableBase, IShoutP
 
     private static string GenKey(OmniSignature signature, string channel)
     {
-        return StringConverter.ToString(signature, channel);
+        return signature.ToString() + "/" + channel;
     }
 }
