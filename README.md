@@ -12,6 +12,7 @@ sudo apt-get install -y libsnappy-dev
 ```
 
 ## Docs
+
 - [Requirements](./docs/requirements/index.adoc)
 - [Specifications](./docs/specifications/index.adoc)
 - [FAQ](./docs/faq.md)

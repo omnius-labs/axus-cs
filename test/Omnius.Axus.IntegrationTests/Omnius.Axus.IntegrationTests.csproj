@@ -10,9 +10,8 @@
     <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.Net.Upnp\Omnius.Core.Net.Upnp.csproj" />
     <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.UnitTestToolkit\Omnius.Core.UnitTestToolkit.csproj" />
     <ProjectReference Include="..\..\src\Omnius.Axus.Daemon\Omnius.Axus.Daemon.csproj" />
-    <ProjectReference Include="..\..\src\Omnius.Axus.Engines\Omnius.Axus.Engines.csproj" />
+    <ProjectReference Include="..\..\src\Omnius.Axus.Core\Omnius.Axus.Core.csproj" />
     <ProjectReference Include="..\..\src\Omnius.Axus.Messages\Omnius.Axus.Messages.csproj" />
-    <ProjectReference Include="..\..\src\Omnius.Axus.Interactors\Omnius.Axus.Interactors.csproj" />
   </ItemGroup>
 
   <ItemGroup>

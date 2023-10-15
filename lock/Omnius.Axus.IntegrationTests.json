@@ -1368,33 +1368,7 @@
         "resolved": "11.2.1",
         "contentHash": "tBt8K+korVfrjH9wyDEhiLKxbs8qoLCLIFwvYgkSUuMC9//w3z0cFQ8LQAI/5MCKq+BMil0cfRTRvPeE7eXhQw=="
       },
-      "omnius.axus.daemon": {
-        "type": "Project",
-        "dependencies": {
-          "Cocona.Lite": "[2.1.0, )",
-          "GitInfo": "[2.2.0, )",
-          "NLog": "[4.7.15, )",
-          "NLog.Config": "[4.7.15, )",
-          "Omnius.Axus.Engines": "[0.0.1-alpha.1, )",
-          "Omnius.Axus.Messages": "[0.0.1-alpha.1, )",
-          "Omnius.Axus.Remoting": "[0.0.1-alpha.1, )",
-          "Omnius.Core": "[0.0.1-alpha.1, )",
-          "Omnius.Core.Collections": "[0.0.1-alpha.1, )",
-          "Omnius.Core.Cryptography": "[0.0.1-alpha.1, )",
-          "Omnius.Core.Net": "[0.0.1-alpha.1, )",
-          "Omnius.Core.Net.Proxies": "[0.0.1-alpha.1, )",
-          "Omnius.Core.Net.Upnp": "[0.0.1-alpha.1, )",
-          "Omnius.Core.Pipelines": "[0.0.1-alpha.1, )",
-          "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )",
-          "Omnius.Core.Serialization": "[0.0.1-alpha.1, )",
-          "Omnius.Core.Storages": "[0.0.1-alpha.1, )",
-          "Omnius.Core.Streams": "[0.0.1-alpha.1, )",
-          "Omnius.Core.Tasks": "[0.0.1-alpha.1, )",
-          "Omnius.Core.Utils": "[0.0.1-alpha.1, )",
-          "YamlDotNet": "[11.2.1, )"
-        }
-      },
-      "omnius.axus.engines": {
+      "omnius.axus.core": {
         "type": "Project",
         "dependencies": {
           "NLog": "[4.7.15, )",
@@ -1415,10 +1389,14 @@
           "System.Linq.Async": "[6.0.1, )"
         }
       },
-      "omnius.axus.interactors": {
+      "omnius.axus.daemon": {
         "type": "Project",
         "dependencies": {
+          "Cocona.Lite": "[2.1.0, )",
+          "GitInfo": "[2.2.0, )",
           "NLog": "[4.7.15, )",
+          "NLog.Config": "[4.7.15, )",
+          "Omnius.Axus.Core": "[0.0.1-alpha.1, )",
           "Omnius.Axus.Messages": "[0.0.1-alpha.1, )",
           "Omnius.Axus.Remoting": "[0.0.1-alpha.1, )",
           "Omnius.Core": "[0.0.1-alpha.1, )",
@@ -1427,14 +1405,14 @@
           "Omnius.Core.Net": "[0.0.1-alpha.1, )",
           "Omnius.Core.Net.Proxies": "[0.0.1-alpha.1, )",
           "Omnius.Core.Net.Upnp": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Pipelines": "[0.0.1-alpha.1, )",
           "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )",
-          "Omnius.Core.RocketPack.Remoting": "[0.0.1-alpha.1, )",
           "Omnius.Core.Serialization": "[0.0.1-alpha.1, )",
-          "Omnius.Core.Sql": "[0.0.1-alpha.1, )",
           "Omnius.Core.Storages": "[0.0.1-alpha.1, )",
-          "SqlKata": "[2.3.7, )",
-          "SqlKata.Execution": "[2.3.7, )",
-          "System.Data.SQLite.Core": "[1.0.116, )"
+          "Omnius.Core.Streams": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Tasks": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Utils": "[0.0.1-alpha.1, )",
+          "YamlDotNet": "[11.2.1, )"
         }
       },
       "omnius.axus.messages": {

@@ -5,37 +5,32 @@ using "Omnius.Axus.Messages";
 namespace "Omnius.Axus.Remoting";
 
 service AxusService {
+    // Config
     GetConfig: () -> (GetConfigResult),
     SetConfig: (SetConfigParam) -> (),
 
-    GetSessionsReport: () -> (GetSessionsReportResult),
+    // Session
+    GetSessions: () -> (GetSessionsResult),
 
+    // MyNodeLocation
     GetMyNodeLocation: () -> (GetMyNodeLocationResult),
 
+    // CloudNodeLocation
     GetCloudNodeLocations: () -> (GetCloudNodeLocationsResult),
     AddCloudNodeLocations: (AddCloudNodeLocationsParam) -> (),
 
-    GetPublishedFilesReport: (GetPublishedFilesReportParam) -> (GetPublishedFilesReportResult),
-    PublishFileFromStorage: (PublishFileFromStorageParam) -> (PublishFileFromStorageResult),
-    PublishFileFromMemory: (PublishFileFromMemoryParam) -> (PublishFileFromMemoryResult),
-    UnpublishFileFromStorage: (UnpublishFileFromStorageParam) -> (),
-    UnpublishFileFromMemory: (UnpublishFileFromMemoryParam) -> (),
+    // PublishFile
+    GetPublishedFiles: (GetPublishedFilesParam) -> (GetPublishedFilesResult),
+    PublishFiles: (PublishFilesParam) -> (),
+    UnpublishFiles: (UnpublishFilesParam) -> (),
 
-    GetSubscribedFilesReport: (GetSubscribedFilesReportParam) -> (GetSubscribedFilesReportResult),
-    SubscribeFile: (SubscribeFileParam) -> (),
-    UnsubscribeFile: (UnsubscribeFileParam) -> (),
-    TryExportFileToStorage: (TryExportFileToStorageParam) -> (TryExportFileToStorageResult),
-    TryExportFileToMemory: (TryExportFileToMemoryParam) -> (TryExportFileToMemoryResult),
-
-    GetPublishedShoutsReport: (GetPublishedShoutsReportParam) -> (GetPublishedShoutsReportResult),
-    PublishShout: (PublishShoutParam) -> (),
-    UnpublishShout: (UnpublishShoutParam) -> (),
-
-    GetSubscribedShoutsReport: (GetSubscribedShoutsReportParam) -> (GetSubscribedShoutsReportResult),
-    SubscribeShout: (SubscribeShoutParam) -> (),
-    UnsubscribeShout: (UnsubscribeShoutParam) -> (),
-    TryExportShout: (TryExportShoutParam) -> (TryExportShoutResult),
+    // SubscribeFile
+    GetSubscribedFiles: (GetSubscribedFilesParam) -> (GetSubscribedFilesResult),
+    SubscribeFiles: (SubscribeFilesParam) -> (),
+    UnsubscribeFiles: (UnsubscribeFilesParam) -> (),
 }
+
+// Config
 
 message GetConfigResult {
     Config: ServiceConfig,
@@ -45,190 +40,67 @@ message SetConfigParam {
     Config: ServiceConfig,
 }
 
-message GetSessionsReportResult {
-    Sessions: vector<SessionReport>(capacity: 8192),
+// Session
+
+message GetSessionsResult {
+    Sessions: vector<SessionReport>,
 }
+
+// MyNodeLocation
 
 message GetMyNodeLocationResult {
     NodeLocation: NodeLocation,
 }
 
+// CloudNodeLocation
+
 message GetCloudNodeLocationsResult {
-    NodeLocations: vector<NodeLocation>(capacity: 8192),
+    NodeLocations: vector<NodeLocation>,
 }
 
 message AddCloudNodeLocationsParam {
-    NodeLocations: vector<NodeLocation>(capacity: 8192),
+    NodeLocations: vector<NodeLocation>,
 }
 
-message GetPublishedFilesReportParam {
-    Zone: string,
+// PublishedFile
+
+message GetPublishedFilesParam {
+    Matcher: GetPublishedFilesMatcher?,
+    Direction: GetPublishedFilesDirection?,
+    Offset: int64?,
+    Limit: int64?,
 }
 
-message GetPublishedFilesReportResult {
+message GetPublishedFilesResult {
     PublishedFiles: vector<PublishedFileReport>,
 }
 
-message PublishFileFromStorageParam {
-    FilePath: string,
+message PublishFilesParam {
+    FilePath: vector<string>,
     MaxBlockSize: int32,
-    Property: AttachedProperty?,
-    Zone: string,
-}
-message PublishFileFromStorageResult {
-    Hash: OmniHash,
 }
 
-message PublishFileFromMemoryParam {
-    Memory: bytes(capacity: 32 * 1024 * 1024),
-    MaxBlockSize: int32,
-    Property: AttachedProperty?,
-    Zone: string,
-}
-message PublishFileFromMemoryResult {
-    Hash: OmniHash,
+message UnpublishFilesParam {
+    FilePath: vector<string>,
 }
 
-message UnpublishFileFromStorageParam {
-    FilePath: string,
-    Zone: string,
+// SubscribedFile
+
+message GetSubscribedFilesParam {
+    Matcher: GetSubscribedFilesMatcher?,
+    Direction: GetSubscribedFilesDirection?,
+    Offset: int64?,
+    Limit: int64?,
 }
 
-message UnpublishFileFromMemoryParam {
-    RootHash: OmniHash,
-    Zone: string,
-}
-
-message GetSubscribedFilesReportParam {
-    Zone: string,
-}
-
-message GetSubscribedFilesReportResult {
+message GetSubscribedFilesResult {
     SubscribedFiles: vector<SubscribedFileReport>,
 }
 
-message SubscribeFileParam {
-    RootHash: OmniHash,
-    Property: AttachedProperty?,
-    Zone: string,
+message SubscribeFilesParam {
+    RootHashes: vector<OmniHash>,
 }
 
 message UnsubscribeFileParam {
-    RootHash: OmniHash,
-    Zone: string,
-}
-
-message TryExportFileToStorageParam {
-    RootHash: OmniHash,
-    FilePath: string,
-}
-
-message TryExportFileToStorageResult {
-    Success: bool,
-}
-
-message TryExportFileToMemoryParam {
-    RootHash: OmniHash,
-}
-
-message TryExportFileToMemoryResult {
-    Memory: bytes?(capacity: 32 * 1024 * 1024, recyclable: true),
-}
-
-message GetPublishedShoutsReportParam {
-    Zone: string,
-}
-
-message GetPublishedShoutsReportResult {
-    PublishedShouts: vector<PublishedShoutReport>,
-}
-
-message PublishShoutParam {
-    Shout: Shout,
-    Property: AttachedProperty?,
-    Zone: string,
-}
-
-message UnpublishShoutParam {
-    Signature: OmniSignature,
-    Channel: string,
-    Zone: string,
-}
-
-message GetSubscribedShoutsReportParam {
-    Zone: string,
-}
-
-message GetSubscribedShoutsReportResult {
-    SubscribedShouts: vector<SubscribedShoutReport>,
-}
-
-message SubscribeShoutParam {
-    Signature: OmniSignature,
-    Channel: string,
-    Property: AttachedProperty?,
-    Zone: string,
-}
-
-message UnsubscribeShoutParam {
-    Signature: OmniSignature,
-    Channel: string,
-    Zone: string,
-}
-
-message TryExportShoutParam {
-    Signature: OmniSignature,
-    Channel: string,
-    CreatedTime: timestamp64,
-}
-
-message TryExportShoutResult {
-    Shout: Shout?,
-}
-
-// ServiceConfig
-
-message ServiceConfig {
-    Bandwidth: BandwidthConfig?,
-    I2pConnector: I2pConnectorConfig?,
-    I2pAccepter: I2pAccepterConfig?,
-    TcpConnector: TcpConnectorConfig?,
-    TcpAccepter: TcpAccepterConfig?,
-}
-
-message BandwidthConfig {
-    MaxSendBytesPerSeconds: int32,
-    MaxReceiveBytesPerSeconds: int32,
-}
-
-message I2pConnectorConfig {
-    IsEnabled: bool,
-    SamBridgeAddress: OmniAddress,
-}
-
-message I2pAccepterConfig {
-    IsEnabled: bool,
-    SamBridgeAddress: OmniAddress,
-}
-
-message TcpConnectorConfig {
-    IsEnabled: bool,
-    Proxy: TcpProxyConfig?,
-}
-
-message TcpProxyConfig {
-    Type: TcpProxyType,
-    Address: OmniAddress,
-}
-
-enum TcpProxyType : uint8 {
-    None = 0,
-    HttpProxy = 1,
-    Socks5Proxy = 2,
-}
-
-message TcpAccepterConfig {
-    IsEnabled: bool,
-    UseUpnp: bool,
-    ListenAddress: OmniAddress,
+    RootHashes: vector<OmniHash>,
 }

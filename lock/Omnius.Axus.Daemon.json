@@ -546,7 +546,7 @@
           "System.Runtime": "4.3.0"
         }
       },
-      "omnius.axus.engines": {
+      "omnius.axus.core": {
         "type": "Project",
         "dependencies": {
           "NLog": "[4.7.15, )",
