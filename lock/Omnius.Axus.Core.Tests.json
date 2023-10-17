@@ -1355,6 +1355,7 @@
         "dependencies": {
           "NLog": "[4.7.15, )",
           "Omnius.Axus.Messages": "[0.0.1-alpha.1, )",
+          "Omnius.Axus.Remoting": "[0.0.1-alpha.1, )",
           "Omnius.Core": "[0.0.1-alpha.1, )",
           "Omnius.Core.Collections": "[0.0.1-alpha.1, )",
           "Omnius.Core.Cryptography": "[0.0.1-alpha.1, )",
@@ -1383,6 +1384,19 @@
           "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )",
           "Omnius.Core.RocketPack.Remoting": "[0.0.1-alpha.1, )",
           "Omnius.Core.Utils": "[0.0.1-alpha.1, )"
+        }
+      },
+      "omnius.axus.remoting": {
+        "type": "Project",
+        "dependencies": {
+          "NLog": "[4.7.15, )",
+          "Omnius.Axus.Messages": "[0.0.1-alpha.1, )",
+          "Omnius.Core": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Collections": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Cryptography": "[0.0.1-alpha.1, )",
+          "Omnius.Core.Net": "[0.0.1-alpha.1, )",
+          "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )",
+          "Omnius.Core.RocketPack.Remoting": "[0.0.1-alpha.1, )"
         }
       },
       "omnius.core": {

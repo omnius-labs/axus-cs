@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
-using Omnius.Axus.Core.Models;
+using Omnius.Axus.Core.Engine.Models;
 using Omnius.Core;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Caps;
@@ -45,10 +45,7 @@ public sealed partial class ConnectionTcpAccepter : AsyncDisposableBase, IConnec
         _options = options;
     }
 
-    private async ValueTask InitAsync(CancellationToken cancellationToken = default)
-    {
-        _tcpListenerManager = await TcpListenerManager.CreateAsync(_options.ListenAddress, _options.UseUpnp, _upnpClientFactory, cancellationToken);
-    }
+    private async ValueTask InitAsync(CancellationToken cancellationToken = default) => _tcpListenerManager = await TcpListenerManager.CreateAsync(_options.ListenAddress, _options.UseUpnp, _upnpClientFactory, cancellationToken);
 
     protected override async ValueTask OnDisposeAsync()
     {
@@ -95,7 +92,7 @@ public sealed partial class ConnectionTcpAccepter : AsyncDisposableBase, IConnec
     {
         if (!_options.ListenAddress.TryParseTcpEndpoint(out var listenIpAddress, out var port))
         {
-            return Array.Empty<OmniAddress>();
+            return [];
         }
 
         var results = new List<OmniAddress>();
@@ -106,7 +103,7 @@ public sealed partial class ConnectionTcpAccepter : AsyncDisposableBase, IConnec
 
         if (_tcpListenerManager is null)
         {
-            return results.ToArray();
+            return [.. results];
         }
 
         var globalIpAddresses = await _tcpListenerManager.GetMyGlobalIpAddressesAsync(cancellationToken);
@@ -126,6 +123,6 @@ public sealed partial class ConnectionTcpAccepter : AsyncDisposableBase, IConnec
             }
         }
 
-        return results.ToArray();
+        return [.. results];
     }
 }

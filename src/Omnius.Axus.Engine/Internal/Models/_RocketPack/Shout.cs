@@ -6,7 +6,7 @@ using Omnius.Core.RocketPack;
 
 namespace Omnius.Axus.Core.Engine.Models;
 
-public sealed partial class Shout
+internal sealed partial class Shout
 {
     public static Shout Create(string channel, Timestamp64 createdTime, IMemoryOwner<byte> value, OmniDigitalSignature digitalSignature)
     {

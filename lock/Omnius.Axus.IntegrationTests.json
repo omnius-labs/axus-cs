@@ -115,11 +115,6 @@
         "resolved": "2.8.26",
         "contentHash": "OiKusGL20vby4uDEswj2IgkdchC1yQ6rwbIkZDVBPIR6al2b7n3pC91elBul9q33KaBgRKhbZH3+2Ur4fnWx2A=="
       },
-      "Microsoft.Bcl.AsyncInterfaces": {
-        "type": "Transitive",
-        "resolved": "6.0.0",
-        "contentHash": "UcSjPsst+DfAdJGVDsu346FX0ci0ah+lw3WRtn18NUwEqRt70HaOQ7lI72vy3+1LxtqI3T5GWwV39rQSrCzAeg=="
-      },
       "Microsoft.CodeCoverage": {
         "type": "Transitive",
         "resolved": "17.4.1",
@@ -764,14 +759,6 @@
           "System.Runtime.Extensions": "4.3.0"
         }
       },
-      "System.Linq.Async": {
-        "type": "Transitive",
-        "resolved": "6.0.1",
-        "contentHash": "0YhHcaroWpQ9UCot3Pizah7ryAzQhNvobLMSxeDIGmnXfkQn8u5owvpOH0K6EVB+z9L7u6Cc4W17Br/+jyttEQ==",
-        "dependencies": {
-          "Microsoft.Bcl.AsyncInterfaces": "6.0.0"
-        }
-      },
       "System.Linq.Expressions": {
         "type": "Transitive",
         "resolved": "4.3.0",
@@ -1368,27 +1355,6 @@
         "resolved": "11.2.1",
         "contentHash": "tBt8K+korVfrjH9wyDEhiLKxbs8qoLCLIFwvYgkSUuMC9//w3z0cFQ8LQAI/5MCKq+BMil0cfRTRvPeE7eXhQw=="
       },
-      "omnius.axus.core": {
-        "type": "Project",
-        "dependencies": {
-          "NLog": "[4.7.15, )",
-          "Omnius.Axus.Messages": "[0.0.1-alpha.1, )",
-          "Omnius.Core": "[0.0.1-alpha.1, )",
-          "Omnius.Core.Collections": "[0.0.1-alpha.1, )",
-          "Omnius.Core.Cryptography": "[0.0.1-alpha.1, )",
-          "Omnius.Core.Net": "[0.0.1-alpha.1, )",
-          "Omnius.Core.Net.I2p": "[0.0.1-alpha.1, )",
-          "Omnius.Core.Net.Proxies": "[0.0.1-alpha.1, )",
-          "Omnius.Core.Net.Upnp": "[0.0.1-alpha.1, )",
-          "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )",
-          "Omnius.Core.RocketPack.Remoting": "[0.0.1-alpha.1, )",
-          "Omnius.Core.Storages": "[0.0.1-alpha.1, )",
-          "SqlKata": "[2.3.7, )",
-          "SqlKata.Execution": "[2.3.7, )",
-          "System.Data.SQLite.Core": "[1.0.116, )",
-          "System.Linq.Async": "[6.0.1, )"
-        }
-      },
       "omnius.axus.daemon": {
         "type": "Project",
         "dependencies": {
@@ -1396,7 +1362,6 @@
           "GitInfo": "[2.2.0, )",
           "NLog": "[4.7.15, )",
           "NLog.Config": "[4.7.15, )",
-          "Omnius.Axus.Core": "[0.0.1-alpha.1, )",
           "Omnius.Axus.Messages": "[0.0.1-alpha.1, )",
           "Omnius.Axus.Remoting": "[0.0.1-alpha.1, )",
           "Omnius.Core": "[0.0.1-alpha.1, )",
@@ -1506,14 +1471,6 @@
           "Omnius.Core.RocketPack": "[0.0.1-alpha.1, )",
           "Omnius.Core.Serialization": "[0.0.1-alpha.1, )",
           "Omnius.Core.Tasks": "[0.0.1-alpha.1, )"
-        }
-      },
-      "omnius.core.net.i2p": {
-        "type": "Project",
-        "dependencies": {
-          "NLog": "[4.7.15, )",
-          "Omnius.Core": "[0.0.1-alpha.1, )",
-          "Omnius.Core.Pipelines": "[0.0.1-alpha.1, )"
         }
       },
       "omnius.core.net.proxies": {

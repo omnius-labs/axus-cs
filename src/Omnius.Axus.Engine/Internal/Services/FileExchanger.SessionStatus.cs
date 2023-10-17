@@ -6,11 +6,11 @@ using Omnius.Core.Tasks;
 
 namespace Omnius.Axus.Core.Engine.Services;
 
-public sealed partial class FileExchanger
+internal sealed partial class FileExchanger
 {
     private sealed class SessionStatus : AsyncDisposableBase
     {
-        public SessionStatus(ISession session, ExchangeType exchangeType, OmniHash rootHash, ISystemClock systemClock, IBatchActionDispatcher batchActionDispatcher)
+        public SessionStatus(Session session, ExchangeType exchangeType, OmniHash rootHash, ISystemClock systemClock, IBatchActionDispatcher batchActionDispatcher)
         {
             this.Session = session;
             this.ExchangeType = exchangeType;
@@ -31,7 +31,7 @@ public sealed partial class FileExchanger
             this.ReceivedWantBlockHashes.Dispose();
         }
 
-        public ISession Session { get; }
+        public Session Session { get; }
         public ExchangeType ExchangeType { get; }
         public OmniHash RootHash { get; }
         public IBatchActionDispatcher BatchActionDispatcher { get; }

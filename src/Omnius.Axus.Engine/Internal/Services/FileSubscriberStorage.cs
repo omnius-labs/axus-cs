@@ -1,6 +1,5 @@
 using System.Buffers;
 using System.IO.Pipelines;
-using Omnius.Axus.Core.Engine;
 using Omnius.Axus.Core.Engine.Models;
 using Omnius.Axus.Core.Engine.Repositories;
 using Omnius.Axus.Core.Engine.Repositories.Models;
@@ -13,7 +12,7 @@ using Omnius.Core.Storages;
 
 namespace Omnius.Axus.Core.Engine.Services;
 
-public sealed partial class FileSubscriberStorage : AsyncDisposableBase
+internal sealed partial class FileSubscriberStorage : AsyncDisposableBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -282,7 +281,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase
             await foreach (var blockHash in _subscriberRepo.BlockItems.GetBlockHashesAsync(rootHash, true, cancellationToken))
             {
                 var key = GenKey(rootHash, blockHash);
-                await _blockStorage.TryDeleteAsync(key, cancellationToken);
+                _ = await _blockStorage.TryDeleteAsync(key, cancellationToken);
             }
 
             await _subscriberRepo.BlockItems.DeleteAsync(rootHash, cancellationToken);
@@ -330,7 +329,7 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase
 
                 if (!blockHash.Validate(memoryOwner.Memory.Span))
                 {
-                    await _blockStorage.TryDeleteAsync(key, cancellationToken);
+                    _ = await _blockStorage.TryDeleteAsync(key, cancellationToken);
                     return false;
                 }
 
@@ -378,8 +377,5 @@ public sealed partial class FileSubscriberStorage : AsyncDisposableBase
         }
     }
 
-    private static string GenKey(OmniHash rootHash, OmniHash blockHash)
-    {
-        return rootHash.ToString(ConvertBaseType.Base16Lower) + "/" + blockHash.ToString(ConvertBaseType.Base16Lower);
-    }
+    private static string GenKey(OmniHash rootHash, OmniHash blockHash) => rootHash.ToString(ConvertBaseType.Base16Lower) + "/" + blockHash.ToString(ConvertBaseType.Base16Lower);
 }

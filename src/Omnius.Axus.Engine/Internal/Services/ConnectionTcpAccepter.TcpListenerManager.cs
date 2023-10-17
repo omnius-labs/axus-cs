@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
-using Omnius.Axus.Core.Engine;
+using Omnius.Axus.Core.Engine.Services.Helpers;
 using Omnius.Core;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Upnp;
@@ -57,8 +57,8 @@ public sealed partial class ConnectionTcpAccepter
                         _externalIpAddress = await upnpClient.GetExternalIpAddressAsync(cancellationToken);
                         _logger.Debug("UPnP ExternalIpAddress: {}", _externalIpAddress);
 
-                        await upnpClient.ClosePortAsync(UpnpProtocolType.Tcp, port, cancellationToken);
-                        await upnpClient.OpenPortAsync(UpnpProtocolType.Tcp, port, port, "Axus", cancellationToken);
+                        _ = await upnpClient.ClosePortAsync(UpnpProtocolType.Tcp, port, cancellationToken);
+                        _ = await upnpClient.OpenPortAsync(UpnpProtocolType.Tcp, port, port, "Axus", cancellationToken);
                     }
                 }
             }
@@ -68,10 +68,7 @@ public sealed partial class ConnectionTcpAccepter
             }
             finally
             {
-                if (upnpClient != null)
-                {
-                    upnpClient.Dispose();
-                }
+                upnpClient?.Dispose();
             }
         }
 
@@ -99,7 +96,7 @@ public sealed partial class ConnectionTcpAccepter
                                 await upnpClient.ConnectAsync();
                             }
 
-                            await upnpClient.ClosePortAsync(UpnpProtocolType.Tcp, ipEndpoint.Port);
+                            _ = await upnpClient.ClosePortAsync(UpnpProtocolType.Tcp, ipEndpoint.Port);
                         }
                     }
                 }
@@ -110,10 +107,7 @@ public sealed partial class ConnectionTcpAccepter
             }
             finally
             {
-                if (upnpClient != null)
-                {
-                    upnpClient.Dispose();
-                }
+                upnpClient?.Dispose();
             }
         }
 

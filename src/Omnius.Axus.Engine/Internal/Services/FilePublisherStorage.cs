@@ -1,6 +1,5 @@
 using System.Buffers;
 using Omnius.Axus.Core.Implementations.Internal.Repositories;
-using Omnius.Axus.Core.Engine;
 using Omnius.Axus.Core.Engine.Models;
 using Omnius.Axus.Messages;
 using Omnius.Core;
@@ -13,7 +12,7 @@ using Omnius.Axus.Core.Engine.Repositories.Models;
 
 namespace Omnius.Axus.Core.Engine.Services;
 
-public sealed partial class FilePublisherStorage : AsyncDisposableBase
+internal sealed partial class FilePublisherStorage : AsyncDisposableBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -29,7 +28,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase
     private readonly AsyncLock _asyncLock = new();
     private readonly AsyncLock _publishAsyncLock = new();
 
-    private static Base16 _base16 = new Base16(Base16Case.Lower);
+    private static readonly Base16 _base16 = new(Base16Case.Lower);
 
     public static async ValueTask<FilePublisherStorage> CreateAsync(IKeyValueStorageFactory keyValueStorageFactory,
         ISystemClock systemClock, IRandomBytesProvider randomBytesProvider, IBytesPool bytesPool, FilePublisherStorageOptions options, CancellationToken cancellationToken = default)
@@ -257,17 +256,14 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase
         }
     }
 
-    private string GenSpaceId(DateTime now)
-    {
-        return string.Format("{0}_{1}", now.ToString("yyyy-MM-dd_HH-mm-ss"), _base16.BytesToString(new ReadOnlySequence<byte>(_randomBytesProvider.GetBytes(32))));
-    }
+    private string GenSpaceId(DateTime now) => string.Format("{0}_{1}", now.ToString("yyyy-MM-dd_HH-mm-ss"), _base16.BytesToString(new ReadOnlySequence<byte>(_randomBytesProvider.GetBytes(32))));
 
     private async ValueTask DeleteBlocksAsync(string prefix, IEnumerable<OmniHash> blockHashes, CancellationToken cancellationToken = default)
     {
         foreach (var blockHash in blockHashes.ToHashSet())
         {
             var key = GenTempKey(prefix, blockHash);
-            await _blockStorage.TryDeleteAsync(key, cancellationToken);
+            _ = await _blockStorage.TryDeleteAsync(key, cancellationToken);
         }
     }
 
@@ -277,7 +273,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase
         {
             var oldKey = GenTempKey(spaceId, blockHash);
             var newKey = GenFixedKey(rootHash, blockHash);
-            await _blockStorage.TryChangeKeyAsync(oldKey, newKey, cancellationToken);
+            _ = await _blockStorage.TryChangeKeyAsync(oldKey, newKey, cancellationToken);
         }
     }
 
@@ -384,7 +380,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase
             await foreach (var blockItem in _publisherRepo.BlockInternalItems.GetItemsAsync(rootHash, cancellationToken))
             {
                 var key = GenFixedKey(rootHash, blockItem.BlockHash);
-                await _blockStorage.TryDeleteAsync(key, cancellationToken);
+                _ = await _blockStorage.TryDeleteAsync(key, cancellationToken);
             }
 
             await _publisherRepo.BlockInternalItems.DeleteAsync(rootHash, cancellationToken);
@@ -413,7 +409,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase
         if (!File.Exists(filePath)) return null;
 
         using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-        fileStream.Seek(offset, SeekOrigin.Begin);
+        _ = fileStream.Seek(offset, SeekOrigin.Begin);
         var memoryOwner = _bytesPool.Memory.Rent(count).Shrink(count);
 
         for (int position = 0; position < count;)
@@ -432,13 +428,7 @@ public sealed partial class FilePublisherStorage : AsyncDisposableBase
         return memoryOwner;
     }
 
-    private static string GenTempKey(string spaceId, OmniHash blockHash)
-    {
-        return string.Format("tmp/{0}/{1}", spaceId, blockHash.ToString(ConvertBaseType.Base16Lower));
-    }
+    private static string GenTempKey(string spaceId, OmniHash blockHash) => string.Format("tmp/{0}/{1}", spaceId, blockHash.ToString(ConvertBaseType.Base16Lower));
 
-    private static string GenFixedKey(OmniHash rootHash, OmniHash blockHash)
-    {
-        return string.Format("fix/{0}/{1}", rootHash.ToString(ConvertBaseType.Base16Lower), blockHash.ToString(ConvertBaseType.Base16Lower));
-    }
+    private static string GenFixedKey(OmniHash rootHash, OmniHash blockHash) => string.Format("fix/{0}/{1}", rootHash.ToString(ConvertBaseType.Base16Lower), blockHash.ToString(ConvertBaseType.Base16Lower));
 }

@@ -1,4 +1,3 @@
-using Omnius.Axus.Core.Engine;
 using Omnius.Axus.Core.Engine.Models;
 using Omnius.Axus.Messages;
 using Omnius.Core;
@@ -10,7 +9,7 @@ using Omnius.Core.Net.Connections.Secure.V1;
 
 namespace Omnius.Axus.Core.Engine.Services;
 
-public sealed class SessionConnector : AsyncDisposableBase, ISessionConnector
+internal sealed class SessionConnector : AsyncDisposableBase
 {
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -41,7 +40,7 @@ public sealed class SessionConnector : AsyncDisposableBase, ISessionConnector
         _cancellationTokenSource.Dispose();
     }
 
-    public async ValueTask<ISession?> ConnectAsync(OmniAddress address, string scheme, CancellationToken cancellationToken = default)
+    public async ValueTask<Session?> ConnectAsync(OmniAddress address, string scheme, CancellationToken cancellationToken = default)
     {
         foreach (var connector in _connectionConnectors)
         {
@@ -84,9 +83,9 @@ public sealed class SessionConnector : AsyncDisposableBase, ISessionConnector
         return null;
     }
 
-    private async ValueTask<ISession> CreateSessionAsync(IConnection connection, OmniAddress address, string scheme, CancellationToken cancellationToken)
+    private async ValueTask<Session> CreateSessionAsync(IConnection connection, OmniAddress address, string scheme, CancellationToken cancellationToken)
     {
-        var sendHelloMessage = new SessionManagerHelloMessage(new[] { SessionManagerVersion.Version1 });
+        var sendHelloMessage = new SessionManagerHelloMessage([SessionManagerVersion.Version1]);
         var receiveHelloMessage = await connection.ExchangeAsync(sendHelloMessage, cancellationToken);
 
         var version = EnumHelper.GetOverlappedMaxValue(sendHelloMessage.Versions, receiveHelloMessage.Versions);
