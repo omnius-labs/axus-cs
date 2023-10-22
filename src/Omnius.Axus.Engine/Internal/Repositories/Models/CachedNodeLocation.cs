@@ -1,6 +1,6 @@
 using Omnius.Axus.Messages;
 
-namespace Omnius.Axus.Core.Engine.Repositories.Models;
+namespace Omnius.Axus.Engine.Internal.Repositories.Models;
 
 internal record CachedNodeLocation
 {

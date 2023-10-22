@@ -1,8 +1,8 @@
-using Omnius.Axus.Core.Engine.Models;
+using Omnius.Axus.Engine.Internal.Models;
 using Omnius.Axus.Messages;
 using Omnius.Core.Cryptography;
 
-namespace Omnius.Axus.Core.Engine.Repositories.Models;
+namespace Omnius.Axus.Engine.Internal.Repositories.Models;
 
 internal record FilePublishedItem
 {

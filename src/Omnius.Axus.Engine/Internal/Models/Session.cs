@@ -4,7 +4,7 @@ using Omnius.Core.Cryptography;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Connections;
 
-namespace Omnius.Axus.Core.Engine.Models;
+namespace Omnius.Axus.Engine.Internal.Models;
 
 internal class Session : AsyncDisposableBase
 {

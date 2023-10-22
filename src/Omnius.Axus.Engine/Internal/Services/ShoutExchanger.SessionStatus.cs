@@ -1,6 +1,6 @@
 using Omnius.Core;
 
-namespace Omnius.Axus.Core.Engine.Services;
+namespace Omnius.Axus.Engine.Internal.Services;
 
 public sealed partial class ShoutExchanger
 {

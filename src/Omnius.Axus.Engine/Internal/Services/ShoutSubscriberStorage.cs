@@ -1,7 +1,7 @@
 using System.Buffers;
-using Omnius.Axus.Core.Engine;
-using Omnius.Axus.Core.Engine.Models;
-using Omnius.Axus.Core.Engine.Repositories;
+using Omnius.Axus.Engine.Internal;
+using Omnius.Axus.Engine.Internal.Models;
+using Omnius.Axus.Engine.Internal.Repositories;
 using Omnius.Axus.Messages;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
@@ -9,7 +9,7 @@ using Omnius.Core.Pipelines;
 using Omnius.Core.RocketPack;
 using Omnius.Core.Storages;
 
-namespace Omnius.Axus.Core.Engine.Services;
+namespace Omnius.Axus.Engine.Internal.Services;
 
 public sealed partial class ShoutSubscriberStorage : AsyncDisposableBase, IShoutSubscriberStorage
 {

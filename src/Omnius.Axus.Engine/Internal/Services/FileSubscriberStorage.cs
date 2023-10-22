@@ -1,8 +1,8 @@
 using System.Buffers;
 using System.IO.Pipelines;
-using Omnius.Axus.Core.Engine.Models;
-using Omnius.Axus.Core.Engine.Repositories;
-using Omnius.Axus.Core.Engine.Repositories.Models;
+using Omnius.Axus.Engine.Internal.Models;
+using Omnius.Axus.Engine.Internal.Repositories;
+using Omnius.Axus.Engine.Internal.Repositories.Models;
 using Omnius.Axus.Messages;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
@@ -10,7 +10,7 @@ using Omnius.Core.Pipelines;
 using Omnius.Core.Serialization;
 using Omnius.Core.Storages;
 
-namespace Omnius.Axus.Core.Engine.Services;
+namespace Omnius.Axus.Engine.Internal.Services;
 
 internal sealed partial class FileSubscriberStorage : AsyncDisposableBase
 {

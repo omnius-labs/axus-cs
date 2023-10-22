@@ -1672,7 +1672,7 @@ public sealed partial class UnsubscribeFileParam : global::Omnius.Core.RocketPac
         }
     }
 }
-public interface IAxusService
+public interface IAxusApi
 {
     global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetConfigResult> GetConfigAsync(global::System.Threading.CancellationToken cancellationToken = default);
     global::System.Threading.Tasks.ValueTask SetConfigAsync(global::Omnius.Axus.Remoting.SetConfigParam param, global::System.Threading.CancellationToken cancellationToken = default);
@@ -1686,9 +1686,9 @@ public interface IAxusService
     global::System.Threading.Tasks.ValueTask<global::Omnius.Axus.Remoting.GetSubscribedFilesResult> GetSubscribedFilesAsync(global::Omnius.Axus.Remoting.GetSubscribedFilesParam param, global::System.Threading.CancellationToken cancellationToken = default);
     global::System.Threading.Tasks.ValueTask SubscribeFilesAsync(global::Omnius.Axus.Remoting.SubscribeFilesParam param, global::System.Threading.CancellationToken cancellationToken = default);
 }
-public class AxusServiceRemoting
+public class AxusApiRemoting
 {
-    public class Client<TError> : global::Omnius.Axus.Remoting.IAxusService
+    public class Client<TError> : global::Omnius.Axus.Remoting.IAxusApi
         where TError : global::Omnius.Core.RocketPack.IRocketMessage<TError>
     {
         private readonly global::Omnius.Core.RocketPack.Remoting.IRocketRemotingCallerFactory<TError> _callerFactory;
@@ -1757,10 +1757,10 @@ public class AxusServiceRemoting
     public class Server<TError>
         where TError : global::Omnius.Core.RocketPack.IRocketMessage<TError>
     {
-        private readonly global::Omnius.Axus.Remoting.IAxusService _service;
+        private readonly global::Omnius.Axus.Remoting.IAxusApi _service;
         private readonly global::Omnius.Core.RocketPack.Remoting.IRocketRemotingListenerFactory<TError> _listenerFactory;
         private readonly global::Omnius.Core.IBytesPool _bytesPool;
-        public Server(global::Omnius.Axus.Remoting.IAxusService service, global::Omnius.Core.RocketPack.Remoting.IRocketRemotingListenerFactory<TError> listenerFactory, global::Omnius.Core.IBytesPool bytesPool)
+        public Server(global::Omnius.Axus.Remoting.IAxusApi service, global::Omnius.Core.RocketPack.Remoting.IRocketRemotingListenerFactory<TError> listenerFactory, global::Omnius.Core.IBytesPool bytesPool)
         {
             _service = service;
             _listenerFactory = listenerFactory;

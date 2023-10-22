@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Text;
-using Omnius.Axus.Core.Engine.Models;
+using Omnius.Axus.Engine.Internal.Models;
 using Omnius.Axus.Messages;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
@@ -10,10 +10,10 @@ using Omnius.Core.Serialization;
 using Omnius.Core.Sql;
 using SqlKata.Compilers;
 using SqlKata.Execution;
-using Omnius.Axus.Core.Engine.Repositories.Helpers;
-using Omnius.Axus.Core.Engine.Repositories.Models;
+using Omnius.Axus.Engine.Internal.Repositories.Helpers;
+using Omnius.Axus.Engine.Internal.Repositories.Models;
 
-namespace Omnius.Axus.Core.Engine.Repositories;
+namespace Omnius.Axus.Engine.Internal.Repositories;
 
 internal sealed partial class FileSubscriberStorageRepository : AsyncDisposableBase
 {

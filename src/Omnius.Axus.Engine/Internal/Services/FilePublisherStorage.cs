@@ -1,6 +1,6 @@
 using System.Buffers;
 using Omnius.Axus.Core.Implementations.Internal.Repositories;
-using Omnius.Axus.Core.Engine.Models;
+using Omnius.Axus.Engine.Internal.Models;
 using Omnius.Axus.Messages;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
@@ -8,9 +8,9 @@ using Omnius.Core.Cryptography.Functions;
 using Omnius.Core.Pipelines;
 using Omnius.Core.Serialization;
 using Omnius.Core.Storages;
-using Omnius.Axus.Core.Engine.Repositories.Models;
+using Omnius.Axus.Engine.Internal.Repositories.Models;
 
-namespace Omnius.Axus.Core.Engine.Services;
+namespace Omnius.Axus.Engine.Internal.Services;
 
 internal sealed partial class FilePublisherStorage : AsyncDisposableBase
 {

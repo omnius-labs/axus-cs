@@ -3,9 +3,9 @@ syntax v1.0;
 using "Omnius.Core.Cryptography";
 using "Omnius.Core.Net";
 using "Omnius.Axus.Messages";
-using "Omnius.Axus.Core.Engine.Models";
+using "Omnius.Axus.Engine.Models";
 
-namespace "Omnius.Axus.Core.Engine.Models";
+namespace "Omnius.Axus.Engine.Internal.Models";
 option csharp_access_level "internal";
 
 // Common
@@ -23,17 +23,6 @@ message MerkleTreeSection {
 message ContentKey {
     Scheme: string(capacity: 256),
     RootHash: OmniHash,
-}
-
-message Shout {
-    Channel: string(capacity: 256),
-    CreatedTime: timestamp64,
-    Value: bytes(capacity: 32 * 1024 * 1024, recyclable: true),
-    Certificate: OmniCertificate?,
-}
-
-message AttachedProperty {
-    Value: string(capacity: 8192),
 }
 
 // SessionManager

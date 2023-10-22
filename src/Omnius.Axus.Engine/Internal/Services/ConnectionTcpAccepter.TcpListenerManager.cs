@@ -1,11 +1,11 @@
 using System.Net;
 using System.Net.Sockets;
-using Omnius.Axus.Core.Engine.Services.Helpers;
+using Omnius.Axus.Engine.Internal.Services.Helpers;
 using Omnius.Core;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Upnp;
 
-namespace Omnius.Axus.Core.Engine.Services;
+namespace Omnius.Axus.Engine.Internal.Services;
 
 public sealed partial class ConnectionTcpAccepter
 {

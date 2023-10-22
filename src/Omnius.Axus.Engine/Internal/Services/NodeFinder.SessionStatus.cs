@@ -1,11 +1,11 @@
-using Omnius.Axus.Core.Engine.Models;
+using Omnius.Axus.Engine.Internal.Models;
 using Omnius.Axus.Core.Models;
 using Omnius.Axus.Messages;
 using Omnius.Core;
 using Omnius.Core.Collections;
 using Omnius.Core.Tasks;
 
-namespace Omnius.Axus.Core.Engine.Services;
+namespace Omnius.Axus.Engine.Internal.Services;
 
 public sealed partial class NodeFinder
 {

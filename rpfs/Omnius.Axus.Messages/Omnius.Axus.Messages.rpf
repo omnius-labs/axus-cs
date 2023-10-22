@@ -33,7 +33,7 @@ message MatcherText {
     Pattern: string,
 }
 
-enum DirectionType : uint8 {
+enum SortType : uint8 {
     Asc = 0,
     Desc = 1,
 }
@@ -41,14 +41,28 @@ enum DirectionType : uint8 {
 // Config
 
 message ServiceConfig {
+    Profile: ProfileConfig?,
+    Note: NoteConfig,
+    Engine: EngineConfig?,
+}
+
+message ProfileConfig {
+    DigitalSignature: OmniDigitalSignature,
+    TrustedSignatures: vector<OmniSignature>(capacity: 1024),
+    BlockedSignatures: vector<OmniSignature>(capacity: 1024),
+}
+
+message NoteConfig {
+    Tags: vector<string(capacity: 256)>(capacity: 256),
+}
+
+message EngineConfig {
     Bandwidth: BandwidthConfig?,
     I2pConnector: I2pConnectorConfig?,
     I2pAccepter: I2pAccepterConfig?,
     TcpConnector: TcpConnectorConfig?,
     TcpAccepter: TcpAccepterConfig?,
-    FileDownloader: FileDownloaderConfig?,
-    Profile: ProfileConfig?,
-    Note: NoteConfig?,
+    FileSubscriber: FileSubscriberConfig?,
 }
 
 message BandwidthConfig {
@@ -88,18 +102,8 @@ message TcpAccepterConfig {
     ListenAddress: OmniAddress,
 }
 
-message FileDownloaderConfig {
+message FileSubscriberConfig {
     DestinationDirectory: string,
-}
-
-message ProfileConfig {
-    DigitalSignature: OmniDigitalSignature,
-    TrustedSignatures: vector<OmniSignature>(capacity: 1024),
-    BlockedSignatures: vector<OmniSignature>(capacity: 1024),
-}
-
-message NoteConfig {
-    Tags: vector<string(capacity: 256)>(capacity: 256),
 }
 
 // Session
@@ -118,13 +122,17 @@ enum SessionHandshakeType : uint8 {
 
 // PublishedFile
 
+message GetPublishedFilesParam {
+    Name: MatcherText?,
+}
+
 message GetPublishedFilesMatcher {
     Name: MatcherText?,
 }
 
 message GetPublishedFilesDirection {
     FieldType: GetPublishedFilesFieldType,
-    DirectionType: DirectionType,
+    SortType: SortType,
 }
 
 enum GetPublishedFilesFieldType : uint8 {
@@ -166,7 +174,7 @@ message GetSubscribedFilesMatcher {
 
 message GetSubscribedFilesDirection {
     FieldType: GetSubscribedFilesFieldType,
-    DirectionType: DirectionType,
+    SortType: SortType,
 }
 
 enum GetSubscribedFilesFieldType : uint8 {

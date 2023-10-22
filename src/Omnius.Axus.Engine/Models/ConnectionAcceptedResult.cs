@@ -1,7 +1,7 @@
 using Omnius.Core.Net;
 using Omnius.Core.Net.Connections;
 
-namespace Omnius.Axus.Core.Engine.Models;
+namespace Omnius.Axus.Engine.Models;
 
 public record ConnectionAcceptedResult
 {

@@ -17,7 +17,7 @@
     <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.Storages\Omnius.Core.Storages.csproj" />
     <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core.UnitTestToolkit\Omnius.Core.UnitTestToolkit.csproj" />
     <ProjectReference Include="..\..\refs\core-cs\src\Omnius.Core\Omnius.Core.csproj" />
-    <ProjectReference Include="..\..\src\Omnius.Axus.Core\Omnius.Axus.Core.csproj" />
+    <ProjectReference Include="..\..\src\Omnius.Axus.Engine\Omnius.Axus.Engine.csproj" />
     <ProjectReference Include="..\..\src\Omnius.Axus.Messages\Omnius.Axus.Messages.csproj" />
   </ItemGroup>
 

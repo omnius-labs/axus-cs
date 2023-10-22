@@ -1,7 +1,6 @@
-using Omnius.Axus.Remoting.Internal.Entities;
 using Omnius.Core.Utils;
 
-namespace Omnius.Axus.Remoting;
+namespace Omnius.Axus.Messages;
 
 public sealed partial class ServiceConfig
 {

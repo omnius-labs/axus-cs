@@ -3,7 +3,7 @@
 
 namespace Omnius.Axus.Messages;
 
-public enum DirectionType : byte
+public enum SortType : byte
 {
     Asc = 0,
     Desc = 1,
@@ -719,45 +719,31 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
     static ServiceConfig()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.ServiceConfig>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.ServiceConfig>.Empty = new global::Omnius.Axus.Messages.ServiceConfig(null, null, null, null, null, null, null, null);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.ServiceConfig>.Empty = new global::Omnius.Axus.Messages.ServiceConfig(null, global::Omnius.Axus.Messages.NoteConfig.Empty, null);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public ServiceConfig(global::Omnius.Axus.Messages.BandwidthConfig? bandwidth, global::Omnius.Axus.Messages.I2pConnectorConfig? i2pConnector, global::Omnius.Axus.Messages.I2pAccepterConfig? i2pAccepter, global::Omnius.Axus.Messages.TcpConnectorConfig? tcpConnector, global::Omnius.Axus.Messages.TcpAccepterConfig? tcpAccepter, global::Omnius.Axus.Messages.FileDownloaderConfig? fileDownloader, global::Omnius.Axus.Messages.ProfileConfig? profile, global::Omnius.Axus.Messages.NoteConfig? note)
+    public ServiceConfig(global::Omnius.Axus.Messages.ProfileConfig? profile, global::Omnius.Axus.Messages.NoteConfig note, global::Omnius.Axus.Messages.EngineConfig? engine)
     {
-        this.Bandwidth = bandwidth;
-        this.I2pConnector = i2pConnector;
-        this.I2pAccepter = i2pAccepter;
-        this.TcpConnector = tcpConnector;
-        this.TcpAccepter = tcpAccepter;
-        this.FileDownloader = fileDownloader;
+        if (note is null) throw new global::System.ArgumentNullException("note");
         this.Profile = profile;
         this.Note = note;
+        this.Engine = engine;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
-            if (bandwidth != default) ___h.Add(bandwidth.GetHashCode());
-            if (i2pConnector != default) ___h.Add(i2pConnector.GetHashCode());
-            if (i2pAccepter != default) ___h.Add(i2pAccepter.GetHashCode());
-            if (tcpConnector != default) ___h.Add(tcpConnector.GetHashCode());
-            if (tcpAccepter != default) ___h.Add(tcpAccepter.GetHashCode());
-            if (fileDownloader != default) ___h.Add(fileDownloader.GetHashCode());
             if (profile != default) ___h.Add(profile.GetHashCode());
             if (note != default) ___h.Add(note.GetHashCode());
+            if (engine != default) ___h.Add(engine.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
-    public global::Omnius.Axus.Messages.BandwidthConfig? Bandwidth { get; }
-    public global::Omnius.Axus.Messages.I2pConnectorConfig? I2pConnector { get; }
-    public global::Omnius.Axus.Messages.I2pAccepterConfig? I2pAccepter { get; }
-    public global::Omnius.Axus.Messages.TcpConnectorConfig? TcpConnector { get; }
-    public global::Omnius.Axus.Messages.TcpAccepterConfig? TcpAccepter { get; }
-    public global::Omnius.Axus.Messages.FileDownloaderConfig? FileDownloader { get; }
     public global::Omnius.Axus.Messages.ProfileConfig? Profile { get; }
-    public global::Omnius.Axus.Messages.NoteConfig? Note { get; }
+    public global::Omnius.Axus.Messages.NoteConfig Note { get; }
+    public global::Omnius.Axus.Messages.EngineConfig? Engine { get; }
 
     public static global::Omnius.Axus.Messages.ServiceConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -787,6 +773,434 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
+        if ((this.Profile is null) != (target.Profile is null)) return false;
+        if ((this.Profile is not null) && (target.Profile is not null) && this.Profile != target.Profile) return false;
+        if (this.Note != target.Note) return false;
+        if ((this.Engine is null) != (target.Engine is null)) return false;
+        if ((this.Engine is not null) && (target.Engine is not null) && this.Engine != target.Engine) return false;
+
+        return true;
+    }
+    public override int GetHashCode() => ___hashCode.Value;
+
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Messages.ServiceConfig>
+    {
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Messages.ServiceConfig value, scoped in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            if (value.Profile != null)
+            {
+                w.Write((uint)1);
+                global::Omnius.Axus.Messages.ProfileConfig.Formatter.Serialize(ref w, value.Profile, rank + 1);
+            }
+            if (value.Note != global::Omnius.Axus.Messages.NoteConfig.Empty)
+            {
+                w.Write((uint)2);
+                global::Omnius.Axus.Messages.NoteConfig.Formatter.Serialize(ref w, value.Note, rank + 1);
+            }
+            if (value.Engine != null)
+            {
+                w.Write((uint)3);
+                global::Omnius.Axus.Messages.EngineConfig.Formatter.Serialize(ref w, value.Engine, rank + 1);
+            }
+            w.Write((uint)0);
+        }
+        public global::Omnius.Axus.Messages.ServiceConfig Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            global::Omnius.Axus.Messages.ProfileConfig? p_profile = null;
+            global::Omnius.Axus.Messages.NoteConfig p_note = global::Omnius.Axus.Messages.NoteConfig.Empty;
+            global::Omnius.Axus.Messages.EngineConfig? p_engine = null;
+
+            for (; ; )
+            {
+                uint id = r.GetUInt32();
+                if (id == 0) break;
+                switch (id)
+                {
+                    case 1:
+                        {
+                            p_profile = global::Omnius.Axus.Messages.ProfileConfig.Formatter.Deserialize(ref r, rank + 1);
+                            break;
+                        }
+                    case 2:
+                        {
+                            p_note = global::Omnius.Axus.Messages.NoteConfig.Formatter.Deserialize(ref r, rank + 1);
+                            break;
+                        }
+                    case 3:
+                        {
+                            p_engine = global::Omnius.Axus.Messages.EngineConfig.Formatter.Deserialize(ref r, rank + 1);
+                            break;
+                        }
+                }
+            }
+
+            return new global::Omnius.Axus.Messages.ServiceConfig(p_profile, p_note, p_engine);
+        }
+    }
+}
+public sealed partial class ProfileConfig : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.ProfileConfig>
+{
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Messages.ProfileConfig> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.ProfileConfig>.Formatter;
+    public static global::Omnius.Axus.Messages.ProfileConfig Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.ProfileConfig>.Empty;
+
+    static ProfileConfig()
+    {
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.ProfileConfig>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.ProfileConfig>.Empty = new global::Omnius.Axus.Messages.ProfileConfig(global::Omnius.Core.Cryptography.OmniDigitalSignature.Empty, global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>(), global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>());
+    }
+
+    private readonly global::System.Lazy<int> ___hashCode;
+
+    public static readonly int MaxTrustedSignaturesCount = 1024;
+    public static readonly int MaxBlockedSignaturesCount = 1024;
+
+    public ProfileConfig(global::Omnius.Core.Cryptography.OmniDigitalSignature digitalSignature, global::Omnius.Core.Cryptography.OmniSignature[] trustedSignatures, global::Omnius.Core.Cryptography.OmniSignature[] blockedSignatures)
+    {
+        if (digitalSignature is null) throw new global::System.ArgumentNullException("digitalSignature");
+        if (trustedSignatures is null) throw new global::System.ArgumentNullException("trustedSignatures");
+        if (trustedSignatures.Length > 1024) throw new global::System.ArgumentOutOfRangeException("trustedSignatures");
+        foreach (var n in trustedSignatures)
+        {
+            if (n is null) throw new global::System.ArgumentNullException("n");
+        }
+        if (blockedSignatures is null) throw new global::System.ArgumentNullException("blockedSignatures");
+        if (blockedSignatures.Length > 1024) throw new global::System.ArgumentOutOfRangeException("blockedSignatures");
+        foreach (var n in blockedSignatures)
+        {
+            if (n is null) throw new global::System.ArgumentNullException("n");
+        }
+
+        this.DigitalSignature = digitalSignature;
+        this.TrustedSignatures = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Cryptography.OmniSignature>(trustedSignatures);
+        this.BlockedSignatures = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Cryptography.OmniSignature>(blockedSignatures);
+
+        ___hashCode = new global::System.Lazy<int>(() =>
+        {
+            var ___h = new global::System.HashCode();
+            if (digitalSignature != default) ___h.Add(digitalSignature.GetHashCode());
+            foreach (var n in trustedSignatures)
+            {
+                if (n != default) ___h.Add(n.GetHashCode());
+            }
+            foreach (var n in blockedSignatures)
+            {
+                if (n != default) ___h.Add(n.GetHashCode());
+            }
+            return ___h.ToHashCode();
+        });
+    }
+
+    public global::Omnius.Core.Cryptography.OmniDigitalSignature DigitalSignature { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Cryptography.OmniSignature> TrustedSignatures { get; }
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Cryptography.OmniSignature> BlockedSignatures { get; }
+
+    public static global::Omnius.Axus.Messages.ProfileConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
+        return Formatter.Deserialize(ref reader, 0);
+    }
+    public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
+        Formatter.Serialize(ref writer, this, 0);
+    }
+
+    public static bool operator ==(global::Omnius.Axus.Messages.ProfileConfig? left, global::Omnius.Axus.Messages.ProfileConfig? right)
+    {
+        return (right is null) ? (left is null) : right.Equals(left);
+    }
+    public static bool operator !=(global::Omnius.Axus.Messages.ProfileConfig? left, global::Omnius.Axus.Messages.ProfileConfig? right)
+    {
+        return !(left == right);
+    }
+    public override bool Equals(object? other)
+    {
+        if (other is not global::Omnius.Axus.Messages.ProfileConfig) return false;
+        return this.Equals((global::Omnius.Axus.Messages.ProfileConfig)other);
+    }
+    public bool Equals(global::Omnius.Axus.Messages.ProfileConfig? target)
+    {
+        if (target is null) return false;
+        if (object.ReferenceEquals(this, target)) return true;
+        if (this.DigitalSignature != target.DigitalSignature) return false;
+        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.TrustedSignatures, target.TrustedSignatures)) return false;
+        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.BlockedSignatures, target.BlockedSignatures)) return false;
+
+        return true;
+    }
+    public override int GetHashCode() => ___hashCode.Value;
+
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Messages.ProfileConfig>
+    {
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Messages.ProfileConfig value, scoped in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            if (value.DigitalSignature != global::Omnius.Core.Cryptography.OmniDigitalSignature.Empty)
+            {
+                w.Write((uint)1);
+                global::Omnius.Core.Cryptography.OmniDigitalSignature.Formatter.Serialize(ref w, value.DigitalSignature, rank + 1);
+            }
+            if (value.TrustedSignatures.Count != 0)
+            {
+                w.Write((uint)2);
+                w.Write((uint)value.TrustedSignatures.Count);
+                foreach (var n in value.TrustedSignatures)
+                {
+                    global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, n, rank + 1);
+                }
+            }
+            if (value.BlockedSignatures.Count != 0)
+            {
+                w.Write((uint)3);
+                w.Write((uint)value.BlockedSignatures.Count);
+                foreach (var n in value.BlockedSignatures)
+                {
+                    global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, n, rank + 1);
+                }
+            }
+            w.Write((uint)0);
+        }
+        public global::Omnius.Axus.Messages.ProfileConfig Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            global::Omnius.Core.Cryptography.OmniDigitalSignature p_digitalSignature = global::Omnius.Core.Cryptography.OmniDigitalSignature.Empty;
+            global::Omnius.Core.Cryptography.OmniSignature[] p_trustedSignatures = global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>();
+            global::Omnius.Core.Cryptography.OmniSignature[] p_blockedSignatures = global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>();
+
+            for (; ; )
+            {
+                uint id = r.GetUInt32();
+                if (id == 0) break;
+                switch (id)
+                {
+                    case 1:
+                        {
+                            p_digitalSignature = global::Omnius.Core.Cryptography.OmniDigitalSignature.Formatter.Deserialize(ref r, rank + 1);
+                            break;
+                        }
+                    case 2:
+                        {
+                            var length = r.GetUInt32();
+                            p_trustedSignatures = new global::Omnius.Core.Cryptography.OmniSignature[length];
+                            for (int i = 0; i < p_trustedSignatures.Length; i++)
+                            {
+                                p_trustedSignatures[i] = global::Omnius.Core.Cryptography.OmniSignature.Formatter.Deserialize(ref r, rank + 1);
+                            }
+                            break;
+                        }
+                    case 3:
+                        {
+                            var length = r.GetUInt32();
+                            p_blockedSignatures = new global::Omnius.Core.Cryptography.OmniSignature[length];
+                            for (int i = 0; i < p_blockedSignatures.Length; i++)
+                            {
+                                p_blockedSignatures[i] = global::Omnius.Core.Cryptography.OmniSignature.Formatter.Deserialize(ref r, rank + 1);
+                            }
+                            break;
+                        }
+                }
+            }
+
+            return new global::Omnius.Axus.Messages.ProfileConfig(p_digitalSignature, p_trustedSignatures, p_blockedSignatures);
+        }
+    }
+}
+public sealed partial class NoteConfig : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.NoteConfig>
+{
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Messages.NoteConfig> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.NoteConfig>.Formatter;
+    public static global::Omnius.Axus.Messages.NoteConfig Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.NoteConfig>.Empty;
+
+    static NoteConfig()
+    {
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.NoteConfig>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.NoteConfig>.Empty = new global::Omnius.Axus.Messages.NoteConfig(global::System.Array.Empty<global::Omnius.Core.RocketPack.Utf8String>());
+    }
+
+    private readonly global::System.Lazy<int> ___hashCode;
+
+    public static readonly int MaxTagsCount = 256;
+
+    public NoteConfig(global::Omnius.Core.RocketPack.Utf8String[] tags)
+    {
+        if (tags is null) throw new global::System.ArgumentNullException("tags");
+        if (tags.Length > 256) throw new global::System.ArgumentOutOfRangeException("tags");
+        foreach (var n in tags)
+        {
+            if (n is null) throw new global::System.ArgumentNullException("n");
+            if (n.Length > 256) throw new global::System.ArgumentOutOfRangeException("n");
+        }
+
+        this.Tags = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.RocketPack.Utf8String>(tags);
+
+        ___hashCode = new global::System.Lazy<int>(() =>
+        {
+            var ___h = new global::System.HashCode();
+            foreach (var n in tags)
+            {
+                if (!n.IsEmpty) ___h.Add(n.GetHashCode());
+            }
+            return ___h.ToHashCode();
+        });
+    }
+
+    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.RocketPack.Utf8String> Tags { get; }
+
+    public static global::Omnius.Axus.Messages.NoteConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
+        return Formatter.Deserialize(ref reader, 0);
+    }
+    public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
+        Formatter.Serialize(ref writer, this, 0);
+    }
+
+    public static bool operator ==(global::Omnius.Axus.Messages.NoteConfig? left, global::Omnius.Axus.Messages.NoteConfig? right)
+    {
+        return (right is null) ? (left is null) : right.Equals(left);
+    }
+    public static bool operator !=(global::Omnius.Axus.Messages.NoteConfig? left, global::Omnius.Axus.Messages.NoteConfig? right)
+    {
+        return !(left == right);
+    }
+    public override bool Equals(object? other)
+    {
+        if (other is not global::Omnius.Axus.Messages.NoteConfig) return false;
+        return this.Equals((global::Omnius.Axus.Messages.NoteConfig)other);
+    }
+    public bool Equals(global::Omnius.Axus.Messages.NoteConfig? target)
+    {
+        if (target is null) return false;
+        if (object.ReferenceEquals(this, target)) return true;
+        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Tags, target.Tags)) return false;
+
+        return true;
+    }
+    public override int GetHashCode() => ___hashCode.Value;
+
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Messages.NoteConfig>
+    {
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Messages.NoteConfig value, scoped in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            if (value.Tags.Count != 0)
+            {
+                w.Write((uint)1);
+                w.Write((uint)value.Tags.Count);
+                foreach (var n in value.Tags)
+                {
+                    w.Write(n);
+                }
+            }
+            w.Write((uint)0);
+        }
+        public global::Omnius.Axus.Messages.NoteConfig Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        {
+            if (rank > 256) throw new global::System.FormatException();
+
+            global::Omnius.Core.RocketPack.Utf8String[] p_tags = global::System.Array.Empty<global::Omnius.Core.RocketPack.Utf8String>();
+
+            for (; ; )
+            {
+                uint id = r.GetUInt32();
+                if (id == 0) break;
+                switch (id)
+                {
+                    case 1:
+                        {
+                            var length = r.GetUInt32();
+                            p_tags = new global::Omnius.Core.RocketPack.Utf8String[length];
+                            for (int i = 0; i < p_tags.Length; i++)
+                            {
+                                p_tags[i] = r.GetString(256);
+                            }
+                            break;
+                        }
+                }
+            }
+
+            return new global::Omnius.Axus.Messages.NoteConfig(p_tags);
+        }
+    }
+}
+public sealed partial class EngineConfig : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.EngineConfig>
+{
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Messages.EngineConfig> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.EngineConfig>.Formatter;
+    public static global::Omnius.Axus.Messages.EngineConfig Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.EngineConfig>.Empty;
+
+    static EngineConfig()
+    {
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.EngineConfig>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.EngineConfig>.Empty = new global::Omnius.Axus.Messages.EngineConfig(null, null, null, null, null, null);
+    }
+
+    private readonly global::System.Lazy<int> ___hashCode;
+
+    public EngineConfig(global::Omnius.Axus.Messages.BandwidthConfig? bandwidth, global::Omnius.Axus.Messages.I2pConnectorConfig? i2pConnector, global::Omnius.Axus.Messages.I2pAccepterConfig? i2pAccepter, global::Omnius.Axus.Messages.TcpConnectorConfig? tcpConnector, global::Omnius.Axus.Messages.TcpAccepterConfig? tcpAccepter, global::Omnius.Axus.Messages.FileSubscriberConfig? fileSubscriber)
+    {
+        this.Bandwidth = bandwidth;
+        this.I2pConnector = i2pConnector;
+        this.I2pAccepter = i2pAccepter;
+        this.TcpConnector = tcpConnector;
+        this.TcpAccepter = tcpAccepter;
+        this.FileSubscriber = fileSubscriber;
+
+        ___hashCode = new global::System.Lazy<int>(() =>
+        {
+            var ___h = new global::System.HashCode();
+            if (bandwidth != default) ___h.Add(bandwidth.GetHashCode());
+            if (i2pConnector != default) ___h.Add(i2pConnector.GetHashCode());
+            if (i2pAccepter != default) ___h.Add(i2pAccepter.GetHashCode());
+            if (tcpConnector != default) ___h.Add(tcpConnector.GetHashCode());
+            if (tcpAccepter != default) ___h.Add(tcpAccepter.GetHashCode());
+            if (fileSubscriber != default) ___h.Add(fileSubscriber.GetHashCode());
+            return ___h.ToHashCode();
+        });
+    }
+
+    public global::Omnius.Axus.Messages.BandwidthConfig? Bandwidth { get; }
+    public global::Omnius.Axus.Messages.I2pConnectorConfig? I2pConnector { get; }
+    public global::Omnius.Axus.Messages.I2pAccepterConfig? I2pAccepter { get; }
+    public global::Omnius.Axus.Messages.TcpConnectorConfig? TcpConnector { get; }
+    public global::Omnius.Axus.Messages.TcpAccepterConfig? TcpAccepter { get; }
+    public global::Omnius.Axus.Messages.FileSubscriberConfig? FileSubscriber { get; }
+
+    public static global::Omnius.Axus.Messages.EngineConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
+        return Formatter.Deserialize(ref reader, 0);
+    }
+    public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
+    {
+        var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
+        Formatter.Serialize(ref writer, this, 0);
+    }
+
+    public static bool operator ==(global::Omnius.Axus.Messages.EngineConfig? left, global::Omnius.Axus.Messages.EngineConfig? right)
+    {
+        return (right is null) ? (left is null) : right.Equals(left);
+    }
+    public static bool operator !=(global::Omnius.Axus.Messages.EngineConfig? left, global::Omnius.Axus.Messages.EngineConfig? right)
+    {
+        return !(left == right);
+    }
+    public override bool Equals(object? other)
+    {
+        if (other is not global::Omnius.Axus.Messages.EngineConfig) return false;
+        return this.Equals((global::Omnius.Axus.Messages.EngineConfig)other);
+    }
+    public bool Equals(global::Omnius.Axus.Messages.EngineConfig? target)
+    {
+        if (target is null) return false;
+        if (object.ReferenceEquals(this, target)) return true;
         if ((this.Bandwidth is null) != (target.Bandwidth is null)) return false;
         if ((this.Bandwidth is not null) && (target.Bandwidth is not null) && this.Bandwidth != target.Bandwidth) return false;
         if ((this.I2pConnector is null) != (target.I2pConnector is null)) return false;
@@ -797,20 +1211,16 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
         if ((this.TcpConnector is not null) && (target.TcpConnector is not null) && this.TcpConnector != target.TcpConnector) return false;
         if ((this.TcpAccepter is null) != (target.TcpAccepter is null)) return false;
         if ((this.TcpAccepter is not null) && (target.TcpAccepter is not null) && this.TcpAccepter != target.TcpAccepter) return false;
-        if ((this.FileDownloader is null) != (target.FileDownloader is null)) return false;
-        if ((this.FileDownloader is not null) && (target.FileDownloader is not null) && this.FileDownloader != target.FileDownloader) return false;
-        if ((this.Profile is null) != (target.Profile is null)) return false;
-        if ((this.Profile is not null) && (target.Profile is not null) && this.Profile != target.Profile) return false;
-        if ((this.Note is null) != (target.Note is null)) return false;
-        if ((this.Note is not null) && (target.Note is not null) && this.Note != target.Note) return false;
+        if ((this.FileSubscriber is null) != (target.FileSubscriber is null)) return false;
+        if ((this.FileSubscriber is not null) && (target.FileSubscriber is not null) && this.FileSubscriber != target.FileSubscriber) return false;
 
         return true;
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Messages.ServiceConfig>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Messages.EngineConfig>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Messages.ServiceConfig value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Messages.EngineConfig value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -839,24 +1249,14 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
                 w.Write((uint)5);
                 global::Omnius.Axus.Messages.TcpAccepterConfig.Formatter.Serialize(ref w, value.TcpAccepter, rank + 1);
             }
-            if (value.FileDownloader != null)
+            if (value.FileSubscriber != null)
             {
                 w.Write((uint)6);
-                global::Omnius.Axus.Messages.FileDownloaderConfig.Formatter.Serialize(ref w, value.FileDownloader, rank + 1);
-            }
-            if (value.Profile != null)
-            {
-                w.Write((uint)7);
-                global::Omnius.Axus.Messages.ProfileConfig.Formatter.Serialize(ref w, value.Profile, rank + 1);
-            }
-            if (value.Note != null)
-            {
-                w.Write((uint)8);
-                global::Omnius.Axus.Messages.NoteConfig.Formatter.Serialize(ref w, value.Note, rank + 1);
+                global::Omnius.Axus.Messages.FileSubscriberConfig.Formatter.Serialize(ref w, value.FileSubscriber, rank + 1);
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Messages.ServiceConfig Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Messages.EngineConfig Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -865,9 +1265,7 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
             global::Omnius.Axus.Messages.I2pAccepterConfig? p_i2pAccepter = null;
             global::Omnius.Axus.Messages.TcpConnectorConfig? p_tcpConnector = null;
             global::Omnius.Axus.Messages.TcpAccepterConfig? p_tcpAccepter = null;
-            global::Omnius.Axus.Messages.FileDownloaderConfig? p_fileDownloader = null;
-            global::Omnius.Axus.Messages.ProfileConfig? p_profile = null;
-            global::Omnius.Axus.Messages.NoteConfig? p_note = null;
+            global::Omnius.Axus.Messages.FileSubscriberConfig? p_fileSubscriber = null;
 
             for (; ; )
             {
@@ -902,23 +1300,13 @@ public sealed partial class ServiceConfig : global::Omnius.Core.RocketPack.IRock
                         }
                     case 6:
                         {
-                            p_fileDownloader = global::Omnius.Axus.Messages.FileDownloaderConfig.Formatter.Deserialize(ref r, rank + 1);
-                            break;
-                        }
-                    case 7:
-                        {
-                            p_profile = global::Omnius.Axus.Messages.ProfileConfig.Formatter.Deserialize(ref r, rank + 1);
-                            break;
-                        }
-                    case 8:
-                        {
-                            p_note = global::Omnius.Axus.Messages.NoteConfig.Formatter.Deserialize(ref r, rank + 1);
+                            p_fileSubscriber = global::Omnius.Axus.Messages.FileSubscriberConfig.Formatter.Deserialize(ref r, rank + 1);
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axus.Messages.ServiceConfig(p_bandwidth, p_i2pConnector, p_i2pAccepter, p_tcpConnector, p_tcpAccepter, p_fileDownloader, p_profile, p_note);
+            return new global::Omnius.Axus.Messages.EngineConfig(p_bandwidth, p_i2pConnector, p_i2pAccepter, p_tcpConnector, p_tcpAccepter, p_fileSubscriber);
         }
     }
 }
@@ -1624,22 +2012,22 @@ public sealed partial class TcpAccepterConfig : global::Omnius.Core.RocketPack.I
         }
     }
 }
-public sealed partial class FileDownloaderConfig : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.FileDownloaderConfig>
+public sealed partial class FileSubscriberConfig : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.FileSubscriberConfig>
 {
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Messages.FileDownloaderConfig> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.FileDownloaderConfig>.Formatter;
-    public static global::Omnius.Axus.Messages.FileDownloaderConfig Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.FileDownloaderConfig>.Empty;
+    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Messages.FileSubscriberConfig> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.FileSubscriberConfig>.Formatter;
+    public static global::Omnius.Axus.Messages.FileSubscriberConfig Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.FileSubscriberConfig>.Empty;
 
-    static FileDownloaderConfig()
+    static FileSubscriberConfig()
     {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.FileDownloaderConfig>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.FileDownloaderConfig>.Empty = new global::Omnius.Axus.Messages.FileDownloaderConfig(global::Omnius.Core.RocketPack.Utf8String.Empty);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.FileSubscriberConfig>.Formatter = new ___CustomFormatter();
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.FileSubscriberConfig>.Empty = new global::Omnius.Axus.Messages.FileSubscriberConfig(global::Omnius.Core.RocketPack.Utf8String.Empty);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
     public static readonly int MaxDestinationDirectoryLength = 2147483647;
 
-    public FileDownloaderConfig(global::Omnius.Core.RocketPack.Utf8String destinationDirectory)
+    public FileSubscriberConfig(global::Omnius.Core.RocketPack.Utf8String destinationDirectory)
     {
         if (destinationDirectory is null) throw new global::System.ArgumentNullException("destinationDirectory");
         if (destinationDirectory.Length > 2147483647) throw new global::System.ArgumentOutOfRangeException("destinationDirectory");
@@ -1656,7 +2044,7 @@ public sealed partial class FileDownloaderConfig : global::Omnius.Core.RocketPac
 
     public global::Omnius.Core.RocketPack.Utf8String DestinationDirectory { get; }
 
-    public static global::Omnius.Axus.Messages.FileDownloaderConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
+    public static global::Omnius.Axus.Messages.FileSubscriberConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
         var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
         return Formatter.Deserialize(ref reader, 0);
@@ -1667,20 +2055,20 @@ public sealed partial class FileDownloaderConfig : global::Omnius.Core.RocketPac
         Formatter.Serialize(ref writer, this, 0);
     }
 
-    public static bool operator ==(global::Omnius.Axus.Messages.FileDownloaderConfig? left, global::Omnius.Axus.Messages.FileDownloaderConfig? right)
+    public static bool operator ==(global::Omnius.Axus.Messages.FileSubscriberConfig? left, global::Omnius.Axus.Messages.FileSubscriberConfig? right)
     {
         return (right is null) ? (left is null) : right.Equals(left);
     }
-    public static bool operator !=(global::Omnius.Axus.Messages.FileDownloaderConfig? left, global::Omnius.Axus.Messages.FileDownloaderConfig? right)
+    public static bool operator !=(global::Omnius.Axus.Messages.FileSubscriberConfig? left, global::Omnius.Axus.Messages.FileSubscriberConfig? right)
     {
         return !(left == right);
     }
     public override bool Equals(object? other)
     {
-        if (other is not global::Omnius.Axus.Messages.FileDownloaderConfig) return false;
-        return this.Equals((global::Omnius.Axus.Messages.FileDownloaderConfig)other);
+        if (other is not global::Omnius.Axus.Messages.FileSubscriberConfig) return false;
+        return this.Equals((global::Omnius.Axus.Messages.FileSubscriberConfig)other);
     }
-    public bool Equals(global::Omnius.Axus.Messages.FileDownloaderConfig? target)
+    public bool Equals(global::Omnius.Axus.Messages.FileSubscriberConfig? target)
     {
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
@@ -1690,9 +2078,9 @@ public sealed partial class FileDownloaderConfig : global::Omnius.Core.RocketPac
     }
     public override int GetHashCode() => ___hashCode.Value;
 
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Messages.FileDownloaderConfig>
+    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Messages.FileSubscriberConfig>
     {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Messages.FileDownloaderConfig value, scoped in int rank)
+        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Messages.FileSubscriberConfig value, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1703,7 +2091,7 @@ public sealed partial class FileDownloaderConfig : global::Omnius.Core.RocketPac
             }
             w.Write((uint)0);
         }
-        public global::Omnius.Axus.Messages.FileDownloaderConfig Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
+        public global::Omnius.Axus.Messages.FileSubscriberConfig Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
         {
             if (rank > 256) throw new global::System.FormatException();
 
@@ -1723,296 +2111,7 @@ public sealed partial class FileDownloaderConfig : global::Omnius.Core.RocketPac
                 }
             }
 
-            return new global::Omnius.Axus.Messages.FileDownloaderConfig(p_destinationDirectory);
-        }
-    }
-}
-public sealed partial class ProfileConfig : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.ProfileConfig>
-{
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Messages.ProfileConfig> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.ProfileConfig>.Formatter;
-    public static global::Omnius.Axus.Messages.ProfileConfig Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.ProfileConfig>.Empty;
-
-    static ProfileConfig()
-    {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.ProfileConfig>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.ProfileConfig>.Empty = new global::Omnius.Axus.Messages.ProfileConfig(global::Omnius.Core.Cryptography.OmniDigitalSignature.Empty, global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>(), global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>());
-    }
-
-    private readonly global::System.Lazy<int> ___hashCode;
-
-    public static readonly int MaxTrustedSignaturesCount = 1024;
-    public static readonly int MaxBlockedSignaturesCount = 1024;
-
-    public ProfileConfig(global::Omnius.Core.Cryptography.OmniDigitalSignature digitalSignature, global::Omnius.Core.Cryptography.OmniSignature[] trustedSignatures, global::Omnius.Core.Cryptography.OmniSignature[] blockedSignatures)
-    {
-        if (digitalSignature is null) throw new global::System.ArgumentNullException("digitalSignature");
-        if (trustedSignatures is null) throw new global::System.ArgumentNullException("trustedSignatures");
-        if (trustedSignatures.Length > 1024) throw new global::System.ArgumentOutOfRangeException("trustedSignatures");
-        foreach (var n in trustedSignatures)
-        {
-            if (n is null) throw new global::System.ArgumentNullException("n");
-        }
-        if (blockedSignatures is null) throw new global::System.ArgumentNullException("blockedSignatures");
-        if (blockedSignatures.Length > 1024) throw new global::System.ArgumentOutOfRangeException("blockedSignatures");
-        foreach (var n in blockedSignatures)
-        {
-            if (n is null) throw new global::System.ArgumentNullException("n");
-        }
-
-        this.DigitalSignature = digitalSignature;
-        this.TrustedSignatures = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Cryptography.OmniSignature>(trustedSignatures);
-        this.BlockedSignatures = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Cryptography.OmniSignature>(blockedSignatures);
-
-        ___hashCode = new global::System.Lazy<int>(() =>
-        {
-            var ___h = new global::System.HashCode();
-            if (digitalSignature != default) ___h.Add(digitalSignature.GetHashCode());
-            foreach (var n in trustedSignatures)
-            {
-                if (n != default) ___h.Add(n.GetHashCode());
-            }
-            foreach (var n in blockedSignatures)
-            {
-                if (n != default) ___h.Add(n.GetHashCode());
-            }
-            return ___h.ToHashCode();
-        });
-    }
-
-    public global::Omnius.Core.Cryptography.OmniDigitalSignature DigitalSignature { get; }
-    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Cryptography.OmniSignature> TrustedSignatures { get; }
-    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.Cryptography.OmniSignature> BlockedSignatures { get; }
-
-    public static global::Omnius.Axus.Messages.ProfileConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
-    {
-        var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
-        return Formatter.Deserialize(ref reader, 0);
-    }
-    public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
-    {
-        var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
-        Formatter.Serialize(ref writer, this, 0);
-    }
-
-    public static bool operator ==(global::Omnius.Axus.Messages.ProfileConfig? left, global::Omnius.Axus.Messages.ProfileConfig? right)
-    {
-        return (right is null) ? (left is null) : right.Equals(left);
-    }
-    public static bool operator !=(global::Omnius.Axus.Messages.ProfileConfig? left, global::Omnius.Axus.Messages.ProfileConfig? right)
-    {
-        return !(left == right);
-    }
-    public override bool Equals(object? other)
-    {
-        if (other is not global::Omnius.Axus.Messages.ProfileConfig) return false;
-        return this.Equals((global::Omnius.Axus.Messages.ProfileConfig)other);
-    }
-    public bool Equals(global::Omnius.Axus.Messages.ProfileConfig? target)
-    {
-        if (target is null) return false;
-        if (object.ReferenceEquals(this, target)) return true;
-        if (this.DigitalSignature != target.DigitalSignature) return false;
-        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.TrustedSignatures, target.TrustedSignatures)) return false;
-        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.BlockedSignatures, target.BlockedSignatures)) return false;
-
-        return true;
-    }
-    public override int GetHashCode() => ___hashCode.Value;
-
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Messages.ProfileConfig>
-    {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Messages.ProfileConfig value, scoped in int rank)
-        {
-            if (rank > 256) throw new global::System.FormatException();
-
-            if (value.DigitalSignature != global::Omnius.Core.Cryptography.OmniDigitalSignature.Empty)
-            {
-                w.Write((uint)1);
-                global::Omnius.Core.Cryptography.OmniDigitalSignature.Formatter.Serialize(ref w, value.DigitalSignature, rank + 1);
-            }
-            if (value.TrustedSignatures.Count != 0)
-            {
-                w.Write((uint)2);
-                w.Write((uint)value.TrustedSignatures.Count);
-                foreach (var n in value.TrustedSignatures)
-                {
-                    global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, n, rank + 1);
-                }
-            }
-            if (value.BlockedSignatures.Count != 0)
-            {
-                w.Write((uint)3);
-                w.Write((uint)value.BlockedSignatures.Count);
-                foreach (var n in value.BlockedSignatures)
-                {
-                    global::Omnius.Core.Cryptography.OmniSignature.Formatter.Serialize(ref w, n, rank + 1);
-                }
-            }
-            w.Write((uint)0);
-        }
-        public global::Omnius.Axus.Messages.ProfileConfig Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
-        {
-            if (rank > 256) throw new global::System.FormatException();
-
-            global::Omnius.Core.Cryptography.OmniDigitalSignature p_digitalSignature = global::Omnius.Core.Cryptography.OmniDigitalSignature.Empty;
-            global::Omnius.Core.Cryptography.OmniSignature[] p_trustedSignatures = global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>();
-            global::Omnius.Core.Cryptography.OmniSignature[] p_blockedSignatures = global::System.Array.Empty<global::Omnius.Core.Cryptography.OmniSignature>();
-
-            for (; ; )
-            {
-                uint id = r.GetUInt32();
-                if (id == 0) break;
-                switch (id)
-                {
-                    case 1:
-                        {
-                            p_digitalSignature = global::Omnius.Core.Cryptography.OmniDigitalSignature.Formatter.Deserialize(ref r, rank + 1);
-                            break;
-                        }
-                    case 2:
-                        {
-                            var length = r.GetUInt32();
-                            p_trustedSignatures = new global::Omnius.Core.Cryptography.OmniSignature[length];
-                            for (int i = 0; i < p_trustedSignatures.Length; i++)
-                            {
-                                p_trustedSignatures[i] = global::Omnius.Core.Cryptography.OmniSignature.Formatter.Deserialize(ref r, rank + 1);
-                            }
-                            break;
-                        }
-                    case 3:
-                        {
-                            var length = r.GetUInt32();
-                            p_blockedSignatures = new global::Omnius.Core.Cryptography.OmniSignature[length];
-                            for (int i = 0; i < p_blockedSignatures.Length; i++)
-                            {
-                                p_blockedSignatures[i] = global::Omnius.Core.Cryptography.OmniSignature.Formatter.Deserialize(ref r, rank + 1);
-                            }
-                            break;
-                        }
-                }
-            }
-
-            return new global::Omnius.Axus.Messages.ProfileConfig(p_digitalSignature, p_trustedSignatures, p_blockedSignatures);
-        }
-    }
-}
-public sealed partial class NoteConfig : global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.NoteConfig>
-{
-    public static global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Messages.NoteConfig> Formatter => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.NoteConfig>.Formatter;
-    public static global::Omnius.Axus.Messages.NoteConfig Empty => global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.NoteConfig>.Empty;
-
-    static NoteConfig()
-    {
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.NoteConfig>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.NoteConfig>.Empty = new global::Omnius.Axus.Messages.NoteConfig(global::System.Array.Empty<global::Omnius.Core.RocketPack.Utf8String>());
-    }
-
-    private readonly global::System.Lazy<int> ___hashCode;
-
-    public static readonly int MaxTagsCount = 256;
-
-    public NoteConfig(global::Omnius.Core.RocketPack.Utf8String[] tags)
-    {
-        if (tags is null) throw new global::System.ArgumentNullException("tags");
-        if (tags.Length > 256) throw new global::System.ArgumentOutOfRangeException("tags");
-        foreach (var n in tags)
-        {
-            if (n is null) throw new global::System.ArgumentNullException("n");
-            if (n.Length > 256) throw new global::System.ArgumentOutOfRangeException("n");
-        }
-
-        this.Tags = new global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.RocketPack.Utf8String>(tags);
-
-        ___hashCode = new global::System.Lazy<int>(() =>
-        {
-            var ___h = new global::System.HashCode();
-            foreach (var n in tags)
-            {
-                if (!n.IsEmpty) ___h.Add(n.GetHashCode());
-            }
-            return ___h.ToHashCode();
-        });
-    }
-
-    public global::Omnius.Core.Collections.ReadOnlyListSlim<global::Omnius.Core.RocketPack.Utf8String> Tags { get; }
-
-    public static global::Omnius.Axus.Messages.NoteConfig Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
-    {
-        var reader = new global::Omnius.Core.RocketPack.RocketMessageReader(sequence, bytesPool);
-        return Formatter.Deserialize(ref reader, 0);
-    }
-    public void Export(global::System.Buffers.IBufferWriter<byte> bufferWriter, global::Omnius.Core.IBytesPool bytesPool)
-    {
-        var writer = new global::Omnius.Core.RocketPack.RocketMessageWriter(bufferWriter, bytesPool);
-        Formatter.Serialize(ref writer, this, 0);
-    }
-
-    public static bool operator ==(global::Omnius.Axus.Messages.NoteConfig? left, global::Omnius.Axus.Messages.NoteConfig? right)
-    {
-        return (right is null) ? (left is null) : right.Equals(left);
-    }
-    public static bool operator !=(global::Omnius.Axus.Messages.NoteConfig? left, global::Omnius.Axus.Messages.NoteConfig? right)
-    {
-        return !(left == right);
-    }
-    public override bool Equals(object? other)
-    {
-        if (other is not global::Omnius.Axus.Messages.NoteConfig) return false;
-        return this.Equals((global::Omnius.Axus.Messages.NoteConfig)other);
-    }
-    public bool Equals(global::Omnius.Axus.Messages.NoteConfig? target)
-    {
-        if (target is null) return false;
-        if (object.ReferenceEquals(this, target)) return true;
-        if (!global::Omnius.Core.Helpers.CollectionHelper.Equals(this.Tags, target.Tags)) return false;
-
-        return true;
-    }
-    public override int GetHashCode() => ___hashCode.Value;
-
-    private sealed class ___CustomFormatter : global::Omnius.Core.RocketPack.IRocketMessageFormatter<global::Omnius.Axus.Messages.NoteConfig>
-    {
-        public void Serialize(ref global::Omnius.Core.RocketPack.RocketMessageWriter w, scoped in global::Omnius.Axus.Messages.NoteConfig value, scoped in int rank)
-        {
-            if (rank > 256) throw new global::System.FormatException();
-
-            if (value.Tags.Count != 0)
-            {
-                w.Write((uint)1);
-                w.Write((uint)value.Tags.Count);
-                foreach (var n in value.Tags)
-                {
-                    w.Write(n);
-                }
-            }
-            w.Write((uint)0);
-        }
-        public global::Omnius.Axus.Messages.NoteConfig Deserialize(ref global::Omnius.Core.RocketPack.RocketMessageReader r, scoped in int rank)
-        {
-            if (rank > 256) throw new global::System.FormatException();
-
-            global::Omnius.Core.RocketPack.Utf8String[] p_tags = global::System.Array.Empty<global::Omnius.Core.RocketPack.Utf8String>();
-
-            for (; ; )
-            {
-                uint id = r.GetUInt32();
-                if (id == 0) break;
-                switch (id)
-                {
-                    case 1:
-                        {
-                            var length = r.GetUInt32();
-                            p_tags = new global::Omnius.Core.RocketPack.Utf8String[length];
-                            for (int i = 0; i < p_tags.Length; i++)
-                            {
-                                p_tags[i] = r.GetString(256);
-                            }
-                            break;
-                        }
-                }
-            }
-
-            return new global::Omnius.Axus.Messages.NoteConfig(p_tags);
+            return new global::Omnius.Axus.Messages.FileSubscriberConfig(p_destinationDirectory);
         }
     }
 }
@@ -2257,27 +2356,27 @@ public sealed partial class GetPublishedFilesDirection : global::Omnius.Core.Roc
     static GetPublishedFilesDirection()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.GetPublishedFilesDirection>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.GetPublishedFilesDirection>.Empty = new global::Omnius.Axus.Messages.GetPublishedFilesDirection((global::Omnius.Axus.Messages.GetPublishedFilesFieldType)0, (global::Omnius.Axus.Messages.DirectionType)0);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.GetPublishedFilesDirection>.Empty = new global::Omnius.Axus.Messages.GetPublishedFilesDirection((global::Omnius.Axus.Messages.GetPublishedFilesFieldType)0, (global::Omnius.Axus.Messages.SortType)0);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public GetPublishedFilesDirection(global::Omnius.Axus.Messages.GetPublishedFilesFieldType fieldType, global::Omnius.Axus.Messages.DirectionType directionType)
+    public GetPublishedFilesDirection(global::Omnius.Axus.Messages.GetPublishedFilesFieldType fieldType, global::Omnius.Axus.Messages.SortType sortType)
     {
         this.FieldType = fieldType;
-        this.DirectionType = directionType;
+        this.SortType = sortType;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (fieldType != default) ___h.Add(fieldType.GetHashCode());
-            if (directionType != default) ___h.Add(directionType.GetHashCode());
+            if (sortType != default) ___h.Add(sortType.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Axus.Messages.GetPublishedFilesFieldType FieldType { get; }
-    public global::Omnius.Axus.Messages.DirectionType DirectionType { get; }
+    public global::Omnius.Axus.Messages.SortType SortType { get; }
 
     public static global::Omnius.Axus.Messages.GetPublishedFilesDirection Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -2308,7 +2407,7 @@ public sealed partial class GetPublishedFilesDirection : global::Omnius.Core.Roc
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
         if (this.FieldType != target.FieldType) return false;
-        if (this.DirectionType != target.DirectionType) return false;
+        if (this.SortType != target.SortType) return false;
 
         return true;
     }
@@ -2325,10 +2424,10 @@ public sealed partial class GetPublishedFilesDirection : global::Omnius.Core.Roc
                 w.Write((uint)1);
                 w.Write((ulong)value.FieldType);
             }
-            if (value.DirectionType != (global::Omnius.Axus.Messages.DirectionType)0)
+            if (value.SortType != (global::Omnius.Axus.Messages.SortType)0)
             {
                 w.Write((uint)2);
-                w.Write((ulong)value.DirectionType);
+                w.Write((ulong)value.SortType);
             }
             w.Write((uint)0);
         }
@@ -2337,7 +2436,7 @@ public sealed partial class GetPublishedFilesDirection : global::Omnius.Core.Roc
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Axus.Messages.GetPublishedFilesFieldType p_fieldType = (global::Omnius.Axus.Messages.GetPublishedFilesFieldType)0;
-            global::Omnius.Axus.Messages.DirectionType p_directionType = (global::Omnius.Axus.Messages.DirectionType)0;
+            global::Omnius.Axus.Messages.SortType p_sortType = (global::Omnius.Axus.Messages.SortType)0;
 
             for (; ; )
             {
@@ -2352,13 +2451,13 @@ public sealed partial class GetPublishedFilesDirection : global::Omnius.Core.Roc
                         }
                     case 2:
                         {
-                            p_directionType = (global::Omnius.Axus.Messages.DirectionType)r.GetUInt64();
+                            p_sortType = (global::Omnius.Axus.Messages.SortType)r.GetUInt64();
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axus.Messages.GetPublishedFilesDirection(p_fieldType, p_directionType);
+            return new global::Omnius.Axus.Messages.GetPublishedFilesDirection(p_fieldType, p_sortType);
         }
     }
 }
@@ -2766,27 +2865,27 @@ public sealed partial class GetSubscribedFilesDirection : global::Omnius.Core.Ro
     static GetSubscribedFilesDirection()
     {
         global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.GetSubscribedFilesDirection>.Formatter = new ___CustomFormatter();
-        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.GetSubscribedFilesDirection>.Empty = new global::Omnius.Axus.Messages.GetSubscribedFilesDirection((global::Omnius.Axus.Messages.GetSubscribedFilesFieldType)0, (global::Omnius.Axus.Messages.DirectionType)0);
+        global::Omnius.Core.RocketPack.IRocketMessage<global::Omnius.Axus.Messages.GetSubscribedFilesDirection>.Empty = new global::Omnius.Axus.Messages.GetSubscribedFilesDirection((global::Omnius.Axus.Messages.GetSubscribedFilesFieldType)0, (global::Omnius.Axus.Messages.SortType)0);
     }
 
     private readonly global::System.Lazy<int> ___hashCode;
 
-    public GetSubscribedFilesDirection(global::Omnius.Axus.Messages.GetSubscribedFilesFieldType fieldType, global::Omnius.Axus.Messages.DirectionType directionType)
+    public GetSubscribedFilesDirection(global::Omnius.Axus.Messages.GetSubscribedFilesFieldType fieldType, global::Omnius.Axus.Messages.SortType sortType)
     {
         this.FieldType = fieldType;
-        this.DirectionType = directionType;
+        this.SortType = sortType;
 
         ___hashCode = new global::System.Lazy<int>(() =>
         {
             var ___h = new global::System.HashCode();
             if (fieldType != default) ___h.Add(fieldType.GetHashCode());
-            if (directionType != default) ___h.Add(directionType.GetHashCode());
+            if (sortType != default) ___h.Add(sortType.GetHashCode());
             return ___h.ToHashCode();
         });
     }
 
     public global::Omnius.Axus.Messages.GetSubscribedFilesFieldType FieldType { get; }
-    public global::Omnius.Axus.Messages.DirectionType DirectionType { get; }
+    public global::Omnius.Axus.Messages.SortType SortType { get; }
 
     public static global::Omnius.Axus.Messages.GetSubscribedFilesDirection Import(global::System.Buffers.ReadOnlySequence<byte> sequence, global::Omnius.Core.IBytesPool bytesPool)
     {
@@ -2817,7 +2916,7 @@ public sealed partial class GetSubscribedFilesDirection : global::Omnius.Core.Ro
         if (target is null) return false;
         if (object.ReferenceEquals(this, target)) return true;
         if (this.FieldType != target.FieldType) return false;
-        if (this.DirectionType != target.DirectionType) return false;
+        if (this.SortType != target.SortType) return false;
 
         return true;
     }
@@ -2834,10 +2933,10 @@ public sealed partial class GetSubscribedFilesDirection : global::Omnius.Core.Ro
                 w.Write((uint)1);
                 w.Write((ulong)value.FieldType);
             }
-            if (value.DirectionType != (global::Omnius.Axus.Messages.DirectionType)0)
+            if (value.SortType != (global::Omnius.Axus.Messages.SortType)0)
             {
                 w.Write((uint)2);
-                w.Write((ulong)value.DirectionType);
+                w.Write((ulong)value.SortType);
             }
             w.Write((uint)0);
         }
@@ -2846,7 +2945,7 @@ public sealed partial class GetSubscribedFilesDirection : global::Omnius.Core.Ro
             if (rank > 256) throw new global::System.FormatException();
 
             global::Omnius.Axus.Messages.GetSubscribedFilesFieldType p_fieldType = (global::Omnius.Axus.Messages.GetSubscribedFilesFieldType)0;
-            global::Omnius.Axus.Messages.DirectionType p_directionType = (global::Omnius.Axus.Messages.DirectionType)0;
+            global::Omnius.Axus.Messages.SortType p_sortType = (global::Omnius.Axus.Messages.SortType)0;
 
             for (; ; )
             {
@@ -2861,13 +2960,13 @@ public sealed partial class GetSubscribedFilesDirection : global::Omnius.Core.Ro
                         }
                     case 2:
                         {
-                            p_directionType = (global::Omnius.Axus.Messages.DirectionType)r.GetUInt64();
+                            p_sortType = (global::Omnius.Axus.Messages.SortType)r.GetUInt64();
                             break;
                         }
                 }
             }
 
-            return new global::Omnius.Axus.Messages.GetSubscribedFilesDirection(p_fieldType, p_directionType);
+            return new global::Omnius.Axus.Messages.GetSubscribedFilesDirection(p_fieldType, p_sortType);
         }
     }
 }

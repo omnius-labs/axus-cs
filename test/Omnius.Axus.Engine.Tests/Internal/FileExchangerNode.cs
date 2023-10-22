@@ -9,7 +9,7 @@ using Omnius.Core.Net.Upnp;
 using Omnius.Core.Storages;
 using Omnius.Core.UnitTestToolkit;
 
-namespace Omnius.Axus.Core.Engine.Services;
+namespace Omnius.Axus.Engine.Internal.Services;
 
 internal class FileExchangerNode : AsyncDisposableBase
 {

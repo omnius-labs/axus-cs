@@ -1,11 +1,11 @@
 using System.Text;
-using Omnius.Axus.Core.Engine.Models;
+using Omnius.Axus.Engine.Internal.Models;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Cryptography.Functions;
 using Omnius.Core.Pipelines;
 
-namespace Omnius.Axus.Core.Engine.Services.Helpers;
+namespace Omnius.Axus.Engine.Internal.Services.Helpers;
 
 internal static class ContentKeyConverter
 {

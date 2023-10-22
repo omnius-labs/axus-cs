@@ -4,9 +4,9 @@ using Omnius.Core.Cryptography;
 using Omnius.Core.Pipelines;
 using Omnius.Core.RocketPack;
 
-namespace Omnius.Axus.Core.Engine.Models;
+namespace Omnius.Axus.Engine.Models;
 
-internal sealed partial class Shout
+public sealed partial class Shout
 {
     public static Shout Create(string channel, Timestamp64 createdTime, IMemoryOwner<byte> value, OmniDigitalSignature digitalSignature)
     {

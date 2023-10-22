@@ -1,6 +1,6 @@
 using System.Data.SQLite;
 
-namespace Omnius.Axus.Core.Engine.Repositories.Helpers;
+namespace Omnius.Axus.Engine.Internal.Repositories.Helpers;
 
 internal class SQLiteConnectionBuilder
 {

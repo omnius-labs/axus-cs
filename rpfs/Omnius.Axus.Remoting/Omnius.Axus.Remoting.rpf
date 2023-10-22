@@ -4,7 +4,7 @@ using "Omnius.Axus.Messages";
 
 namespace "Omnius.Axus.Remoting";
 
-service AxusService {
+service AxusApi {
     // Config
     GetConfig: () -> (GetConfigResult),
     SetConfig: (SetConfigParam) -> (),

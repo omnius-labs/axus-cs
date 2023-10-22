@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Net;
 using FluentAssertions;
-using Omnius.Axus.Core.Engine;
+using Omnius.Axus.Engine.Internal;
 using Omnius.Axus.Messages;
 using Omnius.Core;
 using Omnius.Core.Cryptography;
@@ -10,7 +10,7 @@ using Omnius.Core.RocketPack;
 using Omnius.Core.UnitTestToolkit;
 using Xunit;
 
-namespace Omnius.Axus.Core.Engine.Services;
+namespace Omnius.Axus.Engine.Internal.Services;
 
 public class ShoutExchangerTest
 {

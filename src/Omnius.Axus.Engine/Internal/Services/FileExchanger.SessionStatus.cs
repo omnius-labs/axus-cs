@@ -1,10 +1,10 @@
-using Omnius.Axus.Core.Engine.Models;
+using Omnius.Axus.Engine.Internal.Models;
 using Omnius.Core;
 using Omnius.Core.Collections;
 using Omnius.Core.Cryptography;
 using Omnius.Core.Tasks;
 
-namespace Omnius.Axus.Core.Engine.Services;
+namespace Omnius.Axus.Engine.Internal.Services;
 
 internal sealed partial class FileExchanger
 {

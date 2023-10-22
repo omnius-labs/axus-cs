@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 using Omnius.Core;
 
-namespace Omnius.Axus.Core.Engine.Services.Helpers;
+namespace Omnius.Axus.Engine.Internal.Services.Helpers;
 
 internal static class IpAddressHelper
 {

@@ -1,6 +1,6 @@
 using Omnius.Core.Cryptography;
 
-namespace Omnius.Axus.Core.Engine.Repositories.Models;
+namespace Omnius.Axus.Engine.Internal.Repositories.Models;
 
 internal record BlockSubscribedItem
 {

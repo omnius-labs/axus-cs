@@ -1,0 +1,20 @@
+syntax v1.0;
+
+using "Omnius.Core.Cryptography";
+using "Omnius.Core.Net";
+using "Omnius.Axus.Messages";
+
+namespace "Omnius.Axus.Engine.Models";
+
+// Common
+
+message Shout {
+    Channel: string(capacity: 256),
+    CreatedTime: timestamp64,
+    Value: bytes(capacity: 32 * 1024 * 1024, recyclable: true),
+    Certificate: OmniCertificate?,
+}
+
+message AttachedProperty {
+    Value: string(capacity: 8192),
+}

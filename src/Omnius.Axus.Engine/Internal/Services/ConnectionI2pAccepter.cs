@@ -1,4 +1,4 @@
-using Omnius.Axus.Core.Engine.Models;
+using Omnius.Axus.Engine.Internal.Models;
 using Omnius.Core;
 using Omnius.Core.Net;
 using Omnius.Core.Net.Caps;
@@ -7,7 +7,7 @@ using Omnius.Core.Net.Connections.Bridge;
 using Omnius.Core.Net.I2p;
 using Omnius.Core.Tasks;
 
-namespace Omnius.Axus.Core.Engine.Services;
+namespace Omnius.Axus.Engine.Internal.Services;
 
 public sealed partial class ConnectionI2pAccepter : AsyncDisposableBase, IConnectionAcceptor
 {

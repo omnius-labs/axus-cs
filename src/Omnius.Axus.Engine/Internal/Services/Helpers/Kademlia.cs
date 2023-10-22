@@ -1,6 +1,6 @@
 using Omnius.Core;
 
-namespace Omnius.Axus.Core.Engine.Services.Helpers;
+namespace Omnius.Axus.Engine.Internal.Services.Helpers;
 
 internal readonly struct KademliaElement<T>
 {

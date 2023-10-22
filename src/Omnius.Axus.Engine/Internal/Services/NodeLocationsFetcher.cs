@@ -1,6 +1,6 @@
 using Omnius.Axus.Messages;
 
-namespace Omnius.Axus.Core.Engine.Services;
+namespace Omnius.Axus.Engine.Internal.Services;
 
 public class NodeLocationsFetcher
 {

@@ -2,9 +2,9 @@ using System.Buffers;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Security.Cryptography;
-using Omnius.Axus.Core.Engine;
-using Omnius.Axus.Core.Engine.Models;
-using Omnius.Axus.Core.Engine.Repositories;
+using Omnius.Axus.Engine.Internal;
+using Omnius.Axus.Engine.Internal.Models;
+using Omnius.Axus.Engine.Internal.Repositories;
 using Omnius.Axus.Core.Models;
 using Omnius.Axus.Messages;
 using Omnius.Core;
@@ -15,7 +15,7 @@ using Omnius.Core.Net.Connections;
 using Omnius.Core.Pipelines;
 using Omnius.Core.Tasks;
 
-namespace Omnius.Axus.Core.Engine.Services;
+namespace Omnius.Axus.Engine.Internal.Services;
 
 public sealed partial class NodeFinder : AsyncDisposableBase
 {

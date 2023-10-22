@@ -6,7 +6,9 @@
       Output: ./src/Omnius.Axus.Messages/_RocketPack/_Generated.cs
     - Input: ./rpfs/Omnius.Axus.Remoting/Omnius.Axus.Remoting.rpf
       Output: ./src/Omnius.Axus.Remoting/_RocketPack/_Generated.cs
-    - Input: ./rpfs/Omnius.Axus.Core/Omnius.Axus.Core.Engine.Models.rpf
-      Output: ./src/Omnius.Axus.Core/Engine/Models/_RocketPack/_Generated.cs
-    - Input: ./rpfs/Omnius.Axus.Core/Omnius.Axus.Core.Interactors.Models.rpf
-      Output: ./src/Omnius.Axus.Core/Interactors/Models/_RocketPack/_Generated.cs
+    - Input: ./rpfs/Omnius.Axus.Engine/Omnius.Axus.Engine.Models.rpf
+      Output: ./src/Omnius.Axus.Engine/Models/_RocketPack/_Generated.cs
+    - Input: ./rpfs/Omnius.Axus.Engine/Omnius.Axus.Engine.Internal.Models.rpf
+      Output: ./src/Omnius.Axus.Engine/Internal/Models/_RocketPack/_Generated.cs
+    - Input: ./rpfs/Omnius.Axus.Service/Omnius.Axus.Service.Internal.Models.rpf
+      Output: ./src/Omnius.Axus.Service/Internal/Models/_RocketPack/_Generated.cs

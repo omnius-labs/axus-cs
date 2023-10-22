@@ -1,9 +1,9 @@
 
 using System.Text.Json;
 
-namespace Omnius.Axus.Core.Engine.Models;
+namespace Omnius.Axus.Engine.Models;
 
-internal sealed partial class AttachedProperty
+public sealed partial class AttachedProperty
 {
     public static AttachedProperty Create<T>(T value)
     {
