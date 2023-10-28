@@ -53,14 +53,23 @@ public static partial class Runner
     {
         using var socketCap = new SocketCap(socket);
 
+        var systemClock = new SystemClock();
+
         var bytesPool = BytesPool.Shared;
         await using var batchActionDispatcher = new BatchActionDispatcher(TimeSpan.FromMilliseconds(10));
 
         var bridgeConnectionOptions = new BridgeConnectionOptions(int.MaxValue);
         await using var bridgeConnection = new BridgeConnection(socketCap, null, null, batchActionDispatcher, bytesPool, bridgeConnectionOptions);
 
-        var multiplexerOption = new OmniConnectionMultiplexerOptions(OmniConnectionMultiplexerType.Accepted, TimeSpan.FromMinutes(1), 10, int.MaxValue, 10);
-        await using var multiplexer = OmniConnectionMultiplexer.CreateV1(bridgeConnection, batchActionDispatcher, bytesPool, multiplexerOption);
+        var multiplexerOption = new OmniConnectionMultiplexerOptions()
+        {
+            Type = OmniConnectionMultiplexerType.Accepted,
+            PacketReceiveTimeout = TimeSpan.FromMinutes(1),
+            MaxStreamRequestQueueSize = 10,
+            MaxStreamDataSize = int.MaxValue,
+            MaxStreamDataQueueSize = 10,
+        };
+        await using var multiplexer = OmniConnectionMultiplexer.CreateV1(bridgeConnection, batchActionDispatcher, systemClock, bytesPool, multiplexerOption);
 
         await multiplexer.HandshakeAsync(cancellationToken);
 

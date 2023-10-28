@@ -1,16 +1,14 @@
 - Includes:
-    - ./refs/core/rpfs/**/*.rpf
+    - ./refs/core-cs/rpfs/**/*.rpf
     - ./rpfs/**/*.rpf
   CompileTargets:
     - Input: ./rpfs/Omnius.Axus.Messages/Omnius.Axus.Messages.rpf
       Output: ./src/Omnius.Axus.Messages/_RocketPack/_Generated.cs
-    - Input: ./rpfs/Omnius.Axus.Engines/Omnius.Axus.Engines.Models.rpf
-      Output: ./src/Omnius.Axus.Engines/Models/_RocketPack/_Generated.cs
-    - Input: ./rpfs/Omnius.Axus.Engines/Omnius.Axus.Engines.Internal.Models.rpf
-      Output: ./src/Omnius.Axus.Engines/Implementations/Internal/Models/_RocketPack/_Generated.cs
     - Input: ./rpfs/Omnius.Axus.Remoting/Omnius.Axus.Remoting.rpf
       Output: ./src/Omnius.Axus.Remoting/_RocketPack/_Generated.cs
-    - Input: ./rpfs/Omnius.Axus.Interactors/Omnius.Axus.Interactors.Models.rpf
-      Output: ./src/Omnius.Axus.Interactors/Models/_RocketPack/_Generated.cs
-    - Input: ./rpfs/Omnius.Axus.Interactors/Omnius.Axus.Interactors.Internal.Models.rpf
-      Output: ./src/Omnius.Axus.Interactors/Implementations/Internal/Models/_RocketPack/_Generated.cs
+    - Input: ./rpfs/Omnius.Axus.Engine/Omnius.Axus.Engine.Models.rpf
+      Output: ./src/Omnius.Axus.Engine/Models/_RocketPack/_Generated.cs
+    - Input: ./rpfs/Omnius.Axus.Engine/Omnius.Axus.Engine.Internal.Models.rpf
+      Output: ./src/Omnius.Axus.Engine/Internal/Models/_RocketPack/_Generated.cs
+    - Input: ./rpfs/Omnius.Axus.Service/Omnius.Axus.Service.Internal.Models.rpf
+      Output: ./src/Omnius.Axus.Service/Internal/Models/_RocketPack/_Generated.cs

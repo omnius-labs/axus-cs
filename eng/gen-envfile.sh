@@ -1,4 +1,4 @@
-#!/usr/env bash
+#!/bin/bash
 set -euo pipefail
 
 rm -f .env

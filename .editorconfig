@@ -77,7 +77,7 @@ dotnet_naming_style.camel_case_underscore_style.capitalization = camel_case
 # Code style defaults
 csharp_using_directive_placement = outside_namespace:suggestion
 dotnet_sort_system_directives_first = true
-csharp_prefer_braces = true:silent
+csharp_prefer_braces = true:none
 csharp_preserve_single_line_blocks = true:none
 csharp_preserve_single_line_statements = false:none
 csharp_prefer_static_local_function = true:suggestion
@@ -157,6 +157,19 @@ dotnet_code_quality.CA1822.api_surface = private
 # https://docs.microsoft.com/ja-jp/dotnet/fundamentals/code-analysis/style-rules/formatting-rules#namespace-options
 csharp_style_namespace_declarations = file_scoped:suggestion
 
+# https://ufcpp.net/blog/2023/6/ca-specify-culture/
+dotnet_diagnostic.CA1304.severity = error
+dotnet_diagnostic.CA1305.severity = error
+dotnet_diagnostic.CA1307.severity = error
+dotnet_diagnostic.CA1310.severity = error
+
+# https://learn.microsoft.com/ja-jp/dotnet/fundamentals/code-analysis/style-rules/ide0007-ide0008
+dotnet_diagnostic.IDE0007.severity = none
+dotnet_diagnostic.IDE0008.severity = none
+
+# https://learn.microsoft.com/en-us/dotnet/csharp//language-reference/proposals/csharp-12.0/primary-constructors
+dotnet_diagnostic.IDE0290.severity = none
+
 # Xml files
 [*.{xml}]
 indent_size = 2
@@ -191,3 +204,7 @@ end_of_line = lf
 # Makefile
 [Makefile]
 indent_style = tab
+
+# Rocket Pack Format files
+[*.rpf]
+end_of_line = lf

@@ -11,18 +11,102 @@ message NodeLocation {
     Addresses: vector<OmniAddress>(capacity: 32),
 }
 
-message Shout {
-    Channel: string(capacity: 256),
-    UpdatedTime: timestamp64,
-    Value: bytes(capacity: 32 * 1024 * 1024, recyclable: true),
-    Certificate: OmniCertificate?,
+message Seed {
+    RootHash: OmniHash,
+    Name: string(capacity: 256),
+    Size: uint64,
 }
 
-message ConsistencyReport {
-    BadBlockCount: uint32,
-    CheckedBlockCount: uint32,
-    TotalBlockCount: uint32,
+message Profile {
+    TrustedSignatures: vector<OmniSignature>(capacity: 1024),
+    BlockedSignatures: vector<OmniSignature>(capacity: 1024),
 }
+
+message Note {
+    Value: string(capacity: 1024),
+    Tag: string(capacity: 256),
+    AnchorHash: OmniHash,
+    CreatedTime: timestamp64,
+}
+
+message MatcherText {
+    Pattern: string,
+}
+
+enum SortType : uint8 {
+    Asc = 0,
+    Desc = 1,
+}
+
+// Config
+
+message ServiceConfig {
+    Profile: ProfileConfig?,
+    Note: NoteConfig,
+    Engine: EngineConfig?,
+}
+
+message ProfileConfig {
+    DigitalSignature: OmniDigitalSignature,
+    TrustedSignatures: vector<OmniSignature>(capacity: 1024),
+    BlockedSignatures: vector<OmniSignature>(capacity: 1024),
+}
+
+message NoteConfig {
+    Tags: vector<string(capacity: 256)>(capacity: 256),
+}
+
+message EngineConfig {
+    Bandwidth: BandwidthConfig?,
+    I2pConnector: I2pConnectorConfig?,
+    I2pAccepter: I2pAccepterConfig?,
+    TcpConnector: TcpConnectorConfig?,
+    TcpAccepter: TcpAccepterConfig?,
+    FileSubscriber: FileSubscriberConfig?,
+}
+
+message BandwidthConfig {
+    MaxSendBytesPerSeconds: int32,
+    MaxReceiveBytesPerSeconds: int32,
+}
+
+message I2pConnectorConfig {
+    IsEnabled: bool,
+    SamBridgeAddress: OmniAddress,
+}
+
+message I2pAccepterConfig {
+    IsEnabled: bool,
+    SamBridgeAddress: OmniAddress,
+}
+
+message TcpConnectorConfig {
+    IsEnabled: bool,
+    Proxy: TcpProxyConfig?,
+}
+
+message TcpProxyConfig {
+    Type: TcpProxyType,
+    Address: OmniAddress,
+}
+
+enum TcpProxyType : uint8 {
+    None = 0,
+    HttpProxy = 1,
+    Socks5Proxy = 2,
+}
+
+message TcpAccepterConfig {
+    IsEnabled: bool,
+    UseUpnp: bool,
+    ListenAddress: OmniAddress,
+}
+
+message FileSubscriberConfig {
+    DestinationDirectory: string,
+}
+
+// Session
 
 message SessionReport {
     Scheme: string(capacity: 256),
@@ -36,21 +120,81 @@ enum SessionHandshakeType : uint8 {
     Accepted = 2,
 }
 
-// Report
+// PublishedFile
+
+message GetPublishedFilesParam {
+    Name: MatcherText?,
+}
+
+message GetPublishedFilesMatcher {
+    Name: MatcherText?,
+}
+
+message GetPublishedFilesDirection {
+    FieldType: GetPublishedFilesFieldType,
+    SortType: SortType,
+}
+
+enum GetPublishedFilesFieldType : uint8 {
+    Unknown = 0,
+    Name = 1,
+    Size = 2,
+    CreatedTime = 3,
+    UpdatedTime = 4,
+    ProcessedRate = 5,
+}
 
 message PublishedFileReport {
-    FilePath: string?,
-    RootHash: OmniHash?,
+    FilePath: string,
+    Seed: Seed?,
+    Status: PublishedFileStatus,
+}
+
+message PublishedFileStatus {
+    CurrentDepth: int32,
+    ProcessedBlockCount: uint32,
+    TotalBlockCount: uint32,
+    State: PublishedFileState,
+    FailedReason: string?,
+}
+
+enum PublishedFileState : uint8 {
+    Unknown = 0,
+    Waiting = 1,
+    Encoding = 2,
+    Completed = 3,
+    Failed = 4,
+}
+
+// SubscribedFile
+
+message GetSubscribedFilesMatcher {
+    Name: MatcherText?,
+}
+
+message GetSubscribedFilesDirection {
+    FieldType: GetSubscribedFilesFieldType,
+    SortType: SortType,
+}
+
+enum GetSubscribedFilesFieldType : uint8 {
+    Unknown = 0,
+    Name = 1,
+    Size = 2,
+    CreatedTime = 3,
+    UpdatedTime = 4,
+    ProcessedRate = 5,
 }
 
 message SubscribedFileReport {
-    RootHash: OmniHash,
+    FilePath: string?,
+    Seed: Seed,
     Status: SubscribedFileStatus,
 }
 
 message SubscribedFileStatus {
     CurrentDepth: int32,
-    DownloadedBlockCount: uint32,
+    ProcessedBlockCount: uint32,
     TotalBlockCount: uint32,
     State: SubscribedFileState,
 }
@@ -58,16 +202,7 @@ message SubscribedFileStatus {
 enum SubscribedFileState : uint8 {
     Unknown = 0,
     Downloading = 1,
-    Downloaded = 2,
-    Failed = 3,
-}
-
-message PublishedShoutReport {
-    Signature: OmniSignature,
-    Channel: string,
-}
-
-message SubscribedShoutReport {
-    Signature: OmniSignature,
-    Channel: string,
+    Decoding = 2,
+    Completed = 3,
+    Failed = 4,
 }

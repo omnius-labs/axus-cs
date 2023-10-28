@@ -16,7 +16,7 @@ public class AxusServiceTest
     [Fact]
     public async Task SimpleTest()
     {
-        using (var tempDirDeleter = FixtureFactory.GenTempDirectory(out var tempDir))
+        using (var tempDirRemover = FixtureFactory.GenTempDirectory(out var tempDir))
         {
             var listenAddress1 = OmniAddress.CreateTcpEndpoint(IPAddress.Loopback, 30001);
             await using var service1 = await this.GenServiceAsync(Path.Combine(tempDir, "service/1"), listenAddress1);

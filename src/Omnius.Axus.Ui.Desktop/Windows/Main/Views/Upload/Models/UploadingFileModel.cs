@@ -28,7 +28,7 @@ public partial class UploadingFileViewModel : BindableBase, ICollectionViewModel
 
     public string FilePath => this.Model?.FilePath ?? "";
 
-    public DateTime CreatedTime => this.Model?.CreatedTime ?? DateTime.MinValue;
+    public DateTime CreatedTime => this.Model?.CreatedTime ?? DateTime.MinValue.ToUniversalTime();
 
     public FileUploadingState State => this.Model?.Status.State ?? FileUploadingState.Unknown;
 }

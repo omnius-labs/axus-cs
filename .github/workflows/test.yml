@@ -3,21 +3,31 @@ name: test
 on:
   push:
     branches:
-      - "**"
+      - "main"
+      - "releases/*"
     paths:
       - "**"
       - "!/docs/**"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  StableTest: true
+  ContinuousIntegrationBuild: true
+
 jobs:
   linux:
     runs-on: ubuntu-latest
-    env:
       ContinuousIntegrationBuild: true
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
         with:
           submodules: "recursive"
+      - name: Install dependencies (lib)
+        run: sudo apt-get install libsnappy-dev
       - name: Setup dotnet
         uses: actions/setup-dotnet@v3
         with:
@@ -29,11 +39,9 @@ jobs:
       - name: format check
         run: dotnet format --verify-no-changes
       - name: Test
-        run: dotnet test --filter "FullyQualifiedName~Omnius.Axus"
+        run: dotnet test --no-restore
   windows:
     runs-on: windows-latest
-    env:
-      ContinuousIntegrationBuild: true
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
@@ -46,4 +54,4 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: Test
-        run: dotnet test --filter "FullyQualifiedName~Omnius.Axus"
+        run: dotnet test --no-restore

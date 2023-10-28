@@ -1,0 +1,50 @@
+syntax v1.0;
+
+using "Omnius.Core.Cryptography";
+using "Omnius.Core.Net";
+using "Omnius.Axus.Messages";
+
+namespace "Omnius.Axus.Engine.Interactors.Internal.Models";
+option csharp_access_level "internal";
+
+// Profile
+
+message CachedProfile {
+    Signature: OmniSignature,
+    CreatedTime: timestamp64,
+    Value: Profile,
+}
+
+// NoteBox
+
+message CachedNoteBox {
+    Signature: OmniSignature,
+    CreatedTime: timestamp64,
+    Value: NoteBox,
+}
+
+message NoteBox {
+    Notes: vector<Note>(capacity: 8 * 1024),
+}
+
+message CachedNote {
+    Signature: OmniSignature,
+    Value: Note,
+}
+
+// SeedBox
+
+message CachedSeedBox {
+    Signature: OmniSignature,
+    CreatedTime: timestamp64,
+    Value: SeedBox,
+}
+
+message SeedBox {
+    Seeds: vector<Seed>(capacity: 1024 * 32),
+}
+
+message CachedSeed {
+    Signature: OmniSignature,
+    Value: Seed,
+}

@@ -17,7 +17,7 @@ public static class Updater
         parsedResult = parsedResult.WithParsed(async options =>
         {
             // extract mode
-            if (TryExtract())
+            if (options.Mode == null && TryExtract())
             {
                 result = true;
                 return;
@@ -54,7 +54,7 @@ public static class Updater
                 var zipFilePath = Directory.GetFiles(updatePath, "*.zip").FirstOrDefault();
                 if (zipFilePath is null) return false;
 
-                DirectoryHelper.CreateOrTrancate(newPath);
+                DirectoryHelper.CreateOrTruncate(newPath);
                 ZipFile.ExtractToDirectory(zipFilePath, newPath);
 
                 Directory.Delete(updatePath, true);
@@ -112,7 +112,7 @@ public static class Updater
 
     private static void MoveFilesForReplace(string sourcePath, string destinationPath)
     {
-        DirectoryHelper.CreateOrTrancate(destinationPath);
+        DirectoryHelper.CreateOrTruncate(destinationPath);
 
         foreach (var dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.TopDirectoryOnly))
         {
