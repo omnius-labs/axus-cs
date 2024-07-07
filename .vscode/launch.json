@@ -26,7 +26,7 @@
                 "-v",
                 "true"
             ],
-            "cwd": "${workspaceFolder}/demo/0",
+            "cwd": "${workspaceFolder}/demo",
             "console": "internalConsole",
             "stopAtEntry": false,
             "windows": {
@@ -52,7 +52,7 @@
                 "-v",
                 "true"
             ],
-            "cwd": "${workspaceFolder}/demo/0",
+            "cwd": "${workspaceFolder}/demo",
             "console": "internalConsole",
             "stopAtEntry": false,
             "windows": {
@@ -71,7 +71,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "design-build (Omnius.Axus.Ui.Desktop)",
-            "cwd": "${workspaceFolder}/demo/0",
+            "cwd": "${workspaceFolder}/demo",
             "console": "internalConsole",
             "stopAtEntry": false,
             "windows": {

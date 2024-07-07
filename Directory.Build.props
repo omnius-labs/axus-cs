@@ -7,12 +7,16 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
+    <InvariantGlobalization>true</InvariantGlobalization>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <DefineConstants Condition=" '$(DesignMode)' != '' ">$(DefineConstants);DESIGN</DefineConstants>
-    <NoWarn>CS1591,CS1998,NU5105,NU1603,NU1605</NoWarn>
+    <NoWarn>CS1591,CS1998,NU5105,NU1603,NU1605,IDE0008</NoWarn>
     <GenerateFullPaths>true</GenerateFullPaths>
     <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))</RepoRoot>
-    <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+    <DefineConstants Condition=" '$(StableTest)' == 'true' ">$(DefineConstants);STABLE_TEST</DefineConstants>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
+    <NuGetLockFilePath>$(MSBuildThisFileDirectory)\lock\$(RuntimeIdentifier)\$(MSBuildProjectName).json</NuGetLockFilePath>
+    <RestoreLockedMode Condition=" '$(ContinuousIntegrationBuild)' == 'true' ">true</RestoreLockedMode>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -36,6 +40,7 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PathMap Condition=" '$(Configuration)' == 'Release' ">$(RepoRoot)=.</PathMap>
   </PropertyGroup>
 
   <!-- Autodetect platform -->
@@ -43,43 +48,22 @@
     <NativeDepsPlatform>Windows</NativeDepsPlatform>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(NativeDepsPlatform)' == '' And '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' ">
-    <NativeDepsPlatform>Mac</NativeDepsPlatform>
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
   <PropertyGroup Condition=" '$(NativeDepsPlatform)' == '' And '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">
     <NativeDepsPlatform>Linux</NativeDepsPlatform>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
+  <!-- Set path -->
   <PropertyGroup Condition=" '$(BuildTargetName)' == '' ">
     <BuildTargetName>normal</BuildTargetName>
   </PropertyGroup>
-
   <PropertyGroup Condition=" '$(NativeDepsPlatform)' == 'Windows' ">
     <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\obj\win-$(BuildTargetName)\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
     <BaseOutputPath Condition=" '$(BaseOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\bin\win-$(BuildTargetName)\$(MSBuildProjectName)\</BaseOutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(NativeDepsPlatform)' == 'Mac' ">
-    <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\obj\mac-$(BuildTargetName)\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
-    <BaseOutputPath Condition=" '$(BaseOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\bin\mac-$(BuildTargetName)\$(MSBuildProjectName)\</BaseOutputPath>
-  </PropertyGroup>
   <PropertyGroup Condition=" '$(NativeDepsPlatform)' == 'Linux' ">
     <BaseIntermediateOutputPath Condition=" '$(BaseIntermediateOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\obj\linux-$(BuildTargetName)\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
     <BaseOutputPath Condition=" '$(BaseOutputPath)' == '' ">$(MSBuildThisFileDirectory)tmp\bin\linux-$(BuildTargetName)\$(MSBuildProjectName)\</BaseOutputPath>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-    <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
-    <NuGetLockFilePath>$(MSBuildThisFileDirectory)\lock\$(RuntimeIdentifier)\$(MSBuildProjectName).json</NuGetLockFilePath>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(ContinuousIntegrationBuild)' == 'true' ">
-    <RestoreLockedMode>true</RestoreLockedMode>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <PathMap>$(RepoRoot)=.</PathMap>
   </PropertyGroup>
 
 </Project>

@@ -1,0 +1,13 @@
+{
+    "cSpell.words": [
+        "AUTOINCREMENT",
+        "Axus",
+        "bkey",
+        "Kademlia",
+        "merkle",
+        "Omni",
+        "Omnius",
+        "Xunit"
+    ],
+    "dotnet.defaultSolution": "axus.sln"
+}
